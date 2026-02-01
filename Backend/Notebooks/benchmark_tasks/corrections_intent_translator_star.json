@@ -1,0 +1,127 @@
+{
+  "task_id": "corrections-intent-translator-star-2026-01-28",
+  "description": "Corriger IntentTranslator selon les validations DOUBLE-CHECK : adapter à la structure réelle de star_mappings.json (mappings avec pattern_name, variants, transformations, abstraction, realisation), corriger score_mapping pour accepter query et situation séparément, compléter le code tronqué, ajouter gestion d'erreurs",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Refactoriser IntentTranslator.__init__ et build_indexes pour charger et parser correctement star_mappings.json. Le fichier JSON a la structure : {\"mappings\": [{\"pattern_name\": \"...\", \"variants\": [...], \"transformations\": {\"user_term\": \"...\", \"tech_term\": \"...\"}, \"abstraction\": {\"name\": \"...\", \"description\": \"...\"}, \"realisation\": {\"template\": \"...\", \"code\": \"...\", \"javascript\": \"...\"}}]}. Construire les index en créant des objets Situation, Transformation, Abstraction, Realisation depuis cette structure. Utiliser Path pour le chemin du fichier. Ajouter validation des clés requises avant accès.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "IntentTranslator charge star_mappings.json avec la structure réelle (mappings array)",
+        "Les index sont construits depuis pattern_name, variants, transformations, abstraction, realisation",
+        "Les objets Situation, Transformation, Abstraction, Realisation sont créés correctement",
+        "Validation des clés requises avant accès (pas de KeyError)",
+        "Gestion d'erreurs si fichier non trouvé ou structure invalide",
+        "Utilisation de Path pour chemins fichiers"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/sullivan/knowledge/star_mappings.json"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Corriger score_mapping() pour accepter query et situation comme paramètres séparés au lieu d'un dict. Signature : def score_mapping(self, query: str, situation: Situation) -> float. Utiliser EmbeddingModelSingleton.get_model() (pas get_instance()) depuis cache/semantic_cache.py. Calculer embeddings de query et situation.description, puis similarité cosinus. Ajouter gestion d'erreurs avec fallback sur comptage mots si embeddings non disponibles. Retourner score entre 0 et 1.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "score_mapping() accepte query: str et situation: Situation comme paramètres séparés",
+        "Utilise EmbeddingModelSingleton.get_model('all-MiniLM-L6-v2') correctement",
+        "Calcule similarité cosinus entre embeddings",
+        "Fallback sur comptage mots si embeddings non disponibles",
+        "Gestion d'erreurs complète avec logging",
+        "Retourne score entre 0 et 1"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "sentence-transformers",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/cache/semantic_cache.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Corriger search_situation() pour utiliser score_mapping() avec la nouvelle signature. Pour chaque Situation dans index_situations, appeler score_mapping(query, situation). Trier par score décroissant et retourner top N (défaut 5) avec paramètre limit optionnel. Ajouter vérification si index_situations est vide avant itération. Retourner List[Situation] triée par pertinence.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "search_situation() utilise score_mapping(query, situation) avec nouvelle signature",
+        "Vérifie si index_situations est vide avant itération",
+        "Trie résultats par score décroissant",
+        "Paramètre limit optionnel (défaut 5)",
+        "Retourne List[Situation] triée par pertinence",
+        "Gestion d'erreurs si score_mapping échoue"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Corriger propagate_star() pour fonctionner avec la nouvelle structure. Au lieu de chercher par ID, chercher par pattern_name ou description. Si une Situation est trouvée via search_situation(), récupérer le mapping correspondant depuis les index, puis construire la chaîne Situation → Transformation → Abstraction → Realisation. Retourner Realisation avec code HTML/JS depuis realisation.code et realisation.javascript.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "propagate_star() fonctionne avec la nouvelle structure (pas de recherche par ID)",
+        "Construit correctement la chaîne STAR depuis les index",
+        "Retourne Realisation avec code HTML/JS depuis realisation.code et realisation.javascript",
+        "Gestion d'erreurs si mapping non trouvé",
+        "Logs pour indiquer propagation STAR"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Nettoyer le code IntentTranslator : supprimer imports inutiles (FastAPI, BaseModel, app si non utilisés), supprimer code d'exemple hardcodé (lignes 98-129), ajouter docstrings complètes avec type hints, ajouter type hints manquants pour tous les paramètres et retours, utiliser loguru.logger au lieu de logging si disponible, code conforme PEP 8.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1", "step_2", "step_3", "step_4"],
+      "validation_criteria": [
+        "Imports inutiles supprimés (FastAPI, BaseModel, app si non utilisés)",
+        "Code d'exemple hardcodé supprimé (lignes 98-129)",
+        "Docstrings complètes avec type hints pour toutes les méthodes publiques",
+        "Type hints ajoutés pour tous les paramètres et retours",
+        "Utilise loguru.logger si disponible, sinon logging",
+        "Code conforme PEP 8"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T12:45:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Corrections IntentTranslator selon validations DOUBLE-CHECK : adapter à structure réelle JSON, corriger signatures méthodes, compléter code, ajouter gestion d'erreurs"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "task_id": "chatbox-toggle-only-2026-01-28",
+  "description": "Transformer la chatbox Sullivan en barre minimisée avec toggle overlay (z-index 9999)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier Frontend/index.html : Ajouter une barre minimisée fixe en bas (.chatbox-minimized-bar avec bouton toggle) et transformer le chat-container existant en overlay fullscreen (.chatbox-overlay). La barre minimisée doit être visible par défaut, l'overlay caché par défaut.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Barre minimisée ajoutée en bas de page",
+        "Chat-container transformé en overlay",
+        "Bouton toggle dans la barre minimisée",
+        "Bouton fermer dans l'overlay"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["Frontend/index.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier Frontend/css/styles.css : Ajouter styles pour .chatbox-minimized-bar (position: fixed, bottom: 0, z-index: 9999, fond blanc), .chatbox-overlay (position: fixed, fullscreen, z-index: 9999, backdrop semi-transparent), animations slide-up/down (transition 0.3s ease-in-out), et états .open/.closed pour gérer la visibilité.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Barre minimisée fixe en bas avec z-index 9999",
+        "Overlay fullscreen avec z-index 9999",
+        "Animations smooth pour ouverture/fermeture",
+        "Backdrop semi-transparent"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["Frontend/css/styles.css"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Frontend/js/app.js : Ajouter fonction toggleChatbox() pour basculer entre ouvert/fermé, gestion état dans localStorage (clé 'chatbox_open'), fermeture via backdrop click, initialisation état au chargement, et préserver toutes les fonctionnalités existantes.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Fonction toggleChatbox() fonctionnelle",
+        "État sauvegardé dans localStorage",
+        "Fermeture via backdrop click",
+        "Fonctionnalités existantes préservées"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["Frontend/js/app.js"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T17:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Chatbox Sullivan avec toggle overlay"
+  }
+}

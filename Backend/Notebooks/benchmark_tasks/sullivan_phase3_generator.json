@@ -1,0 +1,82 @@
+{
+  "task_id": "sullivan_phase3_generator_20250127",
+  "description": "Phase 3 - Génération Réelle de Composants Sullivan Kernel : ComponentGenerator avec intégration AETHERFLOW pour génération réelle HTML/CSS/JS, et remplacement placeholder dans registry.py. Créer plan JSON pour génération composant, exécuter via AETHERFLOW (workflow PROTO ou PROD), parser code généré, structurer composant avec métadonnées.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer ComponentGenerator dans Backend/Prod/sullivan/generator/component_generator.py. Méthode generate_component(intent: str, context: str, user_id: str) -> Component. Créer plan JSON pour génération composant avec steps pour HTML, CSS, JS. Exécuter plan via AETHERFLOW (workflow PROTO pour rapidité ou PROD pour qualité). Récupérer code généré depuis outputs AETHERFLOW. Parser code généré (extraire HTML, CSS, JS). Structurer composant avec métadonnées (nom, taille, date création). Utiliser AgentRouter pour sélection modèle LLM (DeepSeek/Gemini/Groq/Codestral, exclure Claude). Intégrer avec KnowledgeBase pour enrichir contexte génération.",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 5000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe ComponentGenerator avec méthode generate_component async",
+        "Méthode _create_generation_plan pour créer plan JSON AETHERFLOW",
+        "Méthode _execute_plan pour exécuter plan via AETHERFLOW workflows",
+        "Méthode _parse_generated_code pour parser HTML/CSS/JS depuis outputs",
+        "Intégration avec AgentRouter pour LLM",
+        "Intégration avec KnowledgeBase pour contexte",
+        "Type hints complets, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/claude_helper.py",
+          "Backend/Prod/models/agent_router.py",
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Remplacer placeholder _generate_component dans Backend/Prod/sullivan/registry.py par génération réelle via ComponentGenerator. Importer ComponentGenerator. Appeler generate_component avec intent, context enrichi depuis KnowledgeBase, et user_id. Gérer erreurs et logging. Conserver logique existante (sauvegarde LocalCache, suggestion partage si score >= 85).",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Import ComponentGenerator dans registry.py",
+        "Remplacement méthode _generate_component par appel ComponentGenerator",
+        "Enrichissement contexte depuis KnowledgeBase",
+        "Gestion erreurs et logging",
+        "Conservation logique existante (LocalCache, suggestion partage)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/generator/component_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer __init__.py dans Backend/Prod/sullivan/generator/ avec export ComponentGenerator. Mettre à jour Backend/Prod/sullivan/__init__.py si nécessaire pour exports.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "__init__.py créé dans generator/ avec export ComponentGenerator",
+        "Exports corrects pour imports"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/generator/__init__.py",
+          "Backend/Prod/sullivan/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T23:45:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 Sullivan Kernel - Génération Réelle : ComponentGenerator génère composants HTML/CSS/JS via AETHERFLOW (workflow PROTO/PROD), parser code généré, structurer composant avec métadonnées. Remplacement placeholder dans registry.py par génération réelle."
+  }
+}

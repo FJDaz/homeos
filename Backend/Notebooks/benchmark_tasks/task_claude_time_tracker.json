@@ -1,0 +1,163 @@
+{
+  "task_id": "claude-time-tracker-implementation",
+  "description": "Implémenter le système de tracking du temps gagné par Claude Code pour mesurer l'efficacité d'AETHERFLOW",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser la structure actuelle de MetricsCollector et StepMetrics pour comprendre où intégrer le tracking du temps Claude Code",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Compréhension complète de la structure MetricsCollector",
+        "Identification des points d'intégration pour le tracking",
+        "Documentation des champs existants dans StepMetrics"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py",
+          "Backend/Prod/models/deepseek_client.py",
+          "Backend/Prod/orchestrator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le module claude_time_tracker.py avec la classe ClaudeTimeTracker qui calcule le temps estimé manuel basé sur complexity et step_type, et le temps gagné",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe ClaudeTimeTracker créée avec méthode estimate_manual_time()",
+        "Formule d'estimation basée sur complexity et step_type",
+        "Méthode calculate_time_saved() qui calcule temps_gagné = temps_estimé - temps_réel",
+        "Multiplicateurs par type de tâche (analysis, refactoring, code_generation)",
+        "Gestion des cas limites (complexity 0.0 à 1.0)",
+        "Documentation complète avec docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/claude_time_tracker.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier StepMetrics dans metrics.py pour ajouter les champs estimated_manual_time_ms et claude_code_time_saved_ms",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "StepMetrics contient estimated_manual_time_ms (float)",
+        "StepMetrics contient claude_code_time_saved_ms (float)",
+        "Champs optionnels avec valeurs par défaut 0.0",
+        "Compatibilité maintenue avec le code existant"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier PlanMetrics dans metrics.py pour ajouter les métriques agrégées total_estimated_manual_time_ms, total_claude_code_time_saved_ms, et efficiency_ratio",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "PlanMetrics contient total_estimated_manual_time_ms (float)",
+        "PlanMetrics contient total_claude_code_time_saved_ms (float)",
+        "PlanMetrics contient efficiency_ratio (float) = temps_gagné / temps_AETHERFLOW",
+        "Calcul correct des agrégations dans get_plan_metrics()",
+        "Export JSON et CSV incluent les nouveaux champs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Modifier MetricsCollector pour intégrer ClaudeTimeTracker et calculer automatiquement le temps gagné lors de l'enregistrement des résultats d'étapes",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "MetricsCollector initialise ClaudeTimeTracker dans __init__",
+        "record_step_result() calcule estimated_manual_time et time_saved",
+        "Les métriques sont correctement assignées aux StepMetrics",
+        "Gestion des erreurs si le calcul échoue"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Mettre à jour la méthode print_summary() dans MetricsCollector pour afficher les métriques de temps Claude Code gagné dans le résumé console",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "print_summary() affiche total_estimated_manual_time_ms",
+        "print_summary() affiche total_claude_code_time_saved_ms",
+        "print_summary() affiche efficiency_ratio",
+        "Formatage lisible (secondes pour temps, ratio avec 2 décimales)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer un script de test pour valider le fonctionnement du système de tracking avec des exemples de steps de différentes complexités et types",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "Script de test créé dans scripts/test_claude_time_tracker.py",
+        "Teste estimate_manual_time() avec différentes complexités",
+        "Teste calculate_time_saved() avec différents scénarios",
+        "Teste l'intégration complète avec MetricsCollector",
+        "Vérifie que les métriques sont correctement calculées et exportées"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/test_claude_time_tracker.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 - Étape 5 : Intégrer le tracking du temps Claude Code gagné pour mesurer l'efficacité d'AETHERFLOW"
+  }
+}

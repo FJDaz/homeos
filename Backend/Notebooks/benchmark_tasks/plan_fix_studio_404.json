@@ -1,0 +1,45 @@
+{
+  "task_id": "fix-studio-404-vfx",
+  "description": "Corriger le 404 sur http://localhost:5173/studio en dev SvelteKit. Cause: trailingSlash 'always' provoque des redirects qui échouent. Fix: trailingSlash 'ignore' dans +layout.js et _serve_svelte_route dans api.py pour supporter les deux formats de build (studio.html | studio/index.html).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans frontend-svelte/src/routes/+layout.js: remplacer trailingSlash: 'always' par trailingSlash: 'ignore'. Conserver prerender: true. Avec 'ignore', /studio et /studio/ fonctionnent en dev sans redirect problématique. Le build génère alors studio.html et components.html au lieu de studio/index.html.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "trailingSlash est 'ignore'",
+        "npm run dev + curl http://localhost:5173/studio retourne 200"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/routes/+layout.js"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/api.py, fonction _serve_svelte_route: supporter les deux formats de build SvelteKit. Avec trailingSlash ignore: studio.html, components.html. Avec trailingSlash always: studio/index.html, components/index.html. Vérifier successivement svelte_build_path/{base}.html puis svelte_build_path/{base}/index.html. Retourner FileResponse du premier qui existe.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "_serve_svelte_route trouve studio.html ou studio/index.html",
+        "GET /studio et GET /studio/ servent la page Studio quand build existe"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-31T21:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Fix 404 Studio SvelteKit - trailingSlash + API serve routes"
+  }
+}

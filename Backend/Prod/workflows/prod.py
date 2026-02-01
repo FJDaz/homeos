@@ -1,9 +1,19 @@
 """PROD workflow: Quality-first with FAST draft then BUILD refactoring."""
+import json
+import time
 from pathlib import Path
 from typing import Dict, Any, Optional
 from loguru import logger
 
 from ..orchestrator import Orchestrator
+from ..core.plan_status import update_plan_status
+
+# #region agent log
+_DEBUG_LOG = "/Users/francois-jeandazin/AETHERFLOW/.cursor/debug.log"
+def _dbg(hy: str, loc: str, msg: str, data: Optional[Dict] = None):
+    with open(_DEBUG_LOG, "a") as f:
+        f.write(json.dumps({"timestamp": int(time.time() * 1000), "hypothesisId": hy, "location": loc, "message": msg, "data": data or {}, "sessionId": "debug-session"}) + "\n")
+# #endregion
 from ..models.plan_reader import PlanReader, Plan, Step
 
 
@@ -44,13 +54,25 @@ class ProdWorkflow:
             Dictionary with execution results
         """
         logger.info("Starting PROD workflow (FAST draft → BUILD refactor → DOUBLE-CHECK)")
-        
+        # #region agent log
+        _dbg("A", "prod.py:execute", "PROD workflow start", {"plan_path": str(plan_path)})
+        # #endregion
         # Load plan
         plan_reader = PlanReader()
         plan = plan_reader.read(plan_path)
-        
+        update_plan_status(
+            plan_path=str(plan_path),
+            plan_id=getattr(plan, "task_id", None),
+            workflow_type="PROD",
+            phase="FAST",
+            status="running",
+            total_steps=len(plan.steps),
+        )
         # Phase 1: FAST execution (draft)
         logger.info("Phase 1: Generating draft with FAST mode (Groq)")
+        # #region agent log
+        t1 = time.time(); _dbg("A", "prod.py:Phase1", "Phase 1 FAST start", {})
+        # #endregion
         self.orchestrator = Orchestrator(execution_mode="FAST")
         
         try:
@@ -78,15 +100,27 @@ class ProdWorkflow:
                 )
             
             logger.info(f"FAST draft completed: {fast_result['metrics'].total_execution_time_ms/1000:.2f}s")
-            
+            # #region agent log
+            _dbg("A", "prod.py:Phase1", "Phase 1 FAST end", {"duration_s": round(time.time() - t1, 2)})
+            # #endregion
             # Phase 2: BUILD refactoring (with FAST results as context)
             logger.info("Phase 2: Refactoring with BUILD mode (DeepSeek + Guidelines)")
+            update_plan_status(phase="BUILD")
+            # #region agent log
+            t2 = time.time(); _dbg("B", "prod.py:Phase2", "Phase 2 BUILD start", {})
+            # #endregion
             await self.orchestrator.close()
             
             self.orchestrator = Orchestrator(execution_mode="BUILD")
             
             # Build context from FAST results for BUILD phase
+            # #region agent log
+            t_ctx = time.time(); _dbg("E", "prod.py:_build_refactoring_context", "build_context start", {})
+            # #endregion
             build_context = self._build_refactoring_context(fast_result, context)
+            # #region agent log
+            _dbg("E", "prod.py:_build_refactoring_context", "build_context end", {"duration_s": round(time.time() - t_ctx, 2), "context_len": len(build_context)})
+            # #endregion
             
             build_result = await self.orchestrator.execute_plan(
                 plan_path=plan_path,
@@ -97,18 +131,30 @@ class ProdWorkflow:
             )
             
             logger.info(f"BUILD refactoring completed: {build_result['metrics'].total_execution_time_ms/1000:.2f}s")
-            
+            # #region agent log
+            _dbg("B", "prod.py:Phase2", "Phase 2 BUILD end", {"duration_s": round(time.time() - t2, 2)})
+            # #endregion
             # Phase 2.5: Apply refactored code to source files
             logger.info("Phase 2.5: Applying refactored code to source files")
+            update_plan_status(phase="apply")
+            # #region agent log
+            t25 = time.time(); _dbg("B", "prod.py:Phase2.5", "Phase 2.5 apply start", {})
+            # #endregion
             apply_result = await self._apply_refactored_code(
                 plan=plan,
                 build_result=build_result,
                 output_dir=output_dir / "build_refactored" if output_dir else None
             )
             logger.info(f"Applied code to {apply_result['files_applied']} file(s)")
-            
+            # #region agent log
+            _dbg("B", "prod.py:Phase2.5", "Phase 2.5 apply end", {"duration_s": round(time.time() - t25, 2), "files_applied": apply_result["files_applied"]})
+            # #endregion
             # Phase 3: DOUBLE-CHECK validation
             logger.info("Phase 3: Final validation with DOUBLE-CHECK mode (Gemini)")
+            update_plan_status(phase="validation")
+            # #region agent log
+            t3 = time.time(); _dbg("C", "prod.py:Phase3", "Phase 3 validation start", {})
+            # #endregion
             await self.orchestrator.close()
             
             self.orchestrator = Orchestrator(execution_mode="DOUBLE-CHECK")
@@ -119,6 +165,9 @@ class ProdWorkflow:
                 build_context
             )
             
+            # #region agent log
+            _dbg("C", "prod.py:Phase3", "Phase 3 validation end", {"duration_s": round(time.time() - t3, 2)})
+            # #endregion
             # Combine results
             combined_result = {
                 "workflow": "PROD",
@@ -143,11 +192,16 @@ class ProdWorkflow:
                 f"PROD workflow completed: {combined_result['total_time_ms']/1000:.2f}s, "
                 f"${combined_result['total_cost_usd']:.4f}"
             )
-            
+            update_plan_status(
+                status="completed",
+                total_time_ms=combined_result["total_time_ms"],
+                total_cost_usd=combined_result["total_cost_usd"],
+            )
             return combined_result
             
         except Exception as e:
             logger.error(f"PROD workflow failed: {e}")
+            update_plan_status(status="failed", error=str(e))
             raise
         finally:
             if self.orchestrator:

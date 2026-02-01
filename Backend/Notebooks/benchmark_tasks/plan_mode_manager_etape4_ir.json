@@ -1,0 +1,52 @@
+{
+  "task_id": "mode-manager-etape4-ir-001",
+  "description": "Mode Manager étape 4: Intent Refactoring. Pipeline IR + Sullivan Arbiter ; genome v1 unique (intents, features, compartments). Create homeos/ir/ with pipeline that produces genome v1 from backend/PRD; arbiter validates. Reference: docs/04-homeos/PLAN_MODE_MANAGER.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create homeos/ir/__init__.py and homeos/ir/pipeline.py. Class IRPipeline: method run(backend_path: Optional[Path]=None, prd_path: Optional[Path]=None, output_path: Optional[Path]=None) -> dict. (1) Call Backend.Prod.core.genome_generator.generate_genome to get base genome dict. (2) Ensure genome has top-level keys intents (list), features (list), compartments (list); add empty lists if missing. (3) Return genome_v1 dict. Write to output_path if provided (default output/studio/genome_v1.json). Use Path, import generate_genome from Backend.Prod.core.genome_generator.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": ["IRPipeline().run() returns dict with intents, features, compartments", "genome_v1 written to path when output_path given"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/ir/__init__.py", "homeos/ir/pipeline.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Create homeos/ir/arbiter.py. Class SullivanArbiter: method validate(genome: dict) -> dict with keys 'valid': bool, 'errors': list of str. Check required top-level keys: metadata or topology, endpoints; optionally intents, features, compartments. If missing required keys append to errors and set valid False. Return {'valid': len(errors)==0, 'errors': errors}. Do not call Backend.Prod.sullivan internally; keep stub validation. Reference: Sullivan Arbiter for genome validation (docs/04-homeos/PLAN_MODE_MANAGER.md).",
+      "type": "code_generation",
+      "complexity": 0.25,
+      "estimated_tokens": 350,
+      "dependencies": [],
+      "validation_criteria": ["SullivanArbiter().validate(genome_dict) returns dict with valid and errors", "Missing required keys produce valid False and non-empty errors"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/ir/arbiter.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "In homeos/ir/pipeline.py add optional validation step: after building genome_v1, if arbiter=True (default True), call SullivanArbiter().validate(genome_v1). If not valid, log errors and optionally raise or return None. Expose run(..., validate: bool=True). Ensure pipeline writes genome_v1 to output_path only if validation passes when validate=True. Import SullivanArbiter from homeos.ir.arbiter.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 250,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": ["Pipeline runs arbiter when validate=True", "On validation failure do not write file or raise/log errors"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/ir/pipeline.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T17:00:00Z",
+    "project_context": "Mode Manager étape 4 - Intent Refactoring, genome v1"
+  }
+}

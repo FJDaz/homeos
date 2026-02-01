@@ -1,0 +1,126 @@
+{
+  "task_id": "corrections-priorite-3-2026-01-29",
+  "description": "Corrections pour Priorité 3 : Adapter les modifications générées au code existant (ComponentGenerator, PatternAnalyzer, preview module, API endpoints, sauvegarde)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Intégrer IntentTranslator/STAR dans ComponentGenerator._enrich_context() ou _create_generation_plan(). Modifier _enrich_context() pour : 1) Créer instance IntentTranslator (lazy import), 2) Utiliser search_situation() et propagate_star() sur l'intent, 3) Enrichir le contexte avec patterns STAR (Situation, Transformation, Abstraction, Realisation), 4) Inclure templates STAR dans le contexte enrichi. Gérer erreurs (IntentTranslator non disponible → contexte normal sans STAR). Adapter au code existant (pas de registry, utiliser knowledge_base).",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "IntentTranslator intégré dans _enrich_context()",
+        "Contexte enrichi avec patterns STAR",
+        "Gestion d'erreurs complète avec fallback",
+        "Code adapté à la structure existante (pas de registry)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Intégrer IntentTranslator/STAR dans PatternAnalyzer.analyze_patterns(). Modifier analyze_patterns() pour : 1) Créer instance IntentTranslator (lazy import), 2) Analyser les intents des composants Elite avec search_situation(), 3) Mapper patterns STAR aux patterns détectés, 4) Enrichir insights avec informations STAR (patterns fréquents, transformations communes), 5) Ajouter métriques STAR dans les résultats (star_patterns_count, star_transformations, etc.). Gérer erreurs (IntentTranslator non disponible → analyse normale sans STAR).",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "IntentTranslator intégré dans analyze_patterns()",
+        "Insights enrichis avec informations STAR",
+        "Métriques STAR ajoutées aux résultats",
+        "Gestion d'erreurs complète"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer module preview avec preview_generator.py. Créer Backend/Prod/sullivan/preview/__init__.py et preview_generator.py avec : 1) Fonction generate_preview_html(component: Component, base_url: str) qui génère HTML de prévisualisation avec iframe sécurisé, 2) Fonction generate_preview_page(components: List[Component], base_url: str) pour page de liste, 3) Template HTML avec style brutaliste cohérent avec sullivan_builder.py, 4) Support pour afficher HTML/CSS/JS du composant dans iframe. Utiliser le modèle Component existant (pas de nouveau modèle).",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Module preview créé avec __init__.py et preview_generator.py",
+        "Fonction generate_preview_html() génère HTML correct",
+        "Template HTML cohérent avec style brutaliste",
+        "Support iframe pour affichage composants",
+        "Utilise modèle Component existant"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/models/component.py",
+          "Backend/Prod/sullivan/builder/sullivan_builder.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter endpoints API /sullivan/preview/{component_id} et GET /sullivan/preview dans api.py. Les endpoints doivent : 1) Récupérer composant depuis LocalCache ou EliteLibrary via ComponentRegistry, 2) Générer HTML de prévisualisation avec preview_generator.generate_preview_html(), 3) Retourner HTMLResponse avec HTML généré, 4) Gérer erreurs (composant non trouvé → 404, erreur génération → 500). Endpoint GET /sullivan/preview doit retourner liste de tous les composants avec liens vers prévisualisations.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Endpoint /sullivan/preview/{component_id} créé",
+        "Endpoint GET /sullivan/preview créé pour liste",
+        "Gestion d'erreurs complète (404, 500)",
+        "Retourne HTMLResponse correct",
+        "Utilise ComponentRegistry pour récupérer composants"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/registry.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Modifier ComponentGenerator pour sauvegarde systématique après génération. Modifier generate_component() pour : 1) Sauvegarder systématiquement le composant généré dans LocalCache (même si score < 70), 2) Sauvegarder fichiers HTML/CSS/JS dans format exploitable (structure : component_id/html, css, js), 3) Créer metadata JSON avec informations complètes (intent, scores, timestamps, STAR patterns utilisés si disponibles), 4) Intégrer avec Elite Library si score >= 85. Utiliser LocalCache et EliteLibrary depuis ComponentRegistry ou créer instances si nécessaire.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Sauvegarde systématique après génération",
+        "Fichiers sauvegardés dans format exploitable",
+        "Metadata JSON créé avec informations complètes",
+        "Intégration Elite Library si score >= 85",
+        "Utilise LocalCache et EliteLibrary correctement"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/cache/local_cache.py",
+          "Backend/Prod/sullivan/library/elite_library.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:55:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Corrections pour Priorité 3 : Adapter modifications au code existant"
+  }
+}

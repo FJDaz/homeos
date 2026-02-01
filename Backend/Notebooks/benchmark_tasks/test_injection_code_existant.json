@@ -1,0 +1,32 @@
+{
+  "task_id": "test-injection-code-existant-2026-01-29",
+  "description": "Test d'injection du code existant dans le contexte - Ajouter une méthode simple à IntentTranslator",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter une méthode get_mapping_count() à IntentTranslator qui retourne le nombre total de mappings chargés depuis star_mappings.json. La méthode doit être simple et utiliser len(self.index_situations).",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Méthode get_mapping_count() ajoutée à IntentTranslator",
+        "Méthode retourne len(self.index_situations)",
+        "Méthode a docstring et type hints",
+        "Code s'intègre avec la structure existante (imports, classes préservés)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test d'injection du code existant dans le contexte AETHERFLOW"
+  }
+}

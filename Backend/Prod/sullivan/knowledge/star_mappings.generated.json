@@ -1,0 +1,86 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List, Dict
+from pathlib import Path
+import json
+
+app = FastAPI()
+
+class Situation:
+    def __init__(self, pattern_name: str, variants: List[str]):
+        self.pattern_name = pattern_name
+        self.variants = variants
+
+class Transformation:
+    def __init__(self, user_term: str, tech_term: str):
+        self.user_term = user_term
+        self.tech_term = tech_term
+
+class Abstraction:
+    def __init__(self, name: str, description: str):
+        self.name = name
+        self.description = description
+
+class Realisation:
+    def __init__(self, template: str, code: str, javascript: str):
+        self.template = template
+        self.code = code
+        self.javascript = javascript
+
+class IntentTranslator:
+    def __init__(self, file_path: Path):
+        self.file_path = file_path
+        self.indexes = self.build_indexes()
+
+    def build_indexes(self):
+        try:
+            with open(self.file_path, 'r') as file:
+                data = json.load(file)
+            if 'mappings' not in data:
+                raise ValueError("Invalid JSON structure")
+            mappings = data['mappings']
+            indexes = []
+            for mapping in mappings:
+                if not all(key in mapping for key in ['pattern_name', 'variants', 'transformations', 'abstraction', 'realisation']):
+                    raise ValueError("Invalid mapping structure")
+                situation = Situation(mapping['pattern_name'], mapping['variants'])
+                transformations = Transformation(mapping['transformations']['user_term'], mapping['transformations']['tech_term'])
+                abstraction = Abstraction(mapping['abstraction']['name'], mapping['abstraction']['description'])
+                realisation = Realisation(mapping['realisation']['template'], mapping['realisation']['code'], mapping['realisation']['javascript'])
+                indexes.append({
+                    'situation': situation,
+                    'transformations': transformations,
+                    'abstraction': abstraction,
+                    'realisation': realisation
+                })
+            return indexes
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File {self.file_path} not found")
+        except json.JSONDecodeError:
+            raise ValueError(f"Invalid JSON in file {self.file_path}")
+
+    def get_indexes(self):
+        return self.indexes
+
+# Example usage:
+file_path = Path('star_mappings.json')
+translator = IntentTranslator(file_path)
+indexes = translator.get_indexes()
+for index in indexes:
+    print(index['situation'].pattern_name)
+    print(index['transformations'].user_term)
+    print(index['abstraction'].name)
+    print(index['realisation'].template)
+
+# API endpoint to get indexes
+@app.get("/indexes")
+def get_indexes():
+    file_path = Path('star_mappings.json')
+    translator = IntentTranslator(file_path)
+    indexes = translator.get_indexes()
+    return indexes
+
+# Run the API
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

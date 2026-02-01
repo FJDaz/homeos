@@ -1,0 +1,56 @@
+{
+  "task_id": "phase4_sullivan_generate_corps",
+  "description": "Phase 4 Sullivan - Génération des corps (écrans) : à partir du plan d'écrans (Phase 3) et des principes graphiques (Phase 2), générer un squelette HTML par corps (sections ancrées, single-page), puis STOP.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/builder/corps_generator.py. Fonction load_screen_plan(path: Path) -> List[Dict] qui charge screen_plan.json (liste de corps avec corps_id, label, organes, endpoints). Fonction load_design_principles(path: Optional[Path]) -> Dict qui charge design_principles.json si présent (sinon dict vide). Fonction generate_corps_html(screen_plan: List[Dict], design_principles: Dict, base_url: str) -> str : pour chaque corps du plan, générer une section HTML avec id=corps_id (ex. id=\"corps_1\"), un titre (label), des zones layout (header, main, footer ou zones placeholder), et pour chaque organe un bloc placeholder (div avec data-endpoint-path, data-method, data-x-ui-hint). Assembler toutes les sections en un seul document HTML (single-page, sections ancrées), style brutalist cohérent avec sullivan_builder (BRUTALIST_CSS ou minimal). Appliquer design_principles si présents (couleurs, font-family dans une balise style). Fonction build_corps(screen_plan_path: Path, output_path: Path, design_principles_path: Optional[Path], base_url: str) qui charge le plan, charge les principes, appelle generate_corps_html, écrit le fichier. Type hints, docstrings, logging.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "load_screen_plan et load_design_principles chargent des JSON valides",
+        "generate_corps_html produit un HTML single-page avec une section par corps",
+        "Chaque section a id, label, zones layout, placeholders organes (data-endpoint-path, etc.)",
+        "build_corps écrit le HTML dans output_path",
+        "Style brutalist aligné avec sullivan_builder (CSS minimal)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/builder/corps_generator.py",
+          "Backend/Prod/sullivan/builder/sullivan_builder.py",
+          "Backend/Prod/sullivan/planner/screen_planner.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier Backend/Prod/cli.py : pour la branche sullivan, ajouter option --generate-corps (action='store_true') et --screen-plan (type=Path, default=None). Quand sullivan --generate-corps est invoqué : screen_plan_path = args.screen_plan ou output/studio/screen_plan.json, design_principles_path = output/studio/design_principles.json si existant, output_path = output/studio/studio_corps.html. Appeler corps_generator.build_corps(screen_plan_path, output_path, design_principles_path, base_url défaut http://localhost:8000). Afficher un message de succès avec le chemin du fichier généré.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Option --generate-corps et --screen-plan sur sullivan",
+        "sullivan --generate-corps produit output/studio/studio_corps.html",
+        "Utilise screen_plan.json et design_principles.json si présents"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/sullivan/builder/corps_generator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T22:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 4 Sullivan - Génération des corps : squelette HTML par écran (single-page, sections ancrées), prêt pour Phase 5 (organes + chatbot). Commande : sullivan --generate-corps."
+  }
+}

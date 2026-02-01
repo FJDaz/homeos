@@ -1,0 +1,844 @@
+python scripts/benchmark_zero_budget.py --plan docs/references/plan_example.json --output output/zero_budget
+
+2026-01-26 13:21:27.691 | INFO     | __main__:main:330 - ============================================================
+2026-01-26 13:21:27.691 | INFO     | __main__:main:331 - Benchmark: Mode Comparison
+2026-01-26 13:21:27.691 | INFO     | __main__:main:332 - ============================================================
+2026-01-26 13:21:27.691 | INFO     | __main__:benchmark_mode_comparison:31 - Starting mode comparison benchmark
+2026-01-26 13:21:27.691 | INFO     | __main__:benchmark_mode_comparison:37 - Testing mode: FAST
+2026-01-26 13:21:27.692 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 1 cache entries
+2026-01-26 13:21:27.692 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Loading weights: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 968.16it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:21:31.690 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:21:31.705 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:21:31.725 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:21:31.742 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:21:31.758 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:21:31.758 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:21:31.762 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:21:32.053 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:158 - Loaded existing index from rag_index
+2026-01-26 13:21:32.056 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:21:32.056 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:21:32.057 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:21:32.064 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:21:32.064 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:21:32.064 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:21:32.064 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:21:32.064 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:21:32.079 | INFO     | Backend.Prod.rag.pageindex_store:retrieve:376 - Retrieved 3 results for query: Créer une API REST simple avec authentification JW...
+2026-01-26 13:21:32.080 | INFO     | Backend.Prod.orchestrator:execute_plan:142 - Context enriched with RAG: 3 references
+2026-01-26 13:21:32.081 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:21:32.081 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:21:32.081 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:21:32.082 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:32.082 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:32.082 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: groq
+2026-01-26 13:21:32.082 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:21:32.093 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:32.098 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:32.098 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: groq
+2026-01-26 13:21:32.099 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x1566aeb50>                                                                                                                                                     │
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x1566aeb50>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1336d7910>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x133749990>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1336e8a50>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:21:35.219 | DEBUG    | Backend.Prod.cache.semantic_cache:put:360 - Cached prompt-response pair (hash: 6c81a0b1...)
+2026-01-26 13:21:35.219 | INFO     | Backend.Prod.models.agent_router:execute_step:493 - Step step_2 completed: 1126 tokens, $0.0008, 3001ms (provider: groq)
+2026-01-26 13:21:35.219 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:21:35.219 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:21:35.219 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:21:35.220 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:21:35.220 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.220 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.220 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: groq
+2026-01-26 13:21:35.220 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:21:35.321 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:21:35.321 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:21:35.321 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 101ms (semantic cache)
+2026-01-26 13:21:35.322 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:21:35.322 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:21:35.322 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.322 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.322 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: groq
+2026-01-26 13:21:35.322 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+2026-01-26 13:21:35.419 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:21:35.419 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:21:35.419 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 97ms (semantic cache)
+2026-01-26 13:21:35.419 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:21:35.420 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:21:35.420 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.420 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (FAST): code_generation -> groq
+2026-01-26 13:21:35.420 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: groq
+2026-01-26 13:21:35.420 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x133409e90>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1334f72d0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 3.44s   │
+│ Total Tokens │ 1,986   │
+│ Total Cost   │ $0.0013 │
+╰──────────────┴─────────╯
+2026-01-26 13:21:35.529 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/mode_fast/step_outputs
+2026-01-26 13:21:35.532 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/mode_fast/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/mode_fast/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:21:35.534 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 3445ms (3.44s)
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 689ms
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 1,986
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 1,256
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 730
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0013
+2026-01-26 13:21:35.535 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:21:35.536 | INFO     | __main__:benchmark_mode_comparison:63 - Mode FAST completed: 3479ms, $0.0013
+2026-01-26 13:21:35.536 | INFO     | __main__:benchmark_mode_comparison:37 - Testing mode: BUILD
+2026-01-26 13:21:35.537 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 2 cache entries
+2026-01-26 13:21:35.538 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 1265.76it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:21:38.588 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:21:38.589 | INFO     | Backend.Prod.cache.semantic_cache:_load_cache:122 - Loaded 2 entries from semantic cache
+2026-01-26 13:21:38.606 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:21:38.623 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:21:38.640 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:21:38.655 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:21:38.656 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:21:38.656 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:21:38.659 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:148 - Index cache valid, loading from disk...
+2026-01-26 13:21:38.659 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:21:38.659 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:21:38.670 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:21:38.673 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:21:38.673 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:21:38.673 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:21:38.673 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:21:38.673 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:21:38.674 | WARNING  | Backend.Prod.orchestrator:execute_plan:144 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:21:38.674 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:21:38.675 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:21:38.675 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:21:38.675 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:21:38.675 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:21:38.675 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: codestral
+2026-01-26 13:21:38.676 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:21:38.919 | DEBUG    | Backend.Prod.cache.semantic_cache:get:309 - Semantic cache MISS: best_similarity=0.000 < threshold=0.85
+2026-01-26 13:21:38.919 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:21:38.919 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:21:38.919 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:21:38.920 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:21:39.109 | DEBUG    | Backend.Prod.cache.semantic_cache:get:309 - Semantic cache MISS: best_similarity=0.000 < threshold=0.85
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x1399987d0>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x139998290>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x155547510>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x139a0da10>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:21:57.017 | INFO     | Backend.Prod.models.deepseek_client:generate:221 - Generation completed: 569 tokens, $0.0001, 17908ms
+2026-01-26 13:21:57.130 | DEBUG    | Backend.Prod.cache.semantic_cache:put:360 - Cached prompt-response pair (hash: dde4b085...)
+2026-01-26 13:21:57.131 | INFO     | Backend.Prod.models.agent_router:execute_step:493 - Step step_2 completed: 569 tokens, $0.0001, 18098ms (provider: deepseek)
+2026-01-26 13:21:57.131 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:21:57.131 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:21:57.131 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:21:57.132 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:21:57.132 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x155547450>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x156f3dfd0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:22:18.145 | INFO     | Backend.Prod.models.deepseek_client:generate:221 - Generation completed: 2016 tokens, $0.0004, 20876ms
+2026-01-26 13:22:18.271 | DEBUG    | Backend.Prod.cache.semantic_cache:put:360 - Cached prompt-response pair (hash: e690b50f...)
+2026-01-26 13:22:18.271 | INFO     | Backend.Prod.models.agent_router:execute_step:493 - Step step_3 completed: 2016 tokens, $0.0004, 21014ms (provider: deepseek)
+2026-01-26 13:22:18.271 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:18.272 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:22:18.272 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x139949410>                                                                                                                                                     │
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x139949410>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1334ea990>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:22:19.698 | DEBUG    | Backend.Prod.cache.semantic_cache:put:360 - Cached prompt-response pair (hash: abf42da5...)
+2026-01-26 13:22:19.698 | INFO     | Backend.Prod.models.agent_router:execute_step:493 - Step step_4 completed: 2527 tokens, $0.0008, 1291ms (provider: codestral)
+2026-01-26 13:22:19.698 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:19.699 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:22:19.699 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x139935f90>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1336acc50>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x139a0d290>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x13994ba10>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 42.39s  │
+│ Total Tokens │ 7,420   │
+│ Total Cost   │ $0.0020 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:21.071 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/mode_build/step_outputs
+2026-01-26 13:22:21.073 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/mode_build/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:21.074 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/mode_build/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:21.074 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:21.074 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:21.074 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:21.074 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 42396ms (42.40s)
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 8479ms
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 7,420
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 5,600
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 1,820
+2026-01-26 13:22:21.075 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0020
+2026-01-26 13:22:21.076 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:21.076 | INFO     | __main__:benchmark_mode_comparison:63 - Mode BUILD completed: 42406ms, $0.0020
+2026-01-26 13:22:21.077 | INFO     | __main__:benchmark_mode_comparison:37 - Testing mode: DOUBLE-CHECK
+2026-01-26 13:22:21.080 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 5 cache entries
+2026-01-26 13:22:21.080 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Loading weights: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 828.81it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:22:24.773 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:22:24.775 | INFO     | Backend.Prod.cache.semantic_cache:_load_cache:122 - Loaded 7 entries from semantic cache
+2026-01-26 13:22:24.789 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:22:24.807 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:22:24.824 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:22:24.840 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:22:24.840 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:22:24.841 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:22:24.842 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:148 - Index cache valid, loading from disk...
+2026-01-26 13:22:24.842 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:22:24.842 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:22:24.851 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:24.855 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:24.855 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:24.855 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:24.855 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:24.855 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:22:24.855 | WARNING  | Backend.Prod.orchestrator:execute_plan:144 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:22:24.856 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:22:24.856 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:22:24.856 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:22:24.856 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:24.857 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:24.857 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: deepseek
+2026-01-26 13:22:24.857 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_1 completed from cache: 91ms (semantic cache)
+2026-01-26 13:22:24.948 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_1
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:24.948 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:22:24.949 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:22:25.042 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:25.042 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:25.043 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_2 completed from cache: 94ms (semantic cache)
+2026-01-26 13:22:25.043 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:22:25.043 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:22:25.043 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:22:25.043 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:22:25.044 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.044 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.045 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: deepseek
+2026-01-26 13:22:25.045 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:22:25.167 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:25.167 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 123ms (semantic cache)
+2026-01-26 13:22:25.168 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: deepseek
+2026-01-26 13:22:25.168 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x13374b550>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x155545750>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:22:25.391 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:25.391 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:25.391 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 223ms (semantic cache)
+2026-01-26 13:22:25.391 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:25.391 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:22:25.392 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.392 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (DOUBLE-CHECK): code_generation -> deepseek
+2026-01-26 13:22:25.392 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: deepseek
+2026-01-26 13:22:25.392 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x133749e90>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1565b8f50>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 0.74s   │
+│ Total Tokens │ 0       │
+│ Total Cost   │ $0.0000 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:25.602 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/mode_double-check/step_outputs
+2026-01-26 13:22:25.604 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/mode_double-check/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:25.605 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/mode_double-check/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:25.605 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:25.606 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:25.607 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 745ms (0.74s)
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 149ms
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 0
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 0
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 0
+2026-01-26 13:22:25.608 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0000
+2026-01-26 13:22:25.609 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:25.609 | INFO     | __main__:benchmark_mode_comparison:63 - Mode DOUBLE-CHECK completed: 758ms, $0.0000
+2026-01-26 13:22:25.622 | INFO     | __main__:main:339 - ============================================================
+2026-01-26 13:22:25.622 | INFO     | __main__:main:340 - Benchmark: Parallelization
+2026-01-26 13:22:25.622 | INFO     | __main__:main:341 - ============================================================
+2026-01-26 13:22:25.623 | INFO     | __main__:benchmark_parallelization:94 - Starting parallelization benchmark
+2026-01-26 13:22:25.623 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:25.631 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:25.632 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:25.632 | INFO     | __main__:benchmark_parallelization:105 - Plan has 4 batches, 1 with parallelizable steps
+2026-01-26 13:22:25.632 | INFO     | __main__:benchmark_parallelization:106 - Total parallelizable steps: 2
+2026-01-26 13:22:25.633 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 5 cache entries
+2026-01-26 13:22:25.633 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Loading weights: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 1414.11it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:22:28.332 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:22:28.334 | INFO     | Backend.Prod.cache.semantic_cache:_load_cache:122 - Loaded 7 entries from semantic cache
+2026-01-26 13:22:28.360 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:22:28.382 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:22:28.410 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:22:28.433 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:22:28.433 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:22:28.435 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:22:28.435 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:148 - Index cache valid, loading from disk...
+2026-01-26 13:22:28.436 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:22:28.436 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:22:28.436 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:28.441 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:28.442 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:28.442 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:28.442 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:28.442 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:22:28.443 | WARNING  | Backend.Prod.orchestrator:execute_plan:144 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:22:28.448 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:22:28.449 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:22:28.449 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:22:28.449 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.450 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.450 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: codestral
+2026-01-26 13:22:28.450 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:22:28.538 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:28.538 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:28.538 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_1 completed from cache: 89ms (semantic cache)
+2026-01-26 13:22:28.538 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_1
+2026-01-26 13:22:28.539 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:28.539 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:28.539 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:22:28.540 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:22:28.651 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:28.651 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:28.651 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_2 completed from cache: 112ms (semantic cache)
+2026-01-26 13:22:28.651 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:22:28.651 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:22:28.651 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:22:28.652 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:22:28.652 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:28.652 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:28.652 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: deepseek
+2026-01-26 13:22:28.652 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:22:28.769 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:28.769 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:28.769 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 117ms (semantic cache)
+2026-01-26 13:22:28.769 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:28.769 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:22:28.769 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.770 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.770 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: codestral
+2026-01-26 13:22:28.770 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+2026-01-26 13:22:28.890 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:28.890 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:28.890 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 121ms (semantic cache)
+2026-01-26 13:22:28.891 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:28.891 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:22:28.891 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.891 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:28.891 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: codestral
+2026-01-26 13:22:28.891 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x156df3410>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1333b27d0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x156df0c10>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1399985d0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 0.55s   │
+│ Total Tokens │ 0       │
+│ Total Cost   │ $0.0000 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:29.000 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/parallel/step_outputs
+2026-01-26 13:22:29.001 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/parallel/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:29.002 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/parallel/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:29.002 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:29.002 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:29.002 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:29.003 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 552ms (0.55s)
+2026-01-26 13:22:29.004 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 110ms
+2026-01-26 13:22:29.004 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 0
+2026-01-26 13:22:29.004 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 0
+2026-01-26 13:22:29.005 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 0
+2026-01-26 13:22:29.005 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0000
+2026-01-26 13:22:29.005 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:29.005 | INFO     | __main__:benchmark_parallelization:132 - Parallel execution completed: 569ms
+2026-01-26 13:22:29.019 | INFO     | __main__:main:348 - ============================================================
+2026-01-26 13:22:29.020 | INFO     | __main__:main:349 - Benchmark: Streaming
+2026-01-26 13:22:29.020 | INFO     | __main__:main:350 - ============================================================
+2026-01-26 13:22:29.020 | INFO     | __main__:benchmark_streaming:165 - Starting streaming benchmark
+2026-01-26 13:22:29.021 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 5 cache entries
+2026-01-26 13:22:29.021 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Loading weights: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 766.75it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:22:32.494 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:22:32.497 | INFO     | Backend.Prod.cache.semantic_cache:_load_cache:122 - Loaded 7 entries from semantic cache
+2026-01-26 13:22:32.512 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:22:32.535 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:22:32.552 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:22:32.568 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:22:32.568 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:22:32.569 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:22:32.570 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:148 - Index cache valid, loading from disk...
+2026-01-26 13:22:32.570 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:22:32.570 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:22:32.570 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:32.573 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:32.574 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:32.574 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:32.574 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:32.574 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:22:32.575 | WARNING  | Backend.Prod.orchestrator:execute_plan:144 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:22:32.575 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:22:32.575 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:22:32.575 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:22:32.576 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:32.576 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:32.576 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: codestral
+2026-01-26 13:22:32.576 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:22:32.649 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_1 completed from cache: 74ms (semantic cache)
+2026-01-26 13:22:32.650 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_1
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:22:32.650 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:22:32.836 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:32.836 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:32.837 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_2 completed from cache: 186ms (semantic cache)
+2026-01-26 13:22:32.837 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:22:32.837 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:22:32.837 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:22:32.837 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:22:32.837 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:32.838 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:32.838 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: deepseek
+2026-01-26 13:22:32.838 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:22:32.971 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:32.971 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:32.971 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 133ms (semantic cache)
+2026-01-26 13:22:32.971 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:32.971 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:22:32.972 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:32.972 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:32.972 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: codestral
+2026-01-26 13:22:32.972 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x1581b6350>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x1336ce9d0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:22:33.089 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:33.089 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:33.089 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 117ms (semantic cache)
+2026-01-26 13:22:33.089 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:33.089 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:22:33.090 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.090 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.090 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: codestral
+2026-01-26 13:22:33.090 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x1565bb790>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x13994a290>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 0.63s   │
+│ Total Tokens │ 0       │
+│ Total Cost   │ $0.0000 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:33.214 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/normal/step_outputs
+2026-01-26 13:22:33.215 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/normal/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:33.216 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/normal/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:33.216 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:33.216 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:33.216 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:33.216 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 638ms (0.64s)
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 128ms
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 0
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 0
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 0
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0000
+2026-01-26 13:22:33.217 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:33.218 | INFO     | __main__:benchmark_streaming:189 - Normal execution completed: 647ms
+2026-01-26 13:22:33.218 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:536 - Starting streaming execution mode
+2026-01-26 13:22:33.218 | INFO     | Backend.Prod.models.plan_reader:read_streaming:256 - Reading plan in streaming mode from docs/references/plan_example.json
+2026-01-26 13:22:33.225 | DEBUG    | Backend.Prod.models.plan_reader:read_streaming:305 - Streaming step: step_1
+2026-01-26 13:22:33.225 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:560 - Received step via streaming: step_1
+2026-01-26 13:22:33.225 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:33.231 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:33.231 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:33.232 | WARNING  | Backend.Prod.orchestrator:_execute_plan_streaming:601 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:22:33.232 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:625 - Step step_1 is ready, executing immediately
+2026-01-26 13:22:33.232 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.232 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.232 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: codestral
+2026-01-26 13:22:33.233 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:22:33.317 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:33.317 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:33.317 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_1 completed from cache: 85ms (semantic cache)
+2026-01-26 13:22:33.317 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_1
+2026-01-26 13:22:33.324 | DEBUG    | Backend.Prod.models.plan_reader:read_streaming:305 - Streaming step: step_2
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:560 - Received step via streaming: step_2
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:625 - Step step_2 is ready, executing immediately
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:22:33.325 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:22:33.431 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:33.431 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:33.431 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_2 completed from cache: 106ms (semantic cache)
+2026-01-26 13:22:33.431 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:22:33.438 | DEBUG    | Backend.Prod.models.plan_reader:read_streaming:305 - Streaming step: step_3
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:560 - Received step via streaming: step_3
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:625 - Step step_3 is ready, executing immediately
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: deepseek
+2026-01-26 13:22:33.438 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:22:33.556 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:33.556 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:33.556 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 118ms (semantic cache)
+2026-01-26 13:22:33.556 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:33.564 | DEBUG    | Backend.Prod.models.plan_reader:read_streaming:305 - Streaming step: step_4
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:560 - Received step via streaming: step_4
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:625 - Step step_4 is ready, executing immediately
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: codestral
+2026-01-26 13:22:33.565 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+2026-01-26 13:22:33.683 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:33.684 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:33.684 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 119ms (semantic cache)
+2026-01-26 13:22:33.684 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:33.691 | DEBUG    | Backend.Prod.models.plan_reader:read_streaming:305 - Streaming step: step_5
+2026-01-26 13:22:33.691 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:560 - Received step via streaming: step_5
+2026-01-26 13:22:33.691 | INFO     | Backend.Prod.orchestrator:_execute_plan_streaming:625 - Step step_5 is ready, executing immediately
+2026-01-26 13:22:33.691 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.691 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:33.691 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: codestral
+2026-01-26 13:22:33.692 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x15659c550>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x139937710>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x156e9c6d0>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x13994ba10>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯2026-01-26 13:22:34.815 | INFO     | Backend.Prod.models.plan_reader:read_streaming:318 - Plan file appears complete, finishing streaming
+2026-01-26 13:22:34.815 | INFO     | Backend.Prod.models.plan_reader:read_streaming:338 - Streaming complete: 5 steps extracted
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x156e9c6d0>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x13994ba10>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 1.59s   │
+│ Total Tokens │ 0       │
+│ Total Cost   │ $0.0000 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:34.825 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/streaming/step_outputs
+2026-01-26 13:22:34.826 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/streaming/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:34.829 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/streaming/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 1592ms (1.59s)
+2026-01-26 13:22:34.830 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 318ms
+2026-01-26 13:22:34.831 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 0
+2026-01-26 13:22:34.831 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 0
+2026-01-26 13:22:34.831 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 0
+2026-01-26 13:22:34.831 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0000
+2026-01-26 13:22:34.831 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:34.831 | INFO     | __main__:benchmark_streaming:215 - Streaming execution completed: 1614ms
+2026-01-26 13:22:34.839 | INFO     | __main__:main:357 - ============================================================
+2026-01-26 13:22:34.839 | INFO     | __main__:main:358 - Benchmark: Prompt Stripping
+2026-01-26 13:22:34.840 | INFO     | __main__:main:359 - ============================================================
+2026-01-26 13:22:34.840 | INFO     | __main__:benchmark_prompt_stripping:258 - Prompt stripping benchmark (stripped mode is default)
+2026-01-26 13:22:34.840 | INFO     | Backend.Prod.cache.prompt_cache:_load_cache_metadata:76 - Loaded 5 cache entries
+2026-01-26 13:22:34.840 | INFO     | Backend.Prod.cache.semantic_cache:__init__:99 - Loading embedding model: all-MiniLM-L6-v2
+Loading weights: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 103/103 [00:00<00:00, 1340.55it/s, Materializing param=pooler.dense.weight]
+BertModel LOAD REPORT from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED    :can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-01-26 13:22:37.513 | INFO     | Backend.Prod.cache.semantic_cache:__init__:101 - Embedding model loaded successfully
+2026-01-26 13:22:37.514 | INFO     | Backend.Prod.cache.semantic_cache:_load_cache:122 - Loaded 7 entries from semantic cache
+2026-01-26 13:22:37.532 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:57 - DeepSeek provider initialized
+2026-01-26 13:22:37.552 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:68 - Codestral provider initialized
+2026-01-26 13:22:37.569 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:77 - Gemini provider initialized
+2026-01-26 13:22:37.586 | INFO     | Backend.Prod.models.agent_router:_initialize_providers:86 - Groq provider initialized
+2026-01-26 13:22:37.587 | INFO     | Backend.Prod.models.agent_router:_initialize_speculative:198 - Speculative decoding enabled: draft=groq, verify=deepseek
+Embeddings have been explicitly disabled. Using MockEmbedding.
+2026-01-26 13:22:37.587 | INFO     | Backend.Prod.rag.pageindex_store:__init__:106 - PageIndex mode: CPU-only, zero embeddings cost
+2026-01-26 13:22:37.588 | INFO     | Backend.Prod.rag.pageindex_store:_should_rebuild_index:148 - Index cache valid, loading from disk...
+2026-01-26 13:22:37.588 | INFO     | Backend.Prod.rag.pageindex_store:__init__:112 - PageIndexRetriever initialized with 3 documents
+2026-01-26 13:22:37.588 | INFO     | Backend.Prod.orchestrator:__init__:71 - RAG system initialized for context enrichment
+2026-01-26 13:22:37.588 | INFO     | Backend.Prod.models.plan_reader:read:177 - Reading plan from docs/references/plan_example.json
+2026-01-26 13:22:37.592 | DEBUG    | Backend.Prod.models.plan_reader:read:189 - Plan validated against schema successfully
+2026-01-26 13:22:37.592 | INFO     | Backend.Prod.models.plan_reader:read:196 - Plan loaded successfully: a1b2c3d4-e5f6-7890-abcd-ef1234567890 with 5 steps
+2026-01-26 13:22:37.592 | INFO     | Backend.Prod.orchestrator:execute_plan:122 - Starting execution of plan a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:37.592 | INFO     | Backend.Prod.orchestrator:execute_plan:123 - Plan description: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:37.593 | INFO     | Backend.Prod.orchestrator:execute_plan:124 - Total steps: 5
+2026-01-26 13:22:37.593 | WARNING  | Backend.Prod.orchestrator:execute_plan:144 - RAG enrichment failed: 'PageIndexRetriever' object has no attribute 'index', using original context
+2026-01-26 13:22:37.595 | INFO     | Backend.Prod.orchestrator:execute_plan:158 - Execution order: 4 batches
+2026-01-26 13:22:37.596 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 1/4 (2 steps)
+2026-01-26 13:22:37.596 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:242 - Executing 2 steps in parallel
+2026-01-26 13:22:37.597 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:37.598 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:37.598 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_1 with provider: codestral
+2026-01-26 13:22:37.599 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le modèle User avec les champs: id, email, p...
+2026-01-26 13:22:37.680 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:37.680 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:37.680 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_1 completed from cache: 82ms (semantic cache)
+2026-01-26 13:22:37.680 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_1
+2026-01-26 13:22:37.680 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:37.681 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:37.681 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_2 with provider: deepseek
+2026-01-26 13:22:37.681 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer le middleware d'authentification JWT avec fo...
+2026-01-26 13:22:37.772 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:37.773 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:37.773 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_2 completed from cache: 92ms (semantic cache)
+2026-01-26 13:22:37.773 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_2
+2026-01-26 13:22:37.773 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_1 completed successfully
+2026-01-26 13:22:37.773 | INFO     | Backend.Prod.orchestrator:_execute_batch_parallel:284 - ✓ Step step_2 completed successfully
+2026-01-26 13:22:37.773 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 2/4 (1 steps)
+2026-01-26 13:22:37.774 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:37.774 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> deepseek
+2026-01-26 13:22:37.774 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_3 with provider: deepseek
+2026-01-26 13:22:37.774 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer les endpoints POST /register et POST /login...
+2026-01-26 13:22:37.916 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:37.917 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:37.917 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_3 completed from cache: 143ms (semantic cache)
+2026-01-26 13:22:37.917 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_3
+2026-01-26 13:22:37.917 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 3/4 (1 steps)
+2026-01-26 13:22:37.917 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:37.918 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:37.918 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_4 with provider: codestral
+2026-01-26 13:22:37.918 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Créer l'endpoint GET /users/me protégé par authent...
+2026-01-26 13:22:38.040 | INFO     | Backend.Prod.cache.semantic_cache:get:304 - Semantic cache HIT: similarity=1.000
+2026-01-26 13:22:38.040 | INFO     | Backend.Prod.models.agent_router:execute_step:335 - Semantic cache HIT: similarity=1.000, using cached response
+2026-01-26 13:22:38.040 | INFO     | Backend.Prod.models.agent_router:execute_step:364 - Step step_4 completed from cache: 123ms (semantic cache)
+2026-01-26 13:22:38.040 | DEBUG    | Backend.Prod.models.metrics:record_step_result:139 - Recorded metrics for step step_4
+2026-01-26 13:22:38.041 | INFO     | Backend.Prod.orchestrator:execute_plan:165 - Executing batch 4/4 (1 steps)
+2026-01-26 13:22:38.041 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:38.041 | INFO     | Backend.Prod.models.agent_router:select_provider_for_step:129 - Mode-based routing (BUILD): code_generation -> codestral
+2026-01-26 13:22:38.041 | INFO     | Backend.Prod.models.agent_router:execute_step:311 - Executing step step_5 with provider: codestral
+2026-01-26 13:22:38.041 | INFO     | Backend.Prod.models.agent_router:execute_step:314 - Step description: Ajouter la documentation OpenAPI et les tests de b...
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x13999b410>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x156df2e90>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────── AETHERFLOW Execution Monitor ────────────────────────────────────────────────────────────────────────────────╮
+│ <rich.panel.Panel object at 0x139998050>                                                                                                                                                     │
+│                                                                                                                                                                                              │
+│ <rich.table.Table object at 0x156d8bad0>                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Execution Complete    
+╭──────────────┬─────────╮
+│ Metric       │ Value   │
+├──────────────┼─────────┤
+│ Total Steps  │ 5       │
+│ Completed    │ 5       │
+│ Failed       │ 0       │
+│ Success Rate │ 100.0%  │
+│ Total Time   │ 0.57s   │
+│ Total Tokens │ 0       │
+│ Total Cost   │ $0.0000 │
+╰──────────────┴─────────╯
+2026-01-26 13:22:38.165 | INFO     | Backend.Prod.orchestrator:_save_step_outputs:513 - Step outputs saved to output/zero_budget/stripped/step_outputs
+2026-01-26 13:22:38.167 | INFO     | Backend.Prod.models.metrics:export_json:200 - Metrics exported to JSON: output/zero_budget/stripped/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
+2026-01-26 13:22:38.168 | INFO     | Backend.Prod.models.metrics:export_csv:259 - Metrics exported to CSV: output/zero_budget/stripped/metrics_a1b2c3d4-e5f6-7890-abcd-ef1234567890.csv
+2026-01-26 13:22:38.168 | INFO     | Backend.Prod.models.metrics:print_summary:265 - ============================================================
+2026-01-26 13:22:38.169 | INFO     | Backend.Prod.models.metrics:print_summary:266 - EXECUTION SUMMARY
+2026-01-26 13:22:38.169 | INFO     | Backend.Prod.models.metrics:print_summary:267 - ============================================================
+2026-01-26 13:22:38.169 | INFO     | Backend.Prod.models.metrics:print_summary:268 - Task: Créer une API REST simple avec authentification JWT pour gérer des utilisateurs
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:269 - Task ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:270 - Total Steps: 5
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:271 - Successful: 5
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:272 - Failed: 0
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:273 - Success Rate: 100.0%
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:274 - Total Time: 570ms (0.57s)
+2026-01-26 13:22:38.170 | INFO     | Backend.Prod.models.metrics:print_summary:275 - Average Step Time: 114ms
+2026-01-26 13:22:38.171 | INFO     | Backend.Prod.models.metrics:print_summary:276 - Total Tokens: 0
+2026-01-26 13:22:38.171 | INFO     | Backend.Prod.models.metrics:print_summary:277 -   Input: 0
+2026-01-26 13:22:38.171 | INFO     | Backend.Prod.models.metrics:print_summary:278 -   Output: 0
+2026-01-26 13:22:38.171 | INFO     | Backend.Prod.models.metrics:print_summary:279 - Total Cost: $0.0000
+2026-01-26 13:22:38.171 | INFO     | Backend.Prod.models.metrics:print_summary:280 - ============================================================
+2026-01-26 13:22:38.172 | INFO     | __main__:benchmark_prompt_stripping:283 - Stripped prompts execution completed: 583ms, 0 tokens
+2026-01-26 13:22:38.181 | INFO     | __main__:main:370 - Benchmark results saved to: output/zero_budget/benchmark_results.json
+
+============================================================
+BENCHMARK SUMMARY
+============================================================
+
+Mode Comparison:
+  FAST: 3479ms, $0.0013, 100.0% success
+  BUILD: 42406ms, $0.0020, 100.0% success
+  DOUBLE-CHECK: 758ms, $0.0000, 100.0% success
+
+Streaming Gains:
+  Time saved: -966ms (-149.3%)
+
+============================================================
+(venv) francois-jeandazin@MBP-FJDAZ AETHERFLOW % 

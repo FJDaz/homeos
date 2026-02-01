@@ -1,0 +1,25 @@
+{
+  "task_id": "phase-c-hci-ir-001",
+  "description": "Phase C: HCI Intent Refactoring (quick). C1: layout 3 panels (Intentions / Implémentation / Actions), header IR Progress + Phase + Validation, z-index 10000. Create frontend-svelte/src/lib/ir_interface/ with layout component and stub PhaseIndicator, one store irState. Reference docs/02-sullivan/HCI DE L'INTENT REFACTORING.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create frontend-svelte/src/lib/ir_interface/ structure. Add IntentRefactoringLayout.svelte: 3-panel layout (Panel 1 Intentions/Manifeste, Panel 2 Implémentation/code, Panel 3 Actions/décisions), header with IR Progress, Current Phase, Validation Status. Z-index overlay 10000, phase indicator 10001 (cf. HCI doc §2.2). Add components/PhaseIndicator.svelte stub (displays current phase 1-7). Add stores/irState.store.js stub (writable store: phase, progress, validationStatus). No WebSocket yet. Reference docs/02-sullivan/HCI DE L'INTENT REFACTORING.md §2.1, §4, §Implementation technique.",
+      "type": "code_generation",
+      "complexity": 0.45,
+      "estimated_tokens": 900,
+      "dependencies": [],
+      "validation_criteria": ["ir_interface/ layout exists with 3 panels and header", "PhaseIndicator.svelte and irState store exist", "Svelte/JS syntax valid"],
+      "context": {
+        "language": "svelte",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/lib/ir_interface/IntentRefactoringLayout.svelte", "frontend-svelte/src/lib/ir_interface/components/PhaseIndicator.svelte", "frontend-svelte/src/lib/ir_interface/stores/irState.store.js"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-31T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase C - HCI Intent Refactoring (layout + stub components/stores)"
+  }
+}

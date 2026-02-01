@@ -1,0 +1,168 @@
+{
+  "task_id": "improve-benchmarking-scripts",
+  "description": "Améliorer les scripts de benchmarking pour inclure comparaisons providers, comparaisons avant/après parallélisation, et génération de graphiques",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser les scripts de benchmarking existants pour comprendre leur structure et identifier les améliorations nécessaires",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Compréhension complète de la structure des scripts existants",
+        "Identification des métriques actuellement collectées",
+        "Identification des comparaisons manquantes",
+        "Liste des améliorations à apporter"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/run_benchmark_suite.py",
+          "Backend/Prod/models/metrics.py",
+          "output/benchmark_suite/"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer un module de comparaison de providers (benchmark_provider_comparison.py) qui compare les performances de DeepSeek, Gemini, Codestral et Groq sur les mêmes tâches",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Module benchmark_provider_comparison.py créé",
+        "Fonction pour exécuter la même tâche avec différents providers",
+        "Collecte des métriques : temps, coût, tokens, taux de succès",
+        "Comparaison automatique des résultats",
+        "Export des résultats en JSON et CSV"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/benchmark_provider_comparison.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer un module de comparaison avant/après parallélisation (benchmark_parallelization_comparison.py) qui mesure le gain de temps avec la parallélisation",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Module benchmark_parallelization_comparison.py créé",
+        "Fonction pour exécuter un plan avec et sans parallélisation",
+        "Mesure du temps d'exécution dans les deux modes",
+        "Calcul du gain de temps (pourcentage et secondes)",
+        "Export des résultats comparatifs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/benchmark_parallelization_comparison.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer un module de génération de graphiques (benchmark_visualization.py) qui génère des graphiques de performance avec matplotlib ou plotly",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "Module benchmark_visualization.py créé",
+        "Fonction pour générer graphiques de temps par provider",
+        "Fonction pour générer graphiques de coût par provider",
+        "Fonction pour générer graphiques avant/après parallélisation",
+        "Graphiques sauvegardés en PNG/HTML",
+        "Utilisation de matplotlib ou plotly"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/benchmark_visualization.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Améliorer run_benchmark_suite.py pour intégrer les nouveaux modules de comparaison et de visualisation",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_2", "step_3", "step_4"],
+      "validation_criteria": [
+        "run_benchmark_suite.py mis à jour",
+        "Intégration de benchmark_provider_comparison",
+        "Intégration de benchmark_parallelization_comparison",
+        "Intégration de benchmark_visualization",
+        "Génération automatique de rapports complets",
+        "Rapport inclut graphiques et tableaux comparatifs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/run_benchmark_suite.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer un script de test pour valider les nouveaux modules de benchmarking",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "Script test_benchmarking.py créé",
+        "Test de comparaison providers",
+        "Test de comparaison parallélisation",
+        "Test de génération de graphiques",
+        "Tous les tests passent"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/test_benchmarking.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Documenter les nouveaux scripts de benchmarking avec exemples d'utilisation et guide d'interprétation des résultats",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_6"],
+      "validation_criteria": [
+        "Documentation créée (docs/guides/BENCHMARKING_GUIDE.md)",
+        "Exemples d'utilisation pour chaque module",
+        "Guide d'interprétation des graphiques",
+        "Explication des métriques comparatives",
+        "Exemples de rapports générés"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "aetherflow",
+        "files": [
+          "docs/guides/BENCHMARKING_GUIDE.md"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T09:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Amélioration des scripts de benchmarking pour inclure comparaisons providers, comparaisons avant/après parallélisation, et génération de graphiques de performance"
+  }
+}

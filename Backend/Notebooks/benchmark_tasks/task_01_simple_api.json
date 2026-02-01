@@ -1,0 +1,29 @@
+{
+  "task_id": "benchmark-001-simple-api",
+  "description": "Créer une API REST simple avec un endpoint GET /hello",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer un fichier main.py avec FastAPI et un endpoint GET /hello qui retourne {'message': 'Hello, World!'}",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code utilise FastAPI",
+        "Endpoint GET /hello existe",
+        "Retourne JSON avec clé 'message'"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["main.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "API REST simple pour benchmark"
+  }
+}

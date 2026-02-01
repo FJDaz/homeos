@@ -1,0 +1,92 @@
+{
+  "task_id": "benchmark-005-database-crud",
+  "description": "Créer des opérations CRUD avec SQLite",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une connexion à SQLite et une table 'products' avec colonnes id, name, price, stock",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 350,
+      "dependencies": [],
+      "validation_criteria": [
+        "Utilise sqlite3",
+        "Table products créée",
+        "Fonction init_db"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["database.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer fonction create_product pour insérer un produit",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 250,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Insère dans la table products",
+        "Retourne l'ID créé"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["database.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer fonction get_product pour récupérer un produit par ID",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 250,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Retourne le produit ou None",
+        "Gère les erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["database.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer fonction update_product pour mettre à jour un produit",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Met à jour les champs fournis",
+        "Retourne True si succès"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["database.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer fonction delete_product pour supprimer un produit",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Supprime le produit",
+        "Retourne True si succès"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["database.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "CRUD avec SQLite"
+  }
+}

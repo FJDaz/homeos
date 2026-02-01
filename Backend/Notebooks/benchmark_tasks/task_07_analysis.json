@@ -1,0 +1,62 @@
+{
+  "task_id": "benchmark-007-analysis",
+  "description": "Analyser une codebase et générer un rapport de qualité",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser la structure des fichiers et identifier les modules principaux",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Liste tous les modules",
+        "Identifie les dépendances",
+        "Décrit la structure"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["src/**/*.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Identifier les problèmes potentiels (code smells, anti-patterns)",
+      "type": "analysis",
+      "complexity": 0.6,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Liste les code smells",
+        "Identifie les anti-patterns",
+        "Priorise les problèmes"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["src/**/*.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Générer un rapport de qualité avec recommandations",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 400,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Rapport structuré",
+        "Recommandations actionnables",
+        "Format markdown"
+      ],
+      "context": {
+        "language": "markdown",
+        "files": ["quality_report.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Analyse de codebase"
+  }
+}

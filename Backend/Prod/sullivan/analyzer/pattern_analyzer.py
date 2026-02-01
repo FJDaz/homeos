@@ -30,10 +30,10 @@ class PatternAnalyzer:
     
     def analyze_patterns(self) -> Dict[str, Any]:
         """
-        Analyse les composants de la bibliothèque pour générer des insights.
+        Analyse les composants de la bibliothèque pour générer des insights enrichis avec STAR.
 
         Returns:
-            Dictionnaire contenant les insights générés
+            Dictionnaire contenant les insights générés avec métriques STAR
         """
         logger.info("Analyzing patterns in EliteLibrary")
         
@@ -42,7 +42,8 @@ class PatternAnalyzer:
             "category_insights": {},
             "naming_patterns": {},
             "score_correlations": {},
-            "dependency_trends": {}
+            "dependency_trends": {},
+            "star_insights": {}  # Nouveau : insights STAR
         }
         
         # Charger tous les composants depuis les fichiers JSON
@@ -60,6 +61,54 @@ class PatternAnalyzer:
         sizes_by_category: Dict[str, List[int]] = defaultdict(list)
         sullivan_scores_by_category: Dict[str, List[float]] = defaultdict(list)
         component_names: List[str] = []
+        
+        # Analyser intents avec IntentTranslator/STAR si disponible
+        star_patterns_count = 0
+        star_transformations: List[str] = []
+        star_patterns_by_category: Dict[str, List[str]] = defaultdict(list)
+        
+        try:
+            from ..intent_translator import IntentTranslator
+            intent_translator = IntentTranslator()
+            
+            for comp in components:
+                # Essayer d'extraire l'intent depuis le nom ou metadata
+                intent = comp.name.replace("component_", "").replace("_", " ")
+                
+                # Rechercher situations STAR
+                situations = intent_translator.search_situation(intent, limit=1)
+                if situations:
+                    star_patterns_count += 1
+                    situation = situations[0]
+                    
+                    # Propager STAR
+                    realisation = intent_translator.propagate_star(situation)
+                    if realisation:
+                        pattern_name = situation.pattern_name or "Unknown"
+                        star_transformations.append(pattern_name)
+                        
+                        # Catégoriser par pattern STAR
+                        category = comp.category or "unknown"
+                        star_patterns_by_category[category].append(pattern_name)
+            
+            # Métriques STAR
+            insights["star_insights"] = {
+                "components_with_star_patterns": star_patterns_count,
+                "star_patterns_percentage": round((star_patterns_count / total_components * 100), 2) if total_components > 0 else 0,
+                "most_common_star_patterns": dict(Counter(star_transformations).most_common(5)),
+                "star_patterns_by_category": {
+                    cat: dict(Counter(patterns).most_common(3))
+                    for cat, patterns in star_patterns_by_category.items()
+                    if patterns
+                }
+            }
+            
+            logger.info(f"STAR analysis: {star_patterns_count}/{total_components} components matched STAR patterns")
+            
+        except ImportError:
+            logger.debug("IntentTranslator not available. Skipping STAR insights.")
+        except Exception as e:
+            logger.warning(f"Error analyzing STAR patterns: {e}. Continuing without STAR insights.")
         
         for comp in components:
             category = comp.category or "unknown"
@@ -87,12 +136,18 @@ class PatternAnalyzer:
                 avg_sullivan = sum(sullivan_scores_by_category[category.value]) / count
                 avg_size = sum(sizes_by_category[category.value]) / count
                 
-                insights["category_insights"][category.value] = {
+                category_insight = {
                     "count": count,
                     "average_sullivan_score": round(avg_sullivan, 2),
                     "average_size_kb": round(avg_size, 2),
                     "insight": f"Les composants '{category.value}' ont en moyenne un score Sullivan de {round(avg_sullivan, 2)}"
                 }
+                
+                # Ajouter insights STAR pour cette catégorie si disponibles
+                if category.value in insights["star_insights"].get("star_patterns_by_category", {}):
+                    category_insight["star_patterns"] = insights["star_insights"]["star_patterns_by_category"][category.value]
+                
+                insights["category_insights"][category.value] = category_insight
             else:
                 insights["category_insights"][category.value] = {
                     "count": 0,

@@ -1,0 +1,87 @@
+{
+  "task_id": "phase3-genome-enricher-001",
+  "description": "Phase 3 : GénomeEnricher - BayesianInferenceEngine, FeatureExtractor, intégration dans genome_generator et CLI",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer GénomeEnricher avec BayesianInferenceEngine : classe principale avec méthodes enrich(), enrich_x_ui_hint(), enrich_schema_definitions(), enrich_metadata()",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe GénomeEnricher créée avec interface claire",
+        "Méthodes d'enrichissement pour x_ui_hint, schema_definitions, metadata",
+        "Intégration avec IntentTranslator/STAR pour features",
+        "Gestion des erreurs et fallback vers heuristiques basiques"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": ["Backend/Prod/core/genome_enricher.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implémenter BayesianInferenceEngine : calcul de probabilités a priori depuis historique, likelihood depuis features (path, method, summary), inférence bayésienne pour posterior P(hint|features), utilisation d'IntentTranslator/STAR pour enrichir features",
+      "type": "code_generation",
+      "complexity": 0.9,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Moteur d'inférence bayésienne fonctionnel",
+        "Calcul correct des probabilités a priori, likelihood, posterior",
+        "Intégration avec IntentTranslator pour features sémantiques",
+        "Métriques de confiance calculées (probabilité postérieure)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": ["Backend/Prod/core/bayesian_inference.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer FeatureExtractor pour extraire features depuis path/method/summary : extraction segments path, profondeur, patterns regex, features méthode HTTP, embeddings summary, keywords",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "FeatureExtractor extrait toutes les features nécessaires",
+        "Features normalisées et prêtes pour inférence bayésienne",
+        "Support pour embeddings sémantiques via IntentTranslator",
+        "Gestion des cas limites (paths vides, summaries manquants)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": ["Backend/Prod/core/genome_features.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Intégrer GénomeEnricher dans genome_generator.py : ajouter option d'enrichissement dans generate_genome(), appeler enrich() après génération basique, ajouter métriques d'enrichissement (réduction generic, confiance). Ajouter option CLI pour activer/désactiver enrichissement.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "GénomeEnricher intégré dans pipeline de génération",
+        "Option CLI pour activer/désactiver enrichissement",
+        "Métriques d'enrichissement affichées (réduction generic, confiance)",
+        "Rétrocompatibilité préservée (enrichissement optionnel)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/core/genome_generator.py", "Backend/Prod/cli.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW Phase 3 - GénomeEnricher. TDD, DRY, SOLID."
+  }
+}

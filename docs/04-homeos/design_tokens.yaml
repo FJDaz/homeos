@@ -1,0 +1,94 @@
+# Design tokens — Homeos Studio
+# Reference: PRD_HOMEOS.md, docs/02-sullivan/SULLIVAN_WORKFLOW_IDEAL.md
+
+colors:
+  primary: "#2563eb"
+  secondary: "#64748b"
+  background: "#ffffff"
+  text: "#0f172a"
+  text_muted: "#64748b"
+
+typography:
+  font_family: "system-ui, -apple-system, sans-serif"
+  font_size_base: "16px"
+  line_height: 1.5
+
+spacing:
+  spacing_unit: 8
+  padding_sm: 8
+  padding_md: 16
+  padding_lg: 24
+
+border_radius:
+  sm: 4
+  md: 8
+  lg: 12
+
+
+import yaml
+import os
+from dataclasses import dataclass
+from typing import Dict, List
+
+# Define the Task class
+@dataclass
+class Task:
+    id: int
+    complexity: float
+    size_in_tokens: int
+    type: str
+
+# Define the Agent class
+@dataclass
+class Agent:
+    id: str
+    type: str
+
+# Define the AgentRouter class
+class AgentRouter:
+    def select_agent(self, task: Task) -> Agent:
+        decision_matrix = {
+            "code_generation_large": {
+                "agent": "deepseek_v3",
+                "conditions": [
+                    task.complexity > 0.7,
+                    task.size_in_tokens > 500,
+                    task.type in ["module_creation", "code_generation"],
+                ],
+            },
+        }
+
+        for task_type, config in decision_matrix.items():
+            conditions = config["conditions"]
+            if all(conditions):
+                return Agent(id=config["agent"], type=task_type)
+
+        # Default agent selection
+        return Agent(id="default_agent", type="default")
+
+# Define the Metrics class
+class Metrics:
+    def __init__(self):
+        self.metrics = {}
+
+    def export_json(self, file_path: str):
+        with open(file_path, "w") as f:
+            yaml.dump(self.metrics, f)
+
+    def export_csv(self, file_path: str):
+        # Implement CSV export logic
+        pass
+
+    def print_summary(self):
+        # Implement summary printing logic
+        print("Metrics summary:")
+        for key, value in self.metrics.items():
+            print(f"{key}: {value}")
+
+# Define the Orchestrator class
+class Orchestrator:
+    def __init__(self, metrics: Metrics):
+        self.metrics = metrics
+
+    def _save_step_outputs(self, output_dir: str, plan: Dict, results: Dict):
+        # Implement step

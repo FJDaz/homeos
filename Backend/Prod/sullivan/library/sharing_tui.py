@@ -1,4 +1,5 @@
 """SharingTUI - Interface TUI pour confirmation de partage."""
+import sys
 from typing import Optional
 from rich.console import Console
 from rich.prompt import Confirm
@@ -67,6 +68,11 @@ class SharingTUI:
         component_info.append(f"  Catégorie: [purple]{component.category}[/purple]\n")
 
         self.console.print(Panel(component_info, border_style="green"))
+
+        # Mode non-interactif (API, pas de stdin) : ne pas partager
+        if not sys.stdin.isatty():
+            logger.info(f"Non-interactive mode (no TTY): skipping sharing confirmation for '{component.name}'")
+            return None
 
         try:
             # Demander confirmation

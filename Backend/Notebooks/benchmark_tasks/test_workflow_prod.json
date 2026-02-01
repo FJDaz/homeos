@@ -1,0 +1,35 @@
+{
+  "task_id": "test-prod-workflow-001",
+  "description": "Test workflow PROD - Créer une fonction Python avec tests et guidelines",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une fonction Python qui calcule la somme d'une liste de nombres avec gestion d'erreurs",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fonction nommée 'sum_numbers'",
+        "Prend une liste de nombres",
+        "Retourne la somme",
+        "Gère les cas d'erreur (liste vide, types invalides)",
+        "Inclut des tests unitaires",
+        "Respecte DRY (pas de code répété)",
+        "Respecte SOLID (responsabilité unique)",
+        "Type hints présents",
+        "Docstrings présents"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": []
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test workflow PROD avec validation DOUBLE-CHECK et guidelines (TDD, DRY, SOLID)"
+  }
+}

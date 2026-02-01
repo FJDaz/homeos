@@ -1,0 +1,80 @@
+{
+  "task_id": "mode-manager-etape2-adapters-001",
+  "description": "Mode Manager étape 2: Adapters Aetherflow et Sullivan pour construction et project. Create homeos/construction/aetherflow.py (ConstructionAetherflow), homeos/construction/sullivan.py (ConstructionSullivan), homeos/project/aetherflow.py (ProjectAetherflow), homeos/project/sullivan.py (ProjectSullivan). Each adapter __init__(self, config) with config a ModeConfiguration; delegate to Backend.Prod (orchestrator, sullivan). Update homeos/core/mode_manager.py: get_aetherflow() and get_sullivan() must import and return ConstructionAetherflow(current_config) / ProjectAetherflow(current_config) and ConstructionSullivan(current_config) / ProjectSullivan(current_config) instead of returning strings. Référence: docs/04-homeos/homeos-core-mode_manager.py.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create homeos/construction/aetherflow.py. Class ConstructionAetherflow: __init__(self, config) stores config; execute_plan(self, plan_path, output_dir=None, context=None, **kwargs) delegates to Backend.Prod orchestrator (import from Backend.Prod.orchestrator Orchestrator, use execution_mode from config or BUILD); validate_component(self, component_path) optional. Config is ModeConfiguration (has z_index_layers, workflow, etc.). Paths: Backend = project root Backend (AETHERFLOW/Backend).",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": ["ConstructionAetherflow(config) instantiates", "execute_plan delegates to Orchestrator"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/construction/aetherflow.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Create homeos/construction/sullivan.py. Class ConstructionSullivan: __init__(self, config) stores config; generate_component(self, intent) and validate_design(self, design) can delegate to Backend.Prod.sullivan or pass for now. Config is ModeConfiguration. Reference: docs/04-homeos/homeos-core-mode_manager.py.md ConstructionSullivan.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": ["ConstructionSullivan(config) instantiates"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/construction/sullivan.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Create homeos/project/aetherflow.py. Class ProjectAetherflow: __init__(self, config) stores config; execute_plan(self, plan_path, output_dir=None, context=None, **kwargs) delegates to Backend.Prod orchestrator (same as construction but mode PROJECT / different execution_mode if needed). Config is ModeConfiguration.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": ["ProjectAetherflow(config) instantiates", "execute_plan delegates to Orchestrator"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/project/aetherflow.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Create homeos/project/sullivan.py. Class ProjectSullivan: __init__(self, config) stores config; generate_component(self, intent) and validate_design(self, design) can delegate to Backend.Prod.sullivan or pass. Reference: docs/04-homeos ProjectSullivan.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": ["ProjectSullivan(config) instantiates"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/project/sullivan.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Update homeos/core/mode_manager.py: In get_aetherflow(self), replace return 'construction_adapter' with: from homeos.construction.aetherflow import ConstructionAetherflow; return ConstructionAetherflow(self.current_config). Replace return 'project_adapter' with: from homeos.project.aetherflow import ProjectAetherflow; return ProjectAetherflow(self.current_config). In get_sullivan(self), replace return 'construction_adapter' with: from homeos.construction.sullivan import ConstructionSullivan; return ConstructionSullivan(self.current_config). Replace return 'project_adapter' with: from homeos.project.sullivan import ProjectSullivan; return ProjectSullivan(self.current_config). Use self.current_config (the ModeConfiguration instance). Ensure no duplicate class definitions in file.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2", "step_3", "step_4"],
+      "validation_criteria": ["get_aetherflow returns adapter instance", "get_sullivan returns adapter instance"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/core/mode_manager.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T16:10:00Z",
+    "project_context": "Mode Manager étape 2 - PLAN_MODE_MANAGER.md"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "task_id": "double-check-standalone-full",
+  "description": "Implémenter le mode DOUBLE-CHECK standalone (mode full AETHERFLOW) : --check --plan exécute uniquement la phase DOUBLE-CHECK (validation Gemini) sur des step_outputs existants, sans refaire FAST ni BUILD. Référence : docs/MODE_DOUBLE_CHECK_STANDALONE.md. Utiliser la logique de validation PROD (comprehensive, TDD/DRY/SOLID) comme dans ProdWorkflow._validate_results.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/workflows/prod.py, ajouter une fonction publique async run_standalone_double_check(plan_path: Path, output_dir: Path, context: Optional[str] = None) -> Dict[str, Any]. Elle doit : (1) charger le plan avec PlanReader ; (2) pour chaque step du plan, appeler get_step_output(step.id, str(output_dir)) depuis ..claude_helper ; (3) pour chaque step ayant un output, construire une étape de validation PROD (même format que _validate_results : type analysis, validation_criteria TDD/DRY/SOLID, code_to_validate[:3000]) ; (4) construire le validation_plan (task_id, description, steps, metadata) comme dans _validate_results ; (5) écrire le plan dans output_dir/validation_plan.json ; (6) créer Orchestrator(execution_mode='DOUBLE-CHECK'), exécuter execute_plan(plan_path, output_dir, validation_context, execution_mode='DOUBLE-CHECK') avec le même validation_context que _validate_results (guidelines PROD) ; (7) parser les résultats comme _validate_results (validation_details, success, note) ; (8) fermer l'orchestrator et retourner le dict de résultat. Gérer le cas sans step output (return success avec note). Importer get_step_output depuis ..claude_helper.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fonction run_standalone_double_check ajoutée et callable",
+        "Utilise get_step_output(step.id, output_dir) pour charger les outputs",
+        "Réutilise la structure validation_plan et validation_context PROD",
+        "Orchestrator(execution_mode='DOUBLE-CHECK') et execute_plan appelés",
+        "Retourne dict avec success, validation_details, note"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/workflows/prod.py", "Backend/Prod/claude_helper.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/cli.py, remplacer le bloc 'Handle --check command' (vers L617-620). Quand args.check est vrai : (1) si args.plan est absent, afficher '[red]Error: --check requires --plan <plan.json>[/]' et return 1 ; (2) si args.plan existe mais le fichier n'existe pas (args.plan.exists() False), afficher erreur et return 1 ; (3) output_dir = args.output ou Path(settings.output_dir) ; (4) importer run_standalone_double_check depuis .workflows.prod ; (5) result = asyncio.run(run_standalone_double_check(args.plan, output_dir, getattr(args, 'context', None))) ; (6) afficher un tableau récapitulatif (success, validated_steps, execution_time_ms, cost_usd) avec rich Table ; (7) return 0 si result['success'] else 1.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "--check sans --plan affiche erreur et return 1",
+        "--check --plan <fichier> appelle run_standalone_double_check",
+        "output_dir = args.output or settings.output_dir",
+        "Tableau récapitulatif affiché",
+        "Code de retour 0/1 selon result.success"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/cli.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Mettre à jour docs/MODE_DOUBLE_CHECK_STANDALONE.md : dans la section 'État actuel', remplacer le paragraphe sur --check pour indiquer que --check --plan est implémenté. Ajouter une ligne : 'Commande : ./aetherflow --check --plan <plan.json> [--output <dir>]. Les step outputs doivent se trouver dans output_dir/step_outputs/<step_id>.txt (convention get_step_output).'",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Section État actuel mentionne que --check --plan est implémenté",
+        "Convention output_dir/step_outputs documentée"
+      ],
+      "context": {
+        "language": "markdown",
+        "files": ["docs/MODE_DOUBLE_CHECK_STANDALONE.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Implémentation DOUBLE-CHECK standalone en mode AETHERFLOW full : même validation que phase 3 PROD (TDD, DRY, SOLID). Référence docs/MODE_DOUBLE_CHECK_STANDALONE.md."
+  }
+}

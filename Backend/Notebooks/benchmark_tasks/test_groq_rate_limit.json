@@ -1,0 +1,47 @@
+{
+  "task_id": "test-rate-limit-fallback-001",
+  "description": "Test du fallback automatique en cas de rate limit Groq - génération simple de code Python",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une fonction Python simple qui calcule la somme de deux nombres avec type hints et docstring",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fonction avec type hints",
+        "Docstring présente",
+        "Code fonctionnel"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "none",
+        "files": ["test_fallback.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer une fonction Python qui multiplie deux nombres avec gestion d'erreur et type hints",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 250,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fonction avec type hints",
+        "Gestion d'erreur présente",
+        "Code fonctionnel"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "none",
+        "files": ["test_fallback.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-27T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test du fallback automatique Groq -> Gemini en cas de rate limit"
+  }
+}

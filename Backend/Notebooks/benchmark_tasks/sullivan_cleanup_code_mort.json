@@ -1,0 +1,73 @@
+{
+  "task_id": "sullivan-cleanup-code-mort-20260128",
+  "description": "Nettoyer le code mort et les duplications dans knowledge_base.py et sullivan_score.py",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Nettoyer knowledge_base.py : Supprimer la classe Component dupliquée (lignes 8-64) et l'exemple d'utilisation (lignes 156-173). Garder uniquement la classe KnowledgeBase et ses méthodes. Le fichier doit importer Component depuis ..models.component si nécessaire, mais ne doit pas définir sa propre classe Component.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le fichier knowledge_base.py ne contient plus de définition de classe Component",
+        "Seule la classe KnowledgeBase est définie",
+        "Les imports sont corrects",
+        "Le code est fonctionnel"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/knowledge/knowledge_base.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Nettoyer sullivan_score.py : Supprimer la première définition de SullivanScore et Component (lignes 5-112), ainsi que le code dupliqué en bas (lignes 113-163). Garder uniquement la définition finale de SullivanScore (lignes 115-148) avec les types int pour les scores (0-100) et la constante ELITE_THRESHOLD. Supprimer aussi l'import incorrect ligne 169-170 qui référence Backend.Prod.sullivan.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le fichier sullivan_score.py ne contient qu'une seule définition de SullivanScore",
+        "Aucune classe Component n'est définie dans ce fichier",
+        "Les types sont cohérents (int pour scores 0-100)",
+        "ELITE_THRESHOLD est défini",
+        "Aucun import incorrect ou code mort"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/models/sullivan_score.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Vérifier la cohérence : S'assurer que tous les fichiers utilisent Component depuis models.component.py avec user_id: str. Vérifier que knowledge_base.py et sullivan_score.py n'ont plus de code mort et que les imports sont corrects.",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Aucune duplication de classe Component",
+        "Tous les user_id sont de type str",
+        "Les imports sont corrects",
+        "Le code peut être importé sans erreur"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": [
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py",
+          "Backend/Prod/sullivan/models/sullivan_score.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T11:15:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Nettoyage code mort et duplications dans Sullivan Kernel après corrections critiques"
+  }
+}

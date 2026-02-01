@@ -1,0 +1,78 @@
+{
+  "task_id": "phase1_sullivan_template_to_html",
+  "description": "Phase 1 Sullivan - Template vers HTML : module design_to_html (page vierge + webographie), intégration DesignerMode, option CLI --output-html. Génération HTML single-file à partir du design uniquement (pas du genome).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/generator/design_to_html.py. Fonction _load_webography(path=None) qui lit docs/02-sullivan/Références webdesign de Sullivan.md depuis la racine du repo (Path(__file__).resolve().parents[3] / 'docs' / '02-sullivan' / 'Références webdesign de Sullivan.md'). Fonction async generate_html_from_design(design_structure: Dict, frontend_structure: Dict, image_path: Optional[Path], webography_text: str, output_path: Path) -> str : construire un prompt explicite (page vierge, structure design + frontend en JSON dans le contexte, webographie + instruction Stripe/iA.net/Gumroad, document HTML/CSS/JS complet single-file brutalist). Contexte Gemini : design_structure + frontend_structure (tronqué à ~10-12k caractères si besoin). Appel GeminiClient(execution_mode='BUILD').generate(prompt, context=..., output_constraint='Code only', max_tokens=16384). Extraire HTML de la réponse (même logique que _extract_html dans refinement.py : strip ```html ... ```). Écrire le HTML dans output_path et le retourner. Gestion erreurs et logging.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4500,
+      "dependencies": [],
+      "validation_criteria": [
+        "_load_webography retourne le texte du fichier webographie ou chaîne vide si fichier absent",
+        "generate_html_from_design appelle Gemini avec prompt page vierge + webographie",
+        "Contexte contient design_structure et frontend_structure (JSON)",
+        "max_tokens=16384, output_constraint='Code only'",
+        "Extraction HTML (bloc ```html ou raw) et écriture dans output_path",
+        "Type hints, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/design_to_html.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier Backend/Prod/sullivan/modes/designer_mode.py : ajouter paramètres optionnels output_html: bool = False et output_html_path: Optional[Path] = None au __init__. Après l'étape 5 (Miroir, frontend_structure), si output_html est True : charger la webographie via design_to_html._load_webography(), appeler generate_html_from_design(design_structure.to_dict(), frontend_structure, design_file, webography_text, output_html_path ou settings.output_dir/'studio'/'studio_index.html'), puis continuer. Ne pas modifier le reste du flux (sauvegarde JSON si output_path, return dict). Importer le module design_to_html.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "__init__ accepte output_html et output_html_path",
+        "Si output_html : appel _load_webography puis generate_html_from_design après Miroir",
+        "Chemin de sortie par défaut : output/studio/studio_index.html (via settings)",
+        "Flux existant (sauvegarde JSON, return) conservé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/modes/designer_mode.py",
+          "Backend/Prod/sullivan/generator/design_to_html.py",
+          "Backend/Prod/config/settings.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Backend/Prod/cli.py : pour la branche sullivan --design (et sullivan designer), ajouter option --output-html (action='store_true') et option --output-html-path (type=Path, default=None). Lors de l'instanciation de DesignerMode et de l'appel run(), passer output_html=getattr(args, 'output_html', False) et output_html_path=getattr(args, 'output_html_path', None). Défaut pour output_html_path : None (DesignerMode utilisera output/studio/studio_index.html).",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Option --output-html présente sur sullivan (parent) et/ou sous-commande designer",
+        "Option --output-html-path optionnelle",
+        "DesignerMode instancié avec output_html et output_html_path quand sullivan -d est utilisé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T18:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1 Sullivan - Template to HTML : designer produit une page HTML à partir du template (image) en page vierge, en s'appuyant sur docs/02-sullivan/Références webdesign de Sullivan.md. Commande : sullivan -d image.png --output-html."
+  }
+}

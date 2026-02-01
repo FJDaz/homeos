@@ -1,0 +1,183 @@
+{
+  "task_id": "phase2_sullivan_fast",
+  "description": "Créer Sullivan Kernel - Système de mutualisation intelligente pour composants frontend avec ComponentRegistry, Sullivan Score, et RAG Setup",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le modèle Component avec métadonnées (nom, score Sullivan, métriques performance, accessibilité, taille, date création)",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Modèle Component avec Pydantic",
+        "Champs: name, sullivan_score, performance_score, accessibility_score, size_kb, created_at, user_id",
+        "Méthodes pour calculer score total",
+        "Type hints complets"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": [
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer SullivanScore avec calcul composite (performance 30%, accessibilité 30%, écologie 20%, popularité 10%, validation 10%)",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe SullivanScore avec propriétés individuelles",
+        "Méthode total() qui calcule score composite",
+        "Seuil d'entrée Elite Library >= 85",
+        "Type hints et docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": [
+          "Backend/Prod/sullivan/models/sullivan_score.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer LocalCache (Niveau 0) - cache privé utilisateur avec stockage fichiers JSON dans ~/.aetherflow/components/[user_id]/",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Classe LocalCache avec méthodes find_similar(), save(), load()",
+        "Stockage fichiers JSON par composant",
+        "Recherche sémantique basique (similarité nom/description)",
+        "Gestion erreurs fichiers",
+        "Type hints complets"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pathlib",
+        "files": [
+          "Backend/Prod/sullivan/cache/local_cache.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer EliteLibrary (Niveau 1) - bibliothèque composants validés avec score >= 85, stockage dans components/elite/",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Classe EliteLibrary avec méthodes find_similar(), add(), validate_entry()",
+        "Validation score >= 85 avant ajout",
+        "Stockage fichiers JSON dans components/elite/",
+        "Recherche sémantique",
+        "Gestion catégories (core, complex, domain)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pathlib",
+        "files": [
+          "Backend/Prod/sullivan/library/elite_library.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer KnowledgeBase (Niveau 2) - base de connaissances structurelle avec patterns, principes HCI, analytics",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe KnowledgeBase avec méthodes search_patterns(), get_hci_principles(), get_analytics()",
+        "Stockage JSON dans knowledge/patterns/, knowledge/hci_principles/, knowledge/analytics/",
+        "Structure pour patterns (pricing_page_structure.json, login_flow_best_practices.json)",
+        "Méthodes de recherche sémantique basique"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pathlib",
+        "files": [
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer ComponentRegistry - orchestrateur principal qui utilise LocalCache, EliteLibrary, KnowledgeBase avec méthode get_or_generate()",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_3", "step_4", "step_5"],
+      "validation_criteria": [
+        "Classe ComponentRegistry avec __init__() qui initialise les 3 niveaux",
+        "Méthode async get_or_generate(intent, user_id) qui cherche dans LocalCache → EliteLibrary → génère nouveau",
+        "Méthode _suggest_sharing() pour proposer partage si score >= 85",
+        "Logging approprié",
+        "Gestion erreurs complète",
+        "Type hints et docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": [
+          "Backend/Prod/sullivan/registry.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer RAG Setup basique - intégration avec système RAG existant pour recherche sémantique enrichie dans ComponentRegistry",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_6"],
+      "validation_criteria": [
+        "Intégration avec rag/pageindex_store.py existant",
+        "Méthode enrich_context() pour enrichir contexte avec composants similaires",
+        "Méthode search_semantic() pour recherche sémantique dans composants",
+        "Gestion embeddings basique",
+        "Type hints complets"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "rag",
+        "files": [
+          "Backend/Prod/sullivan/rag/integration.py",
+          "Backend/Prod/rag/pageindex_store.py"
+        ]
+      }
+    },
+    {
+      "id": "step_8",
+      "description": "Créer __init__.py pour module sullivan avec exports principaux (ComponentRegistry, SullivanScore, Component)",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2", "step_6"],
+      "validation_criteria": [
+        "Fichier __init__.py avec exports ComponentRegistry, SullivanScore, Component",
+        "Imports corrects depuis sous-modules"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T13:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 Sullivan Kernel - Système de mutualisation intelligente pour composants frontend avec ComponentRegistry, Sullivan Score, RAG Setup. Mode FAST pour prototypage rapide."
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "task_id": "sullivan-rapport-etape-update-2026-01-28",
+  "description": "Mettre à jour le rapport d'étape Sullivan et corriger le bug ComponentGenerator PROD parsing",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Corriger ComponentGenerator._parse_generated_code pour supporter les répertoires fast_draft/ et build_refactored/ du workflow PROD. Actuellement, la méthode cherche uniquement dans fast/, build/, validation/ mais le workflow PROD écrit dans fast_draft/ et build_refactored/. Modifier la méthode pour détecter le workflow (self.workflow) et chercher aussi dans fast_draft/step_outputs et build_refactored/step_outputs si workflow == 'PROD', tout en conservant la recherche dans fast/, build/, validation/ pour le workflow PROTO.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "La méthode _parse_generated_code détecte le workflow (self.workflow)",
+        "Si workflow == 'PROD', cherche dans fast_draft/step_outputs et build_refactored/step_outputs",
+        "Si workflow == 'PROTO', cherche dans fast/step_outputs et build/step_outputs (comportement actuel)",
+        "La recherche dans validation/step_outputs fonctionne pour les deux workflows",
+        "Les logs indiquent clairement quel répertoire est utilisé",
+        "Le code reste rétrocompatible avec PROTO"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Mettre à jour le rapport d'étape Sullivan (docs/RAPPORT_ETAPE_SULLIVAN.md) avec l'état réel de la codebase. Examiner les fichiers suivants pour compléter le rapport : star_mappings.json (mappings STAR présents), sullivan_builder.py (utilisation de 'generic' comme fallback ligne 92 et 140), api.py (endpoints Sullivan disponibles), intent_translator.py (ébauche présente mais non intégrée). Mettre à jour toutes les sections avec détails précis : fichiers, lignes de code, état réel (implémenté/ébauche/non implémenté), bugs confirmés.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Section 1 (Résumé exécutif) mise à jour avec état réel et nuances (bug PROD parsing non bloquant car PROTO utilisé par défaut)",
+        "Section 2 (Ce qui est en place) enrichie avec détails précis : fichiers, lignes, état réel de chaque composant",
+        "Section 3 (Points à traiter) mise à jour avec bugs confirmés, ébauches (IntentTranslator), features manquantes",
+        "Section 4 (Commandes de reprise) vérifiée et complétée si nécessaire",
+        "Section 5 (Prochaines actions) priorisée selon impact réel",
+        "Annexe technique ajoutée avec détails d'implémentation (fichiers, lignes, solutions proposées)",
+        "Cohérence avec PRD_SULLIVAN.md vérifiée",
+        "Le rapport est actionnable (fichiers, lignes, commandes précis)"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "documentation",
+        "files": [
+          "docs/RAPPORT_ETAPE_SULLIVAN.md",
+          "Backend/Prod/sullivan/knowledge/star_mappings.json",
+          "Backend/Prod/sullivan/builder/sullivan_builder.py",
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/api.py",
+          "docs/PRD_SULLIVAN.md"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Mise à jour rapport d'étape Sullivan avec état réel codebase et correction bug ComponentGenerator PROD parsing"
+  }
+}

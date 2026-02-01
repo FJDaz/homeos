@@ -1,0 +1,206 @@
+{
+  "task_id": "73aa985d-7f63-4478-b3ef-a99e9fb886d5",
+  "description": "Implémentation des tâches restantes AETHERFLOW : validation endpoints preview, GénomeEnricher avec inférence bayésienne, et tests Sullivan complets",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Améliorer les tests d'intégration des endpoints preview : ajouter cas limites (composants vides, caractères spéciaux), tests d'erreurs (fichiers manquants, corruption JSON), tests de performance (chargement nombreux composants), tests de sécurité (injection XSS, validation user_id), tests de déduplication (LocalCache + EliteLibrary), tests de base_url dynamique",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests couvrent tous les cas limites identifiés",
+        "Tests de sécurité validés (XSS, user_id)",
+        "Tests de performance avec composants multiples",
+        "Couverture de code > 90% pour endpoints preview"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_api_preview.py",
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/preview/preview_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer GénomeEnricher avec BayesianInferenceEngine : classe principale avec méthodes enrich(), enrich_x_ui_hint(), enrich_schema_definitions(), enrich_metadata()",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe GénomeEnricher créée avec interface claire",
+        "Méthodes d'enrichissement pour x_ui_hint, schema_definitions, metadata",
+        "Intégration avec IntentTranslator/STAR pour features",
+        "Gestion des erreurs et fallback vers heuristiques basiques"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": [
+          "Backend/Prod/core/genome_enricher.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Implémenter BayesianInferenceEngine : calcul de probabilités a priori depuis historique, likelihood depuis features (path, method, summary), inférence bayésienne pour posterior P(hint|features), utilisation d'IntentTranslator/STAR pour enrichir features",
+      "type": "code_generation",
+      "complexity": 0.9,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Moteur d'inférence bayésienne fonctionnel",
+        "Calcul correct des probabilités a priori, likelihood, posterior",
+        "Intégration avec IntentTranslator pour features sémantiques",
+        "Métriques de confiance calculées (probabilité postérieure)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": [
+          "Backend/Prod/core/bayesian_inference.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer FeatureExtractor pour extraire features depuis path/method/summary : extraction segments path, profondeur, patterns regex, features méthode HTTP, embeddings summary, keywords",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "FeatureExtractor extrait toutes les features nécessaires",
+        "Features normalisées et prêtes pour inférence bayésienne",
+        "Support pour embeddings sémantiques via IntentTranslator",
+        "Gestion des cas limites (paths vides, summaries manquants)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "numpy",
+        "files": [
+          "Backend/Prod/core/genome_features.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Intégrer GénomeEnricher dans genome_generator.py : ajouter option d'enrichissement dans generate_genome(), appeler enrich() après génération basique, ajouter métriques d'enrichissement (réduction generic, confiance)",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_2", "step_3", "step_4"],
+      "validation_criteria": [
+        "GénomeEnricher intégré dans pipeline de génération",
+        "Option CLI pour activer/désactiver enrichissement",
+        "Métriques d'enrichissement affichées (réduction generic, confiance)",
+        "Rétrocompatibilité préservée (enrichissement optionnel)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/core/genome_generator.py",
+          "Backend/Prod/cli.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer tests pour fichiers Sullivan haute priorité : Registry (ComponentRegistry), ComponentGenerator, IntentTranslator avec Situation/Transformation/Abstraction/Realisation",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour ComponentRegistry (get_or_generate, cache hierarchy)",
+        "Tests unitaires pour ComponentGenerator (génération composants)",
+        "Tests unitaires pour IntentTranslator (search_situation, propagate_star, embeddings)",
+        "Couverture > 80% pour ces fichiers core",
+        "Fixtures pytest réutilisables pour données de test"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_registry.py",
+          "Backend/Prod/tests/test_component_generator.py",
+          "Backend/Prod/tests/test_intent_translator.py",
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer tests pour fichiers Sullivan moyenne priorité : Evaluators (AccessibilityEvaluator, PerformanceEvaluator, ValidationEvaluator), Analyzers (BackendAnalyzer, DesignAnalyzer, UIInferenceEngine), Modes (DevMode, DesignerMode)",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour chaque Evaluator (WCAGReport, performance metrics, validation)",
+        "Tests unitaires pour chaque Analyzer (parsing, structure detection)",
+        "Tests unitaires pour chaque Mode (workflow execution)",
+        "Tests d'intégration pour interactions entre composants",
+        "Couverture > 70% pour ces fichiers"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_accessibility_evaluator.py",
+          "Backend/Prod/tests/test_performance_evaluator.py",
+          "Backend/Prod/tests/test_validation_evaluator.py",
+          "Backend/Prod/tests/test_backend_analyzer.py",
+          "Backend/Prod/tests/test_design_analyzer.py",
+          "Backend/Prod/tests/test_ui_inference_engine.py",
+          "Backend/Prod/tests/test_dev_mode.py",
+          "Backend/Prod/tests/test_designer_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_8",
+      "description": "Créer tests pour fichiers Sullivan basse priorité : Auditor (SullivanAuditor, screenshot_util), SharingTUI, Refinement, RAG (RAGSetup, RAGIntegration), KnowledgeBase, EliteLibrary, Models (Component, SullivanScore, Categories)",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour Auditor (audit results, screenshot capture)",
+        "Tests unitaires pour SharingTUI, Refinement, RAG",
+        "Tests unitaires pour KnowledgeBase, EliteLibrary",
+        "Tests unitaires pour Models (Pydantic validation, classification)",
+        "Couverture > 60% pour ces fichiers"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_sullivan_auditor.py",
+          "Backend/Prod/tests/test_screenshot_util.py",
+          "Backend/Prod/tests/test_sharing_tui.py",
+          "Backend/Prod/tests/test_refinement.py",
+          "Backend/Prod/tests/test_rag_integration.py",
+          "Backend/Prod/tests/test_knowledge_base.py",
+          "Backend/Prod/tests/test_elite_library.py",
+          "Backend/Prod/tests/test_component_model.py",
+          "Backend/Prod/tests/test_sullivan_score.py",
+          "Backend/Prod/tests/test_categories.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Tâches restantes : tests preview, GénomeEnricher bayésien, tests Sullivan complets. Code doit respecter GUIDELINES.md : TDD, DRY, SOLID, Structure Models/Services/Controllers"
+  }
+}

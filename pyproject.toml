@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aetherflow"
+version = "2.2.0"
+description = "AETHERFLOW - Orchestrateur d'Agents IA pour le Développement Logiciel"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Homeos Team", email = "contact@homeos.dev"}
+]
+keywords = ["ai", "code-generation", "workflow", "automation", "claude", "deepseek", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.10.3",
+    "pydantic-settings>=2.6.1",
+    "python-dotenv>=1.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.6",
+    "jsonschema>=4.23.0",
+    "loguru>=0.7.2",
+    "rich>=13.9.4",
+    "llama-index>=0.10.0",
+    "llama-index-core>=0.10.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0.0",
+]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/FJDaz/homeos"
+Repository = "https://github.com/FJDaz/homeos"
+Issues = "https://github.com/FJDaz/homeos/issues"
+
+[project.scripts]
+aetherflow = "Backend.Prod.cli:main"
+homeos = "homeos.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["Backend.Prod*", "homeos*"]
+exclude = ["tests*", "docs*", "*.tests*"]
+
+[tool.setuptools.package-data]
+"Backend.Prod" = ["**/*.json", "**/*.yaml", "**/*.yml"]
+"Backend.Prod.sullivan" = ["knowledge/**/*.json"]

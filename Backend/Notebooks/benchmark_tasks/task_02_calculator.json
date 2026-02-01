@@ -1,0 +1,45 @@
+{
+  "task_id": "benchmark-002-calculator",
+  "description": "Créer une calculatrice avec opérations de base et tests unitaires",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une classe Calculator avec méthodes add, subtract, multiply, divide",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe Calculator avec 4 méthodes",
+        "Gestion de la division par zéro"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["calculator.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer des tests unitaires pour toutes les méthodes de Calculator",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Tests pour chaque méthode",
+        "Test de division par zéro",
+        "Utilise pytest"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": ["test_calculator.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Calculatrice avec tests"
+  }
+}

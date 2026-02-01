@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sullivan Kernel - Chat</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Barre minimisée (visible par défaut) -->
+    <div class="chatbox-minimized-bar" id="chatbox-minimized-bar">
+        <div class="minimized-info">
+            <div class="minimized-avatar">🤖</div>
+            <div class="minimized-text">
+                <h3>Sullivan Kernel</h3>
+                <p>Cliquez pour ouvrir le chat</p>
+            </div>
+        </div>
+        <button class="toggle-chat-btn" id="toggle-chat-btn" aria-label="Ouvrir le chat">
+            <span>Ouvrir</span>
+        </button>
+    </div>
+
+    <!-- Overlay fullscreen (caché par défaut) -->
+    <div class="chatbox-overlay closed" id="chatbox-overlay">
+        <div class="chat-container">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="header-content">
+                    <h1>🤖 Sullivan Kernel</h1>
+                    <p class="subtitle">Intelligence Frontend - Analyse Backend & Génération Composants <a href="/studio.html" class="studio-link" title="Studio (genome)">Studio</a></p>
+                </div>
+                <button class="close-chat-btn" id="close-chat-btn" aria-label="Fermer le chat">
+                    <span>✕</span>
+                </button>
+            </header>
+
+            <!-- Chat Area -->
+            <main class="chat-area" id="chat-area">
+                <!-- Messages will be dynamically added here -->
+                <div class="welcome-message">
+                    <p>👋 Bonjour ! Je suis Sullivan, votre assistant pour la génération de frontend.</p>
+                    <p>Vous pouvez me demander de :</p>
+                    <ul>
+                        <li>🔍 Rechercher ou générer un composant frontend</li>
+                        <li>📊 Analyser un backend et inférer le frontend correspondant</li>
+                        <li>🎨 Analyser un design et générer le code</li>
+                    </ul>
+                </div>
+            </main>
+
+            <!-- Input Area -->
+            <footer class="chat-input-area">
+                <div class="input-container">
+                    <textarea 
+                        id="message-input" 
+                        placeholder="Tapez votre message... (Ctrl+Enter pour envoyer)"
+                        rows="1"
+                    ></textarea>
+                    <button id="send-btn" class="send-button" aria-label="Envoyer le message">
+                        <span>➤</span>
+                    </button>
+                </div>
+                <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                    <span>Sullivan écrit...</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
+
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
+
+@dataclass
+class Task:
+    """Represents a task to be executed by an agent."""
+    complexity: float
+    size_in_tokens: int
+    type: str
+
+@dataclass
+class Agent:
+    """Represents an agent that can execute tasks."""
+    name: str
+
+    def execute(self, task: Task) -> Dict[str, Any]:
+        """Execute the given task and return results.
+
+        Args:
+            task: The task to execute
+
+        Returns:
+            Dictionary containing execution results
+        """
+        # Agent-specific execution logic would go here
+        return {"status": "completed", "task_type": task.type}

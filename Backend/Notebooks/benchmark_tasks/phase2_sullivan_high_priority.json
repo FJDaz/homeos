@@ -1,0 +1,38 @@
+{
+  "task_id": "phase2-sullivan-high-priority-001",
+  "description": "Phase 2 : Créer tests pour fichiers Sullivan haute priorité (Registry, ComponentGenerator, IntentTranslator)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer tests pour fichiers Sullivan haute priorité : Registry (ComponentRegistry), ComponentGenerator, IntentTranslator avec Situation/Transformation/Abstraction/Realisation",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour ComponentRegistry (get_or_generate, cache hierarchy)",
+        "Tests unitaires pour ComponentGenerator (génération composants)",
+        "Tests unitaires pour IntentTranslator (search_situation, propagate_star, embeddings)",
+        "Couverture > 80% pour ces fichiers core",
+        "Fixtures pytest réutilisables pour données de test"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_registry.py",
+          "Backend/Prod/tests/test_component_generator.py",
+          "Backend/Prod/tests/test_intent_translator.py",
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW Phase 2 - Tests Sullivan haute priorité. TDD, DRY, SOLID."
+  }
+}

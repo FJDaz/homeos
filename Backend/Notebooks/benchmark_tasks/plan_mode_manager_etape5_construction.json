@@ -1,0 +1,52 @@
+{
+  "task_id": "mode-manager-etape5-construction-001",
+  "description": "Mode Manager étape 5: Construction bottom-up et références. MANIFESTE_HOMEOS_V0, design tokens, Sullivan Validation UI. Reference: docs/04-homeos/PLAN_MODE_MANAGER.md, docs/02-sullivan/DÉTAILS_CONSTRUCTION_INTERFACE.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create docs/04-homeos/MANIFESTE_HOMEOS_V0.md. Content: title MANIFESTE_HOMEOS_V0, section INTENTION PRIMAIRE (quote: Construire une interface d'administration Studio pour Homeos - autoconstructive comme Aetherflow, pédagogique, brutaliste mais lisible, séparée des interfaces utilisateur). Section CONTRAINTES HCI FORTES: Navigation 3 niveaux max (Brainstorm > Back > Front > Deploy), Z-index stratifié (Sullivan UI > Studio > Interface utilisateur), Validation obligatoire à chaque étape, Fallback sur design principles. Extract intent from PRD_HOMEOS and docs/02-sullivan/DÉTAILS_CONSTRUCTION_INTERFACE.md. Markdown only, no code.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": ["File exists with INTENTION PRIMAIRE and CONTRAINTES HCI FORTES", "Markdown valid"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/04-homeos/MANIFESTE_HOMEOS_V0.md"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Create docs/04-homeos/design_tokens.yaml (or homeos/config/design_tokens.yaml). YAML with design tokens: colors (primary, secondary, background, text), typography (font_family, font_size_base), spacing (spacing_unit, e.g. 8), border_radius (e.g. 4). Structure: colors:, typography:, spacing:, border_radius:. Values can be placeholders (e.g. primary: '#2563eb'). Reference PRD_HOMEOS and docs/02-sullivan/SULLIVAN_WORKFLOW_IDEAL.md design tokens.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": ["YAML valid", "Contains colors, typography, spacing, border_radius"],
+      "context": {
+        "language": "yaml",
+        "framework": "",
+        "files": ["docs/04-homeos/design_tokens.yaml"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Create docs/04-homeos/SULLIVAN_VALIDATION_UI.md. Document the Sullivan Validation UI contract: purpose (overlay for validation, scoring, action buttons), z-index 10000 (sullivan_validation layer), integration point (Sullivan Studio UI). Optional: create homeos/construction/validation_ui.py with a stub class SullivanValidationUI with method render_overlay() that returns a placeholder string or dict describing the overlay. Reference docs/04-homeos/PLAN_MODE_MANAGER.md step 5 and construction_config z_index_layers sullivan_validation.",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 450,
+      "dependencies": [],
+      "validation_criteria": ["SULLIVAN_VALIDATION_UI.md exists and describes overlay, z-index, integration", "Optional: validation_ui.py stub exists"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/04-homeos/SULLIVAN_VALIDATION_UI.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T17:15:00Z",
+    "project_context": "Mode Manager étape 5 - Construction bottom-up, MANIFESTE, design tokens, Sullivan Validation UI"
+  }
+}

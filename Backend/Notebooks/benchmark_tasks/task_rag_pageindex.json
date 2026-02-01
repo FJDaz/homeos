@@ -1,0 +1,169 @@
+{
+  "task_id": "rag-pageindex-implementation",
+  "description": "Implémenter le système RAG PageIndex pour remplacer ChromaDB par un index hiérarchique raisonné, idéal pour docs structurés (PRD, roadmap) et codebase",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser la structure actuelle de l'orchestrator pour comprendre où intégrer le RAG PageIndex et identifier les points d'intégration",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Compréhension complète de la structure orchestrator.py",
+        "Identification du point d'intégration pour enrichir le contexte avant planification",
+        "Compréhension du flux actuel de génération de plans",
+        "Identification des fichiers de documentation à indexer (PRD, roadmap)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/orchestrator.py",
+          "docs/guides/PRD AETHERFLOW.md",
+          "docs/guides/PLAN_GENERAL_ROADMAP.md"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le module Backend/Prod/rag/pageindex_store.py avec la classe PageIndexRAG utilisant LlamaIndex PageIndexPlanner pour créer un index hiérarchique raisonné",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Module pageindex_store.py créé dans Backend/Prod/rag/",
+        "Classe PageIndexRAG avec méthode __init__() qui initialise SimpleDirectoryReader et PageIndexPlanner",
+        "Méthode retrieve() qui prend query et history, utilise planner.aretrieve() et retourne les références précises",
+        "Gestion des fichiers .md et .py dans docs/guides",
+        "Retourne format 'Fichier:section.ligne' pour traçabilité",
+        "Documentation complète avec docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/rag/pageindex_store.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Intégrer PageIndexRAG dans Orchestrator en ajoutant une méthode process_request() qui enrichit le contexte avec RAG avant la planification",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "PageIndexRAG initialisé dans __init__() de Orchestrator",
+        "Méthode process_request() créée qui appelle rag.retrieve()",
+        "Contexte enrichi avec RAG avant génération du plan",
+        "Intégration dans le flux existant sans casser les fonctionnalités",
+        "Gestion des erreurs si RAG échoue (fallback sur contexte normal)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/orchestrator.py",
+          "Backend/Prod/rag/pageindex_store.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter les dépendances LlamaIndex dans requirements.txt ou pyproject.toml",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "llama-index ajouté aux dépendances",
+        "llama-parse ajouté si nécessaire",
+        "Versions compatibles spécifiées",
+        "Documentation de l'installation"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "requirements.txt",
+          "pyproject.toml"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer un script de test pour valider le RAG PageIndex sur les fichiers PRD et roadmap",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Script test_rag_pageindex.py créé",
+        "Test de récupération de contexte pour 'parallélisation Étape 7'",
+        "Vérification que les références retournées sont précises",
+        "Test de précision (target 95%)",
+        "Test d'intégration avec orchestrator"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "scripts/test_rag_pageindex.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Ajouter des métriques RAG dans le système de métriques : rag_efficiency, precision_refs, retrieval_time_ms",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Métriques RAG ajoutées à StepMetrics ou PlanMetrics",
+        "rag_efficiency calculé",
+        "precision_refs mesuré (target 95%)",
+        "retrieval_time_ms tracké",
+        "Export des métriques RAG dans JSON/CSV"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": [
+          "Backend/Prod/models/metrics.py",
+          "Backend/Prod/rag/pageindex_store.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Documenter le système RAG PageIndex : guide d'utilisation, comparaison avec ChromaDB, exemples d'utilisation",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_6"],
+      "validation_criteria": [
+        "Documentation créée (docs/guides/RAG_PAGEINDEX_GUIDE.md)",
+        "Guide d'utilisation complet",
+        "Comparaison PageIndex vs ChromaDB",
+        "Exemples d'utilisation",
+        "Guide d'interprétation des métriques"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "aetherflow",
+        "files": [
+          "docs/guides/RAG_PAGEINDEX_GUIDE.md"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T09:40:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Implémentation du RAG PageIndex pour remplacer ChromaDB par un index hiérarchique raisonné, idéal pour docs structurés (PRD, roadmap) et codebase. Intégration dans orchestrator pour enrichir le contexte avant planification."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "task_id": "phase1_backend_api",
+  "description": "Adapter l'API FastAPI pour accepter plan_json et workflow, et gérer l'exécution via workflows PROTO/PROD",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier la fonction execute_plan dans Backend/Prod/api.py pour gérer plan_json (créer fichier temporaire si fourni) et utiliser le workflow spécifié (PROTO ou PROD) au lieu de l'orchestrator directement",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "La fonction execute_plan accepte soit plan_path soit plan_json",
+        "Si plan_json fourni, créer fichier temporaire avec tempfile",
+        "Si workflow='PROTO', utiliser ProtoWorkflow.execute()",
+        "Si workflow='PROD', utiliser ProdWorkflow.execute()",
+        "Si workflow non spécifié, utiliser Orchestrator directement (rétrocompatibilité)",
+        "Gérer les erreurs correctement (PlanValidationError, ExecutionError)",
+        "Nettoyer le fichier temporaire après exécution"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/workflows/proto.py",
+          "Backend/Prod/workflows/prod.py",
+          "Backend/Prod/orchestrator.py",
+          "Backend/Prod/models/plan_reader.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter validation pour s'assurer qu'au moins plan_path ou plan_json est fourni dans ExecutePlanRequest",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Valider qu'au moins plan_path ou plan_json est fourni",
+        "Retourner HTTPException 400 avec message clair si aucun n'est fourni",
+        "Si les deux sont fournis, prioriser plan_json"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Adapter la réponse ExecutePlanResponse pour inclure le workflow utilisé dans les métriques",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Ajouter champ 'workflow' dans les métriques retournées",
+        "Inclure 'workflow' dans ExecutePlanResponse.metrics",
+        "Valeur workflow doit être 'PROTO', 'PROD', ou 'DIRECT' (si orchestrator direct)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1 Backend API pour Homeos Studio Beta S1 - Adapter API pour accepter plan_json et workflow PROTO/PROD"
+  }
+}

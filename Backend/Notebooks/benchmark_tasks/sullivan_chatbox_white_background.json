@@ -1,0 +1,48 @@
+{
+  "task_id": "sullivan-chatbox-white-bg-2026-01-28",
+  "description": "Modifier le thème de la chatbox Sullivan pour avoir un fond entièrement blanc et corriger le problème de localStorage qui restaure les anciens messages",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier styles.css pour passer le fond en blanc : changer toutes les variables CSS de couleur sombre vers blanc/clair, adapter les couleurs de texte pour être lisibles sur fond blanc, garder un design moderne et élégant",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Toutes les variables CSS --bg-* sont modifiées vers des tons blancs/clairs",
+        "Les couleurs de texte sont adaptées pour être lisibles sur fond blanc",
+        "Le design reste moderne et élégant",
+        "Les contrastes respectent les standards d'accessibilité"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["Frontend/css/styles.css"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Corriger le problème de localStorage dans app.js : désactiver ou améliorer la restauration automatique des messages pour éviter que les anciens messages s'affichent à chaque rechargement, ou ajouter un bouton pour vider l'historique",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le localStorage ne restaure plus automatiquement les anciens messages à chaque rechargement OU un bouton permet de vider l'historique",
+        "Les nouveaux messages sont toujours sauvegardés correctement",
+        "L'expérience utilisateur est améliorée"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["Frontend/js/app.js"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T16:47:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Chatbox Sullivan avec fond blanc et correction localStorage"
+  }
+}

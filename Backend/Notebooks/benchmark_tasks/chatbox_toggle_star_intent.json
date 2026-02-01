@@ -1,0 +1,163 @@
+{
+  "task_id": "chatbox-toggle-star-intent-2026-01-28",
+  "description": "Transformer la chatbox en barre minimisée avec toggle overlay et implémenter le système de traduction d'intentions STAR intégré dans Sullivan",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier Frontend/index.html : Restructurer le HTML pour avoir une barre minimisée fixe en bas de page (footer avec bouton toggle) et un overlay fullscreen pour la chatbox complète. La barre minimisée doit contenir un bouton pour ouvrir la chatbox, et l'overlay doit avoir un bouton pour la fermer.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Structure HTML avec barre minimisée (.chatbox-minimized-bar) et overlay (.chatbox-overlay)",
+        "Bouton toggle dans la barre minimisée",
+        "Bouton fermer dans l'overlay",
+        "Tous les éléments existants (header, chat-area, input) préservés dans l'overlay"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["Frontend/index.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier Frontend/css/styles.css : Ajouter styles pour la barre minimisée (.chatbox-minimized-bar avec position: fixed, bottom: 0, z-index: 9999), l'overlay (.chatbox-overlay avec position: fixed, fullscreen, z-index: 9999, backdrop), et les animations (slide-up pour ouverture, slide-down pour fermeture avec transition 0.3s ease-in-out). États .open et .closed pour gérer la visibilité. Fond blanc pour la barre et overlay.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Barre minimisée fixe en bas avec z-index 9999",
+        "Overlay fullscreen avec z-index 9999 et backdrop semi-transparent",
+        "Animations smooth pour ouverture/fermeture",
+        "Styles préservés pour tous les éléments existants"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["Frontend/css/styles.css"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Frontend/js/app.js : Ajouter fonction toggleChatbox() pour basculer entre ouvert/fermé, gestion état dans localStorage (clé 'chatbox_open'), fermeture via backdrop click, et initialisation de l'état au chargement. Préserver toutes les fonctionnalités existantes (messages, API calls, etc.).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Fonction toggleChatbox() fonctionnelle",
+        "État sauvegardé dans localStorage",
+        "Fermeture via backdrop click",
+        "Toutes les fonctionnalités existantes préservées"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["Frontend/js/app.js"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer Backend/Prod/sullivan/intent_translator.py : Classe IntentTranslator avec méthodes parse_query() pour extraire entités (éléments, actions, conditions), search_situation() pour rechercher dans l'index des situations, propagate_star() pour chaîner Situation → Transformation → Abstraction → Réalisation, et score_mapping() pour calculer le score bayésien. Utiliser pattern matching initial avec possibilité d'évoluer vers embeddings.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe IntentTranslator avec toutes les méthodes requises",
+        "Pipeline STAR complet implémenté",
+        "Pattern matching fonctionnel pour extraire entités",
+        "Scoring bayésien basique implémenté"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/intent_translator.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer Backend/Prod/sullivan/knowledge/intent_patterns.json : Base de connaissances des patterns STAR avec au moins 4 patterns (Toggle visibility, Accordion, Modal, Navigation). Chaque pattern doit contenir surface_forms (expressions utilisateur variées), intention, constraints, et référence vers abstraction.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier JSON valide avec structure STAR",
+        "Au moins 4 patterns complets",
+        "Surface forms variées pour chaque pattern",
+        "Structure conforme au modèle STAR du document de référence"
+      ],
+      "context": {
+        "language": "json",
+        "framework": "vanilla",
+        "files": ["Backend/Prod/sullivan/knowledge/intent_patterns.json"]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer Backend/Prod/sullivan/knowledge/star_mappings.json : Mappings complets STAR avec transformations (mappings user_term → tech_term, rules), abstractions (pattern_name, category, variants), et realisations (implementations avec templates HTML/CSS/JS). Inclure au moins les patterns Toggle, Accordion, Modal, Navigation avec leurs templates de code.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "Fichier JSON valide avec mappings STAR complets",
+        "Transformations avec mappings sémantiques → techniques",
+        "Abstractions avec patterns UI canoniques",
+        "Réalisations avec templates HTML/CSS/JS fonctionnels"
+      ],
+      "context": {
+        "language": "json",
+        "framework": "vanilla",
+        "files": ["Backend/Prod/sullivan/knowledge/star_mappings.json"]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Modifier Backend/Prod/sullivan/registry.py : Intégrer IntentTranslator dans la méthode get_or_generate() pour traduire l'intent utilisateur avant la recherche/génération. Appeler translate() sur le message utilisateur et utiliser l'intent traduit/enrichi pour la recherche dans les caches et la génération.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_4", "step_5", "step_6"],
+      "validation_criteria": [
+        "IntentTranslator importé et initialisé",
+        "Traduction appelée avant recherche/génération",
+        "Intent traduit utilisé pour la recherche",
+        "Fonctionnalités existantes préservées"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/registry.py"]
+      }
+    },
+    {
+      "id": "step_8",
+      "description": "Modifier Backend/Prod/api.py : Dans l'endpoint /sullivan/search, utiliser IntentTranslator pour traduire le message utilisateur avant la recherche. Retourner aussi le mapping STAR dans la réponse pour transparence (ajouter champ 'star_mapping' dans la réponse JSON).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": ["step_4", "step_7"],
+      "validation_criteria": [
+        "Traduction d'intentions appelée dans /sullivan/search",
+        "Mapping STAR inclus dans la réponse JSON",
+        "Endpoint fonctionne avec et sans traduction",
+        "Rétrocompatibilité préservée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T17:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Chatbox Sullivan avec toggle overlay et système de traduction d'intentions STAR intégré"
+  }
+}

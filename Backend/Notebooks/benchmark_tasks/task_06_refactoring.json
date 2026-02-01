@@ -1,0 +1,61 @@
+{
+  "task_id": "benchmark-006-refactoring",
+  "description": "Refactoriser du code existant pour améliorer la lisibilité",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser le code existant et identifier les problèmes de structure",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "Identifie les fonctions trop longues",
+        "Identifie la duplication de code",
+        "Propose des améliorations"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["legacy_code.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Extraire les fonctions répétitives en fonctions réutilisables",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Code dupliqué extrait",
+        "Fonctions nommées clairement",
+        "Code plus maintenable"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["legacy_code.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Diviser les fonctions trop longues en fonctions plus petites",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 400,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Fonctions < 50 lignes",
+        "Responsabilité unique par fonction"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["legacy_code.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Refactoring de code legacy"
+  }
+}

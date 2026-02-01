@@ -1,0 +1,62 @@
+{
+  "task_id": "sullivan-cleanup-generated-files-20260128",
+  "description": "Supprimer les fichiers .generated.py restants (knowledge_base.generated.py et sullivan_score.generated.py) qui sont des artefacts de génération non intégrés",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Vérifier et supprimer knowledge_base.generated.py s'il existe. Ce fichier est un artefact de génération qui n'a pas été intégré proprement et doit être supprimé pour éviter toute confusion.",
+      "type": "refactoring",
+      "complexity": 0.1,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le fichier knowledge_base.generated.py n'existe plus après suppression",
+        "Aucune référence à ce fichier dans le code"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/knowledge/knowledge_base.generated.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Vérifier et supprimer sullivan_score.generated.py s'il existe. Ce fichier est un artefact de génération qui n'a pas été intégré proprement et doit être supprimé pour éviter toute confusion.",
+      "type": "refactoring",
+      "complexity": 0.1,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le fichier sullivan_score.generated.py n'existe plus après suppression",
+        "Aucune référence à ce fichier dans le code"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/models/sullivan_score.generated.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Vérifier qu'il ne reste plus aucun fichier .generated.py dans le répertoire Backend/Prod/sullivan/ et ses sous-répertoires. Lister tous les fichiers .generated.py trouvés pour confirmation.",
+      "type": "analysis",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Aucun fichier .generated.py ne reste dans Backend/Prod/sullivan/",
+        "Liste complète des fichiers .generated.py trouvés (devrait être vide)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T11:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Nettoyage final des fichiers .generated.py restants dans Sullivan Kernel"
+  }
+}

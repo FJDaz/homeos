@@ -1,0 +1,80 @@
+{
+  "task_id": "test-parallelization",
+  "description": "Test de la parallélisation avec plusieurs étapes indépendantes pour valider le fonctionnement",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer un fichier test1.txt avec le contenu 'Step 1 completed'",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier test1.txt créé",
+        "Contenu correct dans le fichier"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": []
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer un fichier test2.txt avec le contenu 'Step 2 completed'",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier test2.txt créé",
+        "Contenu correct dans le fichier"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": []
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer un fichier test3.txt avec le contenu 'Step 3 completed'",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier test3.txt créé",
+        "Contenu correct dans le fichier"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": []
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer un script Python qui lit les trois fichiers test1.txt, test2.txt, test3.txt et affiche leur contenu",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "Script Python créé",
+        "Script lit les trois fichiers",
+        "Script affiche le contenu"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "aetherflow",
+        "files": []
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T09:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test de la parallélisation - Les étapes 1, 2, 3 sont indépendantes et doivent s'exécuter en parallèle"
+  }
+}

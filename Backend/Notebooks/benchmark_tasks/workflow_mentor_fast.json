@@ -1,0 +1,116 @@
+{
+  "task_id": "workflow-mentor-fast-001",
+  "description": "Phase FAST - Implémentation de base du Workflow Mentor avec feedback pédagogique DOUBLE-CHECK",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/models/feedback_parser.py avec classes RuleViolation et PedagogicalFeedback, et méthode parse_feedback() basique pour parser le feedback texte formaté en structure structurée",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier créé avec classes RuleViolation et PedagogicalFeedback",
+        "Méthode parse_feedback() implémentée",
+        "Parsing basique du format markdown avec sections ✅ et ❌"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": []
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer Backend/Prod/models/feedback_exporter.py avec classe FeedbackExporter et méthode export_json() basique pour exporter le feedback pédagogique en JSON",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Fichier créé avec classe FeedbackExporter",
+        "Méthode export_json() implémentée",
+        "Export JSON fonctionnel"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/models/feedback_parser.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Backend/Prod/workflows/prod.py : améliorer le prompt de validation dans _validate_results() pour demander un feedback pédagogique structuré avec règles précises (TDD, DRY, SOLID), références au code, et explications. Intégrer FeedbackParser pour parser le résultat",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Prompt de validation enrichi avec instructions pédagogiques",
+        "Import de FeedbackParser ajouté",
+        "Parsing du feedback intégré dans validation_details",
+        "Feedback pédagogique inclus dans les résultats"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/workflows/prod.py",
+          "Backend/Prod/models/feedback_parser.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier Backend/Prod/workflows/proto.py : appliquer les mêmes améliorations que prod.py dans _validate_results() avec prompt pédagogique adapté au contexte PROTO (moins strict)",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1", "step_3"],
+      "validation_criteria": [
+        "Prompt de validation enrichi (adapté PROTO)",
+        "Import de FeedbackParser ajouté",
+        "Parsing du feedback intégré",
+        "Feedback pédagogique inclus dans les résultats"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/workflows/proto.py",
+          "Backend/Prod/models/feedback_parser.py",
+          "Backend/Prod/workflows/prod.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Modifier Backend/Prod/cli.py : ajouter option --mentor, fonction display_pedagogical_feedback() avec affichage Rich basique, et intégrer l'affichage dans les résultats des workflows",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1", "step_3", "step_4"],
+      "validation_criteria": [
+        "Option --mentor ajoutée à argparse",
+        "Fonction display_pedagogical_feedback() créée avec Rich",
+        "Affichage intégré dans les résultats workflows",
+        "Import de FeedbackParser ajouté"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/models/feedback_parser.py",
+          "Backend/Prod/workflows/prod.py",
+          "Backend/Prod/workflows/proto.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T15:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase FAST - Implémentation de base du Workflow Mentor pour feedback pédagogique DOUBLE-CHECK"
+  }
+}

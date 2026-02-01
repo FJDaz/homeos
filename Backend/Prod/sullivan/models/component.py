@@ -4,84 +4,6 @@ from typing import Optional
 
 class Component(BaseModel):
     """
-    Modèle de composant avec métadonnées.
-    
-    Attributes:
-    name (str): Nom du composant.
-    sullivan_score (float): Score Sullivan du composant.
-    performance_score (float): Score de performance du composant.
-    accessibility_score (float): Score d'accessibilité du composant.
-    size_kb (float): Taille du composant en kilo-octets.
-    created_at (datetime): Date de création du composant.
-    user_id (int): Identifiant de l'utilisateur qui a créé le composant.
-    """
-    name: str
-    sullivan_score: float
-    performance_score: float
-    accessibility_score: float
-    size_kb: float
-    created_at: datetime
-    user_id: int
-
-    def calculate_total_score(self) -> float:
-        """
-        Calcule le score total du composant en additionnant les scores Sullivan, de performance et d'accessibilité.
-        
-        Returns:
-        float: Le score total du composant.
-        """
-        return self.sullivan_score + self.performance_score + self.accessibility_score
-
-    def calculate_average_score(self) -> float:
-        """
-        Calcule le score moyen du composant en divisant le score total par 3.
-        
-        Returns:
-        float: Le score moyen du composant.
-        """
-        return self.calculate_total_score() / 3
-
-    def get_component_info(self) -> dict:
-        """
-        Renvoie un dictionnaire contenant les informations du composant.
-        
-        Returns:
-        dict: Un dictionnaire contenant les informations du composant.
-        """
-        return {
-            "name": self.name,
-            "sullivan_score": self.sullivan_score,
-            "performance_score": self.performance_score,
-            "accessibility_score": self.accessibility_score,
-            "size_kb": self.size_kb,
-            "created_at": self.created_at,
-            "user_id": self.user_id,
-            "total_score": self.calculate_total_score(),
-            "average_score": self.calculate_average_score()
-        }
-
-# Exemple d'utilisation
-if __name__ == "__main__":
-    component = Component(
-        name="Composant exemple",
-        sullivan_score=8.5,
-        performance_score=9.2,
-        accessibility_score=8.8,
-        size_kb=1024.0,
-        created_at=datetime.now(),
-        user_id=1
-    )
-
-    print(component.get_component_info())
-
-# Backend/Prod/sullivan/models/component.py
-
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
-
-class Component(BaseModel):
-    """
     Modèle de composant Sullivan.
     
     Attributes:
@@ -146,4 +68,3 @@ if __name__ == "__main__":
 
     print(component.to_dict())
     print(component)
-

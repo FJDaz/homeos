@@ -1,0 +1,78 @@
+{
+  "task_id": "benchmark-004-authentication",
+  "description": "Créer un système d'authentification avec hashage de mots de passe",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une fonction pour hasher les mots de passe avec bcrypt",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Utilise bcrypt",
+        "Fonction hash_password",
+        "Fonction verify_password"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["auth.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer une classe User avec email et password_hash",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 250,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe User avec champs requis",
+        "Utilise Pydantic pour validation"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["models.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer une fonction register_user qui crée un utilisateur avec mot de passe hashé",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 350,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Utilise hash_password",
+        "Valide l'email",
+        "Retourne User créé"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["auth.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer une fonction login_user qui vérifie email et mot de passe",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Vérifie le mot de passe",
+        "Retourne True si valide, False sinon"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["auth.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Système d'authentification"
+  }
+}

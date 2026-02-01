@@ -213,6 +213,48 @@ class EliteLibrary:
         component.last_used = datetime.now()
         self._save_component(component)
         logger.debug(f"Updated last_used for component: {component.name}")
+    
+    def list_all(self) -> List[Component]:
+        """
+        Liste tous les composants de la bibliothèque (non archivés).
+
+        Returns:
+            Liste de tous les composants
+        """
+        components = []
+        
+        for file in self.path.glob("*.json"):
+            if file.name.startswith("archived_"):
+                continue
+            
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    component_dict = json.load(f)
+                    # Gérer conversion datetime si nécessaire
+                    if "created_at" in component_dict and isinstance(component_dict["created_at"], str):
+                        component_dict["created_at"] = datetime.fromisoformat(component_dict["created_at"])
+                    if "last_used" in component_dict and isinstance(component_dict["last_used"], str):
+                        component_dict["last_used"] = datetime.fromisoformat(component_dict["last_used"])
+                    
+                    component = Component(**component_dict)
+                    components.append(component)
+            except Exception as e:
+                logger.warning(f"Error loading component from {file}: {e}")
+                continue
+        
+        return components
+    
+    def add_component(self, component: Component) -> bool:
+        """
+        Alias pour add() pour compatibilité avec ComponentGenerator.
+        
+        Args:
+            component: Composant à ajouter
+            
+        Returns:
+            True si ajouté, False sinon
+        """
+        return self.add(component)
 
 
 # Exemple d'utilisation

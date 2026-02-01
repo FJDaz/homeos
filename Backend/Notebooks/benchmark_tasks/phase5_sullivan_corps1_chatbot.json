@@ -1,0 +1,57 @@
+{
+  "task_id": "phase5_sullivan_corps1_chatbot",
+  "description": "Phase 5 Sullivan - Corps 1 + organes + chatbot Sullivan (z-index 10) : proposer les organes pour le corps 1 depuis le plan, endpoint chatbot (Gemini), page HTML avec widget chatbot en overlay z-index 10.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/chatbot/sullivan_chatbot.py. (1) Fonction load_screen_plan(path: Path) -> List[Dict]. (2) Fonction get_organes_for_corps(corps_id: str, screen_plan_path: Path) -> List[Dict] : charge le plan, trouve le corps avec corps_id égal (ex. \"1\"), retourne la liste organes de ce corps (ou endpoints). (3) Async fonction chat(user_message: str, context: Dict) -> str : context peut contenir corps_html, template_summary, design_principles. Construire un prompt pour Gemini : « Tu es Sullivan, assistant pour l'affinage UI. L'utilisateur a dit : {message}. Contexte : {context}. Réponds en texte court avec des suggestions ou instructions pour le frontend (ex. affiner les cellules ici, ce bloc en formulaire). » Appeler GeminiClient(execution_mode='BUILD').generate(prompt, max_tokens=1024), retourner le texte de la réponse. Créer Backend/Prod/sullivan/chatbot/__init__.py qui exporte get_organes_for_corps et chat. Type hints, docstrings, logging.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "get_organes_for_corps retourne la liste organes du corps demandé depuis screen_plan.json",
+        "chat() appelle Gemini avec prompt Sullivan et retourne une réponse texte",
+        "Module chatbot exporte get_organes_for_corps et chat",
+        "Type hints, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/chatbot/sullivan_chatbot.py",
+          "Backend/Prod/sullivan/chatbot/__init__.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/api.py : ajouter GET /sullivan/corps/{corps_id}/organes avec paramètre optionnel screen_plan (path, défaut output/studio/screen_plan.json). Appeler get_organes_for_corps(corps_id, path), retourner JSON { \"corps_id\": \"1\", \"organes\": [...] }. Ajouter POST /sullivan/chatbot avec body Pydantic { \"message\": str, \"context\": dict optionnel }. Appeler sullivan_chatbot.chat(message, context ou {}), retourner { \"reply\": str }. Créer Backend/Prod/sullivan/builder/corps1_chatbot_page.py : fonction generate_corps1_chatbot_html(base_url: str, screen_plan_path: Path) -> str qui retourne un document HTML single-file contenant : (1) Une section corps 1 (titre Corps 1, zone avec placeholders organes chargés via GET /sullivan/corps/1/organes si possible ou statique). (2) Un widget chatbot en position fixed, bottom-right, z-index 10 : textarea pour message, bouton Envoyer, div pour les réponses. JavaScript : au clic Envoyer, fetch POST base_url/sullivan/chatbot avec { message, context: {} }, afficher la reply dans la zone réponses. Style brutalist (bordures, police monospace). Écrire le HTML dans output/studio/studio_corps1_chatbot.html via build_corps1_chatbot_page(screen_plan_path, output_path, base_url).",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 4500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "GET /sullivan/corps/{corps_id}/organes retourne les organes du corps",
+        "POST /sullivan/chatbot accepte message + context et retourne reply (Gemini)",
+        "Page HTML contient section corps 1 + widget chatbot z-index 10, position fixed bottom-right",
+        "JS envoie message au backend et affiche la réponse",
+        "Fichier studio_corps1_chatbot.html généré dans output/studio/"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/chatbot/sullivan_chatbot.py",
+          "Backend/Prod/sullivan/builder/corps1_chatbot_page.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T23:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 5 Sullivan - Corps 1 avec organes proposés + chatbot Sullivan en overlay (z-index 10) pour affinage des cellules. Backend: organes pour corps N, chatbot Gemini. Frontend: page corps 1 + widget flottant."
+  }
+}

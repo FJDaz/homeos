@@ -1,0 +1,61 @@
+{
+  "task_id": "benchmark-003-data-processing",
+  "description": "Créer un script de traitement de données CSV avec validation",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une fonction pour lire un fichier CSV et parser les données",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 350,
+      "dependencies": [],
+      "validation_criteria": [
+        "Utilise la bibliothèque csv",
+        "Gère les erreurs de fichier",
+        "Retourne une liste de dictionnaires"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["csv_processor.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter une fonction de validation des données (vérifier types, valeurs nulles)",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Valide les types de colonnes",
+        "Détecte les valeurs nulles",
+        "Retourne un rapport de validation"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["csv_processor.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer une fonction pour exporter les données validées vers un nouveau CSV",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 250,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Écrit un fichier CSV",
+        "Conserve la structure des données"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["csv_processor.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Traitement de données CSV"
+  }
+}

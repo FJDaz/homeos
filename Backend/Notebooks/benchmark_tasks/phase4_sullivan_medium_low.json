@@ -1,0 +1,71 @@
+{
+  "task_id": "phase4-sullivan-medium-low-001",
+  "description": "Phase 4 : Tests Sullivan moyenne priorité (Evaluators, Analyzers, Modes) et basse priorité (Auditor, SharingTUI, Refinement, RAG, KnowledgeBase, EliteLibrary, Models)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer tests pour fichiers Sullivan moyenne priorité : Evaluators (AccessibilityEvaluator, PerformanceEvaluator, ValidationEvaluator), Analyzers (BackendAnalyzer, DesignAnalyzer, UIInferenceEngine), Modes (DevMode, DesignerMode)",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour chaque Evaluator (WCAGReport, performance metrics, validation)",
+        "Tests unitaires pour chaque Analyzer (parsing, structure detection)",
+        "Tests unitaires pour chaque Mode (workflow execution)",
+        "Tests d'intégration pour interactions entre composants",
+        "Couverture > 70% pour ces fichiers"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_accessibility_evaluator.py",
+          "Backend/Prod/tests/test_performance_evaluator.py",
+          "Backend/Prod/tests/test_validation_evaluator.py",
+          "Backend/Prod/tests/test_backend_analyzer.py",
+          "Backend/Prod/tests/test_design_analyzer.py",
+          "Backend/Prod/tests/test_ui_inference_engine.py",
+          "Backend/Prod/tests/test_dev_mode.py",
+          "Backend/Prod/tests/test_designer_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer tests pour fichiers Sullivan basse priorité : Auditor (SullivanAuditor, screenshot_util), SharingTUI, Refinement, RAG (RAGSetup, RAGIntegration), KnowledgeBase, EliteLibrary, Models (Component, SullivanScore, Categories)",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tests unitaires pour Auditor (audit results, screenshot capture)",
+        "Tests unitaires pour SharingTUI, Refinement, RAG",
+        "Tests unitaires pour KnowledgeBase, EliteLibrary",
+        "Tests unitaires pour Models (Pydantic validation, classification)",
+        "Couverture > 60% pour ces fichiers"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_sullivan_auditor.py",
+          "Backend/Prod/tests/test_screenshot_util.py",
+          "Backend/Prod/tests/test_sharing_tui.py",
+          "Backend/Prod/tests/test_refinement.py",
+          "Backend/Prod/tests/test_rag_integration.py",
+          "Backend/Prod/tests/test_knowledge_base.py",
+          "Backend/Prod/tests/test_elite_library.py",
+          "Backend/Prod/tests/test_component_model.py",
+          "Backend/Prod/tests/test_sullivan_score.py",
+          "Backend/Prod/tests/test_categories.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW Phase 4 - Tests Sullivan moyenne/basse priorité. TDD, DRY, SOLID."
+  }
+}

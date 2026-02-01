@@ -13,13 +13,15 @@ class ContextualRecommender:
     Recommandateur contextuel de composants.
     
     Recommande composants similaires basés sur contexte utilisateur,
-    utilise KnowledgeBase pour recherche sémantique.
+    utilise KnowledgeBase pour recherche sémantique et IntentTranslator/STAR
+    pour enrichir les recommandations.
     """
     
     def __init__(
         self,
         library: Optional[EliteLibrary] = None,
-        knowledge_base: Optional[KnowledgeBase] = None
+        knowledge_base: Optional[KnowledgeBase] = None,
+        intent_translator: Optional[object] = None
     ):
         """
         Initialise le recommandateur contextuel.
@@ -27,11 +29,27 @@ class ContextualRecommender:
         Args:
             library: Instance EliteLibrary (optionnel)
             knowledge_base: Instance KnowledgeBase (optionnel)
+            intent_translator: Instance IntentTranslator pour système STAR (optionnel)
         """
         self.library = library or EliteLibrary()
         # KnowledgeBase peut être instancié sans paramètres (utilise chemins par défaut)
         self.knowledge_base = knowledge_base or KnowledgeBase()
-        logger.info("ContextualRecommender initialized")
+        
+        # IntentTranslator pour système STAR (optionnel, créé si None)
+        if intent_translator is None:
+            try:
+                from ..intent_translator import IntentTranslator
+                self.intent_translator = IntentTranslator()
+                logger.info("ContextualRecommender initialized with STAR (IntentTranslator)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize IntentTranslator: {e}. STAR features disabled.")
+                self.intent_translator = None
+        else:
+            self.intent_translator = intent_translator
+            logger.info("ContextualRecommender initialized with STAR (IntentTranslator provided)")
+        
+        if self.intent_translator is None:
+            logger.info("ContextualRecommender initialized (STAR disabled)")
     
     def recommend(
         self,
@@ -73,10 +91,32 @@ class ContextualRecommender:
         # Utiliser search_patterns pour trouver patterns similaires
         patterns = self.knowledge_base.search_patterns(intent)
         
+        # Enrichir avec système STAR si IntentTranslator disponible
+        star_realisations = []
+        if self.intent_translator:
+            try:
+                # Parser la query avec IntentTranslator
+                parsed_query = self.intent_translator.parse_query(intent)
+                
+                # Rechercher situations similaires avec embeddings
+                situations = self.intent_translator.search_situation(intent, limit=3)
+                
+                # Propager STAR pour obtenir réalisations
+                for situation in situations:
+                    realisation = self.intent_translator.propagate_star(situation)
+                    if realisation:
+                        star_realisations.append(realisation)
+                        logger.debug(f"STAR realisation found: {realisation.description}")
+                
+                if star_realisations:
+                    logger.info(f"Found {len(star_realisations)} STAR realisations for intent '{intent}'")
+            except Exception as e:
+                logger.warning(f"Error using IntentTranslator/STAR: {e}. Continuing without STAR enrichment.")
+        
         # Score de similarité basique (basé sur nom et contexte)
         scored_components = []
         for component in filtered_components:
-            score = self._calculate_similarity_score(component, intent, context, patterns)
+            score = self._calculate_similarity_score(component, intent, context, patterns, star_realisations)
             scored_components.append((score, component))
         
         # Trier par score décroissant, puis par score Sullivan décroissant
@@ -124,7 +164,8 @@ class ContextualRecommender:
         component: Component,
         intent: str,
         context: str,
-        patterns: dict
+        patterns: dict,
+        star_realisations: Optional[List] = None
     ) -> float:
         """
         Calcule un score de similarité entre composant et intent/context.
@@ -134,6 +175,7 @@ class ContextualRecommender:
             intent: Intention recherchée
             context: Contexte additionnel
             patterns: Patterns trouvés dans KnowledgeBase
+            star_realisations: Réalisations STAR trouvées (optionnel)
 
         Returns:
             Score de similarité (0-1)
@@ -145,15 +187,24 @@ class ContextualRecommender:
         component_words = set(component.name.lower().split())
         common_words = intent_words.intersection(component_words)
         if intent_words:
-            score += len(common_words) / len(intent_words) * 0.5
+            score += len(common_words) / len(intent_words) * 0.4
         
         # Score basé sur patterns KnowledgeBase
         if patterns:
-            score += 0.3
+            score += 0.2
+        
+        # Enrichissement avec réalisations STAR
+        if star_realisations:
+            # Bonus si le composant correspond à une réalisation STAR
+            for realisation in star_realisations:
+                if realisation.code and realisation.code in (component.html or ""):
+                    score += 0.2
+                    break
+            score += 0.1  # Bonus général pour utilisation STAR
         
         # Bonus pour score Sullivan élevé
         if component.sullivan_score >= 85:
-            score += 0.2
+            score += 0.1
         
         return min(1.0, score)
 

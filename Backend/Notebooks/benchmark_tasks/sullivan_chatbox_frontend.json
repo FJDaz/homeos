@@ -1,0 +1,70 @@
+{
+  "task_id": "sullivan-chatbox-frontend-20260128",
+  "description": "Remplacer le frontend Homeos actuel par une chatbox pour communiquer avec Sullivan. Interface moderne et intuitive pour interagir avec Sullivan Kernel.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer index.html pour chatbox Sullivan. Structure : header avec titre 'Sullivan Kernel', zone de chat principale avec historique des messages, zone de saisie en bas avec bouton d'envoi. Design moderne et épuré, responsive. Intégrer avec API FastAPI sur http://127.0.0.1:8000.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "HTML sémantique et accessible",
+        "Structure claire : header, chat area, input area",
+        "Intégration API prête (endpoints /sullivan/*)",
+        "Design moderne et épuré"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["Frontend/index.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer styles.css pour chatbox Sullivan. Design moderne : fond sombre élégant, messages utilisateur à droite (bleu), messages Sullivan à gauche (gris foncé), zone de saisie fixe en bas, animations douces, responsive mobile-first. Typographie claire, espacements généreux.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Design moderne et élégant",
+        "Responsive mobile-first",
+        "Animations douces et fluides",
+        "Accessibilité WCAG respectée",
+        "Taille minimale (écologie)"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["Frontend/css/styles.css"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer app.js pour chatbox Sullivan. Fonctionnalités : envoi messages via API /sullivan/search ou /sullivan/dev/analyze, affichage messages en temps réel, gestion historique, indicateur de frappe (typing indicator), gestion erreurs API, formatage des réponses Sullivan (composants, scores, métriques). Vanilla JS, pas de framework.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "JavaScript vanilla (pas de framework)",
+        "Intégration API complète",
+        "Gestion erreurs robuste",
+        "UX fluide (typing indicator, scroll auto)",
+        "Formatage réponses Sullivan"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["Frontend/js/app.js"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T14:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Remplacer frontend Homeos par chatbox Sullivan - Interface de communication avec Sullivan Kernel"
+  }
+}

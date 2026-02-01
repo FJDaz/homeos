@@ -1,0 +1,56 @@
+{
+  "task_id": "tui-save-code-button-001",
+  "description": "Ajouter un bouton 'Save Code' dans le TUI AetherFlow pour sauvegarder le code généré depuis Quick Generate",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter un bouton 'Save Code' dans la zone prompt du TUI qui apparaît après la génération réussie du code",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le bouton 'Save Code' apparaît après une génération réussie",
+        "Le bouton permet de sauvegarder le code généré dans un fichier",
+        "Un dialogue ou champ permet de spécifier le chemin de sauvegarde",
+        "Le code est sauvegardé avec l'extension appropriée (.py, .js, etc.)",
+        "Un message de confirmation s'affiche après sauvegarde"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "textual",
+        "files": [
+          "Backend/Prod/tui/app.py",
+          "Backend/Prod/tui/widgets/console_panel.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implémenter la logique de sauvegarde : détecter automatiquement l'extension de fichier basée sur le langage du code généré, proposer un nom de fichier par défaut, et sauvegarder dans output/tui_quick_generate/",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Détection automatique de l'extension (.py pour Python, .js pour JavaScript, etc.)",
+        "Nom de fichier par défaut basé sur le prompt (sanitisé)",
+        "Sauvegarde dans output/tui_quick_generate/ avec création automatique du dossier",
+        "Gestion des erreurs de sauvegarde (permissions, chemin invalide)",
+        "Message de confirmation avec le chemin complet du fichier sauvegardé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "textual",
+        "files": [
+          "Backend/Prod/tui/app.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-26T17:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow V2.1 TUI - Ajout fonctionnalité de sauvegarde du code généré"
+  }
+}

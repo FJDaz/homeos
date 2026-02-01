@@ -1,0 +1,92 @@
+{
+  "task_id": "sullivan-chatbox-double-check-20260128",
+  "description": "Double-check complet de la chatbox Sullivan : vérification HTML/CSS/JS, intégration API, gestion erreurs, UX, accessibilité",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Vérifier et améliorer index.html : Structure sémantique correcte, accessibilité (ARIA labels, roles), responsive design, intégration correcte CSS et JS. Vérifier que tous les éléments nécessaires sont présents (header, chat-area, input-area, typing-indicator).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "HTML valide et sémantique",
+        "Accessibilité WCAG respectée (ARIA, labels)",
+        "Structure claire et maintenable",
+        "Tous les éléments nécessaires présents"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["Frontend/index.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Vérifier et améliorer styles.css : Design cohérent, responsive mobile-first, animations fluides, accessibilité (contraste, focus visible), gestion dark mode. Vérifier que tous les styles nécessaires sont présents (messages, input, typing indicator, component cards).",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "CSS moderne et performant",
+        "Responsive mobile-first",
+        "Accessibilité (contraste WCAG AA minimum)",
+        "Animations fluides",
+        "Taille minimale (écologie)"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["Frontend/css/styles.css"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Vérifier et améliorer app.js : Gestion erreurs robuste (détection HTML vs JSON), vérification connectivité API, gestion historique localStorage, formatage réponses Sullivan, détection modes (search/dev/designer), UX fluide (typing indicator, scroll auto). Vérifier que toutes les fonctionnalités sont implémentées correctement.",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "JavaScript vanilla (pas de framework)",
+        "Gestion erreurs robuste",
+        "Intégration API complète et correcte",
+        "UX fluide et intuitive",
+        "Code maintenable et documenté"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["Frontend/js/app.js"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Vérifier intégration API : Tester tous les endpoints (/sullivan/search, /sullivan/dev/analyze, /sullivan/designer/analyze), vérifier format des réponses, gestion erreurs API, CORS configuré. Vérifier que l'API retourne bien du JSON et non du HTML.",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Tous les endpoints API fonctionnent",
+        "Format JSON correct",
+        "Gestion erreurs API appropriée",
+        "CORS configuré correctement"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Frontend/js/app.js"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T15:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Double-check complet chatbox Sullivan - Vérification qualité, intégration API, UX, accessibilité"
+  }
+}

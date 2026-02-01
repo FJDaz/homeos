@@ -1,0 +1,113 @@
+{
+  "task_id": "tests-unitaires-sullivan-2026-01-29",
+  "description": "Créer tests unitaires complets pour les intégrations Sullivan récentes : ComponentGenerator STAR, PatternAnalyzer STAR, preview_generator, endpoints API preview",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer test unitaire pour ComponentGenerator._enrich_with_star() adapté au code existant. Le test doit : 1) Importer depuis Backend.Prod.sullivan.generator.component_generator import ComponentGenerator, 2) Créer instance ComponentGenerator avec workflow='PROTO', 3) Mock KnowledgeBase si nécessaire, 4) Appeler _enrich_context() avec intent='bouton toggle', 5) Vérifier que le contexte enrichi contient 'STAR Pattern' ou 'Patterns STAR' si IntentTranslator disponible, 6) Tester fallback si IntentTranslator non disponible (contexte normal sans STAR), 7) Vérifier que les templates STAR sont inclus dans le contexte enrichi. Utiliser pytest fixtures pour éviter duplication. Créer fichier Backend/Prod/tests/test_component_generator_star.py avec imports corrects et assertions adaptées au code réel.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé avec imports corrects depuis Backend.Prod.sullivan",
+        "Test utilise pytest fixtures pour setup",
+        "Test vérifie enrichissement STAR avec patterns",
+        "Test vérifie fallback si STAR non disponible",
+        "Test vérifie inclusion templates STAR",
+        "Code adapté à la structure réelle de ComponentGenerator"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer test unitaire pour PatternAnalyzer.analyze_patterns() avec insights STAR adapté au code existant. Le test doit : 1) Importer depuis Backend.Prod.sullivan.analyzer.pattern_analyzer import PatternAnalyzer, 2) Importer EliteLibrary depuis Backend.Prod.sullivan.library.elite_library, 3) Créer instance EliteLibrary avec composants de test (Component avec noms/intents), 4) Créer instance PatternAnalyzer avec cette EliteLibrary, 5) Appeler analyze_patterns(), 6) Vérifier que les résultats contiennent 'star_insights' avec métriques (components_with_star_patterns, most_common_star_patterns, star_patterns_by_category), 7) Vérifier le fallback si IntentTranslator non disponible (analyse normale sans star_insights). Utiliser pytest fixtures. Créer fichier Backend/Prod/tests/test_pattern_analyzer_star.py.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé avec imports corrects",
+        "Test utilise EliteLibrary réelle avec composants de test",
+        "Test vérifie présence star_insights dans résultats",
+        "Test vérifie métriques STAR (components_with_star_patterns, most_common_star_patterns)",
+        "Test vérifie fallback si STAR non disponible",
+        "Code adapté à la structure réelle de PatternAnalyzer"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/library/elite_library.py",
+          "Backend/Prod/sullivan/models/component.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer test unitaire pour preview_generator adapté au code existant. Le test doit : 1) Importer depuis Backend.Prod.sullivan.preview.preview_generator import generate_preview_html, generate_preview_page, 2) Importer Component depuis Backend.Prod.sullivan.models.component, 3) Créer composant Component de test avec name, sullivan_score, size_kb, performance_score, accessibility_score, ecology_score, 4) Appeler generate_preview_html(component, base_url='http://localhost:8000') et vérifier : HTML contient iframe avec src='/sullivan/preview/{component_id}/render', HTML contient informations composant (score, taille), HTML contient style brutaliste (bordures noires #000, typographie), 5) Appeler generate_preview_page([component1, component2], base_url) et vérifier : HTML contient liste avec liens vers prévisualisations, style brutaliste cohérent. Créer fichier Backend/Prod/tests/test_preview_generator.py.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé avec imports corrects",
+        "Test vérifie generate_preview_html() avec composant réel",
+        "Test vérifie présence iframe et informations composant",
+        "Test vérifie style brutaliste (bordures #000, typographie)",
+        "Test vérifie generate_preview_page() avec liste composants",
+        "Code adapté à la structure réelle de preview_generator"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer tests d'intégration pour endpoints API /sullivan/preview adaptés au code existant. Les tests doivent : 1) Importer depuis fastapi.testclient import TestClient, 2) Importer app depuis Backend.Prod.api, 3) Créer TestClient(app), 4) Créer composant de test dans LocalCache (utiliser ComponentRegistry pour créer composant), 5) Tester GET /sullivan/preview/{component_id} avec composant existant : vérifier status_code=200, vérifier content_type='text/html', vérifier contenu HTML contient iframe, 6) Tester GET /sullivan/preview/{component_id} avec composant inexistant : vérifier status_code=404, 7) Tester GET /sullivan/preview?user_id=test_user : vérifier status_code=200, vérifier HTML contient liste composants, 8) Tester GET /sullivan/preview/{component_id}/render : vérifier status_code=200, vérifier HTML contient component.html, component.css, component.js. Utiliser pytest fixtures pour setup/teardown. Créer fichier Backend/Prod/tests/test_api_preview.py.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Tests créés avec TestClient FastAPI",
+        "Test vérifie GET /sullivan/preview/{component_id} (200, 404)",
+        "Test vérifie GET /sullivan/preview pour liste",
+        "Test vérifie GET /sullivan/preview/{component_id}/render",
+        "Tests utilisent ComponentRegistry et LocalCache réels",
+        "Tests avec fixtures pytest pour setup/teardown",
+        "Code adapté à la structure réelle de api.py"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/cache/local_cache.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T14:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Créer tests unitaires complets adaptés au code Sullivan réel avec intégrations STAR, preview, et endpoints API"
+  }
+}

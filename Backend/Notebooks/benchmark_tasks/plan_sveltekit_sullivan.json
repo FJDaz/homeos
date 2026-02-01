@@ -1,0 +1,100 @@
+{
+  "task_id": "sveltekit-sullivan-001",
+  "description": "Frontend Sullivan en SvelteKit: layout fluide (header OS/Sullivan + Backend, aside chatbot, main pour HTML/CSS produit par Sullivan), thème sombre, intégration API FastAPI.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create SvelteKit project skeleton in frontend-svelte/. Create directory frontend-svelte/ with package.json (name frontend-svelte, type module, scripts: dev, build, preview; dependencies: svelte, @sveltejs/kit, @sveltejs/adapter-static; devDependencies: vite). Create svelte.config.js with adapter-static and default config. Create vite.config.js. Create static/favicon.png placeholder or skip. Create src/app.html with minimal HTML and body. Add .env.example with PUBLIC_API_URL=http://127.0.0.1:8000. Create src/routes/+page.svelte as placeholder (empty or hello). So that 'npm install' and 'npm run build' can run successfully.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "frontend-svelte/package.json exists with svelte, @sveltejs/kit, @sveltejs/adapter-static",
+        "svelte.config.js uses adapter-static",
+        "npm run build completes without error"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/package.json", "frontend-svelte/svelte.config.js", "frontend-svelte/vite.config.js", "frontend-svelte/src/app.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implement root layout in frontend-svelte/src/routes/+layout.svelte. Structure: one flex column; header (full width, dark background, green text) with left: 'OS' small + 'Sullivan' large, center: 'Backend'; aside (fixed width ~320px, dark gray) for chatbot; main (flex 1) for content. Use CSS: background #0d0d0d or similar, color #22c55e for header text. Include global styles in app.css or in layout. Children slot: <slot /> in main.",
+      "type": "code_generation",
+      "complexity": 0.45,
+      "estimated_tokens": 700,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "+layout.svelte has header, aside, main structure",
+        "Header shows OS, Sullivan, Backend with green text on dark bg",
+        "Aside and main are visible and layout is fluid"
+      ],
+      "context": {
+        "language": "svelte",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/routes/+layout.svelte", "frontend-svelte/src/app.css"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Create API module frontend-svelte/src/lib/api.ts (or .js). Export functions: getHealth() -> fetch PUBLIC_API_URL/health; getGenome() -> fetch PUBLIC_API_URL/studio/genome return json; sullivanSearch(body: { intent, user_id }) -> POST PUBLIC_API_URL/sullivan/search; sullivanDevAnalyze(body) -> POST .../sullivan/dev/analyze; sullivanDesignerAnalyze(body) -> POST .../sullivan/designer/analyze. Use import { env } from '$env/dynamic/public' and env.PUBLIC_API_URL or fallback 'http://127.0.0.1:8000'. Create Header.svelte in src/lib/components: display OS, Sullivan (left), Backend (center). Create AsideChat.svelte: messages array (user/sullivan), textarea, send button; on send call API (e.g. sullivanSearch or a generic message endpoint if any) and append response to messages. Use dark theme styles consistent with layout.",
+      "type": "code_generation",
+      "complexity": 0.55,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "api.ts exposes getHealth, getGenome, sullivanSearch, sullivanDevAnalyze, sullivanDesignerAnalyze",
+        "Header.svelte shows OS, Sullivan, Backend",
+        "AsideChat.svelte has message list and input, sends to API and displays replies"
+      ],
+      "context": {
+        "language": "typescript",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/lib/api.ts", "frontend-svelte/src/lib/components/Header.svelte", "frontend-svelte/src/lib/components/AsideChat.svelte"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Create MainGenomeLayout.svelte in frontend-svelte/src/lib/components. It must: (1) have a topology bar at top (flex, full width) with slots or props for links (e.g. Brainstorm, Back, Front, Deploy). (2) have a content area that displays HTML produced by Sullivan: receive a string prop 'sullivanHtml' (or fetch from an API that returns HTML for current user) and render it with {@html sullivanHtml} inside a div with class for styling. If sullivanHtml is empty, show placeholder 'Layout Sullivan (HTML/CSS) apparaîtra ici.' (3) optional: fetch GET /studio/genome and render topology from genome.topology and a fallback list of organes from genome.endpoints. Wire +page.svelte to use Header, AsideChat, MainGenomeLayout; in MainGenomeLayout pass fetched genome or empty sullivanHtml for now.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 900,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "MainGenomeLayout has topology bar and area for Sullivan HTML",
+        "Sullivan HTML is rendered via {@html} when provided",
+        "+page.svelte composes Header, AsideChat, MainGenomeLayout"
+      ],
+      "context": {
+        "language": "svelte",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/lib/components/MainGenomeLayout.svelte", "frontend-svelte/src/routes/+page.svelte"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Update docs/MODE_EMPLOI_SULLIVAN_GENOME.md: add section 'Frontend SvelteKit' explaining that the Sullivan UI can be run via the SvelteKit app in frontend-svelte/. Steps: cd frontend-svelte, npm install, set PUBLIC_API_URL (e.g. in .env) to http://127.0.0.1:8000, npm run dev (dev server on 5173). Build: npm run build; output in build/. Note that FastAPI can serve the built static files by mounting the build directory at / if desired.",
+      "type": "code_generation",
+      "complexity": 0.25,
+      "estimated_tokens": 400,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "MODE_EMPLOI mentions frontend-svelte and how to run dev/build",
+        "PUBLIC_API_URL and FastAPI serving build are documented"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/MODE_EMPLOI_SULLIVAN_GENOME.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-29T15:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Layout Sullivan en SvelteKit: header (OS/Sullivan, Backend), aside chatbot, main affichant HTML/CSS produit par Sullivan. Thème sombre. Intégration API FastAPI existante."
+  }
+}

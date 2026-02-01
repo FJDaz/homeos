@@ -1,0 +1,172 @@
+{
+  "task_id": "sullivan_phase5_features_20250127",
+  "description": "Phase 5 - Fonctionnalités Avancées Sullivan Kernel : Système de catégorisation (core, complex, domain), expiration et archivage dans EliteLibrary, interface TUI pour partage, PatternAnalyzer pour insights, ContextualRecommender pour suggestions.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Implémenter système de catégorisation dans Backend/Prod/sullivan/models/categories.py. Créer enum ComponentCategory avec valeurs core, complex, domain. Ajouter champ category au modèle Component. Créer méthode classify_component(component: Component) -> ComponentCategory pour classification automatique basée sur complexité, taille, dépendances. Core = composants simples réutilisables (< 50 KB, pas de dépendances). Complex = composants avancés (50-200 KB, dépendances modérées). Domain = composants spécialisés métier (> 200 KB, dépendances complexes).",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Enum ComponentCategory avec core, complex, domain",
+        "Champ category ajouté au modèle Component",
+        "Méthode classify_component pour classification automatique",
+        "Logique de classification basée sur taille et complexité",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": [
+          "Backend/Prod/sullivan/models/categories.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter expiration et archivage dans Backend/Prod/sullivan/library/elite_library.py. Ajouter champ last_used (datetime) au modèle Component. Tracker last_used lors de chaque utilisation (find_similar, get_or_generate). Méthode archive_old_components() pour archivage automatique si > 6 mois sans usage. Méthode remove_low_score() pour retrait si score descendant < 85. Créer répertoire archived/ pour composants archivés.",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Champ last_used ajouté au modèle Component",
+        "Tracker last_used lors de chaque utilisation",
+        "Méthode archive_old_components pour archivage > 6 mois",
+        "Méthode remove_low_score pour retrait score < 85",
+        "Répertoire archived/ créé",
+        "Gestion dates et comparaisons"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/library/elite_library.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer interface TUI pour confirmation de partage dans Backend/Prod/sullivan/library/sharing_tui.py. Utiliser rich ou textual pour interface TUI. Afficher composant à partager (nom, scores, taille). Demander confirmation utilisateur (Oui/Non). Si Oui, ajouter à EliteLibrary. Si Non, annuler. Gérer interruption clavier (Ctrl+C).",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Classe SharingTUI avec méthode confirm_sharing",
+        "Affichage composant (nom, scores, taille)",
+        "Confirmation utilisateur (Oui/Non)",
+        "Intégration avec EliteLibrary.add()",
+        "Gestion interruption clavier",
+        "Interface utilisateur claire"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "rich/textual",
+        "files": [
+          "Backend/Prod/sullivan/library/sharing_tui.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer PatternAnalyzer dans Backend/Prod/sullivan/analyzer/pattern_analyzer.py. Analyser patterns dans EliteLibrary pour insights automatiques. Méthode analyze_patterns() -> Dict[str, Any] pour identifier patterns fréquents, tendances, corrélations scores. Détecter patterns de nommage, structures communes, dépendances fréquentes. Générer insights (ex: 'Les composants core ont en moyenne score 85+', 'Les composants domain utilisent souvent React').",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Classe PatternAnalyzer avec méthode analyze_patterns",
+        "Analyse patterns dans EliteLibrary",
+        "Détection patterns fréquents, tendances",
+        "Génération insights automatiques",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/library/elite_library.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer ContextualRecommender dans Backend/Prod/sullivan/recommender/contextual_recommender.py. Recommander composants similaires basés sur contexte utilisateur. Méthode recommend(intent: str, context: str, user_id: str) -> List[Component]. Utiliser KnowledgeBase pour recherche sémantique. Filtrer par catégorie si spécifiée. Trier par score Sullivan décroissant. Retourner top 5 recommandations.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1", "step_4"],
+      "validation_criteria": [
+        "Classe ContextualRecommender avec méthode recommend",
+        "Recherche sémantique via KnowledgeBase",
+        "Filtrage par catégorie",
+        "Tri par score Sullivan",
+        "Retour top 5 recommandations",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/recommender/contextual_recommender.py",
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Intégrer nouvelles fonctionnalités dans ComponentRegistry. Modifier get_or_generate pour utiliser ContextualRecommender avant génération. Utiliser SharingTUI pour confirmation partage au lieu de suggestion directe. Appeler PatternAnalyzer périodiquement pour insights. Mettre à jour last_used lors de chaque utilisation.",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_3", "step_5"],
+      "validation_criteria": [
+        "Intégration ContextualRecommender dans get_or_generate",
+        "Utilisation SharingTUI pour confirmation partage",
+        "Mise à jour last_used lors utilisation",
+        "Conservation logique existante"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/recommender/contextual_recommender.py",
+          "Backend/Prod/sullivan/library/sharing_tui.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer __init__.py dans Backend/Prod/sullivan/recommender/ avec export ContextualRecommender. Mettre à jour Backend/Prod/sullivan/models/__init__.py pour exports categories. Mettre à jour Backend/Prod/sullivan/analyzer/__init__.py pour export PatternAnalyzer.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_4", "step_5"],
+      "validation_criteria": [
+        "__init__.py créés avec exports corrects",
+        "Exports pour imports"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/recommender/__init__.py",
+          "Backend/Prod/sullivan/models/__init__.py",
+          "Backend/Prod/sullivan/analyzer/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T23:50:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 5 Sullivan Kernel - Fonctionnalités Avancées : Catégorisation, expiration/archivage, TUI partage, PatternAnalyzer insights, ContextualRecommender suggestions."
+  }
+}

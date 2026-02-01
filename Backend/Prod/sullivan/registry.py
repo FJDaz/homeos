@@ -20,13 +20,21 @@ class ComponentRegistry:
     
     def __init__(self):
         """
-        Initialise le ComponentRegistry avec les 3 niveaux de stockage.
+        Initialise le ComponentRegistry avec les 3 niveaux de stockage et IntentTranslator/STAR.
         """
         self.local_cache = LocalCache()
         self.elite_library = EliteLibrary()
         self.knowledge_base = KnowledgeBase()
         
-        logger.info("ComponentRegistry initialized with LocalCache, EliteLibrary, and KnowledgeBase")
+        # Créer IntentTranslator partagé pour STAR
+        try:
+            from .intent_translator import IntentTranslator
+            self._intent_translator = IntentTranslator()
+            logger.info("ComponentRegistry initialized with LocalCache, EliteLibrary, KnowledgeBase, and STAR")
+        except Exception as e:
+            logger.warning(f"Failed to initialize IntentTranslator: {e}. STAR features disabled.")
+            self._intent_translator = None
+            logger.info("ComponentRegistry initialized with LocalCache, EliteLibrary, and KnowledgeBase")
     
     async def get_or_generate(
         self,
@@ -72,7 +80,12 @@ class ComponentRegistry:
         
         # Étape 2.5: Recommandations contextuelles avant génération
         from .recommender import ContextualRecommender
-        recommender = ContextualRecommender(library=self.elite_library, knowledge_base=self.knowledge_base)
+        
+        recommender = ContextualRecommender(
+            library=self.elite_library,
+            knowledge_base=self.knowledge_base,
+            intent_translator=self._intent_translator
+        )
         recommendations = recommender.recommend(intent, f"Context for {intent}", user_id, limit=3)
         if recommendations:
             logger.info(f"Found {len(recommendations)} contextual recommendations")
@@ -215,7 +228,7 @@ class ComponentRegistry:
             component.sullivan_score = sullivan_score
             
             # Classifier le composant
-            from ..models.categories import classify_component
+            from .models.categories import classify_component
             component.category = classify_component(component).value
             
             # Initialiser last_used

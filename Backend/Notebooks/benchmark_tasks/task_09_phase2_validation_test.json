@@ -1,0 +1,90 @@
+{
+  "task_id": "phase2-001-validation-test",
+  "description": "Tester le système de validation Claude sur une tâche de génération de code complexe avec plusieurs étapes interdépendantes",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer une classe DataProcessor avec méthode process() qui prend une liste de dictionnaires et applique des transformations (filtrage, tri, agrégation)",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe DataProcessor avec méthode process()",
+        "Gère le filtrage par critères multiples",
+        "Gère le tri par plusieurs colonnes",
+        "Gère l'agrégation (sum, avg, count)",
+        "Gestion d'erreurs appropriée",
+        "Code bien documenté avec docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["data_processor.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer des tests unitaires complets pour DataProcessor avec pytest, couvrant tous les cas d'usage et cas limites",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Tests pour filtrage",
+        "Tests pour tri",
+        "Tests pour agrégation",
+        "Tests de cas limites (liste vide, données invalides)",
+        "Couverture minimale 90%",
+        "Utilise pytest fixtures"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": ["test_data_processor.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer une API FastAPI avec endpoint POST /process qui utilise DataProcessor pour traiter des données JSON",
+      "type": "code_generation",
+      "complexity": 0.75,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Endpoint POST /process fonctionnel",
+        "Valide les données d'entrée avec Pydantic",
+        "Retourne les résultats en JSON",
+        "Gestion d'erreurs HTTP appropriée",
+        "Documentation OpenAPI générée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["api/main.py", "api/schemas.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Analyser la qualité globale du code généré et identifier les points d'amélioration potentiels (performance, sécurité, maintenabilité)",
+      "type": "analysis",
+      "complexity": 0.6,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "Identifie les problèmes de performance",
+        "Identifie les risques de sécurité",
+        "Propose des améliorations de maintenabilité",
+        "Rapport structuré en markdown"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["quality_report.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test du système de validation Claude dans AETHERFLOW Phase 2 - Tâche complexe avec validation automatique"
+  }
+}

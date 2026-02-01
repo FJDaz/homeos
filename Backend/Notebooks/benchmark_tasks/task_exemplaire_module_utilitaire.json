@@ -1,0 +1,107 @@
+{
+  "task_id": "benchmark-exemplaire-module-utilitaire",
+  "description": "Créer un module utilitaire pour validation de données avec amélioration progressive",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser les besoins et définir l'interface du module de validation",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "Liste des fonctions nécessaires",
+        "Interface claire définie",
+        "Cas d'usage identifiés"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "standard library"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Générer le code initial du module avec fonctions de validation de base",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Fonctions de validation email, URL, phone",
+        "Gestion d'erreurs appropriée",
+        "Docstrings complètes"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["validators.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Analyser le code généré et identifier les améliorations possibles",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 350,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Problèmes identifiés",
+        "Suggestions d'amélioration",
+        "Priorisation des changements"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["validators.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Refactoriser le code pour améliorer la maintenabilité et ajouter des validations avancées",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Code plus modulaire",
+        "Ajout de validations avancées (regex, custom)",
+        "Meilleure gestion d'erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["validators.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Générer les tests unitaires complets pour le module",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 900,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Tests pour toutes les fonctions",
+        "Edge cases couverts",
+        "Taux de couverture > 80%"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": ["test_validators.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-26T07:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Benchmark comparatif routage intelligent vs DeepSeek seul",
+    "benchmark": true,
+    "expected_routing": {
+      "step_1": "gemini",
+      "step_2": "deepseek",
+      "step_3": "gemini",
+      "step_4": "codestral",
+      "step_5": "deepseek"
+    },
+    "estimated_total_tokens": 3050,
+    "estimated_cost_usd": 0.001
+  }
+}

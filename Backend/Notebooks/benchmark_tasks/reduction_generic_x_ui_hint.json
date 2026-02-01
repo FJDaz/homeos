@@ -1,0 +1,97 @@
+{
+  "task_id": "reduction-generic-x-ui-hint-2026-01-29",
+  "description": "Réduire l'utilisation de 'generic' dans x_ui_hint en enrichissant _path_to_ui_hint avec plus d'heuristiques et l'intégration d'IntentTranslator/STAR pour une meilleure inférence d'intention",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Enrichir _path_to_ui_hint() avec plus d'heuristiques : ajouter patterns CRUD (/users, /items → list ou dashboard), detail (/users/{id} → detail), action (/execute, /run → form), query (/search, /filter → dashboard), metrics (/metrics, /stats → gauge), file (/upload, /download → form), auth (/login, /logout → form), config (/settings, /config → form). Conserver les heuristiques existantes (log → terminal, score → gauge, etc.).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "_path_to_ui_hint() contient au moins 15 patterns différents",
+        "Patterns CRUD, detail, action, query, metrics, file, auth, config ajoutés",
+        "Heuristiques existantes préservées",
+        "Code bien structuré avec commentaires"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/core/genome_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer fonction _path_to_ui_hint_enriched(path: str, method: str, summary: str = '') qui combine heuristiques + IntentTranslator/STAR. La fonction doit : 1) Appeler d'abord _path_to_ui_hint() pour heuristiques basiques, 2) Si résultat = 'generic', utiliser IntentTranslator pour analyse sémantique (parse_query sur path+summary, search_situation, propagate_star), 3) Mapper les patterns STAR vers x_ui_hint (Toggle Visibility/Accordion/Modal → form/dashboard, Navigation → dashboard/list), 4) Retourner le meilleur hint. Gérer les erreurs (IntentTranslator non disponible → fallback sur heuristiques).",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "_path_to_ui_hint_enriched() créée avec signature correcte",
+        "Utilise _path_to_ui_hint() pour heuristiques basiques",
+        "Intègre IntentTranslator si disponible (lazy import)",
+        "Mappe patterns STAR vers x_ui_hint",
+        "Gestion d'erreurs complète avec fallback",
+        "Logging pour monitoring"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/core/genome_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Mettre à jour generate_genome() pour utiliser _path_to_ui_hint_enriched() au lieu de _path_to_ui_hint(). Modifier ligne 75 pour appeler _path_to_ui_hint_enriched(path, method, summary) en passant le summary de l'endpoint. Le summary est disponible dans op.get('summary') ou op.get('description') ou path (ligne 74).",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 400,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "generate_genome() utilise _path_to_ui_hint_enriched()",
+        "Summary passé correctement à la fonction enrichie",
+        "Code existant préservé (autres lignes inchangées)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/core/genome_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter nouveaux hints au builder sullivan_builder.py si nécessaire. Si de nouveaux hints sont ajoutés (list, detail, create, update, delete), ajouter les templates HTML correspondants dans render_organe() : list (liste avec pagination), detail (vue détaillée), create (formulaire création), update (formulaire édition), delete (confirmation suppression). Conserver les templates existants (terminal, gauge, status, form, dashboard, generic).",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Nouveaux hints ajoutés au builder si nécessaires",
+        "Templates HTML cohérents avec style brutaliste existant",
+        "Templates existants préservés",
+        "Structure HTML conforme aux autres organes"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/builder/sullivan_builder.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Réduction des generic dans x_ui_hint pour améliorer qualité UI générée par builder"
+  }
+}

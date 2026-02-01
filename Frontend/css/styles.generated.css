@@ -1,0 +1,47 @@
+<!-- Structure HTML avec barre minimisée et overlay -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbox</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Barre minimisée avec bouton toggle -->
+    <div class="chatbox-minimized-bar">
+        <button id="toggle-button">Ouvrir la chatbox</button>
+    </div>
+
+    <!-- Overlay avec bouton fermer et contenu de la chatbox -->
+    <div class="chatbox-overlay">
+        <div class="chatbox-overlay-content">
+            <header>
+                <h2>Chatbox</h2>
+            </header>
+            <div class="chat-area">
+                <!-- Contenu de la conversation -->
+                <p>Message 1</p>
+                <p>Message 2</p>
+            </div>
+            <input type="text" placeholder="Tapez un message...">
+            <button id="close-button">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Script pour gérer l'ouverture et la fermeture de la chatbox -->
+    <script>
+        const toggleButton = document.getElementById('toggle-button');
+        const closeButton = document.getElementById('close-button');
+        const overlay = document.querySelector('.chatbox-overlay');
+
+        toggleButton.addEventListener('click', () => {
+            overlay.classList.add('open');
+        });
+
+        closeButton.addEventListener('click', () => {
+            overlay.classList.remove('open');
+        });
+    </script>
+</body>
+</html>

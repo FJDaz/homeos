@@ -125,20 +125,68 @@ def execute_plan_cli(
     return results
 
 
+def split_structure_and_code(raw_output: str) -> Tuple[str, str]:
+    """
+    Split raw LLM output into structure part (file tree / arborescence) and code part.
+    The structure part is never applied to code files; only code_part is used by apply.
+
+    Detects:
+    - Explicit blocks ```file_tree ... ``` or ```structure ... ```
+    - Consecutive lines that look like a directory tree (├──, │, └──).
+
+    Returns:
+        (structure_part, code_part). If no structure detected, structure_part is "", code_part is raw_output.
+    """
+    if not raw_output or not raw_output.strip():
+        return ("", raw_output)
+
+    text = raw_output
+
+    # 1. Explicit block ```file_tree ... ``` or ```structure ... ```
+    for block_name in ("file_tree", "structure"):
+        pattern = rf"```\s*{block_name}\s*\n(.*?)```"
+        match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+        if match:
+            structure_part = match.group(1).strip()
+            code_part = (text[: match.start()] + text[match.end() :]).strip()
+            return (structure_part, code_part)
+
+    # 2. Consecutive lines that look like a directory tree (├──, │, └──)
+    tree_prefix = re.compile(r"^\s*[├│└]\s*")
+    lines = text.split("\n")
+    structure_lines: List[int] = []
+    i = 0
+    while i < len(lines):
+        if tree_prefix.search(lines[i]):
+            start = i
+            while i < len(lines) and tree_prefix.search(lines[i]):
+                structure_lines.append(i)
+                i += 1
+            # Require at least 2 consecutive tree lines to consider it a structure block
+            if len(structure_lines) >= 2:
+                structure_part = "\n".join(lines[j] for j in structure_lines)
+                code_lines = [lines[j] for j in range(len(lines)) if j not in structure_lines]
+                code_part = "\n".join(code_lines).strip()
+                return (structure_part, code_part)
+            structure_lines.clear()
+        else:
+            i += 1
+
+    return ("", raw_output)
+
+
 def get_step_output(step_id: str, output_dir: str = "output") -> Optional[str]:
     """
-    Get the output of a specific step.
-    
-    Args:
-        step_id: Step ID (e.g., "step_1")
-        output_dir: Output directory
-        
-    Returns:
-        Step output content or None
+    Get the output of a specific step (code part only, for apply).
+    Prefers step_X_code.txt when present (structure-free content); otherwise step_X.txt for backward compat.
     """
-    output_file = Path(output_dir) / "step_outputs" / f"{step_id}.txt"
-    if output_file.exists():
-        return output_file.read_text(encoding="utf-8")
+    outputs_dir = Path(output_dir) / "step_outputs"
+    code_file = outputs_dir / f"{step_id}_code.txt"
+    if code_file.exists():
+        return code_file.read_text(encoding="utf-8")
+    full_file = outputs_dir / f"{step_id}.txt"
+    if full_file.exists():
+        return full_file.read_text(encoding="utf-8")
     return None
 
 

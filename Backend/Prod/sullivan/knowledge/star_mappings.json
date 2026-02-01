@@ -1,0 +1,100 @@
+{
+  "mappings": [
+    {
+      "pattern_name": "Toggle Visibility",
+      "category": "UI Component",
+      "variants": [
+        "Afficher/Masquer",
+        "Montrer/Cacher",
+        "Activer/Désactiver",
+        "Ouvrir/Fermer"
+      ],
+      "transformations": {
+        "user_term": "Afficher/Masquer",
+        "tech_term": "toggle-visibility"
+      },
+      "abstraction": {
+        "name": "ToggleVisibilityAbstraction",
+        "description": "Changer la visibilité d'un élément"
+      },
+      "realisation": {
+        "template": "html",
+        "code": "<button id='toggle-visibility' onclick='toggleVisibility()'>Afficher/Masquer</button><div id='element' style='display: none;'>Élément à afficher ou masquer</div>",
+        "javascript": "function toggleVisibility() { var element = document.getElementById('element'); if (element.style.display === 'none') { element.style.display = 'block'; } else { element.style.display = 'none'; } }"
+      }
+    },
+    {
+      "pattern_name": "Accordion",
+      "category": "UI Component",
+      "variants": [
+        "Développer/Réduire",
+        "Étendre/Rétracter",
+        "Montrer les détails/Masquer les détails",
+        "Ouvrir la section/Fermer la section"
+      ],
+      "transformations": {
+        "user_term": "Développer/Réduire",
+        "tech_term": "accordion"
+      },
+      "abstraction": {
+        "name": "AccordionAbstraction",
+        "description": "Changer l'état d'un accordéon"
+      },
+      "realisation": {
+        "template": "html",
+        "code": "<button id='accordion' onclick='toggleAccordion()'>Développer/Réduire</button><div id='section' style='display: none;'>Section à développer ou réduire</div>",
+        "javascript": "function toggleAccordion() { var section = document.getElementById('section'); if (section.style.display === 'none') { section.style.display = 'block'; } else { section.style.display = 'none'; } }"
+      }
+    },
+    {
+      "pattern_name": "Modal",
+      "category": "UI Component",
+      "variants": [
+        "Ouvrir la modale/Fermer la modale",
+        "Afficher la popup/Masquer la popup",
+        "Montrer le dialogue/Cacher le dialogue",
+        "Ouvrir la fenêtre/Fermer la fenêtre"
+      ],
+      "transformations": {
+        "user_term": "Ouvrir la modale/Fermer la modale",
+        "tech_term": "modal"
+      },
+      "abstraction": {
+        "name": "ModalAbstraction",
+        "description": "Changer l'état d'une modale"
+      },
+      "realisation": {
+        "template": "html",
+        "code": "<button id='modal' onclick='toggleModal()'>Ouvrir la modale/Fermer la modale</button><div id='modal-content' style='display: none;'>Modale à ouvrir ou fermer</div>",
+        "javascript": "function toggleModal() { var modalContent = document.getElementById('modal-content'); if (modalContent.style.display === 'none') { modalContent.style.display = 'block'; } else { modalContent.style.display = 'none'; } }"
+      }
+    },
+    {
+      "pattern_name": "Navigation",
+      "category": "UI Component",
+      "variants": [
+        "Aller à",
+        "Naviguer vers",
+        "Se rendre à",
+        "Accéder à"
+      ],
+      "transformations": {
+        "user_term": "Aller à",
+        "tech_term": "navigation"
+      },
+      "abstraction": {
+        "name": "NavigationAbstraction",
+        "description": "Naviguer vers une page ou un élément"
+      },
+      "realisation": {
+        "template": "html",
+        "code": "<a id='navigation' href='#'>Aller à</a>",
+        "javascript": ""
+      }
+    }
+  ]
+}
+
+from intent_translator import IntentTranslator
+
+translator = IntentTranslator()

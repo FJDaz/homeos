@@ -1,0 +1,66 @@
+{
+  "task_id": "mode-manager-couche-meta-001",
+  "description": "Couche méta Mode Manager: package homeos/, core/mode_manager.py, configs YAML (construction_config.yaml, project_config.yaml). Référence: docs/04-homeos/homeos-core-mode_manager.py.md",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create homeos package structure. Create homeos/__init__.py with __version__ = '0.1.0' and docstring. Create homeos/core/__init__.py that exports: from .mode_manager import ModeManager, HomeosMode, ModeConfiguration, mode_manager; __all__ = ['ModeManager', 'HomeosMode', 'ModeConfiguration', 'mode_manager']. Create homeos/construction/__init__.py and homeos/project/__init__.py as empty (pass or minimal). Create homeos/config/ as directory (no file yet). All paths relative to project root (AETHERFLOW).",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": ["homeos is importable", "homeos.core exports ModeManager, HomeosMode"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/__init__.py", "homeos/core/__init__.py", "homeos/construction/__init__.py", "homeos/project/__init__.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Create homeos/core/mode_manager.py. Implement: HomeosMode(Enum) CONSTRUCTION, PROJECT; ModeConfiguration(mode) with _load_config from homeos/config/{mode.value}_config.yaml, properties z_index_layers, allowed_frontend_stack (frontend_stack), workflow_steps (workflow); ModeManager singleton with _detect_current_mode (check .homeos_mode file, then homeos_construction/ dir, default PROJECT), switch_mode (validate, save state, update mode, write .homeos_mode with current_mode and switched_at using datetime.now().isoformat(), reconfigure), get_aetherflow/get_sullivan (import and return construction or project adapter), _validate_mode_switch, _save_current_state (pass), _reconfigure_components (pass). Add from datetime import datetime. Singleton: mode_manager = ModeManager(). Config path: resolve relative to package (Path(__file__).resolve().parent.parent / 'config' / f'{self.mode.value}_config.yaml').",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["ModeManager loads config from YAML", "Detect mode from .homeos_mode or default PROJECT", "Singleton pattern"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/core/mode_manager.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Create homeos/config/construction_config.yaml with: z_index_layers (sullivan_validation: 10000, studio_admin: 1000, generated_preview: 500, background: 1), frontend_stack (sveltekit, typescript, tailwindcss), workflow (homeos_brainstorm, homeos_intent_refactoring, aetherflow_development, sullivan_studio_development, homeos_packaging), validation_rules (must_have_intent_prop, must_import_homeos_context, must_pass_responsive_test, z_index_must_be_allowed), components (sullivan_ui: overlay, studio: svelte_app, preview: iframe). Exact structure from docs/04-homeos/homeos-core-mode_manager.py.md.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 250,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["Valid YAML", "ModeConfiguration can load it"],
+      "context": {
+        "language": "yaml",
+        "framework": "",
+        "files": ["homeos/config/construction_config.yaml"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Create homeos/config/project_config.yaml with: z_index_layers (sullivan_guidance: 10000, user_application: 1), frontend_stack (html5, css3, javascript_vanilla), workflow (project_brainstorm, project_intent_refactoring, backend_generation, frontend_generation, deployment), validation_rules (html_must_be_valid, css_must_use_variables, js_must_have_no_console_errors, must_pass_lighthouse_performance), components (sullivan_ui: chatbot_overlay, application: static_html). Exact structure from docs/04-homeos/homeos-core-mode_manager.py.md.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 250,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["Valid YAML", "ModeConfiguration can load it"],
+      "context": {
+        "language": "yaml",
+        "framework": "",
+        "files": ["homeos/config/project_config.yaml"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T16:00:00Z",
+    "project_context": "Mode Manager couche méta - PLAN_MODE_MANAGER.md étape 1"
+  }
+}

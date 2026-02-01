@@ -1,0 +1,130 @@
+{
+  "task_id": "workflow-mentor-prod-001",
+  "description": "Phase PROD - Refactoring et amélioration qualité du Workflow Mentor avec intégration complète",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Refactoriser Backend/Prod/models/feedback_parser.py : améliorer le parsing pour gérer le format markdown complet avec sections ### ✅ Passed Checks et ### ❌ Failed Checks, extraire location, issue, explanation, suggestion, code_reference. Ajouter type hints complets, docstrings détaillées, et gestion d'erreurs robuste",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Parsing robuste du format markdown complet",
+        "Extraction correcte de location, issue, explanation, suggestion, code_reference",
+        "Type hints présents pour toutes les fonctions",
+        "Docstrings complètes (format Google)",
+        "Gestion d'erreurs appropriée",
+        "Tests unitaires inclus (TDD)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/models/feedback_parser.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Refactoriser Backend/Prod/models/feedback_exporter.py : adapter à la nouvelle structure PedagogicalFeedback, ajouter export_markdown() et export_html(), améliorer export_json() avec gestion Path, ajouter type hints et docstrings complètes",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Adapté à la nouvelle structure PedagogicalFeedback",
+        "Méthode export_markdown() fonctionnelle",
+        "Méthode export_html() fonctionnelle",
+        "Type hints présents",
+        "Docstrings complètes",
+        "Gestion Path correcte"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/models/feedback_exporter.py",
+          "Backend/Prod/models/feedback_parser.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Backend/Prod/workflows/prod.py : améliorer _validate_results() avec prompt pédagogique enrichi demandant format structuré (### ✅ Passed Checks, ### ❌ Failed Checks avec location, issue, explanation, suggestion, code_reference). Intégrer FeedbackParser pour parser le résultat Gemini. Ajouter le feedback pédagogique structuré dans validation_details avec gestion d'erreurs",
+      "type": "refactoring",
+      "complexity": 0.8,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Prompt pédagogique enrichi avec format structuré demandé",
+        "Import FeedbackParser correct",
+        "Parsing du feedback intégré",
+        "Feedback pédagogique dans validation_details",
+        "Gestion d'erreurs si parsing échoue",
+        "Type hints présents"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/workflows/prod.py",
+          "Backend/Prod/models/feedback_parser.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier Backend/Prod/workflows/proto.py : appliquer les mêmes améliorations que prod.py dans _validate_results() mais avec prompt pédagogique adapté au contexte PROTO (moins strict, focus sur syntaxe et sécurité plutôt que guidelines complètes)",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1", "step_3"],
+      "validation_criteria": [
+        "Prompt pédagogique adapté PROTO (moins strict)",
+        "Import FeedbackParser correct",
+        "Parsing du feedback intégré",
+        "Feedback pédagogique dans validation_details",
+        "Gestion d'erreurs appropriée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/workflows/proto.py",
+          "Backend/Prod/models/feedback_parser.py",
+          "Backend/Prod/workflows/prod.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Modifier Backend/Prod/cli.py : ajouter option --mentor à argparse, créer fonction display_pedagogical_feedback() avec affichage Rich structuré (Panel pour status, Table pour violations avec colonnes Rule/Location/Issue/Fix, syntax highlighting pour code_reference). Intégrer l'affichage dans les résultats des workflows quand --mentor est activé",
+      "type": "refactoring",
+      "complexity": 0.7,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1", "step_3", "step_4"],
+      "validation_criteria": [
+        "Option --mentor ajoutée à argparse",
+        "Fonction display_pedagogical_feedback() avec Rich",
+        "Affichage structuré des violations",
+        "Intégration dans résultats workflows",
+        "Import FeedbackParser correct",
+        "Gestion cas où feedback n'est pas disponible"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/models/feedback_parser.py",
+          "Backend/Prod/workflows/prod.py",
+          "Backend/Prod/workflows/proto.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-26T16:35:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase PROD - Refactoring et amélioration qualité du Workflow Mentor avec intégration complète dans workflows et CLI"
+  }
+}

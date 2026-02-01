@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Simple launcher script for AetherFlow TUI."""
+import sys
+import os
+from pathlib import Path
+
+# Get script directory
+script_dir = Path(__file__).parent.absolute()
+project_root = script_dir
+
+# Change to project directory
+os.chdir(project_root)
+
+# Check if we're already running from venv
+venv_python = project_root / "venv" / "bin" / "python3"
+current_python = Path(sys.executable).resolve()
+venv_python_resolved = venv_python.resolve() if venv_python.exists() else None
+
+# Only re-exec if venv exists AND we're not already using it
+if venv_python_resolved and current_python != venv_python_resolved:
+    os.execv(str(venv_python), [str(venv_python)] + sys.argv)
+
+# Add project root to Python path
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Import and run CLI
+if __name__ == "__main__":
+    try:
+        from Backend.Prod.cli import main
+        # If no arguments, launch TUI by default
+        if len(sys.argv) == 1:
+            sys.argv.append("--tui")
+        sys.exit(main())
+    except ImportError as e:
+        print(f"❌ Error importing AetherFlow: {e}", file=sys.stderr)
+        print(f"   Make sure venv is activated or install dependencies", file=sys.stderr)
+        print(f"   Project root: {project_root}", file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,170 @@
+{
+  "task_id": "portabilite-aetherflow-2026-01-28",
+  "description": "Améliorer la portabilité d'AETHERFLOW : Docker optimisé, packaging natif (PyInstaller), installation simplifiée (pip/npm), configuration automatique, documentation et tests multi-plateformes",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Améliorer Backend/Dockerfile : Créer un Dockerfile multi-stage optimisé avec build stage (dépendances) et runtime stage (image finale légère), cache des layers pip, optimisation pour Mac 2016 (compatible x86_64), et healthcheck amélioré. Inclure toutes les dépendances nécessaires (git, curl, build-essentials pour certaines dépendances Python).",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Dockerfile multi-stage avec build et runtime stages",
+        "Image finale < 500MB",
+        "Cache des layers pip optimisé",
+        "Compatible macOS 10.12+ (Sierra) et Linux",
+        "Healthcheck fonctionnel"
+      ],
+      "context": {
+        "language": "dockerfile",
+        "framework": "docker",
+        "files": ["Backend/Dockerfile"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Améliorer docker-compose.yml : Ajouter services pour développement et production, volumes optimisés, variables d'environnement complètes, réseaux configurés, et profiles pour différents modes (dev, prod, rag). Inclure service pour l'API FastAPI avec port mapping.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Services dev et prod séparés",
+        "Volumes persistants configurés",
+        "Profiles pour différents modes",
+        "API FastAPI accessible sur port 8000",
+        "Configuration complète des variables d'environnement"
+      ],
+      "context": {
+        "language": "yaml",
+        "framework": "docker-compose",
+        "files": ["docker-compose.yml"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer setup.py ou pyproject.toml : Configurer le package Python pour installation via pip avec métadonnées complètes (nom, version, description, auteurs), dépendances depuis requirements.txt, scripts d'entrée (aetherflow CLI), et support installation editable (pip install -e .).",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier setup.py ou pyproject.toml valide",
+        "Installation via pip install fonctionnelle",
+        "Script CLI 'aetherflow' disponible après installation",
+        "Métadonnées complètes (nom, version, description)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "setuptools",
+        "files": ["setup.py", "pyproject.toml"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer scripts/packaging/pyinstaller_mac.sh : Script pour packaging Mac avec PyInstaller, configuration pour DMG, icône, architecture x86_64, inclusion des dépendances nécessaires, et génération d'un fichier DMG signé (optionnel). Script doit gérer les dépendances système et créer un bundle autonome.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 700,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Script PyInstaller fonctionnel pour Mac",
+        "Génération DMG réussie",
+        "Bundle autonome fonctionnel",
+        "Compatible macOS 10.12+",
+        "Taille bundle < 200MB"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "pyinstaller",
+        "files": ["scripts/packaging/pyinstaller_mac.sh"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer scripts/packaging/pyinstaller_linux.sh et scripts/packaging/pyinstaller_windows.bat : Scripts similaires pour Linux (DEB/RPM) et Windows (MSI/EXE). Pour Linux, créer package DEB avec dépendances système. Pour Windows, créer exécutable autonome avec NSIS ou InnoSetup.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 800,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Scripts PyInstaller pour Linux et Windows",
+        "Package DEB généré pour Linux",
+        "Exécutable Windows généré",
+        "Bundles autonomes fonctionnels",
+        "Documentation d'utilisation incluse"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "pyinstaller",
+        "files": ["scripts/packaging/pyinstaller_linux.sh", "scripts/packaging/pyinstaller_windows.bat"]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer scripts/install.sh : Script d'installation universel qui détecte l'OS, vérifie les prérequis (Python 3.9+, pip), crée venv, installe dépendances, configure .env avec assistant interactif, et teste l'installation. Doit fonctionner sur Mac, Linux et Windows (via Git Bash ou WSL).",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Détection automatique de l'OS",
+        "Vérification des prérequis",
+        "Installation automatique des dépendances",
+        "Configuration interactive .env",
+        "Test d'installation réussi"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "shell",
+        "files": ["scripts/install.sh"]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer docs/INSTALLATION.md : Documentation complète d'installation avec toutes les méthodes (Docker, pip, packages natifs), prérequis par plateforme, configuration des clés API, dépannage commun, et exemples d'utilisation. Inclure captures d'écran si possible.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1", "step_2", "step_3", "step_6"],
+      "validation_criteria": [
+        "Documentation complète et claire",
+        "Toutes les méthodes d'installation couvertes",
+        "Section dépannage incluse",
+        "Exemples d'utilisation",
+        "Prérequis par plateforme détaillés"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "vanilla",
+        "files": ["docs/INSTALLATION.md"]
+      }
+    },
+    {
+      "id": "step_8",
+      "description": "Créer scripts/test_portability.sh : Script de tests de portabilité qui vérifie l'installation sur différentes plateformes (Mac, Linux, Windows), teste les fonctionnalités principales (CLI, API, workflows), et génère un rapport de compatibilité. Doit pouvoir être exécuté dans CI/CD.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_6"],
+      "validation_criteria": [
+        "Tests sur Mac, Linux, Windows",
+        "Vérification des fonctionnalités principales",
+        "Génération de rapport de compatibilité",
+        "Intégrable dans CI/CD",
+        "Tests automatisés fonctionnels"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "testing",
+        "files": ["scripts/test_portability.sh"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T18:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Amélioration portabilité AETHERFLOW pour déploiement multi-plateformes"
+  }
+}

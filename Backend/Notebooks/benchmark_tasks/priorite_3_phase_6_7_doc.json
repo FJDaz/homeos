@@ -1,0 +1,172 @@
+{
+  "task_id": "priorite-3-phase-6-7-doc-2026-01-29",
+  "description": "Priorité 3 : Finaliser Phase 6 (intégration STAR complète), implémenter Phase 7 (prévisualisation, sauvegarde), et créer documentation (exemples, guide IntentTranslator)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Intégrer IntentTranslator/STAR dans ComponentGenerator pour enrichir la génération de composants. Modifier la méthode generate() ou _build_generation_context() pour : 1) Utiliser self.registry._intent_translator (ou créer instance si non disponible), 2) Parser l'intent avec IntentTranslator pour obtenir patterns STAR, 3) Enrichir le contexte de génération avec les patterns STAR (Situation, Transformation, Abstraction, Realisation), 4) Inclure les templates STAR dans le prompt de génération. Gérer les erreurs (IntentTranslator non disponible → génération normale sans STAR).",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "ComponentGenerator utilise IntentTranslator lors de la génération",
+        "Contexte de génération enrichi avec patterns STAR",
+        "Gestion d'erreurs complète avec fallback",
+        "Logging pour monitoring utilisation STAR"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/sullivan/registry.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Intégrer IntentTranslator/STAR dans PatternAnalyzer pour enrichir l'analyse des patterns Elite Library. Modifier la méthode analyze_patterns() ou _analyze_pattern() pour : 1) Utiliser IntentTranslator pour analyser les intents des composants Elite, 2) Mapper les patterns STAR aux patterns détectés, 3) Enrichir les insights avec informations STAR (patterns fréquents, transformations communes), 4) Ajouter métriques STAR dans les résultats d'analyse. Gérer les erreurs (IntentTranslator non disponible → analyse normale sans STAR).",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "PatternAnalyzer utilise IntentTranslator pour analyse patterns",
+        "Insights enrichis avec informations STAR",
+        "Métriques STAR ajoutées aux résultats",
+        "Gestion d'erreurs complète"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer module preview pour prévisualisation des composants générés. Créer Backend/Prod/sullivan/preview/preview_generator.py avec : 1) Fonction generate_preview_html(component: Component, base_url: str) qui génère HTML de prévisualisation avec iframe, 2) Fonction generate_preview_page(components: List[Component], base_url: str) pour page de liste, 3) Template HTML avec style brutaliste cohérent avec builder, 4) Support pour afficher HTML/CSS/JS du composant dans iframe sécurisé. Créer aussi preview_server.py avec serveur HTTP simple (http.server ou FastAPI) pour servir les prévisualisations.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Module preview créé avec preview_generator.py",
+        "Fonction generate_preview_html() génère HTML correct",
+        "Template HTML cohérent avec style brutaliste",
+        "Support iframe pour affichage composants"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/models/component.py",
+          "Backend/Prod/sullivan/builder/sullivan_builder.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter endpoint API /sullivan/preview/{component_id} dans api.py. L'endpoint doit : 1) Récupérer le composant depuis LocalCache ou EliteLibrary, 2) Générer HTML de prévisualisation avec preview_generator.generate_preview_html(), 3) Retourner HTMLResponse avec le HTML généré, 4) Gérer erreurs (composant non trouvé → 404, erreur génération → 500). Ajouter aussi endpoint GET /sullivan/preview pour liste de tous les composants avec prévisualisations.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Endpoint /sullivan/preview/{component_id} créé",
+        "Endpoint GET /sullivan/preview créé pour liste",
+        "Gestion d'erreurs complète (404, 500)",
+        "Retourne HTMLResponse correct"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/registry.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Modifier ComponentGenerator pour sauvegarde systématique après génération. Modifier la méthode generate() ou _save_component() pour : 1) Sauvegarder systématiquement le composant généré dans LocalCache (même si score < 70), 2) Sauvegarder fichiers HTML/CSS/JS dans format exploitable (structure claire : component_id/html, css, js), 3) Créer metadata JSON avec informations complètes (intent, scores, timestamps, STAR patterns utilisés), 4) Intégrer avec Elite Library si score >= 85. Assurer que tous les composants générés sont sauvegardés de manière exploitable.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Sauvegarde systématique après génération",
+        "Fichiers sauvegardés dans format exploitable",
+        "Metadata JSON créé avec informations complètes",
+        "Intégration Elite Library si score >= 85"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/cache/local_cache.py",
+          "Backend/Prod/sullivan/library/elite_library.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer documentation exemples d'utilisation Sullivan dans docs/guides/SULLIVAN_EXAMPLES.md. Le fichier doit contenir : 1) Exemples DevMode (analyse backend, génération composants), 2) Exemples DesignerMode (analyse design, génération), 3) Exemples API (endpoints /sullivan/search, /sullivan/components, /sullivan/preview), 4) Exemples CLI (sullivan dev, sullivan designer, sullivan read-genome), 5) Exemples avec résultats attendus et sorties. Format markdown avec code blocks, commandes, et explications.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Documentation créée avec exemples complets",
+        "Exemples DevMode, DesignerMode, API, CLI inclus",
+        "Format markdown correct avec code blocks",
+        "Exemples avec résultats attendus"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "documentation",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/modes/dev_mode.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Créer guide d'intégration IntentTranslator/STAR dans docs/guides/INTENT_TRANSLATOR_GUIDE.md. Le guide doit expliquer : 1) Qu'est-ce que STAR (Situation, Transformation, Abstraction, Realisation), 2) Comment utiliser IntentTranslator dans code (initialisation, search_situation, propagate_star), 3) Comment intégrer STAR dans nouveaux modules (exemples ComponentGenerator, PatternAnalyzer), 4) Structure star_mappings.json et comment ajouter nouveaux patterns, 5) Best practices (gestion erreurs, lazy import, embeddings), 6) Exemples concrets d'utilisation. Format markdown avec sections claires, code examples, et diagrammes si nécessaire.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Guide créé avec explications complètes STAR",
+        "Exemples d'utilisation IntentTranslator inclus",
+        "Guide d'intégration dans nouveaux modules",
+        "Best practices documentées",
+        "Format markdown clair et structuré"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "documentation",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/sullivan/knowledge/star_mappings.json",
+          "Backend/Prod/sullivan/recommender/contextual_recommender.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Priorité 3 : Finaliser Phase 6 (STAR complet), implémenter Phase 7 (prévisualisation, sauvegarde), créer documentation"
+  }
+}

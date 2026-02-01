@@ -1,0 +1,169 @@
+{
+  "task_id": "integration-intent-translator-star-2026-01-28",
+  "description": "Intégrer IntentTranslator/STAR dans ContextualRecommender et UIInferenceEngine pour améliorer recommandations et inférence avec système STAR (Situation, Transformation, Abstraction, Réalisation)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Refactoriser IntentTranslator pour charger star_mappings.json au lieu d'exemples hardcodés. Modifier __init__ pour charger le fichier JSON depuis sullivan/knowledge/star_mappings.json, parser les mappings et construire les index (index_situations, index_transformations, index_abstractions, index_realisations) depuis les données JSON. Supprimer le code d'exemple hardcodé (lignes 98-129). Ajouter gestion d'erreurs si fichier non trouvé.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": [
+        "IntentTranslator charge star_mappings.json au démarrage",
+        "Les index sont construits depuis les mappings JSON (4 patterns : Toggle Visibility, Accordion, Modal, Navigation)",
+        "Le code d'exemple hardcodé est supprimé",
+        "Gestion d'erreurs si fichier JSON non trouvé (log warning, index vides)",
+        "Les méthodes existantes (parse_query, search_situation, propagate_star, score_mapping) fonctionnent avec les données chargées"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/sullivan/knowledge/star_mappings.json"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Améliorer score_mapping() dans IntentTranslator pour utiliser embeddings (sentence-transformers) au lieu de comptage mots. Utiliser EmbeddingModelSingleton depuis cache/semantic_cache.py pour obtenir le modèle all-MiniLM-L6-v2. Calculer embedding de la query et embedding de la situation.description, puis calculer similarité cosinus entre les deux embeddings. Retourner le score de similarité (0-1). Conserver fallback sur comptage mots si embeddings non disponibles.",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "score_mapping() utilise EmbeddingModelSingleton pour obtenir le modèle d'embeddings",
+        "Calcul de similarité cosinus entre embeddings de query et situation.description",
+        "Score retourné entre 0 et 1",
+        "Fallback sur comptage mots si embeddings non disponibles (log warning)",
+        "Performance acceptable (pas de rechargement modèle à chaque appel)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "sentence-transformers",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py",
+          "Backend/Prod/cache/semantic_cache.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Améliorer search_situation() dans IntentTranslator pour utiliser score_mapping() avec embeddings au lieu de recherche textuelle simple. Pour chaque situation dans index_situations, calculer score avec score_mapping(query, situation). Trier les résultats par score décroissant et retourner top N (défaut 5). Ajouter paramètre limit optionnel.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "search_situation() utilise score_mapping() pour scorer chaque situation",
+        "Résultats triés par score décroissant",
+        "Paramètre limit optionnel (défaut 5)",
+        "Retourne liste de Situation triée par pertinence"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Intégrer IntentTranslator dans ContextualRecommender.recommend(). Ajouter IntentTranslator comme dépendance optionnelle dans __init__ (instancier si None). Dans recommend(), après avoir chargé les composants et avant de calculer les scores, utiliser IntentTranslator pour : 1) parser la query avec parse_query(), 2) rechercher situations avec search_situation(intent), 3) propager STAR avec propagate_star() pour obtenir réalisations. Utiliser les réalisations pour enrichir le score de similarité dans _calculate_similarity_score(). Ajouter log pour indiquer utilisation STAR.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "ContextualRecommender accepte IntentTranslator optionnel dans __init__",
+        "recommend() utilise IntentTranslator pour parser query et propager STAR",
+        "Les réalisations STAR enrichissent le score de similarité",
+        "Logs indiquent utilisation STAR",
+        "Rétrocompatibilité : fonctionne sans IntentTranslator (fallback sur comportement actuel)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/recommender/contextual_recommender.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Intégrer IntentTranslator dans UIInferenceEngine.propose_intention_structure(). Ajouter IntentTranslator comme dépendance optionnelle dans __init__ (instancier si None). Dans propose_intention_structure(), après avoir utilisé KnowledgeBase.search_patterns(), utiliser IntentTranslator pour : 1) parser product_type avec parse_query(), 2) rechercher situations avec search_situation(product_type), 3) propager STAR pour obtenir réalisations. Ajouter les réalisations STAR dans intention_structure['patterns'] ou créer nouveau champ 'star_realisations'. Ajouter log pour indiquer utilisation STAR.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "UIInferenceEngine accepte IntentTranslator optionnel dans __init__",
+        "propose_intention_structure() utilise IntentTranslator pour propager STAR",
+        "Les réalisations STAR sont incluses dans intention_structure",
+        "Logs indiquent utilisation STAR",
+        "Rétrocompatibilité : fonctionne sans IntentTranslator (fallback sur comportement actuel)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/ui_inference_engine.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Mettre à jour ComponentRegistry pour passer IntentTranslator aux instances ContextualRecommender et UIInferenceEngine. Dans ComponentRegistry.__init__, créer une instance IntentTranslator partagée. Passer cette instance à ContextualRecommender lors de sa création (ligne 75). Si UIInferenceEngine est utilisé ailleurs dans Registry, passer aussi IntentTranslator. Ajouter log pour indiquer initialisation avec STAR.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 600,
+      "dependencies": ["step_4", "step_5"],
+      "validation_criteria": [
+        "ComponentRegistry crée IntentTranslator partagé dans __init__",
+        "IntentTranslator est passé à ContextualRecommender lors de sa création",
+        "Logs indiquent initialisation avec STAR",
+        "Rétrocompatibilité : fonctionne si IntentTranslator échoue (fallback)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Nettoyer le code IntentTranslator : supprimer imports inutiles (FastAPI, BaseModel si non utilisés), corriger les imports (utiliser Path pour chemins fichiers), ajouter docstrings complètes, ajouter type hints manquants, supprimer code d'exemple en bas de fichier (lignes 98-129). S'assurer que le fichier est propre et prêt pour production.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "Imports inutiles supprimés (FastAPI, BaseModel si non utilisés)",
+        "Imports corrects (Path pour chemins fichiers)",
+        "Docstrings complètes pour toutes les méthodes publiques",
+        "Type hints ajoutés pour tous les paramètres et retours",
+        "Code d'exemple supprimé",
+        "Code conforme aux standards Python (PEP 8)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-28T12:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Intégration système STAR (Situation, Transformation, Abstraction, Réalisation) dans flux Sullivan pour améliorer recommandations et inférence UI avec embeddings sémantiques"
+  }
+}

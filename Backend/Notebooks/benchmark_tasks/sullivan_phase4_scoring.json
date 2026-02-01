@@ -1,0 +1,134 @@
+{
+  "task_id": "sullivan_phase4_scoring_20250127",
+  "description": "Phase 4 - Calcul Réel des Scores Sullivan Kernel : Créer PerformanceEvaluator (Lighthouse CI), AccessibilityEvaluator (axe-core/WCAG), ValidationEvaluator (DOUBLE-CHECK AETHERFLOW), et intégrer dans ComponentRegistry pour calcul scores réels après génération composant.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer PerformanceEvaluator dans Backend/Prod/sullivan/evaluators/performance_evaluator.py. Méthode evaluate_performance(component: Component) -> int (0-100). Utiliser Lighthouse CI pour performance réelle (score 0-100 basé sur Lighthouse metrics). Méthode calculate_bundle_size(html: str, css: str, js: str) -> int (KB). Calculer size_kb réel depuis HTML/CSS/JS. Score écologie basé sur taille (plus petit = meilleur score). Gérer erreurs si Lighthouse non disponible (fallback vers calcul heuristique).",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe PerformanceEvaluator avec méthode evaluate_performance async",
+        "Méthode calculate_bundle_size pour calcul taille réelle",
+        "Intégration Lighthouse CI (ou fallback heuristique)",
+        "Score performance 0-100 basé sur métriques réelles",
+        "Score écologie basé sur taille bundle",
+        "Gestion erreurs et logging",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/evaluators/performance_evaluator.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer AccessibilityEvaluator dans Backend/Prod/sullivan/evaluators/accessibility_evaluator.py. Méthode evaluate_accessibility(component: Component) -> int (0-100). Utiliser axe-core ou similar pour WCAG compliance. Score 0-100 basé sur violations WCAG (moins violations = meilleur score). Méthode check_wcag_compliance(html: str) -> WCAGReport. Tests automatiques d'accessibilité (ARIA, contraste couleurs, navigation clavier, etc.). Gérer erreurs si axe-core non disponible (fallback vers validation heuristique basique).",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe AccessibilityEvaluator avec méthode evaluate_accessibility async",
+        "Méthode check_wcag_compliance pour validation WCAG",
+        "Intégration axe-core (ou fallback heuristique)",
+        "Score accessibilité 0-100 basé sur violations WCAG",
+        "Tests ARIA, contraste, navigation clavier",
+        "Gestion erreurs et logging",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/evaluators/accessibility_evaluator.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer ValidationEvaluator dans Backend/Prod/sullivan/evaluators/validation_evaluator.py. Méthode evaluate_validation(component: Component) -> int (0-100). Utiliser DOUBLE-CHECK mode d'AETHERFLOW pour validation guidelines (TDD, DRY, SOLID). Créer plan JSON pour validation composant. Exécuter via AETHERFLOW DOUBLE-CHECK workflow. Score 0-100 basé sur validation guidelines. Analyser code HTML/CSS/JS pour respect principes (DRY: pas de duplication, SOLID: responsabilité unique, TDD: structure testable).",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 5000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe ValidationEvaluator avec méthode evaluate_validation async",
+        "Intégration AETHERFLOW DOUBLE-CHECK workflow",
+        "Création plan JSON pour validation",
+        "Score validation 0-100 basé sur guidelines (TDD, DRY, SOLID)",
+        "Analyse code pour principes DRY, SOLID, TDD",
+        "Gestion erreurs et logging",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/evaluators/validation_evaluator.py",
+          "Backend/Prod/claude_helper.py",
+          "Backend/Prod/workflows/prod.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Intégrer évaluateurs dans ComponentRegistry après génération. Modifier Backend/Prod/sullivan/registry.py méthode _generate_component. Après génération composant via ComponentGenerator, appeler PerformanceEvaluator, AccessibilityEvaluator, ValidationEvaluator. Calculer tous les scores (performance, accessibility, validation, ecology depuis PerformanceEvaluator). Calculer score composite Sullivan depuis scores individuels. Mettre à jour composant avec scores réels. Si score >= 85, suggérer partage (logique existante conservée).",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "Import des 3 évaluateurs dans registry.py",
+        "Appel évaluateurs après génération composant",
+        "Calcul scores réels (performance, accessibility, validation, ecology)",
+        "Calcul score composite Sullivan",
+        "Mise à jour composant avec scores réels",
+        "Conservation logique suggestion partage (score >= 85)",
+        "Gestion erreurs si évaluation échoue"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/registry.py",
+          "Backend/Prod/sullivan/evaluators/performance_evaluator.py",
+          "Backend/Prod/sullivan/evaluators/accessibility_evaluator.py",
+          "Backend/Prod/sullivan/evaluators/validation_evaluator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Créer __init__.py dans Backend/Prod/sullivan/evaluators/ avec exports PerformanceEvaluator, AccessibilityEvaluator, ValidationEvaluator. Mettre à jour Backend/Prod/sullivan/__init__.py si nécessaire pour exports.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "__init__.py créé dans evaluators/ avec exports",
+        "Exports corrects pour imports"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/evaluators/__init__.py",
+          "Backend/Prod/sullivan/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T23:50:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 4 Sullivan Kernel - Calcul Réel des Scores : PerformanceEvaluator (Lighthouse), AccessibilityEvaluator (axe-core/WCAG), ValidationEvaluator (DOUBLE-CHECK AETHERFLOW), intégration dans ComponentRegistry pour scores réels après génération."
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "task_id": "test-validation-etapes-1-4-2026-01-29",
+  "description": "Test et validation des étapes 1-4 de Priorité 3 : STAR dans ComponentGenerator, STAR dans PatternAnalyzer, module Preview, endpoints API Preview",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer test unitaire pour ComponentGenerator._enrich_with_star(). Le test doit : 1) Créer instance ComponentGenerator, 2) Appeler _enrich_context() avec un intent de test, 3) Vérifier que le contexte enrichi contient des patterns STAR si IntentTranslator disponible, 4) Vérifier le fallback si IntentTranslator non disponible (contexte normal), 5) Vérifier que les templates STAR sont inclus. Créer fichier test dans Backend/Prod/tests/test_component_generator_star.py.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé pour _enrich_with_star()",
+        "Test vérifie enrichissement STAR",
+        "Test vérifie fallback si STAR non disponible",
+        "Test vérifie inclusion templates STAR"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/generator/component_generator.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer test unitaire pour PatternAnalyzer.analyze_patterns() avec insights STAR. Le test doit : 1) Créer instance PatternAnalyzer avec EliteLibrary contenant composants de test, 2) Appeler analyze_patterns(), 3) Vérifier que les résultats contiennent 'star_insights' avec métriques (components_with_star_patterns, most_common_star_patterns), 4) Vérifier le fallback si IntentTranslator non disponible (analyse normale sans STAR). Créer fichier test dans Backend/Prod/tests/test_pattern_analyzer_star.py.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé pour analyze_patterns() avec STAR",
+        "Test vérifie présence star_insights dans résultats",
+        "Test vérifie métriques STAR (components_with_star_patterns, most_common_star_patterns)",
+        "Test vérifie fallback si STAR non disponible"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/library/elite_library.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer test unitaire pour preview_generator. Le test doit : 1) Créer un composant Component de test avec HTML/CSS/JS, 2) Appeler generate_preview_html() et vérifier que le HTML généré contient iframe, informations composant (score, taille), style brutaliste, 3) Appeler generate_preview_page() avec liste de composants et vérifier HTML de liste avec liens, 4) Vérifier cohérence style brutaliste (bordures noires, typographie, structure). Créer fichier test dans Backend/Prod/tests/test_preview_generator.py.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test créé pour generate_preview_html()",
+        "Test créé pour generate_preview_page()",
+        "Test vérifie présence iframe et informations composant",
+        "Test vérifie style brutaliste cohérent"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/models/component.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer tests d'intégration pour endpoints API /sullivan/preview. Les tests doivent : 1) Démarrer serveur FastAPI de test, 2) Créer composant de test dans LocalCache, 3) Tester GET /sullivan/preview/{component_id} avec composant existant (vérifier HTMLResponse 200, contenu HTML), 4) Tester GET /sullivan/preview/{component_id} avec composant inexistant (vérifier 404), 5) Tester GET /sullivan/preview pour liste (vérifier HTMLResponse 200, liste composants), 6) Tester GET /sullivan/preview/{component_id}/render pour rendu HTML/CSS/JS (vérifier HTML complet). Utiliser TestClient de FastAPI. Créer fichier test dans Backend/Prod/tests/test_api_preview.py.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Tests créés pour tous les endpoints preview",
+        "Test vérifie GET /sullivan/preview/{component_id} (200, 404)",
+        "Test vérifie GET /sullivan/preview pour liste",
+        "Test vérifie GET /sullivan/preview/{component_id}/render",
+        "Tests utilisent TestClient FastAPI"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/preview/preview_generator.py",
+          "Backend/Prod/sullivan/registry.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T14:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test et validation des intégrations manuelles des étapes 1-4 de Priorité 3"
+  }
+}

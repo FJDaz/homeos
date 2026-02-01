@@ -1,0 +1,39 @@
+{
+  "task_id": "phase-a-consolidation-doc-001",
+  "description": "Phase A: Consolidation et documentation. A1: créer docs/04-homeos/ETAT_LIEUX.md (état des lieux après meta plan et phase B). A2: mettre à jour docs/04-homeos/README.md (paragraphe État des lieux, lien ETAT_LIEUX.md) et optionnellement homeos/README.md. Référence: .cursor/plans/studio_concret_puis_doc.plan.md Phase A.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create docs/04-homeos/ETAT_LIEUX.md. Single document listing what is in place after the meta plan (PLAN_MODE_MANAGER 5 steps) and after Phase B. Content structure: Meta plan (5 steps: couche méta, deux modes, CLI, IR, construction bottom-up) — done. Package homeos/: core (mode_manager), construction, project, config, ir (pipeline + arbiter), cli. CLI: homeos mode, homeos switch --construction|--project. API: GET /studio/genome, Sullivan routes. Frontend: Frontend/ (vanilla) — index, studio.html + studio-genome.js; frontend-svelte (SvelteKit) — Designer upload, Studio genome page, Sullivan Validation UI overlay. Test responsive: homeos/construction/tests/responsive_test.py (construction mode). References: PLAN_MODE_MANAGER, MANIFESTE_HOMEOS_V0, design_tokens, SULLIVAN_VALIDATION_UI. Markdown only, no code.",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": ["File exists with meta plan summary, package structure, CLI, API, Frontend, test responsive", "Markdown valid"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/04-homeos/ETAT_LIEUX.md"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Update docs/04-homeos/README.md: add a short paragraph 'État des lieux' with link to ETAT_LIEUX.md, keep existing links (PRD, plan genome frontend, etc.). Optionally create homeos/README.md (short): role of package (construction/project modes, CLI homeos, typical usage: homeos mode, homeos switch --construction), without detailing all code. Reference: .cursor/plans/studio_concret_puis_doc.plan.md A2.",
+      "type": "refactoring",
+      "complexity": 0.25,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["docs/04-homeos/README.md contains État des lieux paragraph and link to ETAT_LIEUX.md", "Existing links preserved"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/04-homeos/README.md", "homeos/README.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-30T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase A - Consolidation et documentation (ETAT_LIEUX, README homeos)"
+  }
+}

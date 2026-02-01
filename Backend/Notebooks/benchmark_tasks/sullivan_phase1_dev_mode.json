@@ -1,0 +1,158 @@
+{
+  "task_id": "sullivan_phase1_dev_mode_20250127",
+  "description": "Phase 1 - Mode DEV Sullivan Kernel : BackendAnalyzer, UIInferenceEngine (top-down), et DevMode avec CLI. Analyse backend Homeos existant, infère fonction globale, déduit besoins UI selon approche top-down (Intention → Corps → Organes → Molécules → Atomes), et génère frontend.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer BackendAnalyzer dans Backend/Prod/sullivan/analyzer/backend_analyzer.py. Analyser structure projet backend (routes API FastAPI/Flask, modèles Pydantic/SQLAlchemy, schémas DB). Comprendre fonction globale métier : type produit (e-commerce, SaaS, dashboard), acteurs (admin, client, vendeur), flux métier principaux, cas d'usage. Détecter intents automatiquement depuis code/logs ET annotations optionnelles @sullivan_intent(). Analyser métadonnées Homeos (plans JSON, metrics, logs, sullivan_intents.json auto-généré). Utiliser AgentRouter pour choix modèle LLM (DeepSeek/Gemini/Groq/Codestral, exclure Claude). Retourner GlobalFunction avec product_type, actors, business_flows, use_cases.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe BackendAnalyzer avec méthodes analyze_project_structure, analyze_api_routes, analyze_models, infer_global_function",
+        "Détection automatique intents depuis code/routes/modèles/logs",
+        "Support annotations @sullivan_intent() optionnelles",
+        "Analyse métadonnées Homeos (plans, metrics, logs)",
+        "Utilise AgentRouter pour sélection modèle LLM",
+        "Retourne GlobalFunction avec product_type, actors, business_flows, use_cases",
+        "Type hints complets, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/backend_analyzer.py",
+          "Backend/Prod/models/agent_router.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer UIInferenceEngine dans Backend/Prod/sullivan/analyzer/ui_inference_engine.py. Implémenter approche TOP-DOWN (déduction descendante) : Niveau 0 (Intention Suprême) → proposer structure basée sur state-of-the-art et JTBD, demander confirmation user. Niveau 1 (Corps/Séquences) → définir zones contenu pour chaque étape confirmée, avec mécanisme 'Stop du Mentor' pour éviter complexité prématurée. Niveau 2 (Organes & Molécules) → déduire Organes depuis Corps, puis Molécules depuis Organes (composants sont conséquences, pas choix arbitraires). Niveau 3 (Atomes) → déduire Atomes depuis Molécules. Méthodes : propose_intention_structure, infer_corps_from_step, infer_organes_from_corps, infer_molecules_from_organe, infer_atoms_from_molecule, check_cognitive_load, mentor_stop_check. Utiliser KnowledgeBase pour suggestions patterns. Utiliser AgentRouter pour LLM.",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 5000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe UIInferenceEngine avec approche top-down complète",
+        "Méthodes propose_intention_structure, infer_corps_from_step, infer_organes_from_corps, infer_molecules_from_organe, infer_atoms_from_molecule",
+        "Mécanisme 'Stop du Mentor' pour gérer charge cognitive",
+        "Méthodes check_cognitive_load et mentor_stop_check",
+        "Intégration KnowledgeBase pour suggestions patterns",
+        "Utilise AgentRouter pour LLM",
+        "Type hints complets, docstrings détaillées"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/ui_inference_engine.py",
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py",
+          "Backend/Prod/models/agent_router.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer DevMode dans Backend/Prod/sullivan/modes/dev_mode.py. Point d'entrée Mode DEV avec workflow complet 'Collaboration Heureuse' : 1) Dialogue Stratégique (accord sur N étapes parcours, inférence IA basée JTBD), 2) Maillage des Corps (définition zones contenu pour chaque étape), 3) Inférence Technique (AETHERFLOW déroule cascade Organes → Molécules → Atomes), 4) HCI Mentor (surveillance charge cognitive, propose ventilation vers étape N+1 si saturation), 5) Génération 'Miroir' optionnelle (si design PNG fourni, mapper dessins sur structure logique avec Gemini 3 Flash + fallback). CLI command : sullivan dev --backend-path <path> [--output <frontend_path>] [--analyze-only] [--non-interactive]. Mode interactif par défaut pour confirmations stratégiques.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Classe DevMode avec workflow complet 'Collaboration Heureuse'",
+        "Méthodes pour dialogue stratégique, maillage corps, inférence technique",
+        "Intégration HCI Mentor pour gestion charge cognitive",
+        "Support génération 'Miroir' avec Gemini 3 Flash + fallback",
+        "CLI command sullivan dev avec arguments appropriés",
+        "Mode interactif par défaut avec option --non-interactive",
+        "Intégration avec BackendAnalyzer et UIInferenceEngine",
+        "Type hints complets, docstrings"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/modes/dev_mode.py",
+          "Backend/Prod/sullivan/analyzer/backend_analyzer.py",
+          "Backend/Prod/sullivan/analyzer/ui_inference_engine.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter command sullivan dev dans Backend/Prod/cli.py. Parser argument --backend-path (requis), --output (optionnel), --analyze-only (optionnel, affiche seulement rapport fonction globale), --non-interactive (optionnel, désactive confirmations interactives). Appeler DevMode avec ces arguments. Gérer erreurs et afficher résultats.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Commande sullivan dev ajoutée dans cli.py",
+        "Arguments --backend-path, --output, --analyze-only, --non-interactive parsés correctement",
+        "Appel DevMode avec arguments appropriés",
+        "Gestion erreurs et affichage résultats",
+        "Intégration avec système CLI existant"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/sullivan/modes/dev_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Ajouter endpoint POST /sullivan/dev/analyze dans Backend/Prod/api.py. Modèle Pydantic DevAnalyzeRequest avec backend_path (str), output_path (Optional[str]), analyze_only (bool, default False), non_interactive (bool, default False). Modèle DevAnalyzeResponse avec success (bool), global_function (Optional[Dict]), ui_intent (Optional[Dict]), frontend_structure (Optional[Dict]), message (str). Appeler DevMode depuis endpoint. Gérer erreurs HTTPException.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Endpoint POST /sullivan/dev/analyze créé",
+        "Modèles Pydantic DevAnalyzeRequest et DevAnalyzeResponse définis",
+        "Appel DevMode depuis endpoint",
+        "Gestion erreurs HTTPException appropriée",
+        "Retourne résultats structurés"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/modes/dev_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer __init__.py dans Backend/Prod/sullivan/analyzer/ avec exports BackendAnalyzer et UIInferenceEngine. Créer __init__.py dans Backend/Prod/sullivan/modes/ avec export DevMode. Mettre à jour Backend/Prod/sullivan/__init__.py si nécessaire pour exports.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "__init__.py créé dans analyzer/ avec exports BackendAnalyzer, UIInferenceEngine",
+        "__init__.py créé dans modes/ avec export DevMode",
+        "Imports corrects depuis sous-modules",
+        "Structure modulaire respectée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/__init__.py",
+          "Backend/Prod/sullivan/modes/__init__.py",
+          "Backend/Prod/sullivan/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T14:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1 Sullivan Kernel - Mode DEV : BackendAnalyzer analyse backend Homeos existant, UIInferenceEngine infère besoins UI avec approche top-down (Intention → Corps → Organes → Molécules → Atomes), DevMode orchestre workflow complet 'Collaboration Heureuse' avec HCI Mentor et génération 'Miroir'. CLI et API endpoints intégrés."
+  }
+}

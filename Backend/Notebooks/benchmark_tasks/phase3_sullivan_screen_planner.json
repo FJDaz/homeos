@@ -1,0 +1,56 @@
+{
+  "task_id": "phase3_sullivan_screen_planner",
+  "description": "Phase 3 Sullivan - Câblage genome + plan d'écrans : module ScreenPlanner qui produit une liste de corps (écrans) à partir du genome (topology, endpoints, x_ui_hint), stocke screen_plan.json, option CLI.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/planner/screen_planner.py. Classe ScreenPlanner avec méthode plan_from_genome(genome: Dict) -> List[Dict]. genome contient topology (list de str) et endpoints (list de dict avec path, method, x_ui_hint, summary). Pour chaque élément de topology, créer un corps : { \"corps_id\": \"1\", \"label\": <nom topology>, \"organes\": [ { \"endpoint_path\": \"...\", \"method\": \"...\", \"x_ui_hint\": \"...\" } ], \"endpoints\": [ sous-ensemble des endpoints assignés à ce corps ] }. Règle d'assignment : grouper les endpoints par premier segment du path ou par x_ui_hint si besoin ; si topology a N éléments, répartir les endpoints sur les N corps (ex. par ordre ou par tag). Méthode save_plan(plan: List[Dict], output_path: Path) pour écrire le JSON. Fonction load_genome(path: Path) -> Dict et plan_screens(genome_path: Path, output_path: Optional[Path]) -> List[Dict] : charge genome, appelle plan_from_genome, save dans output_path ou output/studio/screen_plan.json. Type hints, docstrings, logging.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "ScreenPlanner.plan_from_genome retourne une liste de corps avec corps_id, label, organes, endpoints",
+        "Chaque organe référence un endpoint (path, method, x_ui_hint)",
+        "save_plan écrit un fichier JSON valide",
+        "plan_screens(genome_path) charge le genome et produit screen_plan.json",
+        "Réutilisation de la structure genome (topology, endpoints) comme dans sullivan_builder"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/planner/screen_planner.py",
+          "Backend/Prod/sullivan/builder/sullivan_builder.py",
+          "Backend/Prod/core/genome_generator.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer Backend/Prod/sullivan/planner/__init__.py qui exporte ScreenPlanner et plan_screens. Ajouter option CLI pour Sullivan : --plan-screens (action='store_true') et --genome (Path, pour plan-screens). Quand sullivan --plan-screens est invoqué : charger le genome (--genome ou défaut output/studio/homeos_genome.json), appeler plan_screens(genome_path, output_path=output/studio/screen_plan.json), afficher un résumé (nombre de corps, labels). Modifier Backend/Prod/cli.py uniquement pour la branche sullivan (parser sullivan, après --build/--design).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "sullivan/planner/__init__.py exporte ScreenPlanner et plan_screens",
+        "Option --plan-screens et --genome sur sullivan",
+        "sullivan --plan-screens produit output/studio/screen_plan.json et affiche résumé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/planner/__init__.py",
+          "Backend/Prod/cli.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T21:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 Sullivan - Plan d'écrans depuis le genome : ScreenPlanner produit screen_plan.json (corps + organes + endpoints), exploitable par Phase 4 (génération des corps). Commande : sullivan --plan-screens."
+  }
+}

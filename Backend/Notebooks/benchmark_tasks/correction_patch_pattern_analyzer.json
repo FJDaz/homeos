@@ -1,0 +1,35 @@
+{
+  "task_id": "correction-patch-pattern-analyzer-2026-01-29",
+  "description": "Corriger le patch dans test_pattern_analyzer_star.py pour gérer correctement le lazy import d'IntentTranslator dans PatternAnalyzer.analyze_patterns()",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Corriger test_analyze_patterns_star_most_common_patterns() dans Backend/Prod/tests/test_pattern_analyzer_star.py. Le problème : PatternAnalyzer utilise un lazy import 'from ..intent_translator import IntentTranslator' à l'intérieur de analyze_patterns(), donc le patch doit être fait au niveau du module intent_translator ET il faut aussi patcher le module pattern_analyzer pour que le lazy import fonctionne. Solution : Utiliser patch.object() ou patcher à la fois 'Backend.Prod.sullivan.intent_translator.IntentTranslator' ET créer un mock dans 'Backend.Prod.sullivan.analyzer.pattern_analyzer' avec create=True. Le test doit : 1) Patcher IntentTranslator au niveau intent_translator, 2) Créer un mock IntentTranslator dans pattern_analyzer avec create=True pour le lazy import, 3) Configurer le mock pour retourner différents patterns selon l'intent (toggle -> Toggle Visibility, accordion -> Accordion), 4) Vérifier que most_common_star_patterns est présent dans star_insights. Adapter le code existant aux lignes 120-160.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Test utilise patch correct pour lazy import",
+        "Test patche à la fois intent_translator et pattern_analyzer",
+        "Test configure mock pour différents patterns selon intent",
+        "Test vérifie most_common_star_patterns dans résultats",
+        "Test passe avec pytest"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/tests/test_pattern_analyzer_star.py",
+          "Backend/Prod/sullivan/analyzer/pattern_analyzer.py",
+          "Backend/Prod/sullivan/intent_translator.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-29T14:20:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Corriger le patch pour gérer le lazy import d'IntentTranslator dans PatternAnalyzer.analyze_patterns()"
+  }
+}

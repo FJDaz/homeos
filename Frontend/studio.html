@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio – Genome</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Studio layout: aside = chatbot, main = topology bar + layout genome (z-10) + layout default (z-1) */
+        body.studio-page { display: flex; min-height: 100vh; overflow: hidden; margin: 0; }
+        .studio-aside {
+            width: 320px;
+            min-width: 280px;
+            background: var(--bg-secondary, #f8f9fa);
+            border-right: 1px solid var(--border-color, #dee2e6);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .studio-workflow-nav {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color, #dee2e6);
+            background: #fff;
+        }
+        .studio-workflow-nav h2 { font-size: 11px; text-transform: uppercase; color: var(--text-secondary, #6c757d); margin-bottom: 0.5rem; }
+        .studio-workflow-nav .workflow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .studio-workflow-nav .workflow-steps a {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+            color: var(--text-primary, #212529);
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+        .studio-workflow-nav .workflow-steps a:hover { background: var(--bg-tertiary, #e9ecef); }
+        .studio-chat-in-aside {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .studio-chat-in-aside .chat-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: #fff;
+        }
+        .studio-chat-in-aside .chat-header h1 { font-size: 1rem; margin: 0; }
+        .studio-chat-in-aside .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .studio-chat-in-aside .chat-input-area { padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); background: #fff; }
+        .studio-chat-in-aside .input-container { display: flex; gap: 0.5rem; align-items: flex-end; }
+        .studio-chat-in-aside #message-input { flex: 1; min-height: 36px; resize: none; }
+        .studio-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .studio-topology-bar {
+            display: flex;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .studio-topology-bar h2 { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); margin: 0; margin-right: 0.5rem; }
+        .studio-topology-bar nav { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+        .studio-topology-bar nav a {
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        .studio-topology-bar nav a:hover { background: var(--bg-tertiary); }
+        .studio-layout-genome {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .studio-layout-genome h1 { font-size: 1.25rem; margin-bottom: 1rem; }
+        .studio-layout-default {
+            position: relative;
+            z-index: 1;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary, #f8f9fa);
+            border-top: 1px dashed var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .organe { background: #fff; border: 1px solid var(--border-color); margin-bottom: 1rem; padding: 1rem; }
+        .organe h3 { font-size: 13px; margin-bottom: 0.5rem; color: var(--text-secondary); }
+        .organe pre, .organe .out { font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+        .organe button, .organe input[type=submit] { font: inherit; padding: 0.4rem 0.8rem; background: var(--accent-blue, #0d6efd); color: #fff; border: none; cursor: pointer; }
+        .organe button:hover { opacity: 0.9; }
+        .organe .err { color: #c00; }
+        .organe .ok { color: #080; }
+        .studio-loading { padding: 1rem; color: var(--text-secondary); }
+        .studio-error { padding: 1rem; color: #c00; }
+    </style>
+</head>
+<body class="studio-page">
+    <!-- Aside = Chatbot + 4 étapes du workflow (Brainstorm, Back, Front, Deploy) -->
+    <aside class="studio-aside" id="studio-sidebar">
+        <div class="studio-workflow-nav">
+            <h2>Pipeline</h2>
+            <div class="workflow-steps">
+                <a href="#brainstorm">Brainstorm</a>
+                <a href="#back">Back</a>
+                <a href="#front">Front</a>
+                <a href="#deploy">Deploy</a>
+            </div>
+        </div>
+        <div class="studio-chat-in-aside">
+            <header class="chat-header">
+                <h1>🤖 Sullivan Kernel</h1>
+                <p class="subtitle" style="margin:0;font-size:12px;color:var(--text-secondary);">Chat – inférence & amendement</p>
+            </header>
+            <main class="chat-area" id="chat-area">
+                <div class="welcome-message">
+                    <p>👋 Bonjour. Je suis Sullivan.</p>
+                    <p>Discutez ici pour amender le layout inféré du genome.</p>
+                </div>
+            </main>
+            <footer class="chat-input-area">
+                <div class="input-container">
+                    <textarea id="message-input" placeholder="Votre message… (Ctrl+Enter pour envoyer)" rows="1"></textarea>
+                    <button id="send-btn" class="send-button" aria-label="Envoyer">➤</button>
+                </div>
+                <div class="typing-indicator" id="typing-indicator" style="display: none;">Sullivan écrit…</div>
+            </footer>
+        </div>
+    </aside>
+
+    <!-- Main = barre topology (flex, pleine largeur) + layout genome (z-10) + layout default (z-1) -->
+    <main class="studio-main">
+        <div class="studio-topology-bar" id="studio-topology-bar">
+            <h2>Topology</h2>
+            <nav id="studio-topology"></nav>
+        </div>
+        <div class="studio-layout-genome">
+            <h1 id="studio-title">Studio</h1>
+            <div id="studio-organes"></div>
+            <div id="studio-loading" class="studio-loading">Chargement du genome…</div>
+            <div id="studio-error" class="studio-error" style="display: none;"></div>
+        </div>
+        <div class="studio-layout-default">
+            Layout par défaut (z-index 1) – contenu de repli sous le layout Sullivan (z-index 10).
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script src="js/studio-genome.js"></script>
+</body>
+</html>
+
+
+Frontend/
+├── studio.html
+├── css/
+│   └── styles.css
+└── js/
+    ├── studio-genome.js
+    └── utils/
+        └── error-handler.js

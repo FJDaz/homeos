@@ -1,0 +1,77 @@
+{
+  "task_id": "phase2_sullivan_design_principles",
+  "description": "Phase 2 Sullivan - Principes graphiques depuis le template : extraire design tokens (couleurs, typo, espacements) depuis l'image et la structure design, stocker design_principles.json, brancher DesignerMode et CLI.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/analyzer/design_principles_extractor.py. Classe DesignPrinciplesExtractor avec __init__(agent_router ou gemini_client). Méthode async extract_principles(image_path: Path, design_structure: Optional[Dict] = None) -> Dict : appel Gemini Vision (generate_with_image) avec prompt explicite : « À partir de cette maquette (et optionnellement de la structure design fournie), liste les principes graphiques réutilisables. Retourne UNIQUEMENT un objet JSON valide avec les clés : primary_color, secondary_color, font_family, font_size_base, spacing_unit, border_radius, shadow_style. Pas de texte avant ou après le JSON. » Parser la réponse pour extraire le JSON (strip markdown code block si présent). Gestion erreurs et logging. Fonction helper save_principles(principles: Dict, output_path: Path) pour écrire le JSON dans output/studio/design_principles.json ou chemin fourni.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "DesignPrinciplesExtractor.extract_principles appelle Gemini Vision avec image + prompt JSON",
+        "Retourne un dict avec clés type primary_color, font_family, spacing_unit, etc.",
+        "save_principles écrit un fichier JSON valide",
+        "Parsing robuste de la réponse (bloc ```json ou raw JSON)",
+        "Type hints, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/design_principles_extractor.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier Backend/Prod/sullivan/modes/designer_mode.py : ajouter paramètres optionnels extract_principles: bool = False et principles_path: Optional[Path] = None au __init__. Après l'étape 1 (analyze_image, design_structure obtenu), si extract_principles est True : instancier DesignPrinciplesExtractor, appeler extract_principles(design_file, design_structure.to_dict()), puis save_principles(principles, principles_path ou settings.output_dir / 'studio' / 'design_principles.json'). Ne pas modifier le reste du flux. Importer le module design_principles_extractor.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "__init__ accepte extract_principles et principles_path",
+        "Si extract_principles : après analyze_image, appel extract_principles puis save_principles",
+        "Chemin par défaut : output/studio/design_principles.json (via settings)",
+        "Flux existant (Miroir, output_html, sauvegarde JSON) conservé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/modes/designer_mode.py",
+          "Backend/Prod/sullivan/analyzer/design_principles_extractor.py",
+          "Backend/Prod/config/settings.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Backend/Prod/cli.py : pour la branche sullivan --design (et sous-commande sullivan designer), ajouter option --extract-principles (action='store_true') et option --principles-path (type=Path, default=None). Lors de l'instanciation de DesignerMode pour sullivan -d ou sullivan designer, passer extract_principles=getattr(args, 'extract_principles', False) et principles_path=getattr(args, 'principles_path', None). Défaut principles_path : None (DesignerMode utilisera output/studio/design_principles.json).",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Option --extract-principles présente sur sullivan (parent) et/ou sous-commande designer",
+        "Option --principles-path optionnelle",
+        "DesignerMode instancié avec extract_principles et principles_path quand sullivan -d est utilisé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T20:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 Sullivan - Principes graphiques : extraire design tokens depuis le template, fichier design_principles.json généré à chaque analyse, utilisé par la génération HTML et les écrans. Commande : sullivan -d image.png --extract-principles."
+  }
+}

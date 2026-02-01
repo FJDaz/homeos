@@ -1,0 +1,28 @@
+z_index_layers:
+  sullivan_validation: 10000
+  studio_admin: 1000
+  generated_preview: 500
+  background: 1
+
+frontend_stack:
+  - sveltekit
+  - typescript
+  - tailwindcss
+
+workflow:
+  - homeos_brainstorm
+  - homeos_intent_refactoring
+  - aetherflow_development
+  - sullivan_studio_development
+  - homeos_packaging
+
+validation_rules:
+  - must_have_intent_prop
+  - must_import_homeos_context
+  - must_pass_responsive_test
+  - z_index_must_be_allowed
+
+components:
+  sullivan_ui: overlay
+  studio: svelte_app
+  preview: iframe

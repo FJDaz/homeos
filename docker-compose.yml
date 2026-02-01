@@ -1,0 +1,82 @@
+version: '3.8'
+
+# Variables d'environnement partagées
+x-environment: &common-environment
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  TZ: "Europe/Paris"
+  LOG_LEVEL: "INFO"
+
+services:
+  # Service principal AETHERFLOW CLI
+  aetherflow:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+      target: runtime
+    container_name: aetherflow
+    stdin_open: true
+    tty: true
+    env_file:
+      - Backend/.env
+    environment:
+      <<: *common-environment
+      APP_NAME: "AetherFlow"
+      APP_ENV: ${APP_ENV:-development}
+    volumes:
+      # Plan files and output
+      - ./Backend/Notebooks/benchmark_tasks:/app/data/plans:ro
+      - ./output:/app/output
+      - ./logs:/app/logs
+      # Code for development (comment out in production)
+      - ./Backend/Prod:/app/Backend/Prod:ro
+    networks:
+      - aetherflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - cli
+      - dev
+
+  # Service API FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+      target: runtime
+    container_name: aetherflow-api
+    env_file:
+      - Backend/.env
+    environment:
+      <<: *common-environment
+      APP_NAME: "AetherFlow API"
+      APP_ENV: ${APP_ENV:-development}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Backend/Prod:/app/Backend/Prod:ro
+      - ./output:/app/output
+      - ./logs:/app/logs
+    networks:
+      - aetherflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["python", "-m", "Backend.Prod.api"]
+    profiles:
+      - api
+      - dev
+      - prod
+
+networks:
+  aetherflow-network:
+    driver: bridge

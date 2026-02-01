@@ -1,0 +1,38 @@
+{
+  "task_id": "mode-manager-etape3-cli-001",
+  "description": "Mode Manager étape 3: CLI Homeos. Create homeos/cli.py with commands: mode (show current), switch --construction / --project. Entry point homeos (python -m homeos.cli). Use homeos.core.mode_manager (mode_manager singleton). Do not modify aetherflow nor Backend/Prod/cli.py. Reference: docs/04-homeos/PLAN_MODE_MANAGER.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Create homeos/cli.py. Use argparse: subparser for 'mode' (no args) and 'switch' (--construction, --project). Command 'mode': call mode_manager.get_mode_info() from homeos.core.mode_manager and print current mode, config_path, z_index_layers. Command 'switch': call mode_manager.switch_mode(HomeosMode.CONSTRUCTION) or HomeosMode.PROJECT according to flag; then print confirmation. def main() entry; if __name__ == '__main__': main(). Import from homeos.core.mode_manager: mode_manager, HomeosMode.",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": ["homeos mode prints current mode", "homeos switch --construction switches and confirms", "homeos switch --project switches and confirms"],
+      "context": {
+        "language": "python",
+        "framework": "argparse",
+        "files": ["homeos/cli.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Add Homeos CLI entry point in pyproject.toml. Under [project.scripts] add: homeos = \"homeos.cli:main\" so that after pip install -e . the command 'homeos' invokes homeos.cli.main(). Do not remove or change the existing aetherflow = \"Backend.Prod.cli:main\" entry.",
+      "type": "code_generation",
+      "complexity": 0.15,
+      "estimated_tokens": 150,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["pyproject.toml has homeos = homeos.cli:main", "aetherflow entry unchanged"],
+      "context": {
+        "language": "toml",
+        "framework": "",
+        "files": ["pyproject.toml"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T16:30:00Z",
+    "project_context": "Mode Manager étape 3 - PLAN_MODE_MANAGER.md"
+  }
+}

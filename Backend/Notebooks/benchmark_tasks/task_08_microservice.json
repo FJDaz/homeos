@@ -1,0 +1,81 @@
+{
+  "task_id": "benchmark-008-microservice",
+  "description": "Créer une architecture microservice simple avec deux services",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le service User Service avec endpoint GET /users et POST /users",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Service FastAPI",
+        "Endpoints fonctionnels",
+        "Modèle User défini"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["user_service/main.py", "user_service/models.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le service Order Service avec endpoint GET /orders et POST /orders",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Service FastAPI",
+        "Endpoints fonctionnels",
+        "Modèle Order défini"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["order_service/main.py", "order_service/models.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer un client HTTP pour que Order Service appelle User Service",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Client HTTP async",
+        "Gestion des erreurs",
+        "Validation des réponses"
+      ],
+      "context": {
+        "language": "python",
+        "files": ["order_service/user_client.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer docker-compose.yml pour orchestrer les deux services",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "validation_criteria": [
+        "Deux services définis",
+        "Réseau configuré",
+        "Ports exposés"
+      ],
+      "context": {
+        "language": "yaml",
+        "files": ["docker-compose.yml"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Architecture microservice"
+  }
+}

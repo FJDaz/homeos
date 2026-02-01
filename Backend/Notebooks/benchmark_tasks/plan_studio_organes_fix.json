@@ -1,0 +1,64 @@
+{
+  "task_id": "studio-organes-fix-001",
+  "description": "Studio organes: substitution des paramètres de chemin {param} et corps POST par défaut pour éviter 404/422 sur les organes (preview, dev/analyze, designer/analyze).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "In Frontend/js/studio-genome.js, add path parameter substitution before calling the API. When building the request URL (in apiCall or before passing path to apiCall), replace any OpenAPI-style path parameter like {component_id}, {user_id} with a default value: {component_id} -> 'example', {user_id} -> 'default_user', and any other {param_name} -> 'default'. So /sullivan/preview/{component_id} becomes /sullivan/preview/example, and /sullivan/preview/{component_id}/render becomes /sullivan/preview/example/render. Implement a small helper e.g. substitutePathParams(path) that uses a regex to replace /{identifier}/ with /value/ using a map of param names to default values. Call it when building the URL in the organ click handler.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Paths containing {component_id} are requested as /.../example/...",
+        "Paths containing {user_id} are requested with default_user",
+        "No 404 due to literal {component_id} in URL"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "",
+        "files": ["Frontend/js/studio-genome.js"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "In Frontend/js/studio-genome.js, for POST (and PUT) endpoints when the user clicks the organ button without a form body, send a minimal default JSON body so the server does not return 422 Unprocessable Entity. If the path contains 'dev/analyze', send body { backend_path: '.' }; if the path contains 'designer/analyze', send body { design_path: '.' }; for any other POST/PUT send body {}. Use this in the run() handler that calls apiCall(path, method) so that when method is POST or PUT we pass this default body when none is provided.",
+      "type": "refactoring",
+      "complexity": 0.35,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "POST /sullivan/dev/analyze is called with body { backend_path: '.' }",
+        "POST /sullivan/designer/analyze is called with body { design_path: '.' }",
+        "Other POST endpoints receive {} instead of no body"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "",
+        "files": ["Frontend/js/studio-genome.js"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "In Backend/Prod/api.py, ensure GET /sullivan/preview (preview_list) never raises 500 when there are no components. The handler must return 200 with an empty or minimal HTML list page when components list is empty (e.g. generate_preview_page([]) or a simple 'No components' message). Add a guard so that if generate_preview_page or any step fails on empty list, we still return 200 with a fallback HTML string like '<html><body><p>No components yet.</p></body></html>'.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "GET /sullivan/preview returns 200 when no components exist",
+        "Response is valid HTML (list or fallback message)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-29T14:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Studio genome frontend: fix organ Fetch 404/422/500 so all 12 endpoints respond without client errors."
+  }
+}

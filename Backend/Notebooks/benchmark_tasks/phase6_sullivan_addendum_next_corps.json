@@ -1,0 +1,58 @@
+{
+  "task_id": "phase6_sullivan_addendum_next_corps",
+  "description": "Phase 6 Sullivan - Addendum graphique + questions Sullivan + passage au corps 2 : upload addendum, endpoint questions (Gemini 1-3 questions), endpoint valider écran N et passer à N+1, frontend addendum + questions + bouton Passer à l'écran suivant.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Backend - (1) Dans Backend/Prod/sullivan/chatbot/sullivan_chatbot.py ajouter async generate_questions(corps_id: str, addendum_path: Optional[Path], context: Dict) -> List[str] : si addendum_path existe, construire un prompt pour Gemini du type « Contexte : écran corps {corps_id}, addendum graphique fourni (chemin ou description). Génère 1 à 3 questions courtes pour clarifier l'intention de l'utilisateur (ex. Ce bloc doit-il être une liste ou un formulaire ?). Retourne uniquement les questions, une par ligne. » Appeler Gemini avec ce prompt, parser la réponse en liste de chaînes (split par newline). Si pas d'addendum, retourner liste vide. (2) Dans api.py : POST /sullivan/addendum/upload (file: UploadFile) : sauvegarder le fichier dans output/studio/addendum/ (créer le dossier si besoin), nommer addendum_<timestamp>.<ext>, retourner { \"path\": str, \"filename\": str }. POST /sullivan/chatbot/questions avec body { \"corps_id\": str, \"addendum_path\": str optionnel, \"context\": dict optionnel } : appeler generate_questions, retourner { \"questions\": List[str] }. POST /sullivan/corps/{corps_id}/validate-and-next avec body optionnel { \"state\": dict } : charger screen_plan (output/studio/screen_plan.json), trouver le corps suivant (corps_id + 1), retourner { \"next_corps_id\": str, \"next_label\": str, \"organes\": [...] } ou 404 si pas de suivant. Type hints, docstrings.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4000,
+      "dependencies": [],
+      "validation_criteria": [
+        "generate_questions appelle Gemini et retourne 1-3 questions (liste de str)",
+        "POST /sullivan/addendum/upload enregistre le fichier et retourne path/filename",
+        "POST /sullivan/chatbot/questions retourne { questions: [...] }",
+        "POST /sullivan/corps/{corps_id}/validate-and-next retourne next_corps_id, next_label, organes",
+        "Gestion cas pas de corps suivant (404 ou next_corps_id null)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/chatbot/sullivan_chatbot.py",
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/planner/screen_planner.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Frontend - Étendre la page corps+chatbot (Backend/Prod/sullivan/builder/corps1_chatbot_page.py ou fichier équivalent) pour Phase 6 : (1) Ajouter un bouton « Ajouter addendum » qui ouvre un input type=file accept=image/*, envoie POST /sullivan/addendum/upload (FormData avec le fichier), affiche le nom du fichier uploadé et stocke addendum_path. (2) Après upload (ou si addendum_path présent), bouton « Obtenir les questions Sullivan » qui appelle POST /sullivan/chatbot/questions avec { corps_id, addendum_path }, affiche les questions retournées dans une liste avec un champ texte (textarea ou input) par question pour la réponse utilisateur. (3) Ajouter un bouton « Passer à l'écran suivant » qui appelle POST /sullivan/corps/{corps_id}/validate-and-next, reçoit next_corps_id et organes ; met à jour l'affichage pour le corps suivant (titre Corps 2, organes du corps 2) ou redirige vers une URL avec corps_id=2. Réutiliser le même widget chatbot et la même structure de page pour tous les corps. Générer le HTML dans output/studio/studio_corps_chatbot.html (single-page avec corps dynamique, addendum, questions, next). Style brutalist cohérent.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Bouton Ajouter addendum avec input file, envoi POST /sullivan/addendum/upload",
+        "Bouton Obtenir les questions appelle /sullivan/chatbot/questions et affiche les questions + champs réponses",
+        "Bouton Passer à l'écran suivant appelle validate-and-next et met à jour la vue (corps N+1)",
+        "Page unique réutilisable pour tous les corps (corps_id dynamique)",
+        "Fichier studio_corps_chatbot.html ou équivalent généré"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/builder/corps1_chatbot_page.py",
+          "Backend/Prod/api.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-30T23:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 6 Sullivan - Addendum graphique, questions Sullivan pour clarifier l'intention, passage au corps 2 (et corps suivants). Boucle complète : addendum → questions → affinage → passer à l'écran suivant."
+  }
+}

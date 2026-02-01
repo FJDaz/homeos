@@ -1,0 +1,128 @@
+{
+  "task_id": "sullivan_phase2_designer_mode_20250127",
+  "description": "Phase 2 - Mode DESIGNER Sullivan Kernel : DesignAnalyzer avec modèle vision (Gemini 3 Flash + fallback), DesignerMode avec workflow upload → analyse → génération 'Miroir'. Analyse designs PNG/Figma/Sketch, extrait structure visuelle, mappe dessins sur structure logique (Intention → Corps → Organes → Molécules → Atomes).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer DesignAnalyzer dans Backend/Prod/sullivan/analyzer/design_analyzer.py. Analyser designs (PNG/JPG/SVG) avec modèle vision Gemini 3 Flash via AgentRouter. Fallback automatique si rate limit (429) vers autre modèle vision disponible ou OCR + heuristics. Extraire structure visuelle : sections identifiées (Hero, Features, CTA), composants détectés (buttons, forms, cards), layout et hiérarchie visuelle. Comparer avec patterns KnowledgeBase. Méthodes : analyze_image(image_path), extract_components(structure), match_patterns(structure). Utiliser AgentRouter pour sélection modèle vision (Gemini 3 Flash prioritaire).",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 5000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe DesignAnalyzer avec méthode analyze_image pour images PNG/JPG/SVG",
+        "Utilise AgentRouter pour modèle vision Gemini 3 Flash",
+        "Fallback automatique si rate limit 429 vers autre modèle vision ou OCR",
+        "Extraction structure visuelle (sections, composants, layout)",
+        "Méthode match_patterns pour comparer avec KnowledgeBase",
+        "Type hints complets, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/design_analyzer.py",
+          "Backend/Prod/models/agent_router.py",
+          "Backend/Prod/sullivan/knowledge/knowledge_base.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer DesignerMode dans Backend/Prod/sullivan/modes/designer_mode.py. Workflow complet : 1) Upload design (PNG/Figma/Sketch), 2) Analyser structure avec DesignAnalyzer, 3) Vérifier patterns dans KnowledgeBase, 4) Proposer pattern éprouvé si disponible, 5) Générer composants avec génération 'Miroir' (mapper dessins sur structure logique Intention → Corps → Organes → Molécules → Atomes). Intégrer avec UIInferenceEngine pour mapping structure logique. Support upload fichiers temporaires.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 4500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe DesignerMode avec workflow complet upload → analyse → génération",
+        "Support upload PNG/JPG/SVG (Figma/Sketch en TODO)",
+        "Intégration DesignAnalyzer pour analyse structure",
+        "Génération 'Miroir' avec mapping dessins → structure logique",
+        "Intégration UIInferenceEngine pour mapping",
+        "Type hints complets, docstrings, gestion erreurs"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/sullivan/modes/designer_mode.py",
+          "Backend/Prod/sullivan/analyzer/design_analyzer.py",
+          "Backend/Prod/sullivan/analyzer/ui_inference_engine.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Ajouter command sullivan designer dans Backend/Prod/cli.py. Parser argument --design (requis, chemin fichier design PNG/JPG/SVG), --output (optionnel, chemin sortie), --non-interactive (optionnel, désactive confirmations). Appeler DesignerMode avec ces arguments. Gérer erreurs et afficher résultats.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Commande sullivan designer ajoutée dans cli.py",
+        "Argument --design requis",
+        "Arguments --output et --non-interactive optionnels",
+        "Intégration avec DesignerMode",
+        "Gestion erreurs et affichage résultats"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/cli.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Ajouter endpoint POST /sullivan/designer/analyze dans Backend/Prod/api.py. Modèle Pydantic DesignerAnalyzeRequest avec design_path (str), output_path (Optional[str]), non_interactive (bool, default False). Modèle DesignerAnalyzeResponse avec success (bool), design_structure (Optional[Dict]), matched_patterns (Optional[List[Dict]]), frontend_structure (Optional[Dict]), message (str). Appeler DesignerMode depuis endpoint. Gérer erreurs HTTPException.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Endpoint POST /sullivan/designer/analyze ajouté dans api.py",
+        "Modèles Pydantic DesignerAnalyzeRequest et DesignerAnalyzeResponse",
+        "Intégration avec DesignerMode",
+        "Gestion erreurs HTTPException",
+        "Retourne structure design, patterns matchés, structure frontend"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py"
+        ]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Mettre à jour Backend/Prod/sullivan/analyzer/__init__.py pour exporter DesignAnalyzer. Mettre à jour Backend/Prod/sullivan/modes/__init__.py pour exporter DesignerMode.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "DesignAnalyzer exporté dans analyzer/__init__.py",
+        "DesignerMode exporté dans modes/__init__.py",
+        "Exports corrects pour imports"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/sullivan/analyzer/__init__.py",
+          "Backend/Prod/sullivan/modes/__init__.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T23:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 Sullivan Kernel - Mode DESIGNER : DesignAnalyzer analyse designs PNG/Figma/Sketch avec modèle vision Gemini 3 Flash (fallback automatique), DesignerMode orchestre workflow upload → analyse → génération 'Miroir' (mapper dessins sur structure logique Intention → Corps → Organes → Molécules → Atomes). CLI et API endpoints intégrés."
+  }
+}

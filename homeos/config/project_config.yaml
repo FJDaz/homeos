@@ -1,0 +1,25 @@
+z_index_layers:
+  sullivan_guidance: 10000
+  user_application: 1
+
+frontend_stack:
+  - html5
+  - css3
+  - javascript_vanilla
+
+workflow:
+  - project_brainstorm
+  - project_intent_refactoring
+  - backend_generation
+  - frontend_generation
+  - deployment
+
+validation_rules:
+  - html_must_be_valid
+  - css_must_use_variables
+  - js_must_have_no_console_errors
+  - must_pass_lighthouse_performance
+
+components:
+  sullivan_ui: chatbot_overlay
+  application: static_html

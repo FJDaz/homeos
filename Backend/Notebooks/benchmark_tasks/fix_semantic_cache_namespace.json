@@ -1,0 +1,75 @@
+{
+  "task_id": "fix_semantic_cache_namespace",
+  "description": "Modifier le cache sémantique pour utiliser un namespace par step (step_{step_id}) au lieu de namespace par mode d'exécution, afin d'éviter les collisions entre steps similaires dans un même plan",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier la méthode execute_step() dans Backend/Prod/models/agent_router.py pour utiliser namespace=f'step_{step_id}' au lieu de namespace=f'mode_{execution_mode}'. Remplacer ligne 330: cache_namespace = f'step_{step_id}' au lieu de cache_namespace = f'mode_{self.execution_mode.lower()}'. Utiliser step_id qui est déjà disponible dans la méthode execute_step() (paramètre step_id).",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Ligne 330 modifiée pour utiliser step_id au lieu de execution_mode",
+        "Namespace format: f'step_{step_id}'",
+        "Deux occurrences modifiées: ligne 330 (cache.get) et ligne 494 (cache.put)",
+        "Code fonctionne avec step_id disponible",
+        "Type hints préservés"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": [
+          "Backend/Prod/models/agent_router.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter documentation dans docstring de execute_step() expliquant que le namespace par step isole chaque step pour éviter collisions cache sémantique. Ajouter commentaire ligne 329 expliquant pourquoi on utilise namespace par step.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Docstring mise à jour avec explication namespace par step",
+        "Commentaire ajouté ligne 329 expliquant l'isolation par step",
+        "Documentation claire sur l'objectif: éviter collisions cache"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "python",
+        "files": [
+          "Backend/Prod/models/agent_router.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Vérifier que le namespace par step fonctionne correctement: tester que deux steps différents avec prompts similaires ne se cachent pas mutuellement. Ajouter test unitaire ou vérification manuelle que step_1 et step_2 avec prompts similaires utilisent des namespaces différents.",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Vérification que namespace step_1 != namespace step_2",
+        "Vérification que cache.get() avec namespace step_1 ne trouve pas entrées de step_2",
+        "Logging montre namespace correct dans les messages cache HIT/MISS",
+        "Pas de régression: cache fonctionne toujours pour steps identiques"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pytest",
+        "files": [
+          "Backend/Prod/models/agent_router.py",
+          "Backend/Prod/cache/semantic_cache.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T21:15:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Fix cache sémantique - Option 2: Namespace par step pour éviter collisions entre steps similaires dans plans multi-steps (ex: Phase 2 Sullivan)"
+  }
+}

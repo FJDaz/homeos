@@ -5,3 +5,11 @@ from .design_analyzer import DesignAnalyzer, DesignStructure
 from .pattern_analyzer import PatternAnalyzer
 
 __all__ = ['BackendAnalyzer', 'GlobalFunction', 'UIInferenceEngine', 'DesignAnalyzer', 'DesignStructure', 'PatternAnalyzer']
+
+# Backend/Prod/sullivan/analyzer/__init__.py
+
+from .design_analyzer import DesignAnalyzer
+
+__all__ = [
+    "DesignAnalyzer"
+]

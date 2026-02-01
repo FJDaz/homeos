@@ -1,0 +1,53 @@
+{
+  "task_id": "run-and-fix-workflow-001",
+  "description": "Implémenter le workflow Run-and-Fix dans AETHERFLOW : lancer une commande réelle (build/deploy), en cas d'échec envoyer stdout/stderr + contexte au LLM, appliquer les corrections, relancer jusqu'à succès ou max_rounds. Référence : docs/05-operations/CORRECTION_BUILD_DEPLOY.md.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/core/run_command.py. Module d'exécution de commandes autorisées pour Run-and-Fix. Contenu : (1) ALLOWED_COMMAND_PATTERNS : liste de regex autorisées (npm run *, pnpm run *, yarn *, cd ... && (npm|pnpm|yarn) *, docker build *, python -m pytest/build, ./script.sh). (2) is_command_allowed(command: str) -> bool. (3) run_allowed_command(command, cwd: Path, timeout_sec=120) -> (exit_code, stdout, stderr) avec subprocess.run(shell=True, cwd, capture_output=True, text=True, timeout). Lever ValueError si commande non autorisée. TimeoutExpired -> return (-1, '', 'Command timed out'). Référence : docs/05-operations/CORRECTION_BUILD_DEPLOY.md section Sécurité.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": ["Module run_command.py existe", "is_command_allowed et run_allowed_command présents", "Liste blanche de patterns", "Timeout et ValueError documentés"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/core/run_command.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer Backend/Prod/workflows/run_and_fix.py. Workflow Run-and-Fix : (1) RunAndFixWorkflow.execute(command, workdir=None, max_rounds=5, output_dir=None, timeout_sec=120). (2) Boucle : run_allowed_command(command, workdir) ; si exit_code==0 return success ; sinon gather file context (fichiers .svelte/.ts/.js sous workdir, exclure node_modules/.svelte-kit, limiter taille contexte) ; construire prompt (commande, stdout, stderr, contexte fichiers) ; créer un Step synthétique (fix_round_N) et appeler orchestrator.agent_router.execute_step(step, prompt) ; parser la sortie LLM pour blocs FILE: path puis ```content``` ; écrire chaque bloc dans le fichier (résoudre path depuis workdir/project root, pas de ..) ; incrémenter round et recommencer. (3) Helpers : _gather_file_context(workdir), _parse_file_blocks(llm_output), _apply_fix_blocks(blocks, workdir, base_dir). Project root = Path(__file__).resolve().parent.parent.parent.parent. Référence : docs/05-operations/CORRECTION_BUILD_DEPLOY.md.",
+      "type": "code_generation",
+      "complexity": 0.65,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["RunAndFixWorkflow existe", "Boucle run -> LLM -> apply -> re-run", "Parsing FILE: path et blocs code", "Utilise run_allowed_command et agent_router"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/workflows/run_and_fix.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier Backend/Prod/cli.py pour intégrer Run-and-Fix. (1) Ajouter aux choices de --workflow : 'run-and-fix', 'RunAndFix'. (2) Ajouter arguments : --command (str, help='Command for run-and-fix'), --run-and-fix-workdir (Path), --run-and-fix-max-rounds (int, default=5), --run-and-fix (str, metavar=CMD, help='After -f (PROD), run this command and fix from errors'). (3) Dans la détermination de workflow_type : si args.workflow in ['run-and-fix','RunAndFix'] alors workflow_type='RunAndFix'. (4) Règle de plan : si workflow_type=='RunAndFix' exiger --command au lieu de --plan ; si workflow_type != RunAndFix exiger --plan comme aujourd'hui. (5) Branche d'exécution : elif workflow_type=='RunAndFix' : appeler RunAndFixWorkflow().execute(command=args.command, workdir=args.run_and_fix_workdir, max_rounds=args.run_and_fix_max_rounds, output_dir=output_dir), afficher tableau summary (Rounds, Total Time, Cost, Success, Message) et last_stderr si échec, return 0 si success sinon 1. (6) Dans la branche PROD (run_prod) : après le résumé PROD, si getattr(args,'run_and_fix',None) est défini, appeler RunAndFixWorkflow().execute avec args.run_and_fix comme command, puis afficher Run-and-Fix Summary et return selon rnf_result. Ne pas exiger result['success'] pour lancer run-and-fix. Conserver le code existant pour PROTO, PROD, VerifyFix.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_2"],
+      "validation_criteria": ["--workflow run-and-fix et --command fonctionnent", "aetherflow -f --run-and-fix 'cmd' lance run-and-fix après PROD", "Arguments --run-and-fix-workdir et --run-and-fix-max-rounds présents"],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["Backend/Prod/cli.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-31T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Run-and-Fix workflow : correction en chaîne des erreurs de build/déploiement. Spec : docs/05-operations/CORRECTION_BUILD_DEPLOY.md"
+  }
+}

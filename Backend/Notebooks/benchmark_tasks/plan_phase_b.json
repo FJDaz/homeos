@@ -1,0 +1,81 @@
+{
+  "task_id": "phase-b-studio-concret-001",
+  "description": "Phase B: Studio concret. B1: page Studio genome SvelteKit (route /studio, GET /studio/genome, organes x_ui_hint). B2: ValidationOverlay intégré au Studio. B3: config API (PUBLIC_API_URL dans .env.example). B4: test responsive (ResponsiveDesignTest.test_component). Référence: .cursor/plans/studio_concret_puis_doc.plan.md Phase B.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "B1 — Ensure SvelteKit Studio genome page is complete. In frontend-svelte/src/routes/studio/+page.svelte: use getGenome() from $lib/api (which uses PUBLIC_API_URL or fallback http://127.0.0.1:8000). Render one organ per genome.endpoints with x_ui_hint (terminal, gauge, status, form, dashboard, list, detail, generic). Each organ: title (ep.summary or ep.path), output zone, button label by hint (Refresh/Check/Execute/Load/View/Fetch). On click: call endpoint via fetch(API_BASE+path, method), display response in organ. Keep existing substitutePathParams and defaultPostBody logic. Files: frontend-svelte/src/routes/studio/+page.svelte, frontend-svelte/src/lib/api.js.",
+      "type": "code_generation",
+      "complexity": 0.45,
+      "estimated_tokens": 700,
+      "dependencies": [],
+      "validation_criteria": [
+        "Studio page loads genome via GET /studio/genome using PUBLIC_API_URL when set",
+        "Each endpoint renders as organ with correct x_ui_hint and button",
+        "Clicking button fetches endpoint and displays response"
+      ],
+      "context": {
+        "language": "svelte",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/routes/studio/+page.svelte", "frontend-svelte/src/lib/api.js"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "B2 — Integrate ValidationOverlay in Studio. In frontend-svelte/src/routes/studio/+page.svelte (or a layout that wraps /studio): import ValidationOverlay from $lib/components/ValidationOverlay.svelte and render it. Show overlay when query param ?validation=1 is present or always in dev (e.g. import page from $app/stores and check page.url.searchParams.get('validation') === '1'). ValidationOverlay already has z-index 10000, Accept/Reject/Refine buttons. Ensure the overlay does not block the whole page (pointer-events: none on container, auto on panel). Files: frontend-svelte/src/routes/studio/+page.svelte, frontend-svelte/src/lib/components/ValidationOverlay.svelte.",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 450,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "ValidationOverlay is visible on /studio when ?validation=1",
+        "Overlay has z-index 10000 and Accept/Reject/Refine buttons",
+        "Studio content remains usable (overlay in corner)"
+      ],
+      "context": {
+        "language": "svelte",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/src/routes/studio/+page.svelte", "frontend-svelte/src/lib/components/ValidationOverlay.svelte"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "B3 — API config. In frontend-svelte/.env.example add PUBLIC_API_URL=http://127.0.0.1:8000 with a comment that it is used for GET /studio/genome and Sullivan routes. In frontend-svelte/src/lib/api.js ensure getApiBase() reads from import.meta.env.PUBLIC_API_URL (Vite/SvelteKit public env). No code change required if already correct; otherwise add the env key to .env.example and a one-line comment in api.js. Files: frontend-svelte/.env.example, frontend-svelte/src/lib/api.js.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        ".env.example documents PUBLIC_API_URL",
+        "api.js getGenome and other calls use getApiBase() which uses PUBLIC_API_URL"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "sveltekit",
+        "files": ["frontend-svelte/.env.example", "frontend-svelte/src/lib/api.js"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "B4 — Responsive test. In homeos/construction/tests/responsive_test.py ensure ResponsiveDesignTest has method test_component(component_path: Path) that returns a dict with keys passed (bool), score (float), issues (list), warnings (list). It should read the file content, use SvelteComponentAnalyzer to extract CSS and analyze (forbidden units px/pt/etc, allowed rem/em/vw/vh, @media, flex/grid). Add if __name__ == '__main__' block: accept one path argument, run test_component, print passed/failed and issues/warnings. Files: homeos/construction/tests/responsive_test.py.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "ResponsiveDesignTest.test_component(Path) returns dict with passed, score, issues, warnings",
+        "CLI: python -m homeos.construction.tests.responsive_test <path> prints result"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "",
+        "files": ["homeos/construction/tests/responsive_test.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-30T14:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase B - Studio concret (B1 Studio genome, B2 ValidationOverlay, B3 API config, B4 responsive test). Plan: studio_concret_puis_doc.plan.md"
+  }
+}

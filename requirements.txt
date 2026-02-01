@@ -1,0 +1,43 @@
+# AETHERFLOW requires Python 3.12 or 3.13 (pydantic-core/PyO3 does not support 3.14 yet).
+# On macOS: brew install python@3.13 && python3.13 -m venv venv
+
+# Core dependencies
+httpx==0.27.0
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.0
+
+# API Server
+fastapi==0.115.0
+uvicorn==0.30.6
+
+# JSON Schema validation
+jsonschema==4.23.0
+
+# Logging
+loguru==0.7.2
+
+# CLI and display
+rich==13.9.4
+
+# RAG dependencies (for PageIndex functionality)
+llama-index>=0.10.0
+llama-index-core>=0.10.0
+llama-index-llms-openai>=0.1.0  # For OpenAI LLM integration (can use Gemini via API)
+llama-index-embeddings-openai>=0.1.0  # For embeddings
+
+# Async support (included in Python 3.11+, but explicit for compatibility)
+# asyncio is built-in
+
+# Sullivan multimodal (Visual Auditor)
+playwright>=1.49.0
+
+# AST manipulation for Surgical Edit mode
+astunparse>=1.6.3
+
+# Optional: semantic cache (embedding-based prompt cache). If not installed, cache uses hash-based fallback.
+# pip install sentence-transformers
+# sentence-transformers>=2.2.0
+
+# Testing
+pytest>=7.0.0

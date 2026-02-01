@@ -1,0 +1,79 @@
+{
+  "task_id": "phase1_backend_api_double_check",
+  "description": "Valider et améliorer le code de l'API FastAPI modifiée pour Phase 1 Backend (plan_json, CORS, workflows PROTO/PROD)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Analyser Backend/Prod/api.py pour vérifier la qualité du code : gestion d'erreurs, validation des entrées, gestion des fichiers temporaires, extraction des résultats des workflows",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Vérifier que toutes les exceptions sont gérées correctement",
+        "Vérifier que les fichiers temporaires sont toujours nettoyés (finally block)",
+        "Vérifier que la validation plan_json est correcte",
+        "Vérifier que l'extraction des résultats des workflows est robuste",
+        "Vérifier que les métriques incluent le workflow utilisé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Vérifier la compatibilité avec les workflows PROTO et PROD : s'assurer que l'extraction des résultats (fast_execution, build_refactored) est correcte et gère tous les cas",
+      "type": "analysis",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Vérifier que ProtoWorkflow.execute() retourne bien fast_execution",
+        "Vérifier que ProdWorkflow.execute() retourne bien build_refactored",
+        "Vérifier que l'extraction des résultats gère les cas où ces clés n'existent pas",
+        "Vérifier que les métriques sont extraites correctement des workflows",
+        "Vérifier la rétrocompatibilité avec Orchestrator direct"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/workflows/proto.py",
+          "Backend/Prod/workflows/prod.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Améliorer le code si nécessaire : ajouter logging supplémentaire, améliorer messages d'erreur, optimiser gestion fichiers temporaires, ajouter docstrings manquantes",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "Code respecte les guidelines (TDD, DRY, SOLID)",
+        "Tous les chemins d'exécution sont loggés",
+        "Messages d'erreur sont clairs et informatifs",
+        "Docstrings complètes pour toutes les fonctions",
+        "Gestion fichiers temporaires robuste (try/finally)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": [
+          "Backend/Prod/api.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-27T12:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1 Backend API - Validation DOUBLE-CHECK du code modifié pour Homeos Studio Beta S1"
+  }
+}
