@@ -1,0 +1,35 @@
+{
+  "task_id": "phase3a-etape1-ir-001",
+  "description": "Phase 3 A Étape 1 : Présentation de l'IR (Intent Refactoring). Produire un rapport d'inventaire IR présentable : genome (endpoints, topology) vs intentions (PRD/manifeste), écarts et zones floues. Livrable : rapport lisible (markdown) que l'agent peut présenter à l'utilisateur.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Écrire directement le contenu MARKDOWN du rapport IR dans output/studio/ir_inventaire.md. Le fichier doit être du MARKDOWN uniquement (titres, listes, tableaux), PAS de code Python. Sections obligatoires : (1) Inventaire genome : metadata, topology, liste des endpoints (méthode, path, x_ui_hint, summary) depuis output/studio/homeos_genome.json ou generate_genome() ; (2) Ce qu'Aetherflow fait : modes d'exécution (FAST, BUILD, DOUBLE-CHECK), workflows (PROTO -q, PROD -f, VerifyFix -vfx), Orchestrator/AgentRouter/RAG/cache, Sullivan Kernel (DevMode, DesignerMode, ScreenPlanner, CorpsGenerator, Chatbot), Genome Generator, API ; mentionner 'agents (à venir)' ; (3) Méthodes à disposition du user : CLI (workflows -q/-f/-vfx avec --plan, genome, studio build, sullivan read-genome, plan-screens, build, designer, dev, --costs, --stats, --status) et routes API (GET /studio/genome, /execute, /sullivan/*, etc.) en liste ou tableau ; (4) Intentions PRD : résumé vision/scope/architecture depuis docs/04-homeos/PRD_HOMEOS.md (vision, rôles, Sullivan phases 1-5, modes Sullivan, §8 CLI/API, §9 modèles, §11 roadmap) ; (5) Écarts ou zones floues : genome vs PRD, intents/features/compartments vides, HCI IR à venir. Référence : Backend/Prod/cli.py (workflows, subcommands), PRD_HOMEOS.md, HCI DE L'INTENT REFACTORING.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier output/studio/ir_inventaire.md existe et contient uniquement du MARKDOWN (pas de code Python)",
+        "Rapport contient : inventaire genome (metadata, topology, endpoints), section Ce qu'Aetherflow fait (modes, workflows, Sullivan, API), section Méthodes user (CLI + API), section Intentions PRD (résumé), section Écarts/zones floues",
+        "Rapport en markdown lisible (titres, listes, tableaux)"
+      ],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [
+          "output/studio/ir_inventaire.md"
+        ],
+        "input_files": [
+          "output/studio/homeos_genome.json",
+          "docs/04-homeos/PRD_HOMEOS.md"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T15:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A Répétition - Étape 1 : produire et présenter l'IR (inventaire intention vs implémentation)"
+  }
+}

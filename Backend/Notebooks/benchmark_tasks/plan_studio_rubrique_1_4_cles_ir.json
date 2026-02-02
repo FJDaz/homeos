@@ -1,0 +1,31 @@
+{
+  "task_id": "studio-rubrique-1-4-cles-ir",
+  "description": "Implémenter la rubrique §1.4 Clés IR du Studio HTMX (CONTEXTE_RESUME_GROS.md) : formulaire d'arbitrage pour Clés IR (intents, features, compartments), sans modifier studio.html — sortie dans un fragment pour insertion manuelle.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le fichier Backend/Prod/templates/studio_section_1_4_fragment.html contenant UNIQUEMENT le fragment HTML du formulaire §1.4 Clés IR (pas de DOCTYPE ni html/body). Référence : output/studio/ir_inventaire.md §1.4 et structure des formulaires 1.2 / 1.3 dans Backend/Prod/templates/studio.html. Structure : <form hx-post=\"/studio/validate\" hx-target=\"#distillation-entries\" hx-swap=\"beforeend\" class=\"border rounded p-3 bg-gray-50\"> avec (1) <h3>§1.4 Clés IR</h3> ; (2) <p>Coche les éléments à valider (Garder).</p> ; (3) checkboxes name=\"items\" avec value=\"Intents\", value=\"Features\", value=\"Compartments\" (libellés courts) ; (4) hidden name=\"section_id\" value=\"1.4\", name=\"section_title\" value=\"Clés IR\", name=\"verdict\" value=\"Garder\" ; (5) bouton type=\"submit\" « Valider ». Ce fragment sera inséré manuellement dans studio.html après le formulaire §1.3 Endpoints (avant le bloc hx-get rapport arbitrage).",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier studio_section_1_4_fragment.html créé",
+        "Formulaire avec hx-post /studio/validate, section_id=1.4, section_title=Clés IR",
+        "Au moins 3 checkboxes (Intents, Features, Compartments)",
+        "Fragment uniquement, pas de page HTML complète"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["Backend/Prod/templates/studio_section_1_4_fragment.html"],
+        "input_files": ["Backend/Prod/templates/studio.html", "output/studio/ir_inventaire.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T18:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A — rubrique suivante §1.4 Clés IR (CONTEXTE_RESUME_GROS.md), essai AETHERFLOW -f"
+  }
+}

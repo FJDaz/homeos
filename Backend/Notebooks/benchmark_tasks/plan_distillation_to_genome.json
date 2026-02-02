@@ -1,0 +1,49 @@
+{
+  "task_id": "distillation-to-genome",
+  "description": "Chaînon manquant Distillation → Genome : après chaque validation Studio, mettre à jour homeos_genome.json avec les entrées distillation (clé distillation dans le genome).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le module Backend/Prod/core/distillation_to_genome.py avec une fonction apply_distillation_to_genome(entries_path: Path, genome_path: Path) -> bool. La fonction doit : (1) Lire distillation_entries.json (liste de dict avec section_id, section_title, items, verdict) ; (2) Normaliser verdict 'Garder' en 'Accept' dans chaque entrée ; (3) Lire homeos_genome.json ; (4) Ajouter ou mettre à jour une clé top-level 'distillation' dans le genome : { 'updated_at': datetime.utcnow().isoformat() + 'Z', 'entries': entries_normalized } ; (5) Réécrire le fichier genome_path avec le JSON mis à jour (indent=2, ensure_ascii=False). Ne pas modifier les autres clés du genome (metadata, topology, endpoints, schema_definitions). Retourner True si succès. Gérer FileNotFoundError et json.JSONDecodeError. Utiliser uniquement pathlib, json, datetime (pas de dépendance à api.py ou settings pour éviter imports circulaires).",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Module distillation_to_genome.py existe dans Backend/Prod/core/",
+        "Fonction apply_distillation_to_genome(entries_path, genome_path) définie",
+        "Clé distillation ajoutée au genome avec updated_at et entries",
+        "Verdict Garder normalisé en Accept"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "stdlib",
+        "files": ["Backend/Prod/core/distillation_to_genome.py"],
+        "input_files": ["output/studio/distillation_entries.json", "output/studio/homeos_genome.json"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/api.py, après l'appel à _save_distillation_entries(entries) dans la route POST /studio/validate (post_studio_validate), appeler apply_distillation_to_genome pour mettre à jour le genome. Importer apply_distillation_to_genome depuis Backend.Prod.core.distillation_to_genome. Appeler avec entries_path = studio_reports_dir / 'distillation_entries.json' et genome_path = studio_reports_dir / 'homeos_genome.json'. Ne pas faire échouer la réponse si apply_distillation_to_genome échoue (logger.warning et continuer) pour que la validation Studio renvoie quand même le fragment HTML. Si le fichier genome n'existe pas, skip l'appel (ne pas créer le genome ici).",
+      "type": "refactoring",
+      "complexity": 0.25,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "POST /studio/validate appelle apply_distillation_to_genome après _save_distillation_entries",
+        "En cas d'erreur apply_distillation_to_genome, log warning et réponse 200 inchangée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"],
+        "input_files": ["Backend/Prod/core/distillation_to_genome.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Chaînon Distillation → Genome (SPEC_IR_ORGANES_CLAIMS § Suite)"
+  }
+}

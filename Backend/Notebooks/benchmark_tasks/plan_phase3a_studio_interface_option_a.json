@@ -1,0 +1,39 @@
+{
+  "task_id": "phase3a-studio-interface-option-a",
+  "description": "Option A : Enrichir le Studio HTMX pour interface de validation — panneau Arbitrage (résultat Sullivan + lien genome), panneau Distillation (état genome ou lien /studio/genome). Backend : routes /studio/reports/ir, /studio/reports/arbitrage, /studio/reports/validation, /studio/genome/summary. Frontend : studio.html avec HTMX chargement des rapports.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Backend : (1) Ajouter la dépendance 'markdown' dans requirements.txt (une ligne, même format que les autres). (2) Dans Backend/Prod/api.py, après la route GET /studio/genome (vers ligne 405), ajouter : (a) Variable studio_reports_dir = _root / 'output' / 'studio' (_root déjà défini plus bas dans le fichier pour frontend_path). (b) GET /studio/reports/ir : lire studio_reports_dir/ir_inventaire.md, convertir en HTML avec markdown.markdown(), retourner HTMLResponse avec un div class='prose max-h-96 overflow-auto' contenant le HTML ; si fichier absent retourner HTMLResponse('<p>Rapport non disponible.</p>'). (c) GET /studio/reports/arbitrage : idem avec arbitrage_phase3a_etape2.md. (d) GET /studio/reports/validation : idem avec validation_phase3a_etape3.md. (e) GET /studio/genome/summary : charger le genome comme get_studio_genome (fichier ou minimal), retourner HTMLResponse avec un fragment HTML : version, intent, topologie (liste), nombre d'endpoints, lien <a href='/studio/genome'>Voir genome complet</a>. Utiliser import markdown en haut du bloc ou dans la fonction. Ne pas casser les routes existantes.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2800,
+      "dependencies": [],
+      "validation_criteria": ["markdown dans requirements.txt", "GET /studio/reports/ir retourne HTML", "GET /studio/reports/arbitrage retourne HTML", "GET /studio/reports/validation retourne HTML", "GET /studio/genome/summary retourne fragment HTML avec version et lien"],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["requirements.txt", "Backend/Prod/api.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Frontend : Dans Backend/Prod/templates/studio.html, remplacer les trois placeholders par des panneaux HTMX. (1) Panneau 'Revue — inventaire' : conserver le titre h2, remplacer le contenu par un div avec hx-get='/studio/reports/ir' hx-trigger='load' hx-swap='innerHTML' et une classe pour scroll (ex. max-h-72 overflow-auto). Afficher un court texte de fallback si vide (ex. 'Chargement…'). (2) Panneau 'Arbitrage — validation' : idem avec hx-get='/studio/reports/arbitrage', plus un lien <a href='/studio/genome'>Genome</a> sous le contenu. (3) Panneau 'Distillation — génome' : div avec hx-get='/studio/genome/summary' hx-trigger='load' hx-swap='innerHTML', ou au minimum un lien <a href='/studio/genome'>Voir le genome</a>. Utiliser Tailwind (prose si besoin). Garder la structure grid et les cartes blanches existantes.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["Trois panneaux chargent du contenu via HTMX", "Liens vers /studio/genome présents", "Page /studio affiche Revue, Arbitrage, Distillation avec contenu chargé"],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["Backend/Prod/templates/studio.html"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T18:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A Option A - Studio HTMX interface de validation (Arbitrage + genome + amendements)"
+  }
+}

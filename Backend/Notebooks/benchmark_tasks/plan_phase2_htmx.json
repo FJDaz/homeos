@@ -1,0 +1,53 @@
+{
+  "task_id": "phase2-htmx-squelette-001",
+  "description": "Phase 2 ROADMAP HTMX : Le Squelette HTMX (Installation des micros). 1) Créer le layout Triptyque (Revue | Arbitrage | Distillation) en HTML/Tailwind avec HTMX. 2) FastAPI sert ce fichier statique pour /studio. 3) Le Pont HTMX : un endpoint renvoie un fragment HTML quand la requête a le header HX-Request (pour OOB Swaps).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/templates/studio.html : une seule page HTML avec doctype, head (meta charset, title Studio Homeos), Tailwind CSS via CDN (script src=https://cdn.tailwindcss.com), HTMX via CDN (script src=https://unpkg.com/htmx.org@1.9.10). Body : structure Triptyque en trois panneaux visibles (Revue | Arbitrage | Distillation) avec Tailwind (grid ou flex). Chaque panneau : un div avec titre et zone de contenu placeholder (ex. 'Revue — inventaire', 'Arbitrage — validation', 'Distillation — génome'). Header commun au-dessus avec titre 'Studio Homeos'. Pas de JavaScript custom, uniquement HTML sémantique + classes Tailwind. Référence : ROADMAP Phase 2, TRI Phase 2 (Layout Designer).",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": ["Fichier existe Backend/Prod/templates/studio.html", "Tailwind et HTMX chargés via CDN", "Trois panneaux Revue, Arbitrage, Distillation visibles"],
+      "context": {
+        "language": "html",
+        "framework": "tailwind",
+        "files": ["Backend/Prod/templates/studio.html"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/api.py : définir templates_path = _root / 'Backend' / 'Prod' / 'templates'. Pour GET /studio et GET /studio/ : si (templates_path / 'studio.html').exists(), retourner FileResponse(studio.html) en priorité (avant frontend_path/studio.html). Monter les fichiers statiques du dossier templates si nécessaire (app.mount pour /templates ou servir uniquement studio.html via route). Référence : ROADMAP Phase 2 FastAPI Monolithique.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["GET /studio sert studio.html depuis Backend/Prod/templates quand le fichier existe", "Pas de régression sur les autres routes"],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Dans Backend/Prod/api.py : ajouter un endpoint GET /studio/components/fragment (ou adapter une route existante) qui retourne un fragment HTML (liste simple ul/li ou divs) lorsque le header HX-Request est présent (Request.headers.get('HX-Request') == 'true'). Contenu du fragment : placeholder (ex. 'Composants — fragment HTMX') ou appel à la logique existante list_components pour afficher une liste HTML. Si HX-Request absent, rediriger ou retourner JSON. Référence : ROADMAP Phase 2 Le Pont HTMX (fragments OOB).",
+      "type": "code_generation",
+      "complexity": 0.35,
+      "estimated_tokens": 450,
+      "dependencies": ["step_2"],
+      "validation_criteria": ["Endpoint répond en HTML fragment quand HX-Request: true", "Fragment valide (balises fermées)"],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 ROADMAP HTMX - Squelette Studio, layout Triptyque, pont HTMX fragments"
+  }
+}

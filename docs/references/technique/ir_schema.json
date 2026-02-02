@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IR Inventory Schema (Contrat Aetherflow ↔ Studio)",
+  "description": "Schéma du contrat d'interface entre l'IR (Inventaire) et le Studio. Une section IR = un Organe contenant N claims (cases à cocher). Décision Accept/Revise/Reject par Organe. Référence : FRONTEND AGENCY-LIKE, Roadmap_ARBITRAGE_GPT, Méthode d'arbitrage.",
+  "type": "object",
+  "required": ["source", "organes"],
+  "properties": {
+    "source": {
+      "type": "object",
+      "description": "Métadonnées de la source (genome, PRD, date)",
+      "properties": {
+        "genome_path": { "type": "string", "description": "Chemin ou identifiant du genome source" },
+        "prd_path": { "type": "string", "description": "Chemin ou identifiant du PRD source" },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "organes": {
+      "type": "array",
+      "description": "Liste des Organes (sections IR). Chaque Organe = un bloc UI (formulaire) avec N claims en cases à cocher. Verdict Accept/Revise/Reject par Organe.",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/Organe" }
+    }
+  },
+  "definitions": {
+    "Organe": {
+      "type": "object",
+      "description": "Un Organe = une section de l'IR affichée comme un formulaire (titre + N cases à cocher). La décision d'arbitrage (Accept/Revise/Reject) est prise au niveau de l'Organe.",
+      "required": ["id", "title", "claims"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifiant stable de la section (ex: 1.2, 1.3, 1.4)",
+          "pattern": "^[0-9]+(\\.[0-9]+)*$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Titre court affiché (ex: Topologie déclarée, Endpoints, Clés IR)"
+        },
+        "claims": {
+          "type": "array",
+          "description": "N claims = N cases à cocher. Une section contient N claims.",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/Claim" }
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["Accept", "Revise", "Reject"],
+          "description": "Décision d'arbitrage au niveau de l'Organe. Optionnel jusqu'à validation utilisateur (Accept = Garder actuel)."
+        }
+      }
+    },
+    "Claim": {
+      "type": "object",
+      "description": "Un claim = une assertion extraite (pipeline Roadmap) ou un item de l'inventaire (IR). Affiché comme une case à cocher.",
+      "required": ["id", "text"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifiant unique du claim (ex: c1, endpoint-execute)"
+        },
+        "text": {
+          "type": "string",
+          "description": "Libellé affiché (ex: Brainstorm, POST /execute, Intents)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Phrase courte expliquant le claim (ex: Définir l'intention, le Pourquoi). Optionnel ; améliore l'arbitrage (Roadmap_ARBITRAGE_GPT)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["perf", "securité", "UX", "infra", "business", "inventaire"],
+          "description": "Type optionnel pour le pipeline (extraction / scoring). inventaire = item IR brut."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Score optionnel (pipeline Evidence Scorer)"
+        },
+        "source_line_start": { "type": "integer", "description": "Ligne début dans le PRD (optionnel)" },
+        "source_line_end": { "type": "integer", "description": "Ligne fin dans le PRD (optionnel)" },
+        "checked": {
+          "type": "boolean",
+          "default": true,
+          "description": "Valeur initiale de la case à cocher (côté UI)"
+        }
+      }
+    }
+  }
+}

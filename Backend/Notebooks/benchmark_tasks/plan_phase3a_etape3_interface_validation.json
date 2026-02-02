@@ -1,0 +1,26 @@
+{
+  "task_id": "phase3a-etape3-interface-validation",
+  "description": "Phase 3 A Étape 3 : Interface de validation Arbitrage/genome — rapport ou vue pour amendements (étape 4). Produire un document qui visualise les écarts et facilite les décisions Garder/Réserve/Obsolète.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Produire le rapport d'interface de validation (Phase 3 A Étape 3) en markdown. Titre : '# Interface de validation — Phase 3 A Étape 3'. Objectif : vue ou rapport structuré pour faciliter les amendements (étape 4) — visualiser les écarts et préparer les décisions Garder/Réserve/Obsolète. Sources : output/studio/ir_inventaire.md, output/studio/arbitrage_phase3a_etape2.md (Reference data). Contenu : (1) En-tête : objectif (interface pour amendements), sources (IR + arbitrage). (2) Tableau récapitulatif pour amendements : une section par bloc (Genome — métadonnées, topologie, endpoints ; Modes ; Workflows ; Briques ; Outils CLI) avec pour chaque élément concerné par Réserve ou Obsolète : Élément | Verdict actuel | Action proposée (court). Les éléments Garder peuvent être en liste courte. (3) Section « Éléments à trancher » : liste des Réserve (intent, /studio.html, RunAndFix) avec proposition d'action. (4) Section « Éléments à corriger » : liste des Obsolète (version genome, endpoints manquants) avec action concrète. (5) Rappel étape 4 : amendements et validation (décisions Garder/Réserve/Obsolète). Ton : court, actionnable, tableaux ou listes. Sortie : markdown brut uniquement, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": ["En-tête objectif et sources", "Tableau ou liste récap pour amendements", "Section Éléments à trancher (Réserve)", "Section Éléments à corriger (Obsolète)", "Rappel étape 4", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["output/studio/validation_phase3a_etape3.md"],
+        "input_files": ["output/studio/ir_inventaire.md", "output/studio/arbitrage_phase3a_etape2.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T17:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A Étape 3 - Interface de validation pour amendements (étape 4)"
+  }
+}

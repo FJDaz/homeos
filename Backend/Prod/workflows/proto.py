@@ -76,6 +76,31 @@ class ProtoWorkflow:
                 output_dir=output_dir / "fast" if output_dir else None
             )
             logger.info(f"Applied code to {apply_result['files_applied']} file(s)")
+            # Merge chunked step outputs into one file if plan declares output_merge
+            output_merge = plan.metadata.get("output_merge") if isinstance(getattr(plan, "metadata", None), dict) else None
+            if output_merge and output_dir:
+                merge_file = output_merge.get("file")
+                merge_steps = output_merge.get("steps", [])
+                if merge_file and merge_steps:
+                    from ..claude_helper import merge_step_outputs_to_file
+                    project_root = Path(__file__).parent.parent.parent.parent
+                    merge_path = project_root / merge_file
+                    merge_step_outputs_to_file(merge_steps, str(output_dir / "fast"), merge_path)
+            # Error survey: log apply failures
+            for file_path in apply_result.get("failed_files", []):
+                try:
+                    from ..core.error_survey import log_aetherflow_error
+                    log_aetherflow_error(
+                        title=f"Apply failed: {Path(file_path).name}",
+                        nature="apply_failed",
+                        proposed_solution="Vérifier le step output et le mapping bloc→fichier (claude_helper).",
+                        raw_error=f"Failed to apply code to {file_path}",
+                        file_path=file_path,
+                        plan_path=str(plan_path),
+                        workflow="PROTO",
+                    )
+                except Exception as survey_err:
+                    logger.debug(f"Error survey log failed: {survey_err}")
             
             # Phase 2: Double-check validation
             logger.info("Phase 2: Validating with DOUBLE-CHECK mode (Gemini)")
@@ -101,6 +126,23 @@ class ProtoWorkflow:
                 "total_time_ms": fast_result["metrics"].total_execution_time_ms + validation_result.get("execution_time_ms", 0),
                 "total_cost_usd": fast_result["metrics"].total_cost_usd + validation_result.get("cost_usd", 0.0)
             }
+            
+            # Error survey: log validation failures
+            for d in validation_result.get("validation_details", []):
+                if not d.get("valid", True):
+                    try:
+                        from ..core.error_survey import log_aetherflow_error
+                        log_aetherflow_error(
+                            title=f"Validation failed: {d.get('step_id', '?')}",
+                            nature="validation_failed",
+                            proposed_solution="Corriger le code selon le feedback pédagogique ou relancer avec -vfx.",
+                            raw_error=d.get("output", ""),
+                            step_id=d.get("step_id"),
+                            plan_path=str(plan_path),
+                            workflow="PROTO",
+                        )
+                    except Exception as survey_err:
+                        logger.debug(f"Error survey log failed: {survey_err}")
             
             logger.info(f"PROTO workflow completed: {combined_result['total_time_ms']/1000:.2f}s, ${combined_result['total_cost_usd']:.4f}")
             update_plan_status(

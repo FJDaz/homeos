@@ -33,8 +33,8 @@
           },
           "type": {
             "type": "string",
-            "enum": ["code_generation", "refactoring", "analysis"],
-            "description": "Type of task: code_generation (new code), refactoring (modify existing), analysis (analyze/understand)"
+            "enum": ["code_generation", "refactoring", "analysis", "patch"],
+            "description": "Type of task: code_generation (new/replace), refactoring (output to .generated), analysis (analyze), patch (insert/replace fragment at marker/line)"
           },
           "complexity": {
             "type": "number",
@@ -74,7 +74,14 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "List of file paths relevant to this step"
+                "description": "List of file paths to read/modify and to apply step output to"
+              },
+              "input_files": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Read-only files to inject into the prompt (e.g. genome, PRD). Not used for apply."
               },
               "language": {
                 "type": "string",
@@ -83,6 +90,39 @@
               "framework": {
                 "type": "string",
                 "description": "Framework or library (e.g., 'fastapi', 'react', 'express')"
+              },
+              "patch": {
+                "type": "object",
+                "description": "Requis si type === 'patch'. Où insérer/remplacer le fragment dans le fichier cible.",
+                "properties": {
+                  "position": {
+                    "type": "string",
+                    "enum": ["after", "before", "replace"],
+                    "description": "after = insérer après marker/ligne ; before = avant ; replace = remplacer section entre marker_start et marker_end"
+                  },
+                  "marker": {
+                    "type": "string",
+                    "description": "Chaîne à rechercher (première occurrence). Utilisé avec position after ou before."
+                  },
+                  "marker_start": {
+                    "type": "string",
+                    "description": "Début de section à remplacer (position replace)."
+                  },
+                  "marker_end": {
+                    "type": "string",
+                    "description": "Fin de section à remplacer (position replace)."
+                  },
+                  "line": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Numéro de ligne 1-based. Alternative à marker pour after/before."
+                  },
+                  "idempotent": {
+                    "type": "boolean",
+                    "description": "Si true, ne pas insérer si le fragment est déjà présent (évite doublon en re-run)."
+                  }
+                },
+                "required": ["position"]
               }
             }
           }

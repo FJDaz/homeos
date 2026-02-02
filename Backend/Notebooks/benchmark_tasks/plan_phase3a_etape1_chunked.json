@@ -1,0 +1,90 @@
+{
+  "task_id": "phase3a-etape1-ir-chunked",
+  "description": "Phase 3 A Étape 1 (par paquets) : Rapport IR en 5 sections, remontées côté workflow en un seul fichier.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Produire l'en-tête du rapport puis la section 1 (Inventaire Genome) du rapport IR en markdown. EN-TÊTE (S1) : titre '# Inventaire IR — Phase 3 A Étape 1', un paragraphe indiquant que ce document sert de base pour l'arbitrage Sullivan (étape 2) et les décisions Garder / Réserve / Obsolète, puis les sources (Source genome : output/studio/homeos_genome.json ; Source intentions : docs/04-homeos/PRD_HOMEOS.md). SECTION 1 : '## 1. Inventaire Genome (Implémentation actuelle)' avec 1.1 Métadonnées (tableau Intent, Version, Généré le), 1.2 Topologie déclarée (Brainstorm | Back | Front | Deploy), 1.3 Endpoints — tableau dérivé UNIQUEMENT du genome (Méthode, Path, x_ui_hint, Résumé), colonne Résumé pas Summary ; optionnellement une note sur le contenu supplémentaire du genome si pertinent. 1.4 Clés IR (intents, features, compartments) (S2) : indiquer que dans le genome actuel ces champs sont absents ou vides et « À remplir après arbitrage Sullivan et décisions (étape 4) ». Les listes doivent être exactement dérivées des références fournies (S6). Pas de section 2 ni suivantes. Sortie : markdown brut uniquement, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": ["En-tête avec objectif et sources présents", "Section 1 avec 1.1 à 1.4", "Sous-section 1.4 Clés IR (à remplir après arbitrage)", "Tableau endpoints colonne Résumé", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [],
+        "input_files": ["output/studio/homeos_genome.json", "docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Produire UNIQUEMENT la section 2 (Ce qu'Aetherflow fait) du rapport IR en markdown. Titre : '## 2. Ce qu'Aetherflow fait'. Contenu : modes FAST/BUILD/DOUBLE-CHECK, workflows PROTO (-q), PROD (-f), VerifyFix (-vfx), Orchestrator/AgentRouter/RAG/cache, Sullivan Kernel (DevMode, DesignerMode, ScreenPlanner, CorpsGenerator, Chatbot), Genome Generator, API. Mentionner 'agents (à venir)'. Pas d'autres sections. Sortie : markdown brut, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": ["Section 2 uniquement", "Modes et workflows", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [],
+        "input_files": ["output/studio/homeos_genome.json", "docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Produire UNIQUEMENT la section 3 (Méthodes à disposition du user) du rapport IR en markdown. Titre : '## 3. Méthodes à disposition du user'. Contenu : CLI (workflows -q/-f/-vfx avec --plan, genome, studio build, sullivan read-genome, plan-screens, build, designer, dev, report-correction, --costs, --stats, --status, --no-confirm, --streaming) et routes API. IMPORTANT (S6) : les listes (endpoints, commandes, routes) doivent être dérivées UNIQUEMENT des références fournies (genome, PRD) ; ne pas ajouter d'éléments non présents dans ces références (ex. pas /metrics, /status sauf s'ils sont dans le genome). En tableau ou liste. Pas d'autres sections. Sortie : markdown brut, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": ["Section 3 uniquement", "CLI et API dérivées des références uniquement", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [],
+        "input_files": ["output/studio/homeos_genome.json", "docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Produire UNIQUEMENT la section 4 (Intentions PRD) du rapport IR en markdown. Titre : '## 4. Intentions PRD'. Contenu : résumé vision/scope depuis la Reference data (PRD) : vision, rôles (§1.3), scope (§5), Sullivan phases 1-5 (§6), modèles (§9), roadmap (§11). OBLIGATOIRE (S5) : inclure le bloc '4.7 Public cible et objectifs (PRD §3)' — public (enseignants DNMADE, NSI, BUT MMI, étudiants, développeurs, établissements), objectifs court terme (ex. 100 users, workflow Sullivan stabilisé), moyen terme (référence enseignement front-end), long terme (international, back-end, mobile, Deploy). Pas d'autres sections. Sortie : markdown brut, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 900,
+      "dependencies": [],
+      "validation_criteria": ["Section 4 uniquement", "Résumé PRD", "Bloc 4.7 Public cible et objectifs (PRD §3) présent", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [],
+        "input_files": ["docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Produire UNIQUEMENT les sections 5 et 6 du rapport IR en markdown. Section 5 (S4) : '## 5. Écarts ou zones floues' — ton inventaire pour décision : tableau ou liste COURTE (genome vs PRD, intents/features/compartments vides, Studio HTMX, HCI IR à venir, agents), colonne Détail courte, SANS paragraphes d'impact ou de risques. Section 6 (S3) : '## 6. Suite (Phase 3 A)' — lister UNIQUEMENT les étapes 2 à 6 du PROCESSUS d'arbitrage et de décision du PRD : 2. Arbitrage Sullivan sur le genome (validation metadata, topology, endpoints) ; 3. Interface de validation Arbitrage/genome (vue ou rapport pour amendements) ; 4. Amendements et validation (décisions Garder/Réserve/Obsolète) ; 5. Achèvement du genome (intents/features/compartments) ; 6. Décision commune d'implémentation (liste à implémenter validée). NE PAS mettre de tâches d'implémentation technique (ScreenPlanner, CorpsGenerator, Chatbot, tests, déploiement). Pas d'autres sections. Sortie : markdown brut, pas de bloc ```.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 700,
+      "dependencies": [],
+      "validation_criteria": ["Section 5 : détails courts, actionnables", "Section 6 : étapes 2-6 = processus Phase 3 A (Arbitrage → Validation → Amendements → Genome → Décision), pas implémentation technique", "Markdown brut"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": [],
+        "input_files": ["docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T16:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A Étape 1 par paquets : merge côté workflow",
+    "output_merge": {
+      "file": "output/studio/ir_inventaire.md",
+      "steps": ["step_1", "step_2", "step_3", "step_4", "step_5"]
+    }
+  }
+}

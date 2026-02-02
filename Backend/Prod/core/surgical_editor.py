@@ -320,14 +320,91 @@ class SurgicalInstructionParser:
         """
         Check if output contains surgical instructions.
         
+        Uses multiple heuristics to avoid false positives from Python code
+        containing strings like "operations": in dict literals.
+        
         Args:
             output: Raw LLM output
             
         Returns:
             True if output appears to contain surgical instructions
         """
-        # Check for JSON with "operations" key
-        return bool(re.search(r'"operations"\s*:', output))
+        if not output or not output.strip():
+            return False
+        
+        # Strategy: Find potential JSON blocks and validate they are surgical instructions
+        
+        # Pattern 1: Markdown code block with JSON
+        json_block_pattern = r'```(?:json)?\s*(\{[\s\S]*?"operations"\s*:[\s\S]*?\})\s*```'
+        for match in re.finditer(json_block_pattern, output, re.IGNORECASE):
+            json_content = match.group(1)
+            if SurgicalInstructionParser._is_valid_surgical_json(json_content):
+                return True
+        
+        # Pattern 2: Raw JSON object at start of line or after empty line
+        # This avoids matching Python dicts which are typically after '=' or ':'
+        raw_json_pattern = r'(?:^|\n\n)\s*(\{[\s\S]*?"operations"\s*:[\s\S]*?\})\s*(?:\n\n|$)'
+        for match in re.finditer(raw_json_pattern, output):
+            json_content = match.group(1)
+            if SurgicalInstructionParser._is_valid_surgical_json(json_content):
+                return True
+        
+        return False
+    
+    @staticmethod
+    def _is_valid_surgical_json(json_str: str) -> bool:
+        """
+        Validate that a JSON string represents surgical instructions.
+        
+        Checks:
+        1. Valid JSON
+        2. Has "operations" key at root
+        3. "operations" is an array
+        4. Operations have surgical fields (type, code, target, etc.)
+        
+        Args:
+            json_str: Potential JSON string
+            
+        Returns:
+            True if valid surgical JSON
+        """
+        try:
+            data = json.loads(json_str)
+            
+            # Must have 'operations' key
+            if 'operations' not in data:
+                return False
+            
+            operations = data['operations']
+            
+            # Must be a list
+            if not isinstance(operations, list):
+                return False
+            
+            # Empty operations array is valid but not useful
+            if len(operations) == 0:
+                return False
+            
+            # Check first operation has surgical fields
+            # This distinguishes from random JSON with "operations" key
+            first_op = operations[0]
+            if not isinstance(first_op, dict):
+                return False
+            
+            # Surgical operations typically have these fields
+            surgical_fields = {'type', 'code', 'target', 'position', 'import', 'old', 'new'}
+            op_keys = set(first_op.keys())
+            
+            # Must have at least one surgical field
+            if not op_keys.intersection(surgical_fields):
+                return False
+            
+            return True
+            
+        except json.JSONDecodeError:
+            return False
+        except Exception:
+            return False
 
 
 class SurgicalApplier:
@@ -678,11 +755,83 @@ class SurgicalEditor:
         Returns:
             True if preparation succeeded
         """
+        if not self.file_path.exists():
+            logger.warning(f"Cannot prepare SurgicalEditor: file does not exist: {self.file_path}")
+            return False
+        
         if not self.parser.parse():
             return False
         
         self.applier = SurgicalApplier(self.file_path, self.parser)
         return True
+    
+    @staticmethod
+    def create_new_file(file_path: Path, llm_output: str) -> Tuple[bool, str]:
+        """
+        Create a new file from surgical instructions or raw code.
+        
+        This is a static method for creating new files (where surgical editing
+        doesn't apply since there's no existing code to modify).
+        
+        Args:
+            file_path: Path to the new file to create
+            llm_output: Raw LLM output (surgical instructions or code)
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        try:
+            # Check if output contains surgical instructions
+            if SurgicalInstructionParser.is_surgical_output(llm_output):
+                # Try to extract code from operations
+                operations, error = SurgicalInstructionParser.parse_instructions(llm_output)
+                if operations:
+                    # Collect all code from operations
+                    code_parts = []
+                    for op in operations:
+                        if op.code:
+                            code_parts.append(op.code)
+                    
+                    if code_parts:
+                        # Join with newlines, ensuring each part ends with a newline
+                        code_content = "\n\n".join(
+                            part if part.endswith("\n") else part + "\n"
+                            for part in code_parts
+                        )
+                    else:
+                        code_content = llm_output
+                else:
+                    code_content = llm_output
+            else:
+                # Use output directly
+                code_content = llm_output
+            
+            # Clean up markdown code blocks if present
+            if code_content.startswith('```'):
+                lines = code_content.split('\n')
+                if lines[0].strip().startswith('```'):
+                    lines = lines[1:]
+                if lines and lines[-1].strip() == '```':
+                    lines = lines[:-1]
+                code_content = '\n'.join(lines).strip()
+            
+            # Ensure directory exists
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Validate Python syntax before writing
+            if file_path.suffix == '.py':
+                try:
+                    ast.parse(code_content)
+                except SyntaxError as e:
+                    return False, f"Syntax error in generated code: {e}"
+            
+            # Write the new file
+            file_path.write_text(code_content, encoding='utf-8')
+            return True, f"Created {file_path}"
+            
+        except Exception as e:
+            logger.exception(f"Failed to create new file {file_path}")
+            return False, f"Error creating file: {e}"
     
     def get_ast_context(self) -> str:
         """

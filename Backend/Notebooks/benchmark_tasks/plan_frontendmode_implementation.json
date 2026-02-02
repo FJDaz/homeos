@@ -1,0 +1,149 @@
+{
+  "task_id": "frontendmode-implementation",
+  "description": "Implémenter FrontendMode : orchestration multi-modèles (Gemini vision/gros contexte, DeepSeek code, Groq micro-ajustements/dialogue/validation) pour Sullivan avec routage intelligent par type de tâche.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/models/frontend_router.py : classe FrontendRouter avec méthode get_provider_for_task(task_type: str, context_size: Optional[int] = None) -> str. Mapping : vision/analyze_design → gemini (obligatoire), generate_components/generate_html → gemini si context_size > 50000 sinon deepseek, refine_style/micro_adjustment → groq (fallback gemini si rate limit), dialogue/chat → groq (fallback gemini), validate_homeostasis/validation → groq (fallback gemini). Vérifier disponibilité providers via settings avant retour. Implémenter cache TTL 60s pour groq_limited (éviter retry immédiat après 429).",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "FrontendRouter.get_provider_for_task() retourne le bon provider selon task_type",
+        "Gestion fallback groq → gemini si rate limit",
+        "Vérification disponibilité providers via settings",
+        "Cache groq_limited avec TTL 60s implémenté"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/models/frontend_router.py"],
+        "input_files": [
+          "Backend/Prod/models/execution_router.py",
+          "Backend/Prod/config/settings.py"
+        ]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Corriger Backend/Prod/sullivan/analyzer/design_analyzer.py : remplacer le bloc mock (lignes 235-255 dans _analyze_with_vision_model) par un appel réel à GeminiClient.generate_with_image(). Injecter GeminiClient dans DesignAnalyzer.__init__ (optionnel, ou créer via FrontendRouter). Encoder image en base64, déterminer mime_type depuis extension, appeler generate_with_image avec prompt JSON extraction structure. Parser la réponse JSON (sections, components, layout, hierarchy). Conserver fallback OCR/heuristics en cas d'échec.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "DesignAnalyzer._analyze_with_vision_model() appelle réellement GeminiClient.generate_with_image()",
+        "Image encodée en base64 avec mime_type correct",
+        "Réponse JSON parsée correctement (sections, components, layout, hierarchy)",
+        "Fallback OCR/heuristics conservé en cas d'échec"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/analyzer/design_analyzer.py"],
+        "input_files": [
+          "Backend/Prod/models/gemini_client.py",
+          "Backend/Prod/sullivan/analyzer/design_analyzer.py"
+        ]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer Backend/Prod/sullivan/modes/frontend_mode.py : classe FrontendMode avec méthodes async : analyze_design(image_path: Path) → Gemini (via DesignAnalyzer corrigé), generate_components(design_structure: Dict, genome: Optional[Dict], webography: str, context_size: Optional[int] = None) → Gemini ou DeepSeek selon FrontendRouter (si context_size > 50000 → Gemini, sinon DeepSeek), refine_style(html_fragment: str, instruction: str) → Groq (fallback Gemini), dialogue(message: str, session_context: Optional[Dict]) → Groq (fallback Gemini), validate_homeostasis(json_payload: Dict) → Groq (fallback Gemini). Injecter FrontendRouter, GeminiClient, GroqClient, DeepSeekClient dans __init__. Réutiliser DesignAnalyzer, DesignPrinciplesExtractor, KnowledgeBase pour analyze_design.",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "FrontendMode.analyze_design() utilise Gemini via DesignAnalyzer",
+        "FrontendMode.generate_components() route vers Gemini ou DeepSeek selon contexte",
+        "FrontendMode.refine_style() utilise Groq avec fallback Gemini",
+        "FrontendMode.dialogue() utilise Groq avec fallback Gemini",
+        "FrontendMode.validate_homeostasis() utilise Groq avec fallback Gemini",
+        "Toutes les méthodes sont async et retournent des résultats structurés"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/modes/frontend_mode.py"],
+        "input_files": [
+          "Backend/Prod/models/frontend_router.py",
+          "Backend/Prod/sullivan/modes/designer_mode.py",
+          "Backend/Prod/sullivan/analyzer/design_analyzer.py",
+          "Backend/Prod/models/gemini_client.py",
+          "Backend/Prod/models/groq_client.py",
+          "Backend/Prod/models/deepseek_client.py"
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier Backend/Prod/sullivan/modes/__init__.py : ajouter import FrontendMode et l'exporter dans __all__ pour permettre from .modes import FrontendMode.",
+      "type": "refactoring",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "FrontendMode importé et exporté dans __all__",
+        "from .modes import FrontendMode fonctionne"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/modes/__init__.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Refactoriser Backend/Prod/sullivan/generator/design_to_html.py : modifier generate_html_from_design() pour accepter paramètre optionnel frontend_mode: Optional[FrontendMode] = None. Si frontend_mode fourni, utiliser frontend_mode.generate_components() au lieu d'appeler GeminiClient directement. Sinon, garder comportement actuel (appel GeminiClient direct) pour compatibilité. Calculer context_size depuis design_structure + frontend_structure + webography_text pour routage intelligent.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "generate_html_from_design() accepte frontend_mode optionnel",
+        "Si frontend_mode fourni, utilise frontend_mode.generate_components()",
+        "Sinon, garde comportement actuel (compatibilité)",
+        "context_size calculé correctement pour routage"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/generator/design_to_html.py"],
+        "input_files": [
+          "Backend/Prod/sullivan/modes/frontend_mode.py",
+          "Backend/Prod/sullivan/generator/design_to_html.py"
+        ]
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Ajouter routes API dans Backend/Prod/api.py : POST /sullivan/frontend/analyze (upload PNG → FrontendMode.analyze_design() → JSON structure + principes), POST /sullivan/frontend/generate (design_structure + genome → FrontendMode.generate_components() → HTML), POST /sullivan/frontend/refine (html_fragment + instruction → FrontendMode.refine_style() → HTML ajusté), POST /sullivan/dialogue (message + session_id + visual_intention_report → FrontendMode.dialogue() → réponse Sullivan), POST /sullivan/frontend/validate (json_payload → FrontendMode.validate_homeostasis() → validation). Créer modèles Pydantic pour requests/responses. Gérer erreurs avec HTTPException.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "5 routes API créées avec modèles Pydantic",
+        "Routes appellent FrontendMode méthodes correspondantes",
+        "Gestion erreurs avec HTTPException",
+        "Routes suivent pattern existant (comme /sullivan/designer/analyze)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"],
+        "input_files": [
+          "Backend/Prod/api.py",
+          "Backend/Prod/sullivan/modes/frontend_mode.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T11:50:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Implémentation FrontendMode pour orchestration multi-modèles Sullivan (Gemini/DeepSeek/Groq) selon type de tâche frontend"
+  }
+}

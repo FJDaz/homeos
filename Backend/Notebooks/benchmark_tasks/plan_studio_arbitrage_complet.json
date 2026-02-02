@@ -1,0 +1,37 @@
+{
+  "task_id": "studio-arbitrage-complet",
+  "description": "Compléter la colonne Arbitrage du Studio HTMX avec les sections manquantes de l'IR (1.1, 2, 3, 4, 5). Générer des formulaires interactifs pour chaque section.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le fichier Backend/Prod/templates/studio_arbitrage_complet.html contenant les formulaires HTMX manquants pour la colonne Arbitrage. Les formulaires existants (1.2, 1.3, 1.4) sont déjà dans studio.html. Ajouter APRES le commentaire 'Section 1.5 à venir' : (1) FORMULAIRE 1.1 Métadonnées : hx-post='/studio/validate', hx-target='#distillation-entries', hx-swap='beforeend', hx-indicator='#btn-1-1', class='border rounded p-3 bg-gray-50 mb-3'. Contenu: h3 '§1.1 Métadonnées', p 'Coche les métadonnées à valider.', 3 checkboxes (Intent PaaS_Studio, Version 0.1.0, Généré le), hidden inputs section_id='1.1' section_title='Métadonnées' verdict='Garder', bouton submit id='btn-1-1'. (2) FORMULAIRE 2 Modes : id='btn-2', 3 checkboxes (FAST, BUILD, DOUBLE-CHECK), section_id='2' section_title='Modes'. (3) FORMULAIRE 3 Workflows : id='btn-3', 4 checkboxes (PROTO -q, PROD -f, VerifyFix -vfx, RunAndFix), section_id='3' section_title='Workflows'. (4) FORMULAIRE 4 Briques IR : id='btn-4', 8 checkboxes (Orchestrator, AgentRouter, RAG, Cache sémantique, DevMode, DesignerMode, ScreenPlanner, CorpsGenerator), section_id='4' section_title='Briques IR'. (5) FORMULAIRE 5 CLI : id='btn-5', 12 checkboxes (run_aetherflow.sh -q/-f/-vfx, aetherflow genome, sullivan read-genome, plan-screens, build, designer, dev, --costs, --stats, --status, --no-confirm), section_id='5' section_title='Outils CLI'. Classes Tailwind: labels 'flex items-center gap-2', container 'space-y-1 text-sm', bouton 'mt-2 px-3 py-1 bg-[#A6CE39] hover:bg-[#8fb82e] text-gray-900 rounded text-sm font-medium'. Le fichier doit être un fragment HTML valide sans markdown.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Formulaire 1.1 Métadonnées présent",
+        "Formulaire 2 Modes présent",
+        "Formulaire 3 Workflows présent",
+        "Formulaire 4 Briques IR présent",
+        "Formulaire 5 CLI présent",
+        "Tous les formulaires ont hx-post='/studio/validate'",
+        "Checkboxes name='items' avec value correct",
+        "Hidden inputs section_id, section_title, verdict",
+        "Boutons avec hx-indicator unique",
+        "Classes Tailwind appliquées"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["Backend/Prod/templates/studio_arbitrage_complet.html"],
+        "input_files": ["output/studio/ir_inventaire.md", "Backend/Prod/templates/studio.html"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Studio Arbitrage - Compléter les formulaires manquants de l'IR"
+  }
+}

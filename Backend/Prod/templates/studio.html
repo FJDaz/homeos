@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Homeos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        .htmx-request { opacity: 0.5; pointer-events: none; }
+        .htmx-request button { cursor: wait; }
+        .prose table { font-size: 0.75rem; width: 100%; border-collapse: collapse; }
+        .prose th, .prose td { padding: 0.25rem 0.5rem; border: 1px solid #e5e7eb; text-align: left; }
+        .prose th { background: #f3f4f6; font-weight: 600; }
+        .prose tr:nth-child(even) { background: #f9fafb; }
+        .prose td:nth-child(3), .prose td:nth-child(4) { white-space: nowrap; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-[#A6CE39] py-4 px-6 shadow">
+        <h1 class="text-2xl font-bold text-gray-900">Studio Homeos</h1>
+        <p class="text-sm text-gray-700">Triptyque : Revue | Arbitrage | Distillation</p>
+    </header>
+    <main class="container mx-auto p-4 pt-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- MARKER:revue -->
+            <!-- COLONNE 1: REVUE -->
+            <div class="bg-white rounded shadow-md p-4">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">Revue — inventaire</h2>
+                <div id="revue-content" hx-get="/studio/reports/ir" hx-trigger="load" hx-swap="innerHTML" class="max-h-96 overflow-auto text-sm">
+                    <span class="text-gray-500">Chargement…</span>
+                </div>
+            </div>
+            <!-- MARKER:arbitrage -->
+            <!-- COLONNE 2: ARBITRAGE (formulaires chargés depuis IR JSON) -->
+            <div class="bg-white rounded shadow-md p-4">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">Arbitrage — validation</h2>
+                <div id="arbitrage-forms" class="max-h-96 overflow-auto space-y-4">
+                    <div id="arbitrage-forms-content"
+                         hx-get="/studio/arbitrage/forms"
+                         hx-trigger="load"
+                         hx-swap="innerHTML"
+                         class="space-y-4">
+                        <span class="text-gray-500">Chargement des formulaires d'arbitrage…</span>
+                    </div>
+                    <!-- MARKER:arbitrage-report -->
+<!-- Section 1.5 à venir (patch AETHERFLOW -f) -->
+                    <details class="border rounded p-2 bg-white">
+                        <summary class="cursor-pointer font-semibold text-sm text-gray-700">📋 Voir rapport arbitrage complet</summary>
+                        <div id="arbitrage-report" hx-get="/studio/reports/arbitrage" hx-trigger="revealed" hx-swap="innerHTML" class="prose prose-sm mt-2 max-h-[400px] overflow-auto text-xs">
+                            <span class="text-gray-400">Cliquer pour charger…</span>
+                        </div>
+                    </details>
+                </div>
+                <a href="/studio/genome" class="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm">Genome</a>
+                <a href="/studio/composants" class="ml-2 inline-block mt-2 px-3 py-1.5 bg-[#A6CE39] hover:bg-[#8fb82e] text-gray-900 rounded text-sm font-medium">Valider → Tous les composants</a>
+            </div>
+            <!-- MARKER:distillation -->
+            <!-- COLONNE 3: DISTILLATION -->
+            <div class="bg-white rounded shadow-md p-4">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">Distillation — génome</h2>
+                <p class="text-xs text-gray-500 mb-2">Éléments validés (OOB Swap cible)</p>
+                <div id="distillation-entries" class="space-y-2 mb-4 max-h-64 overflow-auto border border-dashed border-gray-300 rounded p-2 min-h-[60px]" hx-get="/studio/distillation/entries" hx-trigger="load" hx-swap="innerHTML">
+                    <span class="text-gray-400 text-sm">Chargement…</span>
+                </div>
+                <div id="genome-summary" hx-get="/studio/genome/summary" hx-trigger="load" hx-swap="innerHTML" class="max-h-48 overflow-auto text-sm">
+                    <span class="text-gray-400 text-sm">Chargement…</span>
+                </div>
+                <a href="/studio/genome" class="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm">Voir le genome complet →</a>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            console.log('HTMX afterRequest:', evt.detail.pathInfo.requestPath, evt.detail.successful ? 'OK' : 'FAIL');
+        });
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('HTMX error:', evt.detail);
+        });
+    </script>
+</body>
+</html>

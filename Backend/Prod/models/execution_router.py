@@ -125,7 +125,8 @@ class ExecutionRouter:
         # Use Codestral for small tasks (<30 lines or <500 tokens)
         if step:
             if (step.type == "refactoring" and step.complexity < 0.5) or \
-               (step.type == "code_generation" and step.estimated_tokens < 500 and step.complexity < 0.5):
+               (step.type == "code_generation" and step.estimated_tokens < 500 and step.complexity < 0.5) or \
+               (step.type == "patch" and step.complexity < 0.5):
                 if self.available_providers.get("codestral"):
                     stack["execution"] = "codestral"
                 else:

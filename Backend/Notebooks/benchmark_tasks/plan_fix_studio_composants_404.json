@@ -1,0 +1,29 @@
+{
+  "task_id": "fix-studio-composants-404",
+  "description": "Corriger le 404 sur la page Studio Composants : s'assurer que GET /studio/composants et GET /studio/composants/ retournent 200 avec le template Jinja, et que l'iframe /sullivan/preview ne provoque pas de 404.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/api.py : (1) Vérifier que templates_path est défini comme Path(__file__).resolve().parent / 'templates' (donc Backend/Prod/templates). (2) Vérifier que GET /studio/composants et GET /studio/composants/ sont enregistrés avec la même fonction get_studio_composants qui utilise Jinja2Templates(directory=str(templates_path)) et TemplateResponse('studio_composants.html', request, adapted, error). (3) Si la route avec trailing slash manque, l'ajouter avec @app.get('/studio/composants/', response_class=HTMLResponse) sur la même fonction. (4) S'assurer qu'aucune route plus générale (ex: /studio/{path}) ne capture /studio/composants avant. Ne pas modifier la logique métier, uniquement les routes et le chemin des templates.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "GET /studio/composants et GET /studio/composants/ retournent 200",
+        "Le template studio_composants.html est servi depuis Backend/Prod/templates"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"],
+        "input_files": ["Backend/Prod/templates/studio_composants.html"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Fix 404 sur page Tous les composants (Studio)"
+  }
+}

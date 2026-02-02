@@ -1,0 +1,30 @@
+{
+  "task_id": "phase3-md-to-ir-json",
+  "description": "Phase 3 — Post-traitement : convertir ir_inventaire.md en ir_inventaire.json (organes + claims conformes à ir_schema.json). Permet au Studio de charger les formulaires d'arbitrage depuis le JSON produit par Aetherflow.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Lire output/studio/ir_inventaire.md et produire output/studio/ir_inventaire.json conforme à docs/references/technique/ir_schema.json. Structure attendue : { source: { genome_path, prd_path, generated_at }, organes: [ { id, title, claims: [ { id, text, checked } ] } ] }. Extraire les sections suivantes comme organes : (1) §1.2 Topologie déclarée — claims = éléments séparés par | (Brainstorm, Back, Front, Deploy) ; (2) §1.3 Endpoints — claims = chaque ligne du tableau (texte = 'MÉTHODE /path') ; (3) §1.4 Clés IR — claims = Intents, Features, Compartments. Ignorer les sections prose (§2, §3, etc.) qui ne sont pas des listes d'éléments à valider. Chaque claim doit avoir un id unique (ex: topo-brainstorm, ep-execute), un text (libellé affiché), et checked: true par défaut. Le JSON doit être valide et conforme au schéma ir_schema.json (organes requis, claims requis avec id et text). Sortir UNIQUEMENT le JSON (pas de code Python, pas de markdown), prêt à écrire dans ir_inventaire.json.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier ir_inventaire.json créé dans output/studio/",
+        "JSON valide conforme à ir_schema.json",
+        "Au moins 3 organes (1.2, 1.3, 1.4)",
+        "Chaque organe a claims avec id et text"
+      ],
+      "context": {
+        "language": "json",
+        "files": ["output/studio/ir_inventaire.json"],
+        "input_files": ["output/studio/ir_inventaire.md", "docs/references/technique/ir_schema.json"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T00:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 plan clarification IR Arbitrage Genome — Option B post-traitement md → json"
+  }
+}

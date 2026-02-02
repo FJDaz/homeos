@@ -91,6 +91,20 @@ class VerifyFixWorkflow:
         )
         if not apply_result.get("success", True):
             logger.warning(f"Some files could not be applied: {apply_result.get('failed_files', [])}")
+            for file_path in apply_result.get("failed_files", []):
+                try:
+                    from ..core.error_survey import log_aetherflow_error
+                    log_aetherflow_error(
+                        title=f"Apply failed (VerifyFix): {Path(file_path).name}",
+                        nature="apply_failed",
+                        proposed_solution="Vérifier le step output et le mapping bloc→fichier (claude_helper).",
+                        raw_error=f"Failed to apply code to {file_path}",
+                        file_path=file_path,
+                        plan_path=str(plan_path),
+                        workflow="VerifyFix",
+                    )
+                except Exception as survey_err:
+                    logger.debug(f"Error survey log failed: {survey_err}")
 
         # Phase 3: Validation DOUBLE-CHECK
         logger.info("Phase 3: Validating with DOUBLE-CHECK (Gemini)")
@@ -125,6 +139,20 @@ class VerifyFixWorkflow:
             for d in validation_result.get("validation_details", [])
             if not d.get("valid", True)
         ]
+        for d in invalid_details:
+            try:
+                from ..core.error_survey import log_aetherflow_error
+                log_aetherflow_error(
+                    title=f"Validation failed (VerifyFix): {d.get('step_id', '?')}",
+                    nature="validation_failed",
+                    proposed_solution="Correction automatique via fix plan ou correction manuelle Cursor/Claude.",
+                    raw_error=d.get("output", ""),
+                    step_id=d.get("step_id"),
+                    plan_path=str(plan_path),
+                    workflow="VerifyFix",
+                )
+            except Exception as survey_err:
+                logger.debug(f"Error survey log failed: {survey_err}")
         if invalid_details and max_fix_rounds > 0:
             fix_plan = self._build_fix_plan(plan, invalid_details)
             if fix_plan and fix_plan.get("steps"):

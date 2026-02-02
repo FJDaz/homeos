@@ -1,0 +1,244 @@
+---
+description: Workflow AETHERFLOW - Génération de plans JSON pour orchestration d'agents IA
+alwaysApply: true
+---
+
+# Workflow AETHERFLOW - Orchestration Complète
+
+## Contexte
+
+AETHERFLOW est un orchestrateur d'agents IA où **Claude Code orchestre le processus d'IMPLÉMENTATION** :
+- **Claude Code (dans Cursor)** = Architecte et Orchestrateur : génère le plan ET orchestre l'exécution
+- **DeepSeek API** = Exécuteur : génère le code selon le plan
+- **Claude API** = Validateur : valide automatiquement les résultats
+
+## Règle Fondamentale : Quand Utiliser AETHERFLOW
+
+**AETHERFLOW est utilisé UNIQUEMENT pour l'IMPLÉMENTATION (génération de code)**
+
+- ✅ **Utiliser AETHERFLOW** : Génération de code, création de fichiers, implémentation de fonctionnalités
+- ❌ **NE PAS utiliser AETHERFLOW** : Vérification, contrôle, analyse, review, refactoring manuel
+
+**Si la tâche demande de vérifier, contrôler, analyser ou reviewer du code → Claude Code fait directement, sans déléguer à AETHERFLOW.**
+
+## Workflow Complet Automatisé pour IMPLÉMENTATION
+
+Quand l'utilisateur demande "implémente la phase 2" ou toute demande d'IMPLÉMENTATION :
+
+### 1. Génération du Plan
+Tu génères automatiquement un fichier `plan.json` conforme au schéma défini ci-dessous.
+
+### 2. Exécution Automatique via AETHERFLOW
+Tu appelles AETHERFLOW pour exécuter le plan :
+
+```python
+from Backend.Prod.claude_helper import execute_plan_cli
+
+# Exécuter le plan automatiquement
+result = execute_plan_cli(
+    plan_path="Backend/Notebooks/benchmark_tasks/mon_plan.json",
+    output_dir="output/phase2"
+)
+
+if result["success"]:
+    # Récupérer les outputs des étapes
+    from Backend.Prod.claude_helper import get_step_output
+    
+    step1_output = get_step_output("step_1", "output/phase2")
+    step2_output = get_step_output("step_2", "output/phase2")
+    # etc.
+    
+    # Présenter le code final à l'utilisateur
+    print("Code généré avec succès !")
+    print(f"Étape 1: {step1_output}")
+else:
+    print(f"Erreur: {result.get('error')}")
+```
+
+### 3. Application Automatique des Modifications
+**IMPORTANT** : Claude Code doit **APPLIQUER** automatiquement les modifications générées aux fichiers sources, pas seulement les présenter.
+
+Après l'exécution réussie du plan :
+
+```python
+from Backend.Prod.claude_helper import get_step_output, apply_generated_code
+from Backend.Prod.models.plan_reader import PlanReader
+
+# Récupérer le plan pour connaître les fichiers cibles
+plan_reader = PlanReader()
+plan = plan_reader.read(plan_path)
+
+# Pour chaque step qui a généré du code
+for step in plan.steps:
+    step_output = get_step_output(step.id, output_dir)
+    if step_output:
+        # Identifier le fichier cible depuis step.context.files
+        target_files = step.context.get("files", [])
+        for target_file in target_files:
+            # Appliquer les modifications au fichier source
+            success = apply_generated_code(
+                step_output=step_output,
+                target_file=Path(target_file),
+                plan_step=step
+            )
+            if success:
+                logger.info(f"Applied modifications to {target_file}")
+```
+
+**Étapes d'application automatique** :
+1. **Récupérer les outputs** : Utiliser `get_step_output(step_id, output_dir)` pour chaque step
+2. **Parser le code généré** : Extraire les blocs de code (Python, JavaScript, etc.) depuis le step_output
+3. **Identifier les fichiers cibles** : Utiliser `step.context.files` du plan pour savoir quels fichiers modifier
+4. **Appliquer les modifications** : 
+   - Pour `code_generation` : Créer le fichier ou ajouter le code au fichier existant
+   - Pour `refactoring` : Modifier les sections existantes selon les instructions du step_output
+   - Utiliser `apply_generated_code()` helper pour l'application automatique
+5. **Vérifier les modifications** : Valider que le code appliqué est correct (syntaxe, imports, etc.)
+6. **Présenter le résultat** : Afficher un résumé des fichiers modifiés à l'utilisateur
+
+### 4. Vérification et Présentation
+- Tu vérifies les résultats automatiquement (Claude Code fait directement, pas via AETHERFLOW)
+- Tu présentes le code final appliqué à l'utilisateur avec la liste des fichiers modifiés
+- **L'utilisateur n'a rien à faire de plus** : le code est déjà appliqué dans les fichiers sources
+
+## Exemples de Décision
+
+### ✅ Utiliser AETHERFLOW
+- "Implémente une API REST"
+- "Crée un système d'authentification"
+- "Génère les modèles de données"
+- "Crée les tests unitaires"
+
+### ❌ NE PAS utiliser AETHERFLOW (Claude Code fait directement)
+- "Vérifie ce code"
+- "Contrôle la qualité de ce fichier"
+- "Analyse cette fonction"
+- "Review ce pull request"
+- "Corrige cette erreur" (si c'est une correction manuelle)
+- "Refactore ce code" (si c'est du refactoring manuel guidé)
+
+## Format du Plan JSON
+
+## Format du Plan JSON
+
+Le plan doit suivre exactement ce schéma (voir `docs/references/plan_schema.json` pour le schéma complet) :
+
+```json
+{
+  "task_id": "uuid-v4",
+  "description": "Description claire de la tâche principale",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Description détaillée de ce que cette étape doit accomplir",
+      "type": "code_generation|refactoring|analysis",
+      "complexity": 0.0-1.0,
+      "estimated_tokens": 100-8000,
+      "dependencies": [],
+      "validation_criteria": ["critère 1", "critère 2"],
+      "context": {
+        "language": "python|javascript|typescript|etc",
+        "framework": "fastapi|react|express|etc",
+        "files": ["path/to/file1.py", "path/to/file2.js"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Contexte du projet (optionnel)"
+  }
+}
+```
+
+## Types de Tâches
+
+- **code_generation** : Créer du nouveau code
+- **refactoring** : Modifier/améliorer du code existant
+- **analysis** : Analyser/comprendre du code existant
+
+## Règles Importantes
+
+1. **task_id** : Utilise un UUID v4 unique (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+
+2. **steps** : 
+   - Chaque étape doit avoir un `id` unique au format `step_N` (N = numéro)
+   - Les `dependencies` référencent les IDs d'autres étapes (`step_1`, `step_2`, etc.)
+   - La `complexity` doit être entre 0.0 (simple) et 1.0 (très complexe)
+   - `estimated_tokens` doit être réaliste (100-8000)
+
+3. **Dépendances** :
+   - Si une étape dépend d'une autre, liste l'ID dans `dependencies`
+   - Les étapes sans dépendances peuvent s'exécuter en premier
+   - Évite les dépendances circulaires
+
+4. **Validation Criteria** :
+   - Liste des critères pour valider que l'étape est réussie
+   - Sois spécifique et mesurable
+
+5. **Context** :
+   - `language` : Langage de programmation principal
+   - `framework` : Framework/bibliothèque utilisée (si applicable)
+   - `files` : Fichiers concernés par cette étape
+
+## Exemple Concret
+
+Voir `docs/references/plan_example.json` pour un exemple complet.
+
+## Génération du Plan
+
+Quand l'utilisateur demande un plan :
+1. **Charge les Guidelines** : Lit `docs/guides/GUIDELINES.md` pour comprendre les standards de qualité
+2. Analyse la tâche demandée
+3. Décompose en étapes atomiques et séquentielles
+4. Assigne le bon `type` à chaque étape
+5. Estime la `complexity` et les `estimated_tokens`
+6. Définit les `dependencies` si nécessaire
+7. Ajoute des `validation_criteria` clairs en intégrant les guidelines :
+   - Pour les étapes `code_generation` : Inclure TDD (tests), DRY (factorisation), SOLID (responsabilité unique)
+   - Pour les étapes `refactoring` : Inclure DRY, SOLID, mise à jour des tests
+   - Prévoir des étapes de test si nécessaire selon les guidelines
+8. Génère le fichier `plan.json` dans le répertoire approprié (ex: `Backend/Notebooks/benchmark_tasks/`)
+
+### Intégration des Guidelines dans le Plan
+
+Les guidelines (`docs/guides/GUIDELINES.md`) doivent être intégrées dans le plan de deux façons :
+
+1. **Dans les `validation_criteria`** : Chaque étape de type `code_generation` ou `refactoring` doit inclure des critères basés sur les guidelines :
+   ```json
+   "validation_criteria": [
+     "Code généré avec tests unitaires complets (TDD)",
+     "Logique répétée extraite en fonctions réutilisables (DRY)",
+     "Chaque fonction/classe a une responsabilité unique (SOLID)",
+     "Structure respectée : Models/Services/Controllers séparés"
+   ]
+   ```
+
+2. **Étapes de test explicites** : Si le plan est pour le mode BUILD, prévoir des étapes de test séparées :
+   ```json
+   {
+     "id": "step_N_tests",
+     "type": "code_generation",
+     "description": "Générer les tests unitaires pour [fonctionnalité]",
+     "dependencies": ["step_N"],
+     "validation_criteria": ["Tests couvrent au moins 80% du code", "Tests incluent cas limites"]
+   }
+   ```
+
+3. **Contexte du plan** : Le champ `metadata.project_context` peut inclure une référence aux guidelines :
+   ```json
+   "metadata": {
+     "project_context": "Code doit respecter GUIDELINES.md : TDD, DRY, SOLID, Structure Models/Services/Controllers"
+   }
+   ```
+
+## Notes Importantes
+
+- **AETHERFLOW = UNIQUEMENT pour IMPLÉMENTATION** : Génération de code, création de fichiers
+- **Vérification/Contrôle = Claude Code directement** : Pas de délégation à AETHERFLOW
+- Le plan est généré automatiquement par Claude Code pour les tâches d'implémentation
+- L'exécution est déclenchée automatiquement par Claude Code via `claude_helper.execute_plan_cli()`
+- DeepSeek exécute chaque étape et génère le code
+- **Pas de Claude API** : Toute validation/contrôle est fait par Claude Code directement
+- Claude Code récupère les résultats et présente le code final à l'utilisateur
+- **L'utilisateur n'intervient à aucune étape** : tout est automatisé

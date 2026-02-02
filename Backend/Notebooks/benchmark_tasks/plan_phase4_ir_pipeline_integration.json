@@ -1,0 +1,51 @@
+{
+  "task_id": "phase4-ir-pipeline-integration",
+  "description": "Phase 4 — Intégration pipeline IR : quand ir_inventaire.md est produit ou mis à jour, ir_inventaire.json peut être régénéré automatiquement via un module Python déterministe et une commande CLI.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le module Backend/Prod/core/ir_md_to_json.py avec une fonction ir_md_to_json(md_path: Path, json_path: Path, schema_path: Path) -> bool. La fonction doit : (1) Lire le fichier Markdown ir_inventaire.md ; (2) Parser les sections ### 1.2 Topologie déclarée (ligne contenant '|' séparant Brainstorm, Back, Front, Deploy), ### 1.3 Endpoints (table Markdown avec colonnes Méthode, Path, x_ui_hint, Résumé — chaque ligne = un claim avec text = 'MÉTHODE path' et description = valeur Résumé si présente), ### 1.4 Clés IR (claims Intents, Features, Compartments avec description optionnelle depuis le paragraphe suivant) ; (3) Construire l'objet JSON { source: { genome_path, prd_path, generated_at }, organes: [ { id, title, claims: [ { id, text, description?, checked: true } ] } ] } ; (4) Charger docs/references/technique/ir_schema.json et valider l'objet avec jsonschema.validate ; (5) Écrire le JSON dans json_path. Utiliser uniquement pathlib, re, json, jsonschema (pas de LLM). Extraire genome_path et prd_path depuis les lignes 'Source genome :' et 'Source intentions :' du md si présentes, sinon valeurs par défaut output/studio/homeos_genome.json et docs/04-homeos/PRD_HOMEOS.md. generated_at = datetime.utcnow().isoformat(). Retourner True si succès, lever une exception ou retourner False sinon.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Module ir_md_to_json.py existe dans Backend/Prod/core/",
+        "Fonction ir_md_to_json(md_path, json_path, schema_path) définie",
+        "Parsing des sections 1.2, 1.3, 1.4 et génération organes/claims",
+        "Validation jsonschema avant écriture",
+        "Pas d'appel LLM dans le module"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "stdlib",
+        "files": ["Backend/Prod/core/ir_md_to_json.py"],
+        "input_files": ["output/studio/ir_inventaire.md", "docs/references/technique/ir_schema.json"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Intégrer l'appel à ir_md_to_json dans la CLI. Dans Backend/Prod/cli.py : (1) Ajouter un subparser sous le parser 'studio' (studio_parser) pour permettre la sous-commande 'ir-sync' en plus de 'build'. Si le parser studio actuel utilise un argument positionnel 'build', le remplacer par un subparsers avec 'build' (défaut) et 'ir-sync'. (2) Pour la sous-commande ir-sync : arguments optionnels --md (défaut output/studio/ir_inventaire.md), --json (défaut output/studio/ir_inventaire.json), --schema (défaut docs/references/technique/ir_schema.json). (3) Quand l'utilisateur exécute 'aetherflow studio ir-sync', importer ir_md_to_json depuis Backend.Prod.core.ir_md_to_json, appeler ir_md_to_json(md_path, json_path, schema_path) avec les chemins résolus (project root = répertoire parent de Backend/), afficher un message de succès ou l'exception. Ne pas casser la commande existante 'studio' (build).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Commande 'aetherflow studio ir-sync' exécutable",
+        "Commande 'aetherflow studio build' inchangée en comportement",
+        "Chemins par défaut pour md, json, schema corrects"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "argparse",
+        "files": ["Backend/Prod/cli.py"],
+        "input_files": ["Backend/Prod/core/ir_md_to_json.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 4 plan IR Arbitrage Genome — Intégration pipeline : md→json déterministe + CLI ir-sync"
+  }
+}

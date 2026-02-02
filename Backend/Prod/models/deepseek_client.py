@@ -499,6 +499,8 @@ class DeepSeekClient(BaseLLMClient):
             prompt_parts.append("\nRefactor the existing code according to the requirements above.")
         elif step.type == "analysis":
             prompt_parts.append("\nAnalyze and provide insights about the code.")
+        elif step.type == "patch":
+            prompt_parts.append("\nGenerate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file.")
         
         return "".join(prompt_parts)
     

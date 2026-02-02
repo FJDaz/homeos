@@ -303,7 +303,6 @@ Examples:
   %(prog)s --workflow quick --plan plan.json # Same as -q
   %(prog)s --workflow full --plan plan.json  # Same as -f
   %(prog)s --workflow verify-fix --plan plan.json  # Same as -vfx / --verify-fix
-  %(prog)s -rfx --command "cd frontend-svelte && npm run build"  # Run-and-fix
   %(prog)s --stats                           # Cache statistics
   %(prog)s --status                          # Plan monitoring (current or last run)
         """
@@ -317,9 +316,11 @@ Examples:
         help="PROTO workflow: Fast prototyping (FAST → DOUBLE-CHECK) [DEPRECATED: use -q or --workflow quick]"
     )
     workflow_group.add_argument(
+        "-b",
         "--build",
         action="store_true",
-        help="PROD workflow: Quality-first (FAST draft → BUILD refactor → DOUBLE-CHECK) [DEPRECATED: use -f or --workflow full]"
+        dest="build",
+        help="PROD workflow: Quality-first (FAST draft → BUILD refactor → DOUBLE-CHECK) [same as -f]"
     )
     workflow_group.add_argument(
         "-q",
@@ -341,13 +342,6 @@ Examples:
         action="store_true",
         dest="verify_fix",
         help="Verify & fix: Run plan, validate with Gemini, then correct reported errors and re-validate"
-    )
-    workflow_group.add_argument(
-        "-rfx",
-        "--run-and-fix-workflow",
-        action="store_true",
-        dest="run_and_fix_workflow",
-        help="Run-and-fix: Run command (build/deploy), on failure fix from stderr and retry. Requires --command."
     )
     workflow_group.add_argument(
         "--stats",
@@ -374,45 +368,16 @@ Examples:
     parser.add_argument(
         "--workflow",
         type=str,
-        choices=["quick", "full", "verify-fix", "run-and-fix", "PROTO", "PROD", "VerifyFix", "RunAndFix"],
+        choices=["quick", "full", "verify-fix", "PROTO", "PROD", "VerifyFix"],
         default=None,
-        help="Workflow: quick (PROTO), full (PROD), verify-fix, run-and-fix (build/deploy then fix from errors). Overrides -q/-f/--verify-fix if set."
+        help="Workflow: quick (PROTO), full (PROD), verify-fix (validate then correct errors). Overrides -q/-f/--verify-fix if set."
     )
     
     parser.add_argument(
         "--plan",
         type=Path,
         default=None,
-        help="Path to plan JSON file (required for -q/-f/-vfx; not used for run-and-fix)"
-    )
-    
-    parser.add_argument(
-        "--command",
-        type=str,
-        default=None,
-        help="Command for run-and-fix (e.g. 'cd frontend-svelte && npm run build'). Required when --workflow run-and-fix."
-    )
-    
-    parser.add_argument(
-        "--run-and-fix-workdir",
-        type=Path,
-        default=None,
-        help="Working directory for run-and-fix (default: project root)"
-    )
-    
-    parser.add_argument(
-        "--run-and-fix-max-rounds",
-        type=int,
-        default=5,
-        help="Max fix rounds for run-and-fix (default: 5)"
-    )
-    
-    parser.add_argument(
-        "--run-and-fix",
-        type=str,
-        default=None,
-        metavar="CMD",
-        help="After -f (PROD), run this command and fix from errors until success (e.g. 'cd frontend-svelte && npm run build')"
+        help="Path to plan JSON file (required for -q/-f/--fast/--build/--workflow)"
     )
     
     parser.add_argument(
@@ -496,47 +461,160 @@ Examples:
         help="Output path (default: output/studio/homeos_genome.json)"
     )
     
-    # studio build (genome → build → refinement)
+    # report-correction: log a correction applied by Cursor/Claude (error survey)
+    report_parser = subparsers.add_parser(
+        "report-correction",
+        help="Log a correction applied by Cursor or Claude (error survey directory)"
+    )
+    report_parser.add_argument(
+        "--title", "-t",
+        type=str,
+        required=True,
+        help="Short title of the problem/correction"
+    )
+    report_parser.add_argument(
+        "--nature", "-n",
+        type=str,
+        default="correction_applied",
+        help="Nature: correction_applied, apply_fix, validation_fix, etc. (default: correction_applied)"
+    )
+    report_parser.add_argument(
+        "--solution", "-s",
+        type=str,
+        required=True,
+        help="Proposed solution / description of the fix applied"
+    )
+    report_parser.add_argument(
+        "--source",
+        type=str,
+        choices=["cursor", "claude"],
+        default="cursor",
+        help="Source: cursor or claude (default: cursor)"
+    )
+    report_parser.add_argument(
+        "--file", "-f",
+        type=str,
+        default=None,
+        help="File path concerned (optional)"
+    )
+    report_parser.add_argument(
+        "--step",
+        type=str,
+        default=None,
+        help="Step id concerned, e.g. step_1 (optional)"
+    )
+    report_parser.add_argument(
+        "--error",
+        type=str,
+        default=None,
+        help="Raw error message (optional)"
+    )
+    
+    # survey list: read all system anomalies (errors, corrections, build, API, etc.)
+    survey_list_parser = subparsers.add_parser(
+        "survey",
+        help="Survey: list all system anomalies (errors, corrections, build, API, etc.)"
+    )
+    survey_list_parser.add_argument(
+        "action",
+        nargs="?",
+        default="list",
+        choices=["list"],
+        help="Action: list (default)"
+    )
+    survey_list_parser.add_argument(
+        "--source",
+        type=str,
+        choices=["aetherflow", "cursor", "claude", "system"],
+        default=None,
+        help="Filter by source (aetherflow | cursor | claude | system)"
+    )
+    survey_list_parser.add_argument(
+        "--nature",
+        type=str,
+        default=None,
+        help="Filter by nature (e.g. step_failed, build_error, api_error, correction_applied)"
+    )
+    survey_list_parser.add_argument(
+        "--limit", "-n",
+        type=int,
+        default=None,
+        help="Max number of entries to show"
+    )
+    survey_list_parser.add_argument(
+        "--format",
+        type=str,
+        choices=["table", "json"],
+        default="table",
+        help="Output format: table (default) or json"
+    )
+    
+    # studio (build | ir-sync)
     studio_parser = subparsers.add_parser(
         "studio",
-        help="Studio build: genome → build → refinement (Homeos Studio)"
+        help="Studio: build (genome → HTML) or ir-sync (IR Markdown → JSON)"
     )
-    studio_parser.add_argument(
+    studio_subparsers = studio_parser.add_subparsers(
+        dest="studio_command",
+        required=False,
+        help="Studio subcommands (default: build)"
+    )
+    build_parser = studio_subparsers.add_parser(
         "build",
-        nargs="?",
-        default="build",
-        help="Subcommand: build (default)"
+        help="Build studio: genome → build → refinement (Homeos Studio)"
     )
-    studio_parser.add_argument(
+    build_parser.add_argument(
         "--genome", "-g",
         type=Path,
         default=None,
         help="Path to existing genome (default: generate then output/studio/homeos_genome.json)"
     )
-    studio_parser.add_argument(
+    build_parser.add_argument(
         "--output", "-o",
         type=Path,
         default=None,
         help="Output HTML path (default: output/studio/studio_index.html)"
     )
-    studio_parser.add_argument(
+    build_parser.add_argument(
         "--base-url",
         type=str,
         default="http://localhost:8000",
         help="API base URL for Fetch (default: http://localhost:8000)"
     )
-    studio_parser.add_argument(
+    build_parser.add_argument(
         "--max-iterations",
         type=int,
         default=5,
         help="Max refinement iterations (default: 5)"
     )
-    studio_parser.add_argument(
+    build_parser.add_argument(
         "--no-refine",
         action="store_true",
         help="Skip refinement loop (build only)"
     )
-    
+    ir_sync_parser = studio_subparsers.add_parser(
+        "ir-sync",
+        help="Convert IR inventory Markdown to JSON (output/studio/ir_inventaire.json)"
+    )
+    ir_sync_parser.add_argument(
+        "--md",
+        type=Path,
+        default=None,
+        help="Path to IR inventory Markdown (default: output/studio/ir_inventaire.md)"
+    )
+    ir_sync_parser.add_argument(
+        "--json",
+        type=Path,
+        default=None,
+        help="Path to output JSON (default: output/studio/ir_inventaire.json)"
+    )
+    ir_sync_parser.add_argument(
+        "--schema",
+        type=Path,
+        default=None,
+        help="Path to JSON schema (default: docs/references/technique/ir_schema.json)"
+    )
+
     # sullivan (--design = designer en court : sullivan --design image.png)
     sullivan_dev_parser = subparsers.add_parser(
         "sullivan",
@@ -829,7 +907,82 @@ Examples:
         out = getattr(args, "output", None)
         return run_genome_cli(output_path=out)
     
+    # Handle report-correction (error survey: Cursor/Claude corrections)
+    if args.command == "report-correction":
+        from .core.error_survey import log_correction
+        path = log_correction(
+            title=args.title,
+            nature=getattr(args, "nature", "correction_applied"),
+            proposed_solution=args.solution,
+            source=getattr(args, "source", "cursor"),
+            raw_error=getattr(args, "error", None),
+            step_id=getattr(args, "step", None),
+            file_path=getattr(args, "file", None),
+        )
+        console.print(f"[green]Correction enregistrée : {path}[/]")
+        return 0
+    
+    # Handle survey list (read error/correction entries; independent of report-correction)
+    if args.command == "survey":
+        import json
+        from .core.error_survey import list_entries
+        entries = list_entries(
+            source=getattr(args, "source", None),
+            nature=getattr(args, "nature", None),
+            limit=getattr(args, "limit", None),
+        )
+        out_fmt = getattr(args, "format", "table") or "table"
+        if out_fmt == "json":
+            # Strip paths for compact output; keep title, date, nature, source
+            out = [{"title": e.get("title"), "date": e.get("date"), "nature": e.get("nature"), "source": e.get("source"), "md_path": e.get("md_path")} for e in entries]
+            console.print(json.dumps(out, indent=2, ensure_ascii=False))
+            return 0
+        if not entries:
+            console.print(f"[dim]Aucune entrée dans {settings.error_log_dir}[/]")
+            return 0
+        table = Table(title="Error survey", box=box.ROUNDED)
+        table.add_column("Date", style="dim", width=20)
+        table.add_column("Source", width=10)
+        table.add_column("Nature", width=22)
+        table.add_column("Title", style="cyan", no_wrap=False)
+        for e in entries:
+            table.add_row(
+                (e.get("date") or "")[:19],
+                e.get("source") or "",
+                e.get("nature") or "",
+                (e.get("title") or "")[:60],
+            )
+        console.print(table)
+        console.print(f"[dim]{len(entries)} entrée(s) — répertoire : {settings.error_log_dir}[/]")
+        return 0
+    
     # Handle studio build command
+    if args.command == "studio" and getattr(args, "studio_command", None) == "ir-sync":
+        from .core.ir_md_to_json import ir_md_to_json
+        base = Path(settings.output_dir) / "studio"
+        default_md = base / "ir_inventaire.md"
+        default_json = base / "ir_inventaire.json"
+        default_schema = Path("docs/references/technique/ir_schema.json")
+        md_path = getattr(args, "md", None) or default_md
+        json_path = getattr(args, "json", None) or default_json
+        schema_path = getattr(args, "schema", None) or default_schema
+        try:
+            success = ir_md_to_json(
+                Path(md_path),
+                Path(json_path),
+                Path(schema_path),
+            )
+            if success:
+                console.print(f"[green]✓ IR Markdown → JSON: {json_path}[/]")
+                return 0
+            console.print("[red]✗ Conversion failed[/]")
+            return 1
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/]")
+            if getattr(args, "verbose", False):
+                logger.exception("IR sync error")
+            return 1
+
     if args.command == "studio":
         async def run_studio():
             from .core.genome_generator import generate_genome
@@ -1103,16 +1256,12 @@ Examples:
             workflow_type = "PROD"
         elif args.workflow in ["verify-fix", "VerifyFix"]:
             workflow_type = "VerifyFix"
-        elif args.workflow in ["run-and-fix", "RunAndFix"]:
-            workflow_type = "RunAndFix"
     elif args.quick or args.fast:
         workflow_type = "PROTO"
     elif args.full or args.build:
         workflow_type = "PROD"
     elif getattr(args, "verify_fix", False):
         workflow_type = "VerifyFix"
-    elif getattr(args, "run_and_fix_workflow", False):
-        workflow_type = "RunAndFix"
     
     # Debug API keys if requested (before any other action)
     if args.debug_keys:
@@ -1120,18 +1269,17 @@ Examples:
         run_debug_keys(verbose=True)
         print()
     
-    # Require plan for workflow execution (except RunAndFix which requires --command)
-    if workflow_type and workflow_type != "RunAndFix" and not args.plan:
+    # Require plan for workflow execution
+    if workflow_type and not args.plan:
         console.print("[red]Error: --plan is required for -q / -f / -vfx workflows[/]")
         return 1
-    if workflow_type == "RunAndFix" and not getattr(args, "command", None):
-        console.print("[red]Error: --command is required for --workflow run-and-fix[/]")
-        return 1
     
-    # Check if plan file exists (if provided)
-    if args.plan and not args.plan.exists():
-        console.print(f"[red]Error: Plan file not found: {args.plan}[/]")
-        return 1
+    # Check if plan file exists (if provided); resolve to absolute so workflows read the intended file
+    if args.plan:
+        if not args.plan.exists():
+            console.print(f"[red]Error: Plan file not found: {args.plan}[/]")
+            return 1
+        args.plan = args.plan.resolve()
     
     # Show plan info if requested
     if args.info:
@@ -1210,27 +1358,6 @@ Examples:
                         console.print("\n")
                         display_pedagogical_feedback(validation_details)
                 
-                # Optional: after PROD, run-and-fix (build/deploy then fix from errors)
-                run_and_fix_cmd = getattr(args, "run_and_fix", None)
-                if run_and_fix_cmd:
-                    from .workflows.run_and_fix import RunAndFixWorkflow
-                    console.print("\n[cyan]Run-and-Fix phase (build/deploy then fix from errors)[/]")
-                    rnf = RunAndFixWorkflow()
-                    rnf_result = await rnf.execute(
-                        command=run_and_fix_cmd,
-                        workdir=getattr(args, "run_and_fix_workdir", None),
-                        max_rounds=getattr(args, "run_and_fix_max_rounds", 5),
-                        output_dir=output_dir,
-                    )
-                    rnf_table = Table(title="Run-and-Fix Summary", box=box.ROUNDED)
-                    rnf_table.add_column("Metric", style="cyan")
-                    rnf_table.add_column("Value", style="green")
-                    rnf_table.add_row("Rounds", str(rnf_result["rounds_done"]))
-                    rnf_table.add_row("Success", "✓" if rnf_result["success"] else "✗")
-                    rnf_table.add_row("Message", rnf_result.get("message", ""))
-                    console.print(rnf_table)
-                    return 0 if rnf_result["success"] else 1
-                
                 return 0 if result["success"] else 1
             
             return asyncio.run(run_prod())
@@ -1299,7 +1426,7 @@ Examples:
                 use_streaming=args.streaming
             ))
         else:
-            console.print("[red]Error: --plan is required. Use -q / -f / -vfx or --workflow quick|full|verify-fix|run-and-fix[/]")
+            console.print("[red]Error: --plan is required. Use -q / -f / -vfx or --workflow quick|full|verify-fix[/]")
             parser.print_help()
             return 1
     except KeyboardInterrupt:

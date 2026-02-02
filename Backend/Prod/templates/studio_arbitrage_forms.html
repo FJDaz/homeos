@@ -1,0 +1,36 @@
+{% for organe in organes %}
+<form hx-post="/studio/validate"
+      hx-target="#distillation-entries"
+      hx-swap="beforeend"
+      hx-indicator="#btn-{{ organe.id | replace('.', '-') }}"
+      class="border rounded p-3 bg-gray-50 mb-4">
+    <h3 class="font-semibold text-gray-800 text-sm">§{{ organe.id }} {{ organe.title }}</h3>
+    <p class="text-xs text-gray-600 mb-2">Coche les éléments à valider.</p>
+    <div class="space-y-1 text-sm">
+        {% for claim in organe.claims %}
+        <label class="flex items-start gap-2 py-1">
+            <input type="checkbox" name="items" value="{{ claim.text }}" {% if claim.checked %}checked{% endif %} class="mt-0.5">
+            <span>
+                <span class="font-medium text-gray-800">{{ claim.text }}</span>
+                {% if claim.description %}
+                <span class="block text-xs text-gray-500 mt-0.5">{{ claim.description }}</span>
+                {% endif %}
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+    <input type="hidden" name="section_id" value="{{ organe.id }}">
+    <input type="hidden" name="section_title" value="{{ organe.title }}">
+    <div class="mt-2 flex items-center gap-2">
+        <select name="verdict" class="text-sm border rounded px-2 py-1 bg-white">
+            <option value="Accept" selected>✓ Accept</option>
+            <option value="Revise">↻ Revise</option>
+            <option value="Reject">✗ Reject</option>
+        </select>
+        <button id="btn-{{ organe.id | replace('.', '-') }}" type="submit"
+                class="px-3 py-1 bg-[#A6CE39] hover:bg-[#8fb82e] text-gray-900 rounded text-sm font-medium">
+            Valider
+        </button>
+    </div>
+</form>
+{% endfor %}

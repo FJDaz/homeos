@@ -44,6 +44,24 @@ class Settings(BaseSettings):
         alias="ANTHROPIC_API_KEY",
         description="Anthropic API key for Claude validation (automatic)"
     )
+
+    kimi_api_key: str = Field(
+        default="",
+        alias="KIMI_KEY",
+        description="KIMI (Moonshot) API key for gate-keeper validation"
+    )
+
+    kimi_api_url: str = Field(
+        default="https://api.moonshot.cn/v1/chat/completions",
+        alias="KIMI_API_URL",
+        description="KIMI (Moonshot) API endpoint URL"
+    )
+
+    kimi_model: str = Field(
+        default="moonshot-v1-8k",
+        alias="KIMI_MODEL",
+        description="KIMI model to use (moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k)"
+    )
     
     # API Configuration
     deepseek_api_url: str = Field(
@@ -124,6 +142,12 @@ class Settings(BaseSettings):
         default=Path("logs"),
         alias="LOGS_DIR",
         description="Directory for log files"
+    )
+    
+    error_log_dir: Path = Field(
+        default=Path("output/aetherflow_error_log"),
+        alias="AETHERFLOW_ERROR_LOG_DIR",
+        description="Directory for error/correction survey (errors Aetherflow + corrections Cursor/Claude)"
     )
     
     # Logging
@@ -275,6 +299,7 @@ class Settings(BaseSettings):
         # Ensure output and logs directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
+        self.error_log_dir.mkdir(parents=True, exist_ok=True)
 
 
 # Global settings instance

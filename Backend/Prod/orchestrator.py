@@ -371,6 +371,20 @@ class Orchestrator:
             # Store result
             results[step.id] = result
             
+            # Error survey: log step failure
+            if not result.success:
+                try:
+                    from .core.error_survey import log_aetherflow_error
+                    log_aetherflow_error(
+                        title=f"Step {step.id} failed",
+                        nature="step_failed",
+                        proposed_solution="Re-run the step, adjust the plan, or fix the prompt.",
+                        raw_error=result.error,
+                        step_id=step.id,
+                    )
+                except Exception as survey_err:
+                    logger.debug(f"Error survey log failed: {survey_err}")
+            
             # Record metrics with provider info
             self.metrics.record_step_result(step, result, provider=provider_name)
             
@@ -401,7 +415,17 @@ class Orchestrator:
             )
             results[step.id] = failed_result
             self.metrics.record_step_result(step, failed_result)
-            
+            try:
+                from .core.error_survey import log_aetherflow_error
+                log_aetherflow_error(
+                    title=f"Step {step.id} exception",
+                    nature="step_exception",
+                    proposed_solution="Check logs and fix the cause (prompt, provider, or code).",
+                    raw_error=str(e),
+                    step_id=step.id,
+                )
+            except Exception as survey_err:
+                logger.debug(f"Error survey log failed: {survey_err}")
             # Update monitor
             self.monitor.complete_step(
                 step.id,
@@ -411,7 +435,6 @@ class Orchestrator:
                 0.0,
                 str(e)
             )
-            
             return failed_result
     
     def _load_existing_files(self, step: Step) -> Dict[str, Optional[str]]:
@@ -444,7 +467,7 @@ class Orchestrator:
             file_paths = file_paths[:MAX_FILES_PER_STEP]
         
         # Resolve project root (assuming orchestrator.py is in Backend/Prod/)
-        project_root = Path(__file__).parent.parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent
         
         # Limit total size to avoid token overflow (100KB total)
         MAX_TOTAL_SIZE = 100 * 1024  # 100KB
@@ -527,6 +550,53 @@ class Orchestrator:
         logger.info(f"Loaded {sum(1 for v in files_content.values() if v is not None)}/{len(file_paths)} existing files for step {step.id}")
         return files_content
     
+    def _load_input_files(self, step: Step) -> Dict[str, Optional[str]]:
+        """
+        Load read-only file contents from step.context.get("input_files").
+        Used for report/inventory tasks: inject genome, PRD, etc. without applying output to them.
+        """
+        files_content: Dict[str, Optional[str]] = {}
+        if not step.context or not isinstance(step.context, dict):
+            return files_content
+        file_paths = step.context.get("input_files") or []
+        if not file_paths:
+            return files_content
+        MAX_FILES = 5
+        if len(file_paths) > MAX_FILES:
+            logger.warning(f"Step {step.id} has {len(file_paths)} input_files, limiting to {MAX_FILES}")
+            file_paths = file_paths[:MAX_FILES]
+        project_root = Path(__file__).parent.parent.parent
+        MAX_TOTAL_SIZE = 100 * 1024
+        MAX_FILE_SIZE = 50 * 1024
+        total_size = 0
+        for file_path_str in file_paths:
+            try:
+                file_path = Path(file_path_str)
+                if not file_path.is_absolute():
+                    file_path = project_root / file_path
+                file_path = file_path.resolve()
+                if not file_path.exists() or not file_path.is_file():
+                    files_content[file_path_str] = None
+                    continue
+                file_size = file_path.stat().st_size
+                if total_size + file_size > MAX_TOTAL_SIZE:
+                    break
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                content_bytes = content.encode('utf-8')
+                if len(content_bytes) > MAX_FILE_SIZE:
+                    keep_start, keep_end = 40 * 1024, 10 * 1024
+                    if len(content_bytes) > keep_start + keep_end:
+                        content = content_bytes[:keep_start].decode('utf-8', errors='ignore') + "\n\n[... truncated ...]\n\n" + content_bytes[-keep_end:].decode('utf-8', errors='ignore')
+                files_content[file_path_str] = content
+                total_size += len(content.encode('utf-8'))
+            except Exception as e:
+                logger.warning(f"Error reading input_file {file_path_str}: {e}")
+                files_content[file_path_str] = None
+        if files_content:
+            logger.info(f"Loaded {sum(1 for v in files_content.values() if v is not None)} input_files for step {step.id}")
+        return files_content
+    
     async def _execute_step(
         self,
         step: Step,
@@ -559,6 +629,15 @@ class Orchestrator:
             if dep_outputs:
                 step_context = "\n\n".join([step_context] + dep_outputs) if step_context else "\n\n".join(dep_outputs)
         
+        # Load input_files (read-only) and inject as reference data
+        input_files = self._load_input_files(step)
+        if input_files:
+            ref_parts = ["\n\nReference data (read-only, do not modify):\n"]
+            for path, content in input_files.items():
+                if content is not None:
+                    ref_parts.append(f"=== File: {path} ===\n{content}\n")
+            step_context = "\n\n".join([step_context] + ref_parts) if step_context else "".join(ref_parts)
+        
         # Load existing files and inject into context
         existing_files = self._load_existing_files(step)
         surgical_mode = False
@@ -567,7 +646,7 @@ class Orchestrator:
         if existing_files:
             # Check if surgical mode should be activated
             # Surgical mode: PROD mode (BUILD or DOUBLE-CHECK) AND Python files exist
-            project_root = Path(__file__).parent.parent.parent.parent
+            project_root = Path(__file__).parent.parent.parent
             
             # First, check if we have any Python files that exist
             has_python_files = False
@@ -634,12 +713,17 @@ class Orchestrator:
                         files_section += "\nModify the existing code above according to the requirements. Preserve existing structure, imports, and patterns.\n"
                     elif step.type == "code_generation":
                         files_section += "\nAdd new code to the existing files above. Ensure compatibility with existing imports and structure.\n"
+                    elif step.type == "patch":
+                        files_section += "\nGenerate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file.\n"
                 
                 step_context = "\n\n".join([step_context, files_section]) if step_context else files_section
         
         # Execute step via AgentRouter (multi-provider)
         # Pass surgical_mode flag to agent_router
-        result = await self.agent_router.execute_step(step, step_context, surgical_mode=surgical_mode)
+        # Pass loaded_files for smart context estimation
+        result = await self.agent_router.execute_step(
+            step, step_context, surgical_mode=surgical_mode, loaded_files=existing_files
+        )
 
         # Apply surgical instructions if in surgical mode and execution succeeded
         if surgical_mode and result.success and result.output:
@@ -654,30 +738,45 @@ class Orchestrator:
                 application_errors = []
 
                 for file_path_str in existing_files.keys():
-                    if existing_files[file_path_str] is None:
-                        continue
-
                     file_path = Path(file_path_str)
                     if not file_path.is_absolute():
                         file_path = project_root / file_path
 
-                    if file_path.suffix == '.py' and file_path.exists():
-                        try:
-                            editor = SurgicalEditor(file_path)
-                            if editor.prepare():
-                                success, modified_code, original_code = editor.apply_instructions(result.output)
+                    if file_path.suffix != '.py':
+                        continue
 
-                                if success and modified_code:
-                                    # Write the modified code back to the file
-                                    file_path.write_text(modified_code, encoding='utf-8')
-                                    applied_files.append(str(file_path))
-                                    logger.info(f"Applied surgical edits to {file_path}")
-                                elif not success:
-                                    application_errors.append(f"{file_path}: {modified_code}")
-                                    logger.warning(f"Failed to apply surgical edits to {file_path}: {modified_code}")
+                    if existing_files[file_path_str] is None:
+                        # NEW FILE: Create it directly using SurgicalEditor helper
+                        try:
+                            success, message = SurgicalEditor.create_new_file(file_path, result.output)
+                            if success:
+                                applied_files.append(f"{file_path} (created)")
+                                logger.info(message)
+                            else:
+                                application_errors.append(f"{file_path}: {message}")
+                                logger.warning(f"Failed to create {file_path}: {message}")
                         except Exception as e:
-                            application_errors.append(f"{file_path}: {e}")
-                            logger.warning(f"Error applying surgical edits to {file_path}: {e}")
+                            application_errors.append(f"{file_path}: Failed to create new file: {e}")
+                            logger.warning(f"Error creating new file {file_path}: {e}")
+                    else:
+                        # EXISTING FILE: Apply surgical edits
+                        if file_path.exists():
+                            try:
+                                editor = SurgicalEditor(file_path)
+                                if editor.prepare():
+                                    success, modified_code, original_code = editor.apply_instructions(result.output)
+
+                                    if success and modified_code:
+                                        # Write the modified code back to the file
+                                        file_path.write_text(modified_code, encoding='utf-8')
+                                        applied_files.append(f"{file_path} (modified)")
+                                        logger.info(f"Applied surgical edits to {file_path}")
+                                    elif not success:
+                                        application_errors.append(f"{file_path}: {modified_code}")
+                                        logger.warning(f"Failed to apply surgical edits to {file_path}: {modified_code}")
+                            except Exception as e:
+                                application_errors.append(f"{file_path}: {e}")
+                                logger.warning(f"Error applying surgical edits to {file_path}: {e}")
 
                 # Update result output with application summary
                 if applied_files:

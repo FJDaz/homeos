@@ -1,0 +1,21 @@
+<form hx-post="/studio/validate" hx-target="#distillation-entries" hx-swap="beforeend" hx-indicator="#btn-1-4" class="border rounded p-3 bg-gray-50">
+    <h3 class="font-semibold text-gray-800 text-sm">§1.4 Clés IR</h3>
+    <p class="text-xs text-gray-600 mb-2">Coche les éléments à valider.</p>
+    <div class="space-y-1 text-sm">
+        <label class="flex items-center gap-2"><input type="checkbox" name="items" value="Intents" checked> Intents</label>
+        <label class="flex items-center gap-2"><input type="checkbox" name="items" value="Features" checked> Features</label>
+        <label class="flex items-center gap-2"><input type="checkbox" name="items" value="Compartments" checked> Compartments</label>
+    </div>
+    <input type="hidden" name="section_id" value="1.4">
+    <input type="hidden" name="section_title" value="Clés IR">
+    <div class="mt-2 flex items-center gap-2">
+        <select name="verdict" class="text-sm border rounded px-2 py-1 bg-white">
+            <option value="Accept" selected>✓ Accept</option>
+            <option value="Revise">↻ Revise</option>
+            <option value="Reject">✗ Reject</option>
+        </select>
+        <button id="btn-1-4" type="submit" class="px-3 py-1 bg-[#A6CE39] hover:bg-[#8fb82e] text-gray-900 rounded text-sm font-medium">
+            Valider
+        </button>
+    </div>
+</form>

@@ -1,0 +1,33 @@
+{
+  "task_id": "studio-patch-test",
+  "description": "Test du mode patch AETHERFLOW : insérer un fragment HTML dans studio.html après le marqueur Rapport arbitrage (patch apply en -f).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Générer UNIQUEMENT le fragment HTML suivant (une seule ligne, pas de DOCTYPE ni page) : un commentaire HTML <!-- Section 1.5 à venir (patch AETHERFLOW -f) -->. Ce fragment sera inséré après la ligne contenant '<!-- Rapport arbitrage complet (chargé en dessous) -->' dans Backend/Prod/templates/studio.html. Sortie : uniquement cette ligne de commentaire, rien d'autre.",
+      "type": "patch",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fragment est un commentaire HTML unique",
+        "Contient 'Section 1.5' ou 'patch AETHERFLOW'"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["Backend/Prod/templates/studio.html"],
+        "input_files": ["Backend/Prod/templates/studio.html"],
+        "patch": {
+          "position": "after",
+          "marker": "<!-- MARKER:arbitrage-report -->"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Test mode patch (insert fragment at marker) en AETHERFLOW -f"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "task_id": "phase1-tri-htmx-001",
+  "description": "Phase 1 TRI (ROADMAP Passage à HTMX) : Décontamination et nettoyage. 1) Archivage : script pour déplacer frontend-svelte vers archive_svelte. 2) Purge API : retirer tous les résidus Svelte de Backend/Prod/api.py (svelte_build_path, _serve_svelte_route, montage _app), servir / et /studio et /components depuis Frontend/ et output/studio uniquement. 3) Sanctuarisation : vérifier que le kernel homeos (core, ir, construction) n'est pas modifié.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer scripts/phase1_archive_svelte.sh exécutable : depuis la racine du projet, si le répertoire frontend-svelte existe, exécuter 'mv frontend-svelte archive_svelte'. Sinon ne rien faire. Shebang #!/bin/bash. Message echo avant/après pour clarté.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": ["Script existe et est exécutable", "mv frontend-svelte archive_svelte si frontend-svelte existe"],
+      "context": {
+        "language": "shell",
+        "framework": "",
+        "files": ["scripts/phase1_archive_svelte.sh"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/api.py : supprimer svelte_build_path, _serve_svelte_route, le montage de _app (StaticFiles). Servir / avec studio_index_path puis frontend_path/index.html puis page HTML d'accueil API (sans mention de frontend-svelte ni 5173). Servir /studio et /studio/ : redirect /studio.html si frontend_path/studio.html existe, sinon FileResponse studio_index_path, sinon 404 avec message 'Phase 2 HTMX'. Servir /components : redirect / si frontend existe, sinon 404 'Phase 2 HTMX'. Ne pas référencer frontend-svelte ni trailingSlash ni +layout.generated.js.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": ["Aucune référence à svelte_build_path ni _serve_svelte_route", "GET / et /studio et /components servis depuis Frontend ou output/studio", "Landing HTML sans frontend-svelte"],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer docs/04-homeos/PHASE1_SANCTUARISATION.md : court document listant les répertoires sanctuarisés (homeos/core, homeos/ir, homeos/construction) et indiquant qu'ils n'ont pas été modifiés lors de la Phase 1 TRI. Référence ROADMAP Passage à HTMX.",
+      "type": "code_generation",
+      "complexity": 0.15,
+      "estimated_tokens": 150,
+      "dependencies": ["step_2"],
+      "validation_criteria": ["Fichier existe", "Liste core, ir, construction", "Précise non modifié Phase 1"],
+      "context": {
+        "language": "markdown",
+        "framework": "",
+        "files": ["docs/04-homeos/PHASE1_SANCTUARISATION.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1 TRI ROADMAP HTMX - Décontamination, purge API, sanctuarisation kernel homeos"
+  }
+}

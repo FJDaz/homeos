@@ -1,0 +1,86 @@
+{
+  "task_id": "phase1-2-fragments-genome",
+  "description": "Phase 1.2 Péristaltisme : Génération de fragments HTML depuis le Genome. Créer SULLIVAN_DEFAULT_LIBRARY, la route GET /studio/step/4 et le template studio_step_4_defaults.html pour afficher la galerie des composants par défaut (Étape 4 du Parcours UX Sullivan).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/sullivan/default_components.py avec le dictionnaire SULLIVAN_DEFAULT_LIBRARY. Contenu : (1) status_orb avec html='<div id=\"blueprint-health\" class=\"p-4 bg-white border border-slate-200 rounded-xl flex items-center justify-between shadow-sm\"><div class=\"flex items-center gap-3\"><div class=\"relative\"><div class=\"w-3 h-3 bg-green-500 rounded-full\"></div><div class=\"absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75\"></div></div><span class=\"font-medium text-slate-700\">Système Opérationnel</span></div><button hx-get=\"/health\" hx-target=\"#health-details\" hx-swap=\"innerHTML\" class=\"text-xs bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded\">Détails</button></div>' et description='Composant de veille standard.' (2) action_stepper avec html='<div id=\"blueprint-execute\" class=\"p-6 bg-slate-900 text-slate-300 rounded-2xl font-mono text-xs\"><div class=\"flex items-center gap-2 mb-4 border-b border-slate-700 pb-2\"><span class=\"text-emerald-400\">&gt;</span><span class=\"text-slate-100 font-bold uppercase tracking-tighter\">Workflow Terminal</span></div><div class=\"space-y-1\"><p class=\"text-emerald-500/80\">[OK] Initialisation du noyau...</p><p class=\"animate-pulse\">_ En attente d'instruction...</p></div></div>' et description='Interface de suivi d'exécution.' Ajouter une fonction get_components_for_genome(genome: dict) -> dict qui mappe les endpoints du genome (ex: /health -> status_orb, /execute -> action_stepper) vers les entrées de SULLIVAN_DEFAULT_LIBRARY. Référence : docs/02-sullivan/Parcours UX Sullivan.md section Blueprints étape 4.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier default_components.py existe dans sullivan/",
+        "SULLIVAN_DEFAULT_LIBRARY contient status_orb et action_stepper",
+        "get_components_for_genome(genome) retourne un dict comp_id -> {html, description}"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/default_components.py"],
+        "input_files": ["docs/02-sullivan/Parcours UX Sullivan.md"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer Backend/Prod/templates/studio_step_4_defaults.html : template Jinja2 pour la galerie des composants par défaut. Structure : header avec h2 'Vos composants sont prêts.' et p italic 'Puisque nous avons validé ces capacités...' ; grid md:grid-cols-2 avec boucle {% for comp_id, comp_data in library_items.items() %} ; chaque carte : span ORGANE : {{ comp_id }}, div avec {{ comp_data.html | safe }}, p {{ comp_data.description }}, bouton Aperçu ; footer avec message 'C'est un peu générique, non ?' et deux boutons : 'Personnaliser maintenant' (lien href=/studio/composants) et 'Voir des idées de layouts' (lien href=/studio/composants ou placeholder pour Phase 4). Utiliser Tailwind. Référence : docs/02-sullivan/Parcours UX Sullivan.md lignes 845-883.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Template studio_step_4_defaults.html existe",
+        "Boucle sur library_items avec comp_id, comp_data",
+        "HTML safe pour les fragments, structure galerie visible"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "jinja2",
+        "files": ["Backend/Prod/templates/studio_step_4_defaults.html"],
+        "input_files": ["docs/02-sullivan/Parcours UX Sullivan.md"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Dans Backend/Prod/api.py : ajouter GET /studio/step/4 (response_class=HTMLResponse). Cette route doit : (1) Charger le genome (studio_reports_dir/homeos_genome.json ou _get_minimal_genome() si absent), (2) Importer get_components_for_genome depuis Backend.Prod.sullivan.default_components, (3) Appeler library_items = get_components_for_genome(genome), (4) Rendre templates.TemplateResponse('studio_step_4_defaults.html', {'request': request, 'library_items': library_items}). Utiliser Jinja2Templates comme pour les autres routes Studio. S'assurer que studio_reports_dir et templates_path sont disponibles.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "GET /studio/step/4 existe et retourne du HTML",
+        "Galerie affiche les composants du genome",
+        "Pas d'erreur 500 si genome absent (fallback minimal)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"],
+        "input_files": ["Backend/Prod/api.py", "Backend/Prod/sullivan/default_components.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Dans Backend/Prod/templates/studio.html : ajouter un lien ou bouton pour accéder à la galerie des composants par défaut (étape 4). À côté du lien 'Valider → Tous les composants' (qui pointe vers /studio/composants), ajouter un lien 'Voir composants par défaut' qui pointe vers /studio/step/4. Ou modifier le lien existant pour que 'Valider → Tous les composants' ouvre d'abord /studio/step/4 (galerie) avant /studio/composants. Choisir l'option la plus cohérente avec le flux : Arbitrage validé → Genome → Composants Défaut (step 4) → Composants (page complète). Suggestion : garder les deux liens : 'Composants par défaut (étape 4)' -> /studio/step/4 et 'Tous les composants' -> /studio/composants.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Lien vers /studio/step/4 visible dans studio.html",
+        "Utilisateur peut accéder à la galerie depuis le Studio"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["Backend/Prod/templates/studio.html"],
+        "input_files": ["Backend/Prod/templates/studio.html"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T12:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 1.2 Péristaltisme - Fragments HTML depuis Genome. Parcours UX Sullivan étape 4."
+  }
+}

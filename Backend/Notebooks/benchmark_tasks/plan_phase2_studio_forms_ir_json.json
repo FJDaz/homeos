@@ -1,0 +1,50 @@
+{
+  "task_id": "phase2-studio-forms-ir-json",
+  "description": "Phase 2 du plan IR Arbitrage Genome : générer les formulaires d'arbitrage Studio depuis l'IR JSON. Charger output/studio/ir_inventaire.json, valider avec ir_schema.json, exposer GET /studio/ir.json et GET /studio/arbitrage/forms (rendu Jinja), remplacer les formulaires statiques dans studio.html par un chargement HTMX des formulaires rendus.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/api.py : (1) Ajouter une fonction _load_ir_json() qui lit le fichier output/studio/ir_inventaire.json (chemin : studio_reports_dir / 'ir_inventaire.json'), parse le JSON, valide avec jsonschema en utilisant le schéma docs/references/technique/ir_schema.json (charger le fichier JSON du schéma et appeler jsonschema.validate), et retourne le dict ou lève si invalide. (2) Ajouter l'endpoint GET /studio/ir.json qui appelle _load_ir_json() et retourne le JSON (JSONResponse). Gérer le cas fichier absent (retourner 404 ou JSON vide selon contexte). Ne pas modifier studio.html ni les templates dans cette étape.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "_load_ir_json existe et lit ir_inventaire.json",
+        "Validation jsonschema avec ir_schema.json",
+        "GET /studio/ir.json retourne le JSON des organes"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py"],
+        "input_files": ["Backend/Prod/api.py", "docs/references/technique/ir_schema.json", "output/studio/ir_inventaire.json"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le template Jinja2 Backend/Prod/templates/studio_arbitrage_forms.html et l'endpoint GET /studio/arbitrage/forms. (1) Template : recevoir une variable 'organes' (liste de dicts avec id, title, claims où chaque claim a id, text, checked). Pour chaque organe : un <form> avec hx-post=\"/studio/validate\" hx-target=\"#distillation-entries\" hx-swap=\"beforeend\" class=\"border rounded p-3 bg-gray-50\". Dans le form : <h3>§{{ organe.id }} {{ organe.title }}</h3>, <p class=\"text-xs text-gray-600 mb-2\">Coche les éléments à valider.</p>, <div class=\"space-y-1 text-sm\"> avec une boucle sur organe.claims : <label><input type=\"checkbox\" name=\"items\" value=\"{{ claim.text }}\" {% if claim.checked %}checked{% endif %}> {{ claim.text }}</label>, hidden section_id={{ organe.id }}, section_title={{ organe.title }}, <select name=\"verdict\"> avec options Accept (selected), Revise, Reject, bouton Valider. (2) Dans api.py : ajouter Jinja2Templates (from fastapi.templating import Jinja2Templates, templates = Jinja2Templates(directory=str(templates_path))). Ajouter GET /studio/arbitrage/forms qui appelle _load_ir_json(), puis templates.TemplateResponse('studio_arbitrage_forms.html', {'request': request, 'organes': data['organes']}), retourner HTMLResponse. (3) Modifier Backend/Prod/templates/studio.html : remplacer tout le contenu actuel de <div id=\"arbitrage-forms\" class=\"max-h-96 overflow-auto space-y-4\"> (les 3 forms statiques §1.2, §1.3, §1.4) par un seul div avec hx-get=\"/studio/arbitrage/forms\" hx-trigger=\"load\" hx-swap=\"innerHTML\" et un placeholder 'Chargement…'. Conserver le bloc <details> avec 'Voir rapport arbitrage complet' et hx-get /studio/reports/arbitrage juste après. Si jinja2 n'est pas dans requirements.txt, l'ajouter.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Template studio_arbitrage_forms.html existe et boucle sur organes et claims",
+        "GET /studio/arbitrage/forms retourne du HTML avec les forms",
+        "studio.html charge les forms via hx-get /studio/arbitrage/forms",
+        "Rapport arbitrage (details) conservé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/api.py", "Backend/Prod/templates/studio_arbitrage_forms.html", "Backend/Prod/templates/studio.html", "requirements.txt"],
+        "input_files": ["Backend/Prod/api.py", "Backend/Prod/templates/studio.html", "output/studio/ir_inventaire.json"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 2 plan clarification IR Arbitrage Genome — formulaires Studio depuis IR JSON (SPEC_IR_ORGANES_CLAIMS, ir_schema.json)"
+  }
+}

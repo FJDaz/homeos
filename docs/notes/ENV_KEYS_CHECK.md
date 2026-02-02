@@ -3,16 +3,20 @@
 **Date** : 25 janvier 2025  
 **Fichier vérifié** : `/AETHERFLOW/.env`
 
+> ⚠️ **SÉCURITÉ** : Ne jamais coller de vraies clés API dans ce fichier ni dans aucun fichier versionné.  
+> Ce document décrit le format attendu et des exemples **factices** (`sk-...`, `AIza...`, etc.).  
+> Les clés réelles restent uniquement dans `.env` (ignoré par Git).
+
 ---
 
 ## ✅ Clés API Présentes
 
-| Clé API | Présent | Format | Valeur |
-|---------|---------|--------|--------|
-| `DEEPSEEK_API_KEY` | ✅ Oui | ✅ Correct (`sk-...`) | `sk-5686a8c0043845d9bd52d861761a53a3` |
-| `MISTRAL_API_KEY` | ✅ Oui | ✅ Correct | `jtzEsn6zSyxhZ8Mir3jgCqJ09X3uEfJA` |
-| `GOOGLE_API_KEY` | ✅ Oui | ✅ Correct (`AIza...`) | `AIzaSyCYPBwesQV_pM2qRB5LoqRFuepRxU4C3VQ` |
-| `GROQ_API_KEY` | ✅ Oui | ✅ Correct (`gsk_...`) | `gsk***` |
+| Clé API | Présent | Format | Exemple (placeholder) |
+|---------|---------|--------|------------------------|
+| `DEEPSEEK_API_KEY` | ✅ Oui | ✅ Correct (`sk-...`) | `sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `MISTRAL_API_KEY` | ✅ Oui | ✅ Correct | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `GOOGLE_API_KEY` | ✅ Oui | ✅ Correct (`AIza...`) | `AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `GROQ_API_KEY` | ✅ Oui | ✅ Correct (`gsk_...`) | `gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
 | `ANTHROPIC_API_KEY` | ❌ Non | - | Manquant |
 
 ---
@@ -50,12 +54,12 @@
 
 ### Format des Clés API
 
-| Provider | Format Attendu | Format dans .env | Statut |
+| Provider | Format Attendu | Exemple (masqué) | Statut |
 |----------|----------------|------------------|--------|
 | DeepSeek | `sk-...` | `sk-5686...` | ✅ Correct |
-| Mistral | Alphanumérique | `jtzEsn6z...` | ✅ Correct |
-| Google | `AIza...` | `AIzaSyCYP...` | ✅ Correct |
-| Groq | `gsk_...` | `gsk_2qaFK...` | ✅ Correct |
+| Mistral | Alphanumérique | `jtzEsn...` | ✅ Correct |
+| Google | `AIza...` | `AIzaSy...` | ✅ Correct |
+| Groq | `gsk_...` | `gsk_2qa...` | ✅ Correct |
 
 ---
 
@@ -117,6 +121,7 @@ Les 4 providers actifs (DeepSeek, Codestral, Gemini, Groq) ont tous leurs clés 
 1. ✅ **Aucune action urgente** - Toutes les clés critiques sont présentes
 2. ⚠️ **Optionnel** : Ajouter `ANTHROPIC_API_KEY` si vous prévoyez d'utiliser Claude pour validation
 3. ℹ️ **Note** : Les variables de configuration manquantes utilisent les valeurs par défaut de `settings.py`, ce qui est acceptable
+4. 🔒 **Ne jamais** committer de vraies clés dans ce fichier ou ailleurs ; garder les clés uniquement dans `.env` (déjà dans `.gitignore`).
 
 ---
 

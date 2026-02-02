@@ -1,0 +1,36 @@
+{
+  "task_id": "phase3a-etape2-arbitrage-htmx",
+  "description": "Phase 3 A Étape 2 : Interface d'arbitrage Sullivan HTMX interactive. Générer un fichier HTML contenant des formulaires HTMX pour valider chaque élément de l'IR avec verdicts Garder / Réserve / Obsolète.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le fichier output/studio/arbitrage_forms.html contenant des formulaires HTMX interactifs pour l'arbitrage. Chaque section de l'IR doit avoir son propre formulaire avec checkboxes. Structure HTML requise : (1) Un formulaire par section IR (1.1 Métadonnées, 1.2 Topologie, 1.3 Endpoints, 2 Modes, 3 Workflows, 4 Briques, 5 CLI). (2) Chaque formulaire doit avoir : hx-post='/studio/validate', hx-target='#distillation-entries', hx-swap='beforeend', hx-indicator='#btn-{section}', class='border rounded p-3 bg-gray-50 mb-4'. (3) Dans chaque formulaire : titre h3 '§{numéro} {titre}', paragraphe d'instruction, checkboxes pour chaque élément avec name='items' et value='{identifiant}', hidden inputs (section_id, section_title, verdict), et bouton submit '✓ Valider'. (4) Pour les endpoints : inclure les 14 endpoints du genome + 2 manquants comme checkboxes séparées. (5) Pour les modes/workflows/briques : grouper par catégorie. (6) Ton : interface utilisable, compacte, avec classes Tailwind. (7) IMPORTANT : Sortir du HTML brut valide (pas de markdown, pas de ```html), directement le code HTML.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier HTML valide généré",
+        "Formulaires HTMX avec hx-post='/studio/validate'",
+        "Checkboxes pour chaque élément arbitrable",
+        "Hidden inputs section_id, section_title, verdict",
+        "Boutons de validation par section",
+        "14 endpoints + 2 manquants présents",
+        "Sections Modes, Workflows, Briques, CLI incluses",
+        "Classes Tailwind appliquées",
+        "Pas de markdown, HTML pur"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "htmx",
+        "files": ["output/studio/arbitrage_forms.html"],
+        "input_files": ["output/studio/ir_inventaire.md", "output/studio/homeos_genome.json", "docs/04-homeos/PRD_HOMEOS.md"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-01T20:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Phase 3 A Étape 2 - Interface Arbitrage Sullivan HTMX (formulaires interactifs)"
+  }
+}
