@@ -80,14 +80,14 @@
   width: 400px;
   height: 600px;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  border: 1px solid #e2e8f0;
+  border: none;
   transition: all 0.3s ease;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .sullivan-header {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: #8cc63f; /* Couleur identité HOMEOS */
   color: white;
   padding: 16px 20px;
   display: flex;
