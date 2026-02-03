@@ -194,6 +194,7 @@ Validation post-implémentation
 - Modifier `ir/pipeline.py` sans vérifier code dupliqué
 - Contourner les modes AetherFlow (appel direct LLM)
 - Oublier les validations `genome_v1.json`
+- **Modifier `sullivan-super-widget.js` sans consulter `ARCHITECTURE_HOMEOS_SULLIVAN.md`**
 - Implémenter sans plan pré-approuvé
 
 ### ✅ BON (à favoriser) :
@@ -235,6 +236,7 @@ Validation post-implémentation
 
 - `docs/04-homeos/STATUS_REPORT_HOMEOS.md` → État actuel
 - `docs/04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md` → Vision produit
+- `docs/02-sullivan/ARCHITECTURE_HOMEOS_SULLIVAN.md` → **Architecture complète (NOUVEAU - OBLIGATOIRE)**
 - `.cursor/skills/aetherflow-modes/SKILL.md` → Modes AetherFlow
 - `Backend/Prod/sullivan/` → Code existant
 - `docs/02-sullivan/` → Documentation Sullivan
