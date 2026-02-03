@@ -426,6 +426,22 @@
 #sullivan-toggle.visible {
   display: flex !important;
 }
+
+/* === PLAN STEP STATES === */
+.plan-step.active {
+  background: #f0fdf4;
+  border-left: 3px solid #8cc63f;
+  padding-left: 5px;
+}
+
+.plan-step.completed {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.plan-step.completed input[type="checkbox"] {
+  accent-color: #8cc63f;
+}
 `;
 
   // Template HTML
@@ -490,6 +506,15 @@
       this.isTyping = false;
       this.isFullscreen = false;
       this.elements = {};
+      
+      // === PLAN MANAGEMENT STATE ===
+      this.planState = {
+        currentPlan: null,
+        currentStepIndex: 0,
+        logs: [],
+        startTime: null
+      };
+      
       this.init();
     }
 
@@ -646,6 +671,11 @@
         // Exécuter actions code (HTML généré)
         if (data.code_actions?.length > 0) {
           this.executeCodeActions(data.code_actions);
+        }
+
+        // Auto-load plan if response contains one
+        if (data.actions && data.actions.plan) {
+          this.loadPlan(data.actions.plan);
         }
 
       } catch (e) {
@@ -872,6 +902,141 @@
           setTimeout(() => btn.textContent = 'Copier', 2000);
         });
       }
+    }
+
+    // === PLAN MANAGEMENT METHODS ===
+
+    /**
+     * Charge un plan et l'affiche dans la sidebar
+     * @param {Object} planJson - Plan au format {title, steps: [{id, title, status}]}
+     */
+    loadPlan(planJson) {
+      if (!planJson || !planJson.steps) {
+        console.error('[Sullivan] loadPlan: Invalid plan JSON');
+        return;
+      }
+
+      this.planState.currentPlan = planJson;
+      this.planState.currentStepIndex = 0;
+      this.planState.startTime = Date.now();
+      this.planState.logs.push({
+        time: new Date().toISOString(),
+        action: 'plan_loaded',
+        data: { title: planJson.title, stepCount: planJson.steps.length }
+      });
+
+      this.renderPlanSteps();
+      console.log('[Sullivan] Plan loaded:', planJson.title);
+    }
+
+    /**
+     * Affiche les etapes du plan dans la sidebar
+     * Cible: #sullivan-plan-steps
+     */
+    renderPlanSteps() {
+      const container = document.querySelector('#sullivan-plan-steps');
+      if (!container) {
+        console.warn('[Sullivan] renderPlanSteps: #sullivan-plan-steps not found');
+        return;
+      }
+
+      const plan = this.planState.currentPlan;
+      if (!plan || !plan.steps) {
+        container.innerHTML = '<p class="plan-placeholder">Aucun plan actif.</p>';
+        return;
+      }
+
+      const stepsHtml = plan.steps.map((step, index) => {
+        const isActive = index === this.planState.currentStepIndex;
+        const isCompleted = step.status === 'completed';
+        const statusClass = isCompleted ? 'completed' : (isActive ? 'active' : '');
+        const checkboxChecked = isCompleted ? 'checked disabled' : '';
+
+        return `
+          <div class="plan-step ${statusClass}" data-step-index="${index}">
+            <input type="checkbox" ${checkboxChecked}>
+            <span>${step.title}</span>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="plan-title" style="font-weight:600;margin-bottom:8px;color:#1e293b;">
+          ${plan.title || 'Plan sans titre'}
+        </div>
+        ${stepsHtml}
+      `;
+    }
+
+    /**
+     * Marque l'etape courante comme terminee et passe a la suivante
+     */
+    completeCurrentStep() {
+      const plan = this.planState.currentPlan;
+      if (!plan) return;
+
+      const currentStep = plan.steps[this.planState.currentStepIndex];
+      if (currentStep) {
+        currentStep.status = 'completed';
+        this.planState.logs.push({
+          time: new Date().toISOString(),
+          action: 'step_completed',
+          data: { stepIndex: this.planState.currentStepIndex, title: currentStep.title }
+        });
+      }
+
+      if (this.planState.currentStepIndex < plan.steps.length - 1) {
+        this.planState.currentStepIndex++;
+        this.renderPlanSteps();
+      } else {
+        this.completePlan();
+      }
+    }
+
+    /**
+     * Marque le plan comme termine
+     */
+    completePlan() {
+      const duration = Date.now() - this.planState.startTime;
+      this.planState.logs.push({
+        time: new Date().toISOString(),
+        action: 'plan_completed',
+        data: {
+          durationMs: duration,
+          title: this.planState.currentPlan?.title
+        }
+      });
+
+      console.log('[Sullivan] Plan completed in', Math.round(duration/1000), 'seconds');
+      this.renderPlanSteps();
+
+      const container = document.querySelector('#sullivan-plan-steps');
+      if (container) {
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = 'background:#dcfce7;color:#166534;padding:8px;border-radius:4px;margin-top:8px;font-size:12px;';
+        successMsg.textContent = 'Plan termine avec succes!';
+        container.appendChild(successMsg);
+      }
+    }
+
+    /**
+     * Retourne les logs du plan courant
+     */
+    getPlanLogs() {
+      return this.planState.logs;
+    }
+
+    /**
+     * Reset le state du plan
+     */
+    clearPlan() {
+      this.planState = {
+        currentPlan: null,
+        currentStepIndex: 0,
+        logs: [],
+        startTime: null
+      };
+      this.renderPlanSteps();
     }
   }
 
