@@ -1,0 +1,49 @@
+{
+  "task_id": "sullivan-step-3-1-upload-png",
+  "description": "Parcours UX Sullivan 3.1 : Créer la route POST /studio/designer/upload qui reçoit un PNG, appelle DesignerMode, mappe le résultat vers VisualIntentReport, stocke en session, et retourne le fragment HTML de l'étape 6. Inclut le mapper design_structure_to_visual_intent_report et la mise à jour du formulaire étape 5.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/sullivan/identity.py : Créer la fonction design_structure_to_visual_intent_report(design_structure: Dict, design_principles: Optional[Dict] = None) -> VisualIntentReport. Elle mappe design_structure (sections, components, layout, hierarchy) vers VisualIntentReport. metadata.style_global : extraire depuis design_structure.layout ou design_structure.components[].style (bg_color, border_radius, primary_color, font_family) avec valeurs par défaut si absentes. zones : mapper design_structure.sections vers VisualZone pour chaque section : id = section.get('type', f'zone_{i}'), coordinates = section.get('bounds', {}) avec clés x,y,w,h (défaut 0,0,100,100 si absentes), hypothesis = {label: section.get('type','Zone'), confidence: 0.85, reasoning: section.get('description','')}, user_validation = None. Utiliser VisualIntentReport.from_dict() pour construire l'objet. Exporter la fonction dans __all__.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fonction design_structure_to_visual_intent_report définie et exportée",
+        "Gère design_structure avec sections vides ou sans bounds",
+        "Retourne VisualIntentReport valide"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/identity.py"],
+        "input_files": ["Backend/Prod/sullivan/identity.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/sullivan/studio_routes.py : (1) Ajouter import File, UploadFile depuis fastapi. (2) Créer la route POST /studio/designer/upload avec design_file: UploadFile = File(...). Vérifier extension (.png,.jpg,.jpeg,.svg), sauvegarder en tempfile, appeler DesignerMode(design_path=tmp_path, output_path=None, non_interactive=True).run(), puis tmp_path.unlink(). Si result['success'] et result.get('design_structure') : importer design_structure_to_visual_intent_report depuis .identity, appeler report = design_structure_to_visual_intent_report(result['design_structure']), faire studio_session.visual_intent_report = report, studio_session.current_step = 6, retourner await get_step_6_analysis(request). Sinon : retourner HTML avec message d'erreur (p-4 text-red-600). Gérer HTTPException et Exception. (3) Dans get_step_5_choice, modifier le form : hx-post='/studio/designer/upload' (au lieu de /sullivan/designer/upload), garder hx-target='#studio-main-zone', name='design_file'.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Route POST /studio/designer/upload créée et fonctionnelle",
+        "Formulaire étape 5 pointe vers /studio/designer/upload",
+        "Upload PNG alimente studio_session.visual_intent_report et affiche étape 6"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/studio_routes.py"],
+        "input_files": ["Backend/Prod/sullivan/studio_routes.py", "Backend/Prod/api.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T14:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Parcours UX Sullivan - Step 3.1 Upload PNG vers étape 6. Connexion DesignerMode -> VisualIntentReport -> get_step_6_analysis."
+  }
+}

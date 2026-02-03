@@ -1,0 +1,1026 @@
+<!--
+  SUPER WIDGET SULLIVAN - Version Studio
+  
+  Intégration complète au Studio avec:
+  - z-index maximum (flotte au-dessus de tout)
+  - Design cohérent avec le Studio
+  - Mode AGENT complet (pas création)
+  - Capacités: DOM manipulation, HTMX gen, Code R/W
+  
+  Usage: Inclure ce fichier dans studio.html via iframe ou copier le JS/CSS
+-->
+<style id="sullivan-super-widget-styles">
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SUPER WIDGET SULLIVAN - STUDIO EDITION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --sullivan-z-overlay: 9999;
+  --sullivan-z-modal: 10000;
+  --sullivan-primary: #6366f1;
+  --sullivan-primary-dark: #4f46e5;
+  --sullivan-bg: #ffffff;
+  --sullivan-surface: #f8fafc;
+  --sullivan-text: #1e293b;
+  --sullivan-text-muted: #64748b;
+  --sullivan-border: #e2e8f0;
+  --sullivan-bot-bg: #f1f5f9;
+  --sullivan-user-bg: #6366f1;
+  --sullivan-user-text: #ffffff;
+  --sullivan-success: #10b981;
+  --sullivan-warning: #f59e0b;
+  --sullivan-error: #ef4444;
+  --sullivan-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --sullivan-radius: 16px;
+}
+
+/* Widget Container - Flottant z-index max */
+.sullivan-super-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 420px;
+  height: 640px;
+  background: var(--sullivan-bg);
+  border-radius: var(--sullivan-radius);
+  box-shadow: var(--sullivan-shadow);
+  z-index: var(--sullivan-z-overlay);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--sullivan-border);
+}
+
+/* Mode minimisé */
+.sullivan-super-widget.minimized {
+  height: 64px;
+  width: 280px;
+  cursor: pointer;
+}
+
+.sullivan-super-widget.minimized .sullivan-super-body,
+.sullivan-super-widget.minimized .sullivan-super-input {
+  display: none;
+}
+
+/* Mode plein écran */
+.sullivan-super-widget.fullscreen {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  width: auto;
+  height: auto;
+  z-index: var(--sullivan-z-modal);
+}
+
+/* Header */
+.sullivan-super-header {
+  background: linear-gradient(135deg, var(--sullivan-primary), var(--sullivan-primary-dark));
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sullivan-super-avatar {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.sullivan-super-info {
+  flex: 1;
+}
+
+.sullivan-super-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sullivan-super-info p {
+  font-size: 12px;
+  opacity: 0.85;
+  margin: 2px 0 0 0;
+}
+
+.sullivan-super-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sullivan-super-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.sullivan-super-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.sullivan-super-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Body - Messages */
+.sullivan-super-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--sullivan-surface);
+}
+
+.sullivan-super-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sullivan-super-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sullivan-super-body::-webkit-scrollbar-thumb {
+  background: var(--sullivan-border);
+  border-radius: 3px;
+}
+
+/* Messages */
+.sullivan-super-message {
+  display: flex;
+  gap: 12px;
+  animation: sullivanFadeIn 0.3s ease;
+}
+
+@keyframes sullivanFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sullivan-super-message.user {
+  flex-direction: row-reverse;
+}
+
+.sullivan-super-message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sullivan-super-message.bot .sullivan-super-message-avatar {
+  background: var(--sullivan-bot-bg);
+  border: 1px solid var(--sullivan-border);
+}
+
+.sullivan-super-message.user .sullivan-super-message-avatar {
+  background: var(--sullivan-user-bg);
+  color: var(--sullivan-user-text);
+}
+
+.sullivan-super-message-content {
+  max-width: 75%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.sullivan-super-message.bot .sullivan-super-message-content {
+  background: var(--sullivan-bg);
+  border: 1px solid var(--sullivan-border);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sullivan-super-message.user .sullivan-super-message-content {
+  background: var(--sullivan-user-bg);
+  color: var(--sullivan-user-text);
+  border-bottom-right-radius: 4px;
+}
+
+/* Typing indicator */
+.sullivan-super-typing {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--sullivan-bg);
+  border-radius: 16px;
+  border: 1px solid var(--sullivan-border);
+  width: fit-content;
+}
+
+.sullivan-super-typing.active {
+  display: flex;
+}
+
+.sullivan-super-typing span {
+  width: 8px;
+  height: 8px;
+  background: var(--sullivan-text-muted);
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.sullivan-super-typing span:nth-child(1) { animation-delay: 0s; }
+.sullivan-super-typing span:nth-child(2) { animation-delay: 0.2s; }
+.sullivan-super-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Input Area */
+.sullivan-super-input {
+  padding: 16px 20px;
+  background: var(--sullivan-bg);
+  border-top: 1px solid var(--sullivan-border);
+  flex-shrink: 0;
+}
+
+.sullivan-super-input-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  background: var(--sullivan-surface);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--sullivan-border);
+  transition: border-color 0.2s;
+}
+
+.sullivan-super-input-container:focus-within {
+  border-color: var(--sullivan-primary);
+}
+
+.sullivan-super-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  min-height: 24px;
+  max-height: 120px;
+  font-family: inherit;
+}
+
+.sullivan-super-textarea::placeholder {
+  color: var(--sullivan-text-muted);
+}
+
+.sullivan-super-send-btn {
+  background: var(--sullivan-primary);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin: 4px;
+}
+
+.sullivan-super-send-btn:hover:not(:disabled) {
+  background: var(--sullivan-primary-dark);
+  transform: translateY(-1px);
+}
+
+.sullivan-super-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tool Calls Display */
+.sullivan-super-tools {
+  display: none;
+  padding: 8px 20px;
+  background: var(--sullivan-surface);
+  border-top: 1px solid var(--sullivan-border);
+  font-size: 12px;
+  color: var(--sullivan-text-muted);
+}
+
+.sullivan-super-tools.active {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sullivan-super-tools-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--sullivan-primary);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Quick Actions */
+.sullivan-super-quick-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--sullivan-bg);
+  border-top: 1px solid var(--sullivan-border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.sullivan-super-quick-btn {
+  padding: 8px 16px;
+  background: var(--sullivan-surface);
+  border: 1px solid var(--sullivan-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--sullivan-text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.sullivan-super-quick-btn:hover {
+  background: var(--sullivan-bot-bg);
+  border-color: var(--sullivan-primary);
+}
+
+/* Toggle Button (when minimized) */
+.sullivan-super-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--sullivan-primary), var(--sullivan-primary-dark));
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: var(--sullivan-shadow);
+  z-index: var(--sullivan-z-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sullivan-super-toggle:hover {
+  transform: scale(1.1);
+}
+
+.sullivan-super-toggle.hidden {
+  display: none;
+}
+
+/* Code blocks in messages */
+.sullivan-super-message-content pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  margin: 12px 0;
+}
+
+.sullivan-super-message-content code {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.sullivan-super-message-content p {
+  margin: 0 0 8px 0;
+}
+
+.sullivan-super-message-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Context Info Panel */
+.sullivan-super-context {
+  display: none;
+  position: absolute;
+  top: 72px;
+  left: 20px;
+  right: 20px;
+  background: var(--sullivan-bg);
+  border: 1px solid var(--sullivan-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--sullivan-shadow);
+  z-index: 10;
+}
+
+.sullivan-super-context.active {
+  display: block;
+}
+
+.sullivan-super-context h4 {
+  font-size: 13px;
+  margin: 0 0 12px 0;
+  color: var(--sullivan-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sullivan-super-context-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sullivan-border);
+  font-size: 13px;
+}
+
+.sullivan-super-context-item:last-child {
+  border-bottom: none;
+}
+
+.sullivan-super-context-label {
+  color: var(--sullivan-text-muted);
+}
+
+.sullivan-super-context-value {
+  font-weight: 500;
+  color: var(--sullivan-text);
+}
+
+/* Animations for cursor (typewriter) */
+.sullivan-super-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--sullivan-primary);
+  margin-left: 2px;
+  animation: cursorBlink 1s infinite;
+  vertical-align: middle;
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .sullivan-super-widget {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+  
+  .sullivan-super-toggle {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+</style>
+
+<!-- SUPER WIDGET HTML -->
+<div id="sullivan-super-widget" class="sullivan-super-widget minimized">
+  <!-- Header -->
+  <div class="sullivan-super-header">
+    <div class="sullivan-super-avatar">🎨</div>
+    <div class="sullivan-super-info">
+      <h3>Sullivan</h3>
+      <p>Agent Studio <span class="sullivan-super-mode-badge">● AGENT MODE</span></p>
+    </div>
+    <div class="sullivan-super-controls">
+      <button class="sullivan-super-btn" onclick="SullivanSuperWidget.toggleContext()" title="Contexte">📋</button>
+      <button class="sullivan-super-btn" onclick="SullivanSuperWidget.toggleFullscreen()" title="Plein écran">⛶</button>
+      <button class="sullivan-super-btn" onclick="SullivanSuperWidget.toggleMinimize()" title="Minimiser">−</button>
+    </div>
+  </div>
+  
+  <!-- Context Panel -->
+  <div id="sullivan-context-panel" class="sullivan-super-context">
+    <h4>📊 Contexte Studio</h4>
+    <div class="sullivan-super-context-item">
+      <span class="sullivan-super-context-label">Projet</span>
+      <span id="ctx-project" class="sullivan-super-context-value">—</span>
+    </div>
+    <div class="sullivan-super-context-item">
+      <span class="sullivan-super-context-label">Étape</span>
+      <span id="ctx-step" class="sullivan-super-context-value">—</span>
+    </div>
+    <div class="sullivan-super-context-item">
+      <span class="sullivan-super-context-label">Session</span>
+      <span id="ctx-session" class="sullivan-super-context-value">—</span>
+    </div>
+    <div class="sullivan-super-context-item">
+      <span class="sullivan-super-context-label">Mode</span>
+      <span class="sullivan-super-context-value" style="color: var(--sullivan-success);">AGENT</span>
+    </div>
+  </div>
+  
+  <!-- Messages -->
+  <div id="sullivan-messages" class="sullivan-super-body">
+    <div class="sullivan-super-message bot">
+      <div class="sullivan-super-message-avatar">🎨</div>
+      <div class="sullivan-super-message-content">
+        Salut ! Je suis Sullivan en mode <strong>AGENT STUDIO</strong>. Je peux manipuler le DOM, générer du HTMX, lire et modifier le code. Que veux-tu faire ? 🚀
+      </div>
+    </div>
+  </div>
+  
+  <!-- Typing Indicator -->
+  <div id="sullivan-typing" class="sullivan-super-typing">
+    <span></span><span></span><span></span>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="sullivan-super-quick-actions">
+    <button class="sullivan-super-quick-btn" onclick="SullivanSuperWidget.sendQuick('Analyse cette page')">🔍 Analyser</button>
+    <button class="sullivan-super-quick-btn" onclick="SullivanSuperWidget.sendQuick('Génère un composant HTMX')">⚡ HTMX</button>
+    <button class="sullivan-super-quick-btn" onclick="SullivanSuperWidget.sendQuick('Modifie le style')">🎨 Styler</button>
+    <button class="sullivan-super-quick-btn" onclick="SullivanSuperWidget.sendQuick('Debug cette erreur')">🐛 Debug</button>
+  </div>
+  
+  <!-- Tools Status -->
+  <div id="sullivan-tools" class="sullivan-super-tools">
+    <span class="sullivan-super-tools-badge">⚡</span>
+    <span id="sullivan-tools-text">Exécution en cours...</span>
+  </div>
+  
+  <!-- Input -->
+  <div class="sullivan-super-input">
+    <div class="sullivan-super-input-container">
+      <textarea 
+        id="sullivan-input" 
+        class="sullivan-super-textarea" 
+        placeholder="Dis-moi ce que tu veux faire... (ex: 'Change la couleur du header en bleu')"
+        rows="1"
+        onkeydown="SullivanSuperWidget.handleKeydown(event)"
+        oninput="SullivanSuperWidget.autoResize(this)"
+      ></textarea>
+      <button class="sullivan-super-send-btn" onclick="SullivanSuperWidget.send()" id="sullivan-send-btn">
+        ➤
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toggle Button -->
+<button id="sullivan-super-toggle" class="sullivan-super-toggle" onclick="SullivanSuperWidget.toggleMinimize()">
+  🎨
+</button>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// SUPER WIDGET SULLIVAN - JAVASCRIPT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const SullivanSuperWidget = {
+  // Configuration
+  config: {
+    apiUrl: '/api/sullivan/chat',
+    sessionId: null,
+    userId: 'studio-user',
+    step: 9,  // Mode AGENT (pas création)
+    mode: 'agent',  // 'agent' | 'creation'
+    typewriterEnabled: true,
+    typewriterSpeed: 15,
+  },
+  
+  // État
+  state: {
+    isTyping: false,
+    isMinimized: true,
+    isFullscreen: false,
+    contextVisible: false,
+    messages: [],
+    currentProject: null,
+  },
+  
+  // DOM refs
+  elements: {},
+  
+  // Initialisation
+  init() {
+    this.elements = {
+      widget: document.getElementById('sullivan-super-widget'),
+      toggle: document.getElementById('sullivan-super-toggle'),
+      messages: document.getElementById('sullivan-messages'),
+      input: document.getElementById('sullivan-input'),
+      sendBtn: document.getElementById('sullivan-send-btn'),
+      typing: document.getElementById('sullivan-typing'),
+      tools: document.getElementById('sullivan-tools'),
+      toolsText: document.getElementById('sullivan-tools-text'),
+      contextPanel: document.getElementById('sullivan-context-panel'),
+      ctxProject: document.getElementById('ctx-project'),
+      ctxStep: document.getElementById('ctx-step'),
+      ctxSession: document.getElementById('ctx-session'),
+    };
+    
+    // Créer session
+    this.config.sessionId = this.generateSessionId();
+    
+    // Update context panel
+    this.updateContext();
+    
+    // Charger projet actuel du Studio
+    this.detectStudioContext();
+    
+    console.log('[Sullivan Super Widget] Initialized in AGENT mode');
+  },
+  
+  // Détecte le contexte du Studio
+  detectStudioContext() {
+    // Essayer de récupérer les infos du Studio
+    const urlParams = new URLSearchParams(window.location.search);
+    const project = urlParams.get('project') || urlParams.get('genome');
+    
+    if (project) {
+      this.state.currentProject = project;
+      this.updateContext();
+    }
+    
+    // Écouter les changements d'étape du Studio
+    if (window.studioState) {
+      this.config.step = window.studioState.step || 9;
+      this.updateContext();
+    }
+  },
+  
+  // Met à jour l'affichage du contexte
+  updateContext() {
+    if (this.elements.ctxProject) {
+      this.elements.ctxProject.textContent = this.state.currentProject || 'Studio Actif';
+    }
+    if (this.elements.ctxStep) {
+      this.elements.ctxStep.textContent = this.config.mode === 'agent' ? 'AGENT' : `${this.config.step}/9`;
+    }
+    if (this.elements.ctxSession) {
+      this.elements.ctxSession.textContent = this.config.sessionId?.slice(0, 8) + '...';
+    }
+  },
+  
+  // Génère ID de session
+  generateSessionId() {
+    return 'studio_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+  },
+  
+  // Toggle minimize
+  toggleMinimize() {
+    this.state.isMinimized = !this.state.isMinimized;
+    this.elements.widget.classList.toggle('minimized', this.state.isMinimized);
+    this.elements.toggle.classList.toggle('hidden', !this.state.isMinimized);
+    
+    if (!this.state.isMinimized) {
+      this.elements.input.focus();
+    }
+  },
+  
+  // Toggle fullscreen
+  toggleFullscreen() {
+    this.state.isFullscreen = !this.state.isFullscreen;
+    this.elements.widget.classList.toggle('fullscreen', this.state.isFullscreen);
+  },
+  
+  // Toggle context panel
+  toggleContext() {
+    this.state.contextVisible = !this.state.contextVisible;
+    this.elements.contextPanel.classList.toggle('active', this.state.contextVisible);
+  },
+  
+  // Auto-resize textarea
+  autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+  },
+  
+  // Gestion touche Entrée
+  handleKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      this.send();
+    }
+  },
+  
+  // Envoi rapide (boutons)
+  sendQuick(text) {
+    this.elements.input.value = text;
+    this.send();
+  },
+  
+  // Envoi message
+  async send() {
+    const text = this.elements.input.value.trim();
+    if (!text || this.state.isTyping) return;
+    
+    // Ajouter message utilisateur
+    this.addMessage('user', text);
+    this.elements.input.value = '';
+    this.elements.input.style.height = 'auto';
+    
+    // Afficher typing
+    this.showTyping(true);
+    this.state.isTyping = true;
+    
+    try {
+      // Appel API
+      const response = await fetch(this.config.apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          session_id: this.config.sessionId,
+          user_id: this.config.userId,
+          step: this.config.step,
+          mode: this.config.mode,  // 'agent' pour avoir toutes les capacités
+          context: {
+            current_project: this.state.currentProject,
+            page_url: window.location.href,
+            studio_context: this.getStudioContext(),
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Afficher outils utilisés
+      if (data.tool_calls && data.tool_calls.length > 0) {
+        this.showTools(data.tool_calls);
+      }
+      
+      // Afficher réponse avec typewriter
+      await this.addMessageBot(data.content);
+      
+      // Exécuter actions DOM si présentes
+      if (data.dom_actions) {
+        this.executeDomActions(data.dom_actions);
+      }
+      
+    } catch (error) {
+      console.error('[Sullivan] Error:', error);
+      this.addMessage('bot', '❌ Oups, une erreur est survenue. Réessaie ou rafraîchis la page.');
+    } finally {
+      this.showTyping(false);
+      this.showTools(null);
+      this.state.isTyping = false;
+    }
+  },
+  
+  // Récupère le contexte du Studio
+  getStudioContext() {
+    return {
+      step: this.config.step,
+      genome: window.currentGenome || null,
+      topology: window.currentTopology || null,
+      url: window.location.pathname,
+    };
+  },
+  
+  // Ajoute message utilisateur
+  addMessage(role, content) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `sullivan-super-message ${role}`;
+    msgDiv.innerHTML = `
+      <div class="sullivan-super-message-avatar">${role === 'user' ? '👤' : '🎨'}</div>
+      <div class="sullivan-super-message-content">${this.escapeHtml(content)}</div>
+    `;
+    this.elements.messages.appendChild(msgDiv);
+    this.scrollToBottom();
+    
+    this.state.messages.push({ role, content });
+  },
+  
+  // Ajoute message bot avec typewriter
+  async addMessageBot(content) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'sullivan-super-message bot';
+    msgDiv.innerHTML = `
+      <div class="sullivan-super-message-avatar">🎨</div>
+      <div class="sullivan-super-message-content"><span class="typing-content"></span><span class="sullivan-super-cursor"></span></div>
+    `;
+    this.elements.messages.appendChild(msgDiv);
+    
+    const contentSpan = msgDiv.querySelector('.typing-content');
+    const cursor = msgQuerySelector('.sullivan-super-cursor');
+    
+    if (this.config.typewriterEnabled) {
+      await this.typewriterEffect(contentSpan, content);
+      cursor?.remove();
+    } else {
+      contentSpan.innerHTML = this.formatContent(content);
+    }
+    
+    this.scrollToBottom();
+    this.state.messages.push({ role: 'bot', content });
+  },
+  
+  // Effet machine à écrire
+  async typewriterEffect(element, text) {
+    const speed = this.config.typewriterSpeed;
+    const pauseChars = '.!?;,';
+    
+    // Convertir markdown simple en HTML
+    const formatted = this.formatContent(text);
+    
+    // Pour l'instant, on affiche directement (typewriter sur HTML est complexe)
+    // On peut améliorer pour faire caractère par caractère
+    element.innerHTML = formatted;
+    
+    // Animation simple de fade-in
+    element.style.opacity = '0';
+    element.style.transition = 'opacity 0.3s';
+    await this.delay(50);
+    element.style.opacity = '1';
+    
+    // Si on veut vraiment le caractère par caractère, il faut parser le HTML
+    // et afficher progressivement. Pour l'instant, fade-in est plus simple.
+  },
+  
+  // Formate le contenu (markdown simple -> HTML)
+  formatContent(text) {
+    return this.escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code style="background: rgba(99, 102, 241, 0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">$1</code>')
+      .replace(/\n/g, '<br>');
+  },
+  
+  // Escape HTML
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  },
+  
+  // Affiche/masque typing
+  showTyping(show) {
+    this.elements.typing.classList.toggle('active', show);
+    if (show) {
+      this.elements.messages.appendChild(this.elements.typing);
+      this.scrollToBottom();
+    }
+  },
+  
+  // Affiche outils utilisés
+  showTools(tools) {
+    if (!tools || tools.length === 0) {
+      this.elements.tools.classList.remove('active');
+      return;
+    }
+    
+    const toolNames = tools.map(t => t.tool || t.name).join(', ');
+    this.elements.toolsText.textContent = `Outils: ${toolNames}`;
+    this.elements.tools.classList.add('active');
+  },
+  
+  // Exécute actions DOM
+  executeDomActions(actions) {
+    if (!Array.isArray(actions)) return;
+    
+    actions.forEach(action => {
+      try {
+        switch (action.type) {
+          case 'setStyle':
+            this.domSetStyle(action.selector, action.styles);
+            break;
+          case 'addClass':
+            this.domAddClass(action.selector, action.className);
+            break;
+          case 'removeClass':
+            this.domRemoveClass(action.selector, action.className);
+            break;
+          case 'setContent':
+            this.domSetContent(action.selector, action.content);
+            break;
+          case 'insertHTML':
+            this.domInsertHTML(action.selector, action.html, action.position);
+            break;
+          case 'scrollTo':
+            this.domScrollTo(action.selector);
+            break;
+          case 'highlight':
+            this.domHighlight(action.selector);
+            break;
+          default:
+            console.log('[Sullivan DOM Action]', action);
+        }
+      } catch (e) {
+        console.error('[Sullivan DOM Error]', e);
+      }
+    });
+  },
+  
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // CAPACITÉS DOM MANIPULATION
+  // ═══════════════════════════════════════════════════════════════════════════════
+  
+  domSetStyle(selector, styles) {
+    const el = document.querySelector(selector);
+    if (el) Object.assign(el.style, styles);
+  },
+  
+  domAddClass(selector, className) {
+    document.querySelectorAll(selector).forEach(el => el.classList.add(className));
+  },
+  
+  domRemoveClass(selector, className) {
+    document.querySelectorAll(selector).forEach(el => el.classList.remove(className));
+  },
+  
+  domSetContent(selector, content) {
+    const el = document.querySelector(selector);
+    if (el) el.innerHTML = content;
+  },
+  
+  domInsertHTML(selector, html, position = 'beforeend') {
+    const el = document.querySelector(selector);
+    if (el) el.insertAdjacentHTML(position, html);
+  },
+  
+  domScrollTo(selector) {
+    const el = document.querySelector(selector);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+  
+  domHighlight(selector) {
+    const el = document.querySelector(selector);
+    if (el) {
+      el.style.transition = 'box-shadow 0.3s';
+      el.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.5)';
+      setTimeout(() => {
+        el.style.boxShadow = '';
+      }, 2000);
+    }
+  },
+  
+  // Scroll to bottom
+  scrollToBottom() {
+    this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
+  },
+  
+  // Delay helper
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
+};
+
+// Auto-init quand DOM prêt
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => SullivanSuperWidget.init());
+} else {
+  SullivanSuperWidget.init();
+}
+</script>

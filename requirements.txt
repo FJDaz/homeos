@@ -38,6 +38,10 @@ llama-index-embeddings-openai>=0.1.0  # For embeddings
 # Sullivan multimodal (Visual Auditor)
 playwright>=1.49.0
 
+# Sullivan upload mode (resize/compress images for Gemini Vision)
+# Optional: without Pillow, raw image is sent (may fail on large files)
+Pillow>=10.0.0
+
 # AST manipulation for Surgical Edit mode
 astunparse>=1.6.3
 

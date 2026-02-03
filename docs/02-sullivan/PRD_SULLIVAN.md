@@ -77,6 +77,7 @@ Sullivan s’appuie sur **AETHERFLOW** pour la génération de code (exécution 
 | **BackendAnalyzer** | `sullivan/analyzer/backend_analyzer.py` | Structure projet, routes API (FastAPI/Flask), modèles (Pydantic/SQLAlchemy), intents, fonction globale (type produit, acteurs, flux) |
 | **UIInferenceEngine** | `sullivan/analyzer/ui_inference_engine.py` | Inférence UI top-down : Intention → Corps → Organes → Molécules → Atomes |
 | **DevMode** | `sullivan/modes/dev_mode.py` | Workflow « Collaboration Heureuse » : analyse → inférence → génération ; dialogue stratégique, HCI Mentor |
+| **FrontendMode** | `sullivan/modes/frontend_mode.py` | Orchestration intelligente multi-modèles (Gemini/DeepSeek/Groq) pour workflows frontend avancés |
 
 ### Phase 2 : Analyse Design ✅
 
@@ -137,6 +138,19 @@ Extraction Structure → Mapping Logique →
 Génération Composants
 ```
 
+### FrontendMode — « Orchestration Intelligente »
+
+```
+Tâche Frontend → FrontendRouter sélectionne modèle optimal →
+Exécution avec Gemini/DeepSeek/Groq → Résultat
+```
+
+**Routage automatique** :
+- Vision → Gemini
+- Grand contexte (>50k) → Gemini
+- Code génération → DeepSeek
+- Micro-ajustements/Dialogue/Validation → Groq (fallback Gemini)
+
 ---
 
 ## 🔧 Composants Techniques
@@ -172,6 +186,11 @@ Voir `docs/references/technique/REPERTOIRE_OUTPUTS_SULLIVAN.md`.
 - `GET /sullivan/components` — Liste composants  
 - `POST /sullivan/dev/analyze` — Analyse backend (DevMode)  
 - `POST /sullivan/designer/analyze` — Analyse design (DesignerMode)  
+- `POST /sullivan/frontend/analyze` — Analyse design (FrontendMode)  
+- `POST /sullivan/frontend/generate` — Génération composants HTML (FrontendMode)  
+- `POST /sullivan/frontend/refine` — Raffinement style HTML (FrontendMode)  
+- `POST /sullivan/dialogue` — Dialogue conversationnel (FrontendMode)  
+- `POST /sullivan/frontend/validate` — Validation homéostasie JSON (FrontendMode)  
 
 Exposés via l’API FastAPI du projet ; CORS et fichiers statiques pour le frontend.
 

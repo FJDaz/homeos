@@ -469,9 +469,9 @@ class Orchestrator:
         # Resolve project root (assuming orchestrator.py is in Backend/Prod/)
         project_root = Path(__file__).parent.parent.parent
         
-        # Limit total size to avoid token overflow (100KB total)
-        MAX_TOTAL_SIZE = 100 * 1024  # 100KB
-        MAX_FILE_SIZE = 50 * 1024  # 50KB per file
+        # Limit total size to avoid token overflow (~250k tokens ≈ 1MB)
+        MAX_TOTAL_SIZE = 1024 * 1024  # 1MB total
+        MAX_FILE_SIZE = 200 * 1024  # 200KB per file
         total_size = 0
         
         for file_path_str in file_paths:
@@ -520,9 +520,9 @@ class Orchestrator:
                     # Truncate if necessary (keep beginning and end)
                     if len(content.encode('utf-8')) > MAX_FILE_SIZE:
                         content_bytes = content.encode('utf-8')
-                        # Keep first 40KB and last 10KB
-                        keep_start = 40 * 1024
-                        keep_end = 10 * 1024
+                        # Keep first 160KB and last 40KB
+                        keep_start = 160 * 1024
+                        keep_end = 40 * 1024
                         if len(content_bytes) > keep_start + keep_end:
                             start_part = content_bytes[:keep_start].decode('utf-8', errors='ignore')
                             end_part = content_bytes[-keep_end:].decode('utf-8', errors='ignore')
@@ -566,8 +566,8 @@ class Orchestrator:
             logger.warning(f"Step {step.id} has {len(file_paths)} input_files, limiting to {MAX_FILES}")
             file_paths = file_paths[:MAX_FILES]
         project_root = Path(__file__).parent.parent.parent
-        MAX_TOTAL_SIZE = 100 * 1024
-        MAX_FILE_SIZE = 50 * 1024
+        MAX_TOTAL_SIZE = 1024 * 1024  # 1MB
+        MAX_FILE_SIZE = 200 * 1024  # 200KB per file
         total_size = 0
         for file_path_str in file_paths:
             try:
@@ -585,7 +585,7 @@ class Orchestrator:
                     content = f.read()
                 content_bytes = content.encode('utf-8')
                 if len(content_bytes) > MAX_FILE_SIZE:
-                    keep_start, keep_end = 40 * 1024, 10 * 1024
+                    keep_start, keep_end = 160 * 1024, 40 * 1024
                     if len(content_bytes) > keep_start + keep_end:
                         content = content_bytes[:keep_start].decode('utf-8', errors='ignore') + "\n\n[... truncated ...]\n\n" + content_bytes[-keep_end:].decode('utf-8', errors='ignore')
                 files_content[file_path_str] = content

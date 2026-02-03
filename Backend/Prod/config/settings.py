@@ -170,6 +170,12 @@ class Settings(BaseSettings):
         description="Cost per 1K output tokens (USD)"
     )
     
+    deepseek_max_tokens: int = Field(
+        default=4096,
+        alias="DEEPSEEK_MAX_TOKENS",
+        description="Maximum output tokens for DeepSeek API (deepseek-coder limit: 4096-8192, using conservative 4096)"
+    )
+    
     # API URLs (for future providers)
     mistral_api_url: str = Field(
         default="https://api.mistral.ai/v1/chat/completions",

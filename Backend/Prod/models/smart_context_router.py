@@ -114,9 +114,10 @@ class SmartContextRouter:
     THRESHOLD_FAST = 10000      # < 10k: Groq
     THRESHOLD_BALANCED = 50000  # 10k-50k: DeepSeek
     # > 50k: Gemini
-    
+
     # Chunking threshold - steps above this will be chunked
-    CHUNK_THRESHOLD = 30000
+    # Reduced from 30k to 15k to avoid Gemini timeouts on large plans
+    CHUNK_THRESHOLD = 15000
     
     # Max files before considering chunking
     MAX_FILES_BEFORE_CHUNKING = 3

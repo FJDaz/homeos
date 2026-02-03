@@ -1,5 +1,7 @@
 """DesignAnalyzer - Analyse designs avec modèle vision pour extraction structure."""
-from typing import List, Dict, Optional, Any
+import json
+import re
+from typing import List, Dict, Optional, Any, Tuple
 from pathlib import Path
 import base64
 from loguru import logger
@@ -40,6 +42,16 @@ class DesignStructure:
             "layout": self.layout,
             "hierarchy": self.hierarchy
         }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "DesignStructure":
+        """Crée une instance depuis un dictionnaire."""
+        return cls(
+            sections=data.get("sections", []),
+            components=data.get("components", []),
+            layout=data.get("layout", {}),
+            hierarchy=data.get("hierarchy", {}),
+        )
 
 
 class DesignAnalyzer:
@@ -84,13 +96,15 @@ class DesignAnalyzer:
         if not image_path.exists():
             raise FileNotFoundError(f"Image not found: {image_path}")
         
-        # Lire l'image et encoder en base64
-        image_data = self._read_image(image_path)
+        # Pré-traiter l'image pour Gemini (resize/compress si trop grosse)
+        image_data, mime_type = self._load_image_for_vision(image_path)
         
         # Analyser avec modèle vision via AgentRouter
         # Utiliser Gemini 3 Flash (prioritaire) avec fallback automatique
         try:
-            structure_dict = await self._analyze_with_vision_model(image_data, image_path)
+            structure_dict = await self._analyze_with_vision_model(
+                image_data, image_path, mime_type
+            )
         except Exception as e:
             logger.warning(f"Vision model analysis failed: {e}, falling back to OCR + heuristics")
             structure_dict = await self._analyze_with_ocr_heuristics(image_path)
@@ -187,11 +201,25 @@ class DesignAnalyzer:
         """Lit une image et retourne les données binaires."""
         with open(image_path, 'rb') as f:
             return f.read()
-    
+
+    def _load_image_for_vision(self, image_path: Path) -> Tuple[bytes, str]:
+        """
+        Charge et pré-traite l'image pour Gemini Vision.
+        Resize/compress si trop grosse (limite inline ~20MB).
+        """
+        try:
+            from ..upload import preprocess_for_gemini
+            return preprocess_for_gemini(image_path)
+        except ImportError:
+            data = self._read_image(image_path)
+            mime = "image/png" if image_path.suffix.lower() == ".png" else "image/jpeg"
+            return data, mime
+
     async def _analyze_with_vision_model(
         self,
         image_data: bytes,
-        image_path: Path
+        image_path: Path,
+        mime_type: str = "image/png",
     ) -> Dict[str, Any]:
         """
         Analyse avec modèle vision via AgentRouter.
@@ -208,55 +236,137 @@ class DesignAnalyzer:
         # Encoder en base64 pour l'API
         image_base64 = base64.b64encode(image_data).decode('utf-8')
         
-        # Prompt pour extraction structure
-        prompt = f"""
-Analyze this design image and extract:
-1. Sections (Hero, Features, CTA, Footer, etc.) with their types and positions
-2. Components (buttons, forms, cards, inputs, etc.) with their types, text, and bounds
-3. Layout information (grid, flex, spacing, etc.)
-4. Visual hierarchy (primary, secondary, tertiary elements)
+        # Prompt optimisé pour JSON valide (Anchor Tagging technique)
+        # Limite les sections/composants pour éviter JSON trop long qui se tronque
+        prompt = """{
+"task": "Analyze this UI design image",
+"instructions": [
+  "Identify main sections (Header, Sidebar, Content, Footer, etc.)",
+  "Detect components (buttons, inputs, cards, tabs, labels)",
+  "Extract layout type and visual hierarchy",
+  "Output MUST be valid JSON - start with { and end with }",
+  "LIMIT: Max 5 sections, max 15 components total"
+],
+"output_schema": {
+  "sections": [{"type": "string", "bounds": [0,0,100,100], "components": []}],
+  "components": [{"type": "string", "text": "string", "bounds": [0,0,100,100], "style": {}}],
+  "layout": {"type": "string", "columns": 1},
+  "hierarchy": {"primary": [], "secondary": [], "tertiary": []}
+}
+}
 
-Return JSON structure:
-{{
-    "sections": [
-        {{"type": "Hero", "bounds": [x, y, width, height], "components": [...]}},
-        ...
-    ],
-    "components": [
-        {{"type": "button", "text": "...", "bounds": [...], "style": {{...}}}},
-        ...
-    ],
-    "layout": {{"type": "grid", "columns": 3, ...}},
-    "hierarchy": {{"primary": [...], "secondary": [...], "tertiary": [...]}}
-}}
-"""
+CRITICAL: Your response MUST start with { and end with }. No markdown, no explanation, no text outside JSON.
+Return the analysis as a single valid JSON object:"""
         
-        # Utiliser AgentRouter pour appeler modèle vision
-        # AgentRouter gère automatiquement le fallback si rate limit
+        # Appel réel à Gemini Vision
+        gemini = getattr(self.agent_router, "_clients", {}).get("gemini")
+        if not gemini:
+            from ...models.gemini_client import GeminiClient
+            gemini = GeminiClient(execution_mode="BUILD")
+        
+        logger.info("Calling vision model via Gemini (generate_with_image)")
+        result = await gemini.generate_with_image(
+            prompt,
+            image_base64,
+            mime_type=mime_type,
+            output_constraint="JSON only",
+            max_tokens=8192,
+        )
+        
+        if not result.success:
+            raise RuntimeError(result.error or "Gemini vision call failed")
+        
+        # Parser la réponse JSON (robuste aux erreurs Gemini)
+        text = (result.code or "").strip()
+        if "```" in text:
+            match = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
+            if match:
+                text = match.group(1).strip()
+        start = text.find("{")
+        if start >= 0:
+            text = text[start:]
+
+        # Nettoyer le JSON avant parsing (trailing commas, etc.)
+        text = self._clean_json(text)
+
         try:
-            # Pour l'instant, simulation - à remplacer par appel réel à AgentRouter avec vision
-            # Le modèle vision sera sélectionné automatiquement (Gemini 3 Flash prioritaire)
-            logger.info("Calling vision model via AgentRouter (Gemini 3 Flash)")
-            
-            # TODO: Implémenter appel réel à AgentRouter avec support vision
-            # Pour l'instant, retourner structure simulée
-            return {
-                "sections": [
-                    {"type": "Hero", "bounds": [0, 0, 1200, 600], "components": []},
-                    {"type": "Features", "bounds": [0, 600, 1200, 400], "components": []},
-                    {"type": "CTA", "bounds": [0, 1000, 1200, 200], "components": []}
-                ],
-                "components": [
-                    {"type": "button", "text": "Get Started", "bounds": [500, 500, 200, 50]},
-                    {"type": "input", "text": "Email", "bounds": [400, 1050, 400, 40]}
-                ],
-                "layout": {"type": "grid", "columns": 3},
-                "hierarchy": {"primary": ["Hero"], "secondary": ["Features"], "tertiary": ["CTA"]}
-            }
-        except Exception as e:
-            logger.error(f"Vision model analysis failed: {e}")
-            raise
-    
+            return json.loads(text)
+        except json.JSONDecodeError as e:
+            # Log le JSON problématique pour debug
+            logger.error(f"JSON parse error: {e}")
+            logger.debug(f"Problematic JSON (first 2000 chars): {text[:2000]}")
+
+            # Tentative de réparation plus agressive
+            text = self._repair_json_aggressive(text)
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError as e2:
+                logger.error(f"JSON repair failed: {e2}")
+                raise
+
+    def _clean_json(self, text: str) -> str:
+        """Nettoie le JSON malformé retourné par Gemini."""
+        # Supprimer les trailing commas avant ] ou }
+        text = re.sub(r',\s*([\]}])', r'\1', text)
+        # Supprimer les commentaires // ...
+        text = re.sub(r'//[^\n]*', '', text)
+        # Ajouter virgules manquantes entre } et { (objets adjacents dans array)
+        text = re.sub(r'\}\s*\{', '},{', text)
+        # Ajouter virgules manquantes entre ] et [ (arrays adjacents)
+        text = re.sub(r'\]\s*\[', '],[', text)
+        # Ajouter virgules manquantes entre } et " (fin objet, début clé)
+        text = re.sub(r'\}\s*"', '},"', text)
+        # Ajouter virgules manquantes entre ] et " (fin array, début clé)
+        text = re.sub(r'\]\s*"', '],"', text)
+        # Ajouter virgules manquantes entre valeur et " (ex: 100 "next_key")
+        text = re.sub(r'(\d)\s+"', r'\1,"', text)
+        # Ajouter virgules manquantes entre true/false/null et "
+        text = re.sub(r'(true|false|null)\s+"', r'\1,"', text)
+        # Ajouter virgules manquantes entre " et " (fin string, début clé)
+        # Attention: ne pas matcher les strings internes
+        text = re.sub(r'"\s*\n\s*"', '",\n"', text)
+        # Tronquer au dernier } valide (Gemini peut ajouter du texte après)
+        last_brace = text.rfind('}')
+        if last_brace >= 0:
+            text = text[:last_brace + 1]
+        return text
+
+    def _repair_json_aggressive(self, text: str) -> str:
+        """
+        Réparation agressive du JSON malformé.
+        Utilisé en dernier recours si _clean_json échoue.
+        """
+        # Remplacer les single quotes par double quotes (erreur fréquente)
+        # Attention: ne pas remplacer dans les strings
+        text = re.sub(r"(?<=[{,\[])\s*'([^']+)'\s*:", r'"\1":', text)
+        text = re.sub(r":\s*'([^']*)'(?=[,}\]])", r':"\1"', text)
+
+        # Gérer les clés sans quotes
+        text = re.sub(r'(?<=[{,])\s*(\w+)\s*:', r'"\1":', text)
+
+        # Supprimer les virgules en fin de liste/objet (re-check)
+        text = re.sub(r',(\s*[}\]])', r'\1', text)
+
+        # Équilibrer les accolades et crochets
+        open_braces = text.count('{')
+        close_braces = text.count('}')
+        open_brackets = text.count('[')
+        close_brackets = text.count(']')
+
+        # Ajouter les accolades/crochets manquants à la fin
+        text += '}' * (open_braces - close_braces)
+        text += ']' * (open_brackets - close_brackets)
+
+        # Supprimer les accolades/crochets en trop à la fin
+        while text.endswith('}}') and close_braces > open_braces:
+            text = text[:-1]
+            close_braces -= 1
+        while text.endswith(']]') and close_brackets > open_brackets:
+            text = text[:-1]
+            close_brackets -= 1
+
+        return text
+
     async def _analyze_with_ocr_heuristics(self, image_path: Path) -> Dict[str, Any]:
         """
         Fallback : analyse avec OCR + heuristics si modèle vision échoue.

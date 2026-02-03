@@ -28,29 +28,29 @@ class GeminiClient(BaseLLMClient):
         "gemini-2.0-flash-exp",          # Experimental
     ]
     
-    # Cascade de fallback pour mode BUILD/PROD (priorité qualité)
+    # Cascade de fallback pour mode BUILD/PROD (priorité vitesse)
     FALLBACK_MODELS_BUILD = [
-        # Most capable models first
-        "gemini-2.5-pro",                # Most capable stable
-        "gemini-3-pro-preview",          # Most capable preview
-        "gemini-2.5-flash",              # Good balance
+        # Fastest models first
+        "gemini-2.5-flash-lite",         # Fastest and most cost-efficient
+        "gemini-2.5-flash",              # Fast, good price-performance
+        "gemini-2.0-flash",              # Fast (deprecated March 2026)
         "gemini-3-flash-preview",        # Latest balanced preview
         "gemini-2.5-flash-preview-09-2025",
-        "gemini-2.0-flash",              # Stable (deprecated March 2026)
-        # Faster models (fallback)
-        "gemini-2.5-flash-lite",         # Fast but less capable
         "gemini-2.5-flash-lite-preview-09-2025",
+        # More capable models (fallback)
+        "gemini-2.5-pro",                # Most capable stable
+        "gemini-3-pro-preview",          # Most capable preview
         # Experimental (last resort)
         "gemini-2.0-flash-exp",          # Experimental
     ]
     
-    # Cascade par défaut (équilibrée)
+    # Cascade par défaut (priorité vitesse)
     FALLBACK_MODELS_DEFAULT = [
-        # Balanced approach
-        "gemini-2.5-flash",              # Best price-performance ratio
+        # Fastest models first
         "gemini-2.5-flash-lite",         # Fastest and most cost-efficient
-        "gemini-2.5-pro",                # Most capable
+        "gemini-2.5-flash",              # Fast, good price-performance
         "gemini-2.0-flash",              # Stable (deprecated March 2026)
+        "gemini-2.5-pro",                # Most capable
         # Preview models
         "gemini-3-flash-preview",        # Latest preview
         "gemini-3-pro-preview",          # Latest preview (most capable)
@@ -334,7 +334,8 @@ class GeminiClient(BaseLLMClient):
                         break
 
                 except httpx.RequestError as e:
-                    last_error = f"Request error: {str(e)}"
+                    err_msg = str(e) or f"{type(e).__name__}"
+                    last_error = f"Request error: {err_msg}"
                     logger.warning(
                         f"Request error on '{model_name}' (attempt {attempt + 1}): {last_error}"
                     )
@@ -422,7 +423,7 @@ class GeminiClient(BaseLLMClient):
                 "temperature": temperature if temperature is not None else settings.temperature,
             },
         }
-        # response_mime_type not supported by current Gemini REST API; rely on prompt for JSON
+        # Note: responseMimeType not supported by REST API; use prompt engineering for JSON
 
         last_error: Optional[str] = None
         last_model_used: Optional[str] = None

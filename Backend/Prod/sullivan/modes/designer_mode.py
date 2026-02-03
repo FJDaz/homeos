@@ -106,11 +106,18 @@ class DesignerMode:
             }
         
         try:
-            # Étape 1 : Analyser structure avec DesignAnalyzer
-            logger.info("Step 1: Analyzing design structure with DesignAnalyzer")
-            design_structure = await self.design_analyzer.analyze_image(design_file)
+            # Étape 1 : Analyser structure avec DesignAnalyzer (version rapide avec cache)
+            logger.info("Step 1: Analyzing design structure with DesignAnalyzerFast")
+            from ..analyzer.design_analyzer_fast import DesignAnalyzerFast
+            
+            fast_analyzer = DesignAnalyzerFast(
+                design_analyzer=self.design_analyzer,
+                timeout_seconds=60,  # Timeout 60s pour analyses complexes
+            )
+            design_structure = await fast_analyzer.analyze_image(design_file)
             
             # Optionnel : extraire principes graphiques (phase 2 Sullivan)
+            principles = None
             if self.extract_principles:
                 from ...config.settings import settings
                 from ...models.gemini_client import GeminiClient
@@ -174,6 +181,7 @@ class DesignerMode:
             return {
                 "success": True,
                 "design_structure": design_structure.to_dict(),
+                "design_principles": principles if self.extract_principles else None,
                 "matched_patterns": matched_patterns,
                 "proposed_pattern": proposed_pattern,
                 "frontend_structure": frontend_structure,

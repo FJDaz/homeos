@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS Sullivan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        
+        /* Tabs container - full width with evenly distributed tabs */
+        .tabs-container {
+            display: flex;
+            height: 50px;
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-right: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .tab.active {
+            background-color: #90EE90;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* Main layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: #f8f8f8;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            margin-bottom: 25px;
+            padding-left: 5px;
+        }
+        
+        .logo-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4CAF50;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-subtitle {
+            font-size: 14px;
+            color: #888;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+        
+        /* Chat items */
+        .chat-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .avatar.fj {
+            background-color: #999;
+        }
+        
+        .avatar.sullivan {
+            background-color: #7CB342;
+        }
+        
+        .message-bubble {
+            background-color: #f0f0f0;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+            flex: 1;
+        }
+        
+        .message-bubble.sullivan {
+            background-color: #C8E6C9;
+        }
+        
+        .message-label {
+            font-weight: 600;
+            color: #7CB342;
+        }
+        
+        /* Content area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+        }
+        
+        .upload-prompt {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .upload-prompt:hover {
+            opacity: 0.7;
+        }
+        
+        .upload-text {
+            font-size: 32px;
+            font-weight: 300;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+        
+        .upload-icon {
+            font-size: 28px;
+            color: #666;
+            transform: translateY(-2px);
+        }
+        
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tab" data-tab="brainstorm">Brainstrom</div>
+        <div class="tab active" data-tab="backend">Backend</div>
+        <div class="tab" data-tab="frontend">Frontend</div>
+        <div class="tab" data-tab="deploy">Deploy</div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-title">HoméOS</div>
+                <div class="logo-subtitle">Sullivan</div>
+            </div>
+            
+            <div class="chat-item">
+                <div class="avatar fj">FJ</div>
+                <div class="message-bubble">
+                    Passe la div .machin en flex et remets-là dans le main.
+                </div>
+            </div>
+            
+            <div class="chat-item">
+                <div class="avatar sullivan">S</div>
+                <div class="message-bubble sullivan">
+                    <span class="message-label">Veux-tu :</span><br>
+                    Faire des composants des boutons ?<br>
+                    Ajouter un CTA ?<br>
+                    Répartir tout sur la largeur de page ?
+                </div>
+            </div>
+            
+            <div class="chat-item">
+                <div class="avatar fj">FJ</div>
+                <div class="message-bubble">
+                    Passe la div .machin en flex et remets-là dans le main.
+                </div>
+            </div>
+            
+            <div class="chat-item">
+                <div class="avatar sullivan">S</div>
+                <div class="message-bubble sullivan">
+                    <span class="message-label">Veux-tu :</span><br>
+                    Faire des composants des boutons ? Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad
+                </div>
+            </div>
+            
+            <div class="chat-item">
+                <div class="avatar fj">FJ</div>
+                <div class="message-bubble">
+                    Passe la div .machin en flex et remets-là dans le main.
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main content area -->
+        <main class="content-area">
+            <div class="upload-prompt" id="uploadZone">
+                <span class="upload-text">Importez votre layout</span>
+                <span class="upload-icon">↑</span>
+            </div>
+            <input type="file" id="fileInput" accept=".html,.css,.js,.json,.png,.jpg,.svg">
+        </main>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // File upload
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                console.log('File selected:', this.files[0].name);
+                // Handle file upload here
+            }
+        });
+        
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.opacity = '0.5';
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.opacity = '1';
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.opacity = '1';
+            if (e.dataTransfer.files.length) {
+                console.log('File dropped:', e.dataTransfer.files[0].name);
+            }
+        });
+    </script>
+</body>
+</html>

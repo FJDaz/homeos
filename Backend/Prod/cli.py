@@ -1,6 +1,9 @@
 """Command-line interface for AetherFlow."""
 import asyncio
+import os
 import sys
+import time
+import threading
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 import argparse
@@ -9,6 +12,7 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 from rich.table import Table
 from rich import box
+from rich.text import Text
 from loguru import logger
 
 from .orchestrator import Orchestrator, ExecutionError
@@ -17,6 +21,169 @@ from .config.settings import settings
 
 
 console = Console()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TYPEWRITER EFFECT FOR CLI
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TypewriterConfig:
+    """Configuration pour l'effet machine à écrire."""
+    # Lire depuis variable d'env (désactivé par défaut pour ne pas surprendre)
+    ENABLED: bool = os.getenv("SULLIVAN_TYPEWRITER", "0") == "1"
+    BASE_SPEED: float = 0.015     # 15ms par caractère (comme le frontend)
+    MIN_SPEED: float = 0.005      # Minimum 5ms pour textes longs
+    MAX_DURATION: float = 8.0     # Max 8 secondes total
+    PAUSE_CHARS: str = ".!?;,"   # Caractères qui provoquent une pause
+    PAUSE_DURATION: float = 0.08  # 80ms de pause
+    SKIP_KEY: str = " "           # Espace pour skip
+    
+    @classmethod
+    def enable(cls):
+        """Active l'effet machine à écrire."""
+        cls.ENABLED = True
+    
+    @classmethod
+    def disable(cls):
+        """Désactive l'effet machine à écrire."""
+        cls.ENABLED = False
+
+
+def typewriter_print(
+    prefix: str,
+    text: str,
+    prefix_style: str = "bold cyan",
+    text_style: Optional[str] = None,
+    config: TypewriterConfig = TypewriterConfig,
+) -> None:
+    """
+    Affiche du texte avec effet machine à écrire.
+    
+    Args:
+        prefix: Texte avant (ex: "Sullivan:")
+        text: Le contenu à afficher
+        prefix_style: Style rich pour le prefix
+        text_style: Style rich optionnel pour le texte
+        config: Configuration typewriter
+    """
+    import select
+    import termios
+    import tty
+    
+    # Si désactivé, affichage instantané
+    if not config.ENABLED:
+        if text_style:
+            console.print(f"[{prefix_style}]{prefix}[/][{text_style}]{text}[/]")
+        else:
+            console.print(f"[{prefix_style}]{prefix}[/]{text}")
+        return
+    
+    # Afficher le prefix
+    console.print(f"[{prefix_style}]{prefix}[/]", end="")
+    
+    # Calculer la vitesse adaptative (plus rapide pour textes longs)
+    text_length = len(text)
+    if text_length > 500:
+        speed = config.MIN_SPEED
+    elif text_length > 200:
+        # Interpolation entre BASE et MIN
+        ratio = (text_length - 200) / 300
+        speed = config.BASE_SPEED - (config.BASE_SPEED - config.MIN_SPEED) * ratio
+    else:
+        speed = config.BASE_SPEED
+    
+    # S'assurer qu'on ne dépasse pas MAX_DURATION
+    estimated_time = text_length * speed
+    if estimated_time > config.MAX_DURATION:
+        speed = config.MAX_DURATION / text_length
+    
+    # Configurer le terminal pour lecture non-bloquante
+    old_settings = None
+    skip_requested = threading.Event()
+    
+    def check_skip():
+        """Thread qui vérifie si l'utilisateur veut skipper."""
+        try:
+            # Unix only - vérifie si touche pressée
+            import sys
+            import select
+            while not skip_requested.is_set():
+                if select.select([sys.stdin], [], [], 0.05)[0]:
+                    key = sys.stdin.read(1)
+                    if key in (config.SKIP_KEY, '\n', '\r', '\x03'):  # Espace, Entrée, Ctrl+C
+                        skip_requested.set()
+                        break
+        except:
+            pass
+    
+    # Démarrer le thread de détection
+    try:
+        # Mettre le terminal en mode raw pour capturer les touches
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        tty.setcbreak(fd)
+        
+        skip_thread = threading.Thread(target=check_skip, daemon=True)
+        skip_thread.start()
+    except (ImportError, AttributeError, termios.error):
+        # Windows ou erreur terminal - on continue sans skip
+        old_settings = None
+    
+    try:
+        # Affichage caractère par caractère
+        for i, char in enumerate(text):
+            if skip_requested.is_set():
+                # Afficher le reste instantanément
+                console.print(text[i:], end="", style=text_style or "")
+                break
+            
+            console.print(char, end="", style=text_style or "")
+            
+            # Pause sur ponctuation
+            if char in config.PAUSE_CHARS:
+                time.sleep(config.PAUSE_DURATION)
+            else:
+                time.sleep(speed)
+    finally:
+        skip_requested.set()
+        if old_settings:
+            try:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            except:
+                pass
+    
+    console.print()  # Nouvelle ligne finale
+
+
+# Pour Windows ou si termios non dispo
+if sys.platform == "win32":
+    def typewriter_print(
+        prefix: str,
+        text: str,
+        prefix_style: str = "bold cyan",
+        text_style: Optional[str] = None,
+        config: TypewriterConfig = TypewriterConfig,
+    ) -> None:
+        """Version simplifiée pour Windows (sans skip interacif)."""
+        if not config.ENABLED:
+            if text_style:
+                console.print(f"[{prefix_style}]{prefix}[/][{text_style}]{text}[/]")
+            else:
+                console.print(f"[{prefix_style}]{prefix}[/]{text}")
+            return
+        
+        console.print(f"[{prefix_style}]{prefix}[/]", end="")
+        
+        # Calcul vitesse adaptative
+        text_length = len(text)
+        speed = max(config.MIN_SPEED, min(config.BASE_SPEED, 3.0 / text_length if text_length > 0 else 0.01))
+        
+        for char in text:
+            console.print(char, end="", style=text_style or "")
+            time.sleep(speed)
+            if char in config.PAUSE_CHARS:
+                time.sleep(config.PAUSE_DURATION)
+        
+        console.print()
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -788,6 +955,211 @@ Examples:
         help="Sortie screen_plan.json (défaut: output/studio/screen_plan.json)"
     )
     
+    # Chat agent parser
+    chat_parser = sullivan_subparsers.add_parser(
+        "chat",
+        help="Chat avec Sullivan Agent (conversation avec mémoire et outils)"
+    )
+    chat_parser.add_argument(
+        "message",
+        nargs="?",
+        help="Message à envoyer à Sullivan (sinon mode interactif)"
+    )
+    chat_parser.add_argument(
+        "--session", "-s",
+        type=str,
+        default=None,
+        help="ID de session existante (pour continuer une conversation)"
+    )
+    chat_parser.add_argument(
+        "--user", "-u",
+        type=str,
+        default="cli_user",
+        help="ID utilisateur (défaut: cli_user)"
+    )
+    chat_parser.add_argument(
+        "--step",
+        type=int,
+        default=4,
+        help="Étape du parcours UX (1-9, défaut: 4)"
+    )
+    chat_parser.add_argument(
+        "--interactive", "-i",
+        action="store_true",
+        help="Mode interactif (conversation continue)"
+    )
+    
+    # CTO Mode parser
+    cto_parser = sullivan_subparsers.add_parser(
+        "cto",
+        help="Mode CTO: Sullivan comme Chief Technology Officer (analyse → décision → exécution)"
+    )
+    cto_parser.add_argument(
+        "request",
+        nargs="?",
+        help="Demande en langage naturel (ex: 'Crée une page de login', 'Analyse docs/mockup.png')"
+    )
+    cto_parser.add_argument(
+        "--interactive", "-i",
+        action="store_true",
+        help="Mode interactif CTO (conversation avec exécution)"
+    )
+    
+    # Plan Builder parser
+    plan_parser = sullivan_subparsers.add_parser(
+        "plan",
+        help="Mode PlanBuilder: De l'idée au plan structuré (backend + frontend)"
+    )
+    plan_parser.add_argument(
+        "brief",
+        nargs="?",
+        help="Brief en langage naturel (ex: 'Dashboard avec auth et graphiques')"
+    )
+    plan_parser.add_argument(
+        "--interactive", "-i",
+        action="store_true",
+        default=True,
+        help="Mode interactif - dialogue pour affiner le plan (défaut: True)"
+    )
+    plan_parser.add_argument(
+        "--execute", "-e",
+        action="store_true",
+        help="Exécuter le plan immédiatement après création"
+    )
+    plan_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Chemin de sortie pour le plan JSON"
+    )
+    
+    # FrontendMode (frd) parser
+    frd_parser = sullivan_subparsers.add_parser(
+        "frd",
+        help="Mode FRONTEND: orchestration multi-modèles (Gemini/DeepSeek/Groq) pour workflows frontend"
+    )
+    frd_subparsers = frd_parser.add_subparsers(dest="frd_action", required=True, help="Actions FrontendMode")
+    
+    # frd analyze
+    frd_analyze_parser = frd_subparsers.add_parser(
+        "analyze",
+        help="Analyser un design (image) avec Gemini vision"
+    )
+    frd_analyze_parser.add_argument(
+        "--image", "-i",
+        type=Path,
+        required=True,
+        help="Chemin vers l'image design (PNG, JPG, SVG)"
+    )
+    frd_analyze_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Fichier JSON de sortie pour la structure de design (optionnel)"
+    )
+    
+    # frd generate
+    frd_generate_parser = frd_subparsers.add_parser(
+        "generate",
+        help="Générer composants HTML (Gemini si contexte > 50k, sinon DeepSeek)"
+    )
+    frd_generate_parser.add_argument(
+        "--design-structure",
+        type=Path,
+        required=True,
+        help="Fichier JSON avec structure de design"
+    )
+    frd_generate_parser.add_argument(
+        "--genome",
+        type=Path,
+        default=None,
+        help="Fichier JSON avec genome/frontend structure (optionnel)"
+    )
+    frd_generate_parser.add_argument(
+        "--webography",
+        type=Path,
+        default=None,
+        help="Fichier texte avec webographie (défaut: docs/02-sullivan/Références webdesign de Sullivan.md)"
+    )
+    frd_generate_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        required=True,
+        help="Fichier HTML de sortie"
+    )
+    frd_generate_parser.add_argument(
+        "--context-size",
+        type=int,
+        default=None,
+        help="Taille du contexte en tokens (calculé automatiquement si non fourni)"
+    )
+    
+    # frd refine
+    frd_refine_parser = frd_subparsers.add_parser(
+        "refine",
+        help="Raffiner le style d'un fragment HTML (Groq avec fallback Gemini)"
+    )
+    frd_refine_parser.add_argument(
+        "--html",
+        type=Path,
+        required=True,
+        help="Fichier HTML à raffiner"
+    )
+    frd_refine_parser.add_argument(
+        "--instruction", "-i",
+        type=str,
+        required=True,
+        help="Instruction de raffinement"
+    )
+    frd_refine_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        required=True,
+        help="Fichier HTML de sortie"
+    )
+    
+    # frd dialogue
+    frd_dialogue_parser = frd_subparsers.add_parser(
+        "dialogue",
+        help="Dialogue conversationnel (Groq avec fallback Gemini)"
+    )
+    frd_dialogue_parser.add_argument(
+        "--message", "-m",
+        type=str,
+        required=True,
+        help="Message utilisateur"
+    )
+    frd_dialogue_parser.add_argument(
+        "--session-context",
+        type=Path,
+        default=None,
+        help="Fichier JSON avec contexte de session (optionnel)"
+    )
+    frd_dialogue_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Fichier texte de sortie pour la réponse (optionnel, affiche à l'écran si non fourni)"
+    )
+    
+    # frd validate
+    frd_validate_parser = frd_subparsers.add_parser(
+        "validate",
+        help="Valider homéostasie d'un payload JSON (Groq avec fallback Gemini)"
+    )
+    frd_validate_parser.add_argument(
+        "--json", "-j",
+        type=Path,
+        required=True,
+        help="Fichier JSON à valider"
+    )
+    frd_validate_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Fichier JSON de sortie pour le résultat de validation (optionnel)"
+    )
+    
     args = parser.parse_args()
     
     # Setup logging
@@ -1175,6 +1547,194 @@ Examples:
         
         return asyncio.run(run_sullivan_dev())
     
+    # Handle sullivan frd (FrontendMode)
+    if args.command == "sullivan" and getattr(args, "sullivan_command", None) == "frd":
+        async def run_sullivan_frd():
+            from .sullivan.modes.frontend_mode import FrontendMode
+            
+            frontend_mode = FrontendMode()
+            action = getattr(args, "frd_action", None)
+            
+            if action == "analyze":
+                image_path = Path(args.image)
+                if not image_path.exists():
+                    console.print(f"[red]✗ Image not found: {image_path}[/]")
+                    return 1
+                
+                try:
+                    result = await frontend_mode.analyze_design(image_path)
+                    
+                    if args.output:
+                        import json
+                        output_path = Path(args.output)
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
+                        output_path.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+                        console.print(f"[green]✓ Design structure saved to: {output_path}[/]")
+                    
+                    console.print("[green]✓ Design analysis completed[/]")
+                    ds = result
+                    console.print(f"  Sections: {len(ds.get('sections', []))}")
+                    console.print(f"  Components: {len(ds.get('components', []))}")
+                    return 0
+                except Exception as e:
+                    console.print(f"[red]✗ Analysis failed: {e}[/]")
+                    if args.verbose:
+                        logger.exception("FrontendMode analyze failed")
+                    return 1
+            
+            elif action == "generate":
+                import json
+                
+                design_structure_path = Path(args.design_structure)
+                if not design_structure_path.exists():
+                    console.print(f"[red]✗ Design structure file not found: {design_structure_path}[/]")
+                    return 1
+                
+                design_structure = json.loads(design_structure_path.read_text(encoding="utf-8"))
+                
+                genome = None
+                if args.genome:
+                    genome_path = Path(args.genome)
+                    if genome_path.exists():
+                        genome = json.loads(genome_path.read_text(encoding="utf-8"))
+                
+                webography_path = args.webography
+                if webography_path is None:
+                    # Default webography
+                    root = Path(__file__).resolve().parents[3]
+                    webography_path = root / "docs" / "02-sullivan" / "Références webdesign de Sullivan.md"
+                
+                if not Path(webography_path).exists():
+                    console.print(f"[yellow]⚠ Webography file not found: {webography_path}, using empty string[/]")
+                    webography_text = ""
+                else:
+                    webography_text = Path(webography_path).read_text(encoding="utf-8")
+                
+                try:
+                    html = await frontend_mode.generate_components(
+                        design_structure=design_structure,
+                        genome=genome,
+                        webography=webography_text,
+                        context_size=getattr(args, "context_size", None)
+                    )
+                    
+                    output_path = Path(args.output)
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    output_path.write_text(html, encoding="utf-8")
+                    
+                    console.print(f"[green]✓ HTML generated: {output_path}[/]")
+                    return 0
+                except Exception as e:
+                    console.print(f"[red]✗ Generation failed: {e}[/]")
+                    if args.verbose:
+                        logger.exception("FrontendMode generate failed")
+                    return 1
+            
+            elif action == "refine":
+                html_path = Path(args.html)
+                if not html_path.exists():
+                    console.print(f"[red]✗ HTML file not found: {html_path}[/]")
+                    return 1
+                
+                html_fragment = html_path.read_text(encoding="utf-8")
+                instruction = args.instruction
+                
+                try:
+                    refined_html = await frontend_mode.refine_style(html_fragment, instruction)
+                    
+                    output_path = Path(args.output)
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    output_path.write_text(refined_html, encoding="utf-8")
+                    
+                    console.print(f"[green]✓ HTML refined: {output_path}[/]")
+                    return 0
+                except Exception as e:
+                    console.print(f"[red]✗ Refinement failed: {e}[/]")
+                    if args.verbose:
+                        logger.exception("FrontendMode refine failed")
+                    return 1
+            
+            elif action == "dialogue":
+                message = args.message
+                session_context = None
+                
+                if args.session_context:
+                    import json
+                    session_context_path = Path(args.session_context)
+                    if session_context_path.exists():
+                        session_context = json.loads(session_context_path.read_text(encoding="utf-8"))
+                
+                try:
+                    response = await frontend_mode.dialogue(message, session_context)
+                    
+                    if args.output:
+                        output_path = Path(args.output)
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
+                        output_path.write_text(response, encoding="utf-8")
+                        console.print(f"[green]✓ Response saved to: {output_path}[/]")
+                    else:
+                        console.print("[green]✓ Response:[/]")
+                        console.print(response)
+                    
+                    return 0
+                except Exception as e:
+                    console.print(f"[red]✗ Dialogue failed: {e}[/]")
+                    if args.verbose:
+                        logger.exception("FrontendMode dialogue failed")
+                    return 1
+            
+            elif action == "validate":
+                import json
+                
+                json_path = Path(args.json)
+                if not json_path.exists():
+                    console.print(f"[red]✗ JSON file not found: {json_path}[/]")
+                    return 1
+                
+                json_payload = json.loads(json_path.read_text(encoding="utf-8"))
+                
+                try:
+                    validation_result = await frontend_mode.validate_homeostasis(json_payload)
+                    
+                    if args.output:
+                        output_path = Path(args.output)
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
+                        output_path.write_text(
+                            json.dumps(validation_result, indent=2, ensure_ascii=False),
+                            encoding="utf-8"
+                        )
+                        console.print(f"[green]✓ Validation result saved to: {output_path}[/]")
+                    
+                    is_valid = validation_result.get("valid", False)
+                    if is_valid:
+                        console.print("[green]✓ Validation passed[/]")
+                    else:
+                        console.print("[yellow]⚠ Validation failed[/]")
+                        issues = validation_result.get("issues", [])
+                        if issues:
+                            console.print("  Issues:")
+                            for issue in issues:
+                                console.print(f"    - {issue}")
+                    
+                    suggestions = validation_result.get("suggestions", [])
+                    if suggestions:
+                        console.print("  Suggestions:")
+                        for suggestion in suggestions:
+                            console.print(f"    - {suggestion}")
+                    
+                    return 0 if is_valid else 1
+                except Exception as e:
+                    console.print(f"[red]✗ Validation failed: {e}[/]")
+                    if args.verbose:
+                        logger.exception("FrontendMode validate failed")
+                    return 1
+            
+            else:
+                console.print(f"[red]✗ Unknown frd action: {action}[/]")
+                return 1
+        
+        return asyncio.run(run_sullivan_frd())
+    
     # Handle sullivan plan-screens
     if args.command == "sullivan" and getattr(args, "sullivan_command", None) == "plan-screens":
         from .sullivan.planner.screen_planner import plan_screens
@@ -1195,9 +1755,363 @@ Examples:
             console.print(f"[red]✗ plan-screens failed: {e}[/]")
             return 1
     
+    # Handle sullivan chat
+    if args.command == "sullivan" and getattr(args, "sullivan_command", None) == "chat":
+        async def run_sullivan_chat():
+            from .sullivan.agent import create_agent
+            from .sullivan.agent.tools import ToolResult
+            import time
+            
+            session_id = getattr(args, "session", None)
+            user_id = getattr(args, "user", "cli_user")
+            step = getattr(args, "step", 4)
+            message = getattr(args, "message", None)
+            interactive = getattr(args, "interactive", False) or not message
+            
+            # Créer ou récupérer l'agent
+            try:
+                agent = await create_agent(
+                    user_id=user_id,
+                    session_id=session_id,
+                    step=step,
+                )
+            except Exception as e:
+                console.print(f"[red]❌ Erreur création agent: {e}[/]")
+                return 1
+            
+            def display_tool_execution(tool_name: str, params: dict, result: ToolResult, elapsed_ms: float):
+                """Affiche l'exécution d'un outil avec monitoring."""
+                status = "✅" if result.success else "❌"
+                status_color = "green" if result.success else "red"
+                
+                # Afficher l'action
+                console.print(f"\n[{status_color}]{status} Action: {tool_name}[/{status_color}] [dim]({elapsed_ms:.0f}ms)[/]")
+                
+                # Paramètres (limités)
+                if params:
+                    params_str = ", ".join([f"{k}={str(v)[:30]}" for k, v in params.items()])
+                    if len(params_str) > 60:
+                        params_str = params_str[:60] + "..."
+                    console.print(f"   [dim]→ {params_str}[/]")
+                
+                # Résultat
+                if result.content:
+                    content = result.content[:100] + "..." if len(result.content) > 100 else result.content
+                    console.print(f"   [dim]← {content}[/]")
+                
+                if result.error:
+                    console.print(f"   [red]Erreur: {result.error}[/]")
+            
+            def display_response_summary(response, total_time_ms: float):
+                """Affiche un résumé de la réponse style AetherFlow."""
+                from rich.table import Table
+                
+                table = Table(show_header=False, box=None, padding=(0, 2))
+                table.add_column("Label", style="dim", width=12)
+                table.add_column("Value")
+                
+                table.add_row("⏱️  Temps:", f"{total_time_ms:.0f}ms")
+                table.add_row("💬 Réponse:", f"{len(response.content)} caractères")
+                
+                if response.tool_calls:
+                    success_count = sum(1 for r in response.tool_results if r.success)
+                    table.add_row("🔧 Outils:", f"{len(response.tool_calls)} appels, {success_count} ✅")
+                
+                if response.metadata.get("step"):
+                    table.add_row("📍 Étape:", f"{response.metadata['step']}/9")
+                
+                console.print(table)
+            
+            # Si un message est fourni, mode one-shot avec monitoring
+            if message:
+                start_time = time.time()
+                
+                with console.status("[cyan]🧠 Sullivan réfléchit..."):
+                    response = await agent.chat(message)
+                
+                total_time = (time.time() - start_time) * 1000
+                
+                # DEBUG: Afficher les tool_calls détectés
+                if response.tool_calls:
+                    console.print(f"\n[dim]DEBUG: {len(response.tool_calls)} tool_calls détectés:[/]")
+                    for tc in response.tool_calls:
+                        console.print(f"  - {tc.get('tool')}({tc.get('params', {})})")
+                else:
+                    console.print("\n[dim]DEBUG: Aucun tool_calls détecté[/]")
+                
+                # Afficher les actions exécutées
+                if response.tool_calls and response.tool_results:
+                    console.print("\n[bold cyan]🔧 Actions exécutées:[/]")
+                    for call, result in zip(response.tool_calls, response.tool_results):
+                        # Estimer le temps (on n'a pas le détail par outil)
+                        display_tool_execution(call['tool'], call.get('params', {}), result, total_time / max(len(response.tool_calls), 1))
+                
+                # Afficher la réponse
+                console.print("\n[bold cyan]💬 Sullivan:[/]")
+                console.print(response.content)
+                
+                # Résumé
+                console.print()
+                display_response_summary(response, total_time)
+                
+                console.print(f"\n[dim]Session: {response.session_id}[/]")
+                return 0
+            
+            # Mode interactif
+            console.print("\n[bold cyan]🎭 Sullivan Agent[/] - Mode interactif")
+            console.print("[dim]Tape 'quit', 'exit' ou Ctrl+C pour quitter[/]")
+            console.print(f"[dim]Session: {agent.session_id} | Étape: {step} | Monitoring actif ✅[/]\n")
+            
+            import sys
+            if not sys.stdin.isatty():
+                console.print("[yellow]⚠️ stdin n'est pas un terminal interactif.[/]")
+                console.print("[dim]Utilisez: ./aetherflow-chat 'votre message'[/]")
+                return 1
+            
+            # Boucle interactive
+            try:
+                while True:
+                    # Lire l'input
+                    try:
+                        console.print("[bold green]Vous:[/] ", end="")
+                        sys.stdout.flush()
+                        user_input = input()
+                    except EOFError:
+                        console.print("\n[dim]Au revoir ! 👋[/]")
+                        break
+                    
+                    if user_input.lower() in ("quit", "exit", "q"):
+                        console.print("\n[dim]Au revoir ! 👋[/]")
+                        break
+                    
+                    if not user_input.strip():
+                        continue
+                    
+                    # Envoyer le message avec monitoring AetherFlow
+                    start_time = time.time()
+
+                    with console.status("[cyan]🧠 Sullivan réfléchit..."):
+                        response = await agent.chat(user_input)
+
+                    total_time = (time.time() - start_time) * 1000
+
+                    # MONITORING AETHERFLOW - Affichage détaillé des actions
+                    if response.tool_calls and response.tool_results:
+                        from rich.table import Table
+                        from rich import box
+
+                        # Table de monitoring
+                        monitor_table = Table(
+                            title="[bold cyan]⚡ SULLIVAN MONITORING[/]",
+                            box=box.ROUNDED,
+                            show_header=True,
+                            header_style="bold white on blue"
+                        )
+                        monitor_table.add_column("🔧 Outil", style="cyan", width=20)
+                        monitor_table.add_column("📥 Params", style="dim", width=35)
+                        monitor_table.add_column("📤 Résultat", style="green", width=40)
+                        monitor_table.add_column("⏱️", style="yellow", width=8)
+                        monitor_table.add_column("✓", width=3)
+
+                        per_tool_time = total_time / max(len(response.tool_calls), 1)
+
+                        for call, result in zip(response.tool_calls, response.tool_results):
+                            tool_name = call.get('tool', '?')
+                            params = call.get('params', {})
+                            params_str = ", ".join([f"{k}={str(v)[:20]}" for k, v in list(params.items())[:2]])
+                            if len(params_str) > 35:
+                                params_str = params_str[:32] + "..."
+
+                            result_str = result.content[:40] if result.content else "-"
+                            if len(result_str) > 40:
+                                result_str = result_str[:37] + "..."
+
+                            status = "[green]✓[/]" if result.success else "[red]✗[/]"
+                            time_str = f"{per_tool_time:.0f}ms"
+
+                            monitor_table.add_row(tool_name, params_str, result_str, time_str, status)
+
+                        console.print()
+                        console.print(monitor_table)
+
+                        # Résumé
+                        success_count = sum(1 for r in response.tool_results if r.success)
+                        console.print(f"[dim]Total: {len(response.tool_calls)} actions | {success_count} ✅ | {total_time:.0f}ms[/]")
+
+                    # Afficher la réponse
+                    console.print(f"\n[bold cyan]💬 Sullivan:[/]")
+                    console.print(response.content)
+                    console.print()
+                    
+            except KeyboardInterrupt:
+                console.print("\n\n[dim]Au revoir ! 👋[/]")
+                return 0
+            except Exception as e:
+                console.print(f"\n[red]❌ Erreur: {e}[/]")
+                return 1
+            
+            return 0
+        
+        return asyncio.run(run_sullivan_chat())
+    
+    # Handle sullivan cto command
+    if args.command == "sullivan" and getattr(args, "sullivan_command", None) == "cto":
+        async def run_sullivan_cto():
+            from .sullivan.modes.cto_mode import CTOMode
+            
+            request = getattr(args, "request", None)
+            interactive = getattr(args, "interactive", False) or not request
+            
+            cto = CTOMode()
+            
+            # Mode one-shot
+            if request:
+                console.print(f"\n[bold cyan]🎯 CTO Mode[/] - Analyse de la demande...")
+                console.print(f"[dim]→ {request}[/]\n")
+                
+                with console.status("[cyan]Sullivan CTO réfléchit..."):
+                    result = await cto.execute(request)
+                
+                # Afficher la décision
+                console.print(f"[bold]📋 Décision:[/] [cyan]{result['reasoning']}[/]")
+                console.print(f"[bold]🔧 Mode:[/] [green]{result['mode'].upper()}[/]")
+                console.print(f"[bold]🎯 Intent:[/] {result['intent']}\n")
+                
+                # Afficher le résultat selon le mode
+                if result['mode'] == 'direct':
+                    console.print(f"[bold]💬 Réponse:[/]")
+                    console.print(result['result'].get('response', 'Aucune réponse'))
+                elif result['mode'] in ['frontend', 'designer']:
+                    if result['result'].get('output_file'):
+                        console.print(f"[bold]📄 Fichier généré:[/] [green]{result['result']['output_file']}[/]")
+                    console.print(f"[dim]⏱️  Temps: {result['result'].get('time_ms', 0):.0f}ms[/]")
+                    console.print(f"[dim]💰 Coût: ${result['result'].get('cost_usd', 0):.4f}[/]")
+                elif result['mode'] in ['proto', 'prod']:
+                    console.print(f"[bold]📄 Plan:[/] {result['result'].get('plan', 'N/A')}")
+                    console.print(f"[dim]⏱️  Total: {result['result'].get('total_time_ms', 0)/1000:.1f}s[/]")
+                    console.print(f"[dim]💰 Coût: ${result['result'].get('total_cost_usd', 0):.4f}[/]")
+                
+                console.print(f"\n[dim]✅ Exécution terminée en {result['total_time_ms']:.0f}ms[/]")
+                return 0 if result['success'] else 1
+            
+            # Mode interactif CTO
+            console.print("\n[bold cyan]🎯 Sullivan CTO[/] - Mode interactif")
+            console.print("[dim]Parle-moi comme à un CTO. Je décide et j'exécute.[/]")
+            console.print("[dim]Tape 'quit', 'exit' ou Ctrl+C pour quitter[/]\n")
+            
+            import sys
+            if not sys.stdin.isatty():
+                console.print("[yellow]⚠️ stdin non interactif[/]")
+                return 1
+            
+            try:
+                while True:
+                    console.print("[bold green]Vous:[/] ", end="")
+                    sys.stdout.flush()
+                    user_input = input()
+                    
+                    if user_input.lower() in ("quit", "exit", "q"):
+                        console.print("\n[dim]Au revoir ! 👋[/]")
+                        break
+                    
+                    if not user_input.strip():
+                        continue
+                    
+                    # Exécuter la demande
+                    console.print(f"\n[dim]Analyse...[/]")
+                    result = await cto.execute(user_input)
+                    
+                    # Résumé rapide
+                    console.print(f"[cyan]→ {result['reasoning']}[/] ([green]{result['mode'].upper()}[/])")
+                    
+                    if result['mode'] == 'direct':
+                        console.print(f"\n{result['result'].get('response', '')}")
+                    else:
+                        success = "✅" if result['success'] else "❌"
+                        console.print(f"\n{success} Terminé en {result['total_time_ms']:.0f}ms")
+                        if result['result'].get('output_file'):
+                            console.print(f"   📄 {result['result']['output_file']}")
+                    
+                    console.print()
+                    
+            except KeyboardInterrupt:
+                console.print("\n\n[dim]Au revoir ! 👋[/]")
+                return 0
+            except Exception as e:
+                console.print(f"\n[red]❌ Erreur: {e}[/]")
+                return 1
+            
+            return 0
+        
+        return asyncio.run(run_sullivan_cto())
+    
+    # Handle sullivan plan command (PlanBuilder)
+    if args.command == "sullivan" and getattr(args, "sullivan_command", None) == "plan":
+        async def run_sullivan_plan():
+            from .sullivan.modes.plan_builder import PlanBuilder
+            
+            brief = getattr(args, "brief", None)
+            interactive = getattr(args, "interactive", True)
+            execute = getattr(args, "execute", False)
+            output_path = getattr(args, "output", None)
+            
+            # Mode interactif si pas de brief
+            if not brief:
+                console.print("\n[bold cyan]📋 Sullivan PlanBuilder[/]")
+                console.print("[dim]Décris ton projet, je vais générer un plan structuré.[/]\n")
+                console.print("[bold green]Votre brief:[/] ", end="")
+                import sys
+                sys.stdout.flush()
+                brief = input()
+            
+            if not brief.strip():
+                console.print("[red]❌ Brief vide[/]")
+                return 1
+            
+            # Créer le plan
+            builder = PlanBuilder()
+            
+            try:
+                plan = await builder.create_plan_from_brief(
+                    brief=brief,
+                    interactive=interactive
+                )
+                
+                # Sauvegarder si output spécifié
+                if output_path:
+                    import shutil
+                    plan_path = Path(plan.output_dir if hasattr(plan, 'output_dir') else settings.output_dir) / f"{plan.task_id}.json"
+                    if plan_path.exists():
+                        shutil.copy(plan_path, output_path)
+                        console.print(f"[green]✓ Plan copié vers:[/] {output_path}")
+                
+                # Exécuter si demandé
+                if execute:
+                    console.print("\n[bold cyan]🚀 Exécution du plan[/]")
+                    result = await builder.execute_plan_step_by_step(plan, interactive=True)
+                    
+                    if result['success']:
+                        console.print("\n[bold green]✅ Plan exécuté avec succès![/]")
+                    else:
+                        console.print(f"\n[yellow]⚠️ Plan partiellement exécuté ({result['completed_steps']}/{result['total_steps']} étapes)[/]")
+                else:
+                    console.print("\n[dim]Pour exécuter ce plan:[/]")
+                    console.print(f"  [cyan]./aetherflow-chat sullivan plan '{brief}' --execute[/]")
+                    console.print(f"  [cyan]./aetherflow -q --plan output/plans/{plan.task_id}.json[/]")
+                
+                return 0
+                
+            except Exception as e:
+                console.print(f"\n[red]❌ Erreur: {e}[/]")
+                import traceback
+                traceback.print_exc()
+                return 1
+        
+        return asyncio.run(run_sullivan_plan())
+    
     # sullivan sans sous-commande ni --design ni --build → aide
     if args.command == "sullivan" and not getattr(args, "design", None) and not getattr(args, "build", False) and not getattr(args, "sullivan_command", None):
-        console.print("[dim]Usage:[/] [cyan]aetherflow sullivan -d image.png[/] (designer)  |  [cyan]sullivan -b[/] (build)  |  [cyan]sullivan plan-screens[/]  |  [cyan]sullivan dev --backend-path ...[/]  |  [cyan]sullivan build[/]  |  [cyan]sullivan read-genome[/]")
+        console.print("[dim]Usage:[/] [cyan]aetherflow sullivan -d image.png[/] (designer)  |  [cyan]sullivan -b[/] (build)  |  [cyan]sullivan plan-screens[/]  |  [cyan]sullivan dev --backend-path ...[/]  |  [cyan]sullivan build[/]  |  [cyan]sullivan read-genome[/]  |  [cyan]sullivan frd <action>[/] (frontend)  |  [cyan]sullivan chat[/] (agent)  |  [cyan]sullivan cto[/] (CTO)  |  [cyan]sullivan plan[/] (PlanBuilder)")
         return 0
     
     # Handle sullivan build command

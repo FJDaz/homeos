@@ -4,10 +4,11 @@ import json
 import tempfile
 from pathlib import Path
 from typing import Dict, Any, Optional, Literal, Tuple, List
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from loguru import logger
 
@@ -19,8 +20,59 @@ from .sullivan.registry import ComponentRegistry
 from .sullivan.models.component import Component
 from .config.settings import settings
 
+# Import studio routes (Parcours UX Sullivan 9 étapes)
+from .sullivan.studio_routes import router as studio_router
+
+# Import agent routes (Chatbot/Agent Sullivan)
+from .sullivan.agent.api import router as agent_router
+
 
 app = FastAPI(title="AetherFlow API", version="0.1.0")
+
+
+# Middleware pour injecter le widget Sullivan sur toutes les pages HTML
+class SullivanWidgetMiddleware(BaseHTTPMiddleware):
+    """Injecte automatiquement le script Sullivan dans toutes les réponses HTML."""
+
+    WIDGET_SCRIPT = b'\n    <!-- Sullivan Agent Widget -->\n    <script src="/js/sullivan-super-widget.js"></script>\n</body>'
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        # Ne traiter que les réponses HTML
+        content_type = response.headers.get("content-type", "")
+        if "text/html" not in content_type:
+            return response
+
+        # Collecter le body
+        body_parts = []
+        async for chunk in response.body_iterator:
+            body_parts.append(chunk)
+        body = b"".join(body_parts)
+
+        # Injecter le script avant </body>
+        if b"</body>" in body and b"sullivan-super-widget.js" not in body:
+            body = body.replace(b"</body>", self.WIDGET_SCRIPT)
+
+        # Mettre à jour Content-Length
+        headers = dict(response.headers)
+        headers["content-length"] = str(len(body))
+
+        return Response(
+            content=body,
+            status_code=response.status_code,
+            headers=headers,
+            media_type=response.media_type
+        )
+
+
+app.add_middleware(SullivanWidgetMiddleware)
+
+# Include studio routes (Parcours UX Sullivan)
+app.include_router(studio_router)
+
+# Include agent routes (Chatbot Sullivan)
+app.include_router(agent_router)
 
 # Add CORS middleware
 app.add_middleware(
@@ -548,7 +600,7 @@ async def serve_index():
 <ul>
 <li><a href="/health">/health</a></li>
 <li><a href="/studio/genome">/studio/genome</a></li>
-<li><a href="/studio.html">/studio.html</a> (si Frontend présent)</li>
+<li><a href="/studio">/studio</a> (HTMX - Parcours UX Sullivan)</li>
 </ul>
 <p>Frontend Svelte : <code>cd frontend-svelte && npm run dev</code> puis <a href="http://localhost:5173/studio">http://localhost:5173/studio</a>.</p>
 </body></html>""",
@@ -575,17 +627,30 @@ def _serve_svelte_route(path: str) -> Optional[FileResponse]:
 
 @app.get("/studio")
 @app.get("/studio/")
-async def serve_studio_page():
-    """Sert la page Studio (Svelte build ou redirect)."""
-    if res := _serve_svelte_route("studio"):
-        return res
-    if (frontend_path / "studio.html").exists():
-        return RedirectResponse(url="/studio.html", status_code=302)
-    if studio_index_path.exists():
-        return RedirectResponse(url="/", status_code=302)
-    raise HTTPException(
-        status_code=404,
-        detail="Studio: run 'cd frontend-svelte && npm run build' then ./start_api.sh, or npm run dev + http://localhost:5173/studio",
+async def serve_studio_page(request: Request):
+    """Sert la page Studio HTMX (Parcours UX Sullivan 9 étapes)."""
+    from fastapi.templating import Jinja2Templates
+    templates_dir = Path(__file__).resolve().parent / "templates"
+    templates = Jinja2Templates(directory=str(templates_dir))
+
+    # Servir le template HTMX depuis Backend/Prod/templates/studio.html
+    return templates.TemplateResponse("studio.html", {"request": request})
+
+
+@app.get("/studio/composants")
+async def serve_studio_composants(request: Request):
+    """
+    Étape 4 — Affiche les composants par défaut de SULLIVAN_DEFAULT_LIBRARY.
+    """
+    from fastapi.templating import Jinja2Templates
+    from .sullivan.identity import SULLIVAN_DEFAULT_LIBRARY
+
+    templates_dir = Path(__file__).resolve().parent / "templates"
+    templates = Jinja2Templates(directory=str(templates_dir))
+
+    return templates.TemplateResponse(
+        "studio_composants.html",
+        {"request": request, "components": SULLIVAN_DEFAULT_LIBRARY}
     )
 
 
@@ -600,12 +665,9 @@ async def serve_components_page():
         detail="Components: run 'cd frontend-svelte && npm run build' then ./start_api.sh",
     )
 
-# Frontend assets (studio, css, js) when Frontend exists
+# Frontend assets (css, js) when Frontend exists
+# NOTE: /studio.html supprimé - utiliser /studio (HTMX) à la place
 if frontend_path.exists():
-    @app.get("/studio.html")
-    async def serve_studio():
-        """Serve the Studio page (genome-driven UI)."""
-        return FileResponse(frontend_path / "studio.html")
 
     if (frontend_path / "css").exists():
         app.mount("/css", StaticFiles(directory=str(frontend_path / "css")), name="css")

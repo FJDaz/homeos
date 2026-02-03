@@ -9,6 +9,9 @@
     <style>
         .htmx-request { opacity: 0.5; pointer-events: none; }
         .htmx-request button { cursor: wait; }
+        /* Loader upload layout : masqué par défaut, visible pendant la requête */
+        #upload-loader { display: none; }
+        #upload-loader.htmx-request { display: flex !important; }
         .prose table { font-size: 0.75rem; width: 100%; border-collapse: collapse; }
         .prose th, .prose td { padding: 0.25rem 0.5rem; border: 1px solid #e5e7eb; text-align: left; }
         .prose th { background: #f3f4f6; font-weight: 600; }
@@ -22,6 +25,13 @@
         <p class="text-sm text-gray-700">Triptyque : Revue | Arbitrage | Distillation</p>
     </header>
     <main class="container mx-auto p-4 pt-6">
+        <!-- Zone centrale du parcours (étapes 1-9) -->
+        <div id="studio-main-zone" class="mb-6 min-h-[200px] bg-white rounded shadow-md p-4"
+             hx-get="/studio/step/{{ request.query_params.get('layouts') and '5/layouts' or request.query_params.get('step', 1) }}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <span class="text-gray-500">Chargement du parcours…</span>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- MARKER:revue -->
             <!-- COLONNE 1: REVUE -->

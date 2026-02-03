@@ -9,6 +9,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 from loguru import logger
 
+try:
+    from .plan_reader import Step
+except ImportError:
+    # Fallback if Step not available
+    from typing import TYPE_CHECKING
+    if TYPE_CHECKING:
+        from .plan_reader import Step
+
 
 class SectionType(Enum):
     """Types of code sections."""

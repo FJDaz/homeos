@@ -544,10 +544,6 @@ class Metrics:
         # Implement summary print logic
         pass
 
-def generate_genome():
-    # Implement genome generation logic
-    pass
-
 def generate_ir_inventaire():
     with open("output/studio/ir_inventaire.md", "w") as f:
         f.write("# Inventaire genome\n")

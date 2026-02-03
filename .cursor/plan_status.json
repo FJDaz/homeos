@@ -1,23 +1,20 @@
 {
-  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/plan_frontendmode_implementation.json",
-  "plan_id": "frontendmode-implementation",
-  "workflow_type": "VerifyFix",
+  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/plan_design_principles_visual_intent.json",
+  "plan_id": "design-principles-visual-intent",
+  "workflow_type": "PROTO",
   "phase": "validation",
   "batch_index": 1,
   "total_batches": 1,
   "completed_steps": [],
   "current_step_ids": [
-    "step_4",
-    "step_5",
-    "step_6",
     "step_3",
-    "step_1",
-    "step_2"
+    "step_2",
+    "step_1"
   ],
-  "total_steps": 6,
-  "status": "completed",
+  "total_steps": 3,
+  "status": "running",
   "started_at": "2025-01-30T14:00:00+00:00",
-  "updated_at": "2026-02-02T11:52:23.793399+00:00",
+  "updated_at": "2026-02-02T15:26:58.437497+00:00",
   "total_time_ms": 247485.39299999998,
   "total_cost_usd": 0.021156739999999997
 }

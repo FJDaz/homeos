@@ -1,0 +1,49 @@
+{
+  "task_id": "fix-deepseek-max-tokens",
+  "description": "Corriger le bug max_tokens DeepSeek : ajouter deepseek_max_tokens=4096 dans settings.py et l'utiliser dans deepseek_client.py pour éviter de dépasser la limite réelle (8192) lors du chunking.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/config/settings.py : ajouter un nouveau champ deepseek_max_tokens après deepseek_output_cost_per_1k (ligne ~171). Champ : deepseek_max_tokens: int = Field(default=4096, alias=\"DEEPSEEK_MAX_TOKENS\", description=\"Maximum output tokens for DeepSeek API (deepseek-coder limit: 4096-8192)\"). Utiliser 4096 comme valeur conservatrice par défaut (la limite réelle peut être 8192 selon le modèle, mais 4096 est sûr).",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "Champ deepseek_max_tokens ajouté dans Settings",
+        "Valeur par défaut = 4096",
+        "Alias DEEPSEEK_MAX_TOKENS configuré"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/config/settings.py"],
+        "input_files": ["Backend/Prod/config/settings.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/models/deepseek_client.py : modifier la méthode execute_step (ligne ~354) pour utiliser settings.deepseek_max_tokens au lieu de settings.max_tokens. Remplacer \"max_tokens\": min(step.estimated_tokens, settings.max_tokens) par \"max_tokens\": min(step.estimated_tokens, settings.deepseek_max_tokens). Aussi modifier la méthode generate (ligne ~182) pour utiliser settings.deepseek_max_tokens : remplacer \"max_tokens\": max_tokens or settings.max_tokens par \"max_tokens\": min(max_tokens or settings.deepseek_max_tokens, settings.deepseek_max_tokens).",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "execute_step utilise settings.deepseek_max_tokens",
+        "generate utilise settings.deepseek_max_tokens",
+        "min() appliqué pour garantir <= limite DeepSeek"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/models/deepseek_client.py"],
+        "input_files": ["Backend/Prod/models/deepseek_client.py", "Backend/Prod/config/settings.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T13:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Bug fix : max_tokens DeepSeek dépasse limite lors du chunking (step_chunker utilise DEFAULT_CHUNK_SIZE=20000 mais DeepSeek limite à 4096-8192)."
+  }
+}

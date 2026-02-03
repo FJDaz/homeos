@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sullivan Chat Widget</title>
+    <style>
+        :root {
+            --sullivan-primary: #6366f1;
+            --sullivan-bg: #ffffff;
+            --sullivan-text: #1f2937;
+            --sullivan-border: #e5e7eb;
+            --sullivan-muted: #6b7280;
+            --sullivan-bot-bg: #f3f4f6;
+            --sullivan-user-bg: #6366f1;
+            --sullivan-user-text: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        /* Widget Container */
+        .sullivan-widget {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--sullivan-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        /* Header */
+        .sullivan-header {
+            background: linear-gradient(135deg, var(--sullivan-primary), #8b5cf6);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sullivan-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .sullivan-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sullivan-info p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .sullivan-settings {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .sullivan-btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .sullivan-btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Messages Container */
+        .sullivan-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sullivan-message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sullivan-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .sullivan-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sullivan-message.bot .sullivan-message-avatar {
+            background: var(--sullivan-bot-bg);
+        }
+
+        .sullivan-message.user .sullivan-message-avatar {
+            background: var(--sullivan-user-bg);
+            color: var(--sullivan-user-text);
+        }
+
+        .sullivan-message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .sullivan-message.bot .sullivan-message-content {
+            background: var(--sullivan-bot-bg);
+            color: var(--sullivan-text);
+            border-bottom-left-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sullivan-message.bot.typing .sullivan-message-content {
+            background: linear-gradient(135deg, var(--sullivan-bot-bg), #e8e9ff);
+            cursor: pointer;
+        }
+
+        .sullivan-message.bot.typing:hover .sullivan-message-content {
+            background: linear-gradient(135deg, #e8e9ff, #d8daff);
+        }
+
+        .sullivan-message.user .sullivan-message-content {
+            background: var(--sullivan-user-bg);
+            color: var(--sullivan-user-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Typewriter Cursor */
+        .sullivan-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--sullivan-primary);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .sullivan-cursor.hidden {
+            display: none;
+        }
+
+        /* Skip hint amélioré */
+        .sullivan-skip-hint {
+            font-size: 11px;
+            color: var(--sullivan-muted);
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sullivan-skip-hint .skip-icon {
+            font-size: 12px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .sullivan-message.bot:hover .sullivan-skip-hint {
+            opacity: 0.7;
+        }
+
+        .sullivan-skip-hint:hover {
+            opacity: 1 !important;
+            color: var(--sullivan-primary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* Input Area */
+        .sullivan-input-area {
+            padding: 16px 20px;
+            border-top: 1px solid var(--sullivan-border);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .sullivan-input {
+            flex: 1;
+            border: 1px solid var(--sullivan-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .sullivan-input:focus {
+            border-color: var(--sullivan-primary);
+        }
+
+        .sullivan-send-btn {
+            background: var(--sullivan-primary);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .sullivan-send-btn:hover {
+            background: #4f46e5;
+        }
+
+        .sullivan-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sullivan-send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Status Bar */
+        .sullivan-status {
+            padding: 8px 20px;
+            background: #f9fafb;
+            border-top: 1px solid var(--sullivan-border);
+            font-size: 12px;
+            color: var(--sullivan-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sullivan-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sullivan-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .sullivan-status-dot.typing {
+            background: #f59e0b;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Loading */
+        .sullivan-typing {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--sullivan-bot-bg);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .sullivan-typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--sullivan-muted);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .sullivan-typing-dot:nth-child(1) { animation-delay: 0s; }
+        .sullivan-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .sullivan-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Empty State */
+        .sullivan-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--sullivan-muted);
+        }
+
+        .sullivan-empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .sullivan-empty h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--sullivan-text);
+        }
+
+        .sullivan-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .sullivan-suggestion {
+            background: white;
+            border: 1px solid var(--sullivan-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sullivan-suggestion:hover {
+            border-color: var(--sullivan-primary);
+            color: var(--sullivan-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="sullivan-widget">
+        <!-- Header -->
+        <div class="sullivan-header">
+            <div class="sullivan-avatar">🎭</div>
+            <div class="sullivan-info">
+                <h3>Sullivan</h3>
+                <p>Assistant de conception</p>
+            </div>
+            <div class="sullivan-settings">
+                <button class="sullivan-btn-icon" id="toggleTypewriter" title="Effet machine à écrire">⌨️</button>
+                <button class="sullivan-btn-icon" id="clearChat" title="Nouvelle conversation">🗑️</button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="sullivan-messages" id="messagesContainer">
+            <div class="sullivan-empty">
+                <div class="sullivan-empty-icon">👋</div>
+                <h4>Bienvenue ! Je suis Sullivan</h4>
+                <p>Je peux vous aider à créer et affiner des interfaces web.</p>
+                <div class="sullivan-suggestions">
+                    <span class="sullivan-suggestion" onclick="sendSuggestion('Je veux créer une page de login')">Créer une page de login</span>
+                    <span class="sullivan-suggestion" onclick="sendSuggestion('Quelle est l\'étape 5 ?')">Étape 5 du parcours</span>
+                    <span class="sullivan-suggestion" onclick="sendSuggestion('Génère un bouton moderne')">Générer un bouton</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="sullivan-status">
+            <div class="sullivan-status-indicator">
+                <span class="sullivan-status-dot" id="statusDot"></span>
+                <span id="statusText">En ligne</span>
+            </div>
+            <span id="sessionId">Session: nouvelle</span>
+        </div>
+
+        <!-- Input -->
+        <div class="sullivan-input-area">
+            <textarea 
+                class="sullivan-input" 
+                id="messageInput" 
+                placeholder="Écrivez votre message... (Entrée pour envier, Maj+Entrée pour nouvelle ligne)"
+                rows="1"
+            ></textarea>
+            <button class="sullivan-send-btn" id="sendBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_BASE_URL: 'http://localhost:8000',
+            TYPEWRITER_SPEED: 15, // ms par caractère (plus rapide = plus fluide)
+            TYPEWRITER_ENABLED: true,
+            SKIP_ON_CLICK: true,
+            SKIP_ON_KEY: true,
+            ADAPTIVE_SPEED: true, // Vitesse adaptative selon longueur du texte
+            NATURAL_PAUSES: true  // Pauses après ponctuation
+        };
+
+        // Vitesse max pour éviter d'attendre trop longtemps sur les gros textes
+        const MAX_TYPING_DURATION = 8000; // 8 secondes max
+        const MIN_TYPEWRITER_SPEED = 5;   // Vitesse minimum (très rapide)
+
+        // État
+        let sessionId = null;
+        let isTyping = false;
+        let currentTypewriter = null;
+        let messageHistory = [];
+
+        // Éléments DOM
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const sessionIdSpan = document.getElementById('sessionId');
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Envoyer avec Entrée
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Bouton envoyer
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Toggle typewriter avec style amélioré
+        const typewriterBtn = document.getElementById('toggleTypewriter');
+        typewriterBtn.addEventListener('click', function() {
+            CONFIG.TYPEWRITER_ENABLED = !CONFIG.TYPEWRITER_ENABLED;
+            updateTypewriterButton();
+            showToast(CONFIG.TYPEWRITER_ENABLED ? 
+                '⌨️ Effet machine à écrire activé' : 
+                '⏩ Effet machine à écrire désactivé (instantané)');
+        });
+
+        function updateTypewriterButton() {
+            if (CONFIG.TYPEWRITER_ENABLED) {
+                typewriterBtn.style.opacity = '1';
+                typewriterBtn.style.background = 'rgba(99, 102, 241, 0.3)';
+                typewriterBtn.style.transform = 'scale(1)';
+                typewriterBtn.title = 'Effet machine à écrire activé (cliquez pour désactiver)';
+            } else {
+                typewriterBtn.style.opacity = '0.6';
+                typewriterBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+                typewriterBtn.style.transform = 'scale(0.95)';
+                typewriterBtn.title = 'Effet machine à écrire désactivé (cliquez pour activer)';
+            }
+        }
+
+        // Initialiser le bouton
+        updateTypewriterButton();
+
+        // Clear chat
+        document.getElementById('clearChat').addEventListener('click', function() {
+            if (confirm('Nouvelle conversation ?')) {
+                sessionId = null;
+                messageHistory = [];
+                messagesContainer.innerHTML = `
+                    <div class="sullivan-empty">
+                        <div class="sullivan-empty-icon">👋</div>
+                        <h4>Nouvelle conversation</h4>
+                        <p>Je suis prêt à vous aider !</p>
+                        <div class="sullivan-suggestions">
+                            <span class="sullivan-suggestion" onclick="sendSuggestion('Je veux créer une page de login')">Créer une page de login</span>
+                            <span class="sullivan-suggestion" onclick="sendSuggestion('Quelle est l\'étape 5 ?')">Étape 5 du parcours</span>
+                            <span class="sullivan-suggestion" onclick="sendSuggestion('Génère un bouton moderne')">Générer un bouton</span>
+                        </div>
+                    </div>
+                `;
+                sessionIdSpan.textContent = 'Session: nouvelle';
+            }
+        });
+
+        // Envoyer une suggestion
+        function sendSuggestion(text) {
+            messageInput.value = text;
+            sendMessage();
+        }
+
+        // Afficher un toast
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1f2937;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 13px;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // Ajouter un message utilisateur
+        function addUserMessage(text) {
+            // Supprimer l'état vide si présent
+            const empty = messagesContainer.querySelector('.sullivan-empty');
+            if (empty) empty.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'sullivan-message user';
+            messageDiv.innerHTML = `
+                <div class="sullivan-message-avatar">👤</div>
+                <div class="sullivan-message-content">${escapeHtml(text)}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Ajouter un message bot (avec typewriter amélioré)
+        async function addBotMessage(text, useTypewriter = true) {
+            const empty = messagesContainer.querySelector('.sullivan-empty');
+            if (empty) empty.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'sullivan-message bot';
+            messageDiv.innerHTML = `
+                <div class="sullivan-message-avatar">🎭</div>
+                <div class="sullivan-message-content">
+                    <span class="message-text"></span><span class="sullivan-cursor hidden"></span>
+                    <div class="sullivan-skip-hint">
+                        <span class="skip-icon">⚡</span>
+                        <span>Cliquez ou appuyez sur Espace pour afficher tout</span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+
+            const textSpan = messageDiv.querySelector('.message-text');
+            const cursor = messageDiv.querySelector('.sullivan-cursor');
+            const skipHint = messageDiv.querySelector('.sullivan-skip-hint');
+
+            // Typewriter effect
+            if (useTypewriter && CONFIG.TYPEWRITER_ENABLED && text.length > 15) {
+                isTyping = true;
+                currentTypewriter = { cancelled: false };
+                cursor.classList.remove('hidden');
+                setTypingStatus(true);
+                messageDiv.classList.add('typing');
+
+                // Vitesse adaptative pour éviter d'attendre trop longtemps
+                let baseSpeed = CONFIG.TYPEWRITER_SPEED;
+                
+                if (CONFIG.ADAPTIVE_SPEED) {
+                    // Calculer la vitesse nécessaire pour finir dans MAX_TYPING_DURATION
+                    const estimatedDuration = text.length * baseSpeed;
+                    if (estimatedDuration > MAX_TYPING_DURATION) {
+                        baseSpeed = Math.max(MIN_TYPEWRITER_SPEED, MAX_TYPING_DURATION / text.length);
+                    }
+                    // Accélérer encore pour les très longs textes
+                    if (text.length > 500) {
+                        baseSpeed *= 0.7;
+                    }
+                }
+                
+                const adaptiveSpeed = baseSpeed;
+                
+                // Montrer le hint après un délai
+                setTimeout(() => {
+                    if (isTyping && skipHint) {
+                        skipHint.style.opacity = '0.7';
+                    }
+                }, 1000);
+
+                // Skip handlers
+                const skipTypewriter = () => {
+                    if (currentTypewriter && !currentTypewriter.cancelled) {
+                        currentTypewriter.cancelled = true;
+                        textSpan.textContent = text;
+                        cursor.classList.add('hidden');
+                        if (skipHint) skipHint.style.display = 'none';
+                        messageDiv.classList.remove('typing');
+                        // Feedback visuel du skip
+                        messageDiv.style.animation = 'none';
+                        messageDiv.offsetHeight; // Trigger reflow
+                        messageDiv.style.animation = 'pulse 0.3s ease';
+                    }
+                };
+
+                // Multiple façons de skipper
+                const skipEvents = [];
+                
+                if (CONFIG.SKIP_ON_CLICK) {
+                    messageDiv.addEventListener('click', skipTypewriter, { once: true });
+                    skipEvents.push('click');
+                }
+                
+                if (CONFIG.SKIP_ON_KEY) {
+                    const keyHandler = (e) => {
+                        if (e.code === 'Space' || e.code === 'Enter') {
+                            e.preventDefault();
+                            skipTypewriter();
+                        }
+                    };
+                    document.addEventListener('keydown', keyHandler, { once: true });
+                    skipEvents.push('keydown');
+                }
+
+                // Type characters avec gestion des pauses naturelles
+                let i = 0;
+                while (i < text.length) {
+                    if (currentTypewriter.cancelled) {
+                        break;
+                    }
+                    
+                    const char = text[i];
+                    textSpan.textContent += char;
+                    
+                    // Scroll seulement tous les 5 caractères ou à la fin
+                    if (i % 5 === 0 || i === text.length - 1) {
+                        scrollToBottom();
+                    }
+                    
+                    // Pause naturelle après ponctuation (si activé)
+                    let delay = adaptiveSpeed;
+                    if (CONFIG.NATURAL_PAUSES) {
+                        if ('.!?'.includes(char)) {
+                            delay = adaptiveSpeed * 5; // Pause longue après phrase (250-400ms)
+                        } else if (',;'.includes(char)) {
+                            delay = adaptiveSpeed * 2.5; // Pause moyenne (100-200ms)
+                        } else if (char === '\n') {
+                            delay = adaptiveSpeed * 3; // Pause après saut de ligne
+                        }
+                    }
+                    
+                    await sleep(delay);
+                    i++;
+                }
+
+                // Cleanup
+                cursor.classList.add('hidden');
+                if (skipHint) skipHint.style.display = 'none';
+                messageDiv.classList.remove('typing');
+                isTyping = false;
+                currentTypewriter = null;
+                setTypingStatus(false);
+            } else {
+                textSpan.textContent = text;
+                if (skipHint) skipHint.style.display = 'none';
+            }
+
+            scrollToBottom();
+        }
+
+        // Afficher l'indicateur "typing"
+        function showTypingIndicator() {
+            const empty = messagesContainer.querySelector('.sullivan-empty');
+            if (empty) empty.remove();
+
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'sullivan-message bot typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="sullivan-message-avatar">🎭</div>
+                <div class="sullivan-typing">
+                    <div class="sullivan-typing-dot"></div>
+                    <div class="sullivan-typing-dot"></div>
+                    <div class="sullivan-typing-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            scrollToBottom();
+            return typingDiv;
+        }
+
+        // Envoyer un message
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || isTyping) return;
+
+            // Ajouter le message utilisateur
+            addUserMessage(text);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            // Afficher l'indicateur de frappe
+            const typingIndicator = showTypingIndicator();
+            setTypingStatus(true);
+
+            try {
+                // Appel API
+                const response = await fetch(`${CONFIG.API_BASE_URL}/sullivan/agent/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        session_id: sessionId,
+                        user_id: 'web_user',
+                        step: 4
+                    })
+                });
+
+                // Supprimer l'indicateur
+                typingIndicator.remove();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    sessionId = data.session_id;
+                    sessionIdSpan.textContent = `Session: ${sessionId.slice(-8)}`;
+
+                    // Afficher la réponse avec typewriter
+                    await addBotMessage(data.content, true);
+
+                    // Afficher les outils utilisés si présents
+                    if (data.tool_calls && data.tool_calls.length > 0) {
+                        console.log('Outils utilisés:', data.tool_calls);
+                    }
+                } else {
+                    await addBotMessage('Désolé, une erreur est survenue. Veuillez réessayer.', false);
+                }
+            } catch (error) {
+                typingIndicator.remove();
+                await addBotMessage('Erreur de connexion. Vérifiez que l\'API est démarrée (./start_api.sh)', false);
+                console.error('Error:', error);
+            }
+
+            setTypingStatus(false);
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+
+        // Mettre à jour le statut
+        function setTypingStatus(typing) {
+            if (typing) {
+                statusDot.classList.add('typing');
+                statusText.textContent = 'Sullivan écrit...';
+            } else {
+                statusDot.classList.remove('typing');
+                statusText.textContent = 'En ligne';
+            }
+        }
+
+        // Scroll vers le bas
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Utilitaires
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Récupérer la session depuis l'URL si présente
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSession = urlParams.get('session');
+        if (urlSession) {
+            sessionId = urlSession;
+            sessionIdSpan.textContent = `Session: ${sessionId.slice(-8)}`;
+        }
+    </script>
+</body>
+</html>

@@ -82,9 +82,10 @@ class StepChunker:
     """
     
     # Thresholds for chunking
-    DEFAULT_CHUNK_SIZE = 20000  # Target tokens per chunk
-    MAX_CHUNK_SIZE = 30000      # Maximum tokens per chunk
-    MIN_CHUNK_SIZE = 5000       # Minimum tokens per chunk
+    # Reduced from 20k to 12k to avoid Gemini timeouts on large contexts
+    DEFAULT_CHUNK_SIZE = 12000  # Target tokens per chunk
+    MAX_CHUNK_SIZE = 15000      # Maximum tokens per chunk (aligned with CHUNK_THRESHOLD)
+    MIN_CHUNK_SIZE = 3000       # Minimum tokens per chunk
     
     def __init__(self, default_chunk_size: int = 20000):
         """

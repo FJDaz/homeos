@@ -1,0 +1,8 @@
+#!/bin/bash
+# AetherFlow Chat - Script wrapper pour Sullivan Agent CLI
+# Usage: ./aetherflow-chat [message] ou ./aetherflow-chat -i (mode interactif)
+
+cd "$(dirname "$0")"
+source .venv/bin/activate 2>/dev/null || source venv/bin/activate 2>/dev/null
+
+python -m Backend.Prod.cli sullivan chat "$@"

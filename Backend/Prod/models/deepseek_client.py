@@ -179,7 +179,7 @@ class DeepSeekClient(BaseLLMClient):
                     "content": full_prompt
                 }
             ],
-            "max_tokens": max_tokens or settings.max_tokens,
+            "max_tokens": min(max_tokens or settings.deepseek_max_tokens, settings.deepseek_max_tokens),
             "temperature": temperature or settings.temperature
         }
         
@@ -351,7 +351,7 @@ class DeepSeekClient(BaseLLMClient):
                     "content": prompt
                 }
             ],
-            "max_tokens": min(step.estimated_tokens, settings.max_tokens),
+            "max_tokens": min(step.estimated_tokens, settings.deepseek_max_tokens),
             "temperature": settings.temperature
         }
         

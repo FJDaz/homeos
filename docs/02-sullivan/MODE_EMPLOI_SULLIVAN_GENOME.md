@@ -50,6 +50,7 @@ Aujourd’hui, le Studio **affiche directement** le contenu du genome (mapping e
   - recherche de composants (`/sullivan/search`),
   - analyse backend DevMode (`/sullivan/dev/analyze`),
   - analyse design DesignerMode (`/sullivan/designer/analyze`),
+  - workflows frontend FrontendMode (`/sullivan/frontend/*`),
   - envoi de messages et affichage des réponses.
 - **Sullivan** (côté API) : Analyse backend, inférence UI (UIInferenceEngine), génération de composants (ComponentGenerator) via **Aetherflow** (plans, PROTO/PROD). Voir `docs/02-sullivan/PRD_SULLIVAN.md`.
 

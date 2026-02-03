@@ -1,0 +1,66 @@
+{
+  "task_id": "design-principles-visual-intent",
+  "description": "Compléter design_principles dans le flux upload Studio : DesignerMode retourne design_principles, studio_designer_upload active extract_principles et passe au mapper, design_structure_to_visual_intent_report normalise le format Gemini et ajoute fallback layout.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Dans Backend/Prod/sullivan/modes/designer_mode.py : (1) Déclarer principles = None avant le bloc if self.extract_principles (ligne ~113). (2) Dans le return (lignes 174-181), ajouter 'design_principles': principles if self.extract_principles else None. Ainsi DesignerMode.run() retourne les principes extraits quand extract_principles=True.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "principles = None initialisé avant le bloc extract_principles",
+        "Return dict contient design_principles (principles ou None)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/modes/designer_mode.py"],
+        "input_files": ["Backend/Prod/sullivan/modes/designer_mode.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans Backend/Prod/sullivan/studio_routes.py : (1) Ligne ~719 : ajouter extract_principles=True à DesignerMode(design_path=tmp_path, output_path=None, non_interactive=True). (2) Ligne ~726 : appeler design_structure_to_visual_intent_report(result['design_structure'], result.get('design_principles')) au lieu de design_structure_to_visual_intent_report(result['design_structure']).",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "DesignerMode appelé avec extract_principles=True",
+        "design_principles passé au mapper"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/studio_routes.py"],
+        "input_files": ["Backend/Prod/sullivan/studio_routes.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Dans Backend/Prod/sullivan/identity.py : (1) Créer _normalize_principles_to_style(dp: Dict) -> Dict qui mappe format Gemini vers clés style_global : colors.primary ou primary_color -> primary_color, colors.bg ou colors.main ou bg_color -> bg_color, border_radius, font_family. Défauts : primary_color='#6366f1', bg_color='#ffffff', border_radius='8px', font_family='system-ui'. (2) Dans design_structure_to_visual_intent_report : si design_principles, utiliser style_global = _normalize_principles_to_style(design_principles). (3) Dans le bloc else (sans design_principles) : garder components[:3].style ; si style_global vide, tenter layout.get('primary_color'), layout.get('font_family'), etc. ; sinon défaut existant.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 700,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "_normalize_principles_to_style gère colors.primary et primary_color",
+        "design_principles normalisé alimente style_global",
+        "Fallback layout utilisé si components vide"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/identity.py"],
+        "input_files": ["Backend/Prod/sullivan/identity.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-02T15:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "Parcours UX Sullivan - Compléter design_principles dans flux upload PNG vers VisualIntentReport. Plan compléter_design_principles_visualintentreport."
+  }
+}

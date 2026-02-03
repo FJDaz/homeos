@@ -58,14 +58,29 @@ def _image_to_base64(
     screenshot_path_or_bytes: Union[str, Path, bytes],
     mime_type: str = "image/png",
 ) -> tuple[str, str]:
-    """Load image from path or bytes, return (base64_string, mime_type)."""
+    """Load image from path or bytes, preprocess for Gemini, return (base64_string, mime_type)."""
+    try:
+        from ...sullivan.upload.image_preprocessor import (
+            preprocess_for_gemini,
+            preprocess_bytes_for_gemini,
+        )
+    except ImportError:
+        preprocess_for_gemini = None
+        preprocess_bytes_for_gemini = None
+
     if isinstance(screenshot_path_or_bytes, (str, Path)):
         path = Path(screenshot_path_or_bytes)
         if not path.exists():
             raise FileNotFoundError(f"Screenshot not found: {path}")
-        raw = path.read_bytes()
+        if preprocess_for_gemini:
+            raw, mime_type = preprocess_for_gemini(path)
+        else:
+            raw = path.read_bytes()
     elif isinstance(screenshot_path_or_bytes, bytes):
-        raw = screenshot_path_or_bytes
+        if preprocess_bytes_for_gemini:
+            raw, mime_type = preprocess_bytes_for_gemini(screenshot_path_or_bytes)
+        else:
+            raw = screenshot_path_or_bytes
     else:
         raise TypeError("screenshot_path_or_bytes must be path (str|Path) or bytes")
     b64 = base64.standard_b64encode(raw).decode("ascii")

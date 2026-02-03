@@ -93,7 +93,7 @@ from typing import Dict, Optional
 from pathlib import Path
 import json
 import logging
-from gemini_client import GeminiClient
+from ...models.gemini_client import GeminiClient
 
 app = FastAPI()
 
