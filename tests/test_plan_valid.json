@@ -1,0 +1,12 @@
+{
+  "module_cible": "Backend/Prod/sullivan/agent/memory.py",
+  "fichiers_modifies": ["Backend/Prod/sullivan/agent/memory.py"],
+  "mode_aetherflow": "prod",
+  "outils_sullivan_utilises": ["SessionContext", "ConversationMemory"],
+  "risques_identifies": ["Aucun - extension cohérente"],
+  "tests_recommandes": [
+    "Test que theme_preference est sauvegardé",
+    "Test que language_preference persiste entre sessions"
+  ],
+  "description": "Extension de SessionContext pour ajouter theme_preference et language_preference, cohérent avec l'architecture Sullivan existante."
+}

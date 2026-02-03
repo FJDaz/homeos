@@ -1,0 +1,9 @@
+{
+  "module_cible": "Backend/Prod/sullivan/agent/sullivan_agent.py",
+  "fichiers_crees": ["Backend/Prod/sullivan/agent/new_feature.py"],
+  "mode_aetherflow": "prod",
+  "outils_sullivan_utilises": ["SullivanAgent", "SessionContext"],
+  "risques_identifies": ["Nouvelle dépendance possible"],
+  "tests_recommandes": [],
+  "description": "Ajout d'une nouvelle fonctionnalité à SullivanAgent sans tests unitaires prévus. Bonne architecture mais tests manquants."
+}

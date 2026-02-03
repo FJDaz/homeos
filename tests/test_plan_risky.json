@@ -1,0 +1,9 @@
+{
+  "module_cible": "homeos/core/mode_manager.py",
+  "fichiers_modifies": ["homeos/core/mode_manager.py"],
+  "mode_aetherflow": "proto",
+  "outils_sullivan_utilises": [],
+  "risques_identifies": [],
+  "tests_recommandes": [],
+  "description": "Modification du ModeManager pour ajouter une nouvelle méthode sans préserver le pattern singleton. Risque de casser l'architecture HomeOS."
+}
