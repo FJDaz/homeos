@@ -233,7 +233,7 @@
 }
 
 .sullivan-message.user .sullivan-msg-avatar {
-  background: #6366f1;
+  background: #8cc63f;
   color: white;
 }
 
@@ -253,7 +253,7 @@
 }
 
 .sullivan-message.user .sullivan-msg-content {
-  background: #6366f1;
+  background: #8cc63f;
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -314,7 +314,7 @@
 
 .sullivan-quick-btn:hover {
   background: #f1f5f9;
-  border-color: #6366f1;
+  border-color: #8cc63f;
 }
 
 .sullivan-tools {
@@ -337,7 +337,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: #6366f1;
+  background: #8cc63f;
   color: white;
   border-radius: 4px;
   font-size: 11px;
@@ -362,7 +362,7 @@
 }
 
 .sullivan-input-box:focus-within {
-  border-color: #6366f1;
+  border-color: #8cc63f;
 }
 
 .sullivan-textarea {
@@ -380,7 +380,7 @@
 }
 
 .sullivan-send {
-  background: #6366f1;
+  background: #8cc63f;
   color: white;
   border: none;
   width: 40px;
@@ -396,7 +396,7 @@
 }
 
 .sullivan-send:hover:not(:disabled) {
-  background: #4f46e5;
+  background: #8cc63f;
 }
 
 .sullivan-send:disabled {
@@ -410,7 +410,7 @@
   right: 24px;
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, #8cc63f, #8cc63f);
   border: none;
   border-radius: 50%;
   color: white;
@@ -493,10 +493,7 @@
       <button class="sullivan-send" id="sullivan-send-btn">➤</button>
     </div>
   </div>
-</div>
-
-<button id="sullivan-toggle" class="visible" onclick="window.SullivanWidget.toggle()">🎨</button>
-`;
+</div>`;
 
   // Classe du widget
   class SullivanWidgetClass {
