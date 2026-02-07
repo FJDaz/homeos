@@ -1,0 +1,493 @@
+{
+  "genome_version": "3.0-kimi-innocent",
+  "inference_method": "4-source-confrontation",
+  "project": "Homeos/Sullivan",
+  "date": "2026-02-07",
+  "metadata": {
+    "confidence_global": 0.82,
+    "sources_used": ["doc", "code", "logs", "inference"],
+    "composants_count": 29,
+    "methodology": "Kimi innocent - 4 bundles confrontation"
+  },
+  "n0_phases": [
+    {
+      "id": "phase_1_ir",
+      "name": "Intent Refactoring",
+      "description": "Inventaire fonctionnel et détection organes",
+      "order": 1,
+      "confidence": 0.90,
+      "n1_sections": [
+        {
+          "id": "section_ir_report",
+          "name": "Rapport IR",
+          "n2_features": [
+            {
+              "id": "feature_ir_table",
+              "name": "Tableau Organes",
+              "n3_components": [
+                {
+                  "id": "comp_ir_table",
+                  "name": "Vue Rapport IR",
+                  "endpoint": "/studio/reports/ir",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Tableau des organes détectés avec verdict coloré"
+                },
+                {
+                  "id": "comp_ir_detail",
+                  "name": "Détail Organe",
+                  "endpoint": "/studio/drilldown",
+                  "method": "GET",
+                  "visual_hint": "card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-close",
+                  "description_ui": "Carte détaillant un organe avec endpoints et modèles"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_2_arbiter",
+      "name": "Arbitrage",
+      "description": "Décision garder/réserve par capacité",
+      "order": 2,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "section_arbiter",
+          "name": "Arbitrage HCI",
+          "n2_features": [
+            {
+              "id": "feature_stencils",
+              "name": "Stencils",
+              "n3_components": [
+                {
+                  "id": "comp_stencil_card",
+                  "name": "Carte Stencil",
+                  "endpoint": "/studio/arbitrage/forms",
+                  "method": "GET",
+                  "visual_hint": "stencil-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-toggle",
+                  "description_ui": "Carte pouvoir avec toggle Garder/Réserve"
+                },
+                {
+                  "id": "comp_arbiter_validate",
+                  "name": "Validation Arbiter",
+                  "endpoint": "/studio/validate",
+                  "method": "POST",
+                  "visual_hint": "form",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Formulaire validation finale des décisions"
+                },
+                {
+                  "id": "comp_arbiter_table",
+                  "name": "Tableau Expert",
+                  "endpoint": "/studio/reports/arbitrage",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Tableau technique mode expert"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_3_session",
+      "name": "Session",
+      "description": "Gestion état et persistence",
+      "order": 3,
+      "confidence": 0.92,
+      "n1_sections": [
+        {
+          "id": "section_session",
+          "name": "État Session",
+          "n2_features": [
+            {
+              "id": "feature_session_mgmt",
+              "name": "Gestion Session",
+              "n3_components": [
+                {
+                  "id": "comp_session_status",
+                  "name": "Status Session",
+                  "endpoint": "/studio/session",
+                  "method": "GET",
+                  "visual_hint": "status",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "auto-refresh",
+                  "description_ui": "Indicateurs LEDs état current_step, genome, entries"
+                },
+                {
+                  "id": "comp_session_reset",
+                  "name": "Reset Session",
+                  "endpoint": "/studio/session/reset",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-confirm",
+                  "description_ui": "Bouton réinitialisation avec confirmation"
+                },
+                {
+                  "id": "comp_genome_summary",
+                  "name": "Résumé Genome",
+                  "endpoint": "/studio/genome/summary",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-expand",
+                  "description_ui": "Dashboard récapitulatif organes et endpoints"
+                },
+                {
+                  "id": "comp_distillation_list",
+                  "name": "Liste Distillation",
+                  "endpoint": "/studio/distillation/entries",
+                  "method": "GET",
+                  "visual_hint": "list",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Liste entrées distillation avec timestamp"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_4_navigation",
+      "name": "Navigation",
+      "description": "Stepper et flux entre étapes",
+      "order": 4,
+      "confidence": 0.95,
+      "n1_sections": [
+        {
+          "id": "section_nav",
+          "name": "Navigation UX",
+          "n2_features": [
+            {
+              "id": "feature_stepper",
+              "name": "Stepper",
+              "n3_components": [
+                {
+                  "id": "comp_stepper",
+                  "name": "Stepper 9 Étapes",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "stepper",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Stepper horizontal 9 phases avec états active/completed/future"
+                },
+                {
+                  "id": "comp_next_button",
+                  "name": "Bouton Suivant",
+                  "endpoint": "/studio/next/{current_step}",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Bouton étape suivante avec validation prérequis"
+                },
+                {
+                  "id": "comp_breadcrumb",
+                  "name": "Fil d'Ariane",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "breadcrumb",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Breadcrumb Phase > Étape > Section"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_5_layout",
+      "name": "Layout",
+      "description": "Sélection et configuration UI",
+      "order": 5,
+      "confidence": 0.85,
+      "n1_sections": [
+        {
+          "id": "section_layout",
+          "name": "Sélection Layout",
+          "n2_features": [
+            {
+              "id": "feature_layouts",
+              "name": "Galerie Layouts",
+              "n3_components": [
+                {
+                  "id": "comp_layout_grid",
+                  "name": "Galerie Layouts",
+                  "endpoint": "/studio/step/5/layouts",
+                  "method": "GET",
+                  "visual_hint": "grid",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-select",
+                  "description_ui": "Galerie 3×2 layouts avec aperçu"
+                },
+                {
+                  "id": "comp_layout_card",
+                  "name": "Carte Layout",
+                  "endpoint": "/studio/step/5/select-layout/{layout_id}",
+                  "method": "POST",
+                  "visual_hint": "card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Carte layout cliquable sélection visuelle"
+                },
+                {
+                  "id": "comp_choice_style",
+                  "name": "Choix Style",
+                  "endpoint": "/studio/step/5/select-layout/{layout_id}",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "radio-select",
+                  "description_ui": "Radio cards 2×2: Minimal, Brutaliste, Moderne, Corporate"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_6_upload",
+      "name": "Upload",
+      "description": "Upload et analyse maquettes",
+      "order": 6,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "section_upload",
+          "name": "Upload Designer",
+          "n2_features": [
+            {
+              "id": "feature_upload",
+              "name": "Upload et Extraction",
+              "n3_components": [
+                {
+                  "id": "comp_upload_dropzone",
+                  "name": "Zone Upload",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "upload",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "drag-drop",
+                  "description_ui": "Zone drag & drop avec icône 📁 et feedback"
+                },
+                {
+                  "id": "comp_color_palette",
+                  "name": "Palette Extraite",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "color-palette",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-select",
+                  "description_ui": "4 swatches + chips style (rounded, font)"
+                },
+                {
+                  "id": "comp_preview_zones",
+                  "name": "Aperçu Zones",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "preview",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Image avec zones surlignées bleu/vert/rose"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_7_chat",
+      "name": "Dialogue",
+      "description": "Chat Majordome pour affiner",
+      "order": 7,
+      "confidence": 0.90,
+      "n1_sections": [
+        {
+          "id": "section_chat",
+          "name": "Interface Chat",
+          "n2_features": [
+            {
+              "id": "feature_chat",
+              "name": "Chat Sullivan",
+              "n3_components": [
+                {
+                  "id": "comp_chat_bubbles",
+                  "name": "Bulles Conversation",
+                  "endpoint": "/studio/majordome/chat",
+                  "method": "POST",
+                  "visual_hint": "chat/bubble",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "submit",
+                  "description_ui": "Bulles S indigo + user, style Messenger"
+                },
+                {
+                  "id": "comp_chat_input",
+                  "name": "Input Message",
+                  "endpoint": "/studio/majordome/chat",
+                  "method": "POST",
+                  "visual_hint": "chat-input",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Champ saisie + 📎 😊 + bouton envoi ➤"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_8_validation",
+      "name": "Validation",
+      "description": "Récapitulatif et accord final",
+      "order": 8,
+      "confidence": 0.92,
+      "n1_sections": [
+        {
+          "id": "section_validation",
+          "name": "Validation Finale",
+          "n2_features": [
+            {
+              "id": "feature_validation",
+              "name": "Récap Global",
+              "n3_components": [
+                {
+                  "id": "comp_validation_dashboard",
+                  "name": "Dashboard Validation",
+                  "endpoint": "/studio/step/8",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-expand",
+                  "description_ui": "Dashboard métriques: zones, layout, style"
+                },
+                {
+                  "id": "comp_validation_accordion",
+                  "name": "Résumé Décisions",
+                  "endpoint": "/studio/step/8/confirm",
+                  "method": "POST",
+                  "visual_hint": "accordion",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-expand",
+                  "description_ui": "Accordéon sections: zones validées, style, ajustements"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_9_zoom",
+      "name": "Adaptation",
+      "description": "Zoom drill-down et finalisation",
+      "order": 9,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "section_zoom",
+          "name": "Navigation Zoom",
+          "n2_features": [
+            {
+              "id": "feature_zoom",
+              "name": "Contrôles et Actions",
+              "n3_components": [
+                {
+                  "id": "comp_zoom_controls",
+                  "name": "Contrôles Zoom",
+                  "endpoint": "/studio/zoom/{level}/{target_id}",
+                  "method": "GET",
+                  "visual_hint": "zoom-controls",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Navigation ← Out | 🔍 Corps ▼ | In → + breadcrumb"
+                },
+                {
+                  "id": "comp_zoom_out",
+                  "name": "Zoom Out",
+                  "endpoint": "/studio/zoom/out",
+                  "method": "GET",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Bouton remonter niveau hiérarchie"
+                },
+                {
+                  "id": "comp_detail_card",
+                  "name": "Fiche Détail Atome",
+                  "endpoint": "/studio/genome/corps/{corps_id}",
+                  "method": "GET",
+                  "visual_hint": "detail-card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-action",
+                  "description_ui": "Fiche endpoint: méthode, URL, Copier/Tester"
+                },
+                {
+                  "id": "comp_code_editor",
+                  "name": "Éditeur Code",
+                  "endpoint": "/studio/ir-genome-view",
+                  "method": "GET",
+                  "visual_hint": "editor",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "edit",
+                  "description_ui": "Éditeur syntax highlighting avec toolbar"
+                },
+                {
+                  "id": "comp_launch_button",
+                  "name": "Lancer Distillation",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "launch-button",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "submit",
+                  "description_ui": "Bouton fusée 🚀 'Lancer la distillation'"
+                },
+                {
+                  "id": "comp_apply_changes",
+                  "name": "Appliquer Changements",
+                  "endpoint": "/studio/step/7/confirm",
+                  "method": "POST",
+                  "visual_hint": "apply-changes",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "💾 Appliquer / ↩️ Annuler"
+                },
+                {
+                  "id": "comp_confirm_modal",
+                  "name": "Modal Confirmation",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "modal",
+                  "layout_hint": "centered",
+                  "interaction_type": "click-confirm",
+                  "description_ui": "Fenêtre modale avec titre, message, Annuler/Confirmer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
