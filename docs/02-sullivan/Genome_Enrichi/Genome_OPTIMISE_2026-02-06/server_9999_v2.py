@@ -102,7 +102,7 @@ def generate_component_wireframe(component, phase_name, description=""):
     # STENCIL-CARD - Fiche pouvoir enrichie
     elif visual_hint == "stencil-card":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);position:relative;overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8aca7f 0%,#aac87a 100%);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8aca7f 0%,#aac87a 100%);"></div>
             <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <div style="width:40px;height:40px;background:linear-gradient(135deg,#f5f0d0 0%,#f0dcb8 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 4px rgba(251,191,36,0.2);">💡</div>
                 <div style="flex:1;">
@@ -247,7 +247,7 @@ def generate_component_wireframe(component, phase_name, description=""):
     # CARD - Carte enrichie
     elif visual_hint == "card":
         wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,{color} 0%,{color}88 100%);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,{color} 0%,{color}88 100%);"></div>
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
                 <div style="width:40px;height:40px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
@@ -374,7 +374,7 @@ def generate_component_wireframe(component, phase_name, description=""):
     # UPLOAD - Zone upload enrichie
     elif visual_hint == "upload":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px dashed #cbd5e1;border-radius:12px;padding:24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8aca7f 0%,#aac87a 50%,#8aca7f 100%);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8aca7f 0%,#aac87a 50%,#8aca7f 100%);"></div>
             <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 2px 4px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.8);">📁</div>
             <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Déposez votre fichier ici</div>
             <div style="font-size:10px;color:#64748b;margin-bottom:12px;">ou cliquez pour parcourir</div>
@@ -411,7 +411,7 @@ def generate_component_wireframe(component, phase_name, description=""):
     # GENERIC - Fallback enrichi
     else:
         wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,{color} 0%,{color}88 100%);"></div>
+            <div style="position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,{color} 0%,{color}88 100%);"></div>
             <div style="display:flex;align-items:center;gap:12px;">
                 <div style="width:36px;height:36px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
