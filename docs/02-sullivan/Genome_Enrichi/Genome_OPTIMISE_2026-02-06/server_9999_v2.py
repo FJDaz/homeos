@@ -638,7 +638,8 @@ def generate_html(genome):
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/':
+        # Routes acceptées : / et /studio (avec ou sans query params)
+        if self.path == '/' or self.path.startswith('/studio'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
