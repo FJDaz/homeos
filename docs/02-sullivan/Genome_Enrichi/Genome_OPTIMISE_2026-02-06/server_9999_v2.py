@@ -448,20 +448,78 @@ def generate_component_wireframe(component, phase_name, description=""):
 
 
 def generate_html(genome):
-    components = []
-    for phase in genome.get('n0_phases', []):
-        for section in phase.get('n1_sections', []):
-            for feature in section.get('n2_features', []):
-                for comp in feature.get('n3_components', []):
-                    comp['_phase'] = phase.get('name', 'Unknown')
-                    comp['_section'] = section.get('name', 'Unknown')
-                    comp['_feature'] = feature.get('name', 'Unknown')
-                    components.append(comp)
+    # Structure hiérarchique: Corps > Organes > Atomes
+    hierarchy = []
     
+    for phase in genome.get('n0_phases', []):
+        phase_name = phase.get('name', 'Unknown Phase')
+        for section in phase.get('n1_sections', []):
+            section_name = section.get('name', 'Unknown Corps')
+            section_id = section.get('id', 'unknown')
+            section_comps = []
+            
+            for feature in section.get('n2_features', []):
+                feature_name = feature.get('name', 'Unknown Organe')
+                feature_id = feature.get('id', 'unknown')
+                feature_comps = []
+                
+                for comp in feature.get('n3_components', []):
+                    comp['_phase'] = phase_name
+                    comp['_section'] = section_name
+                    comp['_feature'] = feature_name
+                    feature_comps.append(comp)
+                
+                if feature_comps:
+                    section_comps.append({
+                        'type': 'organe',
+                        'name': feature_name,
+                        'id': feature_id,
+                        'components': feature_comps
+                    })
+            
+            if section_comps:
+                hierarchy.append({
+                    'type': 'corps',
+                    'name': section_name,
+                    'id': section_id,
+                    'organes': section_comps
+                })
+    
+    # Générer HTML hiérarchique
     components_html = ""
-    for comp in components:
-        desc = comp.get('description_ui', '')
-        components_html += generate_component_wireframe(comp, comp['_phase'], desc)
+    
+    for corps in hierarchy:
+        components_html += f'''
+        <div class="corps-section" style="margin-bottom: 32px;">
+            <div class="corps-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 14px 18px; background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 10px; border-left: 3px solid #7aca6a;">
+                <span style="font-size: 20px;">🏛️</span>
+                <div>
+                    <div style="font-size: 13px; font-weight: 700; color: #166534; letter-spacing: -0.2px;">{corps['name']}</div>
+                    <div style="font-size: 10px; color: #22c55e; font-weight: 600;">CORPS • {len(corps['organes'])} organes</div>
+                </div>
+            </div>
+        '''
+        
+        for organe in corps['organes']:
+            components_html += f'''
+            <div class="organe-section" style="margin-left: 20px; margin-bottom: 24px;">
+                <div class="organe-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border-left: 2px solid #5a9ac6;">
+                    <span style="font-size: 16px;">⚙️</span>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; color: #334155; letter-spacing: -0.2px;">{organe['name']}</div>
+                        <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Organe • {len(organe['components'])} atomes</div>
+                    </div>
+                </div>
+                <div class="component-grid" style="margin-left: 16px;">
+            '''
+            
+            for comp in organe['components']:
+                desc = comp.get('description_ui', '')
+                components_html += generate_component_wireframe(comp, comp['_phase'], desc)
+            
+            components_html += '</div></div>'
+        
+        components_html += '</div>'
     
     return f'''<!DOCTYPE html>
 <html lang="fr">
@@ -533,12 +591,12 @@ def generate_html(genome):
                 <div class="sidebar-label">Statistiques</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div style="text-align: center; padding: 14px; background: linear-gradient(145deg, #fff 0%, #f8fafc 100%); border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        <div style="font-size: 24px; font-weight: 800; color: #7aca6a; letter-spacing: -1px;">{len(genome.get('n0_phases', []))}</div>
-                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">phases</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #7aca6a; letter-spacing: -1px;">{len(hierarchy)}</div>
+                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">corps</div>
                     </div>
                     <div style="text-align: center; padding: 14px; background: linear-gradient(145deg, #fff 0%, #f8fafc 100%); border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        <div style="font-size: 24px; font-weight: 800; color: #5a9ac6; letter-spacing: -1px;">{len(components)}</div>
-                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">composants</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #5a9ac6; letter-spacing: -1px;">{sum(len(o['components']) for c in hierarchy for o in c['organes'])}</div>
+                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">atomes</div>
                     </div>
                 </div>
             </div>
@@ -569,24 +627,24 @@ def generate_html(genome):
             <div class="genome-container">
                 <div class="stats">
                     <div class="stat">
-                        <div class="stat-value">{len([c for c in components if c.get('method') == 'GET'])}</div>
+                        <div class="stat-value">{len([comp for c in hierarchy for o in c['organes'] for comp in o['components'] if comp.get('method') == 'GET'])}</div>
                         <div class="stat-label">📖 Voir</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value" style="color: #5a9ac6;">{len([c for c in components if c.get('method') == 'POST'])}</div>
+                        <div class="stat-value" style="color: #5a9ac6;">{len([comp for c in hierarchy for o in c['organes'] for comp in o['components'] if comp.get('method') == 'POST'])}</div>
                         <div class="stat-label">➕ Ajouter</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value" style="color: #e4bb5a;">{len([c for c in components if c.get('method') == 'PUT'])}</div>
+                        <div class="stat-value" style="color: #e4bb5a;">{len([comp for c in hierarchy for o in c['organes'] for comp in o['components'] if comp.get('method') == 'PUT'])}</div>
                         <div class="stat-label">✏️ Modifier</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value" style="color: #64748b;">{len([c for c in components if c.get('method') not in ['GET', 'POST', 'PUT']])}</div>
+                        <div class="stat-value" style="color: #64748b;">{len([comp for c in hierarchy for o in c['organes'] for comp in o['components'] if comp.get('method') not in ['GET', 'POST', 'PUT']])}</div>
                         <div class="stat-label">Autres</div>
                     </div>
                 </div>
                 
-                <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 20px; letter-spacing: -0.5px;">🧬 le Génome — <span style="color: #7aca6a;">{len(components)}</span> composants</h2>
+                <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 20px; letter-spacing: -0.5px;">🧬 le Génome — <span style="color: #7aca6a;">{sum(len(o['components']) for c in hierarchy for o in c['organes'])}</span> atomes</h2>
                 
                 <div class="component-grid">
                     {components_html}
