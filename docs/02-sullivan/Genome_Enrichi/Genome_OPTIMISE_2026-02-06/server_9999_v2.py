@@ -513,10 +513,10 @@ def generate_html(genome):
 </head>
 <body>
     <div class="tabs">
-        <div class="tab" onclick="switchTab(this, 'brs')">🚧 BRS</div>
-        <div class="tab" onclick="switchTab(this, 'bkd')">⚙️ BKD</div>
-        <div class="tab active" onclick="switchTab(this, 'frd')" id="tab-frd">🎨 FRD</div>
-        <div class="tab" onclick="switchTab(this, 'dpl')">🚀 DPL</div>
+        <div class="tab" onclick="switchTab(this, 'brs')">Brainstorm</div>
+        <div class="tab" onclick="switchTab(this, 'bkd')">Backend</div>
+        <div class="tab active" onclick="switchTab(this, 'frd')" id="tab-frd">Frontend</div>
+        <div class="tab" onclick="switchTab(this, 'dpl')">Deploy</div>
     </div>
 
     <div class="main">
@@ -558,6 +558,43 @@ def generate_html(genome):
         </aside>
 
         <div class="content">
+            <!-- Picto section pour chaque tab -->
+            <div id="tab-content-brs" class="tab-content" style="display:none;">
+                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#fef3c7 0%,#fde68a 100%);border-radius:12px;margin-bottom:20px;">
+                    <div style="width:80px;height:80px;margin:0 auto 16px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                    <div style="font-size:1.5em;font-weight:800;color:#92400e;">Brainstorm</div>
+                    <div style="font-size:0.9em;color:#b45309;margin-top:8px;">En construction</div>
+                </div>
+            </div>
+            <div id="tab-content-bkd" class="tab-content" style="display:none;">
+                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#dbeafe 0%,#bfdbfe 100%);border-radius:12px;margin-bottom:20px;">
+                    <div style="width:80px;height:80px;margin:0 auto 16px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <div style="font-size:1.5em;font-weight:800;color:#1e40af;">Backend</div>
+                    <div style="font-size:0.9em;color:#3b82f6;margin-top:8px;">Bientôt disponible</div>
+                </div>
+            </div>
+            <div id="tab-content-frd" class="tab-content">
+                <div style="text-align:center;padding:30px;background:linear-gradient(145deg,#dcfce7 0%,#bbf7d0 100%);border-radius:12px;margin-bottom:20px;">
+                    <div style="width:60px;height:60px;margin:0 auto 12px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    </div>
+                    <div style="font-size:1.3em;font-weight:800;color:#166534;">Frontend</div>
+                </div>
+            </div>
+            <div id="tab-content-dpl" class="tab-content" style="display:none;">
+                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#fee2e2 0%,#fecaca 100%);border-radius:12px;margin-bottom:20px;">
+                    <div style="width:80px;height:80px;margin:0 auto 16px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div style="font-size:1.5em;font-weight:800;color:#991b1b;">Deploy</div>
+                    <div style="font-size:0.9em;color:#ef4444;margin-top:8px;">Bientôt disponible</div>
+                </div>
+            </div>
+            
             <div class="sticky-header">
                 <div style="display: flex; gap: 14px; align-items: center;">
                     <input type="checkbox" id="select-all" style="width: 22px; height: 22px; accent-color: #7aca6a; cursor: pointer;" onchange="toggleAll(this)">
@@ -601,8 +638,11 @@ def generate_html(genome):
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             // Ajouter active au tab cliqué
             element.classList.add('active');
-            // Ici on pourrait charger le contenu spécifique au tab
-            console.log('Switched to:', tabName);
+            // Masquer tous les contenus
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            // Afficher le contenu du tab sélectionné
+            const content = document.getElementById('tab-content-' + tabName);
+            if (content) content.style.display = 'block';
         }}
         
         function toggleAll(source) {{
