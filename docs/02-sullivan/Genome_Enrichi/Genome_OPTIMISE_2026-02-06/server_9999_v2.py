@@ -25,12 +25,11 @@ def load_genome():
     if os.path.exists(GENOME_FILE):
         with open(GENOME_FILE, 'r') as f:
             data = json.load(f)
-            # Normaliser toutes les clés en minuscules
             data = normalize_keys(data)
             if 'n0_phases' not in data:
                 data['n0_phases'] = []
             if 'metadata' not in data:
-                data['metadata'] = {'confidence_global': 0.8}
+                data['metadata'] = {'confidence_global': 0.85}
             return data
     return {"n0_phases": [], "metadata": {"confidence_global": 0.0}}
 
@@ -653,7 +652,6 @@ def generate_html(genome):
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # Routes acceptées : / et /studio (avec ou sans query params)
         if self.path == '/' or self.path.startswith('/studio'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
