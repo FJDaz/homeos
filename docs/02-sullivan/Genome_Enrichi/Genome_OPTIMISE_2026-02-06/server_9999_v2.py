@@ -10,7 +10,7 @@ import os
 
 # Configuration
 PORT = 9999
-GENOME_FILE = "genome_enrichi.json"
+GENOME_FILE = "genome_inferred_kimi_innocent.json"
 
 def normalize_keys(obj):
     """Normalise les clés d'un dict (MAJUSCULES -> minuscules)"""
