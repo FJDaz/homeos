@@ -8,6 +8,9 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
+# Import visual inference for DaisyUI component mapping
+from .visual_inference import infer_visual_hint, enrich_endpoint_with_visual
+
 # Lazy import to avoid circular deps / heavy init
 def _get_openapi() -> Dict[str, Any]:
     from ..api import app
@@ -197,11 +200,20 @@ def generate_genome(
             summary = (op.get("summary") or op.get("description") or "").strip() or path
             # Utiliser _path_to_ui_hint_enriched() avec summary pour enrichir l'inférence
             hint = _path_to_ui_hint_enriched(path, method, summary)
+            
+            # Inférer les métadonnées visuelles (DaisyUI component mapping)
+            visual_meta = infer_visual_hint(method, path, summary)
+            
             endpoints.append({
                 "method": method.upper(),
                 "path": path,
                 "x_ui_hint": hint,
                 "summary": summary[:200],
+                # Couche visuelle (Mission 2: IR Visuelle)
+                "visual_hint": visual_meta["visual_hint"],
+                "visual_category": visual_meta["visual_category"],
+                "inferred_daisy_component": visual_meta["inferred_daisy_component"],
+                "wireframe_sketch": visual_meta["wireframe_sketch"],
             })
 
     schema_definitions: Dict[str, Any] = {}

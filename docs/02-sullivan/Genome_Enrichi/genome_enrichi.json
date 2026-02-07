@@ -1,0 +1,668 @@
+{
+  "genome": {
+    "name": "AetherFlow Studio",
+    "version": "1.0-enriched",
+    "generated_at": "2026-02-05T09:59:12.733381",
+    "source": "ir_visuel_edite.md",
+    "corps": [
+      {
+        "id": "studio",
+        "name": "Studio",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "studio_reports",
+            "name": "Reports",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_reports_get__studio_reports_ir",
+                "name": "Get Ir Report",
+                "endpoint": "/studio/reports/ir",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_reports_get__studio_reports_arbitrage",
+                "name": "Get Arbitrage Report",
+                "endpoint": "/studio/reports/arbitrage",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          },
+          {
+            "id": "studio_arbitrage",
+            "name": "Arbitrage",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_arbitrage_get__studio_arbitrage_forms",
+                "name": "Get Arbitrage Forms",
+                "endpoint": "/studio/arbitrage/forms",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_arbitrage_post__studio_validate",
+                "name": "Post Studio Validate",
+                "endpoint": "/studio/validate",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              },
+              {
+                "id": "studio_arbitrage_get__studio_typologies_arbiter",
+                "name": "Get Arbiter Typologies",
+                "endpoint": "/studio/typologies/arbiter",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_arbitrage_get__studio_typologies_daisy",
+                "name": "Get Daisy Typologies",
+                "endpoint": "/studio/typologies/daisy",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          },
+          {
+            "id": "studio_genome",
+            "name": "Genome",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_genome_get__studio_distillation_entries",
+                "name": "Get Distillation Entries",
+                "endpoint": "/studio/distillation/entries",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_genome_get__studio_genome_summary",
+                "name": "Get Genome Summary",
+                "endpoint": "/studio/genome/summary",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_genome_post__studio_finalize",
+                "name": "Finalize Generation",
+                "endpoint": "/studio/finalize",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              },
+              {
+                "id": "studio_genome_get__studio_genome",
+                "name": "Get Studio Genome",
+                "endpoint": "/studio/genome",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          },
+          {
+            "id": "studio_navigation",
+            "name": "Navigation",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_navigation_post__studio_next_current_step",
+                "name": "Navigate Next Step",
+                "endpoint": "/studio/next/{current_step}",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              },
+              {
+                "id": "studio_navigation_get__studio_step_step",
+                "name": "Get Step Fragment",
+                "endpoint": "/studio/step/{step}",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "studio_navigation_get__studio_step_5_layouts",
+                "name": "Get Step 5 Layouts",
+                "endpoint": "/studio/step/5/layouts",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "studio_navigation_post__studio_step_5_select_layout_layout_id",
+                "name": "Select Layout",
+                "endpoint": "/studio/step/5/select-layout/{layout_id}",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              },
+              {
+                "id": "studio_navigation_get__studio_zoom_level_target_id",
+                "name": "Handle Zoom",
+                "endpoint": "/studio/zoom/{level}/{target_id}",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "studio_navigation_get__studio_zoom_out",
+                "name": "Handle Zoom Out",
+                "endpoint": "/studio/zoom/out",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          },
+          {
+            "id": "studio_designer",
+            "name": "Designer",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_designer_post__studio_designer_upload",
+                "name": "Studio Designer Upload",
+                "endpoint": "/studio/designer/upload",
+                "method": "POST",
+                "component_ref": "daisy_file_input",
+                "figma_type": "INSTANCE",
+                "visual_hint": "upload",
+                "wireframe_sketch": "Drop zone with icon + file list + progress bars + upload button"
+              }
+            ]
+          },
+          {
+            "id": "studio_session",
+            "name": "Session",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_session_get__studio_session",
+                "name": "Get Session",
+                "endpoint": "/studio/session",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "studio_session_post__studio_session_reset",
+                "name": "Reset Session",
+                "endpoint": "/studio/session/reset",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "studio_misc",
+            "name": "Divers",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "studio_misc_get__studio_inference_typology",
+                "name": "Get Inference Results",
+                "endpoint": "/studio/inference/{typology}",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "studio_misc_get__studio_",
+                "name": "Serve Studio Page",
+                "endpoint": "/studio/",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sullivan_agent",
+        "name": "Sullivan Agent",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "sullivan_agent_chat",
+            "name": "Chat",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "sullivan_agent_chat_post__sullivan_agent_chat",
+                "name": "Chat",
+                "endpoint": "/sullivan/agent/chat",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              },
+              {
+                "id": "sullivan_agent_chat_post__sullivan_agent_chat_stream",
+                "name": "Chat Stream",
+                "endpoint": "/sullivan/agent/chat/stream",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "sullivan_agent_session",
+            "name": "Session",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "sullivan_agent_session_get__sullivan_agent_session_session_id",
+                "name": "Get Session",
+                "endpoint": "/sullivan/agent/session/{session_id}",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "sullivan_agent_session_post__sullivan_agent_session_session_id_clear",
+                "name": "Clear Session",
+                "endpoint": "/sullivan/agent/session/{session_id}/clear",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "sullivan_agent_tools",
+            "name": "Outils",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "sullivan_agent_tools_get__sullivan_agent_tools",
+                "name": "List Tools",
+                "endpoint": "/sullivan/agent/tools",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "execute",
+        "name": "Execute",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "execute_execution",
+            "name": "Exécution",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "execute_execution_post__execute",
+                "name": "Execute Plan",
+                "endpoint": "/execute",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "execute_search",
+            "name": "Recherche",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "execute_search_post__sullivan_search",
+                "name": "Search Component",
+                "endpoint": "/sullivan/search",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "execute_dev",
+            "name": "Dev",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "execute_dev_post__sullivan_dev_analyze",
+                "name": "Sullivan Dev Analyze",
+                "endpoint": "/sullivan/dev/analyze",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "system",
+        "name": "System",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "system_health",
+            "name": "Santé",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "system_health_get__health",
+                "name": "Health",
+                "endpoint": "/health",
+                "method": "GET",
+                "component_ref": "daisy_stat",
+                "figma_type": "INSTANCE",
+                "visual_hint": "stat",
+                "wireframe_sketch": "Grid of stat cards with large numbers + trend indicators + sparklines"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "components",
+        "name": "Components",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "components_list",
+            "name": "Liste",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "components_list_get__sullivan_components",
+                "name": "List Components",
+                "endpoint": "/sullivan/components",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "components_list_get__components_",
+                "name": "Serve Components Page",
+                "endpoint": "/components/",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "components_list_get__components",
+                "name": "Serve Components Page",
+                "endpoint": "/components",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "misc",
+        "name": "Divers",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "misc_misc",
+            "name": "Divers",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "misc_misc_get__",
+                "name": "Serve Index",
+                "endpoint": "/",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "misc_misc_get__studio",
+                "name": "Serve Studio Page",
+                "endpoint": "/studio",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "misc_misc_get__arbiter_showcase",
+                "name": "Serve Arbiter Showcase",
+                "endpoint": "/arbiter-showcase",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "misc_misc_get__daisy_showcase",
+                "name": "Serve Daisy Showcase",
+                "endpoint": "/daisy-showcase",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "homeos",
+        "name": "HomeOS",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "homeos_pages",
+            "name": "Pages",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "homeos_pages_get__homeos_",
+                "name": "Serve Homeos Page",
+                "endpoint": "/homeos/",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              },
+              {
+                "id": "homeos_pages_get__homeos",
+                "name": "Serve Homeos Page",
+                "endpoint": "/homeos",
+                "method": "GET",
+                "component_ref": "daisy_list",
+                "figma_type": "INSTANCE",
+                "visual_hint": "list",
+                "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "designer",
+        "name": "Designer",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "designer_analyze",
+            "name": "Analyse",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "designer_analyze_post__sullivan_designer_analyze",
+                "name": "Sullivan Designer Analyze",
+                "endpoint": "/sullivan/designer/analyze",
+                "method": "POST",
+                "component_ref": "daisy_fieldset",
+                "figma_type": "INSTANCE",
+                "visual_hint": "form",
+                "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+              }
+            ]
+          },
+          {
+            "id": "designer_upload",
+            "name": "Upload",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "designer_upload_post__sullivan_designer_upload",
+                "name": "Sullivan Designer Upload",
+                "endpoint": "/sullivan/designer/upload",
+                "method": "POST",
+                "component_ref": "daisy_file_input",
+                "figma_type": "INSTANCE",
+                "visual_hint": "upload",
+                "wireframe_sketch": "Drop zone with icon + file list + progress bars + upload button"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "preview",
+        "name": "Preview",
+        "status": "todo",
+        "figma_type": "FRAME",
+        "organes": [
+          {
+            "id": "preview_preview",
+            "name": "Prévisualisation",
+            "figma_type": "COMPONENT_SET",
+            "atomes": [
+              {
+                "id": "preview_preview_get__sullivan_preview_component_id",
+                "name": "Preview Component",
+                "endpoint": "/sullivan/preview/{component_id}",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "preview_preview_get__sullivan_preview",
+                "name": "Preview List",
+                "endpoint": "/sullivan/preview",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              },
+              {
+                "id": "preview_preview_get__sullivan_preview_component_id_render",
+                "name": "Render Component",
+                "endpoint": "/sullivan/preview/{component_id}/render",
+                "method": "GET",
+                "component_ref": "daisy_card",
+                "figma_type": "INSTANCE",
+                "visual_hint": "card",
+                "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "total_corps": 9,
+    "total_organes": 20,
+    "total_atomes": 44,
+    "coverage": "44/44 endpoints mappes"
+  }
+}

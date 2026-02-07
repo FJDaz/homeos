@@ -1,8 +1,38 @@
 # Guide pour les Agents IA (Claude, Cursor, Kimi)
 
-**Projet**: AetherFlow / Sullivan  
-**Version**: 2.2  
-**Date**: 2 février 2026
+**Projet**: AetherFlow / Sullivan
+**Version**: 2.3
+**Date**: 3 février 2026
+
+---
+
+## 🚨 STOP - PROTOCOLE OBLIGATOIRE AVANT TOUTE ACTION
+
+### Tu DOIS faire ces 6 choses AVANT d'écrire du code :
+
+1. **LIRE** `docs/02-sullivan/ARCHITECTURE_HOMEOS_SULLIVAN.md`
+2. **VÉRIFIER** `git status` - les fichiers existent et sont trackés ?
+3. **IDENTIFIER** le mode AetherFlow (PROTO/PROD/SURGICAL)
+4. **CHERCHER** si un outil Sullivan existe déjà
+5. **PRÉSENTER** ton plan à l'utilisateur
+6. **ATTENDRE** le "GO" explicite
+
+### Format de réponse OBLIGATOIRE :
+
+```
+## CHECKLIST PRE-ACTION
+- [x] Architecture consultée
+- [x] git status vérifié
+- [x] Mode identifié : [PROTO/PROD/SURGICAL]
+- [x] Outils existants vérifiés
+- [ ] Plan présenté (ci-dessous)
+- [ ] GO reçu : EN ATTENTE
+
+## PLAN
+[description]
+
+Attente validation "GO".
+```
 
 ---
 

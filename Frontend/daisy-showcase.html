@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaisyUI Showcase - Sullivan Genome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; }
+        .component-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+        .preview-area { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 120px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        .code-block { background: #1e293b; color: #e2e8f0; padding: 1rem; font-size: 12px; overflow-x: auto; }
+        .category-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .complexity-badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; }
+        .complexity-low { background: #dcfce7; color: #166534; }
+        .complexity-medium { background: #fef9c3; color: #854d0e; }
+        .complexity-high { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">🌼 DaisyUI Genome</h1>
+                        <p class="text-slate-500 text-sm mt-1">57 composants pré-validés • Tailwind CSS uniquement</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <span class="badge badge-primary">28 Atoms</span>
+                        <span class="badge badge-secondary">15 Molecules</span>
+                        <span class="badge badge-accent">14 Organisms</span>
+                        <a href="/arbiter-showcase" class="btn btn-sm btn-outline">← ARBITER</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter -->
+        <div class="bg-white border-b">
+            <div class="max-w-7xl mx-auto px-6 py-3">
+                <div class="flex gap-2" id="filters">
+                    <button class="btn btn-sm btn-active" onclick="filter('all')">Tous</button>
+                    <button class="btn btn-sm btn-ghost" onclick="filter('atoms')">Atoms</button>
+                    <button class="btn btn-sm btn-ghost" onclick="filter('molecules')">Molecules</button>
+                    <button class="btn btn-sm btn-ghost" onclick="filter('organisms')">Organisms</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Components Grid -->
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="components-grid">
+
+                <!-- daisy_button -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <button class="btn">Button</button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_button</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI button - Bouton action avec variants...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">button</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><button class="btn">Button</button>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_swap -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <label class="swap"><input type="checkbox" /><div class="swap-on">ON</div><div class="swap-off">OFF</div></label>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_swap</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI swap - Toggle swap animation...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">swap</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><label class="swap"><input type="checkbox" /><div class="swap-on">ON</div><div class="swap-off">OFF</div></label>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_theme_controller -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <label class="swap swap-rotate"><input type="checkbox" class="theme-controller" value="dark" /><svg class="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg><svg class="swap-on fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg></label>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_theme_controller</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI theme-controller - Contrôleur de thème dark/light...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">theme controller</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><label class="swap swap-rotate"><input type="checkbox" class="theme-controller" value="dark" /><svg class="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_kbd -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <kbd class="kbd kbd-sm">Shift</kbd>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_kbd</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI kbd - Touche clavier...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">kbd</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><kbd class="kbd kbd-sm">Shift</kbd>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_status -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="badge badge-primary badge-outline"><span class="badge badge-xs badge-primary mr-1"></span>Online</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_status</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI status - Indicateur de statut...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">status</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="badge badge-primary badge-outline"><span class="badge badge-xs badge-primary mr-1"></span>Online</div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_alert -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div role="alert" class="alert alert-info"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>New software update available.</span></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_alert</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI alert - Alerte informative...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">alert</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div role="alert" class="alert alert-info"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin=...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_loading -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <span class="loading loading-spinner loading-md"></span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_loading</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI loading - Spinner de chargement...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">loading</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><span class="loading loading-spinner loading-md"></span>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_progress -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <progress class="progress w-56" value="70" max="100"></progress>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_progress</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI progress - Barre de progression...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">progress</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><progress class="progress w-56" value="70" max="100"></progress>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_skeleton -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="skeleton h-32 w-32"></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_skeleton</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI skeleton - Placeholder skeleton...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">skeleton</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="skeleton h-32 w-32"></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_toast -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="toast"><div class="alert alert-info"><span>New message arrived.</span></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_toast</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI toast - Notification toast...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">toast</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="toast"><div class="alert alert-info"><span>New message arrived.</span></div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_tooltip -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="tooltip" data-tip="hello"><button class="btn">Hover me</button></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_tooltip</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI tooltip - Infobulle...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">tooltip</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="tooltip" data-tip="hello"><button class="btn">Hover me</button></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_checkbox -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="form-control"><label class="label cursor-pointer"><span class="label-text">Remember me</span><input type="checkbox" checked="checked" class="checkbox" /></label></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_checkbox</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI checkbox - Case à cocher...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">checkbox</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="form-control"><label class="label cursor-pointer"><span class="label-text">Remember me</span><input type="checkbox" checked="checked" class="checkbox" /></label></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_file_input -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <input type="file" class="file-input file-input-bordered w-full max-w-xs" />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_file_input</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI file-input - Input fichier...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">file input</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><input type="file" class="file-input file-input-bordered w-full max-w-xs" />...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_input -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_input</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI input - Champ texte...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">input</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_radio -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="form-control"><label class="label cursor-pointer"><span class="label-text">Red pill</span><input type="radio" name="radio-10" class="radio checked:bg-red-500" checked /></label></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_radio</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI radio - Bouton radio...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">radio</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="form-control"><label class="label cursor-pointer"><span class="label-text">Red pill</span><input type="radio" name="radio-10" class="radio checked:bg-red-500" checked /></label></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_range -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <input type="range" min="0" max="100" value="40" class="range" />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_range</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI range - Slider range...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">range</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><input type="range" min="0" max="100" value="40" class="range" />...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_rating -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="rating"><input type="radio" name="rating-2" class="mask mask-star-2 bg-orange-400" /></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_rating</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI rating - Notation étoiles...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">rating</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="rating"><input type="radio" name="rating-2" class="mask mask-star-2 bg-orange-400" /></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_select -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <select class="select select-bordered w-full max-w-xs"><option disabled selected>Who shot first?</option><option>Han Solo</option><option>Greedo</option></select>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_select</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI select - Liste déroulante...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">select</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><select class="select select-bordered w-full max-w-xs"><option disabled selected>Who shot first?</option><option>Han Solo</option><option>Greedo</option></select>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_textarea -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <textarea class="textarea textarea-bordered" placeholder="Bio"></textarea>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_textarea</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI textarea - Zone de texte...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">textarea</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><textarea class="textarea textarea-bordered" placeholder="Bio"></textarea>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_toggle -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <input type="checkbox" class="toggle" checked />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_toggle</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI toggle - Interrupteur on/off...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">toggle</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><input type="checkbox" class="toggle" checked />...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_divider -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="divider">OR</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_divider</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI divider - Séparateur...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">divider</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="divider">OR</div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_indicator -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="indicator"><span class="indicator-item badge badge-secondary">99+</span><button class="btn">inbox</button></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_indicator</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI indicator - Badge indicateur...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">indicator</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="indicator"><span class="indicator-item badge badge-secondary">99+</span><button class="btn">inbox</button></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_mask -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <img class="mask mask-squircle" src="https://img.daisyui.com/images/stock/photo-1567653418876-5bb0e566e1c2.webp" />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_mask</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI mask - Masque d'image...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">mask</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><img class="mask mask-squircle" src="https://img.daisyui.com/images/stock/photo-1567653418876-5bb0e566e1c2.webp" />...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_fab -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <button class="btn btn-circle btn-lg btn-primary fixed bottom-4 right-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_fab</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI fab - Bouton d'action flottant...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">fab</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><button class="btn btn-circle btn-lg btn-primary fixed bottom-4 right-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-line...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_link -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <a class="link link-primary">I'm a simple link</a>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_link</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI link - Lien hypertexte...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">link</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><a class="link link-primary">I'm a simple link</a>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_radial-progress -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <div class="radial-progress" style="--value:70;" role="progressbar">70%</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_radial-progress</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI radial-progress - Progression circulaire...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">feedback</span>
+                            <span class="badge badge-sm badge-outline">radial-progress</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="radial-progress" style="--value:70;" role="progressbar">70%</div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_validator -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <form class="flex flex-col gap-4"><label class="input input-bordered flex items-center gap-2"><input type="text" class="grow" placeholder="Search" required /><span class="badge badge-error hidden validator-hint">Required</span></label></form>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_validator</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI validator - Validation de formulaire...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">validator</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><form class="flex flex-col gap-4"><label class="input input-bordered flex items-center gap-2"><input type="text" class="grow" placeholder="Search" required /><span class="badge badge-error hidden vali...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_label -->
+                <div class="component-card" data-category="atoms">
+                    <div class="preview-area">
+                        <label class="form-control w-full max-w-xs"><div class="label"><span class="label-text">What is your name?</span><span class="label-text-alt">Alt label</span></div><input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" /><div class="label"><span class="label-text-alt">Helper</span><span class="label-text-alt">Counter</span></div></label>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_label</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-primary">atoms</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI label - Étiquette de champ...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">label</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><label class="form-control w-full max-w-xs"><div class="label"><span class="label-text">What is your name?</span><span class="label-text-alt">Alt label</span></div><input type="text" placeholder="Type...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_accordion -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="collapse collapse-arrow bg-base-200"><input type="radio" name="my-accordion-2" checked="checked" /><div class="collapse-title text-xl font-medium">Click to open this one and close others</div><div class="collapse-content"><p>hello</p></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_accordion</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI accordion - Accordéon collapsible...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">accordion</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="collapse collapse-arrow bg-base-200"><input type="radio" name="my-accordion-2" checked="checked" /><div class="collapse-title text-xl font-medium">Click to open this one and close others</...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_avatar -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="avatar"><div class="w-24 rounded"><img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_avatar</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI avatar - Avatar image...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">avatar</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="avatar"><div class="w-24 rounded"><img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /></div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_badge -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <span class="badge badge-primary">Primary</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_badge</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI badge - Badge de statut...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">badge</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><span class="badge badge-primary">Primary</span>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_card -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="card w-96 bg-base-100 shadow-xl"><figure><img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" /></figure><div class="card-body"><h2 class="card-title">Shoes!</h2><p>If a dog chews shoes whose shoes does he choose?</p><div class="card-actions justify-end"><button class="btn btn-primary">Buy Now</button></div></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_card</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI card - Carte avec image et contenu...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">card</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="card w-96 bg-base-100 shadow-xl"><figure><img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" /></figure><div class="card-body"><h2 class="card...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_chat_bubble -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="chat chat-start"><div class="chat-bubble chat-bubble-primary">What kind of nonsense is this</div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_chat_bubble</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI chat-bubble - Bulle de chat...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">chat bubble</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="chat chat-start"><div class="chat-bubble chat-bubble-primary">What kind of nonsense is this</div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_collapse -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div tabindex="0" class="collapse collapse-arrow border-base-300 bg-base-200 border"><div class="collapse-title text-xl font-medium">Focus me to see content</div><div class="collapse-content"><p>tabindex="0" attribute is necessary to make the div focusable</p></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_collapse</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI collapse - Section collapsible...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">collapse</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div tabindex="0" class="collapse collapse-arrow border-base-300 bg-base-200 border"><div class="collapse-title text-xl font-medium">Focus me to see content</div><div class="collapse-content"><p>tabin...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_list -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <ul class="menu bg-base-200 w-56 rounded-box"><li><a>Item 1</a></li><li><a>Item 2</a></li></ul>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_list</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-low">low</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI list - Liste de menu...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">list</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><ul class="menu bg-base-200 w-56 rounded-box"><li><a>Item 1</a></li><li><a>Item 2</a></li></ul>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_stat -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="stats shadow"><div class="stat"><div class="stat-title">Total Page Views</div><div class="stat-value">89,400</div><div class="stat-desc">21% more than last month</div></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_stat</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI stat - Statistique avec valeur...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">stat</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="stats shadow"><div class="stat"><div class="stat-title">Total Page Views</div><div class="stat-value">89,400</div><div class="stat-desc">21% more than last month</div></div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_timeline -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <ul class="timeline timeline-vertical"><li><div class="timeline-start">1984</div><div class="timeline-middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="timeline-end timeline-box">First Macintosh computer</div><hr/></li></ul>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_timeline</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI timeline - Timeline verticale...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">timeline</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><ul class="timeline timeline-vertical"><li><div class="timeline-start">1984</div><div class="timeline-middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_fieldset -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <fieldset class="fieldset"><legend class="fieldset-legend">Page title</legend><input type="text" class="input" placeholder="My awesome page" /><p class="fieldset-label">Optional</p></fieldset>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_fieldset</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI fieldset - Groupe de champs...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">fieldset</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><fieldset class="fieldset"><legend class="fieldset-legend">Page title</legend><input type="text" class="input" placeholder="My awesome page" /><p class="fieldset-label">Optional</p></fieldset>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_join -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="join"><input class="join-item btn" type="radio" name="options" aria-label="Radio 1" /><input class="join-item btn" type="radio" name="options" aria-label="Radio 2" /></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_join</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI join - Groupe d'éléments joints...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">join</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="join"><input class="join-item btn" type="radio" name="options" aria-label="Radio 1" /><input class="join-item btn" type="radio" name="options" aria-label="Radio 2" /></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_stack -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="stack"><div class="card shadow-md bg-primary text-primary-content"><div class="card-body"><h2 class="card-title">Notification 1</h2></div></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_stack</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI stack - Pile de cartes...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">stack</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="stack"><div class="card shadow-md bg-primary text-primary-content"><div class="card-body"><h2 class="card-title">Notification 1</h2></div></div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_countdown -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <span class="countdown"><span style="--value:10;"></span>h<span style="--value:24;"></span>m<span style="--value:36;"></span>s</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_countdown</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI countdown - Compte à rebours...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">countdown</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><span class="countdown"><span style="--value:10;"></span>h<span style="--value:24;"></span>m<span style="--value:36;"></span>s</span>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_diff -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="diff aspect-[16/9]"><div class="diff-item-1"><img alt="daisy" src="https://img.daisyui.com/images/stock/photo-1560717789-0ac7c58ac90a.webp" /></div><div class="diff-item-2"><img alt="daisy" src="https://img.daisyui.com/images/stock/photo-1560717789-0ac7c58ac90a-blur.webp" /></div><div class="diff-resizer"></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_diff</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI diff - Comparateur avant/après...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">diff</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="diff aspect-[16/9]"><div class="diff-item-1"><img alt="daisy" src="https://img.daisyui.com/images/stock/photo-1560717789-0ac7c58ac90a.webp" /></div><div class="diff-item-2"><img alt="daisy...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_filter -->
+                <div class="component-card" data-category="molecules">
+                    <div class="preview-area">
+                        <div class="dropdown"><div tabindex="0" role="button" class="btn m-1">Click</div><ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"><li><input type="checkbox" class="checkbox" /> Option 1</li></ul></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_filter</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-secondary">molecules</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI filter - Filtre avec checkbox...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-input</span>
+                            <span class="badge badge-sm badge-outline">filter</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="dropdown"><div tabindex="0" role="button" class="btn m-1">Click</div><ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"><li><input type="checkbox"...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_dropdown -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="dropdown"><div tabindex="0" role="button" class="btn">Dropdown</div><ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"><li><a>Item 1</a></li></ul></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_dropdown</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI dropdown - Menu déroulant...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">dropdown</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="dropdown"><div tabindex="0" role="button" class="btn">Dropdown</div><ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"><li><a>Item 1</a></li></ul>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_modal -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <button class="btn" onclick="my_modal.showModal()">Open Modal</button><dialog id="my_modal" class="modal"><div class="modal-box"><h3 class="font-bold text-lg">Hello!</h3><p class="py-4">Press ESC key or click the button below to close</p><div class="modal-action"><form method="dialog"><button class="btn">Close</button></form></div></div></dialog>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_modal</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI modal - Boîte de dialogue modale...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">actions</span>
+                            <span class="badge badge-sm badge-outline">modal</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><button class="btn" onclick="my_modal.showModal()">Open Modal</button><dialog id="my_modal" class="modal"><div class="modal-box"><h3 class="font-bold text-lg">Hello!</h3><p class="py-4">Press ESC key ...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_carousel -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="carousel w-full"><div id="item1" class="carousel-item w-full"><img src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp" class="w-full" /></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_carousel</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI carousel - Carrousel d'images...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">carousel</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="carousel w-full"><div id="item1" class="carousel-item w-full"><img src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp" class="w-full" /></div></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_table -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="overflow-x-auto"><table class="table"><thead><tr><th>Name</th><th>Job</th></tr></thead><tbody><tr><td>Cy Ganderton</td><td>Quality Control Specialist</td></tr></tbody></table></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_table</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI table - Tableau de données...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">data-display</span>
+                            <span class="badge badge-sm badge-outline">table</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="overflow-x-auto"><table class="table"><thead><tr><th>Name</th><th>Job</th></tr></thead><tbody><tr><td>Cy Ganderton</td><td>Quality Control Specialist</td></tr></tbody></table></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_breadcrumbs -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="breadcrumbs text-sm"><ul><li><a>Home</a></li><li><a>Documents</a></li><li>Add Document</li></ul></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_breadcrumbs</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI breadcrumbs - Fil d'Ariane...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">breadcrumbs</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="breadcrumbs text-sm"><ul><li><a>Home</a></li><li><a>Documents</a></li><li>Add Document</li></ul></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_menu -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <ul class="menu bg-base-200 w-56 rounded-box"><li><a>Item 1</a></li><li><a>Item 2</a></li><li><a>Item 3</a></li></ul>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_menu</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI menu - Menu vertical...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">menu</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><ul class="menu bg-base-200 w-56 rounded-box"><li><a>Item 1</a></li><li><a>Item 2</a></li><li><a>Item 3</a></li></ul>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_navbar -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="navbar bg-base-100"><div class="navbar-start"><a class="btn btn-ghost text-xl">daisyUI</a></div><div class="navbar-center hidden lg:flex"><ul class="menu menu-horizontal px-1"><li><a>Item 1</a></li></ul></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_navbar</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI navbar - Barre de navigation...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">navbar</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="navbar bg-base-100"><div class="navbar-start"><a class="btn btn-ghost text-xl">daisyUI</a></div><div class="navbar-center hidden lg:flex"><ul class="menu menu-horizontal px-1"><li><a>Item ...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_pagination -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="join"><button class="join-item btn">1</button><button class="join-item btn btn-active">2</button><button class="join-item btn">3</button></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_pagination</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI pagination - Pagination...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">pagination</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="join"><button class="join-item btn">1</button><button class="join-item btn btn-active">2</button><button class="join-item btn">3</button></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_steps -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <ul class="steps"><li class="step step-primary">Register</li><li class="step step-primary">Choose plan</li><li class="step">Purchase</li></ul>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_steps</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI steps - Étapes d'un processus...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">steps</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><ul class="steps"><li class="step step-primary">Register</li><li class="step step-primary">Choose plan</li><li class="step">Purchase</li></ul>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_tab -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div role="tablist" class="tabs tabs-bordered"><a role="tab" class="tab tab-active">Tab 1</a><a role="tab" class="tab">Tab 2</a></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_tab</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI tab - Onglets...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">tab</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div role="tablist" class="tabs tabs-bordered"><a role="tab" class="tab tab-active">Tab 1</a><a role="tab" class="tab">Tab 2</a></div>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_drawer -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="drawer"><input id="my-drawer" type="checkbox" class="drawer-toggle" /><div class="drawer-content"><label for="my-drawer" class="btn btn-primary drawer-button">Open drawer</label></div><div class="drawer-side"><label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label><ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4"><li><a>Sidebar Item 1</a></li></ul></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_drawer</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-high">high</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI drawer - Drawer latéral...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">drawer</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="drawer"><input id="my-drawer" type="checkbox" class="drawer-toggle" /><div class="drawer-content"><label for="my-drawer" class="btn btn-primary drawer-button">Open drawer</label></div><div...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_footer -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <footer class="footer bg-neutral text-neutral-content p-10"><nav><h6 class="footer-title">Services</h6><a class="link link-hover">Branding</a></nav></footer>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_footer</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI footer - Pied de page...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">footer</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><footer class="footer bg-neutral text-neutral-content p-10"><nav><h6 class="footer-title">Services</h6><a class="link link-hover">Branding</a></nav></footer>...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_hero -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="hero bg-base-200"><div class="hero-content text-center"><div class="max-w-md"><h1 class="text-5xl font-bold">Hello there</h1><p class="py-6">Provident cupiditate voluptatem et in.</p><button class="btn btn-primary">Get Started</button></div></div></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_hero</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI hero - Section hero...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">layout</span>
+                            <span class="badge badge-sm badge-outline">hero</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="hero bg-base-200"><div class="hero-content text-center"><div class="max-w-md"><h1 class="text-5xl font-bold">Hello there</h1><p class="py-6">Provident cupiditate voluptatem et in.</p><butt...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- daisy_dock -->
+                <div class="component-card" data-category="organisms">
+                    <div class="preview-area">
+                        <div class="dock dock-sm"><button class="dock-active"><svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></g></svg><span class="dock-label">Home</span></button></div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-slate-800">daisy_dock</h3>
+                            <div class="flex gap-1">
+                                <span class="category-badge text-accent">organisms</span>
+                                <span class="complexity-badge complexity-medium">medium</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">DaisyUI dock - Barre d'accueil mobile...</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            <span class="badge badge-sm badge-outline">daisyui</span>
+                            <span class="badge badge-sm badge-outline">navigation</span>
+                            <span class="badge badge-sm badge-outline">dock</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-xs btn-outline flex-1" onclick="toggleCode(this)">Code</button>
+                        </div>
+                        <div class="hidden mt-3">
+                            <div class="code-block rounded"><div class="dock dock-sm"><button class="dock-active"><svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function filter(cat) {
+            const cards = document.querySelectorAll('.component-card');
+            const buttons = document.querySelectorAll('#filters button');
+            
+            buttons.forEach(btn => {
+                btn.classList.remove('btn-active');
+                btn.classList.add('btn-ghost');
+                if (btn.textContent.toLowerCase().includes(cat) || (cat === 'all' && btn.textContent === 'Tous')) {
+                    btn.classList.add('btn-active');
+                    btn.classList.remove('btn-ghost');
+                }
+            });
+            
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.category === cat) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        function toggleCode(btn) {
+            const codeBlock = btn.closest('.p-4').querySelector('.hidden');
+            codeBlock.classList.toggle('hidden');
+            btn.textContent = codeBlock.classList.contains('hidden') ? 'Code' : 'Cacher';
+        }
+    </script>
+</body>
+</html>

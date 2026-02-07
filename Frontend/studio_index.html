@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio – PaaS_Studio</title>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #fff;
+  --bg2: #f5f5f5;
+  --text: #111;
+  --text2: #444;
+  --border: #ccc;
+  --accent: #0066cc;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+}
+.sidebar {
+  width: 200px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 1rem 0;
+}
+.sidebar h2 { font-size: 12px; text-transform: uppercase; padding: 0 1rem 0.5rem; color: var(--text2); }
+.sidebar nav a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.sidebar nav a:hover { background: var(--bg); border-left-color: var(--accent); }
+.main {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+.main h1 { font-size: 1.25rem; margin-bottom: 1rem; }
+.organe {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+.organe.is-loading {
+  border-color: var(--accent); /* Visual feedback for loading state */
+}
+.organe h3 { font-size: 13px; margin-bottom: 0.5rem; color: var(--text2); }
+.organe pre, .organe .out {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--border); /* Dedicated zone for output */
+  min-height: 2em; /* Ensure output area is always visible */
+}
+.organe button, .organe input[type=submit] {
+  font: inherit;
+  padding: 0.4rem 0.8rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.organe button:hover { opacity: 0.9; }
+.organe button:disabled, .organe input[type=submit]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.organe input, .organe textarea { font: inherit; padding: 0.4rem; border: 1px solid var(--border); width: 100%; max-width: 400px; }
+.organe .err { color: #c00; border: 1px solid #c00; background: #ffebeb; }
+.organe .ok { color: #080; border: 1px solid #080; background: #ebffe1; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Pipeline</h2>
+    <nav><a href="#Brainstorm">Brainstorm</a><a href="#Back">Back</a><a href="#Front">Front</a><a href="#Deploy">Deploy</a></nav>
+  </aside>
+  <main class="main">
+    <h1>PaaS_Studio</h1>
+    
+<div class="organe" data-path="/execute" data-method="POST" data-hint="form">
+  <h3>Execute Plan</h3>
+  <form id="form_execute"><button type="submit">Execute</button></form>
+  <div id="out_execute" class="out"></div>
+</div>
+<div class="organe" data-path="/health" data-method="GET" data-hint="status">
+  <h3>Health</h3>
+  <div id="out_health" class="out"></div>
+  <button id="btn_health" type="button">Check</button>
+</div>
+<div class="organe" data-path="/studio/genome" data-method="GET" data-hint="generic">
+  <h3>Get Studio Genome</h3>
+  <div id="out_studio_genome" class="out"></div>
+  <button id="btn_studio_genome" type="button">Fetch</button>
+</div>
+<div class="organe" data-path="/sullivan/search" data-method="POST" data-hint="dashboard">
+  <h3>Search Component</h3>
+  <div id="out_sullivan_search" class="out"></div>
+  <button id="btn_sullivan_search" type="button">Load</button>
+</div>
+<div class="organe" data-path="/sullivan/components" data-method="GET" data-hint="dashboard">
+  <h3>List Components</h3>
+  <div id="out_sullivan_components" class="out"></div>
+  <button id="btn_sullivan_components" type="button">Load</button>
+</div>
+<div class="organe" data-path="/" data-method="GET" data-hint="generic">
+  <h3>Serve Index</h3>
+  <div id="out_root" class="out"></div>
+  <button id="btn_root" type="button">Fetch</button>
+</div>
+<div class="organe" data-path="/studio.html" data-method="GET" data-hint="generic">
+  <h3>Serve Studio</h3>
+  <div id="out_studio.html" class="out"></div>
+  <button id="btn_studio.html" type="button">Fetch</button>
+</div>
+<div class="organe" data-path="/sullivan/dev/analyze" data-method="POST" data-hint="form">
+  <h3>Sullivan Dev Analyze</h3>
+  <form id="form_sullivan_dev_analyze"><button type="submit">Execute</button></form>
+  <div id="out_sullivan_dev_analyze" class="out"></div>
+</div>
+<div class="organe" data-path="/sullivan/designer/analyze" data-method="POST" data-hint="form">
+  <h3>Sullivan Designer Analyze</h3>
+  <form id="form_sullivan_designer_analyze"><button type="submit">Execute</button></form>
+  <div id="out_sullivan_designer_analyze" class="out"></div>
+</div>
+<div class="organe" data-path="/sullivan/designer/upload" data-method="POST" data-hint="form">
+  <h3>Sullivan Designer Upload</h3>
+  <form id="form_sullivan_designer_upload"><button type="submit">Execute</button></form>
+  <div id="out_sullivan_designer_upload" class="out"></div>
+</div>
+<div class="organe" data-path="/sullivan/preview/{component_id}" data-method="GET" data-hint="dashboard">
+  <h3>Preview Component</h3>
+  <div id="out_sullivan_preview_{component_id}" class="out"></div>
+  <button id="btn_sullivan_preview_{component_id}" type="button">Load</button>
+</div>
+<div class="organe" data-path="/sullivan/preview" data-method="GET" data-hint="generic">
+  <h3>Preview List</h3>
+  <div id="out_sullivan_preview" class="out"></div>
+  <button id="btn_sullivan_preview" type="button">Fetch</button>
+</div>
+<div class="organe" data-path="/sullivan/preview/{component_id}/render" data-method="GET" data-hint="dashboard">
+  <h3>Render Component</h3>
+  <div id="out_sullivan_preview_{component_id}_render" class="out"></div>
+  <button id="btn_sullivan_preview_{component_id}_render" type="button">Load</button>
+</div>
+  </main>
+
+<script>
+(function() {
+  const BASE = "http://localhost:8000";
+  function api(path, method, body) {
+    const url = BASE ? (BASE + (path.startsWith("/") ? path : "/" + path)) : path;
+    const opt = { method: method || "GET", headers: { "Content-Type": "application/json" } };
+    if (body && (method === "POST" || method === "PUT")) opt.body = JSON.stringify(body);
+    return fetch(url, opt).then(r => r.json().catch(() => r.text()));
+  }
+  function render(el, data) {
+    if (typeof data === "string") { el.textContent = data; return; }
+    el.textContent = JSON.stringify(data, null, 2);
+  }
+  document.querySelectorAll(".organe").forEach(o => {
+    const path = o.dataset.path;
+    const method = (o.dataset.method || "GET").toUpperCase();
+    const out = o.querySelector(".out") || o.querySelector("[id^=out_]");
+    if (!path || !out) return;
+
+    const btn = o.querySelector("button[id^=btn_]") || o.querySelector("button:not([type=submit])");
+    const form = o.querySelector("form");
+    const formSubmitBtn = form ? form.querySelector("button[type=submit]") : null;
+    const activeTrigger = btn || formSubmitBtn;
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        o.classList.add("is-loading");
+        out.classList.remove("err", "ok");
+        out.textContent = "Loading...";
+        if (activeTrigger) activeTrigger.disabled = true;
+      } else {
+        o.classList.remove("is-loading");
+        if (activeTrigger) activeTrigger.disabled = false;
+      }
+    }
+
+    function run() {
+      setLoading(true);
+      api(path, method)
+        .then(d => {
+          setLoading(false);
+          out.classList.add("ok");
+          render(out, d);
+        })
+        .catch(e => {
+          setLoading(false);
+          out.classList.add("err");
+          out.textContent = "Error: " + (e.message || "Unknown error occurred.");
+        });
+    }
+
+    if (form) {
+      form.addEventListener("submit", function(e) { e.preventDefault(); run(); });
+    } else if (btn) {
+      btn.addEventListener("click", run);
+    }
+  });
+})();
+</script>
+</body>
+</html>

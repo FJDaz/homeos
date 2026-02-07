@@ -6,25 +6,37 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Literal, Tuple, List
 from fastapi import FastAPI, HTTPException, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, RedirectResponse, Response
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse, Response, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from loguru import logger
 
-from .orchestrator import Orchestrator, ExecutionError
-from .models.plan_reader import PlanReader, PlanValidationError, Plan
-from .workflows.proto import ProtoWorkflow
-from .workflows.prod import ProdWorkflow
-from .sullivan.registry import ComponentRegistry
-from .sullivan.models.component import Component
-from .config.settings import settings
-
-# Import studio routes (Parcours UX Sullivan 9 étapes)
-from .sullivan.studio_routes import router as studio_router
-
-# Import agent routes (Chatbot/Agent Sullivan)
-from .sullivan.agent.api import router as agent_router
+try:
+    # Imports relatifs (package mode)
+    from .orchestrator import Orchestrator, ExecutionError
+    from .models.plan_reader import PlanReader, PlanValidationError, Plan
+    from .workflows.proto import ProtoWorkflow
+    from .workflows.prod import ProdWorkflow
+    from .sullivan.registry import ComponentRegistry
+    from .sullivan.models.component import Component
+    from .config.settings import settings
+    from .sullivan.studio_routes import router as studio_router
+    from .sullivan.agent.api import router as agent_router
+except ImportError:
+    # Imports absolus (module mode - Python 3.14 compatible)
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent))
+    from orchestrator import Orchestrator, ExecutionError
+    from models.plan_reader import PlanReader, PlanValidationError, Plan
+    from workflows.proto import ProtoWorkflow
+    from workflows.prod import ProdWorkflow
+    from sullivan.registry import ComponentRegistry
+    from sullivan.models.component import Component
+    from config.settings import settings
+    from sullivan.studio_routes import router as studio_router
+    from sullivan.agent.api import router as agent_router
 
 
 app = FastAPI(title="AetherFlow API", version="0.1.0")
@@ -627,31 +639,39 @@ def _serve_svelte_route(path: str) -> Optional[FileResponse]:
 
 @app.get("/studio")
 @app.get("/studio/")
-async def serve_studio_page(request: Request):
-    """Sert la page Studio HTMX (Parcours UX Sullivan 9 étapes)."""
+async def serve_studio_page(
+    request: Request,
+    step: int = 1,
+    layout: Optional[str] = None
+):
+    """
+    Studio Sullivan — Layout HomeOS unifié (4 tabs + sidebar).
+    
+    Args:
+        step: Étape du parcours (1-9). Défaut: 1
+        layout: Layout optionnel (non utilisé actuellement)
+    """
     from fastapi.templating import Jinja2Templates
     templates_dir = Path(__file__).resolve().parent / "templates"
     templates = Jinja2Templates(directory=str(templates_dir))
 
-    # Servir le template HTMX depuis Backend/Prod/templates/studio.html
-    return templates.TemplateResponse("studio.html", {"request": request})
-
-
-@app.get("/studio/composants")
-async def serve_studio_composants(request: Request):
-    """
-    Étape 4 — Affiche les composants par défaut de SULLIVAN_DEFAULT_LIBRARY.
-    """
-    from fastapi.templating import Jinja2Templates
-    from .sullivan.identity import SULLIVAN_DEFAULT_LIBRARY
-
-    templates_dir = Path(__file__).resolve().parent / "templates"
-    templates = Jinja2Templates(directory=str(templates_dir))
-
+    # Validation step 1-9 avec fallback
+    if step < 1 or step > 9:
+        step = 1
+    
+    # TOUJOURS studio_homeos.html (layout unifié)
     return templates.TemplateResponse(
-        "studio_composants.html",
-        {"request": request, "components": SULLIVAN_DEFAULT_LIBRARY}
+        "studio_homeos.html", 
+        {"request": request, "step": step, "layout": layout}
     )
+
+
+@app.get("/homeos")
+@app.get("/homeos/")
+async def serve_homeos_page(request: Request):
+    """Redirige vers /studio (layout unifié)."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/studio", status_code=302)
 
 
 @app.get("/components")
@@ -673,6 +693,26 @@ if frontend_path.exists():
         app.mount("/css", StaticFiles(directory=str(frontend_path / "css")), name="css")
     if (frontend_path / "js").exists():
         app.mount("/js", StaticFiles(directory=str(frontend_path / "js")), name="js")
+
+
+# Route ARBITER Component Gallery
+@app.get("/arbiter-showcase", response_class=HTMLResponse)
+async def serve_arbiter_showcase():
+    """Sert la page galerie des composants ARBITER."""
+    showcase_path = frontend_path / "arbiter-showcase.html"
+    if showcase_path.exists():
+        return HTMLResponse(content=showcase_path.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail="arbiter-showcase.html not found")
+
+
+# Route DaisyUI Component Gallery
+@app.get("/daisy-showcase", response_class=HTMLResponse)
+async def serve_daisy_showcase():
+    """Sert la page galerie des composants DaisyUI."""
+    showcase_path = frontend_path / "daisy-showcase.html"
+    if showcase_path.exists():
+        return HTMLResponse(content=showcase_path.read_text(encoding='utf-8'))
+    raise HTTPException(status_code=404, detail="daisy-showcase.html not found")
 
 
 # Sullivan DevMode endpoint
@@ -1037,3 +1077,13 @@ def run_api(host: str = "127.0.0.1", port: int = 8000):
 if __name__ == "__main__":
     run_api()
 
+
+# Route pour servir le genome_inferred_complete.json
+@app.get("/studio/genome/inferred")
+async def get_genome_inferred():
+    """Sert le genome_inferred_complete.json depuis la racine du projet."""
+    genome_path = Path("/Users/francois-jeandazin/AETHERFLOW/genome_inferred_complete.json")
+    if genome_path.exists():
+        with open(genome_path, 'r') as f:
+            return json.load(f)
+    raise HTTPException(status_code=404, detail="Genome file not found")

@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 Genome Drill-Down - Sullivan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;
+            --bg-panel: #252525;
+            --bg-hover: #333;
+            --accent: #7cb342;
+            --accent-hover: #8bc34a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --border: #3a3a3a;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, #1e3a1e 0%, #252525 100%);
+        }
+        
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        
+        .tree-container {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+        
+        /* Tree nodes */
+        .tree-node {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .tree-content {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            font-size: 13px;
+        }
+        
+        .tree-content:hover {
+            background: var(--bg-hover);
+        }
+        
+        .tree-content.selected {
+            background: rgba(124, 179, 66, 0.15);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .tree-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .tree-icon {
+            font-size: 14px;
+        }
+        
+        .tree-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .tree-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-todo { background: #888; }
+        .status-wip { background: #ff9800; }
+        .status-ok { background: #4caf50; }
+        
+        .tree-children {
+            margin-left: 20px;
+            border-left: 1px dashed var(--border);
+            padding-left: 8px;
+        }
+        
+        .tree-children.hidden {
+            display: none;
+        }
+        
+        /* Main content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .breadcrumb {
+            padding: 12px 20px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .breadcrumb-item {
+            color: var(--accent);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        
+        .breadcrumb-item:hover {
+            background: rgba(124, 179, 66, 0.1);
+        }
+        
+        .breadcrumb-item:last-child {
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: default;
+        }
+        
+        .breadcrumb-item:last-child:hover {
+            background: transparent;
+        }
+        
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        /* Level views */
+        .level-genome .stat-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .level-genome .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .level-genome .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+        
+        .progress-bar {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            height: 24px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, #8bc34a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a1a;
+            transition: width 0.5s ease;
+        }
+        
+        /* Cards */
+        .info-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .info-card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card h3 {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        
+        .atom-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .atom-list { background: rgba(124, 179, 66, 0.15); color: #8bc34a; }
+        .atom-form { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
+        .atom-card { background: rgba(66, 165, 245, 0.15); color: #42a5f5; }
+        .atom-stat { background: rgba(171, 71, 188, 0.15); color: #ab47bc; }
+        .atom-upload { background: rgba(236, 64, 122, 0.15); color: #ec407a; }
+        
+        .endpoint-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
+        .method-get { color: #4caf50; }
+        .method-post { color: #ff9800; }
+        .method-put { color: #2196f3; }
+        .method-patch { color: #9c27b0; }
+        .method-delete { color: #f44336; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+        
+        .btn-validate {
+            background: var(--accent);
+            color: #1a1a1a;
+        }
+        
+        .btn-validate:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-replace {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-replace:hover {
+            background: #444;
+        }
+        
+        .btn-delete {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(244, 67, 54, 0.2);
+        }
+        
+        /* Legend */
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        
+        /* Component Thumbnails */
+        .component-thumb {
+            width: 48px;
+            height: 36px;
+            border-radius: 4px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 3px;
+            gap: 2px;
+        }
+        
+        .component-thumb-small {
+            width: 36px;
+            height: 28px;
+        }
+        
+        /* daisy_list thumbnail */
+        .thumb-list .thumb-item {
+            height: 6px;
+            background: #3a3a3a;
+            border-radius: 1px;
+        }
+        .thumb-list .thumb-item:nth-child(1) { width: 90%; }
+        .thumb-list .thumb-item:nth-child(2) { width: 70%; }
+        .thumb-list .thumb-item:nth-child(3) { width: 85%; }
+        
+        /* daisy_fieldset thumbnail */
+        .thumb-fieldset {
+            gap: 3px;
+        }
+        .thumb-fieldset .thumb-label {
+            height: 3px;
+            width: 40%;
+            background: #555;
+            border-radius: 1px;
+        }
+        .thumb-fieldset .thumb-input {
+            height: 8px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 2px;
+        }
+        
+        /* daisy_card thumbnail */
+        .thumb-card {
+            padding: 2px;
+        }
+        .thumb-card .thumb-header {
+            height: 6px;
+            background: #444;
+            border-radius: 1px 1px 0 0;
+            margin-bottom: 2px;
+        }
+        .thumb-card .thumb-body {
+            flex: 1;
+            background: #2a2a2a;
+            border-radius: 0 0 1px 1px;
+        }
+        
+        /* daisy_table thumbnail */
+        .thumb-table {
+            padding: 2px;
+        }
+        .thumb-table .thumb-header-row {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+        .thumb-table .thumb-header-cell {
+            flex: 1;
+            height: 5px;
+            background: #555;
+            border-radius: 1px;
+        }
+        .thumb-table .thumb-data-row {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 1px;
+        }
+        .thumb-table .thumb-data-cell {
+            flex: 1;
+            height: 4px;
+            background: #3a3a3a;
+            border-radius: 1px;
+        }
+        
+        /* daisy_stat thumbnail */
+        .thumb-stat {
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .thumb-stat .thumb-number {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .thumb-stat .thumb-label {
+            font-size: 5px;
+            color: #666;
+        }
+        
+        /* daisy_file_input thumbnail */
+        .thumb-file {
+            align-items: center;
+            justify-content: center;
+            border-style: dashed;
+        }
+        .thumb-file .thumb-icon {
+            font-size: 12px;
+            color: #555;
+        }
+        
+        /* daisy_modal thumbnail */
+        .thumb-modal {
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .thumb-modal .thumb-box {
+            width: 70%;
+            height: 60%;
+            background: #333;
+            border-radius: 2px;
+            border: 1px solid #555;
+        }
+        
+        /* daisy_button thumbnail */
+        .thumb-button {
+            align-items: center;
+            justify-content: center;
+        }
+        .thumb-button .thumb-btn {
+            width: 70%;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Preview in main area */
+        .component-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .component-preview-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        /* Large preview variants */
+        .preview-list .preview-item {
+            height: 32px;
+            background: #3a3a3a;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+        .preview-list .preview-item::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: #555;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        .preview-list .preview-item::after {
+            content: '';
+            flex: 1;
+            height: 8px;
+            background: #555;
+            border-radius: 2px;
+        }
+        
+        .preview-fieldset .preview-input-group {
+            margin-bottom: 12px;
+        }
+        .preview-fieldset .preview-input-group::before {
+            content: 'Label';
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .preview-fieldset .preview-input {
+            width: 100%;
+            height: 36px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+        }
+        .preview-fieldset .preview-submit {
+            width: 100%;
+            height: 36px;
+            background: var(--accent);
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        
+        .preview-card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .preview-card .preview-header {
+            height: 48px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+        .preview-card .preview-header::before {
+            content: '';
+            width: 32px;
+            height: 32px;
+            background: #555;
+            border-radius: 50%;
+        }
+        .preview-card .preview-header::after {
+            content: '';
+            flex: 1;
+            height: 12px;
+            background: #555;
+            border-radius: 2px;
+        }
+        .preview-card .preview-body {
+            padding: 16px;
+        }
+        .preview-card .preview-body::before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: #444;
+            border-radius: 2px;
+            margin-bottom: 8px;
+        }
+        .preview-card .preview-body::after {
+            content: '';
+            display: block;
+            width: 70%;
+            height: 8px;
+            background: #444;
+            border-radius: 2px;
+        }
+        .preview-card .preview-footer {
+            height: 48px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 16px;
+            gap: 8px;
+        }
+        .preview-card .preview-footer::before,
+        .preview-card .preview-footer::after {
+            content: '';
+            width: 60px;
+            height: 28px;
+            background: #555;
+            border-radius: 4px;
+        }
+        .preview-card .preview-footer::before {
+            background: transparent;
+            border: 1px solid #555;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: var(--text-secondary);
+        }
+        
+        .error {
+            padding: 20px;
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 8px;
+            color: #f44336;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="flex h-screen">
+        <div class="loading">
+            <span class="loading loading-spinner loading-md mr-3"></span>
+            Chargement du Genome...
+        </div>
+    </div>
+
+    <script>
+        // State
+        let genomeData = null;
+        let selectedNode = null;
+        let expandedNodes = new Set(['genome']);
+        
+        // Determine API URL based on current host
+        function getApiUrl() {
+            const currentPort = window.location.port;
+            const currentHost = window.location.hostname;
+            // If served from static server (8080), use API server (8000)
+            if (currentPort === '8080') {
+                return `http://${currentHost}:8000/studio/genome/enriched`;
+            }
+            // Otherwise use relative URL (same origin)
+            return '/studio/genome/enriched';
+        }
+        
+        // Fetch genome data
+        async function loadGenome() {
+            try {
+                const apiUrl = getApiUrl();
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to load genome');
+                genomeData = await response.json();
+                renderApp();
+            } catch (error) {
+                document.getElementById('app').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Erreur de chargement</strong><br>
+                        ${error.message}<br><br>
+                        <em>Assurez-vous que le serveur API est démarré sur le port 8000</em><br>
+                        <code>./start_api.sh</code>
+                    </div>
+                `;
+            }
+        }
+        
+        // Render the full app
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                ${renderSidebar()}
+                ${renderMain()}
+            `;
+            attachEventListeners();
+        }
+        
+        // Render sidebar
+        function renderSidebar() {
+            const genome = genomeData.genome;
+            return `
+                <aside class="sidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-title">🧬 ${genome.name}</div>
+                        <div class="sidebar-subtitle">v${genome.version}</div>
+                    </div>
+                    <div class="tree-container">
+                        <div class="tree-node" data-id="genome" data-type="genome">
+                            <div class="tree-content ${selectedNode?.id === 'genome' ? 'selected' : ''}" onclick="selectNode('genome', 'genome')">
+                                <span class="tree-icon">🧬</span>
+                                <span class="tree-label">Genome</span>
+                            </div>
+                            <div class="tree-children">
+                                ${genome.corps.map(corp => renderCorpNode(corp)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-footer">
+                        <div class="legend-item"><span class="tree-status status-todo"></span> todo</div>
+                        <div class="legend-item"><span class="tree-status status-wip"></span> wip</div>
+                        <div class="legend-item"><span class="tree-status status-ok"></span> ok</div>
+                    </div>
+                </aside>
+            `;
+        }
+        
+        // Render corps node
+        function renderCorpNode(corp) {
+            const isExpanded = expandedNodes.has(corp.id);
+            const hasChildren = corp.organes && corp.organes.length > 0;
+            
+            return `
+                <div class="tree-node" data-id="${corp.id}" data-type="corps">
+                    <div class="tree-content ${selectedNode?.id === corp.id ? 'selected' : ''}" 
+                         onclick="selectNode('${corp.id}', 'corps')"
+                         ondblclick="toggleNode('${corp.id}')">
+                        ${hasChildren ? `<span class="tree-toggle ${isExpanded ? '' : 'collapsed'}" onclick="event.stopPropagation(); toggleNode('${corp.id}')">▼</span>` : '<span style="width:16px"></span>'}
+                        <span class="tree-icon">📄</span>
+                        <span class="tree-label">${corp.name}</span>
+                        <span class="tree-status status-${corp.status}"></span>
+                    </div>
+                    ${hasChildren && isExpanded ? `
+                        <div class="tree-children">
+                            ${corp.organes.map(organe => renderOrganeNode(organe, corp.id)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Render organe node
+        function renderOrganeNode(organe, parentId) {
+            const isExpanded = expandedNodes.has(organe.id);
+            const hasChildren = organe.atomes && organe.atomes.length > 0;
+            
+            return `
+                <div class="tree-node" data-id="${organe.id}" data-type="organe" data-parent="${parentId}">
+                    <div class="tree-content ${selectedNode?.id === organe.id ? 'selected' : ''}"
+                         onclick="selectNode('${organe.id}', 'organe')"
+                         ondblclick="toggleNode('${organe.id}')">
+                        ${hasChildren ? `<span class="tree-toggle ${isExpanded ? '' : 'collapsed'}" onclick="event.stopPropagation(); toggleNode('${organe.id}')">▼</span>` : '<span style="width:16px"></span>'}
+                        <span class="tree-icon">📦</span>
+                        <span class="tree-label">${organe.name}</span>
+                        <span style="color:#666;font-size:10px;">${organe.atomes?.length || 0}</span>
+                    </div>
+                    ${hasChildren && isExpanded ? `
+                        <div class="tree-children">
+                            ${organe.atomes.map(atome => renderAtomeNode(atome, organe.id)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Render atome node with component thumbnail
+        function renderAtomeNode(atome, parentId) {
+            const thumbHTML = renderComponentThumbnail(atome.component_ref, 'small');
+            
+            return `
+                <div class="tree-node" data-id="${atome.id}" data-type="atome" data-parent="${parentId}">
+                    <div class="tree-content ${selectedNode?.id === atome.id ? 'selected' : ''}"
+                         onclick="selectNode('${atome.id}', 'atome')"
+                         ondblclick="selectNode('${atome.id}', 'atome')">
+                        <span style="width:16px"></span>
+                        ${thumbHTML}
+                        <span class="tree-label" title="${atome.endpoint}">${atome.name}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render main content area
+        function renderMain() {
+            return `
+                <main class="main-container">
+                    ${renderBreadcrumb()}
+                    <div class="content-area">
+                        ${selectedNode ? renderNodeContent() : renderGenomeOverview()}
+                    </div>
+                </main>
+            `;
+        }
+        
+        // Render breadcrumb
+        function renderBreadcrumb() {
+            const items = [{ id: 'genome', label: '🧬 Genome', type: 'genome' }];
+            
+            if (selectedNode) {
+                // Build path from selected node
+                const path = buildNodePath(selectedNode.id, selectedNode.type);
+                items.push(...path);
+            }
+            
+            return `
+                <nav class="breadcrumb">
+                    ${items.map((item, index) => `
+                        ${index > 0 ? '<span class="breadcrumb-separator">›</span>' : ''}
+                        <span class="breadcrumb-item ${index === items.length - 1 ? 'active' : ''}" 
+                              onclick="selectNode('${item.id}', '${item.type}')">${item.label}</span>
+                    `).join('')}
+                </nav>
+            `;
+        }
+        
+        // Build path from node id
+        function buildNodePath(nodeId, nodeType) {
+            const path = [];
+            const genome = genomeData.genome;
+            
+            if (nodeType === 'corps') {
+                const corp = genome.corps.find(c => c.id === nodeId);
+                if (corp) path.push({ id: corp.id, label: `📄 ${corp.name}`, type: 'corps' });
+            } else if (nodeType === 'organe') {
+                for (const corp of genome.corps) {
+                    const organe = corp.organes.find(o => o.id === nodeId);
+                    if (organe) {
+                        path.push({ id: corp.id, label: `📄 ${corp.name}`, type: 'corps' });
+                        path.push({ id: organe.id, label: `📦 ${organe.name}`, type: 'organe' });
+                        break;
+                    }
+                }
+            } else if (nodeType === 'atome') {
+                for (const corp of genome.corps) {
+                    for (const organe of corp.organes) {
+                        const atome = organe.atomes.find(a => a.id === nodeId);
+                        if (atome) {
+                            path.push({ id: corp.id, label: `📄 ${corp.name}`, type: 'corps' });
+                            path.push({ id: organe.id, label: `📦 ${organe.name}`, type: 'organe' });
+                            path.push({ id: atome.id, label: `⚛️ ${atome.name}`, type: 'atome' });
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return path;
+        }
+        
+        // Render content based on selected node
+        function renderNodeContent() {
+            switch (selectedNode.type) {
+                case 'genome': return renderGenomeOverview();
+                case 'corps': return renderCorpsView(selectedNode.id);
+                case 'organe': return renderOrganeView(selectedNode.id);
+                case 'atome': return renderAtomeView(selectedNode.id);
+                default: return renderGenomeOverview();
+            }
+        }
+        
+        // N0 - Genome overview
+        function renderGenomeOverview() {
+            const stats = genomeData.stats;
+            const genome = genomeData.genome;
+            
+            // Calculate progress
+            const totalCorps = stats.total_corps;
+            const okCorps = genome.corps.filter(c => c.status === 'ok').length;
+            const progress = Math.round((okCorps / totalCorps) * 100);
+            
+            return `
+                <div class="level-genome">
+                    <h1 class="text-3xl font-bold mb-2">${genome.name}</h1>
+                    <p class="text-gray-400 mb-8">Version ${genome.version} • Généré le ${new Date(genome.generated_at).toLocaleDateString('fr-FR')}</p>
+                    
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="stat-card">
+                            <div class="stat-number">1</div>
+                            <div class="stat-label">Genome</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_corps}</div>
+                            <div class="stat-label">Corps</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_organes}</div>
+                            <div class="stat-label">Organes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_atomes}</div>
+                            <div class="stat-label">Atomes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>Progression</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%">${progress}%</div>
+                        </div>
+                        <p class="text-sm text-gray-400">${okCorps}/${totalCorps} corps validés</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h2>📄 Corps</h2>
+                        <div class="grid gap-2">
+                            ${genome.corps.map(corp => `
+                                <div class="flex items-center justify-between p-3 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30"
+                                     onclick="selectNode('${corp.id}', 'corps')">
+                                    <div class="flex items-center gap-3">
+                                        <span>📄</span>
+                                        <span>${corp.name}</span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm text-gray-400">
+                                        <span>${corp.organes?.length || 0} organes</span>
+                                        <span>${corp.organes?.reduce((sum, o) => sum + (o.atomes?.length || 0), 0) || 0} atomes</span>
+                                        <span class="px-2 py-1 rounded text-xs ${corp.status === 'ok' ? 'bg-green-500/20 text-green-400' : corp.status === 'wip' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-500/20 text-gray-400'}">${corp.status}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // N1 - Corps view
+        function renderCorpsView(corpId) {
+            const genome = genomeData.genome;
+            const corp = genome.corps.find(c => c.id === corpId);
+            if (!corp) return '<div class="error">Corps non trouvé</div>';
+            
+            const totalAtomes = corp.organes?.reduce((sum, o) => sum + (o.atomes?.length || 0), 0) || 0;
+            
+            return `
+                <div class="level-corps">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-4xl">📄</span>
+                        <div>
+                            <h1 class="text-2xl font-bold">${corp.name}</h1>
+                            <p class="text-gray-400">${corp.organes?.length || 0} organes • ${totalAtomes} atomes</p>
+                        </div>
+                        <span class="ml-auto px-3 py-1 rounded-full text-sm ${corp.status === 'ok' ? 'bg-green-500/20 text-green-400' : corp.status === 'wip' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-500/20 text-gray-400'}">${corp.status}</span>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h2>📦 Organes</h2>
+                        <div class="grid gap-2">
+                            ${corp.organes?.map(organe => `
+                                <div class="flex items-center justify-between p-3 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30"
+                                     onclick="selectNode('${organe.id}', 'organe')">
+                                    <div class="flex items-center gap-3">
+                                        <span>📦</span>
+                                        <span>${organe.name}</span>
+                                    </div>
+                                    <span class="text-sm text-gray-400">${organe.atomes?.length || 0} atomes</span>
+                                </div>
+                            `).join('') || '<p class="text-gray-500">Aucun organe</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // N2 - Organe view
+        function renderOrganeView(organeId) {
+            const genome = genomeData.genome;
+            let organe = null;
+            let parentCorp = null;
+            
+            for (const corp of genome.corps) {
+                const found = corp.organes.find(o => o.id === organeId);
+                if (found) {
+                    organe = found;
+                    parentCorp = corp;
+                    break;
+                }
+            }
+            
+            if (!organe) return '<div class="error">Organe non trouvé</div>';
+            
+            // Count by visual hint
+            const hintCounts = {};
+            organe.atomes?.forEach(a => {
+                hintCounts[a.visual_hint] = (hintCounts[a.visual_hint] || 0) + 1;
+            });
+            
+            return `
+                <div class="level-organe">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-4xl">📦</span>
+                        <div>
+                            <h1 class="text-2xl font-bold">${organe.name}</h1>
+                            <p class="text-gray-400">${organe.atomes?.length || 0} atomes</p>
+                        </div>
+                    </div>
+                    
+                    ${Object.keys(hintCounts).length > 0 ? `
+                        <div class="flex gap-2 mb-6">
+                            ${Object.entries(hintCounts).map(([hint, count]) => `
+                                <span class="atom-badge atom-${hint}">${getVisualEmoji(hint)} ${hint} (${count})</span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="info-card">
+                        <h2>⚛️ Atomes</h2>
+                        <div class="grid gap-2">
+                            ${organe.atomes?.map(atome => `
+                                <div class="flex items-center justify-between p-3 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30"
+                                     onclick="selectNode('${atome.id}', 'atome')">
+                                    <div class="flex items-center gap-3">
+                                        ${renderComponentThumbnail(atome.component_ref)}
+                                        <div>
+                                            <div class="font-medium">${atome.name}</div>
+                                            <div class="text-xs text-gray-500 font-mono">${atome.method} ${atome.endpoint}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="atom-badge atom-${atome.visual_hint}">${getVisualEmoji(atome.visual_hint)} ${atome.visual_hint}</span>
+                                        <code class="text-xs bg-black/30 px-2 py-1 rounded">${atome.component_ref}</code>
+                                    </div>
+                                </div>
+                            `).join('') || '<p class="text-gray-500">Aucun atome</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // N3 - Atome view
+        function renderAtomeView(atomeId) {
+            const genome = genomeData.genome;
+            let atome = null;
+            let parentOrgane = null;
+            let parentCorp = null;
+            
+            for (const corp of genome.corps) {
+                for (const organe of corp.organes) {
+                    const found = organe.atomes.find(a => a.id === atomeId);
+                    if (found) {
+                        atome = found;
+                        parentOrgane = organe;
+                        parentCorp = corp;
+                        break;
+                    }
+                }
+                if (atome) break;
+            }
+            
+            if (!atome) return '<div class="error">Atome non trouvé</div>';
+            
+            const thumbHTML = renderComponentThumbnail(atome.component_ref);
+            
+            return `
+                <div class="level-atome">
+                    <div class="flex items-center gap-4 mb-6">
+                        ${thumbHTML}
+                        <div>
+                            <h1 class="text-2xl font-bold">${atome.name}</h1>
+                            <p class="text-gray-400">${parentCorp.name} › ${parentOrgane.name}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>Endpoint</h3>
+                        <div class="endpoint-row">
+                            <span class="method-${atome.method.toLowerCase()} font-bold">${atome.method}</span>
+                            <span class="text-gray-300">${atome.endpoint}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="info-card">
+                            <h3>Visual Hint</h3>
+                            <div class="flex items-center gap-3 mt-2">
+                                <span class="text-2xl">${getVisualEmoji(atome.visual_hint)}</span>
+                                <span class="atom-badge atom-${atome.visual_hint}">${atome.visual_hint}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>Composant</h3>
+                            <code class="block mt-2 p-3 bg-black/30 rounded text-sm">${atome.component_ref}</code>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>Aperçu du Composant</h3>
+                        <div class="component-preview mt-3">
+                            ${renderComponentPreview(atome.component_ref)}
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>Wireframe Sketch</h3>
+                        <p class="mt-2 text-gray-300">${atome.wireframe_sketch}</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-action btn-validate" onclick="alert('✅ Validé: ${atome.name}')">✓ Valider</button>
+                        <button class="btn-action btn-replace" onclick="alert('🔄 Remplacer: ${atome.name}')">⇄ Remplacer</button>
+                        <button class="btn-action btn-delete" onclick="alert('🗑️ Supprimer: ${atome.name}')">× Supprimer</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render component thumbnail
+        function renderComponentThumbnail(componentRef, size = 'small') {
+            const sizeClass = size === 'small' ? 'component-thumb-small' : '';
+            
+            // Map component_ref to thumbnail class
+            const thumbMap = {
+                'daisy_list': 'thumb-list',
+                'daisy_fieldset': 'thumb-fieldset',
+                'daisy_card': 'thumb-card',
+                'daisy_table': 'thumb-table',
+                'daisy_stat': 'thumb-stat',
+                'daisy_file_input': 'thumb-file',
+                'daisy_modal': 'thumb-modal',
+                'daisy_button': 'thumb-button'
+            };
+            
+            const thumbClass = thumbMap[componentRef] || 'thumb-list';
+            
+            // Generate thumbnail HTML based on component type
+            let innerHTML = '';
+            
+            switch(componentRef) {
+                case 'daisy_list':
+                    innerHTML = `
+                        <div class="thumb-item"></div>
+                        <div class="thumb-item"></div>
+                        <div class="thumb-item"></div>
+                    `;
+                    break;
+                case 'daisy_fieldset':
+                    innerHTML = `
+                        <div class="thumb-label"></div>
+                        <div class="thumb-input"></div>
+                        <div class="thumb-label"></div>
+                        <div class="thumb-input"></div>
+                    `;
+                    break;
+                case 'daisy_card':
+                    innerHTML = `
+                        <div class="thumb-header"></div>
+                        <div class="thumb-body"></div>
+                    `;
+                    break;
+                case 'daisy_table':
+                    innerHTML = `
+                        <div class="thumb-header-row">
+                            <div class="thumb-header-cell"></div>
+                            <div class="thumb-header-cell"></div>
+                            <div class="thumb-header-cell"></div>
+                        </div>
+                        <div class="thumb-data-row">
+                            <div class="thumb-data-cell"></div>
+                            <div class="thumb-data-cell"></div>
+                            <div class="thumb-data-cell"></div>
+                        </div>
+                        <div class="thumb-data-row">
+                            <div class="thumb-data-cell"></div>
+                            <div class="thumb-data-cell"></div>
+                            <div class="thumb-data-cell"></div>
+                        </div>
+                    `;
+                    break;
+                case 'daisy_stat':
+                    innerHTML = `
+                        <div class="thumb-number">42</div>
+                        <div class="thumb-label">stat</div>
+                    `;
+                    break;
+                case 'daisy_file_input':
+                    innerHTML = `
+                        <div class="thumb-icon">↑</div>
+                    `;
+                    break;
+                case 'daisy_modal':
+                    innerHTML = `
+                        <div class="thumb-box"></div>
+                    `;
+                    break;
+                case 'daisy_button':
+                    innerHTML = `
+                        <div class="thumb-btn"></div>
+                    `;
+                    break;
+                default:
+                    innerHTML = `<div class="thumb-item"></div><div class="thumb-item"></div>`;
+            }
+            
+            return `<div class="component-thumb ${thumbClass} ${sizeClass}">${innerHTML}</div>`;
+        }
+        
+        // Render large preview of component
+        function renderComponentPreview(componentRef) {
+            const previewClass = `preview-${componentRef.replace('daisy_', '')}`;
+            
+            switch(componentRef) {
+                case 'daisy_list':
+                    return `
+                        <div class="component-preview-inner preview-list">
+                            <div class="preview-item"></div>
+                            <div class="preview-item"></div>
+                            <div class="preview-item"></div>
+                        </div>
+                    `;
+                case 'daisy_fieldset':
+                    return `
+                        <div class="component-preview-inner preview-fieldset">
+                            <div class="preview-input-group">
+                                <div class="preview-input"></div>
+                            </div>
+                            <div class="preview-input-group">
+                                <div class="preview-input"></div>
+                            </div>
+                            <div class="preview-submit"></div>
+                        </div>
+                    `;
+                case 'daisy_card':
+                    return `
+                        <div class="component-preview-inner preview-card">
+                            <div class="preview-header"></div>
+                            <div class="preview-body"></div>
+                            <div class="preview-footer"></div>
+                        </div>
+                    `;
+                default:
+                    return renderComponentThumbnail(componentRef, 'large');
+            }
+        }
+        
+        // Helper: get emoji for visual hint
+        function getVisualEmoji(hint) {
+            const emojis = {
+                table: '📊',
+                form: '📝',
+                card: '📋',
+                modal: '🪟',
+                stat: '📈',
+                list: '📄',
+                upload: '📤',
+                generic: '📦'
+            };
+            return emojis[hint] || '📦';
+        }
+        
+        // Actions
+        function selectNode(id, type) {
+            selectedNode = { id, type };
+            
+            // Auto-expand parents
+            if (type === 'organe') {
+                expandedNodes.add(id);
+                // Find and expand parent corps
+                for (const corp of genomeData.genome.corps) {
+                    if (corp.organes.some(o => o.id === id)) {
+                        expandedNodes.add(corp.id);
+                        break;
+                    }
+                }
+            } else if (type === 'atome') {
+                // Find and expand parents
+                for (const corp of genomeData.genome.corps) {
+                    for (const organe of corp.organes) {
+                        if (organe.atomes.some(a => a.id === id)) {
+                            expandedNodes.add(corp.id);
+                            expandedNodes.add(organe.id);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            renderApp();
+        }
+        
+        function toggleNode(id) {
+            if (expandedNodes.has(id)) {
+                expandedNodes.delete(id);
+            } else {
+                expandedNodes.add(id);
+            }
+            renderApp();
+        }
+        
+        function attachEventListeners() {
+            // Any additional listeners if needed
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadGenome);
+    </script>
+</body>
+</html>

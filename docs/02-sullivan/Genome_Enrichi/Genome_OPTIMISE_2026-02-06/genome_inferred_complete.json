@@ -1,0 +1,471 @@
+{
+  "genome_version": "3.0-confronted",
+  "inference_method": "4-source-confrontation-kimi-innocent",
+  "project": "Homeos/Sullivan",
+  "date": "2026-02-07",
+  "metadata": {
+    "confidence_global": 0.85,
+    "sources_used": ["doc", "code", "inference"],
+    "composants_count": 29,
+    "methodology": "Kimi innocent - 4 bundles confrontation"
+  },
+  "n0_phases": [
+    {
+      "id": "phase_1_ir",
+      "name": "Intent Refactoring - Inventaire",
+      "description": "Phase 1 : Analyse du backend et détection automatique des organes/fonctions",
+      "order": 1,
+      "confidence": 0.95,
+      "n1_sections": [
+        {
+          "id": "section_ir_report",
+          "name": "Rapport d'Inventaire",
+          "description": "Visualisation du rapport IR avec organes détectés",
+          "n2_features": [
+            {
+              "id": "feature_ir_list",
+              "name": "Liste des Organes",
+              "description": "Tableau des organes découverts avec verdict",
+              "n3_components": [
+                {
+                  "id": "comp_ir_report_view",
+                  "name": "Vue Rapport IR",
+                  "endpoint": "/studio/reports/ir",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Tableau listant les organes détectés avec colonnes: nom, type, verdict (vert/jaune/rouge)"
+                },
+                {
+                  "id": "comp_ir_organe_detail",
+                  "name": "Détail Organe IR",
+                  "endpoint": "/studio/drilldown",
+                  "method": "GET",
+                  "visual_hint": "card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-close",
+                  "description_ui": "Carte détaillant un organe: endpoints, modèles, intents détectés"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_2_arbiter",
+      "name": "Arbitrage des Capacités",
+      "description": "Phase 2 : Sullivan confronte les fonctions avec les contraintes",
+      "order": 2,
+      "confidence": 0.90,
+      "n1_sections": [
+        {
+          "id": "section_arbiter_normal",
+          "name": "Mode Normal HCI",
+          "description": "Vue pédagogique avec stencils",
+          "n2_features": [
+            {
+              "id": "feature_arbiter_stencils",
+              "name": "Stencils d'Arbitrage",
+              "description": "Cartes traduisant les endpoints en intentions pédagogiques",
+              "n3_components": [
+                {
+                  "id": "comp_stencil_card",
+                  "name": "Carte Stencil",
+                  "endpoint": "/studio/arbitrage/forms",
+                  "method": "GET",
+                  "visual_hint": "stencil-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-toggle",
+                  "description_ui": "Carte avec icône, titre HCI, description pédagogique, toggle Garder/Réserve"
+                },
+                {
+                  "id": "comp_arbiter_actions",
+                  "name": "Actions d'Arbitrage",
+                  "endpoint": "/studio/validate",
+                  "method": "POST",
+                  "visual_hint": "form",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Boutons Garder/Réserve par capacité. Validation finale 'Fixer le Génome'"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_3_states",
+      "name": "Machine à États - Session",
+      "description": "Phase 3 : Gestion de session et navigation entre étapes",
+      "order": 3,
+      "confidence": 0.95,
+      "n1_sections": [
+        {
+          "id": "section_session",
+          "name": "Gestion Session",
+          "description": "Contrôle de la session utilisateur",
+          "n2_features": [
+            {
+              "id": "feature_session",
+              "name": "État Session",
+              "description": "Visualisation et contrôle de la session",
+              "n3_components": [
+                {
+                  "id": "comp_session_status",
+                  "name": "Status Session",
+                  "endpoint": "/studio/session",
+                  "method": "GET",
+                  "visual_hint": "status",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "auto-refresh",
+                  "description_ui": "Indicateurs LED montrant l'état: current_step, genome loaded, distillation entries"
+                },
+                {
+                  "id": "comp_session_reset",
+                  "name": "Reset Session",
+                  "endpoint": "/studio/session/reset",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-confirm",
+                  "description_ui": "Bouton de réinitialisation de la session avec confirmation"
+                },
+                {
+                  "id": "comp_genome_summary",
+                  "name": "Résumé Genome",
+                  "endpoint": "/studio/genome/summary",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-expand",
+                  "description_ui": "Dashboard récapitulatif du genome: nombre d'organes, endpoints, confiance"
+                },
+                {
+                  "id": "comp_distillation_entries",
+                  "name": "Entrées Distillation",
+                  "endpoint": "/studio/distillation/entries",
+                  "method": "GET",
+                  "visual_hint": "list",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Liste des entrées de distillation avec timestamp et statut"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_4_navigation",
+      "name": "Navigation Parcours UX",
+      "description": "Phase 4 : Navigation entre les 9 étapes du workflow",
+      "order": 4,
+      "confidence": 0.90,
+      "n1_sections": [
+        {
+          "id": "section_navigation",
+          "name": "Navigation Étapes",
+          "description": "Stepper et navigation temporelle",
+          "n2_features": [
+            {
+              "id": "feature_stepper",
+              "name": "Stepper Progression",
+              "description": "Indicateur des 9 étapes du parcours",
+              "n3_components": [
+                {
+                  "id": "comp_stepper",
+                  "name": "Stepper 9 Étapes",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "stepper",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Stepper horizontal montrant les 9 phases: active, completed, future"
+                },
+                {
+                  "id": "comp_next_step",
+                  "name": "Bouton Suivant",
+                  "endpoint": "/studio/next/{current_step}",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Bouton 'Étape Suivante' avec validation des prérequis"
+                },
+                {
+                  "id": "comp_breadcrumb",
+                  "name": "Fil d'Ariane",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "breadcrumb",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Breadcrumb montrant le chemin: Accueil > Phase > Étape"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_5_layout",
+      "name": "Sélection Layout - Designer",
+      "description": "Phase 5 : Upload design et sélection de layout",
+      "order": 5,
+      "confidence": 0.85,
+      "n1_sections": [
+        {
+          "id": "section_layout_selection",
+          "name": "Sélection Layout",
+          "description": "Choix du layout UI",
+          "n2_features": [
+            {
+              "id": "feature_layouts",
+              "name": "Galerie Layouts",
+              "description": "Présentation des layouts disponibles",
+              "n3_components": [
+                {
+                  "id": "comp_layout_gallery",
+                  "name": "Galerie Layouts",
+                  "endpoint": "/studio/step/5/layouts",
+                  "method": "GET",
+                  "visual_hint": "grid",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-select",
+                  "description_ui": "Galerie 3×2 des layouts disponibles avec aperçu visuel"
+                },
+                {
+                  "id": "comp_layout_select",
+                  "name": "Sélection Layout",
+                  "endpoint": "/studio/step/5/select-layout/{layout_id}",
+                  "method": "POST",
+                  "visual_hint": "card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Carte de layout cliquable avec sélection visuelle"
+                },
+                {
+                  "id": "comp_arbiter_table",
+                  "name": "Tableau Arbitrage Expert",
+                  "endpoint": "/studio/reports/arbitrage",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-select",
+                  "description_ui": "Tableau technique endpoints pour mode expert avec checkboxes"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_6_upload",
+      "name": "Upload Design - Designer",
+      "description": "Phase 6 : Upload et analyse de maquettes",
+      "order": 6,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "section_designer_upload",
+          "name": "Upload Designer",
+          "description": "Upload et analyse de designs",
+          "n2_features": [
+            {
+              "id": "feature_upload",
+              "name": "Upload Maquette",
+              "description": "Zone de drop pour fichiers design",
+              "n3_components": [
+                {
+                  "id": "comp_upload_dropzone",
+                  "name": "Zone Upload",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "upload",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "drag-drop",
+                  "description_ui": "Zone drag & drop avec icône 📁 et feedback visuel"
+                },
+                {
+                  "id": "comp_color_palette",
+                  "name": "Palette Extraite",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "color-palette",
+                  "layout_hint": "grid",
+                  "interaction_type": "click-select",
+                  "description_ui": "4 swatches de couleurs extraites + chips style (rounded, font)"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_7_dialogue",
+      "name": "Dialogue - Majordome",
+      "description": "Phase 7 : Sullivan affine avec l'utilisateur via chat",
+      "order": 7,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "section_dialogue_chat",
+          "name": "Interface Dialogue",
+          "description": "Chat interactif pour valider/ajuster",
+          "n2_features": [
+            {
+              "id": "feature_chat_interface",
+              "name": "Chat Sullivan",
+              "description": "Interface conversationnelle",
+              "n3_components": [
+                {
+                  "id": "comp_chat_bubble",
+                  "name": "Bulles de Chat",
+                  "endpoint": "/studio/majordome/chat",
+                  "method": "POST",
+                  "visual_hint": "chat/bubble",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "submit",
+                  "description_ui": "Chat style Messenger: avatar 'S' indigo, bulles questions/réponses"
+                },
+                {
+                  "id": "comp_chat_input",
+                  "name": "Input Message",
+                  "endpoint": "/studio/majordome/chat",
+                  "method": "POST",
+                  "visual_hint": "chat-input",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "Champ saisie + 📎 😊 + bouton envoi ➤"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_8_validation",
+      "name": "Validation Finale",
+      "description": "Phase 8 : Accord final sur la structure avant distillation",
+      "order": 8,
+      "confidence": 0.90,
+      "n1_sections": [
+        {
+          "id": "section_validation_final",
+          "name": "Validation Finale",
+          "description": "Récapitulatif complet avant lancement",
+          "n2_features": [
+            {
+              "id": "feature_validation_overview",
+              "name": "Vue d'Ensemble",
+              "description": "Synthèse des décisions: genome, zones, style",
+              "n3_components": [
+                {
+                  "id": "comp_validation_summary",
+                  "name": "Carte Récapitulative",
+                  "endpoint": "/studio/step/8",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-expand",
+                  "description_ui": "Dashboard avec métriques: zones validées, layout sélectionné, style"
+                },
+                {
+                  "id": "comp_choice_style",
+                  "name": "Choix de Style",
+                  "endpoint": "/studio/step/8/confirm",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "radio-select",
+                  "description_ui": "Grille 2×2 radio-cards: Minimal, Brutaliste, Moderne, Corporate"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_9_adaptation",
+      "name": "Adaptation - Zoom Top-Bottom",
+      "description": "Phase 9 : Navigation drill-down Corps > Organe > Atome",
+      "order": 9,
+      "confidence": 0.92,
+      "n1_sections": [
+        {
+          "id": "section_zoom_navigation",
+          "name": "Navigation Zoom",
+          "description": "Navigation hiérarchique Top-Bottom",
+          "n2_features": [
+            {
+              "id": "feature_zoom_controls",
+              "name": "Contrôles Zoom",
+              "description": "Boutons zoom in/out et sélection niveau",
+              "n3_components": [
+                {
+                  "id": "comp_zoom_controls",
+                  "name": "Contrôles Zoom",
+                  "endpoint": "/studio/zoom/{level}/{target_id}",
+                  "method": "GET",
+                  "visual_hint": "zoom-controls",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Navigation: ← Out | 🔍 Corps ▼ | In → + breadcrumb"
+                },
+                {
+                  "id": "comp_zoom_out",
+                  "name": "Zoom Out",
+                  "endpoint": "/studio/zoom/out",
+                  "method": "GET",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click-navigate",
+                  "description_ui": "Bouton pour remonter d'un niveau dans la hiérarchie"
+                },
+                {
+                  "id": "comp_detail_card",
+                  "name": "Fiche Détail Atome",
+                  "endpoint": "/studio/genome/corps/{corps_id}",
+                  "method": "GET",
+                  "visual_hint": "detail-card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click-action",
+                  "description_ui": "Fiche technique endpoint: méthode, URL, paramètres, actions Copier/Tester"
+                },
+                {
+                  "id": "comp_launch_button",
+                  "name": "Lancer Distillation",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "launch-button",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "submit",
+                  "description_ui": "Bouton fusée 🚀 'Lancer la distillation'"
+                },
+                {
+                  "id": "comp_apply_changes",
+                  "name": "Appliquer Changements",
+                  "endpoint": "/studio/step/7/confirm",
+                  "method": "POST",
+                  "visual_hint": "apply-changes",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "💾 Appliquer / ↩️ Annuler - sauvegarde des modifications"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

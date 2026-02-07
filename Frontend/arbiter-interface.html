@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intent Revue - Arbitrage Sullivan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ========== PANNEAU GAUCHE (CLAIR) ========== */
+        .panel-left {
+            width: 55%;
+            background: #f0f0e8;
+            min-height: 100vh;
+            padding: 24px 32px;
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #d0d0c8;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5a5a52;
+            letter-spacing: 0.5px;
+        }
+
+        .arbiter-badge {
+            background: #7cb342;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Section Typologie */
+        .typology-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7cb342;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        .typology-content {
+            display: flex;
+            gap: 40px;
+        }
+
+        .typology-list {
+            font-size: 11px;
+            color: #5a5a52;
+            line-height: 1.8;
+        }
+
+        .typology-list span {
+            display: block;
+        }
+
+        .typology-list span::before {
+            content: "▸ ";
+            color: #7cb342;
+        }
+
+        /* Dropdowns */
+        .dropdowns-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dropdown-item {
+            font-size: 10px;
+            color: #888;
+            padding: 2px 0;
+        }
+
+        /* User icons avec labels */
+        .users-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .user-avatar {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #7cb342;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+        }
+
+        /* Toggle & Button */
+        .action-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .toggle-switch {
+            width: 36px;
+            height: 18px;
+            background: #7cb342;
+            border-radius: 9px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+        }
+
+        .action-btn {
+            background: #7cb342;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-btn.secondary {
+            background: #5a8f2e;
+        }
+
+        /* Section Pourquoi */
+        .why-section {
+            display: flex;
+            gap: 40px;
+            margin-top: 16px;
+        }
+
+        .why-col {
+            font-size: 10px;
+            color: #7cb342;
+            font-weight: 600;
+        }
+
+        .why-text {
+            font-size: 9px;
+            color: #888;
+            margin-top: 4px;
+            line-height: 1.5;
+            max-width: 120px;
+        }
+
+        /* Expandable sections */
+        .expandable-section {
+            margin-top: 24px;
+            border-top: 1px solid #d0d0c8;
+            padding-top: 16px;
+        }
+
+        .expandable-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .expand-icon {
+            color: #7cb342;
+            font-size: 12px;
+        }
+
+        .expandable-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #7cb342;
+        }
+
+        .expandable-content {
+            margin-top: 12px;
+            padding-left: 20px;
+            font-size: 10px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .expandable-content span {
+            display: block;
+        }
+
+        .expandable-content span::before {
+            content: "◆ ";
+            color: #7cb342;
+            font-size: 8px;
+        }
+
+        .section-meta {
+            font-size: 9px;
+            color: #999;
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+
+        /* ========== PANNEAU DROIT (SOMBRE) ========== */
+        .panel-right {
+            width: 45%;
+            background: #252525;
+            min-height: 100vh;
+            padding: 24px 32px;
+            color: #fff;
+        }
+
+        .genome-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .genome-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sections Corps/Organes/Cellules */
+        .genome-section {
+            margin-bottom: 28px;
+        }
+
+        .genome-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .genome-content {
+            display: flex;
+            gap: 24px;
+        }
+
+        .genome-col {
+            flex: 1;
+        }
+
+        .genome-col-header {
+            font-size: 10px;
+            color: #7cb342;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Dark dropdowns */
+        .dark-dropdowns {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .dark-dropdown-item {
+            font-size: 10px;
+            color: #888;
+            padding: 4px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .dark-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Dark user items */
+        .dark-users {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .dark-user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: #aaa;
+            padding: 3px 0;
+        }
+
+        .dark-user-avatar {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: #ccc;
+        }
+
+        /* Dark toggle */
+        .dark-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .dark-toggle-switch {
+            width: 32px;
+            height: 16px;
+            background: #444;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .dark-toggle-switch.active {
+            background: #7cb342;
+        }
+
+        .dark-toggle-switch::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+        }
+
+        .dark-toggle-switch.active::after {
+            left: auto;
+            right: 2px;
+        }
+
+        .dark-btn {
+            background: #7cb342;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        /* Notification banner */
+        .notification-banner {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .notification-icon {
+            color: #7cb342;
+            font-size: 14px;
+        }
+
+        .notification-text {
+            font-size: 9px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        /* Icons grid (Organes) */
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .icon-cell {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .icon-cell.green {
+            color: #7cb342;
+        }
+
+        .icon-cell.gray {
+            color: #555;
+        }
+
+        /* Cellules row */
+        .cellules-row {
+            display: flex;
+            gap: 24px;
+        }
+
+        .cellules-row .genome-col-header {
+            font-size: 9px;
+        }
+
+        /* Floating badge */
+        .floating-badge {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #7cb342;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+        }
+
+        /* User profile card */
+        .profile-card {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7cb342;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .profile-role {
+            font-size: 8px;
+            color: #7cb342;
+        }
+    </style>
+</head>
+<body>
+    <!-- PANNEAU GAUCHE - Intent Revue -->
+    <div class="panel-left">
+        <div class="panel-header">
+            <span class="panel-title">Intent Revue</span>
+            <span class="arbiter-badge">Arbitrage Sullivan</span>
+        </div>
+
+        <!-- Typologie déclarée -->
+        <div class="typology-section">
+            <div class="section-title">Typologie déclarée</div>
+            <div class="typology-content">
+                <div class="typology-list">
+                    <span>Brainstorm</span>
+                    <span>Back</span>
+                    <span>Front</span>
+                    <span>Front</span>
+                </div>
+                <div class="dropdowns-col">
+                    <div class="dropdown-item">DROPDOWN</div>
+                    <div class="dropdown-item">DROPDOWN</div>
+                    <div class="dropdown-item">DROPDOWN</div>
+                    <div class="dropdown-item">DROPDOWN</div>
+                </div>
+                <div class="users-col">
+                    <div class="user-item">
+                        <div class="user-avatar">👤</div>
+                        <span>PSEUDOCOLOR</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-avatar">👤</div>
+                        <span>PSEUDOCOLOR</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-avatar">👤</div>
+                        <span>PSEUDOCOLOR</span>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-avatar">👤</div>
+                        <span>PSEUDOCOLOR</span>
+                    </div>
+                </div>
+                <div class="action-col">
+                    <div class="toggle-switch"></div>
+                    <button class="action-btn">LARGE BUTTON</button>
+                    <button class="action-btn secondary">LARGE BUTTON</button>
+                </div>
+            </div>
+            <div class="why-section">
+                <div class="why-col">
+                    Pourquoi
+                    <div class="why-text">Explication du choix de la zone, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam</div>
+                </div>
+                <div class="why-col">
+                    Pourquoi
+                    <div class="why-text">Explication du choix de la zone, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam</div>
+                </div>
+                <div class="why-col">
+                    Pourquoi
+                    <div class="why-text">Explication du choix de la zone, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="expandable-section">
+            <div class="expandable-header">
+                <span class="expand-icon">↕</span>
+                <span class="expandable-title">§1.3 Endpoints</span>
+            </div>
+            <div class="expandable-content">
+                <span>POST /execute</span>
+                <span>GET /health</span>
+                <span>GET /fullgenome</span>
+            </div>
+            <div class="section-meta">→ 16 lignes</div>
+        </div>
+
+        <!-- Code IR -->
+        <div class="expandable-section">
+            <div class="expandable-header">
+                <span class="expand-icon">↕</span>
+                <span class="expandable-title">§1.4 Code IR</span>
+            </div>
+            <div class="expandable-content">
+                <span>Intents</span>
+                <span>Features</span>
+                <span>Brainstorm</span>
+                <span>Back</span>
+                <span>Front</span>
+            </div>
+            <div class="section-meta">→ 5 items</div>
+        </div>
+    </div>
+
+    <!-- PANNEAU DROIT - Génome -->
+    <div class="panel-right">
+        <div class="genome-header">
+            <span class="genome-title">Génome de [Nom du produit]</span>
+        </div>
+
+        <!-- Corps -->
+        <div class="genome-section">
+            <div class="genome-section-title">Corps</div>
+            <div class="genome-content">
+                <div class="genome-col">
+                    <div class="genome-col-header">Brainstorm</div>
+                    <div class="dark-dropdowns">
+                        <div class="dark-dropdown-item">DROPDOWN</div>
+                        <div class="dark-dropdown-item">DROPDOWN</div>
+                        <div class="dark-dropdown-item">DROPDOWN</div>
+                        <div class="dark-dropdown-item">DROPDOWN</div>
+                        <div class="dark-dropdown-item">DROPDOWN</div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 10px; color: #7cb342; font-weight: 600;">Pourquoi</div>
+                    <div style="margin-top: 4px; font-size: 9px; color: #666; line-height: 1.4;">
+                        Explication du choix de la zone, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam
+                    </div>
+                </div>
+                <div class="genome-col">
+                    <div class="genome-col-header">Back</div>
+                    <div class="profile-card">
+                        <div class="profile-avatar">👤</div>
+                        <div class="profile-name">PSEUDOCOLOR</div>
+                        <div class="profile-role">Front</div>
+                    </div>
+                    <div class="dark-users" style="margin-top: 8px;">
+                        <div class="dark-user-item">
+                            <div class="dark-user-avatar">👤</div>
+                            <span>PSEUDOCOLOR</span>
+                        </div>
+                        <div class="dark-user-item">
+                            <div class="dark-user-avatar">👤</div>
+                            <span>PSEUDOCOLOR</span>
+                        </div>
+                        <div class="dark-user-item">
+                            <div class="dark-user-avatar">👤</div>
+                            <span>PSEUDOCOLOR</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="genome-col">
+                    <div class="genome-col-header">Front</div>
+                    <div class="dark-toggle">
+                        <div class="dark-toggle-switch active"></div>
+                        <button class="dark-btn">LARGE BUTTON</button>
+                    </div>
+                </div>
+                <div class="genome-col">
+                    <div class="genome-col-header">Front</div>
+                    <div class="dark-toggle">
+                        <div class="dark-toggle-switch"></div>
+                        <button class="dark-btn">LARGE BUTTON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div class="notification-banner">
+            <span class="notification-icon">📍</span>
+            <span class="notification-text">Lorem ipsum dolor sit amet, consectetur<br>adipiscing elit, sed do eiusmod tempor</span>
+        </div>
+
+        <!-- Organes -->
+        <div class="genome-section">
+            <div class="genome-section-title">Organes</div>
+            <div class="genome-content">
+                <div class="genome-col">
+                    <div class="genome-col-header">Brainstorm</div>
+                    <div class="icons-grid">
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▼</div>
+                        <div class="icon-cell green">♦</div>
+                        <div class="icon-cell green">✕</div>
+                        <div class="icon-cell gray">▣</div>
+                        <div class="icon-cell gray">▣</div>
+                        <div class="icon-cell gray">▣</div>
+                        <div class="icon-cell gray">▣</div>
+                        <div class="icon-cell green">▼</div>
+                        <div class="icon-cell green">♦</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">✕</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▣</div>
+                        <div class="icon-cell green">▼</div>
+                        <div class="icon-cell green">♦</div>
+                        <div class="icon-cell green">✕</div>
+                    </div>
+                </div>
+                <div class="genome-col">
+                    <div class="genome-col-header">Back/Front</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cellules -->
+        <div class="genome-section">
+            <div class="genome-section-title">Cellules</div>
+            <div class="cellules-row">
+                <div class="genome-col">
+                    <div class="genome-col-header">Brainstorm</div>
+                </div>
+                <div class="genome-col">
+                    <div class="genome-col-header">Back/Front</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badge flottant -->
+    <div class="floating-badge">Sullivan</div>
+</body>
+</html>

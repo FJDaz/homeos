@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS Sullivan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        /* Tabs container - full width with evenly distributed tabs */
+        .tabs-container {
+            display: flex;
+            height: 50px;
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-right: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .tab:last-child {
+            border-right: none;
+        }
+
+        .tab:hover {
+            background-color: #f9f9f9;
+        }
+
+        .tab.active {
+            background-color: #A6CE39;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Main layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Sidebar - Sullivan Tools */
+        .sidebar {
+            width: 280px;
+            background-color: #f8f8f8;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fff;
+        }
+
+        .logo-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #8cc63f;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #888;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* Sidebar Tools */
+        .sidebar-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tool-btn {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #8cc63f;
+            border-color: #7ab32e;
+            color: #fff;
+        }
+
+        /* Sidebar Sections */
+        .sidebar-section {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 8px 0;
+        }
+
+        .plan-steps-container,
+        .components-container,
+        .context-container {
+            min-height: 60px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .plan-placeholder {
+            font-size: 12px;
+            color: #94a3b8;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* Plan Steps Checklist */
+        .plan-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .plan-step:last-child {
+            border-bottom: none;
+        }
+
+        .plan-step.completed {
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+
+        .plan-step input[type="checkbox"] {
+            accent-color: #8cc63f;
+        }
+
+        /* Component cards in sidebar */
+        .component-card {
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            cursor: grab;
+            font-size: 11px;
+        }
+
+        .component-card:hover {
+            border-color: #8cc63f;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Content area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        /* ========== STYLES FIGMA TOOLS (from sidebar-right) ========== */
+        .figma-property-group {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .figma-property-group:last-child {
+            border-bottom: none;
+        }
+
+        .figma-property-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .figma-property-field {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .figma-property-field label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            width: 14px;
+        }
+
+        .figma-property-field input[type="number"] {
+            flex: 1;
+            width: 40px;
+            padding: 3px 6px;
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            color: #333;
+            font-size: 11px;
+        }
+
+        .figma-property-label {
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .figma-color-picker {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .figma-color-picker input[type="color"] {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .figma-color-value {
+            flex: 1;
+            font-size: 10px;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        .figma-color-picker input[type="range"] {
+            flex: 1;
+            height: 4px;
+        }
+
+        /* ========== GENOME DRILLDOWN TREE ========== */
+        .genome-tree-container {
+            font-size: 12px;
+        }
+
+        .genome-tree-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .genome-tree-item:hover {
+            background: #f0f0f0;
+        }
+
+        .genome-tree-item[data-level="1"] {
+            padding-left: 16px;
+        }
+
+        .genome-tree-item[data-level="2"] {
+            padding-left: 32px;
+        }
+
+        .genome-tree-item[data-level="3"] {
+            padding-left: 48px;
+        }
+
+        .tree-toggle {
+            font-size: 10px;
+            color: #888;
+            width: 12px;
+        }
+
+        .tree-icon {
+            font-size: 12px;
+        }
+
+        .tree-label {
+            color: #334155;
+        }
+
+        .genome-tree-children {
+            display: block;
+        }
+
+        /* ========== VALIDATION WORKFLOW ========== */
+        .validation-workflow {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .validation-panel {
+            display: flex;
+            gap: 20px;
+            min-height: 300px;
+        }
+
+        .validation-col {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .validation-col-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .validation-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 16px;
+            background: #8cc63f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .validation-btn:hover {
+            background: #7ab32e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(140, 198, 63, 0.3);
+        }
+
+        .validation-anchor {
+            height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .validation-anchor.active {
+            height: auto;
+            padding: 20px 0;
+        }
+
+        /* ========== CANVAS FIGMA ZONE ========== */
+        .canvas-figma-zone {
+            width: 100%;
+            min-height: 500px;
+            background: #f5f5f5;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .canvas-tool-btn {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .canvas-tool-btn:hover {
+            background: #8cc63f;
+            color: white;
+        }
+
+        #figma-canvas {
+            width: 100%;
+            height: 450px;
+            background: #fff;
+            cursor: crosshair;
+        }
+
+        /* Tab content panels */
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Frontend workflow specific */
+        .frontend-workflow {
+            padding: 20px;
+        }
+
+        /* Upload prompt for default state */
+        .upload-prompt {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            flex: 1;
+        }
+
+        .upload-prompt:hover {
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-size: 32px;
+            font-weight: 300;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+
+        .upload-icon {
+            font-size: 28px;
+            color: #666;
+            transform: translateY(-2px);
+        }
+
+        /* HTMX loading states */
+        .htmx-request { opacity: 0.5; pointer-events: none; }
+        .htmx-request button { cursor: wait; }
+
+        /* ========== DESIGN ARBITER - PANNEAUX ========== */
+        /* Panel container for Arbiter design */
+        .arbiter-container {
+            display: flex;
+            height: 100%;
+            min-height: calc(100vh - 50px);
+        }
+
+        /* Panneau Gauche (Clair) - Intent Revue */
+        .panel-left {
+            width: 55%;
+            background: #f0f0e8;
+            padding: 24px 32px;
+            overflow-y: auto;
+            border-right: 1px solid #d0d0c8;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #d0d0c8;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5a5a52;
+            letter-spacing: 0.5px;
+        }
+
+        .arbiter-badge {
+            background: #7cb342;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Section Typologie */
+        .typology-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7cb342;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        .typology-content {
+            display: flex;
+            gap: 40px;
+        }
+
+        .typology-list {
+            font-size: 11px;
+            color: #5a5a52;
+            line-height: 1.8;
+        }
+
+        .typology-list span {
+            display: block;
+        }
+
+        .typology-list span::before {
+            content: "▸ ";
+            color: #7cb342;
+        }
+
+        /* Dropdowns */
+        .dropdowns-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dropdown-item {
+            font-size: 10px;
+            color: #888;
+            padding: 2px 0;
+        }
+
+        /* User icons avec labels */
+        .users-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .user-avatar {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #7cb342;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+        }
+
+        /* Toggle & Button */
+        .action-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .toggle-switch {
+            width: 36px;
+            height: 18px;
+            background: #7cb342;
+            border-radius: 9px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+        }
+
+        .action-btn {
+            background: #7cb342;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-btn.secondary {
+            background: #5a8f2e;
+        }
+
+        /* Section Pourquoi */
+        .why-section {
+            display: flex;
+            gap: 40px;
+            margin-top: 16px;
+        }
+
+        .why-col {
+            font-size: 10px;
+            color: #7cb342;
+            font-weight: 600;
+        }
+
+        .why-text {
+            font-size: 9px;
+            color: #888;
+            margin-top: 4px;
+            line-height: 1.5;
+            max-width: 120px;
+        }
+
+        /* Expandable sections */
+        .expandable-section {
+            margin-top: 24px;
+            border-top: 1px solid #d0d0c8;
+            padding-top: 16px;
+        }
+
+        .expandable-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .expand-icon {
+            color: #7cb342;
+            font-size: 12px;
+        }
+
+        .expandable-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #7cb342;
+        }
+
+        .expandable-content {
+            margin-top: 12px;
+            padding-left: 20px;
+            font-size: 10px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .expandable-content span {
+            display: block;
+        }
+
+        .expandable-content span::before {
+            content: "◆ ";
+            color: #7cb342;
+            font-size: 8px;
+        }
+
+        .section-meta {
+            font-size: 9px;
+            color: #999;
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+
+        /* ========== PANNEAU DROIT (SOMBRE) ========== */
+        .panel-right {
+            width: 45%;
+            background: #252525;
+            min-height: 100%;
+            padding: 24px 32px;
+            color: #fff;
+            overflow-y: auto;
+        }
+
+        .genome-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .genome-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sections Corps/Organes/Cellules */
+        .genome-section {
+            margin-bottom: 28px;
+        }
+
+        .genome-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .genome-content {
+            display: flex;
+            gap: 24px;
+        }
+
+        .genome-col {
+            flex: 1;
+        }
+
+        .genome-col-header {
+            font-size: 10px;
+            color: #7cb342;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Dark dropdowns */
+        .dark-dropdowns {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .dark-dropdown-item {
+            font-size: 10px;
+            color: #888;
+            padding: 4px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .dark-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Dark user items */
+        .dark-users {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .dark-user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: #aaa;
+            padding: 3px 0;
+        }
+
+        .dark-user-avatar {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: #ccc;
+        }
+
+        /* Dark toggle */
+        .dark-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .dark-toggle-switch {
+            width: 32px;
+            height: 16px;
+            background: #444;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .dark-toggle-switch.active {
+            background: #7cb342;
+        }
+
+        .dark-toggle-switch::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+        }
+
+        .dark-toggle-switch.active::after {
+            left: auto;
+            right: 2px;
+        }
+
+        .dark-btn {
+            background: #7cb342;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Notification banner */
+        .notification-banner {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .notification-icon {
+            color: #7cb342;
+            font-size: 14px;
+        }
+
+        .notification-text {
+            font-size: 9px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        /* Icons grid (Organes) */
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .icon-cell {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .icon-cell.green {
+            color: #7cb342;
+        }
+
+        .icon-cell.gray {
+            color: #555;
+        }
+
+        /* Cellules row */
+        .cellules-row {
+            display: flex;
+            gap: 24px;
+        }
+
+        .cellules-row .genome-col-header {
+            font-size: 9px;
+        }
+
+        /* Profile card */
+        .profile-card {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7cb342;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .profile-role {
+            font-size: 8px;
+            color: #7cb342;
+        }
+
+        /* Table styles for reports */
+        .prose table { font-size: 0.75rem; width: 100%; border-collapse: collapse; }
+        .prose th, .prose td { padding: 0.25rem 0.5rem; border: 1px solid #e5e7eb; text-align: left; }
+        .prose th { background: #f3f4f6; font-weight: 600; }
+        .prose tr:nth-child(even) { background: #f9fafb; }
+
+        /* Workflow cards */
+        .workflow-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .workflow-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .workflow-card p {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Coming soon placeholder */
+        .coming-soon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            color: #999;
+        }
+
+        .coming-soon-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .coming-soon-text {
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+
+        /* ========== INFÉRENCE DE COMPOSANTS ========== */
+        .inference-results {
+            padding: 20px;
+            max-height: calc(100vh - 50px);
+            overflow-y: auto;
+        }
+
+        .inference-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .inference-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #7cb342;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .inference-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-select-all, .btn-deselect-all {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .btn-select-all:hover {
+            background: #7cb342;
+            color: white;
+            border-color: #7cb342;
+        }
+
+        .btn-deselect-all:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        .components-form {
+            margin-bottom: 20px;
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .component-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 14px;
+            transition: all 0.2s;
+        }
+
+        .component-card:hover {
+            border-color: #7cb342;
+            box-shadow: 0 2px 8px rgba(124, 179, 66, 0.15);
+        }
+
+        .component-card.unselected {
+            opacity: 0.6;
+            background: #f9f9f9;
+        }
+
+        .component-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .component-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #7cb342;
+            cursor: pointer;
+        }
+
+        .component-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .component-description {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            min-height: 30px;
+        }
+
+        .component-endpoints {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .endpoint-badge.more {
+            background: #f5f5f5;
+            color: #888;
+        }
+
+        .component-reason {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .reason-icon {
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .reason-text {
+            line-height: 1.4;
+        }
+
+        .inference-footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-validate-components {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #7cb342;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-validate-components:hover {
+            background: #6a9e38;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        /* Loading state */
+        .inference-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .inference-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #7cb342;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== ARBITER COMPONENTS PANEL ========== */
+        /* Composants suggérés dans ARBITER (panel-right sombre) */
+        #arbiter-components-section {
+            border-top: 2px solid #7cb342;
+            padding-top: 16px;
+        }
+
+        #arbiter-components-panel {
+            min-height: 60px;
+        }
+
+        .arbiter-component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .arbiter-component-item {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 10px;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .arbiter-component-item:hover {
+            border-color: #7cb342;
+            background: #2a2a2a;
+        }
+
+        .arbiter-component-item.selected {
+            border-color: #7cb342;
+            background: #2a3a1e;
+        }
+
+        .arbiter-component-item input[type="checkbox"] {
+            margin-right: 6px;
+            accent-color: #7cb342;
+            cursor: pointer;
+        }
+
+        .arbiter-component-name {
+            font-weight: 600;
+            color: #fff;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+
+        .arbiter-component-reason {
+            font-size: 9px;
+            color: #888;
+            line-height: 1.3;
+            margin-top: 4px;
+        }
+
+        .arbiter-component-category {
+            display: inline-block;
+            font-size: 8px;
+            color: #7cb342;
+            background: #2a3a1e;
+            padding: 1px 4px;
+            border-radius: 2px;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .arbiter-component-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #3a3a3a;
+        }
+
+        .arbiter-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .arbiter-btn-primary {
+            background: #7cb342;
+            color: white;
+        }
+
+        .arbiter-btn-primary:hover {
+            background: #6a9e38;
+        }
+
+        .arbiter-btn-secondary {
+            background: #3a3a3a;
+            color: #aaa;
+        }
+
+        .arbiter-btn-secondary:hover {
+            background: #4a4a4a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tabs - 4 HomeOS Workflow Phases -->
+    <div class="tabs-container">
+        <div class="tab" data-tab="brainstorm">Brainstorm</div>
+        <div class="tab" data-tab="backend">Backend</div>
+        <div class="tab active" data-tab="frontend">Frontend</div>
+        <div class="tab" data-tab="deploy">Deploy</div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-container">
+        <!-- Sidebar - Sullivan Tools -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-title">HoméOS</div>
+                <div class="logo-subtitle">Sullivan Tools</div>
+            </div>
+
+            <!-- Quick Actions - Boutons outils -->
+            <div class="sidebar-tools">
+                <button class="tool-btn" onclick="window.SullivanWidget && window.SullivanWidget.quick('Analyse cette page')">Analyser</button>
+                <button class="tool-btn" onclick="window.SullivanWidget && window.SullivanWidget.quick('Génère HTMX')">HTMX</button>
+                <button class="tool-btn" onclick="window.SullivanWidget && window.SullivanWidget.quick('Affiche le system prompt')">System</button>
+                <button class="tool-btn" onclick="window.SullivanWidget && window.SullivanWidget.quick('Debug: affiche l état de la session')">DEBUG</button>
+            </div>
+
+            <!-- Outils Figma (from sidebar-right) -->
+            <div class="sidebar-section" id="figma-tools-section">
+                <h3 class="sidebar-section-title">🎨 Outils Figma</h3>
+                
+                <!-- Position & Size -->
+                <div class="figma-property-group">
+                    <div class="figma-property-row">
+                        <div class="figma-property-field">
+                            <label>X</label>
+                            <input type="number" id="figma-prop-x" value="0">
+                        </div>
+                        <div class="figma-property-field">
+                            <label>Y</label>
+                            <input type="number" id="figma-prop-y" value="0">
+                        </div>
+                    </div>
+                    <div class="figma-property-row">
+                        <div class="figma-property-field">
+                            <label>W</label>
+                            <input type="number" id="figma-prop-w" value="0">
+                        </div>
+                        <div class="figma-property-field">
+                            <label>H</label>
+                            <input type="number" id="figma-prop-h" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fill -->
+                <div class="figma-property-group">
+                    <div class="figma-property-label">Fill</div>
+                    <div class="figma-color-picker">
+                        <input type="color" id="figma-fill-color" value="#3b82f6">
+                        <span class="figma-color-value">#3B82F6</span>
+                        <input type="range" id="figma-fill-opacity" min="0" max="100" value="100">
+                    </div>
+                </div>
+
+                <!-- Stroke -->
+                <div class="figma-property-group">
+                    <div class="figma-property-label">Stroke</div>
+                    <div class="figma-color-picker">
+                        <input type="color" id="figma-stroke-color" value="#000000">
+                        <span class="figma-color-value">#000000</span>
+                    </div>
+                    <div class="figma-property-field">
+                        <label>Width</label>
+                        <input type="number" id="figma-stroke-width" value="1" min="0">
+                    </div>
+                </div>
+
+                <!-- Corner Radius -->
+                <div class="figma-property-group">
+                    <div class="figma-property-label">Corner Radius</div>
+                    <input type="range" id="figma-corner-radius" min="0" max="50" value="0">
+                </div>
+
+                <!-- Opacity -->
+                <div class="figma-property-group">
+                    <div class="figma-property-label">Opacity</div>
+                    <input type="range" id="figma-opacity" min="0" max="100" value="100">
+                </div>
+            </div>
+
+            <!-- Drilldown Genome -->
+            <div class="sidebar-section" id="genome-drilldown-section">
+                <h3 class="sidebar-section-title">🧬 Genome Drilldown</h3>
+                <div id="genome-tree" class="genome-tree-container">
+                    <div class="genome-tree-level" data-level="0">
+                        <div class="genome-tree-item expanded" data-id="genome-root">
+                            <span class="tree-toggle">▼</span>
+                            <span class="tree-icon">🧬</span>
+                            <span class="tree-label">Genome Root</span>
+                        </div>
+                        <div class="genome-tree-children">
+                            <div class="genome-tree-item" data-level="1" data-id="corps-brainstorm">
+                                <span class="tree-toggle">▶</span>
+                                <span class="tree-icon">💡</span>
+                                <span class="tree-label">Corps: Brainstorm</span>
+                            </div>
+                            <div class="genome-tree-item" data-level="1" data-id="corps-back">
+                                <span class="tree-toggle">▶</span>
+                                <span class="tree-icon">⚙️</span>
+                                <span class="tree-label">Corps: Back</span>
+                            </div>
+                            <div class="genome-tree-item" data-level="1" data-id="corps-front">
+                                <span class="tree-toggle">▶</span>
+                                <span class="tree-icon">🎨</span>
+                                <span class="tree-label">Corps: Front</span>
+                            </div>
+                            <div class="genome-tree-item" data-level="1" data-id="corps-deploy">
+                                <span class="tree-toggle">▶</span>
+                                <span class="tree-icon">🚀</span>
+                                <span class="tree-label">Corps: Deploy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan Steps - Target pour Sullivan -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">Plan en cours</h3>
+                <div id="sullivan-plan-steps" class="plan-steps-container">
+                    <p class="plan-placeholder">Aucun plan actif. Demande à Sullivan de créer un plan.</p>
+                </div>
+            </div>
+
+            <!-- Context Zone - Genome summary -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">Contexte projet</h3>
+                <div id="sullivan-context" class="context-container"
+                     hx-get="/studio/genome/summary"
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <span class="plan-placeholder">Chargement...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main content area - Tab panels -->
+        <main class="content-area">
+            <!-- Brainstorm Tab -->
+            <div id="tab-brainstorm" class="tab-content">
+                <div class="coming-soon">
+                    <div class="coming-soon-icon">💡</div>
+                    <div class="coming-soon-text">Brainstorm - Phase d'idéation</div>
+                    <p style="color: #bbb; margin-top: 8px; font-size: 13px;">Définissez votre projet, vos objectifs, et votre audience</p>
+                </div>
+            </div>
+
+            <!-- Backend Tab -->
+            <div id="tab-backend" class="tab-content">
+                <div class="coming-soon">
+                    <div class="coming-soon-icon">⚙️</div>
+                    <div class="coming-soon-text">Backend - Architecture & API</div>
+                    <p style="color: #bbb; margin-top: 8px; font-size: 13px;">Configurez votre architecture backend et vos endpoints</p>
+                </div>
+            </div>
+
+            <!-- Frontend Tab - Design ARBITER (Intent Revue + Génome) -->
+            <div id="tab-frontend" class="tab-content active">
+                <!-- VIEW STEP 4: Composants Inférés + Validation + Canvas -->
+                <div id="frontend-step4-view" class="inference-results" style="display: none;">
+                    
+                    <!-- VALIDATION PANEL 50/50 -->
+                    <div class="validation-workflow">
+                        <div class="validation-panel">
+                            <!-- Col Gauche: IR + Visuel -->
+                            <div class="validation-col">
+                                <div class="validation-col-header">📋 IR + Visuel</div>
+                                <div id="ir-visual-content">
+                                    <div class="endpoint-list">
+                                        <div class="endpoint-item" style="padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 8px; border: 1px solid #e0e0e0;">
+                                            <div style="font-size: 12px; font-weight: 600; color: #333;">GET /studio/genome</div>
+                                            <div style="font-size: 11px; color: #666;">Récupère le genome enrichi</div>
+                                        </div>
+                                        <div class="endpoint-item" style="padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 8px; border: 1px solid #e0e0e0;">
+                                            <div style="font-size: 12px; font-weight: 600; color: #333;">POST /studio/analyze</div>
+                                            <div style="font-size: 11px; color: #666;">Analyse le design</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Visual Hint Preview -->
+                                    <div style="margin-top: 16px; padding: 12px; background: #fff; border: 1px dashed #8cc63f; border-radius: 4px;">
+                                        <div style="font-size: 11px; color: #8cc63f; margin-bottom: 8px;">🎨 Wireframe esquissé</div>
+                                        <div style="height: 80px; background: #f9f9f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px;">
+                                            Preview visuel du composant
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="validation-btn" onclick="validateCurrentCorps()">
+                                    ✓ VALIDER CE CORPS ↓
+                                </button>
+                            </div>
+                            
+                            <!-- Col Droite: Genome -->
+                            <div class="validation-col">
+                                <div class="validation-col-header">🧬 Genome</div>
+                                <div id="genome-detail-content">
+                                    <div class="genome-node" style="padding: 10px; background: #fff; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #8cc63f;">
+                                        <div style="font-size: 12px; font-weight: 600; color: #333;">N1: Corps Front</div>
+                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">3 organes • 12 atomes</div>
+                                    </div>
+                                    <div class="genome-node" style="padding: 10px; background: #fff; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #3b82f6;">
+                                        <div style="font-size: 12px; font-weight: 600; color: #333;">N2: Organe Navigation</div>
+                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Endpoints: /studio/step/*</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 12px; padding: 10px; background: #e8f5e9; border-radius: 4px; font-size: 11px; color: #2e7d32;">
+                                    <strong>Progression:</strong> <span id="corps-progress">1/4 corps validés</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Anchor FRD Step 2 -->
+                        <div id="anchor-frd-step2" class="validation-anchor">
+                            <div style="padding: 20px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                                <h4 style="margin: 0 0 12px 0; color: #0369a1; font-size: 14px;">🎯 Validation Corps: <span id="validated-corps-name">Front</span></h4>
+                                <p style="margin: 0; font-size: 12px; color: #0ea5e9;">Corps sauvegardé. Passage au corps suivant...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- UPLOAD SECTION -->
+                    <div id="upload-section" style="padding: 0 20px 20px 20px;">
+                        <div style="display: flex; gap: 16px; align-items: center; padding: 20px; background: #f8f9fa; border: 2px dashed #d0d0d0; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('design-upload').click()">
+                            <div style="font-size: 32px;">📁</div>
+                            <div>
+                                <div style="font-size: 14px; font-weight: 600; color: #333;">UPLOAD Fil ou Design</div>
+                                <div style="font-size: 12px; color: #666;">Glissez-déposez ou cliquez pour sélectionner</div>
+                            </div>
+                            <input type="file" id="design-upload" style="display: none;" accept=".png,.jpg,.jpeg,.svg">
+                        </div>
+                        
+                        <button class="validation-btn" onclick="validateForNextStep()" style="margin-top: 16px;">
+                            ✓ VALIDER POUR ÉTAPE SUIVANTE ↓
+                        </button>
+                    </div>
+                    
+                    <!-- Anchor FRD Step 2 (Canvas) -->
+                    <div id="anchor-frd-canvas" class="validation-anchor">
+                        <div style="padding: 0 20px 20px 20px;">
+                            <div style="padding: 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; margin-bottom: 16px;">
+                                <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px;">✅ Étape validée</h4>
+                                <p style="margin: 0; font-size: 12px; color: #22c55e;">Ouvrir le Canvas Figma pour prototypage</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CANVAS FIGMA ZONE (100% width) -->
+                    <div style="padding: 0 20px 20px 20px;">
+                        <div class="canvas-figma-zone">
+                            <div class="canvas-toolbar">
+                                <button class="canvas-tool-btn active" data-tool="select">↖ Select</button>
+                                <button class="canvas-tool-btn" data-tool="rect">▭ Rect</button>
+                                <button class="canvas-tool-btn" data-tool="circle">○ Circle</button>
+                                <button class="canvas-tool-btn" data-tool="text">T Text</button>
+                                <button class="canvas-tool-btn" data-tool="line">/ Line</button>
+                                <div style="flex: 1;"></div>
+                                <span style="font-size: 11px; color: #666;">Grid: 20px | Snap: ON</span>
+                            </div>
+                            <canvas id="figma-canvas"></canvas>
+                        </div>
+                        
+                        <!-- Validation finale UI -->
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="validation-btn" style="flex: 1; background: #3b82f6;" onclick="previewRealRender()">
+                                👁️ APERÇU RÉEL
+                            </button>
+                            <button class="validation-btn" style="flex: 1;" onclick="validateModeConstruction()">
+                                ✓ VALIDER MODE CONSTRUCTION
+                            </button>
+                            <button class="validation-btn" style="flex: 1; background: #ef4444;" onclick="cancelAndReturn()">
+                                ✗ ANNULER
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW DEFAULT: Arbiter (affiché par défaut) -->
+                <div id="frontend-arbiter-view" class="arbiter-container">
+                    <!-- PANNEAU GAUCHE - Intent Revue (Clair) -->
+                    <div class="panel-left">
+                        <div class="panel-header">
+                            <span class="panel-title">Intent Revue</span>
+                            <span class="arbiter-badge">Arbitrage Sullivan</span>
+                        </div>
+
+                        <!-- Composants Inférés par Typologie (chargé via HTMX) -->
+                        <div class="expandable-section" id="typologies-section-container">
+                            <div class="expandable-header">
+                                <span class="expand-icon">↕</span>
+                                <span class="expandable-title">§1.5 Composants suggérés</span>
+                            </div>
+                            <div id="typologies-section"
+                                 hx-get="/studio/typologies/arbiter"
+                                 hx-trigger="load"
+                                 hx-swap="innerHTML">
+                                <div style="padding: 12px 0; color: #888; font-size: 11px;">
+                                    <div style="width: 16px; height: 16px; border: 2px solid #d0d0c8; border-top-color: #7cb342; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px;"></div>
+                                    Analyse des endpoints en cours...
+                                </div>
+                            </div>
+                            <div class="section-meta">→ Composants inférés depuis le genome</div>
+                        </div>
+                    </div>
+
+                    <!-- PANNEAU DROIT - Génome (Sombre) -->
+                    <div class="panel-right">
+                        <div class="genome-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="genome-title">Génome de HoméOS Sullivan</span>
+                            <button type="button" onclick="navigateToStep4()" class="arbiter-badge" style="cursor: pointer; border: none; font-family: inherit;">
+                                Valider → Tous les composants
+                            </button>
+                        </div>
+
+                        <!-- Corps -->
+                        <div class="genome-section">
+                            <div class="genome-section-title">Corps</div>
+                            <div class="genome-content">
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Brainstorm</div>
+                                    <div class="dark-dropdowns">
+                                        <div class="dark-dropdown-item">Intent definition</div>
+                                        <div class="dark-dropdown-item">User stories</div>
+                                        <div class="dark-dropdown-item">Feature mapping</div>
+                                        <div class="dark-dropdown-item">Acceptance criteria</div>
+                                    </div>
+                                    <div style="margin-top: 12px; font-size: 10px; color: #7cb342; font-weight: 600;">Pourquoi</div>
+                                    <div style="margin-top: 4px; font-size: 9px; color: #666; line-height: 1.4;">
+                                        Phase d'idéation structurée pour capturer les besoins métier et utilisateur.
+                                    </div>
+                                </div>
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Back</div>
+                                    <div class="profile-card">
+                                        <div class="profile-avatar">⚙️</div>
+                                        <div class="profile-name">API Layer</div>
+                                        <div class="profile-role">FastAPI</div>
+                                    </div>
+                                    <div class="dark-users" style="margin-top: 8px;">
+                                        <div class="dark-user-item">
+                                            <div class="dark-user-avatar">📡</div>
+                                            <span>/execute</span>
+                                        </div>
+                                        <div class="dark-user-item">
+                                            <div class="dark-user-avatar">💊</div>
+                                            <span>/health</span>
+                                        </div>
+                                        <div class="dark-user-item">
+                                            <div class="dark-user-avatar">🧬</div>
+                                            <span>/genome</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Front</div>
+                                    <div class="dark-toggle">
+                                        <div class="dark-toggle-switch active"></div>
+                                        <button class="dark-btn">Actif</button>
+                                    </div>
+                                </div>
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Deploy</div>
+                                    <div class="dark-toggle">
+                                        <div class="dark-toggle-switch"></div>
+                                        <button class="dark-btn">Config</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notification -->
+                        <div class="notification-banner">
+                            <span class="notification-icon">📍</span>
+                            <span class="notification-text">Système en mode Construction.<br>Basculer vers Mode Projet pour livraison client.</span>
+                        </div>
+
+                        <!-- Organes -->
+                        <div class="genome-section">
+                            <div class="genome-section-title">Organes</div>
+                            <div class="genome-content">
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Brainstorm</div>
+                                    <div class="icons-grid">
+                                        <div class="icon-cell green">💡</div>
+                                        <div class="icon-cell green">📝</div>
+                                        <div class="icon-cell green">🎯</div>
+                                        <div class="icon-cell green">📊</div>
+                                        <div class="icon-cell green">🔍</div>
+                                        <div class="icon-cell green">💬</div>
+                                        <div class="icon-cell green">🎨</div>
+                                        <div class="icon-cell green">✓</div>
+                                        <div class="icon-cell gray">○</div>
+                                        <div class="icon-cell gray">○</div>
+                                        <div class="icon-cell gray">○</div>
+                                        <div class="icon-cell gray">○</div>
+                                    </div>
+                                </div>
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Back/Front</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cellules -->
+                        <div class="genome-section">
+                            <div class="genome-section-title">Cellules</div>
+                            <div class="cellules-row">
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Brainstorm</div>
+                                    <div class="dark-dropdowns">
+                                        <div class="dark-dropdown-item">Intent cards</div>
+                                        <div class="dark-dropdown-item">User personas</div>
+                                    </div>
+                                </div>
+                                <div class="genome-col">
+                                    <div class="genome-col-header">Back/Front</div>
+                                    <div class="dark-dropdowns">
+                                        <div class="dark-dropdown-item">API schemas</div>
+                                        <div class="dark-dropdown-item">Components</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Composants Inférés (chargé dynamiquement via HTMX) -->
+                        <div class="genome-section" id="arbiter-components-section" style="display: none;">
+                            <div class="genome-section-title">
+                                Composants suggérés
+                                <span style="float: right; font-size: 9px; color: #7cb342; text-transform: none;">
+                                    <span id="arbiter-comp-count">0</span> trouvés
+                                </span>
+                            </div>
+                            <div id="arbiter-components-panel"
+                                 hx-get="/studio/typologies/arbiter"
+                                 hx-trigger="load"
+                                 hx-swap="innerHTML">
+                                <div style="text-align: center; padding: 20px; color: #666; font-size: 11px;">
+                                    <div style="width: 20px; height: 20px; border: 2px solid #3a3a3a; border-top-color: #7cb342; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                                    Analyse des endpoints en cours...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /frontend-arbiter-view -->
+            </div><!-- /tab-frontend -->
+
+            <!-- Deploy Tab -->
+            <div id="tab-deploy" class="tab-content">
+                <div class="coming-soon">
+                    <div class="coming-soon-icon">🚀</div>
+                    <div class="coming-soon-text">Deploy - Publication</div>
+                    <p style="color: #bbb; margin-top: 8px; font-size: 13px;">Déployez votre application en production</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chargement du Genome -->
+    <script>
+        // Chargement des données du genome_inferred_complete.json
+        let GENOME_DATA = null;
+        let ENDPOINTS_LIST = [];
+        
+        async function loadGenomeData() {
+            try {
+                const response = await fetch('/studio/genome/inferred');
+                if (response.ok) {
+                    GENOME_DATA = await response.json();
+                    console.log('✅ Genome chargé:', GENOME_DATA.genome_version);
+                    parseGenomeEndpoints();
+                    updateIRPanel();
+                    updateGenomePanel();
+                    return true;
+                }
+            } catch (e) {
+                console.warn('⚠️ Impossible de charger le genome, utilisation des données mock');
+            }
+            return false;
+        }
+        
+        function parseGenomeEndpoints() {
+            ENDPOINTS_LIST = [];
+            if (!GENOME_DATA || !GENOME_DATA.n0_phases) return;
+            
+            GENOME_DATA.n0_phases.forEach(phase => {
+                (phase.n1_sections || []).forEach(section => {
+                    (section.n2_features || []).forEach(feature => {
+                        (feature.n3_components || []).forEach(comp => {
+                            ENDPOINTS_LIST.push({
+                                id: comp.id,
+                                name: comp.name,
+                                endpoint: comp.endpoint,
+                                method: comp.method,
+                                visual_hint: comp.visual_hint,
+                                description_ui: comp.description_ui,
+                                phase_id: phase.id,
+                                phase_name: phase.name
+                            });
+                        });
+                    });
+                });
+            });
+            
+            console.log(`📡 ${ENDPOINTS_LIST.length} endpoints trouvés`);
+        }
+        
+        function updateIRPanel() {
+            const container = document.getElementById('ir-visual-content');
+            if (!container || !GENOME_DATA) return;
+            
+            // Mettre à jour le compteur d'endpoints
+            const countEl = document.getElementById('endpoint-count');
+            if (countEl) countEl.textContent = ENDPOINTS_LIST.length;
+            
+            // Générer la liste des endpoints
+            let html = '<div class="endpoint-list">';
+            ENDPOINTS_LIST.slice(0, 6).forEach(ep => {
+                const methodColor = ep.method === 'GET' ? '#8cc63f' : (ep.method === 'POST' ? '#3b82f6' : '#f59e0b');
+                html += `
+                    <div class="endpoint-item" style="padding: 10px; background: #fff; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e0e0e0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 11px; font-weight: 700; color: ${methodColor}; background: ${methodColor}15; padding: 2px 6px; border-radius: 3px;">${ep.method}</span>
+                            <span style="font-size: 10px; color: #888;">${ep.visual_hint}</span>
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: #333; margin-top: 6px;">${ep.endpoint}</div>
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">${ep.name}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            html += `
+                <div style="margin-top: 16px; padding: 12px; background: #fff; border: 1px dashed #8cc63f; border-radius: 6px;">
+                    <div style="font-size: 11px; color: #8cc63f; margin-bottom: 8px; font-weight: 600;">🎨 ${ENDPOINTS_LIST.length} composants inférés</div>
+                    <div style="height: 80px; background: #f9f9f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px; text-align: center;">
+                        Genome: ${GENOME_DATA.project}<br>
+                        Version: ${GENOME_DATA.genome_version}<br>
+                        Confiance: ${(GENOME_DATA.metadata.confidence_global * 100).toFixed(0)}%
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function updateGenomePanel() {
+            if (!GENOME_DATA || !GENOME_DATA.n0_phases) return;
+            
+            // Construire l'arbre du genome dans la sidebar
+            const treeContainer = document.getElementById('genome-tree');
+            if (!treeContainer) return;
+            
+            let html = '<div class="genome-tree-level" data-level="0">';
+            html += `
+                <div class="genome-tree-item expanded" data-id="genome-root">
+                    <span class="tree-toggle">▼</span>
+                    <span class="tree-icon">🧬</span>
+                    <span class="tree-label">${GENOME_DATA.project} (${GENOME_DATA.n0_phases.length} phases)</span>
+                </div>
+                <div class="genome-tree-children">
+            `;
+            
+            GENOME_DATA.n0_phases.forEach((phase, idx) => {
+                const icon = ['📋', '⚖️', '🧬', '📦', '📤', '🔍', '💬', '✅', '🧭'][idx] || '📄';
+                const sectionCount = (phase.n1_sections || []).length;
+                html += `
+                    <div class="genome-tree-item" data-level="1" data-id="${phase.id}">
+                        <span class="tree-toggle">▶</span>
+                        <span class="tree-icon">${icon}</span>
+                        <span class="tree-label">Phase ${phase.order}: ${phase.name}</span>
+                        <span style="font-size: 10px; color: #888; margin-left: 4px;">(${sectionCount})</span>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            treeContainer.innerHTML = html;
+            
+            // Mettre à jour le compteur de composants
+            const compCount = document.getElementById('component-count');
+            if (compCount) compCount.textContent = ENDPOINTS_LIST.length;
+        }
+        
+        // Chargement au démarrage
+        document.addEventListener('DOMContentLoaded', loadGenomeData);
+    </script>
+
+    <script>
+        // Récupérer le step depuis l'URL (paramètre ?step=N)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentStep = parseInt(urlParams.get('step')) || 1;
+
+        // Mapping step → tab à activer
+        // step 1-3 → Brainstorm (index 0)
+        // step 4-9 → Frontend (index 2)
+        function getTabIndexFromStep(step) {
+            if (step >= 1 && step <= 3) return 0;  // Brainstorm
+            if (step >= 4 && step <= 9) return 2;  // Frontend
+            return 0;  // Default: Brainstorm
+        }
+
+        // Navigation client-side vers step 4 (préserve le contexte chatbox)
+        function navigateToStep4() {
+            // Changer l'URL sans recharger la page
+            history.pushState({step: 4}, '', '/studio?step=4');
+            // Activer le tab Frontend (index 2)
+            const tabs = document.querySelectorAll('.tab');
+            if (tabs[2]) {
+                tabs[2].click();
+            }
+            // Afficher la section des composants dans ARBITER
+            showArbiterComponentsSection();
+            console.log('Navigation client-side → Step 4 (ARBITER avec composants)');
+        }
+
+        // Afficher la section des composants dans le panneau ARBITER
+        function showArbiterComponentsSection() {
+            const section = document.getElementById('arbiter-components-section');
+            if (section) {
+                section.style.display = 'block';
+                // Déclencher le chargement HTMX si pas encore chargé
+                const panel = document.getElementById('arbiter-components-panel');
+                if (panel && !panel.querySelector('.arbiter-component-grid')) {
+                    htmx.trigger(panel, 'load');
+                }
+            }
+        }
+
+        // Masquer la section des composants (retour étape 3 par exemple)
+        function hideArbiterComponentsSection() {
+            const section = document.getElementById('arbiter-components-section');
+            if (section) {
+                section.style.display = 'none';
+            }
+        }
+
+        // Sélectionner/désélectionner tous les composants
+        function selectAllComponents(select) {
+            const checkboxes = document.querySelectorAll('.component-checkbox');
+            checkboxes.forEach(chk => {
+                chk.checked = select;
+                const card = chk.closest('.component-card');
+                if (card) {
+                    card.classList.toggle('unselected', !select);
+                }
+            });
+            updateValidateButton();
+        }
+
+        // Mettre à jour le compteur du bouton valider
+        function updateValidateButton() {
+            const checkboxes = document.querySelectorAll('.component-checkbox:checked');
+            const btn = document.querySelector('.btn-validate-components');
+            if (btn) {
+                const count = checkboxes.length;
+                btn.innerHTML = `<span class="btn-icon">🚀</span> Valider la sélection (${count} composant${count > 1 ? 's' : ''})`;
+            }
+        }
+
+        // Valider la sélection de composants
+        function validateComponentSelection() {
+            const selected = [];
+            document.querySelectorAll('.component-checkbox:checked').forEach(chk => {
+                selected.push(chk.value);
+            });
+            console.log('Composants sélectionnés:', selected);
+            // TODO: Envoyer au backend pour génération
+            alert(`${selected.length} composants validés! Prochaine étape: génération du code.`);
+        }
+
+        // Gestion des checkboxes individuels
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('component-checkbox')) {
+                const card = e.target.closest('.component-card');
+                if (card) {
+                    card.classList.toggle('unselected', !e.target.checked);
+                }
+                updateValidateButton();
+            }
+        });
+
+        // Activer le bon tab et vue au chargement selon le step
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabIndex = getTabIndexFromStep(currentStep);
+            const tabs = document.querySelectorAll('.tab');
+            if (tabs[tabIndex]) {
+                tabs[tabIndex].click();
+            }
+            
+            // ARBITER UI DYNAMIQUE: Afficher composants si step=4
+            if (currentStep === 4) {
+                showArbiterComponentsSection();
+            } else {
+                hideArbiterComponentsSection();
+            }
+            
+            console.log('HomeOS Studio - Step:', currentStep, '→ Tab index:', tabIndex);
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update tab active state
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Update content visibility
+                const tabName = this.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById('tab-' + tabName).classList.add('active');
+            });
+        });
+
+        // HTMX event logging
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            console.log('HTMX afterRequest:', evt.detail.pathInfo.requestPath, evt.detail.successful ? 'OK' : 'FAIL');
+        });
+
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('HTMX error:', evt.detail);
+        });
+
+        // Sullivan chat - auto-scroll on new messages
+        const chatContainer = document.getElementById('sullivan-chat');
+        if (chatContainer) {
+            const chatObserver = new MutationObserver(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+            chatObserver.observe(chatContainer, { childList: true, subtree: true });
+        }
+
+        // ========== VALIDATION WORKFLOW FUNCTIONS ==========
+        
+        let validatedCorps = [];
+        let currentCorpsIndex = 0;
+        const allCorps = ['Brainstorm', 'Back', 'Front', 'Deploy'];
+        
+        // Valider le corps actuel
+        function validateCurrentCorps() {
+            const currentCorps = allCorps[currentCorpsIndex];
+            validatedCorps.push(currentCorps);
+            
+            // Mettre à jour la progression
+            document.getElementById('corps-progress').textContent = 
+                `${validatedCorps.length}/${allCorps.length} corps validés`;
+            document.getElementById('validated-corps-name').textContent = currentCorps;
+            
+            // Afficher l'anchor step 2
+            const anchor = document.getElementById('anchor-frd-step2');
+            anchor.classList.add('active');
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            console.log(`✓ Corps validé: ${currentCorps}`);
+            
+            // Passer au corps suivant si disponible
+            currentCorpsIndex++;
+            if (currentCorpsIndex < allCorps.length) {
+                setTimeout(() => {
+                    alert(`Corps "${currentCorps}" validé!\nPassage au corps suivant: ${allCorps[currentCorpsIndex]}`);
+                }, 500);
+            } else {
+                // Tous les corps validés
+                setTimeout(() => {
+                    alert('🎉 Tous les corps ont été validés!\nVous pouvez maintenant valider l\'UI.');
+                    showFinalValidation();
+                }, 500);
+            }
+        }
+        
+        // Valider pour passer à l'étape suivante
+        function validateForNextStep() {
+            const anchor = document.getElementById('anchor-frd-canvas');
+            anchor.classList.add('active');
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Initialiser le canvas
+            setTimeout(initFigmaCanvas, 600);
+        }
+        
+        // Afficher la validation finale
+        function showFinalValidation() {
+            document.getElementById('ui-validation-panel').style.display = 'block';
+        }
+        
+        // Aperçu réel du rendu
+        function previewRealRender() {
+            alert('👁️ Génération de l\'aperçu réel...\n(Cette fonctionnalité nécessite le backend)');
+        }
+        
+        // Valider le mode construction
+        function validateModeConstruction() {
+            if (confirm('✓ Valider et remplacer l\'UI existant par cette version?')) {
+                alert('✅ Mode Construction validé!\nL\'UI va être mise à jour.');
+                // Redirection ou mise à jour de l'interface
+                window.location.href = '/studio?step=5';
+            }
+        }
+        
+        // Annuler et retourner au step précédent
+        function cancelAndReturn() {
+            if (confirm('✗ Annuler les modifications et retourner au step précédent?')) {
+                window.location.href = '/studio?step=3';
+            }
+        }
+        
+        // ========== CANVAS FIGMA FUNCTIONS ==========
+        
+        let canvas, ctx;
+        let currentTool = 'select';
+        let isDrawing = false;
+        let startX, startY;
+        
+        function initFigmaCanvas() {
+            canvas = document.getElementById('figma-canvas');
+            if (!canvas) return;
+            
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // Dessiner la grille
+            drawGrid();
+            
+            // Event listeners
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            
+            console.log('🎨 Canvas Figma initialisé');
+        }
+        
+        function drawGrid() {
+            const gridSize = 20;
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+        
+        function handleCanvasMouseDown(e) {
+            if (currentTool === 'select') return;
+            
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+        }
+        
+        function handleCanvasMouseMove(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Redessiner la grille
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            
+            // Dessiner la forme en preview
+            ctx.strokeStyle = '#8cc63f';
+            ctx.lineWidth = 2;
+            
+            if (currentTool === 'rect') {
+                ctx.strokeRect(startX, startY, x - startX, y - startY);
+            } else if (currentTool === 'circle') {
+                const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+                ctx.beginPath();
+                ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+        
+        function handleCanvasMouseUp(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+        }
+        
+        // Gestion des outils du canvas
+        document.querySelectorAll('.canvas-tool-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.canvas-tool-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTool = this.dataset.tool;
+            });
+        });
+        
+        // Gestion du tree drilldown
+        document.querySelectorAll('.genome-tree-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const toggle = this.querySelector('.tree-toggle');
+                const children = this.nextElementSibling;
+                
+                if (children && children.classList.contains('genome-tree-children')) {
+                    const isExpanded = toggle.textContent === '▼';
+                    toggle.textContent = isExpanded ? '▶' : '▼';
+                    children.style.display = isExpanded ? 'none' : 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

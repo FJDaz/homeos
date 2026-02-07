@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎩 Majordome - Sullivan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;
+            --bg-panel: #252525;
+            --bg-hover: #333;
+            --accent: #7cb342;
+            --accent-hover: #8bc34a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --border: #3a3a3a;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #majordome-widget {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        #majordome-header {
+            background: linear-gradient(135deg, #1e3a1e 0%, var(--bg-panel) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px 12px 0 0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        #majordome-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        #majordome-provider {
+            background: rgba(124, 179, 66, 0.2);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        #majordome-messages {
+            flex: 1;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .message.majordome .message-avatar {
+            background: rgba(124, 179, 66, 0.2);
+        }
+        
+        .message.user .message-avatar {
+            background: #3a3a3a;
+        }
+        
+        .message-content {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            position: relative;
+        }
+        
+        .message.user .message-content {
+            background: rgba(124, 179, 66, 0.1);
+            border-color: rgba(124, 179, 66, 0.3);
+        }
+        
+        .message-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .provider-badge {
+            background: rgba(124, 179, 66, 0.15);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        #majordome-input {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        #majordome-input input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        #majordome-input input:focus {
+            border-color: var(--accent);
+        }
+        
+        #majordome-input input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        #majordome-input button {
+            background: var(--accent);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        #majordome-input button:hover {
+            background: var(--accent-hover);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        
+        .quick-action {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .quick-action:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .welcome-message h2 {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .welcome-message p {
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .capability {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .capability-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .capability-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .capability-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div id="majordome-widget">
+        <div id="majordome-header">
+            <div id="majordome-title">
+                <span>🎩</span>
+                <span>Majordome</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="majordome-provider">En attente...</span>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <button class="quick-action" onclick="sendQuick('Liste les composants')">📦 Composants</button>
+            <button class="quick-action" onclick="sendQuick('Ouvre le drilldown')">🧬 Drill-down</button>
+            <button class="quick-action" onclick="sendQuick('Analyse le backend')">🔍 Analyse</button>
+            <button class="quick-action" onclick="sendQuick('Génère une card')">🎨 Générer</button>
+            <button class="quick-action" onclick="sendQuick('Status du genome')">📊 Status</button>
+        </div>
+        
+        <div id="majordome-messages">
+            <div class="welcome-message">
+                <h2>🎩 Bienvenue, je suis votre Majordome</h2>
+                <p>Je route vos requêtes vers le meilleur provider selon votre besoin.</p>
+                
+                <div class="capabilities">
+                    <div class="capability">
+                        <div class="capability-icon">⚡</div>
+                        <div class="capability-title">Navigation rapide</div>
+                        <div class="capability-desc">Groq - 20ms</div>
+                    </div>
+                    <div class="capability">
+                        <div class="capability-icon">🧠</div>
+                        <div class="capability-title">Analyse code</div>
+                        <div class="capability-desc">DeepSeek - 200ms</div>
+                    </div>
+                    <div class="capability">
+                        <div class="capability-icon">📄</div>
+                        <div class="capability-title">Documents</div>
+                        <div class="capability-desc">Gemini - 300ms</div>
+                    </div>
+                    <div class="capability">
+                        <div class="capability-icon">🎨</div>
+                        <div class="capability-title">UI/Design</div>
+                        <div class="capability-desc">Kimi - 400ms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="majordome-input">
+            <input type="text" id="message-input" placeholder="Que puis-je faire pour vous ?" 
+                   onkeydown="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('majordome-messages');
+        const messageInput = document.getElementById('message-input');
+        const providerBadge = document.getElementById('majordome-provider');
+        
+        // Classification heuristique locale (ZERO appel API)
+        function classifyMessage(message) {
+            const msg = message.toLowerCase();
+            
+            // Navigation / commandes courtes → Groq
+            if (/(va|ouvre|montre|liste|status|aide|help|next|retour|show|open|list)/.test(msg)) {
+                return 'groq';
+            }
+            
+            // Analyse code / architecture → DeepSeek
+            if (/(analyse|refactor|bug|code|architecture|pourquoi|explique|explain|fix|debug)/.test(msg)) {
+                return 'deepseek';
+            }
+            
+            // Documents / images → Gemini
+            if (/(document|fichier|image|pdf|screenshot|png|file|doc)/.test(msg)) {
+                return 'gemini';
+            }
+            
+            // UI / template → Kimi
+            if (/(template|composant|ui|design|layout|figma|component|generate|card)/.test(msg)) {
+                return 'kimi';
+            }
+            
+            // Default → Groq (le plus rapide)
+            return 'groq';
+        }
+        
+        function addMessage(text, sender, provider = null, latency = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'majordome' ? '🎩' : '👤';
+            const providerHtml = provider ? `<span class="provider-badge">${provider}</span>` : '';
+            const latencyHtml = latency ? `<span>${latency}ms</span>` : '';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <div class="message-text">${text}</div>
+                    <div class="message-meta">
+                        ${providerHtml}
+                        ${latencyHtml}
+                    </div>
+                </div>
+            `;
+            
+            // Supprimer le message de bienvenue si présent
+            const welcome = messagesContainer.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message majordome typing';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🎩</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+        
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            // Ajouter message utilisateur
+            addMessage(text, 'user');
+            messageInput.value = '';
+            
+            // Classifier
+            const provider = classifyMessage(text);
+            providerBadge.textContent = provider;
+            
+            // Simuler traitement
+            showTyping();
+            
+            // Délais simulés selon le provider
+            const delays = { groq: 200, deepseek: 800, gemini: 1200, kimi: 1500 };
+            const delay = delays[provider] || 500;
+            
+            setTimeout(() => {
+                hideTyping();
+                
+                // Réponse simulée (à remplacer par appel API réel)
+                const responses = {
+                    groq: `J'ai traité votre demande rapidement via Groq. ${getAction(text)}`,
+                    deepseek: `Après analyse approfondie via DeepSeek : ${getAnalysis(text)}`,
+                    gemini: `J'ai analysé votre document via Gemini. ${getDocAnalysis(text)}`,
+                    kimi: `J'ai généré le composant via Kimi. ${getUIResponse(text)}`
+                };
+                
+                addMessage(responses[provider], 'majordome', provider, delay);
+            }, delay);
+        }
+        
+        function sendQuick(text) {
+            messageInput.value = text;
+            sendMessage();
+        }
+        
+        // Réponses simulées selon le contexte
+        function getAction(text) {
+            if (text.includes('drilldown') || text.includes('drill')) return 'Le Drill-Down est ouvert dans un nouvel onglet.';
+            if (text.includes('composant')) return 'Voici la liste de vos 100 composants (57 DaisyUI + 43 ARBITER).';
+            if (text.includes('status')) return 'Genome: 9 Corps, 20 Organes, 44 Atomes. Tous les endpoints sont mappés.';
+            return 'Action effectuée avec succès.';
+        }
+        
+        function getAnalysis(text) {
+            return 'L\'architecture suggère une structure N0-N3 avec 9 corps principaux. Je recommande d\'utiliser daisy_card pour les vues détail et daisy_list pour les collections.';
+        }
+        
+        function getDocAnalysis(text) {
+            return 'Le document contient 44 endpoints mappés avec leurs composants visuels correspondants.';
+        }
+        
+        function getUIResponse(text) {
+            return 'Composant généré avec daisy_card (header + body + footer). Score estimé: 85/100.';
+        }
+        
+        // Focus sur l'input au chargement
+        messageInput.focus();
+    </script>
+</body>
+</html>

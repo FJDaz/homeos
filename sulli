@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""
+CLI Sulli - Interface simplifiée pour AetherFlow/Sullivan
+Usage: sulli [options]
+
+Options:
+    --major, -major, -u    Lance le chat Majordome (mode terminal)
+    --help, -h             Affiche cette aide
+    --version, -v          Version
+"""
+
+import sys
+import subprocess
+import webbrowser
+
+def show_help():
+    print("""
+🎩 SULLI - CLI AetherFlow/Sullivan
+
+USAGE:
+    sulli [options]
+
+OPTIONS:
+    --major, -major, -u     Lance le chat Majordome (mode terminal)
+    --drilldown, -d         Ouvre le Drill-Down N0-N3
+    --showcase, -s          Ouvre le DaisyUI Showcase
+    --api, -a               Démarre l'API serveur
+    --help, -h              Affiche cette aide
+    --version, -v           Version
+
+EXEMPLES:
+    sulli --major           # Chat Majordome (terminal)
+    sulli -u                # Raccourci Majordome (terminal)
+    sulli -d                # Drill-Down
+    sulli -s                # Showcase composants
+
+URLS:
+    http://localhost:8000/studio/drilldown
+    http://localhost:8080/Frontend/daisy-showcase.html
+""")
+
+def open_drilldown():
+    """Ouvre le Drill-Down dans le navigateur."""
+    print("🧬 Ouverture du Drill-Down...")
+    url = "http://localhost:8000/studio/drilldown"
+    webbrowser.open(url)
+    print(f"   {url}")
+
+def open_showcase():
+    """Ouvre le DaisyUI Showcase."""
+    print("🌼 Ouverture du DaisyUI Showcase...")
+    url = "http://localhost:8080/Frontend/daisy-showcase.html"
+    webbrowser.open(url)
+    print(f"   {url}")
+
+def open_majordome():
+    """Lance le chat Majordome en mode terminal."""
+    print("🎩 Lancement du Majordome en mode terminal...")
+    
+    # Activer le venv et lancer le chat CLI
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
+    
+    # Lancer le chat Sullivan en mode interactif
+    subprocess.run([
+        sys.executable, "-m", "Backend.Prod.cli", 
+        "sullivan", "chat", "-i"
+    ])
+
+def start_api():
+    """Démarre le serveur API."""
+    print("🚀 Démarrage de l'API AetherFlow...")
+    subprocess.Popen(["./start_api.sh"], 
+                     stdout=subprocess.DEVNULL, 
+                     stderr=subprocess.DEVNULL)
+    print("   http://localhost:8000")
+    print("   http://localhost:8000/studio")
+
+def main():
+    if len(sys.argv) < 2:
+        show_help()
+        sys.exit(0)
+    
+    arg = sys.argv[1]
+    
+    if arg in ("--help", "-h"):
+        show_help()
+    
+    elif arg in ("--version", "-v"):
+        print("Sulli CLI v2.3 - Sullivan Studio")
+        print("AetherFlow Genome Enrichi + IR Visuelle")
+    
+    elif arg in ("--major", "-major", "-u"):
+        # Lance le Majordome
+        open_majordome()
+    
+    elif arg in ("--drilldown", "-d"):
+        open_drilldown()
+    
+    elif arg in ("--showcase", "-s"):
+        open_showcase()
+    
+    elif arg in ("--api", "-a"):
+        start_api()
+    
+    else:
+        print(f"❌ Option inconnue: {arg}")
+        print("Utilisez --help pour voir les options disponibles.")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

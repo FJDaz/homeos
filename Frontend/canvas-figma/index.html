@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeOS Canvas - Figma Like</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header / Toolbar -->
+    <header class="toolbar">
+        <div class="toolbar-section logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">HomeOS Canvas</span>
+        </div>
+        
+        <div class="toolbar-section tools">
+            <button class="tool-btn active" data-tool="select" title="Sélection (V)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                </svg>
+            </button>
+            <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                </svg>
+            </button>
+            <button class="tool-btn" data-tool="circle" title="Cercle (O)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+            </button>
+            <button class="tool-btn" data-tool="text" title="Texte (T)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+                </svg>
+            </button>
+            <button class="tool-btn" data-tool="line" title="Ligne (L)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="19" x2="19" y2="5"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="toolbar-section actions">
+            <button class="action-btn" id="zoom-out" title="Zoom arrière">-</button>
+            <span class="zoom-level" id="zoom-level">100%</span>
+            <button class="action-btn" id="zoom-in" title="Zoom avant">+</button>
+            <button class="action-btn" id="reset-view" title="Réinitialiser vue">⌘</button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar - Layers -->
+        <aside class="sidebar sidebar-left">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Layers</span>
+                    <button class="panel-btn" id="add-layer">+</button>
+                </div>
+                <div class="panel-content">
+                    <ul class="layers-list" id="layers-list">
+                        <li class="layer-item selected" data-id="bg">
+                            <span class="layer-icon">⬚</span>
+                            <span class="layer-name">Background</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-container">
+            <div class="canvas-wrapper" id="canvas-wrapper">
+                <canvas id="main-canvas"></canvas>
+                <div class="selection-box" id="selection-box"></div>
+            </div>
+            
+            <!-- Rulers -->
+            <div class="ruler ruler-top"></div>
+            <div class="ruler ruler-left"></div>
+        </main>
+
+        <!-- Right Sidebar - Properties -->
+        <aside class="sidebar sidebar-right">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Design</span>
+                </div>
+                <div class="panel-content">
+                    <!-- Position & Size -->
+                    <div class="property-group">
+                        <div class="property-row">
+                            <div class="property-field">
+                                <label>X</label>
+                                <input type="number" id="prop-x" value="0">
+                            </div>
+                            <div class="property-field">
+                                <label>Y</label>
+                                <input type="number" id="prop-y" value="0">
+                            </div>
+                        </div>
+                        <div class="property-row">
+                            <div class="property-field">
+                                <label>W</label>
+                                <input type="number" id="prop-w" value="0">
+                            </div>
+                            <div class="property-field">
+                                <label>H</label>
+                                <input type="number" id="prop-h" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fill -->
+                    <div class="property-group">
+                        <div class="property-label">Fill</div>
+                        <div class="color-picker">
+                            <input type="color" id="fill-color" value="#3b82f6">
+                            <span class="color-value">#3B82F6</span>
+                            <input type="range" id="fill-opacity" min="0" max="100" value="100">
+                        </div>
+                    </div>
+
+                    <!-- Stroke -->
+                    <div class="property-group">
+                        <div class="property-label">Stroke</div>
+                        <div class="color-picker">
+                            <input type="color" id="stroke-color" value="#000000">
+                            <span class="color-value">#000000</span>
+                        </div>
+                        <div class="property-field">
+                            <label>Width</label>
+                            <input type="number" id="stroke-width" value="1" min="0">
+                        </div>
+                    </div>
+
+                    <!-- Corner Radius -->
+                    <div class="property-group">
+                        <div class="property-label">Corner Radius</div>
+                        <input type="range" id="corner-radius" min="0" max="50" value="0">
+                    </div>
+
+                    <!-- Opacity -->
+                    <div class="property-group">
+                        <div class="property-label">Opacity</div>
+                        <input type="range" id="opacity" min="0" max="100" value="100">
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <div class="status-item">
+            <span id="mouse-pos">0, 0</span>
+        </div>
+        <div class="status-item">
+            <span id="canvas-info">Canvas: 1920×1080</span>
+        </div>
+        <div class="status-item">
+            <label class="toggle">
+                <input type="checkbox" id="show-grid" checked>
+                <span>Grid</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox" id="snap-grid" checked>
+                <span>Snap</span>
+            </label>
+        </div>
+    </footer>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-item" data-action="duplicate">Duplicate</div>
+        <div class="context-item" data-action="delete">Delete</div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="bring-front">Bring to Front</div>
+        <div class="context-item" data-action="send-back">Send to Back</div>
+    </div>
+
+    <script src="canvas.js"></script>
+</body>
+</html>

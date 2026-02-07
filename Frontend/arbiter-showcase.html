@@ -1,0 +1,2637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARBITER Component Library - 28 Composants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #252525 0%, #1a1a1a 100%);
+            border-bottom: 2px solid #7cb342;
+            padding: 24px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .header h1 span {
+            color: #7cb342;
+        }
+        
+        .header p {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            background: #252525;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 12px 20px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #7cb342;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Navigation */
+        .nav-bar {
+            background: #252525;
+            border-bottom: 1px solid #3a3a3a;
+            padding: 0 32px;
+            position: sticky;
+            top: 113px;
+            z-index: 999;
+        }
+        
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+        
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 16px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .nav-btn:hover {
+            color: #fff;
+            background: #2a2a2a;
+        }
+        
+        .nav-btn.active {
+            color: #7cb342;
+            border-bottom-color: #7cb342;
+        }
+        
+        /* Main Content */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        
+        /* Category Sections */
+        .category-section {
+            margin-bottom: 48px;
+        }
+        
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        
+        .category-icon {
+            width: 36px;
+            height: 36px;
+            background: #7cb342;
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .count {
+            color: #888;
+            font-weight: 400;
+            font-size: 16px;
+        }
+        
+        /* Components Grid */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Component Card */
+        .component-card {
+            background: #252525;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        
+        .component-card:hover {
+            border-color: #7cb342;
+            box-shadow: 0 4px 20px rgba(124, 179, 66, 0.15);
+        }
+        
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .component-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .complexity-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .component-description {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .tag {
+            font-size: 10px;
+            padding: 3px 8px;
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #aaa;
+            text-transform: lowercase;
+        }
+        
+        /* Preview Container */
+        .preview-container {
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        /* Preview Inline (dans le header) */
+        .preview-inline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 8px 16px;
+            min-width: 80px;
+            min-height: 40px;
+            margin-left: auto;
+            margin-right: 12px;
+        }
+        
+        .component-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        
+        .component-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        /* Code Section */
+        .code-section {
+            border-top: 1px solid #3a3a3a;
+            padding-top: 12px;
+        }
+        
+        .toggle-code {
+            background: #3a3a3a;
+            border: none;
+            color: #aaa;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .toggle-code:hover {
+            background: #7cb342;
+            color: #fff;
+        }
+        
+        .code-content {
+            margin-top: 12px;
+        }
+        
+        .code-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .code-tab {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 6px 12px;
+            font-size: 11px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .code-tab.active {
+            color: #7cb342;
+            border-bottom-color: #7cb342;
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .code-block code {
+            color: #ddd;
+        }
+        
+        .copy-btn {
+            background: #7cb342;
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 8px;
+            float: right;
+        }
+        
+        .copy-btn:hover {
+            background: #6a9e38;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px;
+            border-top: 1px solid #3a3a3a;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .footer a {
+            color: #7cb342;
+            text-decoration: none;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7cb342;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><span>ARBITER</span> Component Library</h1>
+            <p>28 composants extraits de l'interface arbiter-intent-revue.html</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">28</div>
+                    <div class="stat-label">Composants</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Atoms</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">13</div>
+                    <div class="stat-label">Molecules</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Organisms</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Templates</div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <nav class="nav-bar">
+        <div class="nav-content">
+            <button class="nav-btn active" onclick="filterCategory('all')">Tous</button>
+            <button class="nav-btn" onclick="filterCategory('atoms')">Atoms (8)</button>
+            <button class="nav-btn" onclick="filterCategory('molecules')">Molecules (13)</button>
+            <button class="nav-btn" onclick="filterCategory('organisms')">Organisms (5)</button>
+            <button class="nav-btn" onclick="filterCategory('templates')">Templates (2)</button>
+        </div>
+    </nav>
+    
+    <main class="main">
+        
+        <section class="category-section" id="atoms">
+            <h2 class="category-title">
+                <span class="category-icon">A</span>
+                Atoms
+                <span class="count">(8)</span>
+            </h2>
+            <div class="components-grid">
+                
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_action_btn</h3>
+                <div class="preview-inline">
+                    <style>.action-btn {
+  background: #7cb342;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-btn:hover {
+  background: #6a9e38;
+}
+.action-btn.secondary {
+  background: #5a8f2e;
+}</style>
+                    <button class="action-btn">Valider</button>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Bouton action ARBITER - Bouton Valider/Rejeter</p>
+        
+        <div class="tags-container">
+            <span class="tag">button</span><span class="tag">action</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_action_btn')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_action_btn" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_action_btn', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_action_btn', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_action_btn"><code>&lt;button class="action-btn"&gt;Valider&lt;/button&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_action_btn" style="display: none;"><code>.action-btn {
+  background: #7cb342;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-btn:hover {
+  background: #6a9e38;
+}
+.action-btn.secondary {
+  background: #5a8f2e;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_action_btn')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_badge</h3>
+                <div class="preview-inline">
+                    <style>.arbiter-badge {
+  background: #7cb342;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}</style>
+                    <span class="arbiter-badge">Arbitrage Sullivan</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Badge ARBITER - Label de statut vert</p>
+        
+        <div class="tags-container">
+            <span class="tag">badge</span><span class="tag">status</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_badge')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_badge" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_badge', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_badge', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_badge"><code>&lt;span class="arbiter-badge"&gt;Arbitrage Sullivan&lt;/span&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_badge" style="display: none;"><code>.arbiter-badge {
+  background: #7cb342;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_badge')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_dark_dropdown_item</h3>
+                <div class="preview-inline">
+                    <style>.dark-dropdown-item {
+  font-size: 10px;
+  color: #888;
+  padding: 4px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+.dark-dropdown-item:last-child {
+  border-bottom: none;
+}</style>
+                    <div class="dark-dropdown-item">DROPDOWN</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Item de dropdown sombre ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">dropdown</span><span class="tag">item</span><span class="tag">dark</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_dark_dropdown_item')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_dark_dropdown_item" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_dark_dropdown_item', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_dark_dropdown_item', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_dark_dropdown_item"><code>&lt;div class="dark-dropdown-item"&gt;DROPDOWN&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_dark_dropdown_item" style="display: none;"><code>.dark-dropdown-item {
+  font-size: 10px;
+  color: #888;
+  padding: 4px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+.dark-dropdown-item:last-child {
+  border-bottom: none;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_dark_dropdown_item')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_dropdown_item</h3>
+                <div class="preview-inline">
+                    <style>.dropdown-item {
+  font-size: 10px;
+  color: #888;
+  padding: 2px 0;
+}</style>
+                    <div class="dropdown-item">DROPDOWN</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Item de dropdown clair ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">dropdown</span><span class="tag">item</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_dropdown_item')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_dropdown_item" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_dropdown_item', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_dropdown_item', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_dropdown_item"><code>&lt;div class="dropdown-item"&gt;DROPDOWN&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_dropdown_item" style="display: none;"><code>.dropdown-item {
+  font-size: 10px;
+  color: #888;
+  padding: 2px 0;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_dropdown_item')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_floating_badge</h3>
+                <div class="preview-inline">
+                    <style>.floating-badge {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #7cb342;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+}</style>
+                    <div class="floating-badge">Sullivan</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Badge flottant ARBITER - Sullivan</p>
+        
+        <div class="tags-container">
+            <span class="tag">badge</span><span class="tag">floating</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_floating_badge')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_floating_badge" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_floating_badge', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_floating_badge', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_floating_badge"><code>&lt;div class="floating-badge"&gt;Sullivan&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_floating_badge" style="display: none;"><code>.floating-badge {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #7cb342;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_floating_badge')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_icon_cell</h3>
+                <div class="preview-inline">
+                    <style>.icon-cell {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.icon-cell.green {
+  color: #7cb342;
+}
+.icon-cell.gray {
+  color: #555;
+}</style>
+                    <div class="icon-cell green">▣</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Cellule d'icône ARBITER (grille organes)</p>
+        
+        <div class="tags-container">
+            <span class="tag">icon</span><span class="tag">cell</span><span class="tag">grid</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_icon_cell')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_icon_cell" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_icon_cell', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_icon_cell', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_icon_cell"><code>&lt;div class="icon-cell green"&gt;▣&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_icon_cell" style="display: none;"><code>.icon-cell {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.icon-cell.green {
+  color: #7cb342;
+}
+.icon-cell.gray {
+  color: #555;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_icon_cell')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_section_title</h3>
+                <div class="preview-inline">
+                    <style>.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7cb342;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}</style>
+                    <div class="section-title">Typologie déclarée</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Titre de section ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">title</span><span class="tag">section</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_section_title')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_section_title" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_section_title', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_section_title', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_section_title"><code>&lt;div class="section-title"&gt;Typologie déclarée&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_section_title" style="display: none;"><code>.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7cb342;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_section_title')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="atoms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_toggle_switch</h3>
+                <div class="preview-inline">
+                    <style>.toggle-switch {
+  width: 36px;
+  height: 18px;
+  background: #7cb342;
+  border-radius: 9px;
+  position: relative;
+  cursor: pointer;
+}
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+}
+.toggle-switch.inactive {
+  background: #ccc;
+}
+.toggle-switch.inactive::after {
+  right: auto;
+  left: 2px;
+}</style>
+                    <div class="toggle-switch"></div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Toggle switch ARBITER - Interrupteur on/off</p>
+        
+        <div class="tags-container">
+            <span class="tag">toggle</span><span class="tag">switch</span><span class="tag">form</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_toggle_switch')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_toggle_switch" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_toggle_switch', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_toggle_switch', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_toggle_switch"><code>&lt;div class="toggle-switch"&gt;&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_toggle_switch" style="display: none;"><code>.toggle-switch {
+  width: 36px;
+  height: 18px;
+  background: #7cb342;
+  border-radius: 9px;
+  position: relative;
+  cursor: pointer;
+}
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+}
+.toggle-switch.inactive {
+  background: #ccc;
+}
+.toggle-switch.inactive::after {
+  right: auto;
+  left: 2px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_toggle_switch')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+            </div>
+        </section>
+        
+        <section class="category-section" id="molecules">
+            <h2 class="category-title">
+                <span class="category-icon">M</span>
+                Molecules
+                <span class="count">(13)</span>
+            </h2>
+            <div class="components-grid">
+                
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_action_col</h3>
+                <div class="preview-inline">
+                    <style>.action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}</style>
+                    <div class="action-col">
+  <div class="toggle-switch"></div>
+  <button class="action-btn">Valider</button>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Colonne toggle + boutons ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">action</span><span class="tag">column</span><span class="tag">toggle</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_action_col')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_action_col" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_action_col', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_action_col', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_action_col"><code>&lt;div class="action-col"&gt;
+  &lt;div class="toggle-switch"&gt;&lt;/div&gt;
+  &lt;button class="action-btn"&gt;Valider&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_action_col" style="display: none;"><code>.action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_action_col')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_cellules_row</h3>
+                <div class="preview-inline">
+                    <style>.cellules-row {
+  display: flex;
+  gap: 24px;
+}
+.cellules-row .genome-col-header {
+  font-size: 9px;
+}</style>
+            <div class="cellules-row">
+  <div class="genome-col">
+    <div class="genome-col-header">Brainstorm</div>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_cellules_row')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_cellules_row" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_cellules_row', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_cellules_row', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_cellules_row"><code>&lt;div class="cellules-row"&gt;
+  &lt;div class="genome-col"&gt;
+    &lt;div class="genome-col-header"&gt;Brainstorm&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_cellules_row" style="display: none;"><code>.cellules-row {
+  display: flex;
+  gap: 24px;
+}
+.cellules-row .genome-col-header {
+  font-size: 9px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_cellules_row')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_dark_toggle_group</h3>
+                <div class="preview-inline">
+                    <style>.dark-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.dark-toggle-switch {
+  width: 32px;
+  height: 16px;
+  background: #444;
+  border-radius: 8px;
+  position: relative;
+}
+.dark-toggle-switch.active {
+  background: #7cb342;
+}
+.dark-toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+}
+.dark-toggle-switch.active::after {
+  left: auto;
+  right: 2px;
+}
+.dark-btn {
+  background: #7cb342;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+}</style>
+                    <div class="dark-toggle">
+  <div class="dark-toggle-switch active">
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Groupe toggle sombre + bouton ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">toggle</span><span class="tag">dark</span><span class="tag">group</span><span class="tag">arbiter</span>
+        </div>
+        
+        
+  <button class="dark-btn">Valider</button>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Ligne cellules ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">cellules</span><span class="tag">row</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_dark_toggle_group')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_dark_toggle_group" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_dark_toggle_group', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_dark_toggle_group', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_dark_toggle_group"><code>&lt;div class="dark-toggle"&gt;
+  &lt;div class="dark-toggle-switch active"&gt;&lt;/div&gt;
+  &lt;button class="dark-btn"&gt;Valider&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_dark_toggle_group" style="display: none;"><code>.dark-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.dark-toggle-switch {
+  width: 32px;
+  height: 16px;
+  background: #444;
+  border-radius: 8px;
+  position: relative;
+}
+.dark-toggle-switch.active {
+  background: #7cb342;
+}
+.dark-toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+}
+.dark-toggle-switch.active::after {
+  left: auto;
+  right: 2px;
+}
+.dark-btn {
+  background: #7cb342;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_dark_toggle_group')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_dark_users_list</h3>
+                <div class="preview-inline">
+                    <style>.dark-users {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px;
+}
+.dark-user-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #aaa;
+  padding: 3px 0;
+}
+.dark-user-avatar {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: #ccc;
+}</style>
+            <div class="dark-users">
+  <div class="dark-user-item">
+    <div class="dark-user-avatar">👤</div>
+    <span>PSEUDOCOLOR</span>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_dark_users_list')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_dark_users_list" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_dark_users_list', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_dark_users_list', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_dark_users_list"><code>&lt;div class="dark-users"&gt;
+  &lt;div class="dark-user-item"&gt;
+    &lt;div class="dark-user-avatar"&gt;👤&lt;/div&gt;
+    &lt;span&gt;PSEUDOCOLOR&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_dark_users_list" style="display: none;"><code>.dark-users {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px;
+}
+.dark-user-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #aaa;
+  padding: 3px 0;
+}
+.dark-user-avatar {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: #ccc;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_dark_users_list')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_dropdowns_col</h3>
+                <div class="preview-inline">
+                    <style>.dropdowns-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}</style>
+                    <div class="dropdowns-col">
+  <div class="dropdown-item">DROPDOWN
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Colonne de dropdowns ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">dropdown</span><span class="tag">column</span><span class="tag">arbiter</span>
+        </div>
+        
+        
+  <div class="dropdown-item">DROPDOWN</div>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Liste utilisateurs sombre ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">users</span><span class="tag">list</span><span class="tag">dark</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_dropdowns_col')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_dropdowns_col" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_dropdowns_col', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_dropdowns_col', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_dropdowns_col"><code>&lt;div class="dropdowns-col"&gt;
+  &lt;div class="dropdown-item"&gt;DROPDOWN&lt;/div&gt;
+  &lt;div class="dropdown-item"&gt;DROPDOWN&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_dropdowns_col" style="display: none;"><code>.dropdowns-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_dropdowns_col')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_expandable_section</h3>
+                <div class="preview-inline">
+                    <style>.expandable-section {
+  margin-top: 24px;
+  border-top: 1px solid #d0d0c8;
+  padding-top: 16px;
+}
+.expandable-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.expand-icon {
+  color: #7cb342;
+  font-size: 12px;
+}
+.expandable-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7cb342;
+}
+.expandable-content {
+  margin-top: 12px;
+  padding-left: 20px;
+  font-size: 10px;
+  color: #666;
+  line-height: 1.8;
+}
+.expandable-content span {
+  display: block;
+}
+.expandable-content span::before {
+  content: "◆ ";
+  color: #7cb342;
+  font-size: 8px;
+}
+.section-meta {
+  font-size: 9px;
+  color: #999;
+  margin-top: 8px;
+  padding-left: 20px;
+}</style>
+            <div class="expandable-section">
+  <div class="expandable-header">
+    <span class="expand-icon">↕</span>
+    <span class="expandable-title">§1.3 Endpoints</span>
+  </div>
+  <div class="expandable-content">
+    <span>POST /execute</span>
+  </div>
+  <div class="section-meta">→ 16 lignes</div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_expandable_section')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_expandable_section" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_expandable_section', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_expandable_section', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_expandable_section"><code>&lt;div class="expandable-section"&gt;
+  &lt;div class="expandable-header"&gt;
+    &lt;span class="expand-icon"&gt;↕&lt;/span&gt;
+    &lt;span class="expandable-title"&gt;§1.3 Endpoints&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="expandable-content"&gt;
+    &lt;span&gt;POST /execute&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="section-meta"&gt;→ 16 lignes&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_expandable_section" style="display: none;"><code>.expandable-section {
+  margin-top: 24px;
+  border-top: 1px solid #d0d0c8;
+  padding-top: 16px;
+}
+.expandable-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.expand-icon {
+  color: #7cb342;
+  font-size: 12px;
+}
+.expandable-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7cb342;
+}
+.expandable-content {
+  margin-top: 12px;
+  padding-left: 20px;
+  font-size: 10px;
+  color: #666;
+  line-height: 1.8;
+}
+.expandable-content span {
+  display: block;
+}
+.expandable-content span::before {
+  content: "◆ ";
+  color: #7cb342;
+  font-size: 8px;
+}
+.section-meta {
+  font-size: 9px;
+  color: #999;
+  margin-top: 8px;
+  padding-left: 20px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_expandable_section')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_icons_grid</h3>
+                <div class="preview-inline">
+                    <style>.icons-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}</style>
+                    <div class="icons-grid">
+  <div class="icon-cell green">▣
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Grille 8x3 d'icônes organes ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">icons</span><span class="tag">grid</span><span class="tag">organes</span><span class="tag">arbiter</span>
+        </div>
+        
+        
+  <div class="icon-cell green">▼</div>
+  <div class="icon-cell gray">▣</div>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Section pliable ARBITER (Endpoints, Code IR)</p>
+        
+        <div class="tags-container">
+            <span class="tag">expandable</span><span class="tag">section</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_icons_grid')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_icons_grid" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_icons_grid', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_icons_grid', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_icons_grid"><code>&lt;div class="icons-grid"&gt;
+  &lt;div class="icon-cell green"&gt;▣&lt;/div&gt;
+  &lt;div class="icon-cell green"&gt;▼&lt;/div&gt;
+  &lt;div class="icon-cell gray"&gt;▣&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_icons_grid" style="display: none;"><code>.icons-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_icons_grid')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_notification_banner</h3>
+                <div class="preview-inline">
+                    <style>.notification-banner {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+.notification-icon {
+  color: #7cb342;
+  font-size: 14px;
+}
+.notification-text {
+  font-size: 9px;
+  color: #888;
+  line-height: 1.4;
+}</style>
+                    <div class="notification-banner">
+  <span class="notification-icon">📍</span>
+  <span class="notification-text">Système en mode Construction.</span>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Bannière notification ARBITER - Message avec icône</p>
+        
+        <div class="tags-container">
+            <span class="tag">banner</span><span class="tag">notification</span><span class="tag">alert</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_notification_banner')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_notification_banner" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_notification_banner', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_notification_banner', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_notification_banner"><code>&lt;div class="notification-banner"&gt;
+  &lt;span class="notification-icon"&gt;📍&lt;/span&gt;
+  &lt;span class="notification-text"&gt;Système en mode Construction.&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_notification_banner" style="display: none;"><code>.notification-banner {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+.notification-icon {
+  color: #7cb342;
+  font-size: 14px;
+}
+.notification-text {
+  font-size: 9px;
+  color: #888;
+  line-height: 1.4;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_notification_banner')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_profile_card</h3>
+                <div class="preview-inline">
+                    <style>.profile-card {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #7cb342;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+}
+.profile-name {
+  font-size: 10px;
+  color: #fff;
+  font-weight: 600;
+}
+.profile-role {
+  font-size: 8px;
+  color: #7cb342;
+}</style>
+                    <div class="profile-card">
+  <div class="profile-avatar">👤</div>
+  <div class="profile-name">PSEUDOCOLOR</div>
+  <div class="profile-role">Front</div>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Carte profil ARBITER - Avatar + nom + rôle</p>
+        
+        <div class="tags-container">
+            <span class="tag">card</span><span class="tag">profile</span><span class="tag">avatar</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_profile_card')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_profile_card" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_profile_card', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_profile_card', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_profile_card"><code>&lt;div class="profile-card"&gt;
+  &lt;div class="profile-avatar"&gt;👤&lt;/div&gt;
+  &lt;div class="profile-name"&gt;PSEUDOCOLOR&lt;/div&gt;
+  &lt;div class="profile-role"&gt;Front&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_profile_card" style="display: none;"><code>.profile-card {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #7cb342;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+}
+.profile-name {
+  font-size: 10px;
+  color: #fff;
+  font-weight: 600;
+}
+.profile-role {
+  font-size: 8px;
+  color: #7cb342;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_profile_card')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_typology_list</h3>
+                <div class="preview-inline">
+                    <style>.typology-list {
+  font-size: 11px;
+  color: #5a5a52;
+  line-height: 1.8;
+}
+.typology-list span {
+  display: block;
+}
+.typology-list span::before {
+  content: "▸ ";
+  color: #7cb342;
+}</style>
+                    <div class="typology-list">
+  <span>Brainstorm</span>
+  <span>Back</span>
+  <span>Front</span>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Liste typologie ARBITER avec puces ▸</p>
+        
+        <div class="tags-container">
+            <span class="tag">list</span><span class="tag">typology</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_typology_list')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_typology_list" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_typology_list', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_typology_list', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_typology_list"><code>&lt;div class="typology-list"&gt;
+  &lt;span&gt;Brainstorm&lt;/span&gt;
+  &lt;span&gt;Back&lt;/span&gt;
+  &lt;span&gt;Front&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_typology_list" style="display: none;"><code>.typology-list {
+  font-size: 11px;
+  color: #5a5a52;
+  line-height: 1.8;
+}
+.typology-list span {
+  display: block;
+}
+.typology-list span::before {
+  content: "▸ ";
+  color: #7cb342;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_typology_list')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_user_item</h3>
+                <div class="preview-inline">
+                    <style>.user-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #666;
+}
+.user-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #7cb342;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: white;
+}</style>
+                    <div class="user-item">
+  <div class="user-avatar">👤</div>
+  <span>PSEUDOCOLOR</span>
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Item utilisateur ARBITER - Avatar + label</p>
+        
+        <div class="tags-container">
+            <span class="tag">user</span><span class="tag">avatar</span><span class="tag">item</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_user_item')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_user_item" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_user_item', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_user_item', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_user_item"><code>&lt;div class="user-item"&gt;
+  &lt;div class="user-avatar"&gt;👤&lt;/div&gt;
+  &lt;span&gt;PSEUDOCOLOR&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_user_item" style="display: none;"><code>.user-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #666;
+}
+.user-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #7cb342;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: white;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_user_item')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_users_col</h3>
+                <div class="preview-inline">
+                    <style>.users-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}</style>
+            <div class="users-col">
+  <div class="user-item">
+    <div class="user-avatar">👤</div>
+    <span>PSEUDOCOLOR</span>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_users_col')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_users_col" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_users_col', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_users_col', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_users_col"><code>&lt;div class="users-col"&gt;
+  &lt;div class="user-item"&gt;
+    &lt;div class="user-avatar"&gt;👤&lt;/div&gt;
+    &lt;span&gt;PSEUDOCOLOR&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_users_col" style="display: none;"><code>.users-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_users_col')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="molecules">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_why_col</h3>
+                <div class="preview-inline">
+                    <style>.why-col {
+  font-size: 10px;
+  color: #7cb342;
+  font-weight: 600;
+}
+.why-text {
+  font-size: 9px;
+  color: #888;
+  margin-top: 4px;
+  line-height: 1.5;
+  max-width: 120px;
+}</style>
+                    <div class="why-col">
+  Pourquoi
+  <div class="why-text">Explication du choix...
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Colonne 'Pourquoi' + texte ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">why</span><span class="tag">explanation</span><span class="tag">arbiter</span>
+        </div>
+        
+        
+</div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #22c55e">low</span>
+        </div>
+        <p class="component-description">Colonne d'utilisateurs ARBITER (clair)</p>
+        
+        <div class="tags-container">
+            <span class="tag">users</span><span class="tag">column</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_why_col')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_why_col" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_why_col', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_why_col', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_why_col"><code>&lt;div class="why-col"&gt;
+  Pourquoi
+  &lt;div class="why-text"&gt;Explication du choix...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_why_col" style="display: none;"><code>.why-col {
+  font-size: 10px;
+  color: #7cb342;
+  font-weight: 600;
+}
+.why-text {
+  font-size: 9px;
+  color: #888;
+  margin-top: 4px;
+  line-height: 1.5;
+  max-width: 120px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_why_col')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+            </div>
+        </section>
+        
+        <section class="category-section" id="organisms">
+            <h2 class="category-title">
+                <span class="category-icon">O</span>
+                Organisms
+                <span class="count">(5)</span>
+            </h2>
+            <div class="components-grid">
+                
+    <div class="component-card" data-category="organisms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_genome_section</h3>
+                <div class="preview-inline">
+                    <style>.genome-section {
+  margin-bottom: 28px;
+}
+.genome-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #3a3a3a;
+}
+.genome-content {
+  display: flex;
+  gap: 24px;
+}
+.genome-col {
+  flex: 1;
+}
+.genome-col-header {
+  font-size: 10px;
+  color: #7cb342;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}</style>
+            <div class="genome-section">
+  <div class="genome-section-title">Corps</div>
+  <div class="genome-content">
+    <div class="genome-col">
+      <div class="genome-col-header">Brainstorm</div>
+    </div>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_genome_section')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_genome_section" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_genome_section', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_genome_section', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_genome_section"><code>&lt;div class="genome-section"&gt;
+  &lt;div class="genome-section-title"&gt;Corps&lt;/div&gt;
+  &lt;div class="genome-content"&gt;
+    &lt;div class="genome-col"&gt;
+      &lt;div class="genome-col-header"&gt;Brainstorm&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_genome_section" style="display: none;"><code>.genome-section {
+  margin-bottom: 28px;
+}
+.genome-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #3a3a3a;
+}
+.genome-content {
+  display: flex;
+  gap: 24px;
+}
+.genome-col {
+  flex: 1;
+}
+.genome-col-header {
+  font-size: 10px;
+  color: #7cb342;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_genome_section')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="organisms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_panel_header</h3>
+                <div class="preview-inline">
+                    <style>.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.arbiter-badge {
+  background: #7cb342;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}</style>
+                    <div class="panel-header">
+  <span class="panel-title">Intent Revue</span>
+  <span class="arbiter-badge">Arbitrage Sullivan</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Header panel ARBITER - Titre + badge</p>
+        
+        <div class="tags-container">
+            <span class="tag">header</span><span class="tag">panel</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="preview-inline" style="margin: 12px 0;">
+                    <style>.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.arbiter-badge {
+  background: #7cb342;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}</style>
+                    <div class="panel-header">
+  <span class="panel-title">Intent Revue</span>
+  <span class="arbiter-badge">Arbitrage Sullivan</span>
+                </div>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Sections Corps/Organes/Cellules ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">genome</span><span class="tag">section</span><span class="tag">corps</span><span class="tag">organes</span><span class="tag">cellules</span><span class="tag">arbiter</span>
+        
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_panel_header')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_panel_header" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_panel_header', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_panel_header', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_panel_header"><code>&lt;div class="panel-header"&gt;
+  &lt;span class="panel-title"&gt;Intent Revue&lt;/span&gt;
+  &lt;span class="arbiter-badge"&gt;Arbitrage Sullivan&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_panel_header" style="display: none;"><code>.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.arbiter-badge {
+  background: #7cb342;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_panel_header')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="organisms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_panel_left</h3>
+                <div class="preview-inline">
+                    <style>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+  position: relative;
+}</style>
+                    <div class="panel-left">
+  <div class="panel-header">
+    <span class="panel-title">Intent Revue</span>
+    <span class="arbiter-badge">Arbitrage Sullivan</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Panneau gauche clair ARBITER (Intent Revue)</p>
+        
+        <div class="tags-container">
+            <span class="tag">panel</span><span class="tag">left</span><span class="tag">light</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="preview-inline" style="width: 100%; margin: 12px 0; padding: 12px;">
+                    <style>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+  position: relative;
+}</style>
+                    <div style="transform: scale(0.5); transform-origin: left;"><div class="panel-left">
+  <div class="panel-header">
+    <span class="panel-title">Intent Revue</span>
+    <span class="arbiter-badge">Arbitrage Sullivan</span></div>
+                </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_panel_left')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_panel_left" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_panel_left', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_panel_left', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_panel_left"><code>&lt;div class="panel-left"&gt;
+  &lt;div class="panel-header"&gt;
+    &lt;span class="panel-title"&gt;Intent Revue&lt;/span&gt;
+    &lt;span class="arbiter-badge"&gt;Arbitrage Sullivan&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_panel_left" style="display: none;"><code>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+  position: relative;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_panel_left')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="organisms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_panel_right</h3>
+                <div class="preview-inline">
+                    <style>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.genome-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+}</style>
+                    <div class="panel-right">
+  <div class="genome-header">
+    <span class="genome-title">Génome de [Nom]</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Panneau droit sombre ARBITER (Génome)</p>
+        
+        <div class="tags-container">
+            <span class="tag">panel</span><span class="tag">right</span><span class="tag">dark</span><span class="tag">genome</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="preview-inline" style="width: 100%; margin: 12px 0; padding: 12px;">
+                    <style>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.genome-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+}</style>
+                    <div style="transform: scale(0.5); transform-origin: left;"><div class="panel-right">
+  <div class="genome-header">
+    <span class="genome-title">Génome de [Nom]</span></div>
+                </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_panel_right')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_panel_right" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_panel_right', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_panel_right', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_panel_right"><code>&lt;div class="panel-right"&gt;
+  &lt;div class="genome-header"&gt;
+    &lt;span class="genome-title"&gt;Génome de [Nom]&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_panel_right" style="display: none;"><code>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.genome-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_panel_right')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="organisms">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_typology_section</h3>
+                <div class="preview-inline">
+                    <style>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.genome-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+}</style>
+                    <div class="panel-right">
+  <div class="genome-header">
+    <span class="genome-title">Génome de [Nom]</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #f59e0b">medium</span>
+        </div>
+        <p class="component-description">Section typologie complète ARBITER</p>
+        
+        <div class="tags-container">
+            <span class="tag">typology</span><span class="tag">section</span><span class="tag">arbiter</span>
+        </div>
+        
+        
+  <div class="typology-content">
+    <div class="typology-list">
+      <span>Brainstorm</span>
+      <span>Back</span>
+      <span>Front</span>
+    </div>
+  </div>
+  <div class="why-section">
+    <div class="why-col">Pourquoi</div>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_typology_section')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_typology_section" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_typology_section', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_typology_section', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_typology_section"><code>&lt;div class="typology-section"&gt;
+  &lt;div class="section-title"&gt;Typologie déclarée&lt;/div&gt;
+  &lt;div class="typology-content"&gt;
+    &lt;div class="typology-list"&gt;
+      &lt;span&gt;Brainstorm&lt;/span&gt;
+      &lt;span&gt;Back&lt;/span&gt;
+      &lt;span&gt;Front&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="why-section"&gt;
+    &lt;div class="why-col"&gt;Pourquoi&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_typology_section" style="display: none;"><code>.typology-section {
+  margin-bottom: 24px;
+}
+.typology-content {
+  display: flex;
+  gap: 40px;
+}
+.why-section {
+  display: flex;
+  gap: 40px;
+  margin-top: 16px;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_typology_section')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+            </div>
+        </section>
+        
+        <section class="category-section" id="templates">
+            <h2 class="category-title">
+                <span class="category-icon">T</span>
+                Templates
+                <span class="count">(2)</span>
+            </h2>
+            <div class="components-grid">
+                
+    <div class="component-card" data-category="templates">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_genome_layout</h3>
+                <div class="preview-inline">
+                    <style>.typology-section {
+  margin-bottom: 24px;
+}
+.typology-content {
+  display: flex;
+  gap: 40px;
+}
+.why-section {
+  display: flex;
+  gap: 40px;
+  margin-top: 16px;
+}</style>
+                    <div class="typology-section">
+  <div class="section-title">Typologie déclarée
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #ef4444">high</span>
+        </div>
+        <p class="component-description">Layout Génome ARBITER (panneau droit)</p>
+        
+        <div class="tags-container">
+            <span class="tag">layout</span><span class="tag">genome</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="preview-inline" style="width: 100%; margin: 12px 0; padding: 12px;">
+                    <style>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header { text-align: center; margin-bottom: 32px; }
+.genome-title { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+.genome-section { margin-bottom: 28px; }
+.genome-section-title {
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 1px solid #3a3a3a;
+}</style>
+                    <div style="transform: scale(0.5); transform-origin: left;"><div class="panel-right">
+  <div class="genome-header">
+    <span class="genome-title">Génome de [Nom du produit]</span></div>
+                </div>
+  <div class="genome-section">
+    <div class="genome-section-title">Corps</div>
+  </div>
+  <div class="genome-section">
+    <div class="genome-section-title">Organes</div>
+  </div>
+  <div class="genome-section">
+    <div class="genome-section-title">Cellules</div>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_genome_layout')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_genome_layout" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_genome_layout', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_genome_layout', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_genome_layout"><code>&lt;div class="panel-right"&gt;
+  &lt;div class="genome-header"&gt;
+    &lt;span class="genome-title"&gt;Génome de [Nom du produit]&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="genome-section"&gt;
+    &lt;div class="genome-section-title"&gt;Corps&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="genome-section"&gt;
+    &lt;div class="genome-section-title"&gt;Organes&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="genome-section"&gt;
+    &lt;div class="genome-section-title"&gt;Cellules&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_genome_layout" style="display: none;"><code>.panel-right {
+  width: 45%;
+  background: #252525;
+  min-height: 100vh;
+  padding: 24px 32px;
+  color: #fff;
+}
+.genome-header { text-align: center; margin-bottom: 32px; }
+.genome-title { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+.genome-section { margin-bottom: 28px; }
+.genome-section-title {
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 1px solid #3a3a3a;
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_genome_layout')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component-card" data-category="templates">
+        <div class="component-header">
+            <div class="component-title-row">
+                <h3 class="component-name">arbiter_intent_revue_layout</h3>
+                <div class="preview-inline">
+                    <style>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.typology-section { margin-bottom: 24px; }
+.expandable-section { margin-top: 24px; border-top: 1px solid #d0d0c8; padding-top: 16px; }</style>
+                    <div class="panel-left">
+  <div class="panel-header">
+    <span class="panel-title">Intent Revue</span>
+    <span class="arbiter-badge">Arbitrage Sullivan</span>
+                </div>
+            </div>
+            <span class="complexity-badge" style="background: #ef4444">high</span>
+        </div>
+        <p class="component-description">Layout complet Intent Revue ARBITER (panneau gauche)</p>
+        
+        <div class="tags-container">
+            <span class="tag">layout</span><span class="tag">intent</span><span class="tag">revue</span><span class="tag">arbiter</span>
+        </div>
+        
+        <div class="preview-inline" style="width: 100%; margin: 12px 0; padding: 12px;">
+                    <style>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.typology-section { margin-bottom: 24px; }
+.expandable-section { margin-top: 24px; border-top: 1px solid #d0d0c8; padding-top: 16px; }</style>
+                    <div style="transform: scale(0.5); transform-origin: left;"><div class="panel-left">
+  <div class="panel-header">
+    <span class="panel-title">Intent Revue</span>
+    <span class="arbiter-badge">Arbitrage Sullivan</span></div>
+                </div>
+  <div class="typology-section">
+    <div class="section-title">Typologie déclarée</div>
+    <div class="typology-content">
+      <div class="typology-list">
+        <span>Brainstorm</span>
+        <span>Back</span>
+        <span>Front</span>
+        <span>Front</span>
+      </div>
+    </div>
+  </div>
+  <div class="expandable-section">
+    <div class="expandable-header">
+      <span class="expand-icon">↕</span>
+      <span class="expandable-title">§1.3 Endpoints</span>
+    </div>
+  </div>
+</div>
+        </div>
+        
+        <div class="code-section">
+            <button class="toggle-code" onclick="toggleCode('arbiter_intent_revue_layout')">📋 Voir le code</button>
+            <div class="code-content" id="code-arbiter_intent_revue_layout" style="display: none;">
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchTab('arbiter_intent_revue_layout', 'html')">HTML</button>
+                    <button class="code-tab" onclick="switchTab('arbiter_intent_revue_layout', 'css')">CSS</button>
+                </div>
+                <pre class="code-block html-code" id="html-arbiter_intent_revue_layout"><code>&lt;div class="panel-left"&gt;
+  &lt;div class="panel-header"&gt;
+    &lt;span class="panel-title"&gt;Intent Revue&lt;/span&gt;
+    &lt;span class="arbiter-badge"&gt;Arbitrage Sullivan&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="typology-section"&gt;
+    &lt;div class="section-title"&gt;Typologie déclarée&lt;/div&gt;
+    &lt;div class="typology-content"&gt;
+      &lt;div class="typology-list"&gt;
+        &lt;span&gt;Brainstorm&lt;/span&gt;
+        &lt;span&gt;Back&lt;/span&gt;
+        &lt;span&gt;Front&lt;/span&gt;
+        &lt;span&gt;Front&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="expandable-section"&gt;
+    &lt;div class="expandable-header"&gt;
+      &lt;span class="expand-icon"&gt;↕&lt;/span&gt;
+      &lt;span class="expandable-title"&gt;§1.3 Endpoints&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                <pre class="code-block css-code" id="css-arbiter_intent_revue_layout" style="display: none;"><code>.panel-left {
+  width: 55%;
+  background: #f0f0e8;
+  min-height: 100vh;
+  padding: 24px 32px;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d0d0c8;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5a52;
+  letter-spacing: 0.5px;
+}
+.typology-section { margin-bottom: 24px; }
+.expandable-section { margin-top: 24px; border-top: 1px solid #d0d0c8; padding-top: 16px; }</code></pre>
+                <button class="copy-btn" onclick="copyCode('arbiter_intent_revue_layout')">📄 Copier</button>
+            </div>
+        </div>
+    </div>
+    
+            </div>
+        </section>
+        
+    </main>
+    
+    <footer class="footer">
+        <p>ARBITER Component Library • Généré le 4 février 2026</p>
+        <p style="margin-top: 8px;">Source : <a href="arbiter-interface.html">arbiter-interface.html</a></p>
+    </footer>
+    
+    <script>
+        // Filtrage par catégorie
+        function filterCategory(category) {
+            // Mise à jour des boutons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mise à jour des sections
+            document.querySelectorAll('.category-section').forEach(section => {
+                if (category === 'all' || section.id === category) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+        
+        // Toggle code visibility
+        function toggleCode(name) {
+            const codeDiv = document.getElementById('code-' + name);
+            if (codeDiv.style.display === 'none') {
+                codeDiv.style.display = 'block';
+            } else {
+                codeDiv.style.display = 'none';
+            }
+        }
+        
+        // Switch tab HTML/CSS
+        function switchTab(name, type) {
+            // Update tabs
+            const tabs = document.querySelectorAll('#code-' + name + ' .code-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content
+            document.getElementById('html-' + name).style.display = type === 'html' ? 'block' : 'none';
+            document.getElementById('css-' + name).style.display = type === 'css' ? 'block' : 'none';
+        }
+        
+        // Copy code
+        function copyCode(name) {
+            const htmlCode = document.getElementById('html-' + name).textContent;
+            const cssCode = document.getElementById('css-' + name).textContent;
+            const fullCode = '/* HTML */\n' + htmlCode + '\n\n/* CSS */\n' + cssCode;
+            
+            navigator.clipboard.writeText(fullCode).then(() => {
+                const btn = document.querySelector('#code-' + name + ' .copy-btn');
+                btn.textContent = '✓ Copié !';
+                setTimeout(() => {
+                    btn.textContent = '📄 Copier';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

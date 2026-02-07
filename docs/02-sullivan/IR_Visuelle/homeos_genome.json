@@ -1,0 +1,1020 @@
+{
+  "metadata": {
+    "intent": "PaaS_Studio",
+    "version": "0.1.0",
+    "generated_at": "2026-02-05T08:41:29.028020+00:00"
+  },
+  "topology": [
+    "Brainstorm",
+    "Back",
+    "Front",
+    "Deploy"
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/studio/reports/ir",
+      "x_ui_hint": "generic",
+      "summary": "Get Ir Report",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/reports/arbitrage",
+      "x_ui_hint": "generic",
+      "summary": "Get Arbitrage Report",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/arbitrage/forms",
+      "x_ui_hint": "generic",
+      "summary": "Get Arbitrage Forms",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/validate",
+      "x_ui_hint": "generic",
+      "summary": "Post Studio Validate",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/distillation/entries",
+      "x_ui_hint": "generic",
+      "summary": "Get Distillation Entries",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/genome/summary",
+      "x_ui_hint": "generic",
+      "summary": "Get Genome Summary",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/next/{current_step}",
+      "x_ui_hint": "generic",
+      "summary": "Navigate Next Step",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/step/{step}",
+      "x_ui_hint": "detail",
+      "summary": "Get Step Fragment",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/step/5/layouts",
+      "x_ui_hint": "generic",
+      "summary": "Get Step 5 Layouts",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/step/5/select-layout/{layout_id}",
+      "x_ui_hint": "generic",
+      "summary": "Select Layout",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/designer/upload",
+      "x_ui_hint": "form",
+      "summary": "Studio Designer Upload",
+      "visual_hint": "upload",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_file_input",
+      "wireframe_sketch": "Drop zone with icon + file list + progress bars + upload button"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/zoom/{level}/{target_id}",
+      "x_ui_hint": "detail",
+      "summary": "Handle Zoom",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/finalize",
+      "x_ui_hint": "generic",
+      "summary": "Finalize Generation",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/zoom/out",
+      "x_ui_hint": "generic",
+      "summary": "Handle Zoom Out",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/session",
+      "x_ui_hint": "generic",
+      "summary": "Get Session",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "POST",
+      "path": "/studio/session/reset",
+      "x_ui_hint": "generic",
+      "summary": "Reset Session",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/typologies/arbiter",
+      "x_ui_hint": "generic",
+      "summary": "Get Arbiter Typologies",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/typologies/daisy",
+      "x_ui_hint": "generic",
+      "summary": "Get Daisy Typologies",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/inference/{typology}",
+      "x_ui_hint": "detail",
+      "summary": "Get Inference Results",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/agent/chat",
+      "x_ui_hint": "generic",
+      "summary": "Chat",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/agent/chat/stream",
+      "x_ui_hint": "generic",
+      "summary": "Chat Stream",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/agent/session/{session_id}",
+      "x_ui_hint": "detail",
+      "summary": "Get Session",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/agent/session/{session_id}/clear",
+      "x_ui_hint": "generic",
+      "summary": "Clear Session",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/agent/tools",
+      "x_ui_hint": "generic",
+      "summary": "List Tools",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "POST",
+      "path": "/execute",
+      "x_ui_hint": "form",
+      "summary": "Execute Plan",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "x_ui_hint": "status",
+      "summary": "Health",
+      "visual_hint": "stat",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_stat",
+      "wireframe_sketch": "Grid of stat cards with large numbers + trend indicators + sparklines"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/genome",
+      "x_ui_hint": "generic",
+      "summary": "Get Studio Genome",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/search",
+      "x_ui_hint": "dashboard",
+      "summary": "Search Component",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/components",
+      "x_ui_hint": "dashboard",
+      "summary": "List Components",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "x_ui_hint": "generic",
+      "summary": "Serve Index",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio/",
+      "x_ui_hint": "generic",
+      "summary": "Serve Studio Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/studio",
+      "x_ui_hint": "generic",
+      "summary": "Serve Studio Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/homeos/",
+      "x_ui_hint": "generic",
+      "summary": "Serve Homeos Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/homeos",
+      "x_ui_hint": "generic",
+      "summary": "Serve Homeos Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/components/",
+      "x_ui_hint": "dashboard",
+      "summary": "Serve Components Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/components",
+      "x_ui_hint": "dashboard",
+      "summary": "Serve Components Page",
+      "visual_hint": "list",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_list",
+      "wireframe_sketch": "Vertical list with item titles + descriptions + action icons"
+    },
+    {
+      "method": "GET",
+      "path": "/arbiter-showcase",
+      "x_ui_hint": "generic",
+      "summary": "Serve Arbiter Showcase",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "GET",
+      "path": "/daisy-showcase",
+      "x_ui_hint": "generic",
+      "summary": "Serve Daisy Showcase",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/dev/analyze",
+      "x_ui_hint": "form",
+      "summary": "Sullivan Dev Analyze",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/designer/analyze",
+      "x_ui_hint": "form",
+      "summary": "Sullivan Designer Analyze",
+      "visual_hint": "form",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_fieldset",
+      "wireframe_sketch": "Grouped input fields with labels + submit button + validation messages"
+    },
+    {
+      "method": "POST",
+      "path": "/sullivan/designer/upload",
+      "x_ui_hint": "form",
+      "summary": "Sullivan Designer Upload",
+      "visual_hint": "upload",
+      "visual_category": "data_input",
+      "inferred_daisy_component": "daisy_file_input",
+      "wireframe_sketch": "Drop zone with icon + file list + progress bars + upload button"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/preview/{component_id}",
+      "x_ui_hint": "dashboard",
+      "summary": "Preview Component",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/preview",
+      "x_ui_hint": "generic",
+      "summary": "Preview List",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    },
+    {
+      "method": "GET",
+      "path": "/sullivan/preview/{component_id}/render",
+      "x_ui_hint": "dashboard",
+      "summary": "Render Component",
+      "visual_hint": "card",
+      "visual_category": "data_display",
+      "inferred_daisy_component": "daisy_card",
+      "wireframe_sketch": "Header with title + avatar/icon + body content + action buttons footer"
+    }
+  ],
+  "schema_definitions": {
+    "Body_post_studio_validate_studio_validate_post": {
+      "type": "object",
+      "properties": {
+        "section_id": {
+          "type": "string",
+          "title": "Section Id"
+        },
+        "section_title": {
+          "type": "string",
+          "title": "Section Title"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Items",
+          "default": []
+        },
+        "verdict": {
+          "type": "string",
+          "title": "Verdict"
+        }
+      },
+      "required": [
+        "section_id",
+        "section_title",
+        "verdict"
+      ]
+    },
+    "Body_studio_designer_upload_studio_designer_upload_post": {
+      "type": "object",
+      "properties": {
+        "design_file": {
+          "type": "string",
+          "format": "binary",
+          "title": "Design File"
+        }
+      },
+      "required": [
+        "design_file"
+      ]
+    },
+    "Body_sullivan_designer_upload_sullivan_designer_upload_post": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary",
+          "title": "File"
+        }
+      },
+      "required": [
+        "file"
+      ]
+    },
+    "ChatRequest": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "title": "Message"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Session Id"
+        },
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "default": "anonymous"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Context"
+        },
+        "step": {
+          "type": "integer",
+          "title": "Step",
+          "default": 1
+        },
+        "mode": {
+          "type": "string",
+          "title": "Mode",
+          "default": "creation"
+        }
+      },
+      "required": [
+        "message"
+      ]
+    },
+    "ChatResponse": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "title": "Content"
+        },
+        "session_id": {
+          "type": "string",
+          "title": "Session Id"
+        },
+        "tool_calls": {
+          "items": {},
+          "type": "array",
+          "title": "Tool Calls"
+        },
+        "dom_actions": {
+          "items": {},
+          "type": "array",
+          "title": "Dom Actions",
+          "default": []
+        },
+        "code_actions": {
+          "items": {},
+          "type": "array",
+          "title": "Code Actions",
+          "default": []
+        },
+        "metadata": {
+          "type": "object",
+          "title": "Metadata"
+        }
+      },
+      "required": [
+        "content",
+        "session_id",
+        "tool_calls",
+        "metadata"
+      ]
+    },
+    "DesignerAnalyzeRequest": {
+      "type": "object",
+      "properties": {
+        "design_path": {
+          "type": "string",
+          "title": "Design Path"
+        },
+        "output_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Output Path"
+        },
+        "non_interactive": {
+          "type": "boolean",
+          "title": "Non Interactive",
+          "default": false
+        }
+      },
+      "required": [
+        "design_path"
+      ]
+    },
+    "DesignerAnalyzeResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Success"
+        },
+        "design_structure": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Design Structure"
+        },
+        "matched_patterns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matched Patterns"
+        },
+        "frontend_structure": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frontend Structure"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "success",
+        "message"
+      ]
+    },
+    "DevAnalyzeRequest": {
+      "type": "object",
+      "properties": {
+        "backend_path": {
+          "type": "string",
+          "title": "Backend Path"
+        },
+        "output_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Output Path"
+        },
+        "analyze_only": {
+          "type": "boolean",
+          "title": "Analyze Only",
+          "default": false
+        },
+        "non_interactive": {
+          "type": "boolean",
+          "title": "Non Interactive",
+          "default": false
+        }
+      },
+      "required": [
+        "backend_path"
+      ]
+    },
+    "DevAnalyzeResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Success"
+        },
+        "global_function": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Global Function"
+        },
+        "ui_intent": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ui Intent"
+        },
+        "frontend_structure": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frontend Structure"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "success",
+        "message"
+      ]
+    },
+    "ExecutePlanRequest": {
+      "type": "object",
+      "properties": {
+        "plan_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan Path"
+        },
+        "plan_json": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan Json"
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PROTO",
+                "PROD"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workflow",
+          "default": "PROTO"
+        },
+        "output_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Output Dir"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Context"
+        }
+      },
+      "required": null
+    },
+    "ExecutePlanResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Success"
+        },
+        "task_id": {
+          "type": "string",
+          "title": "Task Id"
+        },
+        "results": {
+          "type": "object",
+          "title": "Results"
+        },
+        "metrics": {
+          "type": "object",
+          "title": "Metrics"
+        },
+        "output_dir": {
+          "type": "string",
+          "title": "Output Dir"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "success",
+        "task_id",
+        "results",
+        "metrics",
+        "output_dir",
+        "message"
+      ]
+    },
+    "HTTPValidationError": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "required": null
+    },
+    "SearchComponentRequest": {
+      "type": "object",
+      "properties": {
+        "intent": {
+          "type": "string",
+          "title": "Intent"
+        },
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "default": "default_user"
+        }
+      },
+      "required": [
+        "intent"
+      ]
+    },
+    "SearchComponentResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Success"
+        },
+        "component": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Component"
+        },
+        "found_in": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Found In"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "success",
+        "message"
+      ]
+    },
+    "SessionResponse": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "title": "Session Id"
+        },
+        "user_id": {
+          "type": "string",
+          "title": "User Id"
+        },
+        "message_count": {
+          "type": "integer",
+          "title": "Message Count"
+        },
+        "current_step": {
+          "type": "integer",
+          "title": "Current Step"
+        },
+        "current_project": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Project"
+        },
+        "mode": {
+          "type": "string",
+          "title": "Mode"
+        },
+        "messages": {
+          "items": {},
+          "type": "array",
+          "title": "Messages"
+        }
+      },
+      "required": [
+        "session_id",
+        "user_id",
+        "message_count",
+        "current_step",
+        "current_project",
+        "mode",
+        "messages"
+      ]
+    },
+    "ValidationError": {
+      "type": "object",
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ]
+    }
+  }
+}

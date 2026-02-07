@@ -589,6 +589,19 @@ async def get_step_4_defaults(request: Request) -> HTMLResponse:
                 </button>
             </div>
         </div>
+        
+        <div class="mt-8 p-6 border border-emerald-200 bg-emerald-50/30 rounded-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-emerald-800">🧬 Explorer le Genome</h3>
+                    <p class="text-sm text-emerald-600">Naviguer dans la structure N0-N3 du projet</p>
+                </div>
+                <a href="/studio/drilldown" target="_blank" 
+                   class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-all">
+                    Ouvrir le Drill-Down
+                </a>
+            </div>
+        </div>
     </div>
     """
     
@@ -1365,5 +1378,584 @@ async def reset_session():
     return {"status": "reset"}
 
 
+# =============================================================================
+# ROUTES ARBITER (Composants suggérés + Inférence)
+# =============================================================================
+
+@router.get("/typologies/arbiter", response_class=HTMLResponse)
+async def get_arbiter_typologies(request: Request):
+    """
+    Retourne les composants suggérés pour le panneau ARBITER (panneau droit).
+    Affiche des PREVIEWS VISUELLES des composants au lieu de simples noms.
+    """
+    # Charge le genome pour inférer les composants
+    genome = load_genome()
+    
+    if not genome:
+        return HTMLResponse(
+            content="""<div class="arbiter-component-grid">
+                <div class="arbiter-component-item">
+                    <div style="text-align: center; padding: 20px; color: #888;">
+                        <div style="font-size: 24px; margin-bottom: 8px;">📦</div>
+                        <span class="arbiter-component-name">Aucun composant</span>
+                        <p class="arbiter-component-reason">Génome non disponible</p>
+                    </div>
+                </div>
+            </div>"""
+        )
+    
+    # Extrait les endpoints et infère les composants avec previews
+    endpoints = genome.get("endpoints", [])
+    
+    # Définit les previews visuelles par type de composant
+    PREVIEWS = {
+        "table": {
+            "icon": "📊",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 8px; width: 100%;">
+                <div style="display: flex; gap: 8px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid #3a3a3a;">
+                    <div style="width: 30%; height: 6px; background: #555; border-radius: 2px;"></div>
+                    <div style="width: 40%; height: 6px; background: #555; border-radius: 2px;"></div>
+                    <div style="width: 20%; height: 6px; background: #555; border-radius: 2px;"></div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+                    <div style="width: 30%; height: 4px; background: #444; border-radius: 1px;"></div>
+                    <div style="width: 40%; height: 4px; background: #444; border-radius: 1px;"></div>
+                    <div style="width: 20%; height: 4px; background: #444; border-radius: 1px;"></div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <div style="width: 30%; height: 4px; background: #444; border-radius: 1px;"></div>
+                    <div style="width: 40%; height: 4px; background: #444; border-radius: 1px;"></div>
+                    <div style="width: 20%; height: 4px; background: #444; border-radius: 1px;"></div>
+                </div>
+            </div>""",
+            "label": "Tableau"
+        },
+        "form": {
+            "icon": "📝",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 10px; width: 100%;">
+                <div style="margin-bottom: 6px;">
+                    <div style="width: 40%; height: 4px; background: #7cb342; border-radius: 1px; margin-bottom: 3px;"></div>
+                    <div style="width: 100%; height: 12px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 2px;"></div>
+                </div>
+                <div>
+                    <div style="width: 30%; height: 4px; background: #7cb342; border-radius: 1px; margin-bottom: 3px;"></div>
+                    <div style="width: 100%; height: 12px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 2px;"></div>
+                </div>
+            </div>""",
+            "label": "Formulaire"
+        },
+        "card": {
+            "icon": "📋",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 6px; padding: 10px; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <div style="width: 20px; height: 20px; background: #7cb342; border-radius: 50%;"></div>
+                    <div style="flex: 1;">
+                        <div style="width: 60%; height: 5px; background: #555; border-radius: 2px; margin-bottom: 3px;"></div>
+                        <div style="width: 40%; height: 3px; background: #444; border-radius: 1px;"></div>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 3px; background: #333; border-radius: 1px; margin-bottom: 2px;"></div>
+                <div style="width: 80%; height: 3px; background: #333; border-radius: 1px;"></div>
+            </div>""",
+            "label": "Carte"
+        },
+        "modal": {
+            "icon": "🗑️",
+            "html": """<div style="position: relative; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 12px; width: 100%;">
+                <div style="background: #2a2a2a; border: 1px solid #7cb342; border-radius: 6px; padding: 8px; margin: 0 auto; width: 80%;">
+                    <div style="width: 60%; height: 5px; background: #fff; border-radius: 2px; margin: 0 auto 6px;"></div>
+                    <div style="display: flex; gap: 6px; justify-content: center;">
+                        <div style="width: 30%; height: 10px; background: #666; border-radius: 2px;"></div>
+                        <div style="width: 30%; height: 10px; background: #7cb342; border-radius: 2px;"></div>
+                    </div>
+                </div>
+            </div>""",
+            "label": "Modal"
+        },
+        "button": {
+            "icon": "🔘",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 12px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <div style="padding: 6px 14px; background: #7cb342; color: white; border-radius: 4px; font-size: 9px; font-weight: 600;">Action</div>
+                <div style="padding: 6px 14px; background: #444; color: #aaa; border-radius: 4px; font-size: 9px;">Cancel</div>
+            </div>""",
+            "label": "Boutons"
+        },
+        "list": {
+            "icon": "📃",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 8px; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid #3a3a3a;">
+                    <div style="width: 6px; height: 6px; background: #7cb342; border-radius: 50%;"></div>
+                    <div style="flex: 1; height: 4px; background: #444; border-radius: 1px;"></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid #3a3a3a;">
+                    <div style="width: 6px; height: 6px; background: #7cb342; border-radius: 50%;"></div>
+                    <div style="flex: 1; height: 4px; background: #444; border-radius: 1px;"></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 6px; height: 6px; background: #7cb342; border-radius: 50%;"></div>
+                    <div style="flex: 1; height: 4px; background: #444; border-radius: 1px;"></div>
+                </div>
+            </div>""",
+            "label": "Liste"
+        },
+        "toggle": {
+            "icon": "🔄",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 12px; width: 100%; display: flex; justify-content: space-around; align-items: center;">
+                <div style="width: 28px; height: 14px; background: #7cb342; border-radius: 7px; position: relative;">
+                    <div style="position: absolute; width: 10px; height: 10px; background: white; border-radius: 50%; top: 2px; right: 2px;"></div>
+                </div>
+                <div style="width: 28px; height: 14px; background: #444; border-radius: 7px; position: relative;">
+                    <div style="position: absolute; width: 10px; height: 10px; background: #888; border-radius: 50%; top: 2px; left: 2px;"></div>
+                </div>
+            </div>""",
+            "label": "Toggle"
+        },
+        "generic": {
+            "icon": "📦",
+            "html": """<div style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 4px; padding: 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <div style="width: 24px; height: 24px; background: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 12px; height: 12px; background: #7cb342; border-radius: 2px;"></div>
+                </div>
+                <div style="flex: 1;">
+                    <div style="width: 70%; height: 5px; background: #555; border-radius: 2px; margin-bottom: 3px;"></div>
+                    <div style="width: 50%; height: 3px; background: #444; border-radius: 1px;"></div>
+                </div>
+            </div>""",
+            "label": "Composant"
+        }
+    }
+    
+    inferred_components = []
+    
+    for ep in endpoints[:8]:  # Limite à 8 composants
+        if isinstance(ep, dict):
+            path = ep.get("path", "")
+            method = ep.get("method", "GET")
+            summary = ep.get("summary", path)
+        else:
+            path = str(ep)
+            method = "GET"
+            summary = path
+        
+        # Détermine le type de preview
+        if "list" in path.lower() or "all" in path.lower():
+            preview_type = "table"
+        elif "create" in path.lower() or "post" in method.lower():
+            preview_type = "form"
+        elif "delete" in path.lower():
+            preview_type = "modal"
+        elif "toggle" in path.lower() or "switch" in path.lower():
+            preview_type = "toggle"
+        elif "button" in path.lower():
+            preview_type = "button"
+        elif "get" in method.lower() and ("item" in path.lower() or "detail" in path.lower()):
+            preview_type = "card"
+        else:
+            preview_type = "generic"
+        
+        preview = PREVIEWS.get(preview_type, PREVIEWS["generic"])
+        
+        inferred_components.append({
+            "id": f"comp_{len(inferred_components)}",
+            "preview_html": preview["html"],
+            "preview_icon": preview["icon"],
+            "preview_label": preview["label"],
+            "endpoint": path,
+            "method": method
+        })
+    
+    # Génère le HTML avec previews visuelles
+    components_html = ""
+    for comp in inferred_components:
+        components_html += f"""
+        <div class="arbiter-component-item" data-component-id="{comp['id']}" style="background: #1e1e1e; border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#7cb342'" onmouseout="this.style.borderColor='#3a3a3a'">
+            <label class="flex items-start gap-3 cursor-pointer" style="display: flex; align-items: flex-start; gap: 12px;">
+                <input type="checkbox" class="component-checkbox" value="{comp['id']}" checked style="margin-top: 4px; accent-color: #7cb342;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px;">{comp['preview_icon']}</span>
+                        <span style="font-size: 11px; color: #7cb342; font-weight: 600; text-transform: uppercase;">{comp['preview_label']}</span>
+                        <code style="font-size: 9px; color: #666; background: #252525; padding: 2px 6px; border-radius: 3px; margin-left: auto;">{comp['method']}</code>
+                    </div>
+                    <div style="margin-bottom: 6px;">
+                        {comp['preview_html']}
+                    </div>
+                    <p style="font-size: 10px; color: #888; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{comp['endpoint']}</p>
+                </div>
+            </label>
+        </div>
+        """
+    
+    # Ajoute les actions
+    html = f"""
+    <div class="arbiter-component-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+        {components_html}
+    </div>
+    <div class="arbiter-component-actions" style="display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #3a3a3a;">
+        <button class="arbiter-btn arbiter-btn-secondary" onclick="selectAllArbiterComponents(false)" style="flex: 1; padding: 10px; background: #3a3a3a; color: #aaa; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">Tout désélectionner</button>
+        <button class="arbiter-btn arbiter-btn-primary" onclick="validateArbiterSelection()" style="flex: 1; padding: 10px; background: #7cb342; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">Valider ({len(inferred_components)})</button>
+    </div>
+    <script>
+        function selectAllArbiterComponents(select) {{
+            document.querySelectorAll('#arbiter-components-panel .component-checkbox').forEach(chk => {{
+                chk.checked = select;
+            }});
+        }}
+        function validateArbiterSelection() {{
+            const selected = Array.from(document.querySelectorAll('#arbiter-components-panel .component-checkbox:checked')).map(chk => chk.value);
+            console.log('Composants ARBITER sélectionnés:', selected);
+            if (window.navigateToStep4) {{
+                window.navigateToStep4();
+            }}
+        }}
+    </script>
+    """
+    
+    return HTMLResponse(content=html)
+
+
+@router.get("/typologies/daisy", response_class=HTMLResponse)
+async def get_daisy_typologies(request: Request):
+    """
+    Retourne les typologies DaisyUI (atomic design) pour le step 4.
+    """
+    genome = load_genome()
+    
+    if not genome:
+        return HTMLResponse(
+            content="""<div class="arbiter-component-grid">
+                <div class="arbiter-component-item">
+                    <div style="text-align: center; padding: 20px; color: #888;">
+                        Lancez d'abord l'analyse IR.
+                    </div>
+                </div>
+            </div>"""
+        )
+    
+    # Récupérer les composants DaisyUI depuis library.json
+    components = []
+    try:
+        library_path = Path(__file__).parent.parent.parent.parent / "output" / "components" / "library.json"
+        if library_path.exists():
+            with open(library_path, 'r') as f:
+                library = json.load(f)
+            
+            for cat_name, cat_comps in library.get("categories", {}).items():
+                for comp_name, comp in cat_comps.items():
+                    if isinstance(comp, dict) and comp.get("source") == "daisyui":
+                        components.append({
+                            "name": comp_name,
+                            "category": cat_name,
+                            "description": comp.get("description", ""),
+                            "complexity": comp.get("complexity", "low"),
+                            "html": comp.get("html", "")[:150]
+                        })
+    except Exception as e:
+        logger.warning(f"Erreur chargement library: {e}")
+    
+    # Grouper par catégorie
+    by_category = {"atoms": [], "molecules": [], "organisms": []}
+    for comp in components:
+        cat = comp["category"]
+        if cat in by_category:
+            by_category[cat].append(comp)
+    
+    # Générer HTML avec previews visuels
+    html_parts = ['<div class="daisy-typology-grid">']
+    
+    for category, comps in by_category.items():
+        if not comps:
+            continue
+            
+        icons = {"atoms": "⚛️", "molecules": "🧬", "organisms": "🔬"}
+        labels = {"atoms": "Atoms", "molecules": "Molecules", "organisms": "Organisms"}
+        colors = {"atoms": "#7cb342", "molecules": "#42a5f5", "organisms": "#ab47bc"}
+        
+        html_parts.append(f'''
+            <div class="daisy-category-section" style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #3a3a3a;">
+                    <span style="font-size: 18px;">{icons.get(category, "📦")}</span>
+                    <span style="color: {colors.get(category, '#aaa')}; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">
+                        {labels.get(category, category)}
+                    </span>
+                    <span style="background: {colors.get(category, '#555')}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px;">
+                        {len(comps)}
+                    </span>
+                </div>
+                <div class="daisy-component-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+        ''')
+        
+        for comp in comps:
+            complexity_color = {"low": "#4caf50", "medium": "#ff9800", "high": "#f44336"}.get(comp["complexity"], "#888")
+            
+            # Preview visuel minimal
+            preview_html = comp.get("html", "")
+            if len(preview_html) > 100:
+                preview_html = preview_html[:100] + "..."
+            
+            html_parts.append(f'''
+                <div class="daisy-component-item" style="background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onclick="selectDaisyComponent('{comp['name']}')" onmouseover="this.style.borderColor='{colors.get(category)}'" onmouseout="this.style.borderColor='#333'">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <input type="checkbox" id="daisy_{comp['name']}" style="cursor: pointer;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="color: #e0e0e0; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {comp['name']}
+                            </div>
+                            <div style="color: #666; font-size: 10px; margin-top: 2px;">
+                                {comp['description'][:40] if comp['description'] else 'DaisyUI component'}...
+                            </div>
+                        </div>
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: {complexity_color};" title="Complexity: {comp['complexity']}"></span>
+                    </div>
+                    <div style="background: #1a1a1a; border-radius: 4px; padding: 8px; font-size: 10px; color: #666; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: monospace;">
+                        {preview_html}
+                    </div>
+                </div>
+            ''')
+        
+        html_parts.append('</div></div>')
+    
+    html_parts.append('</div>')
+    html_parts.append(f'''
+        <div style="margin-top: 20px; padding: 15px; background: #1e3a1e; border-radius: 8px; border-left: 3px solid #4caf50;">
+            <div style="color: #4caf50; font-size: 12px; font-weight: 500; margin-bottom: 5px;">
+                🌼 {len(components)} composants DaisyUI disponibles
+            </div>
+            <div style="color: #81c784; font-size: 11px;">
+                Tailwind CSS uniquement • Atomic Design • Pre-validated
+            </div>
+        </div>
+        <script>
+            function selectDaisyComponent(name) {{
+                const checkbox = document.getElementById('daisy_' + name);
+                if (checkbox) checkbox.checked = !checkbox.checked;
+                
+                // Notifier le parent
+                if (window.parent && window.parent.selectComponent) {{
+                    window.parent.selectComponent('daisy_' + name);
+                }}
+            }}
+        </script>
+    ''')
+    
+    return HTMLResponse(content="".join(html_parts))
+
+
+@router.get("/inference/{typology}", response_class=HTMLResponse)
+async def get_inference_results(request: Request, typology: str):
+    """
+    Retourne les résultats d'inférence de composants pour une typologie donnée.
+    Typologies: Frontend, Backend, Brainstorm, Deploy
+    """
+    genome = load_genome()
+    
+    if not genome:
+        return HTMLResponse(
+            content="""<div class="p-4 text-amber-600 bg-amber-50 rounded-lg">
+                <p class="font-medium">⚠️ Génome non disponible</p>
+                <p class="text-sm mt-1">Lancez d'abord l'analyse IR.</p>
+            </div>"""
+        )
+    
+    # Filtre les endpoints selon la typologie
+    endpoints = genome.get("endpoints", [])
+    filtered_endpoints = []
+    
+    for ep in endpoints:
+        if isinstance(ep, dict):
+            path = ep.get("path", "")
+            method = ep.get("method", "GET")
+            summary = ep.get("summary", path)
+        else:
+            path = str(ep)
+            method = "GET"
+            summary = path
+        
+        # Logique simple de filtrage par typologie
+        include = True
+        if typology.lower() == "frontend":
+            # Tous les endpoints peuvent avoir un composant frontend
+            include = True
+        elif typology.lower() == "backend":
+            include = "api" in path.lower() or "internal" in path.lower()
+        
+        if include:
+            filtered_endpoints.append({"path": path, "method": method, "summary": summary})
+    
+    # Génère les cartes de composants
+    cards_html = ""
+    for i, ep in enumerate(filtered_endpoints[:12]):  # Max 12 composants
+        comp_id = f"inferred_{i}"
+        
+        # Détermine le type de composant
+        if "list" in ep["path"].lower():
+            icon = "📊"
+            comp_type = "Table"
+            description = f"Tableau de données pour {ep['summary']}"
+        elif "create" in ep["path"].lower() or ep["method"] == "POST":
+            icon = "📝"
+            comp_type = "Form"
+            description = f"Formulaire de création pour {ep['summary']}"
+        elif "delete" in ep["path"].lower():
+            icon = "🗑️"
+            comp_type = "Modal"
+            description = f"Modal de confirmation pour suppression"
+        else:
+            icon = "📋"
+            comp_type = "Card"
+            description = f"Carte d'affichage pour {ep['summary']}"
+        
+        cards_html += f"""
+        <div class="component-card" id="card-{comp_id}">
+            <div class="component-header">
+                <input type="checkbox" class="component-checkbox" value="{comp_id}" id="chk-{comp_id}" checked>
+                <span class="component-title" onclick="document.getElementById('chk-{comp_id}').click()">{icon} {comp_type}</span>
+            </div>
+            <p class="component-description">{description}</p>
+            <div class="component-endpoints">
+                <span class="endpoint-badge">{ep['method']}</span>
+                <span class="endpoint-badge">{ep['path']}</span>
+            </div>
+            <div class="component-reason">
+                <span class="reason-icon">💡</span>
+                <span class="reason-text">Inféré depuis l'endpoint "{ep['summary']}"</span>
+            </div>
+        </div>
+        """
+    
+    html = f"""
+    <div class="components-form">
+        <div class="components-grid">
+            {cards_html}
+        </div>
+    </div>
+    <div class="inference-footer">
+        <button class="btn-validate-components" onclick="validateComponentSelection()">
+            <span class="btn-icon">🚀</span> Valider la sélection ({len(filtered_endpoints)} composants)
+        </button>
+    </div>
+    """
+    
+    return HTMLResponse(content=html)
+
+
+@router.get("/drilldown", response_class=HTMLResponse)
+async def get_drilldown_view(request: Request):
+    """Vue drill-down du genome enrichi (N0-N3)."""
+    from pathlib import Path
+    html_path = Path("Frontend/drilldown-sidebar.html")
+    if html_path.exists():
+        return HTMLResponse(content=html_path.read_text(encoding='utf-8'))
+    return HTMLResponse(content="<p>❌ Drilldown not available</p>")
+
+
+@router.get("/genome/enriched", response_class=JSONResponse)
+async def get_enriched_genome():
+    """Retourne le genome enrichi pour le drilldown."""
+    import json
+    from pathlib import Path
+    genome_path = Path("output/studio/genome_enrichi.json")
+    if genome_path.exists():
+        return JSONResponse(content=json.loads(genome_path.read_text(encoding='utf-8')))
+    return JSONResponse(content={"error": "Genome enrichi non disponible"}, status_code=404)
+
+
+@router.post("/majordome/chat")
+async def majordome_chat(request: Request):
+    """Chat Majordome avec routage intelligent (classification heuristique)."""
+    import json
+    import time
+    from fastapi.responses import JSONResponse
+    
+    body = await request.json()
+    message = body.get("message", "")
+    
+    start_time = time.time()
+    
+    # Classification rapide par heuristiques (ZERO appel API)
+    provider = classify_message(message)
+    
+    # Simulation de réponse (à remplacer par appel provider réel)
+    responses = {
+        "groq": f"Réponse rapide via Groq : {get_action_response(message)}",
+        "deepseek": f"Analyse approfondie via DeepSeek : {get_analysis_response(message)}",
+        "gemini": f"Analyse document via Gemini : {get_doc_response(message)}",
+        "kimi": f"Génération UI via Kimi : {get_ui_response(message)}"
+    }
+    
+    elapsed = int((time.time() - start_time) * 1000)
+    
+    return JSONResponse({
+        "response": responses.get(provider, responses["groq"]),
+        "provider": provider,
+        "latency_ms": elapsed
+    })
+
+
+def classify_message(message: str) -> str:
+    """Classifie par heuristiques simples - ZERO appel API."""
+    msg = message.lower()
+    
+    # Navigation / commandes courtes → Groq
+    if any(w in msg for w in ["va", "ouvre", "montre", "liste", "status",
+                                "aide", "help", "next", "retour", "open", "list", "show"]):
+        return "groq"
+    
+    # Analyse code / architecture → DeepSeek
+    if any(w in msg for w in ["analyse", "refactor", "bug", "code",
+                                "architecture", "pourquoi", "explique", "explain", "fix", "debug"]):
+        return "deepseek"
+    
+    # Documents / images → Gemini
+    if any(w in msg for w in ["document", "fichier", "image", "pdf",
+                                "screenshot", "png", "file", "doc"]):
+        return "gemini"
+    
+    # UI / template → Kimi
+    if any(w in msg for w in ["template", "composant", "ui", "design",
+                                "layout", "figma", "component", "generate", "card", "generer"]):
+        return "kimi"
+    
+    # Default → Groq (le plus rapide)
+    return "groq"
+
+
+def get_action_response(message: str) -> str:
+    """Génère une réponse d'action rapide."""
+    msg = message.lower()
+    if "drilldown" in msg or "drill" in msg:
+        return "Le Drill-Down N0-N3 est disponible avec 9 corps et 44 atomes."
+    if "composant" in msg or "component" in msg:
+        return "100 composants disponibles (57 DaisyUI + 43 ARBITER)."
+    if "status" in msg:
+        return "Genome enrichi: 9 Corps, 20 Organes, 44 Atomes. Tous mappés."
+    return "Action effectuée avec succès via Groq (20ms)."
+
+
+def get_analysis_response(message: str) -> str:
+    """Génère une réponse d'analyse."""
+    return "Architecture N0-N3 validée. 44 endpoints analysés avec composants DaisyUI spécifiques."
+
+
+def get_doc_response(message: str) -> str:
+    """Génère une réponse document."""
+    return "Document analysé. 44 endpoints identifiés avec leurs composants visuels."
+
+
+def get_ui_response(message: str) -> str:
+    """Génère une réponse UI."""
+    return "Composant suggéré: daisy_card avec header/body/footer. Score estimé: 85/100."
+
+
 # Export pour inclusion dans api.py
 __all__ = ["router"]
+
+
+# =============================================================================
+# EXTENSION: IR + GENOME VIEW (Mission 2/6)
+# =============================================================================
+# Import et inclusion des routes IR/Genome
+from .studio_routes_ir_genome import router as ir_genome_router
+
+# Inclure les routes supplémentaires
+router.include_router(ir_genome_router)

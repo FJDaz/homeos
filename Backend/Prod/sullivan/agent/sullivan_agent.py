@@ -121,6 +121,11 @@ class SullivanAgent:
                     original_message=message,
                     tool_results=tool_results,
                 )
+            
+            # Extraire les dom_actions des tool_results (pour injection dans la sidebar, etc.)
+            for result in tool_results:
+                if result.success and result.data and "dom_action" in result.data:
+                    dom_actions.append(result.data["dom_action"])
         
         # Ajouter la réponse à l'historique
         metadata = {"tool_calls": tool_calls}

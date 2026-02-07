@@ -782,6 +782,58 @@ Examples:
         help="Path to JSON schema (default: docs/references/technique/ir_schema.json)"
     )
 
+    # monitor - Rapport d'utilisation des modes AetherFlow
+    monitor_parser = subparsers.add_parser(
+        "monitor",
+        help="Rapport d'utilisation des modes AetherFlow (PROTO, PROD, FRONTEND, DESIGNER, SURGICAL)"
+    )
+    monitor_parser.add_argument(
+        "--format",
+        type=str,
+        choices=["text", "json"],
+        default="text",
+        help="Format de sortie: text (défaut) ou json"
+    )
+    monitor_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Chemin de sortie (défaut: affichage console)"
+    )
+    monitor_parser.add_argument(
+        "--period",
+        type=str,
+        choices=["day", "week", "month", "all"],
+        default="all",
+        help="Période de rapport (défaut: all)"
+    )
+
+    # inference - Rapport d'inférences LLM (tracking détaillé)
+    inference_parser = subparsers.add_parser(
+        "inference",
+        help="Rapport détaillé des inférences LLM (Groq, Gemini, DeepSeek, Claude)"
+    )
+    inference_parser.add_argument(
+        "--format",
+        type=str,
+        choices=["text", "json"],
+        default="text",
+        help="Format de sortie: text (défaut) ou json"
+    )
+    inference_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        default=None,
+        help="Chemin de sortie (défaut: affichage console)"
+    )
+    inference_parser.add_argument(
+        "--period",
+        type=str,
+        choices=["session", "all"],
+        default="session",
+        help="Période: session (défaut) ou all (historique complet)"
+    )
+
     # sullivan (--design = designer en court : sullivan --design image.png)
     sullivan_dev_parser = subparsers.add_parser(
         "sullivan",
@@ -1404,6 +1456,36 @@ Examples:
             return 0
         
         return asyncio.run(run_studio())
+    
+    # Handle monitor command (mode tracking report)
+    if args.command == "monitor":
+        from .core.mode_tracking_report import generate_report
+        report = generate_report(
+            format=args.format,
+            period=args.period
+        )
+        if args.output:
+            with open(args.output, 'w', encoding='utf-8') as f:
+                f.write(report)
+            console.print(f"[green]Rapport sauvegardé:[/green] {args.output}")
+        else:
+            console.print(report)
+        return 0
+    
+    # Handle inference command (LLM inference tracking report)
+    if args.command == "inference":
+        from .core.inference_tracker import get_inference_report
+        report = get_inference_report(
+            format=args.format,
+            period=args.period
+        )
+        if args.output:
+            with open(args.output, 'w', encoding='utf-8') as f:
+                f.write(report)
+            console.print(f"[green]Rapport d'inférences sauvegardé:[/green] {args.output}")
+        else:
+            console.print(report)
+        return 0
     
     # Handle sullivan --design (court : sullivan -d image.png = designer)
     if args.command == "sullivan" and getattr(args, "design", None):

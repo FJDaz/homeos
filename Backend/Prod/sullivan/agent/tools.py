@@ -11,10 +11,31 @@ Exemples d'outils:
 
 import json
 import asyncio
+import time
+import re
 from typing import Dict, Any, List, Optional, Callable, Awaitable
 from dataclasses import dataclass
 from pathlib import Path
 from loguru import logger
+
+
+# ===== HELPERS REGISTRY =====
+
+REGISTRY_FILE = Path("/Users/francois-jeandazin/AETHERFLOW/output/components/registry.json")
+
+def _load_registry() -> List[Dict[str, Any]]:
+    """Charge le registre des composants."""
+    if REGISTRY_FILE.exists():
+        try:
+            return json.loads(REGISTRY_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, IOError):
+            return []
+    return []
+
+def _save_registry(registry: List[Dict[str, Any]]) -> None:
+    """Sauvegarde le registre des composants."""
+    REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    REGISTRY_FILE.write_text(json.dumps(registry, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 @dataclass
@@ -420,6 +441,68 @@ class ToolRegistry:
             handler=self._extract_components,
         ))
 
+        # Tool: select_component (SULLIVAN SELECTEUR)
+        self.register(Tool(
+            name="select_component",
+            description="Sélectionne un composant dans la library selon l'intention utilisateur. Cherche d'abord dans la Core Library, adapte les paramètres, et place au bon endroit. Utilise cette fonction PREFERENTIELLEMENT à generate_component.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "intent": {
+                        "type": "string",
+                        "description": "Description de ce que l'utilisateur veut (ex: 'bouton rouge', 'formulaire login')",
+                    },
+                    "target_zone": {
+                        "type": "string",
+                        "description": "Selecteur CSS de la zone cible (défaut: auto-détecté)",
+                        "default": "auto",
+                    },
+                    "params": {
+                        "type": "object",
+                        "description": "Paramètres d'adaptation (couleur, texte, endpoint, etc.)",
+                        "default": {},
+                    },
+                    "force_generate": {
+                        "type": "boolean",
+                        "description": "Forcer la génération même si un composant existe (défaut: false)",
+                        "default": False,
+                    },
+                },
+                "required": ["intent"],
+                "additionalProperties": True,
+            },
+            handler=self._select_component,
+        ))
+        
+        # Tool: select_component_set (SULLIVAN SELECTEUR SET)
+        self.register(Tool(
+            name="select_component_set",
+            description="Sélectionne un SET de composants pour une typologie entière basé sur les endpoints. Utilise l'inférence pour choisir automatiquement les composants appropriés.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "typography": {
+                        "type": "string",
+                        "enum": ["Brainstorm", "Backend", "Frontend", "Deploy"],
+                        "description": "La typologie cible",
+                    },
+                    "endpoints": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "path": {"type": "string"},
+                                "method": {"type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
+                            },
+                        },
+                        "description": "Liste des endpoints à couvrir",
+                    },
+                },
+                "required": ["typography"],
+            },
+            handler=self._select_component_set,
+        ))
+
     # ===== HANDLERS DES OUTILS =====
     
     async def _analyze_design(
@@ -508,13 +591,41 @@ Retourne UNIQUEMENT le code HTML, sans explications ni markdown.
                             html_lines.append(line)
                     html = "\n".join(html_lines).strip()
 
+                # Générer un ID unique pour le composant
+                component_id = f"{component_type}_{int(time.time())}"
+
+                # Sauvegarder dans le registre
+                registry = _load_registry()
+                registry_entry = {
+                    "id": component_id,
+                    "type": component_type,
+                    "description": description,
+                    "style": style,
+                    "html": html,
+                    "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                }
+                registry.append(registry_entry)
+                _save_registry(registry)
+
+                # Sauvegarder aussi le HTML dans un fichier séparé
+                component_file = REGISTRY_FILE.parent / f"{component_id}.html"
+                component_file.write_text(html, encoding="utf-8")
+
                 return ToolResult(
                     success=True,
-                    content=f"Composant {component_type} généré en style {style}.",
+                    content=f"✓ Composant '{component_id}' généré et ajouté à la sidebar.",
                     data={
                         "html": html,
                         "component_type": component_type,
                         "style": style,
+                        "component_id": component_id,
+                        # Action DOM pour injecter dans la sidebar
+                        "dom_action": {
+                            "type": "insertHTML",
+                            "selector": "#sullivan-components",
+                            "position": "beforeend",
+                            "html": f'<div class="component-card" data-id="{component_id}"><h4>{component_type}</h4><div class="preview">{html}</div></div>'
+                        },
                     },
                 )
             else:
@@ -539,13 +650,41 @@ Retourne UNIQUEMENT le code HTML, sans explications ni markdown.
                                 html_lines.append(line)
                         html = "\n".join(html_lines).strip()
 
+                    # Générer un ID unique pour le composant
+                    component_id = f"{component_type}_{int(time.time())}"
+
+                    # Sauvegarder dans le registre
+                    registry = _load_registry()
+                    registry_entry = {
+                        "id": component_id,
+                        "type": component_type,
+                        "description": description,
+                        "style": style,
+                        "html": html,
+                        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    }
+                    registry.append(registry_entry)
+                    _save_registry(registry)
+
+                    # Sauvegarder aussi le HTML dans un fichier séparé
+                    component_file = REGISTRY_FILE.parent / f"{component_id}.html"
+                    component_file.write_text(html, encoding="utf-8")
+
                     return ToolResult(
                         success=True,
-                        content=f"Composant {component_type} généré en style {style} (via Gemini).",
+                        content=f"✓ Composant '{component_id}' généré (via Gemini) et ajouté à la sidebar.",
                         data={
                             "html": html,
                             "component_type": component_type,
                             "style": style,
+                            "component_id": component_id,
+                            # Action DOM pour injecter dans la sidebar
+                            "dom_action": {
+                                "type": "insertHTML",
+                                "selector": "#sullivan-components",
+                                "position": "beforeend",
+                                "html": f'<div class="component-card" data-id="{component_id}"><h4>{component_type}</h4><div class="preview">{html}</div></div>'
+                            },
                         },
                     )
 
@@ -1305,6 +1444,414 @@ Brief: {brief or 'Crée un plan d implémentation basé sur ce document.'}"""
                 success=False,
                 content=f"Erreur extraction composants: {str(e)}",
                 error=str(e),
+            )
+
+    # ===== SULLIVAN SELECTEUR =====
+    # Nouvelle architecture: Tier 1 (Core Library) → Tier 2 (Adaptation) → Tier 3 (Generation)
+
+    # Mapping intent → zone cible (logique Top-Bottom)
+    INTENT_TO_ZONE = {
+        # Brainstorm (étapes 1-3)
+        "wireframe|sketch|idea|concept|brainstorm|maquette": "#tab-brainstorm",
+        
+        # Backend (étapes 4-5)
+        "api|endpoint|schema|model|database|backend": "#tab-backend",
+        
+        # Frontend (étapes 6-8) - DÉFAUT
+        "button|form|card|table|input|modal|navbar|alert|badge|list|nav|header|footer": "#sullivan-components",
+        
+        # Deploy (étape 9)
+        "deploy|config|build|preview|pipeline": "#tab-deploy",
+    }
+
+    def _detect_target_zone(self, intent: str) -> str:
+        """Détecte la zone cible selon l'intention."""
+        intent_lower = intent.lower()
+        for pattern, zone in self.INTENT_TO_ZONE.items():
+            keywords = pattern.split("|")
+            if any(kw in intent_lower for kw in keywords):
+                return zone
+        return "#sullivan-components"  # Défaut: sidebar components
+
+    def _load_component_library(self) -> Dict[str, Any]:
+        """
+        Charge la Core Library depuis output/components/library.json
+        
+        Returns:
+            Dict avec les composants organisés par catégorie
+        """
+        library_path = Path("/Users/francois-jeandazin/AETHERFLOW/output/components/library.json")
+        
+        if not library_path.exists():
+            logger.warning(f"Library non trouvée: {library_path}")
+            return {"categories": {}, "stats": {}}
+        
+        try:
+            data = json.loads(library_path.read_text(encoding="utf-8"))
+            logger.debug(f"Library chargée: {data.get('stats', {}).get('total', 0)} composants")
+            return data
+        except Exception as e:
+            logger.error(f"Erreur chargement library: {e}")
+            return {"categories": {}, "stats": {}}
+
+    def _find_best_component(self, library: Dict, intent: str) -> Optional[Dict]:
+        """
+        Cherche le meilleur composant correspondant à l'intention.
+        
+        Algorithme:
+        1. Matching exact sur les tags
+        2. Matching partiel (score de similarité)
+        3. Retourne le meilleur match ou None
+        
+        Supporte le français via mapping FR→EN.
+        """
+        if not library or "categories" not in library:
+            return None
+        
+        # Mapping français → anglais pour matching
+        FR_TO_EN = {
+            "bouton": "button",
+            "formulaire": "form",
+            "tableau": "table",
+            "carte": "card",
+            "champ": "input",
+            "icône": "icon",
+            "icone": "icon",
+            "entête": "header",
+            "entete": "header",
+            "pied": "footer",
+            "barre": "bar",
+            "recherche": "search",
+            "nav": "nav",
+            "navigation": "nav",
+            "login": "login",
+            "connexion": "login",
+            "modal": "modal",
+            "boîte": "modal",
+            "boite": "modal",
+            "liste": "list",
+            "texte": "text",
+            "couleur": "color",
+        }
+        
+        intent_lower = intent.lower()
+        intent_words = set(intent_lower.split())
+        
+        # Ajouter traductions FR→EN aux mots de l'intent
+        for fr_word, en_word in FR_TO_EN.items():
+            if fr_word in intent_lower:
+                intent_words.add(en_word)
+        
+        best_match = None
+        best_score = 0
+        
+        # Parcourir toutes les catégories
+        for category, components in library["categories"].items():
+            for name, comp in components.items():
+                score = 0
+                tags = [t.lower() for t in comp.get("tags", [])]
+                
+                # 1. Matching exact sur les tags (prioritaire)
+                for tag in tags:
+                    if tag in intent_words:
+                        score += 15  # Score très élevé pour match tag exact
+                    elif tag in intent_lower:
+                        score += 10  # Match partiel
+                
+                # 2. Matching sur le nom du composant (nom simple ou traduit)
+                name_clean = name.lower().split("___")[0]  # Enlever suffixe ___description
+                if name_clean in intent_words:
+                    score += 12  # Nom exact match
+                elif name_clean in intent_lower:
+                    score += 8   # Nom partiel match
+                
+                # 3. Matching mots-clés prioritaires (button, card, form, etc.)
+                priority_keywords = ["button", "card", "form", "input", "modal", "search", "nav"]
+                for keyword in priority_keywords:
+                    if keyword in intent_words and keyword in tags:
+                        score += 8  # Bonus priorité
+                
+                # 4. Matching partiel général
+                comp_words = set(name_clean.split("_") + tags)
+                common_words = intent_words & comp_words
+                score += len(common_words) * 2
+                
+                # 5. Bonus catégorie
+                if category == "atoms" and any(w in intent_words for w in ["button", "input", "icon"]):
+                    score += 3
+                elif category == "molecules" and any(w in intent_words for w in ["form", "search", "card"]):
+                    score += 3
+                
+                # 5. Malus complexité si demande simple
+                complexity = comp.get("complexity", "medium")
+                if complexity == "high" and len(intent_words) < 3:
+                    score -= 3
+                
+                if score > best_score:
+                    best_score = score
+                    best_match = {
+                        **comp,
+                        "match_score": score,
+                        "matched_category": category,
+                    }
+        
+        # Seuil minimum pour considérer un match valide
+        if best_score >= 5:
+            logger.info(f"Meilleur match: {best_match['id']} (score: {best_score})")
+            return best_match
+        
+        logger.debug(f"Aucun match valide trouvé (meilleur score: {best_score})")
+        return None
+
+    def _adapt_component(self, component: Dict, params: Dict) -> str:
+        """
+        Adapte un composant avec les paramètres fournis.
+        
+        Remplace:
+        - Variables CSS (--xxx) par les valeurs fournies
+        - Data attributes (data-xxx) par les valeurs fournies
+        - Classes dynamiques si spécifiées
+        """
+        html = component.get("html", "")
+        css = component.get("css", "")
+        
+        # Fusionner avec les defaults
+        defaults = component.get("defaults", {})
+        effective_params = {**defaults, **params}
+        
+        # 1. Remplacer les variables CSS dans le style
+        for param_key, value in effective_params.items():
+            if param_key.startswith("css:"):
+                var_name = param_key[4:]  # Enlever le prefix
+                # Remplacer var(--xxx) par la valeur
+                css_var_pattern = rf'var\(--{re.escape(var_name)}\)'
+                css = re.sub(css_var_pattern, value, css)
+                # Remplacer aussi --xxx: default; par --xxx: value;
+                css_default_pattern = rf'(--{re.escape(var_name)}):\s*[^;]+;'
+                css = re.sub(css_default_pattern, f'\\1: {value};', css)
+        
+        # 2. Remplacer les data attributes
+        for param_key, value in effective_params.items():
+            if param_key.startswith("data:"):
+                attr_name = param_key[5:]
+                # Pattern: data-attr="value" ou data-attr='value'
+                pattern = f'data-{attr_name}="[^"]*"'
+                replacement = f'data-{attr_name}="{value}"'
+                html = re.sub(pattern, replacement, html)
+                # Pattern simple quote
+                pattern2 = f"data-{attr_name}='[^']*'"
+                replacement2 = f"data-{attr_name}='{value}'"
+                html = re.sub(pattern2, replacement2, html)
+        
+        # 3. Remplacer le contenu texte pour les boutons
+        if "text" in effective_params and "<button" in html:
+            # Chercher le span.btn-content ou le texte direct
+            if '<span class="btn-content">' in html:
+                html = re.sub(
+                    r'(<span class="btn-content">)[^<]*(</span>)',
+                    f'\\1{effective_params["text"]}\\2',
+                    html
+                )
+        
+        # 4. Remplacer le placeholder pour les inputs
+        if "placeholder" in effective_params and "<input" in html:
+            html = re.sub(
+                r'placeholder="[^"]*"',
+                f'placeholder="{effective_params["placeholder"]}"',
+                html
+            )
+        
+        # Combiner HTML et CSS
+        if css.strip():
+            return f"{html}\n<style>{css}</style>"
+        return html
+
+    async def _select_component(
+        self,
+        intent: str,
+        target_zone: str = "auto",
+        params: Dict = None,
+        force_generate: bool = False,
+        **kwargs,
+    ) -> ToolResult:
+        """
+        Sélectionne un composant de la library selon l'intent.
+        
+        Architecture 3 Tiers:
+        1. Tier 1: Core Library (0ms) - Match exact
+        2. Tier 2: Adaptation (<100ms) - Paramétrage
+        3. Tier 3: Generation (1-5s) - Dernier recours
+        """
+        start_time = time.time()
+        params = params or {}
+        
+        try:
+            # Détecter la zone cible si auto
+            if target_zone == "auto":
+                target_zone = self._detect_target_zone(intent)
+            
+            # === TIER 3 (Dernier recours): Generation forcée ===
+            if force_generate:
+                logger.info("Tier 3: Generation forcée")
+                return await self._generate_component(
+                    description=intent,
+                    component_type="custom",
+                )
+            
+            # === TIER 1: Core Library ===
+            library = self._load_component_library()
+            best_match = self._find_best_component(library, intent)
+            
+            if not best_match:
+                # === TIER 3: Aucun match → Generation ===
+                logger.info(f"Tier 3: Aucun match pour '{intent}', génération...")
+                gen_result = await self._generate_component(
+                    description=intent,
+                    component_type="custom",
+                )
+                
+                if gen_result.success:
+                    # Injecter dans la bonne zone
+                    if gen_result.data and "dom_action" in gen_result.data:
+                        gen_result.data["dom_action"]["selector"] = target_zone
+                    # Ajouter les métadonnées manquantes
+                    if gen_result.data:
+                        gen_result.data["target_zone"] = target_zone
+                        gen_result.data["tier"] = 3  # Generation tier
+                
+                return gen_result
+            
+            # === TIER 2: Adaptation ===
+            adapted_html = self._adapt_component(best_match, params)
+            exec_time = (time.time() - start_time) * 1000  # ms
+            
+            # Construire la dom_action
+            dom_action = {
+                "type": "insertHTML",
+                "selector": target_zone,
+                "position": "beforeend",
+                "html": adapted_html,
+            }
+            
+            # Générer un ID unique pour cette instance
+            instance_id = f"{best_match['id']}_{int(time.time())}"
+            
+            return ToolResult(
+                success=True,
+                content=f"✓ Composant '{best_match['name']}' sélectionné (score: {best_match.get('match_score', 0)}) et adapté en {exec_time:.0f}ms",
+                data={
+                    "component_id": best_match["id"],
+                    "instance_id": instance_id,
+                    "category": best_match.get("matched_category"),
+                    "match_score": best_match.get("match_score", 0),
+                    "adaptation_time_ms": exec_time,
+                    "target_zone": target_zone,
+                    "html": adapted_html,
+                    "dom_action": dom_action,
+                    "tier": 2,  # Adaptation tier
+                },
+            )
+            
+        except Exception as e:
+            logger.error(f"select_component error: {e}")
+            return ToolResult(
+                success=False,
+                content=f"Erreur sélection composant: {str(e)}",
+                error=str(e),
+            )
+    
+    async def _select_component_set(
+        self,
+        typography: str,
+        endpoints: List[Dict] = None,
+        **kwargs,
+    ) -> ToolResult:
+        """
+        Sélectionne un set de composants pour une typologie.
+
+        Args:
+            typography: Backend, Frontend, Deploy
+            endpoints: Liste d'endpoints [{path, method}, ...]
+
+        Returns:
+            ToolResult avec les composants par endpoint
+        """
+        from Backend.Prod.sullivan.agent.component_inference import (
+            infer_components_for_typography,
+            infer_components_for_endpoint,
+        )
+        
+        try:
+            if endpoints:
+                results = infer_components_for_typography(typography, endpoints)
+            else:
+                # Pas d'endpoints fournis, utiliser des defaults selon typography
+                default_endpoints = {
+                    "Backend": [
+                        {"path": "/api/health", "method": "GET"},
+                        {"path": "/api/config", "method": "GET"},
+                    ],
+                    "Frontend": [
+                        {"path": "/api/users", "method": "GET"},
+                        {"path": "/api/users", "method": "POST"},
+                    ],
+                    "Deploy": [
+                        {"path": "/api/status", "method": "GET"},
+                    ],
+                }
+                results = infer_components_for_typography(
+                    typography,
+                    default_endpoints.get(typography, []),
+                )
+
+            # Formater la réponse
+            output = []
+            all_components = []
+
+            for result in results:
+                endpoint_info = {
+                    "endpoint": result.endpoint,
+                    "method": result.method,
+                    "components": [],
+                }
+
+                for comp in result.components:
+                    comp_info = {
+                        "id": comp.component_id,
+                        "category": comp.category,
+                        "reason": comp.reason,
+                        "selected": comp.selected,
+                    }
+                    endpoint_info["components"].append(comp_info)
+                    all_components.append(comp_info)
+
+                output.append(endpoint_info)
+
+            # Dédupliquer les composants
+            seen = set()
+            unique_components = []
+            for c in all_components:
+                if c["id"] not in seen:
+                    seen.add(c["id"])
+                    unique_components.append(c)
+
+            return ToolResult(
+                success=True,
+                content=f"✅ {len(unique_components)} composants sélectionnés pour {typography}",
+                data={
+                    "typography": typography,
+                    "total_components": len(unique_components),
+                    "by_endpoint": output,
+                    "unique_components": unique_components,
+                },
+            )
+
+        except Exception as e:
+            logger.error(f"Erreur select_component_set: {e}")
+            return ToolResult(
+                success=False,
+                content=f"❌ Erreur: {str(e)}",
+                data={"error": str(e)},
             )
 
 

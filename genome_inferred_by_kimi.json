@@ -1,0 +1,588 @@
+{
+  "genome_version": "1.0.0",
+  "inferred_by": "Kimi",
+  "inference_date": "2026-02-06",
+  "project": "AETHERFLOW/Homeos/Sullivan",
+  "description": "Structure N0-N3 inférée des documents PRD, Parcours UX, Manifest et studio_routes.py",
+  
+  "N0_PHASES": [
+    {
+      "id": "intent_refactoring",
+      "name": "Intent Refactoring",
+      "description": "Phases 1-3 : Inventaire, Arbitrage et Consolidation du Génome",
+      "order": 1,
+      "N1_SECTIONS": [
+        {
+          "id": "ir_inventory",
+          "name": "Inventaire Fonctionnel",
+          "description": "Phase 1 - Inventaire exhaustif des features réellement implémentées",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "ir_report_view",
+              "name": "Rapport IR",
+              "description": "Affichage du rapport d'inventaire avec organes, claims et verdicts",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "ir_organes_list",
+                  "name": "Liste des Organes",
+                  "endpoint": "GET /studio/reports/ir",
+                  "visual_hint": "list",
+                  "description": "Liste des organes détectés avec verdicts colorés (Accept/Revise/Reject)"
+                },
+                {
+                  "id": "ir_claim_card",
+                  "name": "Carte de Claim",
+                  "endpoint": "component_internal",
+                  "visual_hint": "card",
+                  "description": "Carte affichant les claims avec checkmarks pour validation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ir_arbitrage",
+          "name": "Arbitrage",
+          "description": "Phase 2 - Dialogue de décision User ↔ Aetherflow avec Stencils HCI",
+          "order": 2,
+          "N2_FEATURES": [
+            {
+              "id": "arbitrage_forms",
+              "name": "Formulaires d'Arbitrage",
+              "description": "Formulaires de validation avec traduction HCI des endpoints",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "arbitrage_stencil_card",
+                  "name": "Stencil Card",
+                  "endpoint": "GET /studio/arbitrage/forms",
+                  "visual_hint": "card",
+                  "description": "Carte HCI avec icône, titre traduit, description et boutons Garder/Réserve"
+                },
+                {
+                  "id": "arbitrage_validation_form",
+                  "name": "Formulaire de Validation",
+                  "endpoint": "POST /studio/validate",
+                  "visual_hint": "form",
+                  "description": "Formulaire HTMX pour valider un élément avec verdict"
+                },
+                {
+                  "id": "arbitrage_report_panel",
+                  "name": "Panneau de Rapport",
+                  "endpoint": "GET /studio/reports/arbitrage",
+                  "visual_hint": "list",
+                  "description": "Liste des validations effectuées avec couleurs par verdict"
+                }
+              ]
+            },
+            {
+              "id": "typologies_arbiter",
+              "name": "Typologies Arbiter",
+              "description": "Composants suggérés inférés depuis le Génome",
+              "order": 2,
+              "N3_COMPONENTS": [
+                {
+                  "id": "component_preview_grid",
+                  "name": "Grille de Previews",
+                  "endpoint": "GET /studio/typologies/arbiter",
+                  "visual_hint": "grid",
+                  "description": "Grille de previews visuelles des composants (table, form, card, modal, button, list)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ir_genome",
+          "name": "Génome",
+          "description": "Phase 3 - Consolidation et gel du Génome v1",
+          "order": 3,
+          "N2_FEATURES": [
+            {
+              "id": "genome_summary",
+              "name": "Résumé du Génome",
+              "description": "Affichage de la topologie validée et des endpoints",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "genome_stats_panel",
+                  "name": "Panneau de Statistiques",
+                  "endpoint": "GET /studio/genome/summary",
+                  "visual_hint": "dashboard_card",
+                  "description": "Carte affichant endpoints count, compartiments count et statut validé"
+                },
+                {
+                  "id": "topology_tags",
+                  "name": "Tags de Topologie",
+                  "endpoint": "component_internal",
+                  "visual_hint": "tag_list",
+                  "description": "Liste de tags colorés représentant les compartiments"
+                },
+                {
+                  "id": "endpoints_list_compact",
+                  "name": "Liste Compacte d'Endpoints",
+                  "endpoint": "component_internal",
+                  "visual_hint": "code_list",
+                  "description": "Liste monospace des endpoints avec méthode HTTP"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "materialization",
+      "name": "Matérialisation",
+      "description": "Phase 4 - Génération des composants par défaut",
+      "order": 2,
+      "N1_SECTIONS": [
+        {
+          "id": "default_components",
+          "name": "Composants par Défaut",
+          "description": "Galerie de composants standards basés sur le Génome validé",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "default_library_gallery",
+              "name": "Galerie Bibliothèque Défaut",
+              "description": "Affichage des composants par défaut disponibles",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "blueprint_card",
+                  "name": "Carte Blueprint",
+                  "endpoint": "GET /studio/step/4",
+                  "visual_hint": "preview_card",
+                  "description": "Carte avec preview HTML du composant, badge ORGANE et description"
+                },
+                {
+                  "id": "status_orb_blueprint",
+                  "name": "Status Orb Blueprint",
+                  "endpoint": "component_internal",
+                  "visual_hint": "status_indicator",
+                  "description": "Indicateur de statut pulsant avec point vert et label"
+                },
+                {
+                  "id": "action_stepper_blueprint",
+                  "name": "Action Stepper Blueprint",
+                  "endpoint": "component_internal",
+                  "visual_hint": "terminal",
+                  "description": "Terminal style avec logs de workflow et curseur clignotant"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "personalization",
+      "name": "Personnalisation",
+      "description": "Phases 5-6 : Carrefour créatif et Analyse visuelle",
+      "order": 3,
+      "N1_SECTIONS": [
+        {
+          "id": "creative_crossroad",
+          "name": "Carrefour Créatif",
+          "description": "Phase 5 - Choix entre upload PNG ou propositions de layouts",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "upload_or_layouts",
+              "name": "Upload ou Layouts",
+              "description": "Interface de choix de personnalisation",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "png_upload_zone",
+                  "name": "Zone d'Upload PNG",
+                  "endpoint": "POST /studio/designer/upload",
+                  "visual_hint": "dropzone",
+                  "description": "Zone de drop avec bordures dashed, icône image et loader d'analyse"
+                },
+                {
+                  "id": "layout_proposals_grid",
+                  "name": "Grille de Propositions",
+                  "endpoint": "GET /studio/step/5/layouts",
+                  "visual_hint": "style_grid",
+                  "description": "Grille de 8 styles (Minimaliste, Brutaliste, TDAH-friendly, etc.) avec previews"
+                },
+                {
+                  "id": "layout_select_card",
+                  "name": "Carte de Sélection Layout",
+                  "endpoint": "POST /studio/step/5/select-layout/{layout_id}",
+                  "visual_hint": "selectable_card",
+                  "description": "Carte cliquable avec preview couleur, nom et description du style"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "visual_analysis",
+          "name": "Analyse Visuelle",
+          "description": "Phase 6 - Analyse assistée et Rapport d'Intention Visuelle",
+          "order": 2,
+          "N2_FEATURES": [
+            {
+              "id": "visual_intent_report",
+              "name": "Rapport d'Intention Visuelle",
+              "description": "Calque d'analyse sur le PNG uploadé",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "svg_overlay_zones",
+                  "name": "Overlay SVG des Zones",
+                  "endpoint": "GET /studio/step/6",
+                  "visual_hint": "annotated_image",
+                  "description": "Image avec calque SVG contenant rectangles de zones détectées et labels"
+                },
+                {
+                  "id": "zone_detection_rect",
+                  "name": "Rectangle de Détection",
+                  "endpoint": "component_internal",
+                  "visual_hint": "detection_box",
+                  "description": "Rectangle dashed avec fill transparent et label de hypothèse"
+                },
+                {
+                  "id": "style_tokens_panel",
+                  "name": "Panneau de Tokens de Style",
+                  "endpoint": "component_internal",
+                  "visual_hint": "token_grid",
+                  "description": "Grille affichant couleurs détectées, border-radius, typographie"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "refinement",
+      "name": "Affinement",
+      "description": "Phases 7-8 : Dialogue et Validation finale",
+      "order": 4,
+      "N1_SECTIONS": [
+        {
+          "id": "dialogue",
+          "name": "Dialogue",
+          "description": "Phase 7 - Collaboration Heureuse avec Sullivan",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "sullivan_dialogue",
+              "name": "Dialogue Sullivan",
+              "description": "Questions et réponses pour affiner l'intention",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "postit_question_card",
+                  "name": "Carte Post-it Question",
+                  "endpoint": "GET /studio/step/7",
+                  "visual_hint": "sticky_note",
+                  "description": "Carte style post-it avec rotation, texte question et boutons Oui/Non"
+                },
+                {
+                  "id": "confidence_badge",
+                  "name": "Badge de Confiance",
+                  "endpoint": "component_internal",
+                  "visual_hint": "percentage_badge",
+                  "description": "Badge affichant le pourcentage de confiance de l'hypothèse"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "final_validation",
+          "name": "Validation Finale",
+          "description": "Phase 8 - Accord final et Check d'Homéostasie",
+          "order": 2,
+          "N2_FEATURES": [
+            {
+              "id": "homeostasis_check",
+              "name": "Check d'Homéostasie",
+              "description": "Vérification de cohérence entre design et Génome",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "validation_summary_card",
+                  "name": "Carte de Résumé",
+                  "endpoint": "GET /studio/step/8",
+                  "visual_hint": "summary_card",
+                  "description": "Carte récapitulative avec éléments validés, endpoints actifs, style sélectionné"
+                },
+                {
+                  "id": "homeostasis_alert",
+                  "name": "Alerte d'Homéostasie",
+                  "endpoint": "component_internal",
+                  "visual_hint": "warning_banner",
+                  "description": "Bannière amber si fonction vitale manquante dans le design"
+                },
+                {
+                  "id": "generate_button",
+                  "name": "Bouton de Génération",
+                  "endpoint": "POST /studio/next/8",
+                  "visual_hint": "primary_button",
+                  "description": "Bouton principal vert avec icône check pour lancer la génération"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adaptation",
+      "name": "Adaptation",
+      "description": "Phase 9 - Adaptation Top-Bottom (Corps > Organe > Atome)",
+      "order": 5,
+      "N1_SECTIONS": [
+        {
+          "id": "top_bottom_navigation",
+          "name": "Navigation Top-Bottom",
+          "description": "Exploration granulaire de la structure",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "corps_view",
+              "name": "Vue Corps",
+              "description": "Vue d'ensemble du layout (Header, Sidebar, Main, Footer)",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "corps_layout_grid",
+                  "name": "Grille de Layout Corps",
+                  "endpoint": "GET /studio/step/9",
+                  "visual_hint": "layout_grid",
+                  "description": "Grille CSS représentant les zones du corps cliquables"
+                },
+                {
+                  "id": "breadcrumb_nav",
+                  "name": "Navigation Fil d'Ariane",
+                  "endpoint": "component_internal",
+                  "visual_hint": "breadcrumb",
+                  "description": "Fil d'ariane Corps → Organe → Atome avec flèches"
+                }
+              ]
+            },
+            {
+              "id": "organe_view",
+              "name": "Vue Organe",
+              "description": "Zoom sur un organe spécifique avec Ghost Mode",
+              "order": 2,
+              "N3_COMPONENTS": [
+                {
+                  "id": "organe_detail_panel",
+                  "name": "Panneau Détail Organe",
+                  "endpoint": "GET /studio/zoom/organe/{target_id}",
+                  "visual_hint": "detail_panel",
+                  "description": "Panneau avec contexte ghost (filigrane) et liste des atomes"
+                },
+                {
+                  "id": "ghost_mode_overlay",
+                  "name": "Overlay Ghost Mode",
+                  "endpoint": "component_internal",
+                  "visual_hint": "ghost_background",
+                  "description": "Overlay à 20% d'opacité montrant le contexte spatial du corps"
+                },
+                {
+                  "id": "atome_list_item",
+                  "name": "Item de Liste Atome",
+                  "endpoint": "component_internal",
+                  "visual_hint": "list_item_clickable",
+                  "description": "Item de liste cliquable représentant un atome"
+                }
+              ]
+            },
+            {
+              "id": "atome_view",
+              "name": "Vue Atome",
+              "description": "Édition granulaire d'un atome individuel",
+              "order": 3,
+              "N3_COMPONENTS": [
+                {
+                  "id": "atome_editor_panel",
+                  "name": "Panneau Éditeur Atome",
+                  "endpoint": "GET /studio/zoom/atome/{target_id}",
+                  "visual_hint": "editor_panel",
+                  "description": "Panneau d'édition avec preview et contrôles (couleurs, animation)"
+                },
+                {
+                  "id": "color_picker_circles",
+                  "name": "Sélecteur de Couleurs",
+                  "endpoint": "component_internal",
+                  "visual_hint": "color_swatches",
+                  "description": "Cercles de couleurs cliquables avec ring de sélection"
+                },
+                {
+                  "id": "animation_select",
+                  "name": "Sélecteur d'Animation",
+                  "endpoint": "component_internal",
+                  "visual_hint": "dropdown",
+                  "description": "Dropdown pour choisir le type d'animation (pulse doux/rapide/statique)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "finalization",
+          "name": "Finalisation",
+          "description": "Génération finale et export",
+          "order": 2,
+          "N2_FEATURES": [
+            {
+              "id": "finalize_generation",
+              "name": "Finaliser la Génération",
+              "description": "Validation finale et création des fichiers",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "success_screen",
+                  "name": "Écran de Succès",
+                  "endpoint": "POST /studio/finalize",
+                  "visual_hint": "success_screen",
+                  "description": "Écran centré avec icône check verte, titre et prochaines étapes"
+                },
+                {
+                  "id": "action_buttons_final",
+                  "name": "Boutons d'Action Finale",
+                  "endpoint": "component_internal",
+                  "visual_hint": "button_group",
+                  "description": "Groupe de boutons Nouvelle session / Exporter"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "session_management",
+      "name": "Gestion de Session",
+      "description": "Gestion de la session utilisateur et machine à états",
+      "order": 6,
+      "N1_SECTIONS": [
+        {
+          "id": "state_machine",
+          "name": "Machine à États",
+          "description": "Navigation entre les 9 étapes du parcours UX",
+          "order": 1,
+          "N2_FEATURES": [
+            {
+              "id": "step_navigation",
+              "name": "Navigation par Étapes",
+              "description": "Passage d'une étape à l'autre",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "next_step_button",
+                  "name": "Bouton Étape Suivante",
+                  "endpoint": "POST /studio/next/{current_step}",
+                  "visual_hint": "nav_button",
+                  "description": "Bouton avec flèche pour avancer à l'étape suivante"
+                },
+                {
+                  "id": "step_fragment_loader",
+                  "name": "Chargeur de Fragment",
+                  "endpoint": "GET /studio/step/{step}",
+                  "visual_hint": "htmx_fragment",
+                  "description": "Conteneur HTMX pour charger le fragment de l'étape courante"
+                }
+              ]
+            },
+            {
+              "id": "session_debug",
+              "name": "Debug Session",
+              "description": "Outils de debug pour la session",
+              "order": 2,
+              "N3_COMPONENTS": [
+                {
+                  "id": "session_status_json",
+                  "name": "Statut Session JSON",
+                  "endpoint": "GET /studio/session",
+                  "visual_hint": "json_viewer",
+                  "description": "Affichage JSON brut de l'état de la session"
+                },
+                {
+                  "id": "session_reset_button",
+                  "name": "Bouton Reset Session",
+                  "endpoint": "POST /studio/session/reset",
+                  "visual_hint": "danger_button",
+                  "description": "Bouton pour réinitialiser la session"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "distillation",
+          "name": "Distillation",
+          "description": "Gestion des entrées de distillation",
+          "order": 2,
+          "N2_FEATURES": [
+            {
+              "id": "distillation_entries",
+              "name": "Entrées de Distillation",
+              "description": "Visualisation des validations effectuées",
+              "order": 1,
+              "N3_COMPONENTS": [
+                {
+                  "id": "distillation_list",
+                  "name": "Liste de Distillation",
+                  "endpoint": "GET /studio/distillation/entries",
+                  "visual_hint": "bordered_list",
+                  "description": "Liste avec bordure colorée gauche selon le verdict"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "endpoints_summary": [
+    {"method": "GET", "path": "/studio/reports/ir", "phase": "1", "component": "ir_organes_list"},
+    {"method": "GET", "path": "/studio/reports/arbitrage", "phase": "2", "component": "arbitrage_report_panel"},
+    {"method": "GET", "path": "/studio/arbitrage/forms", "phase": "2", "component": "arbitrage_stencil_card"},
+    {"method": "POST", "path": "/studio/validate", "phase": "2", "component": "arbitrage_validation_form"},
+    {"method": "GET", "path": "/studio/genome/summary", "phase": "3", "component": "genome_stats_panel"},
+    {"method": "POST", "path": "/studio/next/{current_step}", "phase": "all", "component": "next_step_button"},
+    {"method": "GET", "path": "/studio/step/{step}", "phase": "all", "component": "step_fragment_loader"},
+    {"method": "GET", "path": "/studio/step/5/layouts", "phase": "5", "component": "layout_proposals_grid"},
+    {"method": "POST", "path": "/studio/step/5/select-layout/{layout_id}", "phase": "5", "component": "layout_select_card"},
+    {"method": "POST", "path": "/studio/designer/upload", "phase": "5", "component": "png_upload_zone"},
+    {"method": "GET", "path": "/studio/zoom/{level}/{target_id}", "phase": "9", "component": "organe_detail_panel"},
+    {"method": "GET", "path": "/studio/zoom/out", "phase": "9", "component": "breadcrumb_nav"},
+    {"method": "POST", "path": "/studio/finalize", "phase": "9", "component": "success_screen"},
+    {"method": "GET", "path": "/studio/session", "phase": "debug", "component": "session_status_json"},
+    {"method": "POST", "path": "/studio/session/reset", "phase": "debug", "component": "session_reset_button"},
+    {"method": "GET", "path": "/studio/typologies/arbiter", "phase": "2", "component": "component_preview_grid"},
+    {"method": "GET", "path": "/studio/distillation/entries", "phase": "2", "component": "distillation_list"}
+  ],
+  
+  "compartments": {
+    "core": [
+      "intent_refactoring",
+      "materialization",
+      "finalization"
+    ],
+    "support": [
+      "personalization",
+      "refinement"
+    ],
+    "reserve": [
+      "adaptation"
+    ],
+    "interface_patterns": {
+      "stencils": ["status_dot_pulse", "progress_stepper", "component_grid"],
+      "blueprints": ["status_orb", "action_stepper"],
+      "zoom_levels": ["corps", "organe", "atome"]
+    }
+  }
+}
