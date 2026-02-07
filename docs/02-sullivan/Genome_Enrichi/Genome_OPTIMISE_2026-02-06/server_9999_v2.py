@@ -478,7 +478,7 @@ def generate_html(genome):
         .tab {{ flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: #64748b; border-right: 1px solid #f1f5f9; transition: all 0.2s; font-weight: 500; letter-spacing: -0.2px; }}
         .tab:last-child {{ border-right: none; }}
         .tab:hover {{ background: linear-gradient(180deg, #fff 0%, #f8fafc 100%); color: #334155; }}
-        .tab.active {{ background: linear-gradient(180deg, #9ad85a 0%, #7aca6a 100%); color: #1e293b; font-weight: 600; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05); }}
+        .tab.active {{ background: transparent !important; color: #1e293b; font-size: 1.2em; font-weight: 900; box-shadow: none; border-bottom: 3px solid #7aca6a; padding-bottom: 10px; }}
         
         /* Main */
         .main {{ display: flex; height: calc(100vh - 52px); }}
@@ -513,10 +513,10 @@ def generate_html(genome):
 </head>
 <body>
     <div class="tabs">
-        <div class="tab">Brainstorm</div>
-        <div class="tab">Backend</div>
-        <div class="tab active">Frontend</div>
-        <div class="tab">Deploy</div>
+        <div class="tab" onclick="switchTab(this, 'brs')">🚧 BRS</div>
+        <div class="tab" onclick="switchTab(this, 'bkd')">⚙️ BKD</div>
+        <div class="tab active" onclick="switchTab(this, 'frd')" id="tab-frd">🎨 FRD</div>
+        <div class="tab" onclick="switchTab(this, 'dpl')">🚀 DPL</div>
     </div>
 
     <div class="main">
@@ -596,6 +596,15 @@ def generate_html(genome):
     </div>
     
     <script>
+        function switchTab(element, tabName) {{
+            // Retirer active de tous les tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // Ajouter active au tab cliqué
+            element.classList.add('active');
+            // Ici on pourrait charger le contenu spécifique au tab
+            console.log('Switched to:', tabName);
+        }}
+        
         function toggleAll(source) {{
             checkboxes = document.querySelectorAll('.comp-checkbox');
             checkboxes.forEach(cb => cb.checked = source.checked);
