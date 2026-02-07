@@ -12,11 +12,26 @@ import os
 PORT = 9999
 GENOME_FILE = "genome_enrichi.json"
 
+def normalize_keys(obj):
+    """Normalise les clés d'un dict (MAJUSCULES -> minuscules)"""
+    if isinstance(obj, dict):
+        return {k.lower(): normalize_keys(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [normalize_keys(item) for item in obj]
+    return obj
+
 def load_genome():
     """Charge le genome depuis le fichier JSON"""
     if os.path.exists(GENOME_FILE):
         with open(GENOME_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            # Normaliser toutes les clés en minuscules
+            data = normalize_keys(data)
+            if 'n0_phases' not in data:
+                data['n0_phases'] = []
+            if 'metadata' not in data:
+                data['metadata'] = {'confidence_global': 0.8}
+            return data
     return {"n0_phases": [], "metadata": {"confidence_global": 0.0}}
 
 def generate_component_wireframe(component, phase_name, description=""):
