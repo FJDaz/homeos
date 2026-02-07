@@ -50,182 +50,182 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # STATUS - LEDs avec ombres et gradients
     if visual_hint == "status":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
                 <div style="width:8px;height:8px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;box-shadow:0 0 0 2px rgba(140,198,63,0.2);"></div>
-                <span style="font-size:11px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🏥 Santé du projet</span>
+                <span style="font-size:8px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🏥 Santé du projet</span>
             </div>
-            <div style="display:flex;justify-content:center;gap:16px;margin:16px 0;">
+            <div style="display:flex;justify-content:center;gap:6px;margin:16px 0;">
                 <div style="text-align:center;">
-                    <div style="width:16px;height:16px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:9px;color:#64748b;font-weight:500;">OK</span>
+                    <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
+                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
-                    <div style="width:16px;height:16px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:9px;color:#64748b;font-weight:500;">OK</span>
+                    <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
+                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
-                    <div style="width:16px;height:16px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:9px;color:#64748b;font-weight:500;">OK</span>
+                    <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
+                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
-                    <div style="width:16px;height:16px;background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%);border-radius:50%;margin:0 auto 6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:9px;color:#64748b;font-weight:500;">?</span>
+                    <div style="width:12px;height:12px;background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%);border-radius:50%;margin:0 auto 6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);"></div>
+                    <span style="font-size:6px;color:#64748b;font-weight:500;">?</span>
                 </div>
             </div>
             <div style="background:linear-gradient(90deg,rgba(140,198,63,0.1) 0%,rgba(140,198,63,0.05) 100%);border-radius:6px;padding:8px;text-align:center;">
-                <span style="font-size:10px;color:#7aca6a;font-weight:600;">✅ Fonctions vitales présentes</span>
+                <span style="font-size:7px;color:#7aca6a;font-weight:600;">✅ Fonctions vitales présentes</span>
             </div>
         </div>'''
     
     # ZOOM-CONTROLS - Navigation riche
     elif visual_hint == "zoom-controls":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                <span style="font-size:11px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🔭 Navigation</span>
-                <span style="margin-left:auto;font-size:9px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px;">N2</span>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
+                <span style="font-size:8px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🔭 Navigation</span>
+                <span style="margin-left:auto;font-size:6px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px;">N2</span>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:12px;">
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:10px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">← Out</span>
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border:1px solid #3d72a0;border-radius:8px;text-align:center;font-size:10px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">🔍 Corps ▼</span>
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:10px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">In →</span>
+            <div style="display:flex;gap:5px;margin-bottom:12px;">
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">← Out</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border:1px solid #3d72a0;border-radius:6px;text-align:center;font-size:7px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">🔍 Corps ▼</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">In →</span>
             </div>
             <div style="background:#f8fafc;border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
-                <span style="color:#7aca6a;font-weight:700;font-size:10px;background:rgba(140,198,63,0.1);padding:2px 8px;border-radius:4px;">◉ Corps</span>
-                <span style="color:#94a3b8;font-size:9px;">›</span>
-                <span style="color:#64748b;font-size:10px;font-weight:500;">○ Organe</span>
-                <span style="color:#94a3b8;font-size:9px;">›</span>
-                <span style="color:#64748b;font-size:10px;font-weight:500;">○ Atome</span>
+                <span style="color:#7aca6a;font-weight:700;font-size:7px;background:rgba(140,198,63,0.1);padding:2px 8px;border-radius:4px;">◉ Corps</span>
+                <span style="color:#94a3b8;font-size:6px;">›</span>
+                <span style="color:#64748b;font-size:7px;font-weight:500;">○ Organe</span>
+                <span style="color:#94a3b8;font-size:6px;">›</span>
+                <span style="color:#64748b;font-size:7px;font-weight:500;">○ Atome</span>
             </div>
         </div>'''
     
     # STENCIL-CARD - Fiche pouvoir enrichie
     elif visual_hint == "stencil-card":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);position:relative;overflow:hidden;">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 100%);"></div>
-            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
-                <div style="width:40px;height:40px;background:linear-gradient(135deg,#fff8a0 0%,#f8e090 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 4px rgba(251,191,36,0.2);">💡</div>
+            <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:12px;">
+                <div style="width:28px;height:28px;background:linear-gradient(135deg,#fff8a0 0%,#f8e090 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:7px;box-shadow:0 2px 4px rgba(251,191,36,0.2);">💡</div>
                 <div style="flex:1;">
-                    <div style="font-size:13px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;margin-bottom:4px;">Veille du Système</div>
-                    <div style="font-size:11px;color:#64748b;line-height:1.5;">Voir l'état de santé du projet en un coup d'œil</div>
+                    <div style="font-size:7px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;margin-bottom:4px;">Veille du Système</div>
+                    <div style="font-size:8px;color:#64748b;line-height:1.5;">Voir l'état de santé du projet en un coup d'œil</div>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;">
-                <span style="flex:1;padding:8px 12px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:8px;text-align:center;font-size:11px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🟢 Garder</span>
-                <span style="flex:1;padding:8px 12px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:11px;color:#64748b;font-weight:500;">⚪ Réserve</span>
+            <div style="display:flex;gap:5px;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;">
+                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🟢 Garder</span>
+                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#64748b;font-weight:500;">⚪ Réserve</span>
             </div>
         </div>'''
     
     # DETAIL-CARD - Fiche technique Figma-like
     elif visual_hint == "detail-card":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
-                <span style="font-size:10px;font-weight:700;color:#5a9ac6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">GET</span>
-                <span style="font-size:11px;font-weight:600;color:#1e293b;font-family:'SF Mono',monospace;letter-spacing:-0.3px;">/api/health</span>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+                <span style="font-size:7px;font-weight:700;color:#5a9ac6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">GET</span>
+                <span style="font-size:8px;font-weight:600;color:#1e293b;font-family:'SF Mono',monospace;letter-spacing:-0.3px;">/api/health</span>
             </div>
-            <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;color:#64748b;margin-bottom:6px;font-weight:500;">Retour JSON</div>
-                <div style="font-size:9px;color:#94a3b8;font-family:monospace;background:#1e293b;padding:8px;border-radius:6px;line-height:1.6;">
+            <div style="background:#f8fafc;border-radius:6px;padding:8px;margin-bottom:12px;">
+                <div style="font-size:7px;color:#64748b;margin-bottom:6px;font-weight:500;">Retour JSON</div>
+                <div style="font-size:6px;color:#94a3b8;font-family:monospace;background:#1e293b;padding:8px;border-radius:6px;line-height:1.6;">
                     <span style="color:#7aca6a;">{</span><br>
                     &nbsp;&nbsp;<span style="color:#98c8f8;">"status"</span><span style="color:#e2e8f0;">:</span> <span style="color:#b8e8ff;">"ok"</span>,<br>
                     &nbsp;&nbsp;<span style="color:#98c8f8;">"uptime"</span><span style="color:#e2e8f0;">:</span> <span style="color:#f0e080;">3600</span><br>
                     <span style="color:#7aca6a;">}</span>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;">
-                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:10px;color:#475569;font-weight:600;">📋 Copier</span>
-                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:8px;text-align:center;font-size:10px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">↗️ Tester</span>
+            <div style="display:flex;gap:5px;">
+                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:600;">📋 Copier</span>
+                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;text-align:center;font-size:7px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">↗️ Tester</span>
             </div>
         </div>'''
     
     # COLOR-PALETTE - Style détecté enrichi
     elif visual_hint == "color-palette":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <span style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Style détecté</span>
-                <span style="font-size:9px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:12px;">3.2s</span>
+                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Style détecté</span>
+                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3.2s</span>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:14px;">
-                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:10px;box-shadow:0 2px 4px rgba(59,130,246,0.3),inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;">
+            <div style="display:flex;gap:5px;margin-bottom:14px;">
+                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:7px;box-shadow:0 2px 4px rgba(59,130,246,0.3),inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;">
                     <div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:rgba(0,0,0,0.1);"></div>
                 </div>
-                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:10px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 1px 0 rgba(255,255,255,0.2);"></div>
-                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#e4bb5a 0%,#c69c4a 100%);border-radius:10px;box-shadow:0 2px 4px rgba(245,158,11,0.3),inset 0 1px 0 rgba(255,255,255,0.2);"></div>
-                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);border-radius:10px;box-shadow:0 2px 4px rgba(30,41,59,0.3),inset 0 1px 0 rgba(255,255,255,0.1);"></div>
+                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:7px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 1px 0 rgba(255,255,255,0.2);"></div>
+                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#e4bb5a 0%,#c69c4a 100%);border-radius:7px;box-shadow:0 2px 4px rgba(245,158,11,0.3),inset 0 1px 0 rgba(255,255,255,0.2);"></div>
+                <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);border-radius:7px;box-shadow:0 2px 4px rgba(30,41,59,0.3),inset 0 1px 0 rgba(255,255,255,0.1);"></div>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:9px;color:#475569;font-weight:600;">Rounded: 8px</span>
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:9px;color:#475569;font-weight:600;font-family:system-ui;">Inter</span>
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border:1px solid #f0e080;border-radius:20px;font-size:9px;color:#92400e;font-weight:600;">Spacing: 16px</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:6px;color:#475569;font-weight:600;">Rounded: 8px</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:6px;color:#475569;font-weight:600;font-family:system-ui;">Inter</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border:1px solid #f0e080;border-radius:20px;font-size:6px;color:#92400e;font-weight:600;">Spacing: 16px</span>
             </div>
         </div>'''
     
     # CHOICE-CARD - Sélection style
     elif visual_hint == "choice-card":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;margin-bottom:14px;">🎨 Choisissez votre style</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-                <div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);transition:all 0.2s;cursor:pointer;">
-                    <div style="width:24px;height:24px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;">○</div>
-                    <span style="font-size:10px;color:#475569;font-weight:600;">Minimal</span>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;margin-bottom:14px;">🎨 Choisissez votre style</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;">
+                <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);transition:all 0.2s;cursor:pointer;">
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
+                    <span style="font-size:7px;color:#475569;font-weight:600;">Minimal</span>
                 </div>
-                <div style="border:1px solid #7aca6a;border-radius:10px;padding:12px;text-align:center;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);box-shadow:0 0 0 1px rgba(140,198,63,0.2),0 2px 4px rgba(140,198,63,0.1);">
-                    <div style="width:24px;height:24px;margin:0 auto 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;box-shadow:0 2px 4px rgba(140,198,63,0.3);">●</div>
-                    <span style="font-size:10px;color:#4a8b54;font-weight:700;">Brutaliste</span>
+                <div style="border:1px solid #7aca6a;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);box-shadow:0 0 0 1px rgba(140,198,63,0.2),0 2px 4px rgba(140,198,63,0.1);">
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;box-shadow:0 2px 4px rgba(140,198,63,0.3);">●</div>
+                    <span style="font-size:7px;color:#4a8b54;font-weight:700;">Brutaliste</span>
                 </div>
-                <div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
-                    <div style="width:24px;height:24px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;">○</div>
-                    <span style="font-size:10px;color:#475569;font-weight:600;">Moderne</span>
+                <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
+                    <span style="font-size:7px;color:#475569;font-weight:600;">Moderne</span>
                 </div>
-                <div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
-                    <div style="width:24px;height:24px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;">○</div>
-                    <span style="font-size:10px;color:#475569;font-weight:600;">Corporate</span>
+                <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
+                    <span style="font-size:7px;color:#475569;font-weight:600;">Corporate</span>
                 </div>
             </div>
             <div style="display:flex;justify-content:flex-end;">
-                <span style="padding:8px 16px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:8px;font-size:11px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">Continuer →</span>
+                <span style="padding:8px 16px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;font-size:8px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">Continuer →</span>
             </div>
         </div>'''
     
     # LAUNCH-BUTTON - Fusée enrichie
     elif visual_hint == "launch-button":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);text-align:center;">
-            <div style="width:48px;height:48px;margin:0 auto 14px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 8px rgba(251,191,36,0.3),inset 0 1px 0 rgba(255,255,255,0.5);">🚀</div>
-            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Génération du code</div>
-            <div style="font-size:10px;color:#64748b;margin-bottom:16px;">Prêt à distiller votre projet</div>
-            <div style="padding:12px 24px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:10px;font-size:12px;color:white;font-weight:700;box-shadow:0 4px 8px rgba(140,198,63,0.3),0 2px 4px rgba(140,198,63,0.2),inset 0 1px 0 rgba(255,255,255,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🚀 Lancer la distillation</div>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);text-align:center;">
+            <div style="width:32px;height:32px;margin:0 auto 14px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 8px rgba(251,191,36,0.3),inset 0 1px 0 rgba(255,255,255,0.5);">🚀</div>
+            <div style="font-size:7px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Génération du code</div>
+            <div style="font-size:7px;color:#64748b;margin-bottom:16px;">Prêt à distiller votre projet</div>
+            <div style="padding:8px 24px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:7px;font-size:6px;color:white;font-weight:700;box-shadow:0 4px 8px rgba(140,198,63,0.3),0 2px 4px rgba(140,198,63,0.2),inset 0 1px 0 rgba(255,255,255,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🚀 Lancer la distillation</div>
         </div>'''
     
     # APPLY-CHANGES - Sauvegarder/Annuler
     elif visual_hint == "apply-changes":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
-                <div style="width:32px;height:32px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">💾</div>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:7px;">💾</div>
                 <div>
-                    <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Sauvegarder les changements</div>
-                    <div style="font-size:10px;color:#64748b;">3 modifications en attente</div>
+                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Sauvegarder les changements</div>
+                    <div style="font-size:7px;color:#64748b;">3 modifications en attente</div>
                 </div>
             </div>
-            <div style="display:flex;gap:10px;">
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:11px;color:#475569;font-weight:600;transition:all 0.2s;">↩️ Annuler</span>
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:8px;text-align:center;font-size:11px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">💾 Appliquer</span>
+            <div style="display:flex;gap:6px;">
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#475569;font-weight:600;transition:all 0.2s;">↩️ Annuler</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">💾 Appliquer</span>
             </div>
         </div>'''
     
     # TABLE - Tableau enrichi
     elif visual_hint == "table":
-        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
-                <div style="width:32px;height:32px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                    <span style="color:white;font-size:12px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,0.2);">{method[:1]}</span>
+        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                    <span style="color:white;font-size:6px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,0.2);">{method[:1]}</span>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
-                    <div style="font-size:10px;color:#64748b;font-family:monospace;">{endpoint}</div>
+                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
+                    <div style="font-size:7px;color:#64748b;font-family:monospace;">{endpoint}</div>
                 </div>
-                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:9px;color:#475569;font-weight:700;text-transform:uppercase;">{method}</span>
+                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:6px;color:#475569;font-weight:700;text-transform:uppercase;">{method}</span>
             </div>
-            <div style="background:#f8fafc;border-radius:8px;padding:12px;">
+            <div style="background:#f8fafc;border-radius:6px;padding:8px;">
                 <div style="display:flex;gap:6px;margin-bottom:8px;">
                     <div style="flex:2;height:8px;background:linear-gradient(90deg,#e2e8f0 0%,#cbd5e1 100%);border-radius:2px;"></div>
                     <div style="flex:1;height:8px;background:linear-gradient(90deg,{color}22 0%,{color}44 100%);border-radius:2px;"></div>
@@ -246,13 +246,13 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # CARD - Carte enrichie
     elif visual_hint == "card":
-        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
+        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,{color} 0%,{color}88 100%);"></div>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                <div style="width:40px;height:40px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
+                <div style="width:28px;height:28px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
-                    <div style="font-size:13px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;">{nom_clair}</div>
-                    <div style="font-size:10px;color:#64748b;">{method} {endpoint}</div>
+                    <div style="font-size:7px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;">{nom_clair}</div>
+                    <div style="font-size:7px;color:#64748b;">{method} {endpoint}</div>
                 </div>
             </div>
             <div style="height:6px;background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:3px;position:relative;overflow:hidden;">
@@ -262,48 +262,48 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # FORM - Formulaire enrichi
     elif visual_hint == "form":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
-                <span style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Formulaire</span>
-                <span style="margin-left:auto;font-size:9px;color:#94a3b8;">2 champs requis</span>
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Formulaire</span>
+                <span style="margin-left:auto;font-size:6px;color:#94a3b8;">2 champs requis</span>
             </div>
             <div style="margin-bottom:14px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                    <span style="font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Nom du projet</span>
-                    <span style="font-size:9px;color:#d56363;">*</span>
+                    <span style="font-size:7px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Nom du projet</span>
+                    <span style="font-size:6px;color:#d56363;">*</span>
                 </div>
-                <div style="height:36px;border:1px solid #cbd5e1;border-radius:8px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
+                <div style="height:36px;border:1px solid #cbd5e1;border-radius:6px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
             </div>
             <div style="margin-bottom:16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                    <span style="font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Description</span>
+                    <span style="font-size:7px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Description</span>
                 </div>
-                <div style="height:36px;border:1px solid #cbd5e1;border-radius:8px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
+                <div style="height:36px;border:1px solid #cbd5e1;border-radius:6px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
             </div>
-            <div style="display:flex;gap:10px;padding-top:12px;border-top:1px solid #f1f5f9;">
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:11px;color:#475569;font-weight:600;">Annuler</span>
-                <span style="flex:1;padding:10px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:8px;text-align:center;font-size:11px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);">Valider</span>
+            <div style="display:flex;gap:6px;padding-top:12px;border-top:1px solid #f1f5f9;">
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#475569;font-weight:600;">Annuler</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);">Valider</span>
             </div>
         </div>'''
     
     # DASHBOARD - Dashboard enrichi
     elif visual_hint == "dashboard":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <span style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">📊 Dashboard</span>
-                <span style="font-size:9px;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:12px;">Temps réel</span>
+                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">📊 Dashboard</span>
+                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:6px;">Temps réel</span>
             </div>
-            <div style="display:flex;gap:12px;margin-bottom:16px;">
-                <div style="flex:1;text-align:center;padding:12px;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);border:1px solid #b8ecd0;border-radius:10px;">
+            <div style="display:flex;gap:5px;margin-bottom:16px;">
+                <div style="flex:1;text-align:center;padding:8px;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);border:1px solid #b8ecd0;border-radius:7px;">
                     <div style="font-size:22px;font-weight:800;color:#4a8b54;margin-bottom:2px;letter-spacing:-0.5px;">29</div>
-                    <div style="font-size:9px;color:#6ac87a;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Composants</div>
+                    <div style="font-size:6px;color:#6ac87a;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Composants</div>
                 </div>
-                <div style="flex:1;text-align:center;padding:12px;background:linear-gradient(145deg,#e8f4ff 0%,#d0e6ff 100%);border:1px solid #b8d8f0;border-radius:10px;">
+                <div style="flex:1;text-align:center;padding:8px;background:linear-gradient(145deg,#e8f4ff 0%,#d0e6ff 100%);border:1px solid #b8d8f0;border-radius:7px;">
                     <div style="font-size:22px;font-weight:800;color:#4a7a9e;margin-bottom:2px;letter-spacing:-0.5px;">9</div>
-                    <div style="font-size:9px;color:#5a9ac6;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Phases</div>
+                    <div style="font-size:6px;color:#5a9ac6;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Phases</div>
                 </div>
             </div>
-            <div style="background:#f8fafc;border-radius:8px;padding:12px;">
+            <div style="background:#f8fafc;border-radius:6px;padding:8px;">
                 <div style="display:flex;align-items:flex-end;gap:4px;height:50px;padding:0 4px;">
                     <div style="flex:1;height:40%;background:linear-gradient(180deg,#7aca6a 0%,#6aba5a 100%);border-radius:3px 3px 0 0;box-shadow:0 -2px 4px rgba(140,198,63,0.2);"></div>
                     <div style="flex:1;height:65%;background:linear-gradient(180deg,#7aca6a 0%,#6aba5a 100%);border-radius:3px 3px 0 0;box-shadow:0 -2px 4px rgba(140,198,63,0.2);"></div>
@@ -316,55 +316,55 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # CHAT/BUBBLE - Chat enrichi
     elif visual_hint == "chat/bubble":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display:flex;gap:10px;margin-bottom:14px;">
-                <div style="width:32px;height:32px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;box-shadow:0 2px 4px rgba(79,70,229,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.2);">S</div>
-                <div style="flex:1;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:12px 12px 12px 4px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;gap:6px;margin-bottom:14px;">
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;box-shadow:0 2px 4px rgba(79,70,229,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.2);">S</div>
+                <div style="flex:1;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:6px 12px 12px 4px;padding:8px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
                     <div style="height:5px;background:#cbd5e1;border-radius:2px;margin-bottom:5px;width:85%;"></div>
                     <div style="height:5px;background:#cbd5e1;border-radius:2px;width:60%;"></div>
                 </div>
             </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                <div style="flex:1;max-width:70%;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:12px 12px 4px 12px;padding:12px;box-shadow:0 2px 4px rgba(79,70,229,0.2);">
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+                <div style="flex:1;max-width:70%;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:6px 12px 4px 12px;padding:8px;box-shadow:0 2px 4px rgba(79,70,229,0.2);">
                     <div style="height:5px;background:rgba(255,255,255,0.4);border-radius:2px;margin-bottom:5px;width:80%;"></div>
                     <div style="height:5px;background:rgba(255,255,255,0.4);border-radius:2px;width:50%;"></div>
                 </div>
             </div>
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;display:flex;gap:8px;">
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;display:flex;gap:5px;">
                 <div style="flex:1;height:32px;background:#f1f5f9;border-radius:16px;"></div>
-                <div style="width:32px;height:32px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;box-shadow:0 2px 4px rgba(79,70,229,0.3);">➤</div>
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:6px;box-shadow:0 2px 4px rgba(79,70,229,0.3);">➤</div>
             </div>
         </div>'''
     
     # EDITOR - Éditeur enrichi
     elif visual_hint == "editor":
-        wireframe = '''<div style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:12px;padding:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1),0 2px 4px rgba(0,0,0,0.1);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:6px;padding:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1),0 2px 4px rgba(0,0,0,0.1);">
             <div style="display:flex;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #334155;">
                 <div style="width:10px;height:10px;background:#d56363;border-radius:50%;box-shadow:0 0 0 1px rgba(239,68,68,0.3);"></div>
                 <div style="width:10px;height:10px;background:#e4bb5a;border-radius:50%;box-shadow:0 0 0 1px rgba(245,158,11,0.3);"></div>
                 <div style="width:10px;height:10px;background:#7aca6a;border-radius:50%;box-shadow:0 0 0 1px rgba(140,198,63,0.3);"></div>
-                <div style="flex:1;text-align:center;font-size:9px;color:#64748b;font-family:monospace;">component.py</div>
+                <div style="flex:1;text-align:center;font-size:6px;color:#64748b;font-family:monospace;">component.py</div>
             </div>
-            <div style="font-family:'SF Mono',monospace;font-size:10px;line-height:1.7;">
-                <div style="display:flex;gap:8px;"><span style="color:#64748b;width:16px;text-align:right;">1</span><span style="color:#a8d8f0;">def</span> <span style="color:#8acad8;">render</span><span style="color:#e2e8f0;">(</span><span style="color:#e0b0b0;">props</span><span style="color:#e2e8f0;">):</span></div>
-                <div style="display:flex;gap:8px;"><span style="color:#64748b;width:16px;text-align:right;">2</span><span style="color:#e2e8f0;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#a8d8f0;">return</span> <span style="color:#b8e8ff;">"hello"</span></div>
-                <div style="display:flex;gap:8px;"><span style="color:#64748b;width:16px;text-align:right;">3</span></div>
+            <div style="font-family:'SF Mono',monospace;font-size:7px;line-height:1.7;">
+                <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">1</span><span style="color:#a8d8f0;">def</span> <span style="color:#8acad8;">render</span><span style="color:#e2e8f0;">(</span><span style="color:#e0b0b0;">props</span><span style="color:#e2e8f0;">):</span></div>
+                <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">2</span><span style="color:#e2e8f0;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#a8d8f0;">return</span> <span style="color:#b8e8ff;">"hello"</span></div>
+                <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">3</span></div>
             </div>
         </div>'''
     
     # PREVIEW - Aperçu enrichi
     elif visual_hint == "preview":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                <span style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">👁️ Aperçu maquette</span>
-                <span style="font-size:9px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:12px;">3 zones</span>
+                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">👁️ Aperçu maquette</span>
+                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3 zones</span>
             </div>
-            <div style="position:relative;background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);border-radius:8px;height:100px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
+            <div style="position:relative;background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);border-radius:6px;height:100px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="position:absolute;top:15%;left:10%;width:35%;height:30%;background:linear-gradient(135deg,rgba(59,130,246,0.2) 0%,rgba(37,99,235,0.15) 100%);border:1px dashed #5a9ac6;border-radius:6px;box-shadow:0 0 0 4px rgba(59,130,246,0.1);"></div>
                 <div style="position:absolute;top:45%;left:55%;width:30%;height:40%;background:linear-gradient(135deg,rgba(140,198,63,0.2) 0%,rgba(122,179,46,0.15) 100%);border:1px dashed #7aca6a;border-radius:6px;box-shadow:0 0 0 4px rgba(140,198,63,0.1);"></div>
                 <div style="position:absolute;bottom:10%;left:5%;width:25%;height:25%;background:linear-gradient(135deg,rgba(236,72,153,0.15) 0%,rgba(219,39,119,0.1) 100%);border:1px dashed #ec4899;border-radius:6px;box-shadow:0 0 0 4px rgba(236,72,153,0.1);"></div>
             </div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
+            <div style="display:flex;gap:5px;margin-top:12px;">
                 <span style="padding:3px 8px;background:rgba(59,130,246,0.1);border-radius:4px;font-size:8px;color:#5a9ac6;font-weight:600;">Header</span>
                 <span style="padding:3px 8px;background:rgba(140,198,63,0.1);border-radius:4px;font-size:8px;color:#7aca6a;font-weight:600;">Content</span>
                 <span style="padding:3px 8px;background:rgba(236,72,153,0.1);border-radius:4px;font-size:8px;color:#ec4899;font-weight:600;">Sidebar</span>
@@ -373,36 +373,36 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # UPLOAD - Zone upload enrichie
     elif visual_hint == "upload":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px dashed #cbd5e1;border-radius:12px;padding:24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 50%,#7aca6a 100%);"></div>
-            <div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 2px 4px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.8);">📁</div>
-            <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Déposez votre fichier ici</div>
-            <div style="font-size:10px;color:#64748b;margin-bottom:12px;">ou cliquez pour parcourir</div>
+            <div style="width:36px;height:36px;margin:0 auto 16px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 2px 4px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.8);">📁</div>
+            <div style="font-size:6px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Déposez votre fichier ici</div>
+            <div style="font-size:7px;color:#64748b;margin-bottom:12px;">ou cliquez pour parcourir</div>
             <div style="height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden;margin:0 20px;">
                 <div style="width:0%;height:100%;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 100%);"></div>
             </div>
-            <div style="font-size:9px;color:#94a3b8;margin-top:10px;">PNG, JPG, Figma jusqu'à 20MB</div>
+            <div style="font-size:6px;color:#94a3b8;margin-top:10px;">PNG, JPG, Figma jusqu'à 20MB</div>
         </div>'''
     
     # GRID - Galerie enrichie
     elif visual_hint == "grid":
-        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <span style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Galerie de styles</span>
-                <span style="font-size:9px;color:#64748b;">6 layouts</span>
+                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Galerie de styles</span>
+                <span style="font-size:6px;color:#64748b;">6 layouts</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                <div style="aspect-ratio:1;background:linear-gradient(145deg,#d0e6ff 0%,#b8d8f0 100%);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 4px rgba(59,130,246,0.15);border:1px solid #7aca6a;position:relative;">
-                    <span style="font-family:Georgia,serif;font-size:14px;color:#4a7a9e;font-weight:600;">Aa</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                <div style="aspect-ratio:1;background:linear-gradient(145deg,#d0e6ff 0%,#b8d8f0 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 4px rgba(59,130,246,0.15);border:1px solid #7aca6a;position:relative;">
+                    <span style="font-family:Georgia,serif;font-size:8px;color:#4a7a9e;font-weight:600;">Aa</span>
                     <span style="font-size:8px;color:#5a9ac6;font-weight:600;">Serif</span>
-                    <div style="position:absolute;top:4px;right:4px;width:14px;height:14px;background:#7aca6a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:700;">✓</div>
+                    <div style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:#7aca6a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:700;">✓</div>
                 </div>
-                <div style="aspect-ratio:1;background:linear-gradient(145deg,#e0f8e0 0%,#b8ecd0 100%);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <span style="font-family:system-ui,sans-serif;font-size:14px;color:#4a8b54;font-weight:600;">Aa</span>
+                <div style="aspect-ratio:1;background:linear-gradient(145deg,#e0f8e0 0%,#b8ecd0 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <span style="font-family:system-ui,sans-serif;font-size:8px;color:#4a8b54;font-weight:600;">Aa</span>
                     <span style="font-size:8px;color:#6ac87a;">Sans</span>
                 </div>
-                <div style="aspect-ratio:1;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <span style="font-family:monospace;font-size:14px;color:#92400e;font-weight:600;">Aa</span>
+                <div style="aspect-ratio:1;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <span style="font-family:monospace;font-size:8px;color:#92400e;font-weight:600;">Aa</span>
                     <span style="font-size:8px;color:#e4bb5a;">Mono</span>
                 </div>
             </div>
@@ -410,15 +410,15 @@ def generate_component_wireframe(component, phase_name, description=""):
     
     # GENERIC - Fallback enrichi
     else:
-        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
+        wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,{color} 0%,{color}88 100%);"></div>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:36px;height:36px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
+            <div style="display:flex;align-items:center;gap:5px;">
+                <div style="width:36px;height:36px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
-                    <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
-                    <div style="font-size:10px;color:#64748b;font-family:monospace;">{endpoint}</div>
+                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
+                    <div style="font-size:7px;color:#64748b;font-family:monospace;">{endpoint}</div>
                 </div>
-                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:9px;color:#475569;font-weight:700;">{method}</span>
+                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:6px;color:#475569;font-weight:700;">{method}</span>
             </div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;">
                 <div style="display:flex;gap:6px;">
@@ -434,12 +434,12 @@ def generate_component_wireframe(component, phase_name, description=""):
             <input type="checkbox" id="comp-{comp_id}" class="comp-checkbox" value="{comp_id}" style="width:18px;height:18px;cursor:pointer;accent-color:#6a9a4f;" onclick="event.stopPropagation();updateValidateButton()">
         </div>
         {wireframe}
-        <div style="padding:10px 12px;border-top:1px solid #f1f5f9;background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);">
-            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;letter-spacing:-0.2px;">{nom_clair}</div>
-            {f'<div style="font-size:11px;color:#64748b;line-height:1.4;margin-bottom:6px;">{description}</div>' if description else ''}
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span style="padding:2px 6px;background:{color}15;color:{color};border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">{method}</span>
-                <span style="font-size:10px;color:#94a3b8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{endpoint}</span>
+        <div style="padding:6px 12px;border-top:1px solid #f1f5f9;background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);">
+            <div style="font-size:7px;font-weight:700;color:#1e293b;margin-bottom:4px;letter-spacing:-0.2px;">{nom_clair}</div>
+            {f'<div style="font-size:8px;color:#64748b;line-height:1.4;margin-bottom:6px;">{description}</div>' if description else ''}
+            <div style="display:flex;align-items:center;gap:5px;">
+                <span style="padding:2px 6px;background:{color}15;color:{color};border-radius:4px;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">{method}</span>
+                <span style="font-size:7px;color:#94a3b8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{endpoint}</span>
             </div>
         </div>
     </div>'''
@@ -506,7 +506,7 @@ def generate_html(genome):
         .stat-label {{ font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 4px; }}
         
         /* Component Grid */
-        .component-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }}
+        .component-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }}
         .component-card:hover {{ box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }}
         .component-card.selected {{ border-color: #7aca6a; box-shadow: 0 0 0 3px rgba(140,198,63,0.15), 0 8px 24px rgba(140,198,63,0.1); }}
     </style>
@@ -545,14 +545,14 @@ def generate_html(genome):
             <div class="sidebar-section">
                 <div class="sidebar-label">Wireframes FRD V2</div>
                 <div style="font-size: 12px; color: #64748b; line-height: 1.8; font-weight: 500;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> status</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> zoom-controls</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> stencil-card</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> detail-card</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> color-palette</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> choice-card</div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> launch-button</div>
-                    <div style="display:flex;align-items:center;gap:8px;"><span style="color:#7aca6a;">●</span> apply-changes</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> status</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> zoom-controls</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> stencil-card</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> detail-card</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> color-palette</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> choice-card</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> launch-button</div>
+                    <div style="display:flex;align-items:center;gap:5px;"><span style="color:#7aca6a;">●</span> apply-changes</div>
                 </div>
             </div>
         </aside>
