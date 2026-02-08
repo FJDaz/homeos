@@ -53,28 +53,28 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
                 <div style="width:8px;height:8px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;box-shadow:0 0 0 2px rgba(140,198,63,0.2);"></div>
-                <span style="font-size:8px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🏥 Santé du projet</span>
+                <span style="font-size:13px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🏥 Santé du projet</span>
             </div>
             <div style="display:flex;justify-content:center;gap:6px;margin:16px 0;">
                 <div style="text-align:center;">
                     <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
+                    <span style="font-size:11px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
                     <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
+                    <span style="font-size:11px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
                     <div style="width:12px;height:12px;background:linear-gradient(135deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;margin:0 auto 6px;box-shadow:0 2px 4px rgba(140,198,63,0.3),inset 0 -2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:6px;color:#64748b;font-weight:500;">OK</span>
+                    <span style="font-size:11px;color:#64748b;font-weight:500;">OK</span>
                 </div>
                 <div style="text-align:center;">
                     <div style="width:12px;height:12px;background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%);border-radius:50%;margin:0 auto 6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);"></div>
-                    <span style="font-size:6px;color:#64748b;font-weight:500;">?</span>
+                    <span style="font-size:11px;color:#64748b;font-weight:500;">?</span>
                 </div>
             </div>
             <div style="background:linear-gradient(90deg,rgba(140,198,63,0.1) 0%,rgba(140,198,63,0.05) 100%);border-radius:6px;padding:8px;text-align:center;">
-                <span style="font-size:7px;color:#7aca6a;font-weight:600;">✅ Fonctions vitales présentes</span>
+                <span style="font-size:12px;color:#7aca6a;font-weight:600;">✅ Fonctions vitales présentes</span>
             </div>
         </div>'''
     
@@ -82,20 +82,20 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "zoom-controls":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
-                <span style="font-size:8px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🔭 Navigation</span>
-                <span style="margin-left:auto;font-size:6px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px;">N2</span>
+                <span style="font-size:13px;font-weight:600;color:#1e293b;letter-spacing:-0.2px;">🔭 Navigation</span>
+                <span style="margin-left:auto;font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px;">N2</span>
             </div>
             <div style="display:flex;gap:5px;margin-bottom:12px;">
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">← Out</span>
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border:1px solid #3d72a0;border-radius:6px;text-align:center;font-size:7px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">🔍 Corps ▼</span>
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">In →</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:12px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">← Out</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border:1px solid #3d72a0;border-radius:6px;text-align:center;font-size:12px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">🔍 Corps ▼</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:12px;color:#475569;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,0.05);">In →</span>
             </div>
             <div style="background:#f8fafc;border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
-                <span style="color:#7aca6a;font-weight:700;font-size:7px;background:rgba(140,198,63,0.1);padding:2px 8px;border-radius:4px;">◉ Corps</span>
-                <span style="color:#94a3b8;font-size:6px;">›</span>
-                <span style="color:#64748b;font-size:7px;font-weight:500;">○ Organe</span>
-                <span style="color:#94a3b8;font-size:6px;">›</span>
-                <span style="color:#64748b;font-size:7px;font-weight:500;">○ Atome</span>
+                <span style="color:#7aca6a;font-weight:700;font-size:12px;background:rgba(140,198,63,0.1);padding:2px 8px;border-radius:4px;">◉ Corps</span>
+                <span style="color:#94a3b8;font-size:11px;">›</span>
+                <span style="color:#64748b;font-size:12px;font-weight:500;">○ Organe</span>
+                <span style="color:#94a3b8;font-size:11px;">›</span>
+                <span style="color:#64748b;font-size:12px;font-weight:500;">○ Atome</span>
             </div>
         </div>'''
     
@@ -104,15 +104,15 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 100%);"></div>
             <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:12px;">
-                <div style="width:28px;height:28px;background:linear-gradient(135deg,#fff8a0 0%,#f8e090 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:7px;box-shadow:0 2px 4px rgba(251,191,36,0.2);">💡</div>
+                <div style="width:28px;height:28px;background:linear-gradient(135deg,#fff8a0 0%,#f8e090 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 4px rgba(251,191,36,0.2);">💡</div>
                 <div style="flex:1;">
-                    <div style="font-size:7px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;margin-bottom:4px;">Veille du Système</div>
-                    <div style="font-size:8px;color:#64748b;line-height:1.5;">Voir l'état de santé du projet en un coup d'œil</div>
+                    <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;margin-bottom:4px;">Veille du Système</div>
+                    <div style="font-size:13px;color:#64748b;line-height:1.5;">Voir l'état de santé du projet en un coup d'œil</div>
                 </div>
             </div>
             <div style="display:flex;gap:5px;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;">
-                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🟢 Garder</span>
-                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#64748b;font-weight:500;">⚪ Réserve</span>
+                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:13px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🟢 Garder</span>
+                <span style="flex:1;padding:5px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:13px;color:#64748b;font-weight:500;">⚪ Réserve</span>
             </div>
         </div>'''
     
@@ -120,12 +120,12 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "detail-card":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
-                <span style="font-size:7px;font-weight:700;color:#5a9ac6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">GET</span>
-                <span style="font-size:8px;font-weight:600;color:#1e293b;font-family:'SF Mono',monospace;letter-spacing:-0.3px;">/api/health</span>
+                <span style="font-size:12px;font-weight:700;color:#5a9ac6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">GET</span>
+                <span style="font-size:13px;font-weight:600;color:#1e293b;font-family:'SF Mono',monospace;letter-spacing:-0.3px;">/api/health</span>
             </div>
             <div style="background:#f8fafc;border-radius:6px;padding:8px;margin-bottom:12px;">
-                <div style="font-size:7px;color:#64748b;margin-bottom:6px;font-weight:500;">Retour JSON</div>
-                <div style="font-size:6px;color:#94a3b8;font-family:monospace;background:#1e293b;padding:8px;border-radius:6px;line-height:1.6;">
+                <div style="font-size:12px;color:#64748b;margin-bottom:6px;font-weight:500;">Retour JSON</div>
+                <div style="font-size:11px;color:#94a3b8;font-family:monospace;background:#1e293b;padding:8px;border-radius:6px;line-height:1.6;">
                     <span style="color:#7aca6a;">{</span><br>
                     &nbsp;&nbsp;<span style="color:#98c8f8;">"status"</span><span style="color:#e2e8f0;">:</span> <span style="color:#b8e8ff;">"ok"</span>,<br>
                     &nbsp;&nbsp;<span style="color:#98c8f8;">"uptime"</span><span style="color:#e2e8f0;">:</span> <span style="color:#f0e080;">3600</span><br>
@@ -133,8 +133,8 @@ def generate_component_wireframe(component, phase_name, description=""):
                 </div>
             </div>
             <div style="display:flex;gap:5px;">
-                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:7px;color:#475569;font-weight:600;">📋 Copier</span>
-                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;text-align:center;font-size:7px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">↗️ Tester</span>
+                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:12px;color:#475569;font-weight:600;">📋 Copier</span>
+                <span style="flex:1;padding:8px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;text-align:center;font-size:12px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">↗️ Tester</span>
             </div>
         </div>'''
     
@@ -142,8 +142,8 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "color-palette":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Style détecté</span>
-                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3.2s</span>
+                <span style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Style détecté</span>
+                <span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3.2s</span>
             </div>
             <div style="display:flex;gap:5px;margin-bottom:14px;">
                 <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:7px;box-shadow:0 2px 4px rgba(59,130,246,0.3),inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;">
@@ -154,36 +154,36 @@ def generate_component_wireframe(component, phase_name, description=""):
                 <div style="flex:1;aspect-ratio:1;background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);border-radius:7px;box-shadow:0 2px 4px rgba(30,41,59,0.3),inset 0 1px 0 rgba(255,255,255,0.1);"></div>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:6px;color:#475569;font-weight:600;">Rounded: 8px</span>
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:6px;color:#475569;font-weight:600;font-family:system-ui;">Inter</span>
-                <span style="padding:4px 10px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border:1px solid #f0e080;border-radius:20px;font-size:6px;color:#92400e;font-weight:600;">Spacing: 16px</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:11px;color:#475569;font-weight:600;">Rounded: 8px</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:20px;font-size:11px;color:#475569;font-weight:600;font-family:system-ui;">Inter</span>
+                <span style="padding:4px 10px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border:1px solid #f0e080;border-radius:20px;font-size:11px;color:#92400e;font-weight:600;">Spacing: 16px</span>
             </div>
         </div>'''
     
     # CHOICE-CARD - Sélection style
     elif visual_hint == "choice-card":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;margin-bottom:14px;">🎨 Choisissez votre style</div>
+            <div style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;margin-bottom:14px;">🎨 Choisissez votre style</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;">
                 <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);transition:all 0.2s;cursor:pointer;">
-                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
-                    <span style="font-size:7px;color:#475569;font-weight:600;">Minimal</span>
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;">○</div>
+                    <span style="font-size:12px;color:#475569;font-weight:600;">Minimal</span>
                 </div>
                 <div style="border:1px solid #7aca6a;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);box-shadow:0 0 0 1px rgba(140,198,63,0.2),0 2px 4px rgba(140,198,63,0.1);">
-                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;box-shadow:0 2px 4px rgba(140,198,63,0.3);">●</div>
-                    <span style="font-size:7px;color:#4a8b54;font-weight:700;">Brutaliste</span>
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;box-shadow:0 2px 4px rgba(140,198,63,0.3);">●</div>
+                    <span style="font-size:12px;color:#4a8b54;font-weight:700;">Brutaliste</span>
                 </div>
                 <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
-                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
-                    <span style="font-size:7px;color:#475569;font-weight:600;">Moderne</span>
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;">○</div>
+                    <span style="font-size:12px;color:#475569;font-weight:600;">Moderne</span>
                 </div>
                 <div style="border:1px solid #e2e8f0;border-radius:7px;padding:8px;text-align:center;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);">
-                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;">○</div>
-                    <span style="font-size:7px;color:#475569;font-weight:600;">Corporate</span>
+                    <div style="width:16px;height:16px;margin:0 auto 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;">○</div>
+                    <span style="font-size:12px;color:#475569;font-weight:600;">Corporate</span>
                 </div>
             </div>
             <div style="display:flex;justify-content:flex-end;">
-                <span style="padding:8px 16px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;font-size:8px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">Continuer →</span>
+                <span style="padding:8px 16px;background:linear-gradient(145deg,#5a9ac6 0%,#4a83b6 100%);border-radius:6px;font-size:13px;color:white;font-weight:600;box-shadow:0 2px 4px rgba(59,130,246,0.3);">Continuer →</span>
             </div>
         </div>'''
     
@@ -191,24 +191,24 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "launch-button":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);text-align:center;">
             <div style="width:32px;height:32px;margin:0 auto 14px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 8px rgba(251,191,36,0.3),inset 0 1px 0 rgba(255,255,255,0.5);">🚀</div>
-            <div style="font-size:7px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Génération du code</div>
-            <div style="font-size:7px;color:#64748b;margin-bottom:16px;">Prêt à distiller votre projet</div>
-            <div style="padding:8px 24px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:7px;font-size:6px;color:white;font-weight:700;box-shadow:0 4px 8px rgba(140,198,63,0.3),0 2px 4px rgba(140,198,63,0.2),inset 0 1px 0 rgba(255,255,255,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🚀 Lancer la distillation</div>
+            <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Génération du code</div>
+            <div style="font-size:12px;color:#64748b;margin-bottom:16px;">Prêt à distiller votre projet</div>
+            <div style="padding:8px 24px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:7px;font-size:11px;color:white;font-weight:700;box-shadow:0 4px 8px rgba(140,198,63,0.3),0 2px 4px rgba(140,198,63,0.2),inset 0 1px 0 rgba(255,255,255,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.1);">🚀 Lancer la distillation</div>
         </div>'''
     
     # APPLY-CHANGES - Sauvegarder/Annuler
     elif visual_hint == "apply-changes":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
-                <div style="width:22px;height:22px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:7px;">💾</div>
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;">💾</div>
                 <div>
-                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Sauvegarder les changements</div>
-                    <div style="font-size:7px;color:#64748b;">3 modifications en attente</div>
+                    <div style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Sauvegarder les changements</div>
+                    <div style="font-size:12px;color:#64748b;">3 modifications en attente</div>
                 </div>
             </div>
             <div style="display:flex;gap:6px;">
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#475569;font-weight:600;transition:all 0.2s;">↩️ Annuler</span>
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">💾 Appliquer</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:13px;color:#475569;font-weight:600;transition:all 0.2s;">↩️ Annuler</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:13px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);">💾 Appliquer</span>
             </div>
         </div>'''
     
@@ -217,13 +217,13 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
                 <div style="width:22px;height:22px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                    <span style="color:white;font-size:6px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,0.2);">{method[:1]}</span>
+                    <span style="color:white;font-size:11px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,0.2);">{method[:1]}</span>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
-                    <div style="font-size:7px;color:#64748b;font-family:monospace;">{endpoint}</div>
+                    <div style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
+                    <div style="font-size:12px;color:#64748b;font-family:monospace;">{endpoint}</div>
                 </div>
-                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:6px;color:#475569;font-weight:700;text-transform:uppercase;">{method}</span>
+                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:11px;color:#475569;font-weight:700;text-transform:uppercase;">{method}</span>
             </div>
             <div style="background:#f8fafc;border-radius:6px;padding:8px;">
                 <div style="display:flex;gap:6px;margin-bottom:8px;">
@@ -249,10 +249,10 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,{color} 0%,{color}88 100%);"></div>
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px;">
-                <div style="width:28px;height:28px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
+                <div style="width:28px;height:28px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
-                    <div style="font-size:7px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;">{nom_clair}</div>
-                    <div style="font-size:7px;color:#64748b;">{method} {endpoint}</div>
+                    <div style="font-size:12px;font-weight:700;color:#1e293b;letter-spacing:-0.3px;">{nom_clair}</div>
+                    <div style="font-size:12px;color:#64748b;">{method} {endpoint}</div>
                 </div>
             </div>
             <div style="height:6px;background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:3px;position:relative;overflow:hidden;">
@@ -264,25 +264,25 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "form":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
-                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Formulaire</span>
-                <span style="margin-left:auto;font-size:6px;color:#94a3b8;">2 champs requis</span>
+                <span style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">Formulaire</span>
+                <span style="margin-left:auto;font-size:11px;color:#94a3b8;">2 champs requis</span>
             </div>
             <div style="margin-bottom:14px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                    <span style="font-size:7px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Nom du projet</span>
-                    <span style="font-size:6px;color:#d56363;">*</span>
+                    <span style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Nom du projet</span>
+                    <span style="font-size:11px;color:#d56363;">*</span>
                 </div>
                 <div style="height:36px;border:1px solid #cbd5e1;border-radius:6px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
             </div>
             <div style="margin-bottom:16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                    <span style="font-size:7px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Description</span>
+                    <span style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.3px;">Description</span>
                 </div>
                 <div style="height:36px;border:1px solid #cbd5e1;border-radius:6px;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);"></div>
             </div>
             <div style="display:flex;gap:6px;padding-top:12px;border-top:1px solid #f1f5f9;">
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:8px;color:#475569;font-weight:600;">Annuler</span>
-                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:8px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);">Valider</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:13px;color:#475569;font-weight:600;">Annuler</span>
+                <span style="flex:1;padding:6px;background:linear-gradient(145deg,#7aca6a 0%,#6aba5a 100%);border-radius:6px;text-align:center;font-size:13px;color:white;font-weight:700;box-shadow:0 2px 4px rgba(140,198,63,0.3);">Valider</span>
             </div>
         </div>'''
     
@@ -290,17 +290,17 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "dashboard":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">📊 Dashboard</span>
-                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:6px;">Temps réel</span>
+                <span style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">📊 Dashboard</span>
+                <span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:6px;">Temps réel</span>
             </div>
             <div style="display:flex;gap:5px;margin-bottom:16px;">
                 <div style="flex:1;text-align:center;padding:8px;background:linear-gradient(145deg,#f5fff0 0%,#e0f8e0 100%);border:1px solid #b8ecd0;border-radius:7px;">
                     <div style="font-size:22px;font-weight:800;color:#4a8b54;margin-bottom:2px;letter-spacing:-0.5px;">29</div>
-                    <div style="font-size:6px;color:#6ac87a;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Composants</div>
+                    <div style="font-size:11px;color:#6ac87a;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Composants</div>
                 </div>
                 <div style="flex:1;text-align:center;padding:8px;background:linear-gradient(145deg,#e8f4ff 0%,#d0e6ff 100%);border:1px solid #b8d8f0;border-radius:7px;">
                     <div style="font-size:22px;font-weight:800;color:#4a7a9e;margin-bottom:2px;letter-spacing:-0.5px;">9</div>
-                    <div style="font-size:6px;color:#5a9ac6;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Phases</div>
+                    <div style="font-size:11px;color:#5a9ac6;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Phases</div>
                 </div>
             </div>
             <div style="background:#f8fafc;border-radius:6px;padding:8px;">
@@ -318,7 +318,7 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "chat/bubble":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;gap:6px;margin-bottom:14px;">
-                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;box-shadow:0 2px 4px rgba(79,70,229,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.2);">S</div>
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;box-shadow:0 2px 4px rgba(79,70,229,0.3);text-shadow:0 1px 2px rgba(0,0,0,0.2);">S</div>
                 <div style="flex:1;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:6px 12px 12px 4px;padding:8px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
                     <div style="height:5px;background:#cbd5e1;border-radius:2px;margin-bottom:5px;width:85%;"></div>
                     <div style="height:5px;background:#cbd5e1;border-radius:2px;width:60%;"></div>
@@ -332,7 +332,7 @@ def generate_component_wireframe(component, phase_name, description=""):
             </div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;display:flex;gap:5px;">
                 <div style="flex:1;height:32px;background:#f1f5f9;border-radius:16px;"></div>
-                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:6px;box-shadow:0 2px 4px rgba(79,70,229,0.3);">➤</div>
+                <div style="width:22px;height:22px;background:linear-gradient(145deg,#6a8aca 0%,#5a7aba 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;box-shadow:0 2px 4px rgba(79,70,229,0.3);">➤</div>
             </div>
         </div>'''
     
@@ -343,9 +343,9 @@ def generate_component_wireframe(component, phase_name, description=""):
                 <div style="width:10px;height:10px;background:#d56363;border-radius:50%;box-shadow:0 0 0 1px rgba(239,68,68,0.3);"></div>
                 <div style="width:10px;height:10px;background:#e4bb5a;border-radius:50%;box-shadow:0 0 0 1px rgba(245,158,11,0.3);"></div>
                 <div style="width:10px;height:10px;background:#7aca6a;border-radius:50%;box-shadow:0 0 0 1px rgba(140,198,63,0.3);"></div>
-                <div style="flex:1;text-align:center;font-size:6px;color:#64748b;font-family:monospace;">component.py</div>
+                <div style="flex:1;text-align:center;font-size:11px;color:#64748b;font-family:monospace;">component.py</div>
             </div>
-            <div style="font-family:'SF Mono',monospace;font-size:7px;line-height:1.7;">
+            <div style="font-family:'SF Mono',monospace;font-size:12px;line-height:1.7;">
                 <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">1</span><span style="color:#a8d8f0;">def</span> <span style="color:#8acad8;">render</span><span style="color:#e2e8f0;">(</span><span style="color:#e0b0b0;">props</span><span style="color:#e2e8f0;">):</span></div>
                 <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">2</span><span style="color:#e2e8f0;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#a8d8f0;">return</span> <span style="color:#b8e8ff;">"hello"</span></div>
                 <div style="display:flex;gap:5px;"><span style="color:#64748b;width:16px;text-align:right;">3</span></div>
@@ -356,8 +356,8 @@ def generate_component_wireframe(component, phase_name, description=""):
     elif visual_hint == "preview":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">👁️ Aperçu maquette</span>
-                <span style="font-size:6px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3 zones</span>
+                <span style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">👁️ Aperçu maquette</span>
+                <span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:6px;">3 zones</span>
             </div>
             <div style="position:relative;background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);border-radius:6px;height:100px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="position:absolute;top:15%;left:10%;width:35%;height:30%;background:linear-gradient(135deg,rgba(59,130,246,0.2) 0%,rgba(37,99,235,0.15) 100%);border:1px dashed #5a9ac6;border-radius:6px;box-shadow:0 0 0 4px rgba(59,130,246,0.1);"></div>
@@ -365,9 +365,9 @@ def generate_component_wireframe(component, phase_name, description=""):
                 <div style="position:absolute;bottom:10%;left:5%;width:25%;height:25%;background:linear-gradient(135deg,rgba(236,72,153,0.15) 0%,rgba(219,39,119,0.1) 100%);border:1px dashed #ec4899;border-radius:6px;box-shadow:0 0 0 4px rgba(236,72,153,0.1);"></div>
             </div>
             <div style="display:flex;gap:5px;margin-top:12px;">
-                <span style="padding:3px 8px;background:rgba(59,130,246,0.1);border-radius:4px;font-size:8px;color:#5a9ac6;font-weight:600;">Header</span>
-                <span style="padding:3px 8px;background:rgba(140,198,63,0.1);border-radius:4px;font-size:8px;color:#7aca6a;font-weight:600;">Content</span>
-                <span style="padding:3px 8px;background:rgba(236,72,153,0.1);border-radius:4px;font-size:8px;color:#ec4899;font-weight:600;">Sidebar</span>
+                <span style="padding:3px 8px;background:rgba(59,130,246,0.1);border-radius:4px;font-size:13px;color:#5a9ac6;font-weight:600;">Header</span>
+                <span style="padding:3px 8px;background:rgba(140,198,63,0.1);border-radius:4px;font-size:13px;color:#7aca6a;font-weight:600;">Content</span>
+                <span style="padding:3px 8px;background:rgba(236,72,153,0.1);border-radius:4px;font-size:13px;color:#ec4899;font-weight:600;">Sidebar</span>
             </div>
         </div>'''
     
@@ -376,34 +376,34 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 50%,#7aca6a 100%);"></div>
             <div style="width:36px;height:36px;margin:0 auto 16px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 2px 4px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.8);">📁</div>
-            <div style="font-size:6px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Déposez votre fichier ici</div>
-            <div style="font-size:7px;color:#64748b;margin-bottom:12px;">ou cliquez pour parcourir</div>
+            <div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:6px;letter-spacing:-0.2px;">Déposez votre fichier ici</div>
+            <div style="font-size:12px;color:#64748b;margin-bottom:12px;">ou cliquez pour parcourir</div>
             <div style="height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden;margin:0 20px;">
                 <div style="width:0%;height:100%;background:linear-gradient(90deg,#7aca6a 0%,#9ad85a 100%);"></div>
             </div>
-            <div style="font-size:6px;color:#94a3b8;margin-top:10px;">PNG, JPG, Figma jusqu'à 20MB</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:10px;">PNG, JPG, Figma jusqu'à 20MB</div>
         </div>'''
     
     # GRID - Galerie enrichie
     elif visual_hint == "grid":
         wireframe = '''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Galerie de styles</span>
-                <span style="font-size:6px;color:#64748b;">6 layouts</span>
+                <span style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">🎨 Galerie de styles</span>
+                <span style="font-size:11px;color:#64748b;">6 layouts</span>
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
                 <div style="aspect-ratio:1;background:linear-gradient(145deg,#d0e6ff 0%,#b8d8f0 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 4px rgba(59,130,246,0.15);border:1px solid #7aca6a;position:relative;">
-                    <span style="font-family:Georgia,serif;font-size:8px;color:#4a7a9e;font-weight:600;">Aa</span>
-                    <span style="font-size:8px;color:#5a9ac6;font-weight:600;">Serif</span>
-                    <div style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:#7aca6a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:700;">✓</div>
+                    <span style="font-family:Georgia,serif;font-size:13px;color:#4a7a9e;font-weight:600;">Aa</span>
+                    <span style="font-size:13px;color:#5a9ac6;font-weight:600;">Serif</span>
+                    <div style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:#7aca6a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;">✓</div>
                 </div>
                 <div style="aspect-ratio:1;background:linear-gradient(145deg,#e0f8e0 0%,#b8ecd0 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <span style="font-family:system-ui,sans-serif;font-size:8px;color:#4a8b54;font-weight:600;">Aa</span>
-                    <span style="font-size:8px;color:#6ac87a;">Sans</span>
+                    <span style="font-family:system-ui,sans-serif;font-size:13px;color:#4a8b54;font-weight:600;">Aa</span>
+                    <span style="font-size:13px;color:#6ac87a;">Sans</span>
                 </div>
                 <div style="aspect-ratio:1;background:linear-gradient(145deg,#fff8a0 0%,#f8e090 100%);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <span style="font-family:monospace;font-size:8px;color:#92400e;font-weight:600;">Aa</span>
-                    <span style="font-size:8px;color:#e4bb5a;">Mono</span>
+                    <span style="font-family:monospace;font-size:13px;color:#92400e;font-weight:600;">Aa</span>
+                    <span style="font-size:13px;color:#e4bb5a;">Mono</span>
                 </div>
             </div>
         </div>'''
@@ -413,12 +413,12 @@ def generate_component_wireframe(component, phase_name, description=""):
         wireframe = f'''<div style="background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);border:1px solid #e2e8f0;border-radius:6px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
             <div style="position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,{color} 0%,{color}88 100%);"></div>
             <div style="display:flex;align-items:center;gap:5px;">
-                <div style="width:36px;height:36px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
+                <div style="width:36px;height:36px;background:linear-gradient(145deg,{color} 0%,{color}dd 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">◆</div>
                 <div style="flex:1;">
-                    <div style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
-                    <div style="font-size:7px;color:#64748b;font-family:monospace;">{endpoint}</div>
+                    <div style="font-size:11px;font-weight:700;color:#1e293b;letter-spacing:-0.2px;">{nom_clair}</div>
+                    <div style="font-size:12px;color:#64748b;font-family:monospace;">{endpoint}</div>
                 </div>
-                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:6px;color:#475569;font-weight:700;">{method}</span>
+                <span style="padding:3px 8px;background:linear-gradient(145deg,#f1f5f9 0%,#e2e8f0 100%);border-radius:4px;font-size:11px;color:#475569;font-weight:700;">{method}</span>
             </div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;">
                 <div style="display:flex;gap:6px;">
@@ -435,17 +435,145 @@ def generate_component_wireframe(component, phase_name, description=""):
         </div>
         {wireframe}
         <div style="padding:6px 12px;border-top:1px solid #f1f5f9;background:linear-gradient(145deg,#ffffff 0%,#fafafa 100%);">
-            <div style="font-size:7px;font-weight:700;color:#1e293b;margin-bottom:4px;letter-spacing:-0.2px;">{nom_clair}</div>
-            {f'<div style="font-size:8px;color:#64748b;line-height:1.4;margin-bottom:6px;">{description}</div>' if description else ''}
+            <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:4px;letter-spacing:-0.2px;">{nom_clair}</div>
+            {f'<div style="font-size:13px;color:#64748b;line-height:1.4;margin-bottom:6px;">{description}</div>' if description else ''}
             <div style="display:flex;align-items:center;gap:5px;">
-                <span style="padding:2px 6px;background:{color}15;color:{color};border-radius:4px;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">{method}</span>
-                <span style="font-size:7px;color:#94a3b8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{endpoint}</span>
+                <span style="padding:2px 6px;background:{color}15;color:{color};border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">{method}</span>
+                <span style="font-size:12px;color:#94a3b8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{endpoint}</span>
             </div>
         </div>
     </div>'''
     
     return html
 
+
+def generate_hierarchy_html(genome):
+    """Generate 4-level hierarchy: Corps > Organes > Cellules > Atomes"""
+    
+    # Classification des composants par niveau
+    corps_items = []      # Pages/Templates
+    organes_items = []    # Zones sémantiques
+    cellules_items = []   # Composants composites
+    atomes_items = []     # Éléments primitifs
+    
+    for phase in genome.get('n0_phases', []):
+        for section in phase.get('n1_sections', []):
+            for feature in section.get('n2_features', []):
+                for comp in feature.get('n3_components', []):
+                    comp['_phase'] = phase.get('name', 'Unknown')
+                    visual = comp.get('visual_hint', 'generic')
+                    
+                    # Classification par visual_hint
+                    if visual in ['preview', 'table', 'dashboard', 'grid', 'editor', 'list', 'accordion']:
+                        corps_items.append(comp)
+                    elif visual in ['stepper', 'breadcrumb', 'status', 'zoom-controls', 'chat/bubble']:
+                        organes_items.append(comp)
+                    elif visual in ['upload', 'color-palette', 'stencil-card', 'detail-card', 
+                                   'choice-card', 'card', 'form', 'chat-input', 'modal']:
+                        cellules_items.append(comp)
+                    else:  # button, launch-button, apply-changes, etc.
+                        atomes_items.append(comp)
+    
+    # Ordre pédagogique user-teaching-friendly
+    # Corps: ordre de découverte - preview d'abord (où tout commence)
+    corps_order = ['preview', 'table', 'dashboard', 'grid', 'editor', 'list', 'accordion']
+    corps_items.sort(key=lambda x: corps_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in corps_order else 99)
+    
+    # Organes: ordre de navigation - stepper d'abord (où en suis-je)
+    organes_order = ['stepper', 'breadcrumb', 'status', 'zoom-controls', 'chat/bubble']
+    organes_items.sort(key=lambda x: organes_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in organes_order else 99)
+    
+    # Cellules: ordre d'interaction - upload d'abord (la première action)
+    cellules_order = ['upload', 'color-palette', 'stencil-card', 'detail-card', 'choice-card', 'card', 'form', 'chat-input', 'modal']
+    cellules_items.sort(key=lambda x: cellules_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in cellules_order else 99)
+    
+    # Atomes: ordre d'usage fréquent - boutons génériques d'abord
+    atomes_order = ['button', 'launch-button', 'apply-changes']
+    atomes_items.sort(key=lambda x: atomes_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in atomes_order else 99)
+    
+    def render_items(items):
+        html = '<div class="component-grid">'
+        for comp in items:
+            desc = comp.get('description_ui', '')
+            html += generate_component_wireframe(comp, comp['_phase'], desc)
+        html += '</div>'
+        return html
+    
+    return f'''
+    <div class="hierarchy-container">
+        <!-- CORPS: Templates et Pages -->
+        <div class="level-section">
+            <div class="level-header" onclick="toggleLevel('corps')">
+                <span class="level-arrow" id="arrow-corps">6</span>
+                <span class="level-title">Corps</span>
+                <span class="level-count">{len(corps_items)}</span>
+                <span class="level-desc">Templates et pages conteneurs</span>
+            </div>
+            <div class="level-content open" id="content-corps">
+                <p class="level-explanation">
+                    Les Corps sont les pages et templates qui structurent l'espace ecran. 
+                    Vous commencez par l'apercu maquette, puis explorez les rapports, dashboards et editeurs 
+                    qui organisent votre travail en espaces coherents.
+                </p>
+                {render_items(corps_items)}
+            </div>
+        </div>
+        
+        <!-- ORGANES: Zones sémantiques -->
+        <div class="level-section">
+            <div class="level-header" onclick="toggleLevel('organes')">
+                <span class="level-arrow" id="arrow-organes">6</span>
+                <span class="level-title">Organes</span>
+                <span class="level-count">{len(organes_items)}</span>
+                <span class="level-desc">Zones sémantiques et navigation</span>
+            </div>
+            <div class="level-content open" id="content-organes">
+                <p class="level-explanation">
+                    Les Organes sont les zones fonctionnelles qui guident votre navigation. 
+                    Le stepper vous situe dans le processus, le fil d'ariane vous oriente, 
+                    les indicateurs d'etat vous informent sur la sante du systeme.
+                </p>
+                {render_items(organes_items)}
+            </div>
+        </div>
+        
+        <!-- CELLULES: Composants composites -->
+        <div class="level-section">
+            <div class="level-header" onclick="toggleLevel('cellules')">
+                <span class="level-arrow" id="arrow-cellules">6</span>
+                <span class="level-title">Cellules</span>
+                <span class="level-count">{len(cellules_items)}</span>
+                <span class="level-desc">Blocs fonctionnels composes</span>
+            </div>
+            <div class="level-content open" id="content-cellules">
+                <p class="level-explanation">
+                    Les Cellules sont les outils d'interaction : vous uploadez un design, 
+                    recevez une palette de couleurs, choisissez des styles, consultez des details. 
+                    Chaque Cellule realise une tache complete pour construire votre interface.
+                </p>
+                {render_items(cellules_items)}
+            </div>
+        </div>
+        
+        <!-- ATOMES: Elements primitifs -->
+        <div class="level-section">
+            <div class="level-header" onclick="toggleLevel('atomes')">
+                <span class="level-arrow" id="arrow-atomes">6</span>
+                <span class="level-title">Atomes</span>
+                <span class="level-count">{len(atomes_items)}</span>
+                <span class="level-desc">Elements d'interface indivisibles</span>
+            </div>
+            <div class="level-content open" id="content-atomes">
+                <p class="level-explanation">
+                    Les Atomes sont les briques de base de l'interface : les boutons que vous cliquez, 
+                    les lancements d'actions, les validations. Invisibles seuls, ils donnent vie aux Cellules 
+                    et rendent l'interface interactive.
+                </p>
+                {render_items(atomes_items)}
+            </div>
+        </div>
+    </div>
+    '''
 
 def generate_html(genome):
     components = []
@@ -458,10 +586,7 @@ def generate_html(genome):
                     comp['_feature'] = feature.get('name', 'Unknown')
                     components.append(comp)
     
-    components_html = ""
-    for comp in components:
-        desc = comp.get('description_ui', '')
-        components_html += generate_component_wireframe(comp, comp['_phase'], desc)
+    hierarchy_html = generate_hierarchy_html(genome)
     
     return f'''<!DOCTYPE html>
 <html lang="fr">
@@ -489,7 +614,7 @@ def generate_html(genome):
         .sidebar-title {{ font-size: 22px; font-weight: 800; color: #7aca6a; letter-spacing: -0.5px; }}
         .sidebar-subtitle {{ font-size: 12px; color: #94a3b8; margin-top: 4px; font-weight: 500; }}
         .sidebar-section {{ padding: 18px; border-bottom: 1px solid #f1f5f9; }}
-        .sidebar-label {{ font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }}
+        .sidebar-label {{ font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }}
         
         /* Content */
         .content {{ flex: 1; overflow-y: auto; padding: 24px; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }}
@@ -503,10 +628,51 @@ def generate_html(genome):
         .stat {{ flex: 1; text-align: center; padding: 18px 12px; background: linear-gradient(145deg, #fff 0%, #fafafa 100%); border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }}
         .stat:hover {{ transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }}
         .stat-value {{ font-size: 28px; font-weight: 800; color: #7aca6a; letter-spacing: -1px; }}
-        .stat-label {{ font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 4px; }}
+        .stat-label {{ font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 4px; }}
+        
+        /* Hierarchical Genome Structure */
+        .hierarchy-container {{ padding: 0; }}
+        
+        .level-section {{ border-top: 1px solid #e2e8f0; }}
+        .level-section:first-child {{ border-top: none; }}
+        
+        .level-header {{ 
+            display: flex; align-items: center; gap: 12px; padding: 16px 24px; 
+            cursor: pointer; background: #fff; user-select: none;
+            transition: background 0.15s;
+        }}
+        .level-header:hover {{ background: #f8fafc; }}
+        
+        .level-arrow {{ 
+            font-family: "Wingdings 2", sans-serif; font-size: 16px; color: #64748b;
+            width: 20px; text-align: center;
+        }}
+        
+        .level-title {{ 
+            font-size: 15px; font-weight: 600; color: #1e293b; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }}
+        .level-count {{ 
+            font-size: 13px; color: #94a3b8; font-weight: 500; 
+            margin-left: 8px; background: #f1f5f9; padding: 2px 10px; border-radius: 10px;
+        }}
+        
+        .level-desc {{ 
+            font-size: 14px; color: #64748b; margin-left: auto; font-weight: 400;
+        }}
+        
+        .level-content {{ 
+            padding: 0 24px 24px 56px; background: #fafafa; display: none;
+        }}
+        .level-content.open {{ display: block; }}
+        
+        .level-explanation {{
+            font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.6;
+            padding: 16px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 3px solid #7aca6a;
+        }}
         
         /* Component Grid */
-        .component-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }}
+        .component-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }}
         .component-card:hover {{ box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }}
         .component-card.selected {{ border-color: #7aca6a; box-shadow: 0 0 0 3px rgba(140,198,63,0.15), 0 8px 24px rgba(140,198,63,0.1); }}
     </style>
@@ -523,7 +689,17 @@ def generate_html(genome):
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">HoméOS</div>
-                <div class="sidebar-subtitle">Genome Viewer v2.1</div>
+                <div class="sidebar-subtitle">Architecture Genome</div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Le Genome</div>
+                <p style="font-size: 13px; color: #166534; line-height: 1.6; margin-bottom: 12px;">
+                    <strong>Le Genome est l'ADN de votre application.</strong> Il capture la structure et les interactions.
+                </p>
+                <p style="font-size: 12px; color: #15803d; line-height: 1.5;">
+                    <strong>Production:</strong> Inférence par confrontation de 4 sources.<br>
+                    <strong>Organisation:</strong> Hiérarchie biologique Corps/Organes/Cellules/Atomes.
+                </p>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-label">Confiance globale</div>
@@ -534,67 +710,46 @@ def generate_html(genome):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div style="text-align: center; padding: 14px; background: linear-gradient(145deg, #fff 0%, #f8fafc 100%); border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <div style="font-size: 24px; font-weight: 800; color: #7aca6a; letter-spacing: -1px;">{len(genome.get('n0_phases', []))}</div>
-                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">phases</div>
+                        <div style="font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">phases</div>
                     </div>
                     <div style="text-align: center; padding: 14px; background: linear-gradient(145deg, #fff 0%, #f8fafc 100%); border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <div style="font-size: 24px; font-weight: 800; color: #5a9ac6; letter-spacing: -1px;">{len(components)}</div>
-                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">composants</div>
+                        <div style="font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">composants</div>
                     </div>
                 </div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-label">Wireframes FRD V2</div>
-                <div style="font-size: 12px; color: #64748b; line-height: 1.8; font-weight: 500;">
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> status</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> zoom-controls</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> stencil-card</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> detail-card</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> color-palette</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> choice-card</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="color:#7aca6a;">●</span> launch-button</div>
-                    <div style="display:flex;align-items:center;gap:5px;"><span style="color:#7aca6a;">●</span> apply-changes</div>
+                <div class="sidebar-label">Types de composants</div>
+                <div style="font-size: 13px; color: #64748b; line-height: 1.8; font-weight: 500;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <span style="width:8px;height:8px;background:#7aca6a;border-radius:50%;"></span>
+                        <span style="flex:1;">Indicateurs d'etat</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <span style="width:8px;height:8px;background:#5a9ac6;border-radius:50%;"></span>
+                        <span style="flex:1;">Contrôles de navigation</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <span style="width:8px;height:8px;background:#e4bb5a;border-radius:50%;"></span>
+                        <span style="flex:1;">Cartes de donnees</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <span style="width:8px;height:8px;background:#8b5cf6;border-radius:50%;"></span>
+                        <span style="flex:1;">Visualisation design</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <span style="width:8px;height:8px;background:#ec4899;border-radius:50%;"></span>
+                        <span style="flex:1;">Formulaires de choix</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="width:8px;height:8px;background:#64748b;border-radius:50%;"></span>
+                        <span style="flex:1;">Actions principales</span>
+                    </div>
                 </div>
             </div>
         </aside>
 
         <div class="content">
-            <!-- Picto section pour chaque tab -->
-            <div id="tab-content-brs" class="tab-content" style="display:none;">
-                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#fef3c7 0%,#fde68a 100%);border-radius:12px;margin-bottom:20px;">
-                    <div style="width:80px;height:80px;margin:0 auto 16px;">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                    </div>
-                    <div style="font-size:1.5em;font-weight:800;color:#92400e;">Brainstorm</div>
-                    <div style="font-size:0.9em;color:#b45309;margin-top:8px;">En construction</div>
-                </div>
-            </div>
-            <div id="tab-content-bkd" class="tab-content" style="display:none;">
-                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#dbeafe 0%,#bfdbfe 100%);border-radius:12px;margin-bottom:20px;">
-                    <div style="width:80px;height:80px;margin:0 auto 16px;">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    </div>
-                    <div style="font-size:1.5em;font-weight:800;color:#1e40af;">Backend</div>
-                    <div style="font-size:0.9em;color:#3b82f6;margin-top:8px;">Bientôt disponible</div>
-                </div>
-            </div>
-            <div id="tab-content-frd" class="tab-content">
-                <div style="text-align:center;padding:30px;background:linear-gradient(145deg,#dcfce7 0%,#bbf7d0 100%);border-radius:12px;margin-bottom:20px;">
-                    <div style="width:60px;height:60px;margin:0 auto 12px;">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    </div>
-                    <div style="font-size:1.3em;font-weight:800;color:#166534;">Frontend</div>
-                </div>
-            </div>
-            <div id="tab-content-dpl" class="tab-content" style="display:none;">
-                <div style="text-align:center;padding:40px;background:linear-gradient(145deg,#fee2e2 0%,#fecaca 100%);border-radius:12px;margin-bottom:20px;">
-                    <div style="width:80px;height:80px;margin:0 auto 16px;">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </div>
-                    <div style="font-size:1.5em;font-weight:800;color:#991b1b;">Deploy</div>
-                    <div style="font-size:0.9em;color:#ef4444;margin-top:8px;">Bientôt disponible</div>
-                </div>
-            </div>
-            
             <div class="sticky-header">
                 <div style="display: flex; gap: 14px; align-items: center;">
                     <input type="checkbox" id="select-all" style="width: 22px; height: 22px; accent-color: #7aca6a; cursor: pointer;" onchange="toggleAll(this)">
@@ -607,15 +762,15 @@ def generate_html(genome):
                 <div class="stats">
                     <div class="stat">
                         <div class="stat-value">{len([c for c in components if c.get('method') == 'GET'])}</div>
-                        <div class="stat-label">📖 Voir</div>
+                        <div class="stat-label">Lire (GET)</div>
                     </div>
                     <div class="stat">
                         <div class="stat-value" style="color: #5a9ac6;">{len([c for c in components if c.get('method') == 'POST'])}</div>
-                        <div class="stat-label">➕ Ajouter</div>
+                        <div class="stat-label">Creer (POST)</div>
                     </div>
                     <div class="stat">
                         <div class="stat-value" style="color: #e4bb5a;">{len([c for c in components if c.get('method') == 'PUT'])}</div>
-                        <div class="stat-label">✏️ Modifier</div>
+                        <div class="stat-label">Modifier (PUT)</div>
                     </div>
                     <div class="stat">
                         <div class="stat-value" style="color: #64748b;">{len([c for c in components if c.get('method') not in ['GET', 'POST', 'PUT']])}</div>
@@ -623,11 +778,10 @@ def generate_html(genome):
                     </div>
                 </div>
                 
-                <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 20px; letter-spacing: -0.5px;">🧬 le Génome — <span style="color: #7aca6a;">{len(components)}</span> composants</h2>
+                <h2 style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; letter-spacing: -0.3px;">Architecture Genome</h2>
+                <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">{len(components)} composants classifies par niveau d'abstraction</p>
                 
-                <div class="component-grid">
-                    {components_html}
-                </div>
+                {hierarchy_html}
             </div>
         </div>
     </div>
@@ -643,6 +797,20 @@ def generate_html(genome):
             // Afficher le contenu du tab sélectionné
             const content = document.getElementById('tab-content-' + tabName);
             if (content) content.style.display = 'block';
+        }}
+        
+        function toggleLevel(level) {{
+            const content = document.getElementById('content-' + level);
+            const arrow = document.getElementById('arrow-' + level);
+            if (content && arrow) {{
+                content.classList.toggle('open');
+                // Webdings: 6 = down (open), 5 = up (closed)
+                if (content.classList.contains('open')) {{
+                    arrow.textContent = '6';
+                }} else {{
+                    arrow.textContent = '5';
+                }}
+            }}
         }}
         
         function toggleAll(source) {{

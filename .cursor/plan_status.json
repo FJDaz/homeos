@@ -1,20 +1,18 @@
 {
-  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/plan_design_principles_visual_intent.json",
-  "plan_id": "design-principles-visual-intent",
+  "plan_path": "/private/tmp/update_prd_plan.json",
+  "plan_id": "update-prd-homeos-v2-3",
   "workflow_type": "PROTO",
   "phase": "validation",
   "batch_index": 1,
   "total_batches": 1,
   "completed_steps": [],
   "current_step_ids": [
-    "step_3",
-    "step_2",
     "step_1"
   ],
-  "total_steps": 3,
-  "status": "running",
+  "total_steps": 1,
+  "status": "completed",
   "started_at": "2025-01-30T14:00:00+00:00",
-  "updated_at": "2026-02-02T15:26:58.437497+00:00",
-  "total_time_ms": 247485.39299999998,
-  "total_cost_usd": 0.021156739999999997
+  "updated_at": "2026-02-07T15:11:06.811878+00:00",
+  "total_time_ms": 7893.827,
+  "total_cost_usd": 0.007017710000000001
 }
