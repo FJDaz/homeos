@@ -25,6 +25,7 @@ from .identity import (
     auditor,
     distiller,
     layout_proposals,
+    stenciler,  # Étape 4 : Stenciler (Composants Défaut)
     VisualIntentReport,
     VisualZone,
     SULLIVAN_DEFAULT_LIBRARY,
@@ -1363,6 +1364,117 @@ async def reset_session():
     sullivan.clear_journal()
     navigator.history = []
     return {"status": "reset"}
+
+
+# =============================================================================
+# ROUTES STENCILER (Étape 4 - Composants Défaut)
+# =============================================================================
+
+@router.get("/stencils", response_class=JSONResponse)
+async def get_stencils():
+    """
+    Retourne la liste des 9 Corps avec leur SVG et les composants.
+    
+    Returns:
+        JSON avec corps[], components et stats
+    """
+    try:
+        corps_list = stenciler.get_corps()
+        components_by_corps = {}
+        
+        for corps in corps_list:
+            corps_id = corps["id"]
+            # Générer le SVG
+            svg = stenciler.generate_stencil_svg(corps_id, width=200, height=120)
+            corps["svg"] = svg
+            
+            # Récupérer les composants avec leur statut
+            components = stenciler.get_components_for_corps(corps_id)
+            for comp in components:
+                comp["status"] = stenciler.get_selection(comp["id"]) or "none"
+            
+            components_by_corps[corps_id] = components
+        
+        stats = stenciler.get_stats()
+        
+        return {
+            "corps": corps_list,
+            "components_by_corps": components_by_corps,
+            "stats": stats
+        }
+    except Exception as e:
+        logger.error(f"Error getting stencils: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/stencils/select", response_class=JSONResponse)
+async def select_component(request: Request):
+    """
+    Marque un composant comme 'keep' ou 'reserve'.
+    
+    Request Body:
+        {"component_id": "comp_1", "status": "keep"}
+    
+    Returns:
+        {"success": true, "component_id": "...", "status": "..."}
+    """
+    try:
+        data = await request.json()
+        component_id = data.get("component_id")
+        status = data.get("status")
+        
+        if not component_id:
+            raise HTTPException(status_code=400, detail="component_id requis")
+        
+        if status not in ("keep", "reserve"):
+            raise HTTPException(status_code=400, detail="status doit être 'keep' ou 'reserve'")
+        
+        stenciler.set_selection(component_id, status)
+        
+        logger.info(f"Component {component_id} marked as {status}")
+        
+        return {
+            "success": True,
+            "component_id": component_id,
+            "status": status
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error selecting component: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stencils/validated", response_class=JSONResponse)
+async def get_validated_genome():
+    """
+    Retourne le genome filtré (seulement les composants 'keep').
+    
+    Returns:
+        {"genome": {...}, "stats": {...}}
+    """
+    try:
+        validated = stenciler.get_validated_genome()
+        stats = stenciler.get_stats()
+        
+        # Compter les composants gardés
+        total_kept = 0
+        for phase in validated.get("n0_phases", []):
+            for section in phase.get("n1_sections", []):
+                for feature in section.get("n2_features", []):
+                    total_kept += len(feature.get("n3_components", []))
+        
+        return {
+            "genome": validated,
+            "stats": {
+                "total_kept": total_kept,
+                "total_reserved": stats.get("reserve", 0),
+                "total_selected": stats.get("total", 0)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting validated genome: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Export pour inclusion dans api.py
