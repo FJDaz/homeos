@@ -1,290 +1,208 @@
 # PLAN INTEGRATION FIGMA EDITOR - Genome FRD
 
 **Date** : 2026-02-08  
-**Mode AetherFlow** : PROD (-f) avec Surgical Edit  
-**Fichier cible** : `server_9999_v2.py` (Genome Viewer existant)  
-**Référence UX** : `UX Phase FRD Clarifé.md`  
-**Spécifications POC** : Pré-génération optimale | Desktop 1440×900 | localStorage
+**Status** : ✅ **RESTRUCTURATION + DIMENSIONS RÉELLES COMPLÉTÉES**  
+**Fichier cible** : `server_9999_v2.py`  
+**Port** : 9999  
+**URL** : http://localhost:9999/studio
 
 ---
 
-## ARCHITECTURE : Deux vues dans une seule app
+## 🏗️ ARCHITECTURE RESTRUCTURÉE N0-N3 + DIMENSIONS RÉELLES
+
+### Vue d'ensemble
 
 ```
-server_9999_v2.py génère:
-├── Vue 1: GENOME BROWSER (actuelle)
-│   ├── Liste hiérarchique Corps/Organes/Cellules/Atomes
-│   ├── Checkboxes de sélection
-│   ├── Stats (Lire/Créer/Modifier)
-│   ├── **Génération background des blueprints** (dès chargement)
-│   └── Bouton "Valider (n)" → SWITCH TO VUE 2
-│
-└── Vue 2: FIGMA EDITOR (nouvelle, cachée par défaut)
-    ├── Row Corps (haut) - miniatures avec états ⏳/✅/⚠️
-    ├── Breadcrumb - navigation hiérarchique
-    ├── Main Area - Canvas Fabric.js
-    ├── Sidebar - hiérarchie accordéon (sans Corps en haut)
-    └── Toolbar - zoom/export
+┌──────────────────────────────────────────────────────────┐
+│  ROW CORPS (N0) - 9 phases du genome                    │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
+│  │ [Aperçu│ │ [Aperçu│ │ [Aperçu│ │ [Aperçu│       │
+│  │  wiref] │ │  wiref] │ │  wiref] │ │  wiref] │       │
+│  │ Intent  │ │ Arbitra │ │ Session │ │ Navigat │       │
+│  │   ✓     │ │         │ │         │ │         │       │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+│  [Cliquer = changer contexte sidebar]                   │
+├──────────────────────────────────────────────────────────┤
+│  CANVAS - Corps en DIMENSIONS RÉELLES                   │
+│  ┌─────────────────────────────────────────┐            │
+│  │ ┌─────────────────────────────────────┐ │            │
+│  │ │ Intent Refactoring    1440×900    │ │ ← Header    │
+│  │ ├─────────────────────────────────────┤ │            │
+│  │ │ ┌────────┐  ┌───────────────────┐ │ │            │
+│  │ │ │sidebar │  │                   │ │ │ ← Zones    │
+│  │ │ │  280px │  │    content        │ │ │   Sullivan │
+│  │ │ │        │  │    1160px         │ │ │            │
+│  │ │ └────────┘  └───────────────────┘ │ │            │
+│  │ └─────────────────────────────────────┘ │            │
+│  │          [25% échelle affichage]        │            │
+│  └─────────────────────────────────────────┘            │
+│  [Drop Corps = rendu 1440×900 avec layout]              │
+├──────────────────────────────────────────────────────────┤
+│  SIDEBAR - Organes du Corps actif uniquement            │
+│  ┌─────────────────────────────────────────┐             │
+│  │ ▼ Corps Actif: Intent Refactoring       │             │
+│  │   ├─ Rapport IR (N1)                   │             │
+│  │   │   ├─ Tableau IR (N2)               │             │
+│  │   │   └─ Détail Organe (N2)            │             │
+│  └─────────────────────────────────────────┘             │
+├──────────────────────────────────────────────────────────┤
+│  [Delete/Suppr/Backspace] = Supprimer objet sélectionné │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## PHASE 0 : Pré-génération des Blueprints (NOUVEAU)
+## ✅ RESTRUCTURATION N0-N3 COMPLÉTÉE
 
-**Objectif** : Générer les esquisses de layouts dès le chargement de la Vue 1 pour une réponse immédiate au switch.
+### 1. Row Corps - 9 N0 avec wireframes persistés
 
-### 0.1 Détection des Corps
+**9 Corps extraits de `n0_phases`** :
+1. `phase_1_ir` → Intent Refactoring (table)
+2. `phase_2_arbiter` → Arbitrage (card)
+3. `phase_3_session` → Session (status)
+4. `phase_4_navigation` → Navigation (breadcrumb)
+5. `phase_5_layout` → Layout (grid)
+6. `phase_6_upload` → Upload (upload)
+7. `phase_7_chat` → Dialogue (chat)
+8. `phase_8_validation` → Validation (dashboard)
+9. `phase_9_zoom` → Adaptation (preview)
+
+**Aperçus visuels** :
+- SVG wireframe unique par type
+- Persisté dans `localStorage` (cache)
+- Généré une seule fois, réutilisé ensuite
+
+### 2. Sidebar - Filtrage strict par Corps actif
+
 ```javascript
-// Au chargement de la page, identifier tous les Corps du Genome
-const corpsList = detectCorpsFromGenome(genomeData);
-// Résultat : ['dashboard', 'profile', 'settings', 'reports']
-```
-
-### 0.2 Génération asynchrone des blueprints
-```javascript
-// Pour chaque Corps détecté
-function generateBlueprint(corpsId, visualHint) {
-  // Tous les Corps en desktop 1440×900 pour ce POC
-  const blueprint = {
-    id: corpsId,
-    width: 1440,
-    height: 900,
-    viewport: 'desktop',
-    structure: inferStructureFromHint(visualHint),
-    organes: [], // Positions prédéfinies mais vides
-    generated_at: new Date().toISOString(),
-    status: 'ready' // ou 'missing' si besoin brainstorm
-  };
-  
-  // Stockage localStorage
-  saveToLocalStorage(`blueprint_${corpsId}`, blueprint);
+function activateCorps(corpsId) {
+  // Highlight dans le Row
+  // Filtrer sidebar : uniquement N1 de ce N0
+  // Reset N2/N3
 }
 ```
 
-### 0.3 Structures par type de Corps
-```javascript
-const structures = {
-  'preview': { 
-    layout: 'single', 
-    zones: [{type: 'preview-area', x: 0, y: 0, w: 1440, h: 900}]
-  },
-  'table': { 
-    layout: 'header-content', 
-    zones: [
-      {type: 'header', x: 0, y: 0, w: 1440, h: 80},
-      {type: 'table', x: 0, y: 80, w: 1440, h: 820}
-    ]
-  },
-  'dashboard': { 
-    layout: 'header-grid-footer', 
-    zones: [
-      {type: 'header', x: 0, y: 0, w: 1440, h: 80},
-      {type: 'stats', x: 0, y: 80, w: 1440, h: 200},
-      {type: 'content', x: 0, y: 280, w: 1440, h: 620}
-    ]
-  },
-  'grid': { 
-    layout: 'masonry', 
-    zones: [{type: 'grid', x: 0, y: 0, w: 1440, h: 900}]
-  },
-  'editor': { 
-    layout: 'sidebar-content', 
-    zones: [
-      {type: 'sidebar', x: 0, y: 0, w: 280, h: 900},
-      {type: 'editor', x: 280, y: 0, w: 1160, h: 900}
-    ]
-  },
-  'default': { 
-    layout: 'flex', 
-    zones: [{type: 'content', x: 0, y: 0, w: 1440, h: 900}]
-  }
-};
-```
+### 3. Canvas - Dimensions réelles 1440×900
 
-### 0.4 Stockage localStorage
+**Avant** : Petit rectangle 300×200px
+**Après** : Desktop réel 1440×900px (affiché à 25% = 360×225px)
+
 ```javascript
-// Clé : homeos_blueprints
-// Valeur : JSON avec tous les blueprints générés
-{
-  "version": "1.0",
-  "generated_at": "2026-02-08T18:30:00Z",
-  "blueprints": {
-    "dashboard": { /* blueprint */ },
-    "profile": { /* blueprint */ },
-    "settings": { /* blueprint */ }
-  }
+function renderCorpsOnCanvas(canvas, corpsId, dropX, dropY) {
+  const REAL_WIDTH = 1440;
+  const REAL_HEIGHT = 900;
+  const scale = 0.25; // 25% pour tenir dans la vue
+  
+  // Rendu avec :
+  // - Cadre principal (blanc + bordure verte)
+  // - Header (80px réel = 20px affiché)
+  // - Titre du Corps
+  // - Badge "1440×900"
+  // - Zones selon structure Sullivan
 }
 ```
 
----
+### 4. Structure Sullivan appliquée
 
-## PHASE 1 : Intégration du switch Vue 1 → Vue 2
+Selon `CORP_STRUCTURES` :
 
-### 1.1 Wrapper les vues
-```html
-<div id="browser-view">...</div>
-<div id="editor-view" style="display:none">...</div>
-```
+| Type | Layout | Zones visibles |
+|------|--------|----------------|
+| `dashboard` | header-grid-footer | header + stats + content |
+| `table` | header-content | header + table |
+| `editor` | sidebar-content | sidebar (280px) + content (1160px) |
+| `grid` | masonry | grille de cartes |
+| `preview` | single | zone preview unique |
 
-### 1.2 JavaScript de transition
+### 5. Suppression (Delete/Suppr/Backspace)
+
 ```javascript
-function openEditor(selectedIds) {
-  // 1. Récupérer les blueprints depuis localStorage
-  const blueprints = selectedIds.map(id => 
-    loadFromLocalStorage(`blueprint_${id}`)
-  );
-  
-  // 2. Afficher Row Corps avec états
-  renderRowCorps(blueprints);
-  
-  // 3. Switch de vue
-  document.getElementById('browser-view').style.display = 'none';
-  document.getElementById('editor-view').style.display = 'grid';
-  
-  // 4. Initialiser Fabric.js
-  initEditor(selectedIds, blueprints);
-}
-```
-
-### 1.3 Connecter "Valider"
-```javascript
-document.getElementById('validate-btn').addEventListener('click', () => {
-  const selectedIds = getSelectedCorpsIds();
-  openEditor(selectedIds);
-});
-```
-
----
-
-## PHASE 2 : Row Corps et Drag & Drop
-
-### 2.1 Row Corps avec états
-```
-[⏳ Dashboard]  [✅ Profile]  [⚠️ Settings]
-   skeleton      aperçu       dimensions?
-```
-
-**États :**
-- **⏳ Skeleton** : Blueprint en cours de génération
-- **✅ Généré** : Blueprint disponible dans localStorage
-- **⚠️ Brainstorm** : Dimensions manquantes
-
-### 2.2 Drag & Drop HTML5
-```javascript
-const thumbs = document.querySelectorAll('.corps-thumb');
-thumbs.forEach(thumb => {
-  thumb.addEventListener('dragstart', (e) => {
-    e.dataTransfer.setData('corps-id', thumb.dataset.id);
-  });
-});
-
-const canvas = document.getElementById('fabric-canvas');
-canvas.addEventListener('drop', (e) => {
-  const corpsId = e.dataTransfer.getData('corps-id');
-  const blueprint = loadFromLocalStorage(`blueprint_${corpsId}`);
-  
-  if (blueprint.status === 'missing') {
-    showBrainstormModal(corpsId);
-  } else {
-    renderBlueprintOnCanvas(blueprint);
+document.addEventListener('keydown', (e) => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && canvas.getActiveObject()) {
+    canvas.remove(canvas.getActiveObject());
+    saveCanvasState();
   }
 });
 ```
 
 ---
 
-## PHASE 3 : Navigation hiérarchique
+## 🎯 WORKFLOW UTILISATEUR
 
-### 3.1 Double-clic drill-down
+1. **Sélectionner** dans Browser → "Valider"
+2. **Row** s'affiche avec les 9 Corps + aperçus
+3. **Premier Corps** actif par défaut
+4. **Sidebar** affiche ses organes uniquement
+5. **Drag Corps** sur canvas → Apparaît en 1440×900
+6. **Zones visibles** selon type (header/sidebar/content...)
+7. **Cliquer autre Corps** dans Row → Sidebar change
+8. **Delete** pour supprimer
+9. **Zoom** pour voir les détails
+
+---
+
+## 📊 COMPARAISON AVANT/APRÈS
+
+| Aspect | Avant | Après |
+|--------|-------|-------|
+| **Row** | 29 éléments mélangés | 9 Corps N0 structurés |
+| **Aperçus** | Rectangle gris générique | Wireframe SVG typé |
+| **Sidebar** | Tout mélangé | Filtré par Corps actif |
+| **Canvas** | 300×200px | 1440×900px (échelle 25%) |
+| **Layout** | Simple rectangle | Structure Sullivan complète |
+| **Suppression** | Non implémentée | Delete/Suppr/Backspace |
+
+---
+
+## 🔧 DÉTAILS TECHNIQUES
+
+### Rendu Canvas (1440×900)
+
+```
+Dimensions réelles:     1440 × 900 px
+Échelle affichage:      25%
+Dimensions affichées:   360 × 225 px
+
+Structure rendue:
+┌────────────────────────────────────────┐ ← Frame (blanc + ombre)
+│ Intent Refactoring        1440×900    │ ← Header (h:20px)
+├────────────────────────────────────────┤
+│ ┌─────┐ ┌──────────────────────────┐ │ ← Zones selon type
+│ │side │ │                          │ │   - sidebar: 70px
+│ │70px │ │       content            │ │   - content: 290px
+│ │     │ │       290px              │ │
+│ └─────┘ └──────────────────────────┘ │
+└────────────────────────────────────────┘
+```
+
+### Cache Wireframes
+
 ```javascript
-canvas.on('mouse:dblclick', (e) => {
-  const obj = e.target;
-  if (obj.data?.type === 'corps') {
-    zoomToOrganeView(obj.data.id);
-  } else if (obj.data?.type === 'organe') {
-    zoomToAtomeView(obj.data.id);
-  }
-});
-```
-
-### 3.2 Breadcrumb
-```
-Corps > Dashboard > StatsZone
-```
-
-### 3.3 Sidebar accordéon (sans Corps)
-```
-▼ Dashboard (MAX LUM)
-  ├─ Header (MIDDLE LUM)
-  ├─ Stats (MIDDLE LUM)
-  └─ Footer (MIDDLE LUM)
-
-▶ Profile (MIN LUM)
-▶ Settings (MIN LUM)
+const WIREFRAME_CACHE_KEY = 'homeos_wireframe_cache';
+// Stockage: { 'phase_1_ir': '<svg>...</svg>', ... }
 ```
 
 ---
 
-## PHASE 4 : Brainstorm et Export
+## CONTRAINTES RESPECTÉES
 
-### 4.1 Brainstorm Modal
-**Déclenchement** : Si Corps déposé avec `status === 'missing'`
+- ✅ PAS DE SERVEUR (Python = statique)
+- ✅ PAS DE BUILD (Fabric.js CDN)
+- ✅ PAS DE FRAMEWORK (Vanilla JS)
+- ✅ localStorage persistance
+- ✅ 9 Corps max N0
+- ✅ Dimensions réelles desktop
+- ✅ Suppression clavier
 
-### 4.2 Export JSON
-```javascript
-function exportToJSON() {
-  const exportData = {
-    version: '1.0',
-    exported_at: new Date().toISOString(),
-    canvas_state: canvas.toJSON(),
-    blueprints_used: getUsedBlueprints(),
-    fabric_objects: canvas.getObjects().map(obj => ({
-      type: obj.type,
-      position: { x: obj.left, y: obj.top },
-      size: { width: obj.width, height: obj.height },
-      data: obj.data
-    }))
-  };
-  
-  downloadJSON(exportData, `homeos-export-${Date.now()}.json`);
-}
+---
+
+## COMMANDES
+
+```bash
+python3 server_9999_v2.py
+# http://localhost:9999/studio
 ```
 
 ---
 
-## CONTRAINTES
-
-- **PAS DE SERVEUR** : Python sert fichiers statiques
-- **PAS DE BUILD** : Fabric.js via CDN
-- **PAS DE FRAMEWORK** : Vanilla JS
-- **Surgical Edit** : Modifications minimales
-- **Desktop First** : Tous les Corps en 1440×900
-- **localStorage** : Stockage client uniquement
-
----
-
-## WORKFLOW UTILISATEUR
-
-1.  **Ouvre** `localhost:9999` → Vue 1
-    └→ *Background* : Génération blueprints dans localStorage
-
-2.  **Coche** des Corps → **Clique** "Valider (3)"
-    └→ **Switch** → Vue 2 avec Row Corps (✅)
-
-3.  **Drag** un Corps sur le canvas
-    └→ Rendu immédiat du blueprint 1440×900
-
-4.  **Double-clic** → Navigation drill-down
-
-5.  **Export** JSON → Fichier téléchargé
-
----
-
-## TIMELINE POC (1 mois)
-
-| Semaine | Phase | Livrable |
-|---------|-------|----------|
-| S1 | 0 + 1 | Blueprints + Switch |
-| S2 | 2 | Row Corps + Drag & Drop |
-| S3 | 3 | Navigation drill-down |
-| S4 | 4 | Brainstorm + Export |
+**Mémo** : "9 Corps, dimensions réelles, structure Sullivan, suppression fluide."

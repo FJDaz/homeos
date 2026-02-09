@@ -190,3 +190,97 @@ Avant commit:
 ---
 
 **Mémo**: "4 bundles, 5 phases, 29 composants, 10 wireframes, 0 approximation."
+
+---
+
+## 🎨 FIGMA EDITOR INTEGRATION
+
+Le Genome généré alimente un éditeur visuel Figma-like intégré dans `server_9999_v2.py`.
+
+### Architecture Deux-Vues (Restructurée N0-N3 + Dimensions Réelles)
+```
+Vue 1: GENOME BROWSER (localhost:9999/studio)
+├── Hiérarchie N0-N3 (Corps/Organes/Cellules/Atomes)
+├── Checkboxes de sélection
+├── Génération background blueprints (localStorage)
+└── Bouton "Valider (n)" → scroll vers Vue 2
+
+Vue 2: FIGMA EDITOR (Navigation Contextuelle FRD)
+├── Row Corps (N0) - 9 phases du genome
+│   ├── 9 miniatures avec wireframes SVG persistés
+│   ├── Aperçu visuel par type (table/card/dashboard...)
+│   ├── Cliquable pour changer de contexte
+│   └── Highlight du Corps actif
+├── Sidebar - Organes du Corps actif UNIQUEMENT
+│   ├── Filtrage strict par N0 sélectionné
+│   └── Header "Corps Actif: [Nom]"
+├── Canvas Fabric.js (DIMENSIONS RÉELLES)
+│   ├── Drop = rendu 1440×900px (desktop)
+│   ├── Échelle 25% pour tenir dans la vue
+│   ├── Structure Sullivan appliquée (zones visibles)
+│   └── Header/sidebar/content selon type
+├── Breadcrumb navigation (N0 › N1 › N2)
+├── Suppression: Delete/Suppr/Backspace
+└── Export JSON
+```
+
+### Phases d'Implémentation
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 0 | Blueprints localStorage | ✅ |
+| 1 | Switch scroll vertical | ✅ |
+| 2 | Row Corps + Drag & Drop | ✅ |
+| 3 | Drill-down + Breadcrumb | ✅ |
+| 4 | Brainstorm modal + Export | ✅ |
+
+### Phase 4 : Brainstorm Modal & Export JSON
+
+#### 4.1 Brainstorm Modal
+**Déclenchement** : Drop d'un Corps avec `status === 'missing'`
+
+```javascript
+function showBrainstormModal(corpsId) {
+  // Popup overlay
+  // Formulaire dimensions (width, height)
+  // Validation → mise à jour blueprint
+}
+```
+
+**UI Modal** :
+```
+┌─────────────────────────────────┐
+│  💡 Brainstorm                  │
+│                                 │
+│  Corps: Dashboard               │
+│                                 │
+│  Dimensions:                    │
+│  [________] × [________] px    │
+│                                 │
+│  [Annuler]  [Valider]          │
+└─────────────────────────────────┘
+```
+
+#### 4.2 Export JSON
+```javascript
+function exportToJSON() {
+  const exportData = {
+    version: '1.0',
+    exported_at: new Date().toISOString(),
+    canvas_state: canvas.toJSON(),
+    blueprints_used: getUsedBlueprints(),
+    fabric_objects: canvas.getObjects().map(obj => ({
+      type: obj.type,
+      position: { x: obj.left, y: obj.top },
+      size: { width: obj.width, height: obj.height },
+      data: obj.data
+    }))
+  };
+  
+  downloadJSON(exportData, `homeos-export-${Date.now()}.json`);
+}
+```
+
+### Fichiers
+- **Plan**: `docs/02-sullivan/FIGMA-Like/Figma-like_2026_02_08/PLAN_INTEGRATION.md`
+- **Serveur**: `docs/02-sullivan/Genome_Enrichi/Genome_OPTIMISE_2026-02-06/server_9999_v2.py`
+- **Data**: `genome_inferred_kimi_innocent.json`
