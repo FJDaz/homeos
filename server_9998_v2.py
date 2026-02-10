@@ -368,40 +368,40 @@ def generate_wireframe_general(visual_hint, color="#7aca6a"):
 
 # Corps : noms inchangés mais wireframes améliorés
 CORPS_MAPPING = {
-    'n0_brainstorm': {'name': 'Brainstorm', 'hint': 'brainstorm', 'desc': '💡 Phase créative : comprendre vos besoins et structurer votre projet'},
-    'n0_backend': {'name': 'Backend', 'hint': 'backend', 'desc': '⚙️ Moteur invisible : gestion des données et logique métier'},
-    'n0_frontend': {'name': 'Frontend', 'hint': 'frontend', 'desc': '🎨 Ce que vous voyez : interface, design et expérience utilisateur'},
-    'n0_deploy': {'name': 'Deploy', 'hint': 'deploy', 'desc': '🚀 Mise en ligne : publication et livraison de votre projet'}
+    'n0_brainstorm': {'name': 'Brainstorm', 'hint': 'brainstorm', 'desc': 'Phase créative : comprendre vos besoins et structurer votre projet'},
+    'n0_backend': {'name': 'Backend', 'hint': 'backend', 'desc': 'Moteur invisible : gestion des données et logique métier'},
+    'n0_frontend': {'name': 'Frontend', 'hint': 'frontend', 'desc': 'Ce que vous voyez : interface, design et expérience utilisateur'},
+    'n0_deploy': {'name': 'Deploy', 'hint': 'deploy', 'desc': 'Mise en ligne : publication et livraison de votre projet'}
 }
 
-# Organes : noms user-friendly
+# Organes : noms user-friendly (sans emojis)
 ORGANES_MAPPING = {
-    'n1_ir': {'name': '🔍 Analyse du Projet', 'hint': 'analyse', 'desc': 'Inventaire complet de ce dont vous avez besoin'},
-    'n1_arbitrage': {'name': '⚖️ Choix des Fonctions', 'hint': 'choix', 'desc': 'Décider quelles fonctionnalités garder ou mettre de côté'},
-    'n1_session': {'name': '📁 Mon Travail', 'hint': 'sauvegarde', 'desc': 'Sauvegarde automatique et état de votre progression'},
-    'n1_navigation': {'name': '🧭 Parcours', 'hint': 'parcours', 'desc': 'Guide visuel : où vous êtes et où vous allez'},
-    'n1_layout': {'name': '🖼️ Style de Page', 'hint': 'style', 'desc': 'Choisir l\'apparence visuelle de votre projet'},
-    'n1_upload': {'name': '📤 Importer ma Maquette', 'hint': 'import', 'desc': 'Envoyer une image ou maquette existante'},
-    'n1_analysis': {'name': '🔎 Décrypter l\'Image', 'hint': 'decrypter', 'desc': 'L\'IA analyse votre design et extrait les éléments'},
-    'n1_dialogue': {'name': '💬 Discussion avec l\'Assistant', 'hint': 'discussion', 'desc': 'Affiner votre projet en conversation avec Sullivan'},
-    'n1_validation': {'name': '✅ Vérifier & Valider', 'hint': 'verifier', 'desc': 'Contrôle final avant génération du code'},
-    'n1_adaptation': {'name': '🔧 Détails & Réglages', 'hint': 'details', 'desc': 'Zoom sur les détails et ajustements fin'},
-    'n1_export': {'name': '📥 Récupérer mon Code', 'hint': 'recuperer', 'desc': 'Télécharger le code final de votre projet'}
+    'n1_ir': {'name': 'Analyse du Projet', 'hint': 'analyse', 'desc': 'Inventaire complet de ce dont vous avez besoin'},
+    'n1_arbitrage': {'name': 'Choix des Fonctions', 'hint': 'choix', 'desc': 'Décider quelles fonctionnalités garder ou mettre de côté'},
+    'n1_session': {'name': 'Mon Travail', 'hint': 'sauvegarde', 'desc': 'Sauvegarde automatique et état de votre progression'},
+    'n1_navigation': {'name': 'Parcours', 'hint': 'parcours', 'desc': 'Guide visuel : où vous êtes et où vous allez'},
+    'n1_layout': {'name': 'Style de Page', 'hint': 'style', 'desc': 'Choisir l\'apparence visuelle de votre projet'},
+    'n1_upload': {'name': 'Importer ma Maquette', 'hint': 'import', 'desc': 'Envoyer une image ou maquette existante'},
+    'n1_analysis': {'name': 'Décrypter l\'Image', 'hint': 'decrypter', 'desc': 'L\'IA analyse votre design et extrait les éléments'},
+    'n1_dialogue': {'name': 'Discussion avec l\'Assistant', 'hint': 'discussion', 'desc': 'Affiner votre projet en conversation avec Sullivan'},
+    'n1_validation': {'name': 'Vérifier & Valider', 'hint': 'verifier', 'desc': 'Contrôle final avant génération du code'},
+    'n1_adaptation': {'name': 'Détails & Réglages', 'hint': 'details', 'desc': 'Zoom sur les détails et ajustements fin'},
+    'n1_export': {'name': 'Récupérer mon Code', 'hint': 'recuperer', 'desc': 'Télécharger le code final de votre projet'}
 }
 
-# Cellules : noms user-friendly (sous-éléments)
+# Cellules : noms user-friendly (sous-éléments, sans emojis)
 CELLULES_MAPPING = {
-    'n2_ir_report': {'name': '📊 Résultat de l\'Analyse', 'hint': 'analyse'},
-    'n2_stencils': {'name': '🎴 Cartes de Fonctions', 'hint': 'choix'},
-    'n2_session_mgmt': {'name': '💾 Sauvegarde Auto', 'hint': 'sauvegarde'},
-    'n2_stepper': {'name': '📍 Où j\'en suis', 'hint': 'parcours'},
-    'n2_layouts': {'name': '🎨 Choix du Look', 'hint': 'style'},
-    'n2_upload': {'name': '📤 Envoyer & Extraire', 'hint': 'import'},
-    'n2_vision_analysis': {'name': '👁️ Ce que l\'IA voit', 'hint': 'decrypter'},
-    'n2_chat': {'name': '💬 Ma Conversation', 'hint': 'discussion'},
-    'n2_validation': {'name': '📋 Mon Récap', 'hint': 'verifier'},
-    'n2_zoom': {'name': '🔍 Zoom Avant/Arrière', 'hint': 'details'},
-    'n2_export': {'name': '📦 Mon Projet Final', 'hint': 'recuperer'}
+    'n2_ir_report': {'name': 'Résultat de l\'Analyse', 'hint': 'analyse'},
+    'n2_stencils': {'name': 'Cartes de Fonctions', 'hint': 'choix'},
+    'n2_session_mgmt': {'name': 'Sauvegarde Auto', 'hint': 'sauvegarde'},
+    'n2_stepper': {'name': 'Où j\'en suis', 'hint': 'parcours'},
+    'n2_layouts': {'name': 'Choix du Look', 'hint': 'style'},
+    'n2_upload': {'name': 'Envoyer & Extraire', 'hint': 'import'},
+    'n2_vision_analysis': {'name': 'Ce que l\'IA voit', 'hint': 'decrypter'},
+    'n2_chat': {'name': 'Ma Conversation', 'hint': 'discussion'},
+    'n2_validation': {'name': 'Mon Récap', 'hint': 'verifier'},
+    'n2_zoom': {'name': 'Zoom Avant/Arrière', 'hint': 'details'},
+    'n2_export': {'name': 'Mon Projet Final', 'hint': 'recuperer'}
 }
 
 
