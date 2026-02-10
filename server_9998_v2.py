@@ -867,7 +867,7 @@ def generate_html(genome):
             box-shadow: 0 0 0 3px rgba(122,202,106,0.3);
         }}
         
-        /* Style Previews */
+        /* Style Previews - Classy & Elegant */
         .style-preview {{
             width: 100%;
             height: 100%;
@@ -876,85 +876,117 @@ def generate_html(genome):
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 8px;
+            padding: 10px;
         }}
         .style-preview .sp-title {{
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 2px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            letter-spacing: 0.3px;
         }}
         .style-preview .sp-sub {{
-            font-size: 9px;
-            font-weight: 500;
-            opacity: 0.8;
+            font-size: 8px;
+            font-weight: 400;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }}
         
-        /* Minimal: Clean, light, airy */
+        /* Minimal: Refined simplicity */
         .minimal-preview {{
-            background: #ffffff;
-            color: #334155;
+            background: #fafafa;
+            color: #525252;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }}
-        .minimal-preview .sp-title {{ font-weight: 300; letter-spacing: 0.5px; }}
+        .minimal-preview .sp-title {{ 
+            font-weight: 400; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 10px;
+        }}
         
-        /* Corporate: Professional, structured */
+        /* Corporate: Executive elegance */
         .corporate-preview {{
-            background: #1e3a5f;
-            color: #ffffff;
-            font-family: Georgia, 'Times New Roman', serif;
+            background: #f8fafc;
+            color: #1e3a5f;
+            font-family: 'Times New Roman', Times, serif;
         }}
-        .corporate-preview .sp-title {{ font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }}
+        .corporate-preview .sp-title {{ 
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            font-size: 12px;
+        }}
         
-        /* Creative: Bold, artistic */
+        /* Creative: Artistic sophistication */
         .creative-preview {{
-            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
+            background: #fef7ed;
+            color: #9a3412;
+            font-family: Georgia, 'Palatino', serif;
         }}
-        .creative-preview .sp-title {{ font-weight: 800; font-style: italic; }}
+        .creative-preview .sp-title {{ 
+            font-weight: 500; 
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }}
         
-        /* Tech: Modern, code-like */
+        /* Tech: Precision engineering */
         .tech-preview {{
-            background: #0f172a;
-            color: #22d3ee;
-            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            color: #334155;
+            font-family: 'SF Mono', 'Monaco', monospace;
         }}
-        .tech-preview .sp-title {{ font-weight: 700; letter-spacing: 2px; font-size: 11px; }}
+        .tech-preview .sp-title {{ 
+            font-weight: 500; 
+            letter-spacing: 1px;
+            font-size: 10px;
+        }}
         
-        /* Elegant: Refined, luxurious */
+        /* Elegant: Timeless luxury */
         .elegant-preview {{
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-            font-family: Georgia, serif;
+            background: #fffbeb;
+            color: #713f12;
+            font-family: 'Times New Roman', serif;
         }}
-        .elegant-preview .sp-title {{ font-weight: 400; letter-spacing: 1px; }}
+        .elegant-preview .sp-title {{ 
+            font-weight: 400; 
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 10px;
+        }}
         
-        /* Playful: Friendly, rounded */
+        /* Playful: Approachable warmth */
         .playful-preview {{
-            background: #fce7f3;
-            color: #be185d;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: #fdf4ff;
+            color: #7c3aed;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }}
-        .playful-preview .sp-title {{ font-weight: 700; font-size: 13px; }}
+        .playful-preview .sp-title {{ 
+            font-weight: 500; 
+            letter-spacing: 0.5px;
+        }}
         
-        /* Dark: Night mode, sleek */
+        /* Dark: Understated sophistication */
         .dark-preview {{
-            background: #18181b;
-            color: #e4e4e7;
-            font-family: system-ui, sans-serif;
-        }}
-        .dark-preview .sp-title {{ font-weight: 500; letter-spacing: 0.5px; }}
-        
-        /* Colorful: Vibrant, gradient */
-        .colorful-preview {{
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
-            background-size: 200% 200%;
-            color: #ffffff;
+            background: #27272a;
+            color: #d4d4d8;
             font-family: -apple-system, sans-serif;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }}
-        .colorful-preview .sp-title {{ font-weight: 800; }} }} 
+        .dark-preview .sp-title {{ 
+            font-weight: 400; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 10px;
+        }}
+        
+        /* Colorful: Curated harmony */
+        .colorful-preview {{
+            background: linear-gradient(135deg, #ddd6fe 0%, #fce7f3 50%, #fed7aa 100%);
+            color: #581c87;
+            font-family: -apple-system, sans-serif;
+        }}
+        .colorful-preview .sp-title {{ 
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }}
         
         /* Section header emoji removal */
