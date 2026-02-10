@@ -1,0 +1,8 @@
+#!/bin/bash
+# Wrapper pour Hybrid FRD Mode
+# Usage: aetherflow-hybrid "Create login component"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR" || exit 1
+
+python Backend/Prod/cli.py --hybrid "$1"

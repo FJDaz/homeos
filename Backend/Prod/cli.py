@@ -531,6 +531,13 @@ Examples:
         dest="plan_status",
         help="Show current or last plan execution status (monitoring)"
     )
+    workflow_group.add_argument(
+        "--hybrid",
+        type=str,
+        metavar="TASK",
+        dest="hybrid_task",
+        help="Hybrid FRD: KIMI code + DeepSeek tests + Review. Example: aetherflow --hybrid 'Create login component'"
+    )
     
     parser.add_argument(
         "--workflow",
@@ -1272,7 +1279,69 @@ Examples:
         else:
             console.print("[dim]Aucune donnée Claude Code trouvée (~/.config/claude ou CLAUDE_CONFIG_DIR)[/]")
         return 0
-    
+
+    # Handle -h/--hybrid command (Hybrid FRD Mode: KIMI + DeepSeek + Sonnet)
+    if args.hybrid_task:
+        import asyncio
+        from .sullivan.modes.hybrid_frd_mode import HybridFRDMode
+
+        async def run_hybrid_frd():
+            console.print(f"\n[cyan]╔══════════════════════════════════════╗[/]")
+            console.print(f"[cyan]║   Hybrid FRD Mode                    ║[/]")
+            console.print(f"[cyan]╚══════════════════════════════════════╝[/]\n")
+            console.print(f"[bold]Tâche :[/] {args.hybrid_task}\n")
+            console.print("[dim]KIMI (code) → DeepSeek (tests) → Sonnet (review)[/]\n")
+
+            hybrid = HybridFRDMode()
+
+            try:
+                result = await hybrid.execute_from_task(args.hybrid_task)
+
+                if result["success"]:
+                    console.print("\n[green]╔═══════════════════════════╗[/]")
+                    console.print("[green]║   WORKFLOW COMPLETED      ║[/]")
+                    console.print("[green]║   Verdict : ✅ GO         ║[/]")
+                    console.print("[green]║   Ready for production    ║[/]")
+                    console.print("[green]╚═══════════════════════════╝[/]\n")
+
+                    # Afficher résumé
+                    console.print("[bold]Résumé :[/]")
+                    if 'kimi' in result:
+                        console.print(f"  • KIMI : {len(result['kimi']['files_created'])} fichiers créés")
+                    if 'deepseek' in result:
+                        console.print(f"  • DeepSeek : {len(result['deepseek']['test_files_created'])} tests (Coverage: {result['deepseek']['coverage']}%)")
+                    if 'review' in result:
+                        console.print(f"  • Sonnet : Verdict {result['review']['verdict']}")
+
+                    return 0
+                else:
+                    console.print("\n[red]╔═══════════════════════════╗[/]")
+                    console.print("[red]║   WORKFLOW FAILED         ║[/]")
+                    console.print("[red]║   Verdict : ❌ NO-GO      ║[/]")
+                    console.print("[red]╚═══════════════════════════╝[/]\n")
+
+                    # Afficher erreur et détails
+                    if 'error' in result:
+                        console.print(f"[bold red]Erreur :[/] {result['error']}")
+
+                    if 'details' in result:
+                        console.print(f"[dim]{result['details']}[/]")
+
+                    # Afficher issues si disponibles
+                    if 'review' in result and 'issues' in result['review'] and result['review']['issues']:
+                        console.print("\n[bold red]Issues :[/]")
+                        for issue in result['review']['issues']:
+                            console.print(f"  • {issue}")
+
+                    return 1
+
+            except Exception as e:
+                console.print(f"\n[red]✗ Erreur : {e}[/]")
+                logger.exception("Hybrid FRD Mode failed")
+                return 1
+
+        return asyncio.run(run_hybrid_frd())
+
     # Handle genome command
     if args.command == "genome":
         from .core.genome_generator import run_genome_cli

@@ -71,6 +71,11 @@ app.add_middleware(SullivanWidgetMiddleware)
 # Include studio routes (Parcours UX Sullivan)
 app.include_router(studio_router)
 
+# Mount uploads directory for Step 5 PNG uploads
+uploads_dir = Path.home() / ".aetherflow" / "uploads" / "studio"
+uploads_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
 # Include agent routes (Chatbot Sullivan)
 app.include_router(agent_router)
 

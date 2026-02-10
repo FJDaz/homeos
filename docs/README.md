@@ -17,7 +17,8 @@ Documentation du projet, organisée **par thème**.
 | **references/** | Références : **business/** (positionnement, politique, tarifs), **technique/** (schémas, outputs Sullivan, cache), **security/** |
 | **plans/** | Plans de construction (détails dans 02-sullivan et 04-homeos) |
 | **notes/** | Notes de développement, brouillons |
-| **support/** | Support : cache, audits (DEV SENIOR) |
+| **support/** | Support : cache, audits (DEV SENIOR) & scans |
+| **support/audits/** | Audits (DEV SENIOR), checklists pré-review et rapports |
 | **templates/** | Fichiers modèles (ex. `.env`) |
 | **DA/** | Design / maquettes (assets) |
 | **tutos/** | Tutoriels |

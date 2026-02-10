@@ -14,3 +14,4 @@
 - **DOUBLE_CHECK_CHATBOX_SULLIVAN.md** — Vérifications chatbox
 - **ANALYSE_SULLIVAN_AETHERFLOW.md** — Analyse Sullivan / Aetherflow
 - **RAPPORT_ETAPE_SULLIVAN.md** — Rapport d'étape Sullivan
+- **SULLIVAN_PERSONALITIES.md** — Guide des personnalités de Sullivan

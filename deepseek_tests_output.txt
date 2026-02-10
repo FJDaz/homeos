@@ -1,0 +1,457 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0 -- /Users/francois-jeandazin/AETHERFLOW/venv/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /Users/francois-jeandazin/AETHERFLOW/Backend/Prod
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 204 items
+
+Backend/Prod/tests/test_new_file_creation.py::test_surgical_editor_create_new_file PASSED [  0%]
+Backend/Prod/tests/test_new_file_creation.py::test_post_apply_validator_new_file PASSED [  0%]
+Backend/Prod/tests/test_new_file_creation.py::test_apply_generated_code_new_file PASSED [  1%]
+Backend/Prod/tests/test_new_file_creation.py::test_apply_generated_code_refactoring_new_file PASSED [  1%]
+Backend/Prod/tests/test_pattern_analyzer_star.py::test_analyze_patterns_with_star_insights PASSED [  2%]
+Backend/Prod/tests/test_pattern_analyzer_star.py::test_analyze_patterns_without_star_insights PASSED [  2%]
+Backend/Prod/tests/test_pattern_analyzer_star.py::test_analyze_patterns_star_most_common_patterns PASSED [  3%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_empty_component FAILED [  3%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_special_chars FAILED [  4%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_missing_file FAILED [  4%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_corrupted_json FAILED [  5%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_multiple_components FAILED [  5%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_xss_attack FAILED [  6%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_invalid_user_id FAILED [  6%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_duplicate_components FAILED [  7%]
+Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_dynamic_base_url FAILED [  7%]
+Backend/Prod/tests/test_rag_integration.py::test_audit_results FAILED    [  8%]
+Backend/Prod/tests/test_rag_integration.py::test_screenshot_capture FAILED [  8%]
+Backend/Prod/tests/test_rag_integration.py::test_auditor_init PASSED     [  9%]
+Backend/Prod/tests/test_refinement.py::test_audit_results FAILED         [  9%]
+Backend/Prod/tests/test_refinement.py::test_screenshot_capture FAILED    [ 10%]
+Backend/Prod/tests/test_refinement.py::test_auditor_init PASSED          [ 10%]
+Backend/Prod/tests/test_registry.py::test_get_or_generate PASSED         [ 11%]
+Backend/Prod/tests/test_registry.py::test_cache_hierarchy PASSED         [ 11%]
+Backend/Prod/tests/test_registry.py::test_get_or_generate_cache_hit PASSED [ 12%]
+Backend/Prod/tests/test_registry.py::test_generate_component PASSED      [ 12%]
+Backend/Prod/tests/test_registry.py::test_generate_component_with_dependencies PASSED [ 13%]
+Backend/Prod/tests/test_registry.py::test_search_situation PASSED        [ 13%]
+Backend/Prod/tests/test_registry.py::test_propagate_star PASSED          [ 14%]
+Backend/Prod/tests/test_registry.py::test_embeddings PASSED              [ 14%]
+Backend/Prod/tests/test_registry.py::test_search_situation_with_context PASSED [ 15%]
+Backend/Prod/tests/test_screenshot_util.py::test_audit_results FAILED    [ 15%]
+Backend/Prod/tests/test_screenshot_util.py::test_screenshot_capture FAILED [ 16%]
+Backend/Prod/tests/test_screenshot_util.py::test_auditor_init PASSED     [ 16%]
+Backend/Prod/tests/test_sharing_tui.py::test_audit_results FAILED        [ 17%]
+Backend/Prod/tests/test_sharing_tui.py::test_screenshot_capture FAILED   [ 17%]
+Backend/Prod/tests/test_sharing_tui.py::test_auditor_init PASSED         [ 18%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_initialization PASSED [ 18%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_initialization_with_providers PASSED [ 19%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_estimate_tokens_simple PASSED [ 19%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_estimate_tokens_with_context PASSED [ 20%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_estimate_tokens_with_files PASSED [ 20%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_select_provider_small_tokens PASSED [ 21%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_select_provider_medium_tokens PASSED [ 21%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_select_provider_large_tokens PASSED [ 22%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_select_provider_vision PASSED [ 22%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_should_chunk_step PASSED [ 23%]
+Backend/Prod/tests/test_smart_routing.py::TestSmartContextRouter::test_get_fallback_chain PASSED [ 23%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_circuit_breaker PASSED [ 24%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_classify_error_rate_limit PASSED [ 24%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_classify_error_token_limit PASSED [ 25%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_classify_error_timeout PASSED [ 25%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_should_retry_rate_limit PASSED [ 25%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_should_not_retry_token_limit PASSED [ 26%]
+Backend/Prod/tests/test_smart_routing.py::TestProviderFallbackCascade::test_should_not_retry_after_max_attempts PASSED [ 26%]
+Backend/Prod/tests/test_smart_routing.py::TestStepChunker::test_analyze_step_should_chunk PASSED [ 27%]
+Backend/Prod/tests/test_smart_routing.py::TestStepChunker::test_analyze_step_should_not_chunk PASSED [ 27%]
+Backend/Prod/tests/test_smart_routing.py::TestStepChunker::test_chunk_by_files PASSED [ 28%]
+Backend/Prod/tests/test_smart_routing.py::TestStepChunker::test_chunk_iterative PASSED [ 28%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_create_plan_python PASSED [ 29%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_create_plan_javascript PASSED [ 29%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_analyze_description_imports PASSED [ 30%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_analyze_description_classes PASSED [ 30%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_should_use_section_generation_true PASSED [ 31%]
+Backend/Prod/tests/test_smart_routing.py::TestSectionGenerator::test_should_use_section_generation_false PASSED [ 31%]
+Backend/Prod/tests/test_smart_routing.py::TestIntegration::test_full_routing_flow PASSED [ 32%]
+Backend/Prod/tests/test_smart_routing.py::TestIntegration::test_chunking_integration PASSED [ 32%]
+Backend/Prod/tests/test_sullivan_auditor.py::test_audit_results FAILED   [ 33%]
+Backend/Prod/tests/test_sullivan_auditor.py::test_screenshot_capture FAILED [ 33%]
+Backend/Prod/tests/test_sullivan_auditor.py::test_auditor_init PASSED    [ 34%]
+Backend/Prod/tests/test_sullivan_score.py::test_audit_results FAILED     [ 34%]
+Backend/Prod/tests/test_sullivan_score.py::test_screenshot_capture FAILED [ 35%]
+Backend/Prod/tests/test_sullivan_score.py::test_auditor_init PASSED      [ 35%]
+Backend/Prod/tests/test_surgical_detection.py::test_is_surgical_output_real_surgical PASSED [ 36%]
+Backend/Prod/tests/test_surgical_detection.py::test_is_surgical_output_python_code_false_positive PASSED [ 36%]
+Backend/Prod/tests/test_surgical_detection.py::test_is_surgical_output_complex_python PASSED [ 37%]
+Backend/Prod/tests/test_surgical_detection.py::test_is_surgical_output_edge_cases PASSED [ 37%]
+Backend/Prod/tests/test_surgical_detection.py::test_is_surgical_output_mixed_content PASSED [ 38%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_parse_simple_class PASSED [ 38%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_parse_imports PASSED [ 39%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_parse_functions PASSED [ 39%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_get_structure_summary PASSED [ 40%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_parse_nonexistent_file PASSED [ 40%]
+Backend/Prod/tests/test_surgical_editor.py::TestASTParser::test_parse_invalid_syntax PASSED [ 41%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_is_surgical_output_valid PASSED [ 41%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_is_surgical_output_invalid PASSED [ 42%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_simple PASSED [ 42%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_multiple_ops PASSED [ 43%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_markdown_block PASSED [ 43%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_invalid_json PASSED [ 44%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_missing_operations PASSED [ 44%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalInstructionParser::test_parse_instructions_empty_operations PASSED [ 45%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_add_method_to_class PASSED [ 45%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_add_import PASSED [ 46%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_replace_import PASSED [ 46%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_add_class PASSED [ 47%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_add_function PASSED [ 47%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_add_method_nonexistent_class PASSED [ 48%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_modify_method PASSED [ 48%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_modify_method_not_found PASSED [ 49%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalApplier::test_invalid_operation_type PASSED [ 49%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalEditor::test_prepare PASSED [ 50%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalEditor::test_get_ast_context PASSED [ 50%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalEditor::test_apply_instructions_success PASSED [ 50%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalEditor::test_apply_instructions_invalid_json PASSED [ 51%]
+Backend/Prod/tests/test_surgical_editor.py::TestSurgicalEditor::test_apply_instructions_nonexistent_file PASSED [ 51%]
+Backend/Prod/tests/test_surgical_editor.py::TestIntegration::test_full_workflow_add_method PASSED [ 52%]
+Backend/Prod/tests/test_surgical_editor.py::TestIntegration::test_multiple_operations PASSED [ 52%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_empty_component FAILED [ 53%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_special_chars FAILED [ 53%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_missing_file FAILED [ 54%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_corrupted_json FAILED [ 54%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_multiple_components FAILED [ 55%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_xss_attack FAILED [ 55%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_invalid_user_id FAILED [ 56%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_duplicate_components FAILED [ 56%]
+Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_dynamic_base_url FAILED [ 57%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_empty_component FAILED [ 57%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_special_chars FAILED [ 58%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_missing_file FAILED [ 58%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_corrupted_json FAILED [ 59%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_multiple_components FAILED [ 59%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_xss_attack FAILED [ 60%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_invalid_user_id FAILED [ 60%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_duplicate_components FAILED [ 61%]
+Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_dynamic_base_url FAILED [ 61%]
+Backend/Prod/tests/test_verify_fix.py::test_build_fix_plan_empty_invalid_details PASSED [ 62%]
+Backend/Prod/tests/test_verify_fix.py::test_build_fix_plan_no_matching_step PASSED [ 62%]
+Backend/Prod/tests/test_verify_fix.py::test_build_fix_plan_creates_fix_steps PASSED [ 63%]
+Backend/Prod/tests/test_verify_fix.py::test_build_fix_plan_fallback_without_pedagogical_feedback PASSED [ 63%]
+Backend/Prod/tests/test_verify_fix.py::test_fix_context_formats_details PASSED [ 64%]
+Backend/Prod/tests/test_verify_fix.py::test_get_minimal_genome_structure PASSED [ 64%]
+Backend/Prod/tests/test_verify_fix.py::test_get_studio_genome_returns_json_with_endpoints PASSED [ 65%]
+Backend/Prod/tests/test_verify_fix.py::test_get_studio_genome_never_500 PASSED [ 65%]
+Backend/Prod/tests/test_verify_fix.py::test_serve_svelte_route_returns_none_if_build_missing PASSED [ 66%]
+Backend/Prod/tests/test_verify_fix.py::test_serve_svelte_route_prefers_html_over_index PASSED [ 66%]
+Backend/Prod/tests/test_verify_fix.py::test_serve_svelte_route_finds_index_html PASSED [ 67%]
+Backend/Prod/tests/test_verify_fix.py::test_plan_fix_studio_404_exists_and_valid PASSED [ 67%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestStencilerInitialization::test_load_genome_success PASSED [ 68%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestStencilerInitialization::test_load_genome_file_not_found PASSED [ 68%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestStencilerInitialization::test_default_genome_path PASSED [ 69%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetCorps::test_get_corps_returns_list PASSED [ 69%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetCorps::test_get_corps_structure PASSED [ 70%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetCorps::test_get_corps_empty_genome PASSED [ 70%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetComponentsForCorps::test_get_components_existing_corps PASSED [ 71%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetComponentsForCorps::test_get_components_nonexistent_corps PASSED [ 71%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetComponentsForCorps::test_get_components_structure PASSED [ 72%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGenerateStencilSvg::test_generate_svg_returns_string PASSED [ 72%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGenerateStencilSvg::test_generate_svg_contains_rect PASSED [ 73%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGenerateStencilSvg::test_generate_svg_different_types PASSED [ 73%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGenerateStencilSvg::test_generate_svg_default_for_unknown PASSED [ 74%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_set_selection_keep PASSED [ 74%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_set_selection_reserve PASSED [ 75%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_set_selection_invalid_status PASSED [ 75%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_get_selection_nonexistent PASSED [ 75%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_get_all_selections PASSED [ 76%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestSelection::test_selections_isolation PASSED [ 76%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetValidatedGenome::test_validated_genome_keep_only PASSED [ 77%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetValidatedGenome::test_validated_genome_empty_selections PASSED [ 77%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetValidatedGenome::test_validated_genome_structure_preserved PASSED [ 78%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetStats::test_stats_empty PASSED [ 78%]
+Backend/Prod/tests/sullivan/test_stenciler.py::TestGetStats::test_stats_with_selections PASSED [ 79%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetStencils::test_get_stencils_status_code PASSED [ 79%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetStencils::test_get_stencils_structure SKIPPED [ 80%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetStencils::test_get_stencils_corps_structure SKIPPED [ 80%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetStencils::test_get_stencils_svg_present PASSED [ 81%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetStencils::test_get_stencils_stats_structure PASSED [ 81%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestSelectComponent::test_select_keep_success PASSED [ 82%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestSelectComponent::test_select_reserve_success PASSED [ 82%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestSelectComponent::test_select_missing_component_id PASSED [ 83%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestSelectComponent::test_select_invalid_status PASSED [ 83%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestSelectComponent::test_select_persists PASSED [ 84%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetValidatedGenome::test_get_validated_status_code PASSED [ 84%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetValidatedGenome::test_get_validated_structure PASSED [ 85%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetValidatedGenome::test_get_validated_genome_structure PASSED [ 85%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetValidatedGenome::test_get_validated_stats_structure PASSED [ 86%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestGetValidatedGenome::test_validated_after_selection PASSED [ 86%]
+Backend/Prod/tests/sullivan/test_studio_routes_stenciler.py::TestIntegration::test_full_workflow PASSED [ 87%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Choice::test_step_5_choice_status_code PASSED [ 87%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Choice::test_step_5_choice_content PASSED [ 88%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Upload::test_upload_valid_png PASSED [ 88%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Upload::test_upload_invalid_extension PASSED [ 89%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Upload::test_upload_jpg_accepted PASSED [ 89%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Layouts::test_layouts_status_code PASSED [ 90%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Layouts::test_layouts_contains_8_styles PASSED [ 90%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Layouts::test_layouts_selection PASSED [ 91%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Integration::test_flow_upload_path PASSED [ 91%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Integration::test_flow_layouts_path PASSED [ 92%]
+Backend/Prod/tests/sullivan/test_studio_step_5.py::TestStep5Integration::test_delete_upload PASSED [ 92%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Analyze::test_analyze_no_png SKIPPED [ 93%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Analyze::test_analyze_with_uploaded_png PASSED [ 93%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Analyze::test_get_analysis_no_cache SKIPPED [ 94%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Analyze::test_regenerate_analysis SKIPPED [ 94%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Template::test_template_renders_with_mock_data PASSED [ 95%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Template::test_template_zones_svg PASSED [ 95%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Template::test_template_colors_display PASSED [ 96%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Integration::test_flow_upload_to_analysis PASSED [ 96%]
+Backend/Prod/tests/sullivan/test_studio_step_6.py::TestStep6Integration::test_analysis_result_structure PASSED [ 97%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_analyze_design_png_success PASSED [ 97%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_analyze_design_png_missing_png PASSED [ 98%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_parse_gemini_vision_response_valid_json_block PASSED [ 98%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_parse_gemini_vision_response_direct_json PASSED [ 99%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_parse_gemini_vision_response_invalid_json PASSED [ 99%]
+Backend/Prod/tests/sullivan/test_vision_analyzer.py::test_analyze_design_png_gemini_api_failure PASSED [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_preview_empty_component _________________________
+Backend/Prod/tests/test_performance_evaluator.py:36: in test_preview_empty_component
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_special_chars ___________________
+Backend/Prod/tests/test_performance_evaluator.py:43: in test_preview_component_with_special_chars
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+___________________ test_preview_component_with_missing_file ___________________
+Backend/Prod/tests/test_performance_evaluator.py:50: in test_preview_component_with_missing_file
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_corrupted_json __________________
+Backend/Prod/tests/test_performance_evaluator.py:57: in test_preview_component_with_corrupted_json
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_multiple_components ________________
+Backend/Prod/tests/test_performance_evaluator.py:68: in test_preview_component_with_multiple_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+____________________ test_preview_component_with_xss_attack ____________________
+Backend/Prod/tests/test_performance_evaluator.py:75: in test_preview_component_with_xss_attack
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_invalid_user_id __________________
+Backend/Prod/tests/test_performance_evaluator.py:82: in test_preview_component_with_invalid_user_id
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_duplicate_components _______________
+Backend/Prod/tests/test_performance_evaluator.py:92: in test_preview_component_with_duplicate_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_dynamic_base_url _________________
+Backend/Prod/tests/test_performance_evaluator.py:99: in test_preview_component_with_dynamic_base_url
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_rag_integration.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_rag_integration.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_refinement.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_refinement.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_screenshot_util.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_screenshot_util.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_sharing_tui.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_sharing_tui.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_sullivan_auditor.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_sullivan_auditor.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+______________________________ test_audit_results ______________________________
+Backend/Prod/tests/test_sullivan_score.py:90: in test_audit_results
+    results = auditor.audit()
+              ^^^^^^^^^^^^^
+E   AttributeError: 'SullivanAuditor' object has no attribute 'audit'
+___________________________ test_screenshot_capture ____________________________
+Backend/Prod/tests/test_sullivan_score.py:95: in test_screenshot_capture
+    screenshot_util.capture_screenshot("test_screenshot.png")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'Backend.Prod.sullivan.auditor.screenshot_util' has no attribute 'capture_screenshot'. Did you mean: 'capture_html_screenshot'?
+_________________________ test_preview_empty_component _________________________
+Backend/Prod/tests/test_ui_inference_engine.py:36: in test_preview_empty_component
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_special_chars ___________________
+Backend/Prod/tests/test_ui_inference_engine.py:43: in test_preview_component_with_special_chars
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+___________________ test_preview_component_with_missing_file ___________________
+Backend/Prod/tests/test_ui_inference_engine.py:50: in test_preview_component_with_missing_file
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_corrupted_json __________________
+Backend/Prod/tests/test_ui_inference_engine.py:57: in test_preview_component_with_corrupted_json
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_multiple_components ________________
+Backend/Prod/tests/test_ui_inference_engine.py:68: in test_preview_component_with_multiple_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+____________________ test_preview_component_with_xss_attack ____________________
+Backend/Prod/tests/test_ui_inference_engine.py:75: in test_preview_component_with_xss_attack
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_invalid_user_id __________________
+Backend/Prod/tests/test_ui_inference_engine.py:82: in test_preview_component_with_invalid_user_id
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_duplicate_components _______________
+Backend/Prod/tests/test_ui_inference_engine.py:92: in test_preview_component_with_duplicate_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_dynamic_base_url _________________
+Backend/Prod/tests/test_ui_inference_engine.py:99: in test_preview_component_with_dynamic_base_url
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________________ test_preview_empty_component _________________________
+Backend/Prod/tests/test_validation_evaluator.py:36: in test_preview_empty_component
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_special_chars ___________________
+Backend/Prod/tests/test_validation_evaluator.py:43: in test_preview_component_with_special_chars
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+___________________ test_preview_component_with_missing_file ___________________
+Backend/Prod/tests/test_validation_evaluator.py:50: in test_preview_component_with_missing_file
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+__________________ test_preview_component_with_corrupted_json __________________
+Backend/Prod/tests/test_validation_evaluator.py:57: in test_preview_component_with_corrupted_json
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_multiple_components ________________
+Backend/Prod/tests/test_validation_evaluator.py:68: in test_preview_component_with_multiple_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+____________________ test_preview_component_with_xss_attack ____________________
+Backend/Prod/tests/test_validation_evaluator.py:75: in test_preview_component_with_xss_attack
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_invalid_user_id __________________
+Backend/Prod/tests/test_validation_evaluator.py:82: in test_preview_component_with_invalid_user_id
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_______________ test_preview_component_with_duplicate_components _______________
+Backend/Prod/tests/test_validation_evaluator.py:92: in test_preview_component_with_duplicate_components
+    response = orchestrator.preview(components)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+_________________ test_preview_component_with_dynamic_base_url _________________
+Backend/Prod/tests/test_validation_evaluator.py:99: in test_preview_component_with_dynamic_base_url
+    response = orchestrator.preview(component)
+               ^^^^^^^^^^^^
+E   NameError: name 'orchestrator' is not defined
+=============================== warnings summary ===============================
+venv/lib/python3.13/site-packages/fastapi/dependencies/utils.py:94
+  /Users/francois-jeandazin/AETHERFLOW/venv/lib/python3.13/site-packages/fastapi/dependencies/utils.py:94: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    from multipart import __version__  # type: ignore
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_empty_component
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_special_chars
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_missing_file
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_corrupted_json
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_multiple_components
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_xss_attack
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_invalid_user_id
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_duplicate_components
+FAILED Backend/Prod/tests/test_performance_evaluator.py::test_preview_component_with_dynamic_base_url
+FAILED Backend/Prod/tests/test_rag_integration.py::test_audit_results - Attri...
+FAILED Backend/Prod/tests/test_rag_integration.py::test_screenshot_capture - ...
+FAILED Backend/Prod/tests/test_refinement.py::test_audit_results - AttributeE...
+FAILED Backend/Prod/tests/test_refinement.py::test_screenshot_capture - Attri...
+FAILED Backend/Prod/tests/test_screenshot_util.py::test_audit_results - Attri...
+FAILED Backend/Prod/tests/test_screenshot_util.py::test_screenshot_capture - ...
+FAILED Backend/Prod/tests/test_sharing_tui.py::test_audit_results - Attribute...
+FAILED Backend/Prod/tests/test_sharing_tui.py::test_screenshot_capture - Attr...
+FAILED Backend/Prod/tests/test_sullivan_auditor.py::test_audit_results - Attr...
+FAILED Backend/Prod/tests/test_sullivan_auditor.py::test_screenshot_capture
+FAILED Backend/Prod/tests/test_sullivan_score.py::test_audit_results - Attrib...
+FAILED Backend/Prod/tests/test_sullivan_score.py::test_screenshot_capture - A...
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_empty_component
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_special_chars
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_missing_file
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_corrupted_json
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_multiple_components
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_xss_attack
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_invalid_user_id
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_duplicate_components
+FAILED Backend/Prod/tests/test_ui_inference_engine.py::test_preview_component_with_dynamic_base_url
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_empty_component
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_special_chars
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_missing_file
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_corrupted_json
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_multiple_components
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_xss_attack
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_invalid_user_id
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_duplicate_components
+FAILED Backend/Prod/tests/test_validation_evaluator.py::test_preview_component_with_dynamic_base_url
+============= 39 failed, 160 passed, 5 skipped, 1 warning in 7.03s =============

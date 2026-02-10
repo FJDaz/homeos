@@ -36,6 +36,25 @@ from .identity import (
 
 
 # =============================================================================
+# CHARGEMENT DU GENOME (pour Stenciler)
+# =============================================================================
+
+GENOME_PATH = Path(__file__).parent.parent.parent / "docs/02-sullivan/Genome_Enrichi/Genome_OPTIMISE_2026-02-06/genome_inferred_kimi_innocent.json"
+
+try:
+    with open(GENOME_PATH, encoding='utf-8') as f:
+        GENOME_DATA = json.load(f)
+    
+    # Initialiser Stenciler avec le genome
+    stenciler.genome = GENOME_DATA
+    
+    logger.info(f"✅ Genome chargé : {len(GENOME_DATA.get('n0_phases', []))} Corps détectés")
+except FileNotFoundError:
+    logger.warning("⚠️ Genome non trouvé, Stenciler vide")
+    GENOME_DATA = {}
+
+
+# =============================================================================
 # ROUTER & TEMPLATES
 # =============================================================================
 
@@ -43,6 +62,9 @@ router = APIRouter(prefix="/studio", tags=["studio"])
 
 # Templates Jinja2
 templates_dir = Path(__file__).parent.parent / "templates"
+# Fallback to sullivan/templates if global templates not found
+if not templates_dir.exists():
+    templates_dir = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(templates_dir))
 
 
@@ -62,6 +84,10 @@ class StudioSession:
         self.validated_zones: List[str] = []
         self.selected_layout: Optional[str] = None
         self.journal: List[str] = []
+        # Step 5 - Carrefour Créatif
+        self.uploaded_design_path: Optional[Path] = None
+        self.uploaded_design_url: Optional[str] = None
+        self.uploaded_filename: Optional[str] = None
     
     def log(self, message: str):
         """Ajoute une entrée au journal."""
@@ -596,69 +622,201 @@ async def get_step_4_defaults(request: Request) -> HTMLResponse:
     return HTMLResponse(content=html)
 
 
+# =============================================================================
+# STEP 5 - CARREFOUR CRÉATIF (Upload PNG ou 8 Propositions)
+# =============================================================================
+
 async def get_step_5_choice(request: Request) -> HTMLResponse:
     """Étape 5 : Carrefour créatif (choix PNG vs Layouts)."""
-    html = """
-    <div id="studio-main-zone" class="p-8 max-w-4xl mx-auto animate-fade-in">
-        <div class="text-center mb-10">
-            <h2 class="text-2xl font-bold text-slate-800">C'est un peu générique, non ?</h2>
-            <p class="text-slate-600 mt-2">Sullivan peut aller plus loin pour rendre ce projet unique.</p>
-        </div>
+    return templates.TemplateResponse(
+        "studio_step_5_choice.html",
+        {"request": request}
+    )
 
-        <div class="grid md:grid-cols-2 gap-8">
-            <!-- Option 1 : Upload PNG -->
-            <div class="relative border-2 border-dashed border-indigo-200 rounded-2xl p-8 hover:border-indigo-400 transition-colors bg-white group">
-                <div id="upload-loader" class="htmx-indicator absolute inset-0 flex flex-col items-center justify-center bg-white/90 rounded-2xl z-10">
-                    <div class="animate-spin w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full mb-3"></div>
-                    <p class="text-sm font-medium text-slate-600">Analyse en cours…</p>
-                    <p class="text-xs text-slate-500 mt-1">Extraction du style et de la structure</p>
-                </div>
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Importez votre layout (PNG)</h3>
-                    <p class="text-sm text-slate-500 mt-2 mb-6">Je vais analyser votre image pour en extraire le style et la structure.</p>
-                    
-                    <form hx-post="/studio/designer/upload" 
-                          hx-encoding="multipart/form-data" 
-                          hx-target="#studio-main-zone"
-                          hx-indicator="#upload-loader">
-                        <label class="cursor-pointer bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                            Choisir un fichier
-                            <input type="file" name="design_file" accept=".png,.jpg,.jpeg" 
-                                   class="hidden" onchange="this.form.requestSubmit()">
-                        </label>
-                    </form>
-                </div>
-            </div>
 
-            <!-- Option 2 : Layout proposals -->
-            <div class="border-2 border-slate-100 rounded-2xl p-8 hover:border-emerald-400 transition-colors bg-white group">
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Proposez-moi des idées</h3>
-                    <p class="text-sm text-slate-500 mt-2 mb-6">Je peux générer 8 propositions de styles adaptées à vos fonctions.</p>
-                    
-                    <button hx-get="/studio/step/5/layouts" 
-                            hx-target="#studio-main-zone"
-                            class="border border-emerald-600 text-emerald-600 px-6 py-2 rounded-lg hover:bg-emerald-50 transition-colors">
-                        Voir les styles
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+@router.post("/step/5/upload", response_class=HTMLResponse)
+async def step_5_upload(
+    request: Request,
+    design_file: UploadFile = File(...),
+):
     """
-    return HTMLResponse(content=html)
+    Upload PNG depuis l'étape 5.
+    Sauvegarde le fichier et retourne le fragment de confirmation.
+    """
+    import shutil
+    
+    allowed = {".png", ".jpg", ".jpeg"}
+    suffix = Path(design_file.filename or "").suffix.lower()
+    
+    if suffix not in allowed:
+        return HTMLResponse(
+            content=f'''<div class="p-4 text-red-600 bg-red-50 rounded-lg">
+                <p class="font-medium">❌ Type non supporté</p>
+                <p class="text-sm mt-1">Formats acceptés: {", ".join(allowed)}</p>
+            </div>''',
+            status_code=400,
+        )
+    
+    try:
+        # Créer le répertoire de stockage
+        uploads_dir = Path.home() / ".aetherflow" / "uploads" / "studio"
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Sauvegarder le fichier avec un nom unique
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_filename = f"{timestamp}_{design_file.filename}"
+        file_path = uploads_dir / safe_filename
+        
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(design_file.file, f)
+        
+        # Mettre à jour la session
+        studio_session.uploaded_design_path = file_path
+        studio_session.uploaded_filename = design_file.filename
+        studio_session.uploaded_design_url = f"/uploads/{safe_filename}"
+        
+        # Calculer la taille
+        file_size_bytes = file_path.stat().st_size
+        file_size_mb = round(file_size_bytes / (1024 * 1024), 2)
+        
+        logger.info(f"✅ Upload réussi: {safe_filename} ({file_size_mb} MB)")
+        
+        return templates.TemplateResponse(
+            "studio_step_5_uploaded.html",
+            {
+                "request": request,
+                "filename": design_file.filename,
+                "file_size_mb": file_size_mb,
+                "image_url": studio_session.uploaded_design_url,
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur upload: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f'''<div class="p-4 text-red-600 bg-red-50 rounded-lg">
+                <p class="font-medium">❌ Erreur lors de l'upload</p>
+                <p class="text-sm mt-1">{str(e)}</p>
+            </div>''',
+            status_code=500,
+        )
+
+
+@router.delete("/step/5/upload", response_class=HTMLResponse)
+async def step_5_delete_upload(request: Request):
+    """Supprime le fichier uploadé et retourne au choix."""
+    if studio_session.uploaded_design_path and studio_session.uploaded_design_path.exists():
+        studio_session.uploaded_design_path.unlink()
+    
+    studio_session.uploaded_design_path = None
+    studio_session.uploaded_filename = None
+    studio_session.uploaded_design_url = None
+    
+    return await get_step_5_choice(request)
+
+
+@router.get("/step/5/layouts", response_class=HTMLResponse)
+async def step_5_layouts(request: Request):
+    """Affiche les 8 propositions de styles avec leurs aperçus visuels."""
+    from .identity import SULLIVAN_LAYOUT_PROPOSALS
+    
+    # Enrichir les propositions avec les classes CSS pour les aperçus
+    proposals_enriched = []
+    preview_styles = {
+        "minimalist": {
+            "preview_bg": "bg-white",
+            "preview_elements": "bg-slate-100",
+            "preview_accent": "bg-slate-800",
+            "preview_card": "bg-white border border-slate-200",
+        },
+        "brutalist": {
+            "preview_bg": "bg-yellow-50",
+            "preview_elements": "bg-black",
+            "preview_accent": "bg-black",
+            "preview_card": "bg-yellow-400 border-2 border-black",
+        },
+        "glassmorphism": {
+            "preview_bg": "bg-gradient-to-br from-purple-400 to-pink-400",
+            "preview_elements": "bg-white/20 backdrop-blur",
+            "preview_accent": "bg-white/40",
+            "preview_card": "bg-white/30 backdrop-blur border border-white/50",
+        },
+        "neumorphism": {
+            "preview_bg": "bg-slate-200",
+            "preview_elements": "bg-slate-200 shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]",
+            "preview_accent": "bg-slate-300",
+            "preview_card": "bg-slate-200 shadow-[inset_2px_2px_5px_#bebebe,inset_-2px_-2px_5px_#ffffff] rounded-xl",
+        },
+        "cyberpunk": {
+            "preview_bg": "bg-black",
+            "preview_elements": "bg-gradient-to-r from-cyan-500 to-purple-500",
+            "preview_accent": "bg-cyan-400",
+            "preview_card": "bg-black border border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]",
+        },
+        "organic": {
+            "preview_bg": "bg-emerald-50",
+            "preview_elements": "bg-emerald-200",
+            "preview_accent": "bg-emerald-600",
+            "preview_card": "bg-white rounded-2xl shadow-lg",
+        },
+        "aero": {
+            "preview_bg": "bg-gradient-to-br from-sky-100 to-blue-200",
+            "preview_elements": "bg-white/60 backdrop-blur",
+            "preview_accent": "bg-sky-500",
+            "preview_card": "bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl rounded-2xl",
+        },
+        "retro": {
+            "preview_bg": "bg-amber-100",
+            "preview_elements": "bg-amber-800",
+            "preview_accent": "bg-orange-600",
+            "preview_card": "bg-amber-50 border-2 border-amber-800 shadow-[4px_4px_0_#92400e]",
+        },
+    }
+    
+    for prop in SULLIVAN_LAYOUT_PROPOSALS:
+        style = preview_styles.get(prop["id"], preview_styles["minimalist"])
+        proposals_enriched.append({**prop, **style})
+    
+    return templates.TemplateResponse(
+        "studio_step_5_layouts.html",
+        {
+            "request": request,
+            "proposals": proposals_enriched,
+            "selected_style": studio_session.selected_layout,
+        }
+    )
+
+
+@router.post("/step/5/layouts/select", response_class=HTMLResponse)
+async def step_5_select_layout(request: Request):
+    """Sélectionne un style depuis les propositions."""
+    form = await request.form()
+    style_id = form.get("style_id")
+    
+    if style_id:
+        studio_session.selected_layout = style_id
+        logger.info(f"🎨 Style sélectionné: {style_id}")
+    
+    # Recharge la page des layouts avec la sélection
+    return await step_5_layouts(request)
+
+
+@router.post("/step/5/validate", response_class=HTMLResponse)
+async def step_5_validate_layout(request: Request):
+    """Valide le style sélectionné et passe à l'étape 8 (validation finale)."""
+    if studio_session.selected_layout:
+        from .identity import SULLIVAN_LAYOUT_PROPOSALS
+        proposal = next(
+            (p for p in SULLIVAN_LAYOUT_PROPOSALS if p["id"] == studio_session.selected_layout),
+            None
+        )
+        if proposal:
+            sullivan.log_event(5, f"Layout validé: {proposal['name']}")
+            studio_session.current_step = 8
+            return await get_step_8_validation(request)
+    
+    # Si pas de sélection, retourne aux layouts
+    return await step_5_layouts(request)
 
 
 @router.get("/step/5/layouts", response_class=HTMLResponse)
@@ -724,6 +882,114 @@ async def select_layout(request: Request, layout_id: str):
     return await get_step_8_validation(request)
 
 
+# =============================================================================
+# STEP 6 - ANALYSE VISION (PNG Analysis avec Gemini Vision)
+# =============================================================================
+
+@router.post("/step/6/analyze", response_class=HTMLResponse)
+async def step_6_analyze(
+    request: Request,
+    session_id: Optional[str] = None
+):
+    """
+    Déclenche l'analyse Gemini Vision du PNG uploadé.
+    Retourne le template HTML avec le rapport visuel.
+    """
+    from .vision_analyzer import analyze_design_png
+    from pathlib import Path
+    import time
+    
+    # Déterminer le chemin du PNG uploadé
+    if studio_session.uploaded_design_path and studio_session.uploaded_design_path.exists():
+        png_path = studio_session.uploaded_design_path
+    else:
+        # Fallback: chercher dans ~/.aetherflow/uploads/studio/
+        uploads_dir = Path.home() / ".aetherflow" / "uploads" / "studio"
+        png_files = list(uploads_dir.glob("*.png")) + list(uploads_dir.glob("*.jpg"))
+        if not png_files:
+            return HTMLResponse(
+                content='''<div class="p-4 text-red-600 bg-red-50 rounded-lg">
+                    <p class="font-medium">❌ Aucune image trouvée</p>
+                    <p class="text-sm mt-1">Veuillez d\'abord uploader une image à l\'étape 5.</p>
+                    <button hx-get="/studio/step/5" hx-target="#studio-main-zone" 
+                            class="mt-3 text-indigo-600 hover:underline">← Retour à l\'étape 5</button>
+                </div>''',
+                status_code=400
+            )
+        png_path = png_files[0]  # Prend le plus récent
+    
+    # Générer un session_id si non fourni
+    if not session_id:
+        session_id = str(int(time.time()))
+    
+    try:
+        # Analyser avec Gemini Vision
+        logger.info(f"🔍 Analyse Vision: {png_path.name}")
+        visual_report = await analyze_design_png(str(png_path), session_id)
+        
+        # Stocker le rapport dans la session
+        studio_session.visual_intent_report = visual_report
+        studio_session.current_step = 6
+        
+        logger.info(f"✅ Analyse terminée: {len(visual_report.get('layout', {}).get('zones', []))} zones détectées")
+        
+        # Retourner le template HTML
+        return templates.TemplateResponse(
+            "studio_step_6_analysis.html",
+            {
+                "request": request,
+                "report": visual_report,
+                "png_url": f"/uploads/{png_path.name}",
+                "session_id": session_id
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur analyse Vision: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f'''<div class="p-4 text-red-600 bg-red-50 rounded-lg">
+                <p class="font-medium">❌ Erreur lors de l\'analyse</p>
+                <p class="text-sm mt-1">{str(e)}</p>
+                <button hx-post="/studio/step/6/analyze" hx-target="#studio-main-zone"
+                        class="mt-3 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    🔄 Réessayer
+                </button>
+            </div>''',
+            status_code=500
+        )
+
+
+@router.post("/step/6/regenerate", response_class=HTMLResponse)
+async def step_6_regenerate(request: Request):
+    """Régénère l'analyse Vision (supprime le cache et relance)."""
+    # Supprimer le rapport visuel de la session pour forcer une nouvelle analyse
+    studio_session.visual_intent_report = None
+    return await step_6_analyze(request)
+
+
+@router.get("/step/6/analysis", response_class=HTMLResponse)
+async def step_6_get_analysis(request: Request):
+    """Affiche l'analyse existante (sans la régénérer)."""
+    if not studio_session.visual_intent_report:
+        # Pas d'analyse en cache, lancer une nouvelle
+        return await step_6_analyze(request)
+    
+    # Utiliser l'analyse en cache
+    png_name = studio_session.uploaded_filename or "design.png"
+    uploads_dir = Path.home() / ".aetherflow" / "uploads" / "studio"
+    png_path = uploads_dir / png_name
+    
+    return templates.TemplateResponse(
+        "studio_step_6_analysis.html",
+        {
+            "request": request,
+            "report": studio_session.visual_intent_report,
+            "png_url": f"/uploads/{png_name}",
+            "session_id": "cached"
+        }
+    )
+
+
 @router.post("/designer/upload", response_class=HTMLResponse)
 async def studio_designer_upload(
     request: Request,
@@ -785,211 +1051,309 @@ async def studio_designer_upload(
 
 async def get_step_6_analysis(request: Request) -> HTMLResponse:
     """Étape 6 : Calque d'analyse sur PNG (Rapport d'Intention Visuelle)."""
-    # Simule un rapport d'intention pour la démo
-    report = studio_session.visual_intent_report
+    # Vérifie si on a un rapport de vision_analyzer.py (format dict) 
+    # ou un VisualIntentReport (format classe legacy)
+    report_data = studio_session.visual_intent_report
     
-    if not report:
-        # Crée un rapport de démo
-        report = VisualIntentReport(
-            metadata={
-                "source_png": "upload_user.png",
-                "style_global": {
-                    "bg_color": "#1a1a1a",
-                    "border_radius": "24px",
-                    "primary_color": "#6366f1",
-                    "font_family": "Geist Sans"
-                }
+    if not report_data:
+        # Pas d'analyse disponible, rediriger vers l'analyse
+        return await step_6_analyze(request)
+    
+    # Normaliser le rapport au format attendu par le template
+    if isinstance(report_data, dict):
+        # Format vision_analyzer.py
+        report = report_data
+    else:
+        # Format VisualIntentReport legacy - convertir en dict
+        report = {
+            "metadata": {
+                "analyzed_at": report_data.metadata.get("analyzed_at", "N/A"),
+                "model": report_data.metadata.get("model", "unknown"),
+                "source_png": report_data.metadata.get("source_png", "design.png")
             },
-            zones=[
-                VisualZone(
-                    id="zone_header",
-                    coordinates={"x": 0, "y": 0, "w": 1000, "h": 80},
-                    hypothesis={
-                        "label": "Veille du Système (/health)",
-                        "confidence": 0.88,
-                        "reasoning": "Zone horizontale haute identifiée comme barre d'état."
+            "style": {
+                "colors": report_data.metadata.get("style_global", {}),
+                "typography": {"family": "sans-serif", "sizes": {}},
+                "spacing": {"border_radius": "0px"}
+            },
+            "layout": {
+                "type": "dashboard",
+                "zones": [
+                    {
+                        "id": z.id,
+                        "type": "zone",
+                        "coordinates": z.coordinates,
+                        "components": [],
+                        "hypothesis": z.hypothesis
                     }
-                ),
-                VisualZone(
-                    id="zone_center",
-                    coordinates={"x": 200, "y": 100, "w": 600, "h": 500},
-                    hypothesis={
-                        "label": "Atelier de Construction (/execute)",
-                        "confidence": 0.92,
-                        "reasoning": "Large zone centrale pour l'atelier."
-                    }
-                )
-            ]
-        )
-        studio_session.visual_intent_report = report
+                    for z in report_data.zones
+                ]
+            }
+        }
     
-    zones_html = ""
-    for zone in report.zones:
-        coords = zone.coordinates
-        confidence_pct = int(zone.hypothesis.get("confidence", 0) * 100)
-        
-        zones_html += f"""
-        <g class="group cursor-pointer" onclick="toggleZone('{zone.id}')">
-            <rect x="{coords['x']}" y="{coords['y']}" 
-                  width="{coords['w']}" height="{coords['h']}"
-                  fill="rgba(99, 102, 241, 0.15)" stroke="#6366f1" stroke-width="2" 
-                  stroke-dasharray="6 4" class="hover:fill-indigo-300/30 transition-all"/>
-            
-            <foreignObject x="{coords['x']}" y="{coords['y'] - 30}" width="300" height="40">
-                <div class="bg-indigo-600 text-white text-[10px] px-2 py-1 rounded-t-lg font-bold inline-block">
-                    {zone.hypothesis.get('label', 'Zone')} ({confidence_pct}%)
-                </div>
-            </foreignObject>
-        </g>
-        """
+    # Déterminer l'URL de l'image
+    png_url = "/uploads/design.png"
+    if studio_session.uploaded_filename:
+        png_url = f"/uploads/{studio_session.uploaded_filename}"
+    elif studio_session.uploaded_design_url:
+        png_url = studio_session.uploaded_design_url
     
-    style = report.metadata.get("style_global", {})
-    
-    html = f"""
-    <div class="p-6 max-w-5xl mx-auto">
-        <div class="text-center mb-6">
-            <h2 class="text-2xl font-bold text-slate-800">Analyse du layout</h2>
-            <p class="text-slate-500">J'ai analysé votre image. Voici ce que j'ai détecté :</p>
-        </div>
-        
-        <div class="relative border-4 border-indigo-200 rounded-2xl overflow-hidden bg-slate-100">
-            <!-- Placeholder pour l'image uploadée -->
-            <div class="w-full h-96 flex items-center justify-center text-slate-400">
-                <div class="text-center">
-                    <svg class="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <p>Votre layout sera affiché ici</p>
-                </div>
-            </div>
-            
-            <!-- Calque SVG avec les zones détectées -->
-            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
-                {zones_html}
-            </svg>
-        </div>
-        
-        <div class="mt-6 bg-white rounded-xl p-6 border border-slate-200">
-            <h3 class="font-bold text-slate-800 mb-4">Style détecté</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="p-3 bg-slate-50 rounded-lg">
-                    <p class="text-xs text-slate-500">Fond</p>
-                    <div class="flex items-center gap-2 mt-1">
-                        <div class="w-6 h-6 rounded border" style="background-color: {style.get('bg_color', '#fff')}"></div>
-                        <span class="text-sm font-mono">{style.get('bg_color', '#ffffff')}</span>
-                    </div>
-                </div>
-                <div class="p-3 bg-slate-50 rounded-lg">
-                    <p class="text-xs text-slate-500">Accent</p>
-                    <div class="flex items-center gap-2 mt-1">
-                        <div class="w-6 h-6 rounded border" style="background-color: {style.get('primary_color', '#6366f1')}"></div>
-                        <span class="text-sm font-mono">{style.get('primary_color', '#6366f1')}</span>
-                    </div>
-                </div>
-                <div class="p-3 bg-slate-50 rounded-lg">
-                    <p class="text-xs text-slate-500">Coins</p>
-                    <p class="text-sm font-medium mt-1">{style.get('border_radius', '8px')}</p>
-                </div>
-                <div class="p-3 bg-slate-50 rounded-lg">
-                    <p class="text-xs text-slate-500">Typographie</p>
-                    <p class="text-sm font-medium mt-1">{style.get('font_family', 'System')}</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-6 flex justify-between">
-            <button hx-post="/studio/next/5"
-                    hx-target="#studio-main-zone"
-                    class="text-slate-500 hover:text-slate-700">
-                ← Retour
-            </button>
-            <button hx-post="/studio/next/6"
-                    hx-target="#studio-main-zone"
-                    class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700">
-                Continuer vers le dialogue →
-            </button>
-        </div>
-    </div>
-    """
-    
-    return HTMLResponse(content=html)
+    # Retourner le template Jinja2
+    return templates.TemplateResponse(
+        "studio_step_6_analysis.html",
+        {
+            "request": request,
+            "report": report,
+            "png_url": png_url,
+            "session_id": "demo"
+        }
+    )
 
 
-async def get_step_7_dialogue(request: Request) -> HTMLResponse:
-    """Étape 7 : Dialogue (post-its, questions Sullivan)."""
-    report = studio_session.visual_intent_report
+# =============================================================================
+# STEP 7 - DIALOGUE (Chat Sullivan pour affiner l'analyse)
+# =============================================================================
+
+@router.get("/step/7/dialogue", response_class=HTMLResponse)
+async def step_7_dialogue(request: Request):
+    """Affiche l'interface de dialogue Sullivan (Step 7)."""
+    # Initialiser l'état du dialogue si nécessaire
+    if not hasattr(studio_session, 'dialogue_state'):
+        studio_session.dialogue_state = {
+            'messages': [],
+            'current_question': 0,
+            'answers': {},
+            'complete': False
+        }
     
-    if not report:
-        report = VisualIntentReport(
-            metadata={"style_global": {"border_radius": "24px"}},
-            zones=[
-                VisualZone(
-                    id="zone_1",
-                    coordinates={},
-                    hypothesis={"label": "Veille du Système", "confidence": 0.85}
-                )
-            ]
-        )
+    # Générer les questions si pas encore fait
+    if not studio_session.dialogue_state['messages']:
+        await _generate_dialogue_questions()
     
-    questions = generate_dialogue_proposals(report)
+    return await _render_dialogue_template(request)
+
+
+@router.post("/step/7/answer", response_class=HTMLResponse)
+async def step_7_answer(request: Request):
+    """Traite une réponse à une question du dialogue."""
+    form = await request.form()
+    question_id = form.get('question_id')
+    answer = form.get('answer')
     
-    questions_html = ""
-    for q in questions:
-        questions_html += f"""
-        <div class="bg-yellow-100 p-4 rounded-lg shadow-sm rotate-1 hover:rotate-0 transition-transform">
-            <p class="text-sm text-slate-800">{q['text']}</p>
-            <div class="mt-3 flex gap-2">
-                <button class="text-xs bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-600">
-                    ✓ Oui
-                </button>
-                <button class="text-xs bg-slate-400 text-white px-3 py-1 rounded-full hover:bg-slate-500">
-                    ✗ Non
-                </button>
-            </div>
-        </div>
-        """
-    
-    # Question globale sur le style
-    style_q = f"""
-    <div class="bg-indigo-100 p-4 rounded-lg shadow-sm -rotate-1 hover:rotate-0 transition-transform">
-        <p class="text-sm text-slate-800">
-            J'ai relevé un style avec coins très arrondis. On garde cet aspect ?
-        </p>
-        <div class="mt-3 flex gap-2">
-            <button class="text-xs bg-indigo-500 text-white px-3 py-1 rounded-full hover:bg-indigo-600">
-                ✓ Parfait
-            </button>
-            <button class="text-xs bg-slate-400 text-white px-3 py-1 rounded-full hover:bg-slate-500">
-                Ajuster...
-            </button>
-        </div>
-    </div>
-    """
-    
-    html = f"""
-    <div class="p-6 max-w-4xl mx-auto">
-        <div class="text-center mb-8">
-            <h2 class="text-2xl font-bold text-slate-800">Un dernier mot...</h2>
-            <p class="text-slate-500">Avant de finaliser, quelques questions pour affiner :</p>
-        </div>
+    # Enregistrer la réponse
+    if hasattr(studio_session, 'dialogue_state'):
+        studio_session.dialogue_state['answers'][question_id] = answer
         
-        <div class="grid md:grid-cols-2 gap-6">
-            {questions_html}
-            {style_q}
-        </div>
+        # Ajouter le message utilisateur
+        studio_session.dialogue_state['messages'].append({
+            'sender': 'user',
+            'text': answer,
+            'timestamp': datetime.now().strftime('%H:%M')
+        })
         
-        <div class="mt-8 text-center">
-            <button hx-post="/studio/next/7"
-                    hx-target="#studio-main-zone"
-                    class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700">
-                Valider et continuer →
-            </button>
-        </div>
-    </div>
-    """
+        # Passer à la question suivante
+        studio_session.dialogue_state['current_question'] += 1
+        
+        # Vérifier si dialogue terminé
+        total_questions = len([m for m in studio_session.dialogue_state['messages'] if m['sender'] == 'sullivan'])
+        if studio_session.dialogue_state['current_question'] >= total_questions:
+            studio_session.dialogue_state['complete'] = True
+            sullivan.log_event(7, "Dialogue terminé")
+        else:
+            # Générer réponse/Question suivante de Sullivan
+            await _generate_next_message()
     
-    return HTMLResponse(content=html)
+    return await _render_dialogue_template(request)
+
+
+@router.post("/step/7/message", response_class=HTMLResponse)
+async def step_7_message(request: Request):
+    """Traite un message libre de l'utilisateur."""
+    form = await request.form()
+    message = form.get('message', '').strip()
+    
+    if message and hasattr(studio_session, 'dialogue_state'):
+        # Ajouter message utilisateur
+        studio_session.dialogue_state['messages'].append({
+            'sender': 'user',
+            'text': message,
+            'timestamp': datetime.now().strftime('%H:%M')
+        })
+        
+        # Générer réponse de Sullivan
+        await _generate_sullivan_response(message)
+    
+    return await _render_dialogue_template(request)
+
+
+@router.post("/step/7/skip", response_class=HTMLResponse)
+async def step_7_skip(request: Request):
+    """Skip le dialogue et passe directement à la validation."""
+    sullivan.log_event(7, "Dialogue skippé")
+    studio_session.current_step = 8
+    return await get_step_8_validation(request)
+
+
+async def _generate_dialogue_questions():
+    """Génère les questions initiales du dialogue basées sur le rapport visuel."""
+    report = studio_session.visual_intent_report or {}
+    zones = report.get('layout', {}).get('zones', []) if isinstance(report, dict) else []
+    style = report.get('style', {}) if isinstance(report, dict) else {}
+    
+    messages = []
+    
+    # Message d'accueil
+    messages.append({
+        'sender': 'sullivan',
+        'text': "J'ai analysé votre design et j'ai quelques questions pour m'assurer que j'ai tout bien compris. Prêt ?",
+        'timestamp': datetime.now().strftime('%H:%M'),
+        'question_id': 'welcome',
+        'options': [
+            {'label': 'Oui, commençons !', 'value': 'oui'},
+            {'label': 'Passer les questions', 'value': 'skip'}
+        ]
+    })
+    
+    # Questions sur les zones
+    for i, zone in enumerate(zones[:3]):  # Limite à 3 zones principales
+        zone_label = zone.get('hypothesis', {}).get('label', f'Zone {i+1}')
+        confidence = zone.get('hypothesis', {}).get('confidence', 0)
+        
+        if confidence < 0.9:  # Questionner les zones avec faible confiance
+            messages.append({
+                'sender': 'sullivan',
+                'text': f"J'ai détecté une zone '{zone_label}' avec {int(confidence*100)}% de confiance. C'est correct ?",
+                'timestamp': datetime.now().strftime('%H:%M'),
+                'question_id': f'zone_{zone.get("id", i)}',
+                'options': [
+                    {'label': 'Oui, c\'est ça', 'value': 'oui'},
+                    {'label': 'Non, corriger', 'value': 'non'},
+                    {'label': 'Ignorer cette zone', 'value': 'ignore'}
+                ]
+            })
+    
+    # Question sur le style
+    colors = style.get('colors', {}) if isinstance(style, dict) else {}
+    primary_color = colors.get('primary', 'indigo')
+    
+    messages.append({
+        'sender': 'sullivan',
+        'text': f"J'ai identifié une couleur principale {primary_color}. Cette palette vous convient ?",
+        'timestamp': datetime.now().strftime('%H:%M'),
+        'question_id': 'style_color',
+        'options': [
+            {'label': 'Parfait !', 'value': 'oui'},
+            {'label': 'À ajuster', 'value': 'ajuster'},
+            {'label': 'Changer complètement', 'value': 'changer'}
+        ]
+    })
+    
+    # Question finale
+    messages.append({
+        'sender': 'sullivan',
+        'text': "Merci pour ces précisions ! Je vais maintenant générer le design final basé sur vos réponses. Êtes-vous prêt à valider ?",
+        'timestamp': datetime.now().strftime('%H:%M'),
+        'question_id': 'final',
+        'options': [
+            {'label': 'Oui, générer le design', 'value': 'valider'},
+            {'label': 'Revoir l\'analyse', 'value': 'revenir'}
+        ]
+    })
+    
+    studio_session.dialogue_state['messages'] = messages[:2]  # Commence avec accueil + 1ère question
+    studio_session.dialogue_state['total_questions'] = len(messages) - 1
+
+
+async def _generate_next_message():
+    """Génère le prochain message/question de Sullivan."""
+    if not hasattr(studio_session, 'dialogue_state'):
+        return
+    
+    current_idx = studio_session.dialogue_state['current_question']
+    all_messages = studio_session.dialogue_state.get('all_messages', [])
+    
+    # Récupérer la question suivante si disponible
+    if current_idx < len(all_messages):
+        next_msg = all_messages[current_idx]
+        studio_session.dialogue_state['messages'].append(next_msg)
+
+
+async def _generate_sullivan_response(user_message: str):
+    """Génère une réponse contextuelle de Sullivan."""
+    # Réponses simples basées sur mots-clés
+    responses = {
+        'couleur': "Je note pour les couleurs. Voulez-vous que je propose des alternatives ?",
+        'zone': "Je peux ajuster la détection des zones. Quelle zone souhaitez-vous modifier ?",
+        'typo': "La typographie est importante. Préférez-vous un style plus moderne ou classique ?",
+        'espacement': "Je peux ajuster les espacements. Plus aéré ou plus compact ?",
+    }
+    
+    response_text = "D'accord, je prends note. Autre chose ?"
+    for keyword, resp in responses.items():
+        if keyword in user_message.lower():
+            response_text = resp
+            break
+    
+    studio_session.dialogue_state['messages'].append({
+        'sender': 'sullivan',
+        'text': response_text,
+        'timestamp': datetime.now().strftime('%H:%M'),
+        'question_id': f'response_{len(studio_session.dialogue_state["messages"])}',
+        'options': [
+            {'label': 'C\'est tout', 'value': 'terminer'},
+            {'label': 'Autre chose...', 'value': 'continuer'}
+        ]
+    })
+
+
+async def _render_dialogue_template(request: Request) -> HTMLResponse:
+    """Rend le template du dialogue avec l'état actuel."""
+    state = getattr(studio_session, 'dialogue_state', {
+        'messages': [],
+        'current_question': 0,
+        'answers': {},
+        'complete': False
+    })
+    
+    report = studio_session.visual_intent_report or {}
+    if isinstance(report, dict):
+        zones = report.get('layout', {}).get('zones', [])
+        layout_type = report.get('layout', {}).get('type', 'unknown')
+    else:
+        zones = getattr(report, 'zones', [])
+        layout_type = 'unknown'
+    
+    # Calculer stats
+    zones_count = len(zones)
+    avg_confidence = 0
+    if zones:
+        confidences = [z.get('hypothesis', {}).get('confidence', 0) for z in zones] if isinstance(zones[0], dict) else []
+        avg_confidence = int(sum(confidences) / len(confidences) * 100) if confidences else 85
+    
+    total_questions = state.get('total_questions', 3)
+    current_q = min(state['current_question'], total_questions)
+    progress_percent = int((current_q / total_questions) * 100) if total_questions > 0 else 0
+    
+    png_url = "/uploads/design.png"
+    if studio_session.uploaded_filename:
+        png_url = f"/uploads/{studio_session.uploaded_filename}"
+    
+    return templates.TemplateResponse(
+        "studio_step_7_dialogue.html",
+        {
+            "request": request,
+            "messages": state['messages'],
+            "zones_count": zones_count,
+            "layout_type": layout_type,
+            "avg_confidence": avg_confidence,
+            "current_question": current_q,
+            "total_questions": total_questions,
+            "progress_percent": progress_percent,
+            "dialogue_complete": state.get('complete', False),
+            "allow_free_text": True,  # Permettre messages libres
+            "png_url": png_url
+        }
+    )
 
 
 async def get_step_8_validation(request: Request) -> HTMLResponse:
@@ -1474,6 +1838,217 @@ async def get_validated_genome():
         }
     except Exception as e:
         logger.error(f"Error getting validated genome: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# ROUTES STEP 5 - CARREFOUR CRÉATIF
+# =============================================================================
+
+@router.get("/step/5", response_class=HTMLResponse)
+async def get_step5_choice(request: Request):
+    """
+    Affiche le Carrefour Créatif (Step 5) : choix entre Upload PNG ou 8 propositions.
+    
+    Returns:
+        HTML avec les deux options
+    """
+    return templates.TemplateResponse("studio_step_5_choice.html", {
+        "request": request
+    })
+
+
+@router.post("/step/5/upload", response_class=HTMLResponse)
+async def upload_design_file(
+    request: Request,
+    design_file: UploadFile = File(...)
+):
+    """
+    Upload fichier PNG/JPG pour analyse visuelle (Step 6).
+    
+    Args:
+        design_file: Fichier image (PNG, JPG, JPEG)
+        
+    Returns:
+        HTML de confirmation avec preview + bouton "Lancer l'analyse"
+    """
+    try:
+        # Vérifier le type de fichier
+        allowed_types = ["image/png", "image/jpeg", "image/jpg"]
+        if design_file.content_type not in allowed_types:
+            return HTMLResponse(
+                content=f"""
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    ❌ Type de fichier non supporté. Veuillez uploader un PNG ou JPG.
+                </div>
+                """,
+                status_code=400
+            )
+        
+        # Créer le répertoire d'upload
+        upload_dir = Path.home() / ".aetherflow" / "uploads" / str(studio_session.current_step)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Sauvegarder le fichier
+        file_path = upload_dir / design_file.filename
+        content = await design_file.read()
+        with open(file_path, "wb") as f:
+            f.write(content)
+        
+        # Stocker le chemin dans la session
+        studio_session.selected_layout = str(file_path)
+        studio_session.log(f"Fichier uploadé: {design_file.filename}")
+        
+        # Retourner HTML avec preview
+        return HTMLResponse(content=f"""
+        <div class="p-6 bg-white border border-indigo-200 rounded-2xl animate-fade-in">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-2">✅</div>
+                <h3 class="text-xl font-bold text-slate-800">Fichier reçu !</h3>
+                <p class="text-slate-600">{design_file.filename}</p>
+            </div>
+            
+            <div class="mb-6 p-4 bg-slate-50 rounded-xl">
+                <img src="/studio/uploads/{design_file.filename}" 
+                     alt="Preview" 
+                     class="max-h-48 mx-auto rounded-lg shadow-sm">
+            </div>
+            
+            <div class="flex gap-4 justify-center">
+                <button hx-post="/studio/step/6/analyze" 
+                        hx-target="#studio-main-zone"
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors">
+                    🔍 Lancer l'analyse Gemini
+                </button>
+                <button hx-get="/studio/step/5" 
+                        hx-target="#studio-main-zone"
+                        class="bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-300 transition-colors">
+                    ↩️ Changer de fichier
+                </button>
+            </div>
+        </div>
+        """)
+        
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        return HTMLResponse(
+            content=f"""
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                ❌ Erreur lors de l'upload : {str(e)}
+            </div>
+            """,
+            status_code=500
+        )
+
+
+@router.get("/step/5/layouts", response_class=HTMLResponse)
+async def get_layout_proposals(request: Request):
+    """
+    Génère les 8 propositions de styles de layout.
+    
+    Returns:
+        HTML avec grid 2×4 des 8 styles
+    """
+    try:
+        # Récupérer les 8 propositions depuis identity.py
+        proposals = layout_proposals.get_all()
+        
+        # Générer le HTML pour chaque proposition
+        proposals_html = ""
+        for proposal in proposals:
+            colors = proposal.get("colors", {})
+            preview_class = proposal.get("preview_class", "")
+            
+            proposals_html += f"""
+            <div class="group cursor-pointer border-2 border-slate-100 rounded-2xl p-4 hover:border-indigo-400 hover:shadow-lg transition-all"
+                 onclick="selectLayout('{proposal['id']}')">
+                <div class="h-32 rounded-xl mb-4 flex items-center justify-center {preview_class}"
+                     style="background-color: {colors.get('bg', '#fff')}; color: {colors.get('primary', '#000')}">
+                    <span class="text-3xl font-bold">Aa</span>
+                </div>
+                <h3 class="font-bold text-slate-800">{proposal['name']}</h3>
+                <p class="text-sm text-slate-500 mt-1">{proposal['description']}</p>
+                <button class="mt-3 w-full bg-indigo-600 text-white py-2 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    Choisir ce style
+                </button>
+            </div>
+            """
+        
+        return HTMLResponse(content=f"""
+        <div class="p-8 max-w-6xl mx-auto animate-fade-in">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">8 Propositions de Styles</h2>
+                <p class="text-slate-600 mt-2">Choisissez l'ambiance qui correspond à votre projet</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {proposals_html}
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button hx-get="/studio/step/5" 
+                        hx-target="#studio-main-zone"
+                        class="bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-300 transition-colors">
+                    ↩️ Retour au choix
+                </button>
+            </div>
+            
+            <script>
+                function selectLayout(layoutId) {{
+                    fetch('/studio/step/5/select-layout', {{
+                        method: 'POST',
+                        headers: {{'Content-Type': 'application/json'}},
+                        body: JSON.stringify({{layout_id: layoutId}})
+                    }}).then(() => {{
+                        htmx.ajax('GET', '/studio/step/6', '#studio-main-zone');
+                    }});
+                }}
+            </script>
+        </div>
+        """)
+        
+    except Exception as e:
+        logger.error(f"Error getting layout proposals: {e}")
+        return HTMLResponse(
+            content=f"""
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                ❌ Erreur : {str(e)}
+            </div>
+            """,
+            status_code=500
+        )
+
+
+@router.post("/step/5/select-layout", response_class=JSONResponse)
+async def select_layout(request: Request):
+    """
+    Stocke le layout sélectionné dans la session.
+    
+    Request Body:
+        {"layout_id": "minimal"}
+    """
+    try:
+        data = await request.json()
+        layout_id = data.get("layout_id")
+        
+        if not layout_id:
+            raise HTTPException(status_code=400, detail="layout_id requis")
+        
+        # Vérifier que le layout existe
+        proposal = layout_proposals.get_by_id(layout_id)
+        if not proposal:
+            raise HTTPException(status_code=404, detail="Layout non trouvé")
+        
+        # Stocker dans la session
+        studio_session.selected_layout = layout_id
+        studio_session.log(f"Layout sélectionné: {layout_id}")
+        
+        return {"success": True, "layout_id": layout_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error selecting layout: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

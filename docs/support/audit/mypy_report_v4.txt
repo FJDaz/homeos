@@ -1,0 +1,8 @@
+Backend/Prod/core/post_apply_validator.py:134: error: Library stubs not installed for "yaml"  [import-untyped]
+Backend/Prod/core/post_apply_validator.py:134: note: Hint: "python3 -m pip install types-PyYAML"
+Backend/Prod/core/post_apply_validator.py:134: note: (or run "mypy --install-types" to install all missing stub packages)
+Backend/Prod/core/post_apply_validator.py:134: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+Backend/Prod/sullivan/agent/component_inference.py: error: Source file found twice under different module names: "Prod.sullivan.agent.component_inference" and "Backend.Prod.sullivan.agent.component_inference"
+Backend/Prod/sullivan/agent/component_inference.py: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#mapping-file-paths-to-modules for more info
+Backend/Prod/sullivan/agent/component_inference.py: note: Common resolutions include: a) adding `__init__.py` somewhere, b) using `--explicit-package-bases` or adjusting MYPYPATH
+Found 2 errors in 2 files (errors prevented further checking)

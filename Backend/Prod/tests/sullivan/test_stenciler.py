@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from sullivan.identity import Stenciler
+from Backend.Prod.sullivan.identity import Stenciler
 
 
 @pytest.fixture
@@ -273,6 +273,7 @@ class TestGetValidatedGenome:
         """Test que seuls les composants 'keep' sont conservés."""
         stenciler_with_temp_genome.set_selection("comp_ir_table", "keep")
         stenciler_with_temp_genome.set_selection("comp_ir_detail", "reserve")
+        stenciler_with_temp_genome.set_selection("comp_stencil_card", "reserve")
         
         validated = stenciler_with_temp_genome.get_validated_genome()
         
