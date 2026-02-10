@@ -425,7 +425,7 @@ async def execute_plan_async(
 
 def print_cache_stats() -> None:
     """Print cache statistics."""
-    from ..cache import SemanticCache
+    from .cache import SemanticCache
     
     try:
         cache = SemanticCache()
