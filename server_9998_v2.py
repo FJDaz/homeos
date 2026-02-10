@@ -64,9 +64,9 @@ def generate_wireframe_corps(visual_hint, color="#7aca6a"):
         </div>'''
     
     elif visual_hint == "frontend":
-        # 🎨 Design - preview coloré
+        # Design - preview colore
         return '''<div style="background:linear-gradient(135deg,#fce7f3 0%,#fbcfe8 100%);padding:8px;border-radius:8px;height:70px;display:flex;flex-direction:column;gap:4px;">
-            <div style="font-size:10px;color:#9d174d;font-weight:600;">🎨 Design & Interface</div>
+            <div style="font-size:10px;color:#9d174d;font-weight:600;">Design & Interface</div>
             <div style="display:flex;gap:4px;justify-content:center;align-items:center;flex:1;">
                 <div style="width:30%;height:45px;background:rgba(59,130,246,0.3);border:1px dashed #3b82f6;border-radius:4px;"></div>
                 <div style="width:35%;height:45px;background:rgba(16,185,129,0.3);border:1px dashed #10b981;border-radius:4px;"></div>
@@ -137,7 +137,7 @@ def generate_wireframe_organes(visual_hint, color="#7aca6a"):
         </div>'''
     
     elif visual_hint == "style":
-        # 🖼️ Style de Page - grille de choix
+        # Style de Page - grille de choix
         return '''<div style="background:#f8fafc;padding:6px;border-radius:6px;height:65px;display:flex;flex-direction:column;gap:3px;">
             <div style="font-size:9px;color:#64748b;text-align:center;">Choisir le look</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;flex:1;">
@@ -149,9 +149,9 @@ def generate_wireframe_organes(visual_hint, color="#7aca6a"):
         </div>'''
     
     elif visual_hint == "import":
-        # 📤 Importer ma Maquette - upload
+        # Importer ma Maquette - upload
         return '''<div style="background:#f8fafc;padding:6px;border-radius:6px;height:65px;display:flex;flex-direction:column;gap:3px;justify-content:center;align-items:center;border:1px dashed #cbd5e1;">
-            <span style="font-size:24px;color:#94a3b8;">📤</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin-bottom:8px;"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
             <div style="font-size:9px;color:#64748b;">Glisser-déposer</div>
         </div>'''
     
@@ -845,30 +845,121 @@ def generate_html(genome):
             gap: 12px;
         }}
         .style-card {{
-            height: 80px;
+            height: 90px;
             background: #f8fafc;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: #64748b;
             cursor: pointer;
             transition: all 0.2s;
+            overflow: hidden;
+            padding: 0;
         }}
         .style-card:hover {{
             border-color: #7aca6a;
-            background: #7aca6a;
-            color: white;
             transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }}
         .style-card.selected {{
             border-color: #7aca6a;
-            background: #7aca6a;
-            color: white;
+            box-shadow: 0 0 0 3px rgba(122,202,106,0.3);
         }}
+        
+        /* Style Previews */
+        .style-preview {{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8px;
+        }}
+        .style-preview .sp-title {{
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }}
+        .style-preview .sp-sub {{
+            font-size: 9px;
+            font-weight: 500;
+            opacity: 0.8;
+        }}
+        
+        /* Minimal: Clean, light, airy */
+        .minimal-preview {{
+            background: #ffffff;
+            color: #334155;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }}
+        .minimal-preview .sp-title {{ font-weight: 300; letter-spacing: 0.5px; }}
+        
+        /* Corporate: Professional, structured */
+        .corporate-preview {{
+            background: #1e3a5f;
+            color: #ffffff;
+            font-family: Georgia, 'Times New Roman', serif;
+        }}
+        .corporate-preview .sp-title {{ font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }}
+        
+        /* Creative: Bold, artistic */
+        .creative-preview {{
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+        }}
+        .creative-preview .sp-title {{ font-weight: 800; font-style: italic; }}
+        
+        /* Tech: Modern, code-like */
+        .tech-preview {{
+            background: #0f172a;
+            color: #22d3ee;
+            font-family: 'SF Mono', Monaco, monospace;
+        }}
+        .tech-preview .sp-title {{ font-weight: 700; letter-spacing: 2px; font-size: 11px; }}
+        
+        /* Elegant: Refined, luxurious */
+        .elegant-preview {{
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            font-family: Georgia, serif;
+        }}
+        .elegant-preview .sp-title {{ font-weight: 400; letter-spacing: 1px; }}
+        
+        /* Playful: Friendly, rounded */
+        .playful-preview {{
+            background: #fce7f3;
+            color: #be185d;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        }}
+        .playful-preview .sp-title {{ font-weight: 700; font-size: 13px; }}
+        
+        /* Dark: Night mode, sleek */
+        .dark-preview {{
+            background: #18181b;
+            color: #e4e4e7;
+            font-family: system-ui, sans-serif;
+        }}
+        .dark-preview .sp-title {{ font-weight: 500; letter-spacing: 0.5px; }}
+        
+        /* Colorful: Vibrant, gradient */
+        .colorful-preview {{
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+            background-size: 200% 200%;
+            color: #ffffff;
+            font-family: -apple-system, sans-serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }}
+        .colorful-preview .sp-title {{ font-weight: 800; }} }} 
+        }}
+        
+        /* Section header emoji removal */
+        .section-title {{ font-size: 14px; font-weight: 700; }}
+        .style-option-header {{ font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 20px; text-align: center; }}
         .btn-secondary {{
             margin-top: 12px;
             padding: 8px 24px;
@@ -1023,18 +1114,20 @@ def generate_html(genome):
                 <div class="section" id="section-style-choice" style="display: none; margin-top: 40px;">
                     <div class="section-header" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
                         <span class="wingding-arrow"></span>
-                        <span class="section-title">📐 Étape 2 : Choisir le Style</span>
-                        <span class="section-desc">Sélectionnez une option pour continuer</span>
+                        <span class="section-title">Etape 2 : Choisir le Style</span>
+                        <span class="section-desc">Selectionnez une option pour continuer</span>
                     </div>
                     <div class="section-content">
                         <div class="row" style="justify-content: center; gap: 32px;">
                             
                             <!-- Option A: Upload -->
                             <div class="style-option-card">
-                                <div class="style-option-header">🖼️ Importer ma Maquette</div>
+                                <div class="style-option-header">Importer ma Maquette</div>
                                 <div class="upload-zone" id="upload-zone">
-                                    <span style="font-size: 48px; color: #cbd5e1;">📤</span>
-                                    <p style="font-size: 14px; color: #64748b; margin-top: 12px;">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin-bottom: 12px;">
+                                        <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                                    </svg>
+                                    <p style="font-size: 14px; color: #64748b; margin-bottom: 8px;">
                                         Glisser-déposer ou cliquer
                                     </p>
                                     <input type="file" id="file-input" accept="image/*" style="display: none;">
@@ -1045,17 +1138,57 @@ def generate_html(genome):
                             </div>
                             
                             <!-- Option B: Styles par défaut -->
-                            <div class="style-option-card">
-                                <div class="style-option-header">🎨 Choisir un Style</div>
+                            <div class="style-option-card" style="width: 500px;">
+                                <div class="style-option-header">Choisir un Style</div>
                                 <div class="styles-grid">
-                                    <div class="style-card" data-style="minimal">Minimal</div>
-                                    <div class="style-card" data-style="corporate">Corporate</div>
-                                    <div class="style-card" data-style="creative">Créatif</div>
-                                    <div class="style-card" data-style="tech">Tech</div>
-                                    <div class="style-card" data-style="elegant">Élégant</div>
-                                    <div class="style-card" data-style="playful">Ludique</div>
-                                    <div class="style-card" data-style="dark">Dark</div>
-                                    <div class="style-card" data-style="colorful">Coloré</div>
+                                    <div class="style-card" data-style="minimal">
+                                        <div class="style-preview minimal-preview">
+                                            <span class="sp-title">Minimal</span>
+                                            <span class="sp-sub">Clean & Light</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="corporate">
+                                        <div class="style-preview corporate-preview">
+                                            <span class="sp-title">Corporate</span>
+                                            <span class="sp-sub">Professional</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="creative">
+                                        <div class="style-preview creative-preview">
+                                            <span class="sp-title">Créatif</span>
+                                            <span class="sp-sub">Bold & Art</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="tech">
+                                        <div class="style-preview tech-preview">
+                                            <span class="sp-title">Tech</span>
+                                            <span class="sp-sub">Modern Code</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="elegant">
+                                        <div class="style-preview elegant-preview">
+                                            <span class="sp-title">Élégant</span>
+                                            <span class="sp-sub">Refined</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="playful">
+                                        <div class="style-preview playful-preview">
+                                            <span class="sp-title">Ludique</span>
+                                            <span class="sp-sub">Friendly</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="dark">
+                                        <div class="style-preview dark-preview">
+                                            <span class="sp-title">Dark</span>
+                                            <span class="sp-sub">Night Mode</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="colorful">
+                                        <div class="style-preview colorful-preview">
+                                            <span class="sp-title">Coloré</span>
+                                            <span class="sp-sub">Vibrant</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
