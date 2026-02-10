@@ -807,6 +807,84 @@ def generate_html(genome):
             margin-top: 4px;
         }}
         
+        /* Style Choice Section */
+        .style-option-card {{
+            width: 450px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+        }}
+        .style-option-card:hover {{
+            border-color: #7aca6a;
+            box-shadow: 0 8px 24px rgba(122,202,106,0.15);
+        }}
+        .style-option-header {{
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }}
+        .upload-zone {{
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .upload-zone:hover {{
+            border-color: #7aca6a;
+            background: #f0fdf4;
+        }}
+        .styles-grid {{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }}
+        .style-card {{
+            height: 80px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .style-card:hover {{
+            border-color: #7aca6a;
+            background: #7aca6a;
+            color: white;
+            transform: scale(1.05);
+        }}
+        .style-card.selected {{
+            border-color: #7aca6a;
+            background: #7aca6a;
+            color: white;
+        }}
+        .btn-secondary {{
+            margin-top: 12px;
+            padding: 8px 24px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .btn-secondary:hover {{
+            background: #e2e8f0;
+        }}
+        
         @media (max-width: 1400px) {{ 
             .comp-card {{ width: calc(25% - 12px); }} 
         }}
@@ -875,7 +953,7 @@ def generate_html(genome):
                         <input type="checkbox" id="select-all" style="width: 22px; height: 22px; accent-color: #7aca6a; cursor: pointer;" onchange="toggleAll(this)">
                         <label for="select-all" style="font-size: 15px; color: #334155; cursor: pointer; font-weight: 600;">Tout sélectionner</label>
                     </div>
-                    <button id="validate-btn" class="validate-btn" disabled>Valider (0)</button>
+                    <button id="validate-btn" class="validate-btn" disabled onclick="scrollToStyleChoice()">Valider (0)</button>
                 </div>
                 
                 <h1>Architecture Genome</h1>
@@ -937,6 +1015,50 @@ def generate_html(genome):
                     <div class="section-content" id="section-atomes">
                         <div class="row">
                             {atomes_cards}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- STEP 2: Style Choice (caché par défaut) -->
+                <div class="section" id="section-style-choice" style="display: none; margin-top: 40px;">
+                    <div class="section-header" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">📐 Étape 2 : Choisir le Style</span>
+                        <span class="section-desc">Sélectionnez une option pour continuer</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="row" style="justify-content: center; gap: 32px;">
+                            
+                            <!-- Option A: Upload -->
+                            <div class="style-option-card">
+                                <div class="style-option-header">🖼️ Importer ma Maquette</div>
+                                <div class="upload-zone" id="upload-zone">
+                                    <span style="font-size: 48px; color: #cbd5e1;">📤</span>
+                                    <p style="font-size: 14px; color: #64748b; margin-top: 12px;">
+                                        Glisser-déposer ou cliquer
+                                    </p>
+                                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                                    <button class="btn-secondary" onclick="document.getElementById('file-input').click()">
+                                        Parcourir
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Option B: Styles par défaut -->
+                            <div class="style-option-card">
+                                <div class="style-option-header">🎨 Choisir un Style</div>
+                                <div class="styles-grid">
+                                    <div class="style-card" data-style="minimal">Minimal</div>
+                                    <div class="style-card" data-style="corporate">Corporate</div>
+                                    <div class="style-card" data-style="creative">Créatif</div>
+                                    <div class="style-card" data-style="tech">Tech</div>
+                                    <div class="style-card" data-style="elegant">Élégant</div>
+                                    <div class="style-card" data-style="playful">Ludique</div>
+                                    <div class="style-card" data-style="dark">Dark</div>
+                                    <div class="style-card" data-style="colorful">Coloré</div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -1004,6 +1126,72 @@ def generate_html(genome):
                 cb.checked = !cb.checked;
                 updateValidateButton();
             }}
+        }}
+        
+        // Fonction de scroll vers le choix de style
+        function scrollToStyleChoice() {{
+            const styleSection = document.getElementById('section-style-choice');
+            if (styleSection) {{
+                // Afficher la section
+                styleSection.style.display = 'block';
+                
+                // Scroll smooth vers la section
+                setTimeout(() => {{
+                    styleSection.scrollIntoView({{
+                        behavior: 'smooth',
+                        block: 'start'
+                    }});
+                }}, 100);
+            }}
+        }}
+        
+        // Gestion upload de fichier
+        document.addEventListener('DOMContentLoaded', () => {{
+            const uploadZone = document.getElementById('upload-zone');
+            const fileInput = document.getElementById('file-input');
+            
+            if (uploadZone && fileInput) {{
+                uploadZone.addEventListener('dragover', (e) => {{
+                    e.preventDefault();
+                    uploadZone.style.borderColor = '#7aca6a';
+                    uploadZone.style.background = '#f0fdf4';
+                }});
+                
+                uploadZone.addEventListener('dragleave', () => {{
+                    uploadZone.style.borderColor = '#cbd5e1';
+                    uploadZone.style.background = 'transparent';
+                }});
+                
+                uploadZone.addEventListener('drop', (e) => {{
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {{
+                        handleFileUpload(files[0]);
+                    }}
+                }});
+                
+                fileInput.addEventListener('change', (e) => {{
+                    if (e.target.files.length > 0) {{
+                        handleFileUpload(e.target.files[0]);
+                    }}
+                }});
+            }}
+            
+            // Gestion sélection de style
+            document.querySelectorAll('.style-card').forEach(card => {{
+                card.addEventListener('click', () => {{
+                    // Désélectionner les autres
+                    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+                    // Sélectionner celui-ci
+                    card.classList.add('selected');
+                    console.log('Style sélectionné:', card.dataset.style);
+                }});
+            }});
+        }});
+        
+        function handleFileUpload(file) {{
+            console.log('Fichier uploadé:', file.name);
+            alert(`Maquette "${{file.name}}" uploadée !\\nAnalyse Gemini Vision à implémenter...`);
         }}
     </script>
 </body>
