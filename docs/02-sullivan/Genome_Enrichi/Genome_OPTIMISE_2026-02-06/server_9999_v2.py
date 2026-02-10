@@ -419,131 +419,98 @@ def generate_component_wireframe(component, phase_name, description=""):
     return html
 
 
+def render_n3_components(components, phase_name):
+    """Render N3 (Atomes) - the actual component cards"""
+    html = []
+    for comp in components:
+        comp['_phase'] = phase_name
+        html.append(generate_component_wireframe(comp, phase_name, comp.get('description_ui', '')))
+    return ''.join(html)
+
+
+def render_n2_features(features, phase_name):
+    """Render N2 (Cellules) within an Organe"""
+    html = []
+    for feature in features:
+        feature_name = feature.get('name', 'Unknown')
+        feature_id = feature.get('id', 'feature-unknown')
+        components = feature.get('n3_components', [])
+
+        html.append(f'''
+        <div class="level-subsubsection level-n2">
+            <div class="level-subsubheader" onclick="toggleLevel('{feature_id}')">
+                <span class="level-arrow" id="arrow-{feature_id}">▼</span>
+                <span class="level-subsubtitle">⚙️ Cellule: {feature_name}</span>
+                <span class="level-count">{len(components)} atomes</span>
+            </div>
+            <div class="level-content" id="content-{feature_id}">
+                <div class="component-grid">
+                    {render_n3_components(components, phase_name)}
+                </div>
+            </div>
+        </div>
+        ''')
+    return ''.join(html)
+
+
+def render_n1_sections(sections, phase_name):
+    """Render N1 (Organes) within a Corps"""
+    html = []
+    for section in sections:
+        section_name = section.get('name', 'Unknown')
+        section_id = section.get('id', 'section-unknown')
+        features = section.get('n2_features', [])
+
+        total_comps = sum(len(f.get('n3_components', [])) for f in features)
+
+        html.append(f'''
+        <div class="level-subsection level-n1">
+            <div class="level-subheader" onclick="toggleLevel('{section_id}')">
+                <span class="level-arrow" id="arrow-{section_id}">▼</span>
+                <span class="level-subtitle">🔧 Organe: {section_name}</span>
+                <span class="level-count">{len(features)} cellules · {total_comps} atomes</span>
+            </div>
+            <div class="level-content" id="content-{section_id}">
+                {render_n2_features(features, phase_name)}
+            </div>
+        </div>
+        ''')
+    return ''.join(html)
+
+
 def generate_hierarchy_html(genome):
-    """Generate 4-level hierarchy: Corps > Organes > Cellules > Atomes"""
-    
-    # Classification des composants par niveau
-    corps_items = []      # Pages/Templates
-    organes_items = []    # Zones sémantiques
-    cellules_items = []   # Composants composites
-    atomes_items = []     # Éléments primitifs
-    
+    """Generate TRUE N0→N1→N2→N3 hierarchy from genome structure"""
+
+    html_sections = []
+
+    # N0 = Corps (Phases: Brainstorm, Backend, Frontend, Deploy)
     for phase in genome.get('n0_phases', []):
-        for section in phase.get('n1_sections', []):
-            for feature in section.get('n2_features', []):
-                for comp in feature.get('n3_components', []):
-                    comp['_phase'] = phase.get('name', 'Unknown')
-                    visual = comp.get('visual_hint', 'generic')
-                    
-                    # Classification par visual_hint
-                    if visual in ['preview', 'table', 'dashboard', 'grid', 'editor', 'list', 'accordion']:
-                        corps_items.append(comp)
-                    elif visual in ['stepper', 'breadcrumb', 'status', 'zoom-controls', 'chat/bubble']:
-                        organes_items.append(comp)
-                    elif visual in ['upload', 'download', 'color-palette', 'stencil-card', 'detail-card',
-                                   'choice-card', 'card', 'form', 'chat-input', 'modal']:
-                        cellules_items.append(comp)
-                    else:  # button, launch-button, apply-changes, etc.
-                        atomes_items.append(comp)
-    
-    # Ordre pédagogique user-teaching-friendly
-    # Corps: ordre de découverte - preview d'abord (où tout commence)
-    corps_order = ['preview', 'table', 'dashboard', 'grid', 'editor', 'list', 'accordion']
-    corps_items.sort(key=lambda x: corps_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in corps_order else 99)
-    
-    # Organes: ordre de navigation - stepper d'abord (où en suis-je)
-    organes_order = ['stepper', 'breadcrumb', 'status', 'zoom-controls', 'chat/bubble']
-    organes_items.sort(key=lambda x: organes_order.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in organes_order else 99)
-    
-    # Cellules: tri par identifiabilité
-    cellules_items.sort(key=lambda x: IDENTIFIABILITY_ORDER.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in IDENTIFIABILITY_ORDER else 999)
-    
-    # Atomes: tri par identifiabilité (upload/preview en premier, boutons génériques en dernier)
-    atomes_items.sort(key=lambda x: IDENTIFIABILITY_ORDER.index(x.get('visual_hint', '')) if x.get('visual_hint', '') in IDENTIFIABILITY_ORDER else 999)
-    
-    def render_items(items):
-        html = '<div class="component-grid">'
-        for comp in items:
-            desc = comp.get('description_ui', '')
-            html += generate_component_wireframe(comp, comp['_phase'], desc)
-        html += '</div>'
-        return html
-    
-    return f'''
-    <div class="hierarchy-container">
-        <!-- CORPS: Templates et Pages -->
-        <div class="level-section">
-            <div class="level-header" onclick="toggleLevel('corps')">
-                <span class="level-arrow" id="arrow-corps">6</span>
-                <span class="level-title">Corps</span>
-                <span class="level-count">{len(corps_items)}</span>
-                <span class="level-desc">Templates et pages conteneurs</span>
+        phase_name = phase.get('name', 'Unknown')
+        phase_id = phase.get('id', 'phase-unknown')
+        n1_sections = phase.get('n1_sections', [])
+
+        # Compter total composants dans ce corps
+        total_comps = sum(
+            len(comp)
+            for section in n1_sections
+            for feature in section.get('n2_features', [])
+            for comp in [feature.get('n3_components', [])]
+        )
+
+        html_sections.append(f'''
+        <div class="level-section level-n0">
+            <div class="level-header" onclick="toggleLevel('{phase_id}')">
+                <span class="level-arrow" id="arrow-{phase_id}">▼</span>
+                <span class="level-title">📦 Corps: {phase_name}</span>
+                <span class="level-count">{len(n1_sections)} organes · {total_comps} atomes</span>
             </div>
-            <div class="level-content open" id="content-corps">
-                <p class="level-explanation">
-                    Les Corps sont les pages et templates qui structurent l'espace ecran. 
-                    Vous commencez par l'apercu maquette, puis explorez les rapports, dashboards et editeurs 
-                    qui organisent votre travail en espaces coherents.
-                </p>
-                {render_items(corps_items)}
+            <div class="level-content" id="content-{phase_id}">
+                {render_n1_sections(n1_sections, phase_name)}
             </div>
         </div>
-        
-        <!-- ORGANES: Zones sémantiques -->
-        <div class="level-section">
-            <div class="level-header" onclick="toggleLevel('organes')">
-                <span class="level-arrow" id="arrow-organes">6</span>
-                <span class="level-title">Organes</span>
-                <span class="level-count">{len(organes_items)}</span>
-                <span class="level-desc">Zones sémantiques et navigation</span>
-            </div>
-            <div class="level-content open" id="content-organes">
-                <p class="level-explanation">
-                    Les Organes sont les zones fonctionnelles qui guident votre navigation. 
-                    Le stepper vous situe dans le processus, le fil d'ariane vous oriente, 
-                    les indicateurs d'etat vous informent sur la sante du systeme.
-                </p>
-                {render_items(organes_items)}
-            </div>
-        </div>
-        
-        <!-- CELLULES: Composants composites -->
-        <div class="level-section">
-            <div class="level-header" onclick="toggleLevel('cellules')">
-                <span class="level-arrow" id="arrow-cellules">6</span>
-                <span class="level-title">Cellules</span>
-                <span class="level-count">{len(cellules_items)}</span>
-                <span class="level-desc">Blocs fonctionnels composes</span>
-            </div>
-            <div class="level-content open" id="content-cellules">
-                <p class="level-explanation">
-                    Les Cellules sont les outils d'interaction : vous uploadez un design, 
-                    recevez une palette de couleurs, choisissez des styles, consultez des details. 
-                    Chaque Cellule realise une tache complete pour construire votre interface.
-                </p>
-                {render_items(cellules_items)}
-            </div>
-        </div>
-        
-        <!-- ATOMES: Elements primitifs -->
-        <div class="level-section">
-            <div class="level-header" onclick="toggleLevel('atomes')">
-                <span class="level-arrow" id="arrow-atomes">6</span>
-                <span class="level-title">Atomes</span>
-                <span class="level-count">{len(atomes_items)}</span>
-                <span class="level-desc">Elements d'interface indivisibles</span>
-            </div>
-            <div class="level-content open" id="content-atomes">
-                <p class="level-explanation">
-                    Les Atomes sont les briques de base de l'interface : les boutons que vous cliquez, 
-                    les lancements d'actions, les validations. Invisibles seuls, ils donnent vie aux Cellules 
-                    et rendent l'interface interactive.
-                </p>
-                {render_items(atomes_items)}
-            </div>
-        </div>
-    </div>
-    '''
+        ''')
+
+    return '<div class="hierarchy-container">' + ''.join(html_sections) + '</div>'
 
 def generate_html(genome):
     # Extraire tous les composants pour les stats
@@ -641,6 +608,52 @@ def generate_html(genome):
             padding: 16px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 3px solid #7aca6a;
         }}
         
+        /* Hierarchical levels - N0, N1, N2 */
+        .level-n0 {{
+            border: 2px solid #7aca6a;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        }}
+
+        .level-n1 {{
+            margin: 12px 0 12px 20px;
+            padding: 12px;
+            border-left: 3px solid #5a9ac6;
+            background: #fafafa;
+            border-radius: 6px;
+        }}
+
+        .level-n2 {{
+            margin: 8px 0 8px 20px;
+            padding: 10px;
+            border-left: 2px solid #e4bb5a;
+            background: #ffffff;
+            border-radius: 4px;
+        }}
+
+        .level-subheader {{
+            display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+            cursor: pointer; background: #fff; user-select: none;
+            transition: background 0.15s; border-radius: 6px;
+        }}
+        .level-subheader:hover {{ background: #f1f5f9; }}
+
+        .level-subsubheader {{
+            display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+            cursor: pointer; background: #f8fafc; user-select: none;
+            transition: background 0.15s; border-radius: 4px;
+        }}
+        .level-subsubheader:hover {{ background: #e2e8f0; }}
+
+        .level-subtitle {{
+            font-size: 14px; font-weight: 600; color: #5a9ac6;
+        }}
+
+        .level-subsubtitle {{
+            font-size: 13px; font-weight: 500; color: #e4bb5a;
+        }}
+
         /* Component Grid */
         .component-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; min-width: 0; }}
         .component-card {{ min-width: 0; }}
