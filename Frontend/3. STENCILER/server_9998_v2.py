@@ -1986,6 +1986,184 @@ def generate_stenciler_html():
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/Geist.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/GeistMono.css">
     <link rel="stylesheet" href="/static/stenciler.css">
+    <style>
+        /* 🌓 Variables Thème Jour/Nuit avec transitions fluides */
+        :root {{
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-sidebar: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-color: rgba(0,0,0,0.05);
+            --canvas-bg: #fafafa;
+            --input-bg: #ffffff;
+            --hover-bg: #f1f5f9;
+            --accent-glow: rgba(122,202,106,0.3);
+            --transition-speed: 0.3s;
+        }}
+        
+        [data-theme="dark"] {{
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-sidebar: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --border-light: #1e293b;
+            --shadow-color: rgba(0,0,0,0.3);
+            --canvas-bg: #0f172a;
+            --input-bg: #1e293b;
+            --hover-bg: #334155;
+            --accent-glow: rgba(122,202,106,0.2);
+        }}
+        
+        /* 🎭 Transitions fluides sur toutes les propriétés de couleur */
+        body, .stenciler-app, .sidebar, .stenciler-header, .right-zone,
+        .preview-band-wrapper, .canvas-zone, .components-zone,
+        h1, h2, h3, h4, p, span, div, button, input, label {{
+            transition: background-color var(--transition-speed) ease,
+                        background-image var(--transition-speed) ease,
+                        color var(--transition-speed) ease,
+                        border-color var(--transition-speed) ease,
+                        box-shadow var(--transition-speed) ease;
+        }}
+        
+        /* Application des variables */
+        body {{
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }}
+        
+        .stenciler-app {{
+            background-color: var(--bg-primary);
+        }}
+        
+        .stenciler-header {{
+            background: var(--bg-secondary);
+            border-bottom-color: var(--border-color);
+        }}
+        
+        .sidebar {{
+            background: var(--bg-sidebar);
+            border-right-color: var(--border-color);
+        }}
+        
+        .sidebar-section-title {{
+            color: var(--text-muted);
+        }}
+        
+        .sidebar-section {{
+            border-bottom-color: var(--border-light);
+        }}
+        
+        .preview-band-wrapper {{
+            background: var(--bg-secondary);
+            border-bottom-color: var(--border-color);
+        }}
+        
+        .canvas-zone {{
+            background: var(--canvas-bg);
+        }}
+        
+        .components-zone {{
+            background: var(--bg-secondary);
+            border-top-color: var(--border-color);
+        }}
+        
+        .component-card {{
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+        }}
+        
+        .component-card:hover {{
+            background: var(--hover-bg);
+        }}
+        
+        input[type="range"] {{
+            background: var(--input-bg);
+        }}
+        
+        .color-swatch {{
+            border-color: var(--border-color);
+        }}
+        
+        .preview-card {{
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+        }}
+        
+        .preview-card:hover {{
+            border-color: #7aca6a;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }}
+        
+        /* 🌙 Mode nuit - ajustements spécifiques */
+        [data-theme="dark"] .stenciler-header h1 {{
+            color: var(--text-primary);
+        }}
+        
+        [data-theme="dark"] .sidebar-brand {{
+            color: var(--text-primary);
+        }}
+        
+        [data-theme="dark"] .sidebar-tagline {{
+            color: var(--text-secondary);
+        }}
+        
+        [data-theme="dark"] .preview-card .name {{
+            color: var(--text-primary);
+        }}
+        
+        [data-theme="dark"] .preview-card .count {{
+            color: var(--text-secondary);
+        }}
+        
+        [data-theme="dark"] .component-card .name {{
+            color: var(--text-primary);
+        }}
+        
+        /* Bouton thème amélioré */
+        #theme-toggle {{
+            background: linear-gradient(135deg, #7aca6a 0%, #5a9a4a 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(122,202,106,0.3);
+        }}
+        
+        #theme-toggle:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(122,202,106,0.4);
+        }}
+        
+        [data-theme="dark"] #theme-toggle {{
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+        }}
+        
+        [data-theme="dark"] #theme-toggle:hover {{
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+        }}
+        
+        /* Canvas tarmac en mode nuit */
+        [data-theme="dark"] #canvas-container {{
+            background: #1e293b;
+            border-color: #334155;
+        }}
+        
+        [data-theme="dark"] .canvas-placeholder {{
+            color: var(--text-muted);
+        }}
+    </style>
 </head>
 <body>
     <div id="stenciler-app" class="stenciler-app">
@@ -1997,7 +2175,10 @@ def generate_stenciler_html():
                     <span class="dot"></span>
                     <span>minimal</span>
                 </div>
-                <button id="theme-toggle">Mode jour</button>
+                <button id="theme-toggle" title="Basculer entre jour et nuit">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Mode nuit</span>
+                </button>
             </div>
         </header>
 
@@ -2246,6 +2427,55 @@ def generate_stenciler_html():
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="/static/stenciler.js"></script>
     <script>
+        // 🌓 GESTION DU THÈME JOUR/NUIT avec transition fluide
+        const ThemeManager = {{
+            init() {{
+                // Récupérer le thème sauvegardé ou défaut (jour)
+                const savedTheme = localStorage.getItem('aetherflow_theme') || 'light';
+                this.applyTheme(savedTheme);
+                
+                // Écouteur sur le bouton
+                const toggleBtn = document.getElementById('theme-toggle');
+                if (toggleBtn) {{
+                    toggleBtn.addEventListener('click', () => this.toggle());
+                }}
+            }},
+            
+            toggle() {{
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.applyTheme(newTheme);
+                
+                // Feedback visuel
+                console.log(`🌓 Thème basculé: ${{newTheme === 'dark' ? 'Mode nuit' : 'Mode jour'}}`);
+            }},
+            
+            applyTheme(theme) {{
+                const html = document.documentElement;
+                const toggleBtn = document.getElementById('theme-toggle');
+                const iconSpan = toggleBtn?.querySelector('.theme-icon');
+                const textSpan = toggleBtn?.querySelector('.theme-text');
+                
+                if (theme === 'dark') {{
+                    html.setAttribute('data-theme', 'dark');
+                    if (iconSpan) iconSpan.textContent = '🌙';
+                    if (textSpan) textSpan.textContent = 'Mode jour';
+                }} else {{
+                    html.removeAttribute('data-theme');
+                    if (iconSpan) iconSpan.textContent = '☀️';
+                    if (textSpan) textSpan.textContent = 'Mode nuit';
+                }}
+                
+                // Sauvegarder la préférence
+                localStorage.setItem('aetherflow_theme', theme);
+            }}
+        }};
+        
+        // Initialiser le thème dès que le DOM est prêt
+        document.addEventListener('DOMContentLoaded', () => {{
+            ThemeManager.init();
+        }});
+        
         // 🚀 Récupération des données depuis la page Genome
         document.addEventListener('DOMContentLoaded', async () => {{
             const selectedStyle = localStorage.getItem('aetherflow_selected_style');
