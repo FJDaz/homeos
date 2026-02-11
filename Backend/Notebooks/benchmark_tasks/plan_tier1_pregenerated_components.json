@@ -1,0 +1,197 @@
+{
+  "task_id": "tier1-pregenerated-components-library",
+  "description": "Tier 1 : Créer la bibliothèque de composants pré-générés pour les 8 styles (Minimal, Corporate, Creative, Tech, Elegant, Playful, Dark, Colorful)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "CRITICAL: Créer le fichier JSON de définition des composants pré-générés Backend/Prod/sullivan/pregenerated_components.json. IMPORTANT: Ce fichier DOIT être du JSON pur valide, PAS du code Python. Le fichier doit contenir : (1) Un objet racine avec clef 'styles' mappant chaque style_id vers un dictionnaire de composants. (2) Pour chaque style (minimal, corporate, creative, tech, elegant, playful, dark, colorful), définir les atomes de base : button (primary, secondary, danger), input (text, email, password), card (simple, with-header, with-footer), badge (info, success, warning, error), avatar (small, medium, large), divider (horizontal, vertical). (3) Structure de chaque composant : {html: string, css_classes: array, accessibility: {role, aria-label}, props: {customizable_fields}}. (4) Utiliser les design tokens des 8 styles existants dans identity.py (SULLIVAN_LAYOUT_PROPOSALS lignes 114-172) pour cohérence visuelle. RAPPEL: Le fichier doit commencer par '{' et finir par '}', pas de code Python.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier pregenerated_components.json créé dans Backend/Prod/sullivan/",
+        "Structure JSON valide avec 8 styles",
+        "Chaque style contient au minimum 6 types d'atomes (button, input, card, badge, avatar, divider)",
+        "Chaque composant a html, css_classes, accessibility, props",
+        "Design tokens cohérents avec identity.py"
+      ],
+      "context": {
+        "language": "json",
+        "framework": "design-system",
+        "files": ["Backend/Prod/sullivan/pregenerated_components.json"],
+        "reference_files": [
+          "Backend/Prod/sullivan/identity.py (lignes 114-172)"
+        ],
+        "output_structure": {
+          "styles": {
+            "minimal": {
+              "button": {
+                "primary": {"html": "...", "css_classes": [], "accessibility": {}, "props": {}},
+                "secondary": {},
+                "danger": {}
+              },
+              "input": {},
+              "card": {},
+              "badge": {},
+              "avatar": {},
+              "divider": {}
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le module Python Backend/Prod/sullivan/component_library.py avec classe ComponentLibrary. Cette classe doit : (1) Charger pregenerated_components.json au __init__. (2) Méthode get_component(style_id: str, atom_type: str, variant: str = 'primary') -> Dict qui retourne le composant du cache ou lève ComponentNotFoundError. (3) Méthode get_all_atoms(style_id: str) -> List[str] qui liste tous les types d'atomes disponibles pour un style. (4) Méthode render_component(style_id: str, atom_type: str, variant: str, props: Dict) -> str qui injecte les props dans le HTML du composant (remplacement de placeholders). (5) Méthode get_css_classes(style_id: str, atom_type: str, variant: str) -> List[str] pour récupérer les classes CSS. (6) Cache en mémoire (dict) pour éviter de recharger le JSON à chaque appel.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Classe ComponentLibrary définie dans Backend/Prod/sullivan/component_library.py",
+        "Méthodes get_component, get_all_atoms, render_component, get_css_classes implémentées",
+        "Gestion des erreurs (ComponentNotFoundError custom exception)",
+        "Cache en mémoire fonctionnel",
+        "Type hints complets (style_id: str, etc.)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pydantic",
+        "files": ["Backend/Prod/sullivan/component_library.py"],
+        "dependencies_files": ["Backend/Prod/sullivan/pregenerated_components.json"],
+        "error_handling": "Lever ComponentNotFoundError si style/atom/variant introuvable"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Intégrer ComponentLibrary dans le workflow Sullivan. Dans Backend/Prod/sullivan/generator/component_generator.py : (1) Importer ComponentLibrary depuis Backend.Prod.sullivan.component_library. (2) Dans la méthode generate_component (ou équivalent), ajouter une vérification préalable : avant de générer un composant à la volée avec LLM, vérifier si un composant pré-généré existe via library.get_component(style, atom_type, variant). (3) Si trouvé dans library, retourner directement le composant pré-généré (Tier 1 - 0ms latence). (4) Sinon, continuer avec la génération LLM normale (Tier 3). (5) Logger les cache hits/misses pour metrics (ex: logger.info('Cache HIT: {style}/{atom}') ou 'Cache MISS').",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "ComponentLibrary importée dans component_generator.py",
+        "Vérification du cache avant génération LLM",
+        "Retour immédiat si composant pré-généré trouvé",
+        "Fallback vers LLM si non trouvé",
+        "Logs de cache hits/misses"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/sullivan/generator/component_generator.py"],
+        "insertion_logic": "Avant la génération LLM, vérifier library.get_component()",
+        "metrics": "Logger cache hit rate pour monitoring"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer un endpoint API FastAPI pour tester la bibliothèque. Dans Backend/Prod/routes/studio_routes.py : (1) Ajouter un endpoint GET /api/components/library/{style_id}/{atom_type}?variant=primary qui retourne le composant pré-généré. (2) Query params optionnels : variant (default='primary'), props (JSON string pour customisation). (3) Retourner {html, css_classes, accessibility, cache_hit: true}. (4) Gestion d'erreur : retourner 404 si style/atom/variant introuvable avec message explicite. (5) Documentation OpenAPI (docstring) : '# Tier 1 Component Library - Instant component retrieval (0ms latency)'.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Endpoint /api/components/library/{style_id}/{atom_type} créé",
+        "Query params variant et props fonctionnels",
+        "Retour JSON avec html, css_classes, accessibility, cache_hit",
+        "Gestion d'erreur 404 avec message explicite",
+        "Documentation OpenAPI présente"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["Backend/Prod/routes/studio_routes.py"],
+        "endpoint_pattern": "GET /api/components/library/{style_id}/{atom_type}",
+        "response_format": {
+          "html": "string",
+          "css_classes": ["array"],
+          "accessibility": {},
+          "cache_hit": true
+        }
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Connecter la bibliothèque au serveur 9998 (Carrefour Créatif). Modifier server_9998_v2.py : (1) Quand l'utilisateur sélectionne un style (event listener ligne 1059-1067), déclencher un fetch vers /api/components/library/preview/{style_id} qui retourne un aperçu HTML des 6 atomes de base. (2) Afficher cet aperçu dans une nouvelle section 'section-style-preview' (après section-style-choice) avec un effet de fade-in. (3) Ajouter un bouton 'Confirmer ce style' qui enregistre le choix et passe au step suivant. (4) Style CSS : section-style-preview avec background blanc, border #7aca6a, padding 24px, border-radius 12px. (5) Layout : grille 3x2 des 6 atomes avec labels.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Fetch API vers /api/components/library/preview/{style_id} au clic sur style-card",
+        "Section section-style-preview créée et affichée après sélection",
+        "Grille 3x2 des atomes avec fade-in animation",
+        "Bouton 'Confirmer ce style' fonctionnel",
+        "Design cohérent avec le reste (couleurs #7aca6a)"
+      ],
+      "context": {
+        "language": "javascript+html",
+        "framework": "vanilla",
+        "files": ["server_9998_v2.py"],
+        "insertion_point": "Après ligne 1067 (event listener style-card)",
+        "new_section": "section-style-preview (display:none par défaut)",
+        "animation": "Fade-in CSS transition 300ms"
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Tests manuels de validation (TDD). Vérifier que : (1) Le fichier pregenerated_components.json contient bien 8 styles × 6 atomes = 48 entrées minimum. (2) L'endpoint /api/components/library/minimal/button?variant=primary retourne un objet JSON valide avec html, css_classes, cache_hit:true. (3) Sur le serveur 9998, cliquer sur un style-card (ex: Minimal) affiche la section-style-preview avec 6 atomes visibles. (4) Le bouton 'Confirmer ce style' enregistre le choix (vérifier console.log 'Style confirmé: minimal'). (5) Les composants pré-générés ont des aria-labels valides (accessibility). (6) Cache hit rate > 80% si on demande plusieurs fois le même composant (vérifier logs).",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1000,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "48+ entrées dans pregenerated_components.json",
+        "API endpoint retourne JSON valide avec cache_hit:true",
+        "Preview des 6 atomes s'affiche au clic sur style-card",
+        "Bouton confirmation fonctionne (console.log)",
+        "aria-labels présents sur tous les composants",
+        "Cache hit rate > 80% (logs)"
+      ],
+      "context": {
+        "language": "manual_testing",
+        "framework": "browser+api",
+        "test_urls": [
+          "GET /api/components/library/minimal/button?variant=primary",
+          "http://localhost:9998 (Carrefour Créatif)"
+        ],
+        "test_scenarios": [
+          "Charger pregenerated_components.json et compter les entrées",
+          "Appeler l'API 3x et vérifier cache_hit:true",
+          "Cliquer sur style-card et vérifier section-style-preview visible",
+          "Vérifier accessibility (aria-labels, roles)",
+          "Vérifier logs cache hit rate"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-10T20:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW HOMEOS V2 - Tier 1 Component Library - Stratégie Hybride Pré-génération",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "frontend_generation": "Kimi (API Cloud)",
+      "tdd_qa": "DeepSeek 7B (Local)"
+    },
+    "genome_hierarchy": {
+      "n0": "Frontend",
+      "n1": "Component Generation",
+      "n2": "Pregenerated Library (Tier 1)",
+      "n3": "Atomes (button, input, card, badge, avatar, divider)"
+    },
+    "reference_docs": [
+      "docs/02-sullivan/Composants/STRATEGIE HYBRIDES DE PREGENRATION DES COMPOSANTS.md",
+      "docs/02-sullivan/Composants/Bilan Strategie hybride De pregeneration des composants.md2026_02_10.md"
+    ],
+    "expected_benefits": {
+      "latency": "0ms pour 60% des composants (Tier 1)",
+      "cache_hit_rate": "85%+",
+      "user_satisfaction": "95%+",
+      "avg_response_time": "< 150ms"
+    }
+  }
+}

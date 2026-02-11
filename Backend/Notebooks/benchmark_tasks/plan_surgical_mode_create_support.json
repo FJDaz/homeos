@@ -1,0 +1,120 @@
+{
+  "task_id": "surgical-mode-create-support",
+  "description": "Étendre surgical mode pour supporter les opérations 'create' de fichiers (JSON, HTML, CSS, etc.)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter une classe CreateOperation dans surgical_editor.py. CRITICAL: (1) Dans Backend/Prod/core/surgical_editor.py, après la classe SurgicalInstruction (ligne ~50), ajouter une nouvelle dataclass CreateOperation avec les champs: operation_type (str), path (str), value (Any), file_format (Optional[str] = None). (2) Ajouter une méthode apply_create() qui prend une CreateOperation, extrait path et value, crée les dossiers parents avec Path.mkdir(parents=True, exist_ok=True), et écrit le fichier. Si value est dict/list, sérialiser en JSON avec indent=2. Si c'est une string, écrire directement. (3) Retourner True si succès, False sinon. Logger avec loguru chaque création de fichier.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe CreateOperation ajoutée avec dataclass decorator",
+        "Méthode apply_create() créée et fonctionnelle",
+        "Support JSON auto-detect (dict/list → json.dumps)",
+        "Création des dossiers parents automatique",
+        "Logging avec loguru pour chaque fichier créé"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pathlib",
+        "files": ["Backend/Prod/core/surgical_editor.py"],
+        "insertion_point": "Après ligne ~50 (class SurgicalInstruction)",
+        "imports_needed": ["from pathlib import Path", "import json", "from typing import Any, Optional"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier SurgicalInstructionParser.parse() pour détecter les opérations 'create'. CRITICAL: (1) Dans la méthode parse() (ligne ~200), après avoir chargé le JSON avec json.loads(), vérifier si data contient 'operations' ET si la première opération a 'operation': 'create' ou 'type': 'create'. (2) Si détecté, extraire l'opération et créer un objet CreateOperation(operation_type='create', path=op['path'], value=op['value']). (3) Retourner CreateOperation au lieu de lever une exception. (4) Si pas d'opération create, continuer le flow normal (SurgicalInstruction). (5) Logger la détection avec logger.info(f'Detected create operation for {path}').",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Détection automatique des opérations 'create' dans le JSON",
+        "Création correcte de CreateOperation avec tous les champs",
+        "Retour de CreateOperation au lieu d'exception",
+        "Log de confirmation de détection",
+        "Flow normal préservé pour les opérations AST Python"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "json",
+        "files": ["Backend/Prod/core/surgical_editor.py"],
+        "insertion_point": "Méthode parse() ligne ~200",
+        "logic": "if 'operations' in data and data['operations'][0].get('operation') == 'create'"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier orchestrator.py pour appliquer les CreateOperation. CRITICAL: (1) Dans la méthode _execute_step() (ligne ~720), après l'appel à SurgicalInstructionParser.parse(), ajouter une vérification: if isinstance(parsed_result, CreateOperation). (2) Si CreateOperation détecté, appeler directement apply_create() au lieu de passer par SurgicalEditor. (3) Logger le succès/échec avec logger.info(f'File created: {op.path}') ou logger.error(). (4) Mettre à jour step_result avec success=True et output=op.path. (5) Préserver le flow existant pour les SurgicalInstruction (AST Python).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Détection de CreateOperation dans _execute_step()",
+        "Appel à apply_create() pour créer le fichier",
+        "Logging de confirmation de création",
+        "Mise à jour de step_result avec succès",
+        "Flow AST Python non affecté"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~720, après parse()",
+        "import_needed": "from .core.surgical_editor import CreateOperation"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Tester la création de fichiers JSON avec le plan Tier 1. (1) Supprimer Backend/Prod/sullivan/pregenerated_components.json s'il existe. (2) Lancer la commande: cd /Users/francois-jeandazin/AETHERFLOW && ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_tier1_pregenerated_components.json --workflow quick. (3) Vérifier que le fichier Backend/Prod/sullivan/pregenerated_components.json est créé. (4) Valider que c'est du JSON pur (commence par '{', finit par '}', pas de code Python). (5) Parser avec json.loads() pour vérifier la syntaxe. (6) Vérifier les logs pour 'File created: Backend/Prod/sullivan/pregenerated_components.json'.",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Fichier pregenerated_components.json créé automatiquement",
+        "Format JSON valide (json.loads réussit)",
+        "Commence par '{' et finit par '}'",
+        "Pas de code Python dans le fichier",
+        "Log 'File created' présent dans les logs"
+      ],
+      "context": {
+        "language": "bash+python",
+        "framework": "aetherflow-cli",
+        "test_command": "rm Backend/Prod/sullivan/pregenerated_components.json 2>/dev/null; ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_tier1_pregenerated_components.json --workflow quick",
+        "validation_file": "Backend/Prod/sullivan/pregenerated_components.json"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-11T00:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Surgical Mode Create Support",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "code_generation": "Groq",
+      "refactoring": "Codestral",
+      "validation": "Gemini"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Core",
+      "n2": "Surgical Editor",
+      "n3": "File Creation Operations"
+    },
+    "reference_files": [
+      "Backend/Prod/core/surgical_editor.py (modifications needed)",
+      "Backend/Prod/orchestrator.py (integration needed)"
+    ],
+    "expected_benefits": {
+      "functionality": "Support création automatique de fichiers JSON/HTML/CSS",
+      "tier1_unblocked": "Débloque le Tier 1 Component Library",
+      "architecture": "Étend surgical mode de manière cohérente"
+    }
+  }
+}

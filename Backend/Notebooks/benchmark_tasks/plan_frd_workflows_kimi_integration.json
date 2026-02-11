@@ -1,0 +1,165 @@
+{
+  "task_id": "frd-workflows-kimi-integration",
+  "description": "Implémenter les workflows FRD (frd-quick, frd-full, frd-vfx) avec KIMI comme provider principal et support parallélisme 100 workers",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter les phases FRD dans orchestrator.py. CRITICAL: (1) Dans Backend/Prod/orchestrator.py, dans la méthode __init__ (ligne ~50), modifier le dict self.workflow_modes pour ajouter: 'frd-quick': ['FRD-FAST'], 'frd-full': ['FRD-FAST', 'FRD-TEST', 'FRD-REVIEW'], 'frd-vfx': ['FRD-FAST', 'FRD-TEST', 'FRD-VERIFY', 'FRD-FIX']. (2) Ces nouveaux workflows doivent coexister avec les existants (quick, full, verify-fix). (3) Logger au démarrage le workflow mode détecté. (4) Préserver les workflows existants sans modification.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "workflow_modes contient frd-quick, frd-full, frd-vfx",
+        "Phases FRD définies: FRD-FAST, FRD-TEST, FRD-REVIEW, FRD-VERIFY, FRD-FIX",
+        "Workflows backend existants non modifiés",
+        "Logging du workflow mode au démarrage"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "dict",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode __init__ ligne ~50, dict workflow_modes",
+        "phases": "FRD-FAST (KIMI), FRD-TEST (DeepSeek), FRD-REVIEW (Gemini), FRD-VERIFY (Gemini), FRD-FIX (KIMI)"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implémenter smart routing FRD dans _get_provider_for_step(). CRITICAL: (1) Dans la méthode _get_provider_for_step() (ligne ~600), ajouter une condition au début: if self.execution_mode in ['FRD-FAST', 'FRD-FIX']: return 'kimi'. (2) Si self.execution_mode == 'FRD-TEST': return 'deepseek'. (3) Si self.execution_mode in ['FRD-REVIEW', 'FRD-VERIFY']: return 'gemini'. (4) Préserver le smart routing existant pour les autres modes. (5) Logger le provider sélectionné avec logger.info(f'FRD routing: {execution_mode} → {provider}').",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "FRD-FAST et FRD-FIX routent vers KIMI",
+        "FRD-TEST route vers DeepSeek",
+        "FRD-REVIEW et FRD-VERIFY routent vers Gemini",
+        "Smart routing backend préservé",
+        "Logging de confirmation du routing FRD"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "conditional logic",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _get_provider_for_step() ligne ~600, début de méthode",
+        "priority": "FRD routing doit être vérifié AVANT le smart routing général"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Ajouter support batch parallèle dans kimi_client.py. CRITICAL: (1) Dans Backend/Prod/models/kimi_client.py, ajouter une méthode async generate_batch(self, prompts: List[str], max_parallel: int = 100) -> List[GenerationResult]. (2) Créer un asyncio.Semaphore(max_parallel) pour limiter la concurrence. (3) Définir une fonction interne async generate_with_limit(prompt) qui utilise le semaphore et appelle self.generate(prompt). (4) Utiliser asyncio.gather(*[generate_with_limit(p) for p in prompts]) pour exécuter en parallèle. (5) Retourner la liste de GenerationResult. (6) Gérer les erreurs individuelles sans bloquer le batch complet.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Méthode generate_batch() ajoutée",
+        "Semaphore pour limiter à max_parallel (default 100)",
+        "asyncio.gather pour parallélisme",
+        "Retourne List[GenerationResult]",
+        "Gestion d'erreurs par prompt (ne casse pas tout le batch)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/models/kimi_client.py"],
+        "insertion_point": "Après la méthode generate()",
+        "parallelism": "Semaphore limite à 100, gather exécute tout en parallèle"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Détecter et utiliser generate_batch() dans orchestrator pour steps FRD. CRITICAL: (1) Dans _execute_step() (ligne ~720), après la détection du provider, vérifier: if provider == 'kimi' and step.context.get('batch_size') is not None. (2) Si batch détecté, extraire les prompts en array (soit depuis step.context['prompts'] soit générer N fois le même prompt avec variations). (3) Appeler results = await kimi_client.generate_batch(prompts, max_parallel=step.context.get('max_parallel', 100)). (4) Agréger les résultats dans un seul GenerationResult (concat outputs, sum tokens, sum costs). (5) Logger le nombre de prompts traités en parallèle. (6) Sinon, utiliser le flow normal (generate simple).",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Détection de batch_size dans step.context",
+        "Appel à generate_batch() si batch détecté",
+        "Agrégation correcte des résultats multiples",
+        "Logging du nombre de prompts parallèles",
+        "Flow normal préservé pour non-batch"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~720, après provider selection",
+        "batch_detection": "step.context.get('batch_size') is not None"
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Ajouter flags CLI --frd-quick, --frd-full, --frd-vfx. CRITICAL: (1) Dans le script aetherflow (CLI), ajouter trois nouveaux flags mutuellement exclusifs dans le groupe de workflows: --frd-quick (ou -fq), --frd-full (ou -ff), --frd-vfx (ou -fvfx). (2) Mapper ces flags vers les workflow_mode correspondants ('frd-quick', 'frd-full', 'frd-vfx'). (3) Passer le workflow_mode à l'orchestrator. (4) Afficher un message informatif si FRD workflow détecté: '🎨 Using FRD workflow with KIMI (parallel: up to 100 workers)'. (5) Préserver les flags existants --quick, --full, --vfx.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 1800,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Flags --frd-quick, --frd-full, --frd-vfx ajoutés",
+        "Mapping vers workflow_mode correct",
+        "Mutuellement exclusifs avec les flags backend",
+        "Message informatif sur KIMI affiché",
+        "Flags backend préservés"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "argparse",
+        "files": ["aetherflow"],
+        "cli_structure": "Mutually exclusive group pour workflows",
+        "output": "Rich console avec emoji 🎨 pour KIMI"
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Créer un plan de test FRD avec batch. (1) Créer Backend/Notebooks/benchmark_tasks/plan_frd_test_batch.json avec 3 steps: step_1 génère 10 boutons React en batch (batch_size: 10, max_parallel: 10), step_2 génère tests avec DeepSeek, step_3 review avec Gemini. (2) Chaque step doit avoir type: 'frd_generation' pour step_1, 'frd_test' pour step_2, 'frd_review' pour step_3. (3) Lancer ./aetherflow --plan plan_frd_test_batch.json --frd-full. (4) Vérifier que KIMI génère les 10 composants en parallèle (logs doivent montrer 'Processing 10 prompts in parallel'). (5) Vérifier que DeepSeek et Gemini sont appelés correctement. (6) Mesurer le temps total et comparer avec un workflow non-batch.",
+      "type": "analysis",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "Plan FRD test créé avec batch_size: 10",
+        "KIMI traite 10 prompts en parallèle",
+        "Log 'Processing N prompts in parallel' présent",
+        "DeepSeek et Gemini appelés après KIMI",
+        "Temps total < 2× temps d'un seul prompt (grâce au parallélisme)"
+      ],
+      "context": {
+        "language": "json+bash",
+        "framework": "aetherflow-cli",
+        "test_plan": "3 steps FRD-FAST → FRD-TEST → FRD-REVIEW",
+        "batch_test": "10 React buttons generated in parallel",
+        "performance": "Expect ~10× speedup vs sequential"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-11T00:40:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - FRD Workflows + KIMI Integration",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "refactoring": "Codestral",
+      "code_generation": "Groq",
+      "validation": "Gemini"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Orchestration",
+      "n2": "FRD Workflows",
+      "n3": "KIMI Batch Parallelism"
+    },
+    "reference_files": [
+      "Backend/Prod/orchestrator.py (workflow phases + routing)",
+      "Backend/Prod/models/kimi_client.py (batch support)",
+      "aetherflow (CLI flags)"
+    ],
+    "expected_benefits": {
+      "scalability": "100 components in parallel with KIMI",
+      "performance": "10× speedup for large FRD projects",
+      "architecture": "Clean separation FRD vs Backend workflows"
+    }
+  }
+}

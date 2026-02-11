@@ -1,0 +1,92 @@
+{
+  "task_id": "auto-apply-modifications",
+  "description": "Rendre l'application automatique des modifications systématique dans Aetherflow",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Activer le surgical mode par défaut dans orchestrator.py. CRITICAL: (1) Dans la méthode _execute_step() (ligne ~650), modifier la logique de détection du surgical_mode pour le rendre True par défaut au lieu de vérifier step.context.get('surgical_mode', False). (2) Remplacer la ligne 'surgical_mode = step.context.get('surgical_mode', False) and self.execution_mode == 'BUILD'' par 'surgical_mode = step.context.get('surgical_mode', True) or (self.execution_mode in ['BUILD', 'DOUBLE-CHECK'] and step.type in ['refactoring', 'code_generation'])'. (3) Ajouter un log avec logger.info(f'Surgical mode: {surgical_mode} (execution_mode={self.execution_mode}, step_type={step.type})'). (4) Garder la logique d'application des surgical instructions existante (lignes ~740-780). IMPORTANT: Ne modifier QUE la détection du surgical_mode, pas la logique d'application.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "surgical_mode activé par défaut pour refactoring et code_generation en modes BUILD/DOUBLE-CHECK",
+        "Log confirmant l'activation du surgical mode",
+        "Logique d'application des instructions préservée",
+        "Pas de régression sur le mode FAST"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~650 (surgical_mode detection)",
+        "default_behavior": "surgical_mode = True pour refactoring/code_generation en BUILD/DOUBLE-CHECK"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Vérifier et corriger l'application automatique des surgical instructions. CRITICAL: (1) Dans la méthode _execute_step() (ligne ~740), vérifier que le bloc 'if surgical_mode and result.success and result.output:' applique bien les modifications via SurgicalEditor. (2) S'assurer que SurgicalInstructionParser parse correctement le JSON généré par le LLM. (3) Ajouter des logs détaillés : logger.info(f'Applying {len(instructions)} surgical modifications to {file_path}') avant application. (4) En cas d'erreur d'application, logger.warning() au lieu de bloquer complètement. (5) Retourner result même si surgical application échoue (graceful degradation). IMPORTANT: L'objectif est que les modifications soient appliquées AUTOMATIQUEMENT aux fichiers après génération LLM.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Surgical instructions appliquées automatiquement après génération",
+        "Logs détaillés de l'application (nombre de modifications, fichiers)",
+        "Graceful degradation si erreur d'application",
+        "Pas de blocage si surgical parsing échoue"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "loguru",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~740 (surgical application)",
+        "error_handling": "Warning au lieu de raise si application échoue"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Tester l'application automatique avec le plan hybrid-loader-json-forcing. (1) Lancer la commande : cd /Users/francois-jeandazin/AETHERFLOW && ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_hybrid_loader_integration.json --workflow quick --verbose. (2) Vérifier dans les logs la présence de 'Surgical mode: True' pour les steps de refactoring. (3) Vérifier la présence de logs 'Applying X surgical modifications to orchestrator.py'. (4) À la fin, vérifier que Backend/Prod/orchestrator.py contient bien le forçage JSON automatique (grep 'JSON forcing' Backend/Prod/orchestrator.py). (5) Vérifier que le HybridLoader est bien initialisé (grep 'hybrid_loader = HybridLoader' Backend/Prod/orchestrator.py). (6) Si modifications non appliquées, analyser les logs d'erreur et rapporter le problème détecté.",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Logs 'Surgical mode: True' présents",
+        "Logs 'Applying X surgical modifications' présents",
+        "orchestrator.py contient 'JSON forcing' ou détection .json",
+        "orchestrator.py contient 'hybrid_loader = HybridLoader'",
+        "Rapport détaillé si échec (avec logs d'erreur)"
+      ],
+      "context": {
+        "language": "bash+python",
+        "framework": "aetherflow-cli",
+        "test_command": "cd /Users/francois-jeandazin/AETHERFLOW && ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_hybrid_loader_integration.json --workflow quick --verbose",
+        "validation_files": ["Backend/Prod/orchestrator.py"],
+        "expected_content": ["JSON forcing", "hybrid_loader = HybridLoader"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-10T23:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Auto-apply modifications systématique",
+    "mode": "surgical",
+    "agents": {
+      "architect": "Claude",
+      "refactoring": "Gemini/Groq (via cascade)",
+      "validation": "Analysis step"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Orchestration",
+      "n2": "Surgical Mode Auto-apply",
+      "n3": "AST Modifications"
+    },
+    "expected_benefits": {
+      "developer_experience": "Plus besoin d'appliquer manuellement les modifications",
+      "workflow_efficiency": "Code généré = code appliqué automatiquement",
+      "validation_safety": "VFX mode valide après application"
+    }
+  }
+}

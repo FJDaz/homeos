@@ -53,4 +53,4 @@
    ```
 
 3. **Re-vider le cache**  
-   Voir `docs/05-operations/CLEAR_CACHE.md` ou exécuter `./scripts/clear_aetherflow_cache.sh`.
+   Voir `docs/CLEAR_CACHE.md` ou exécuter `./scripts/clear_aetherflow_cache.sh`.

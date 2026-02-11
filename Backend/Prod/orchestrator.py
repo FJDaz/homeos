@@ -24,6 +24,7 @@ from .rag import PageIndexRetriever
 from .core.surgical_editor import SurgicalEditor
 from .core.plan_status import update_plan_status
 from .claude_helper import split_structure_and_code
+from .ui.hybrid_loader import HybridLoader, Phase, StepStatus
 
 
 class ExecutionError(Exception):
@@ -40,7 +41,9 @@ class Orchestrator:
         agent_router: Optional[AgentRouter] = None,
         claude_validator: Optional[ClaudeCodeValidator] = None,
         rag_enabled: bool = True,
-        execution_mode: str = "BUILD"
+        execution_mode: str = "BUILD",
+        enable_hybrid_loader: bool = True,
+        sequential_mode: bool = False
     ):
         """
         Initialize orchestrator.
@@ -54,6 +57,7 @@ class Orchestrator:
         """
         self.plan_reader = plan_reader or PlanReader()
         self.execution_mode = execution_mode.upper()
+        self.sequential_mode = sequential_mode
         # Initialize AgentRouter with prompt cache, semantic cache, and execution mode
         from .cache import PromptCache, SemanticCache
         prompt_cache = PromptCache()
@@ -66,7 +70,9 @@ class Orchestrator:
         self.claude_validator = claude_validator or ClaudeCodeValidator()
         self.metrics: Optional[MetricsCollector] = None
         self.monitor: Optional[ExecutionMonitor] = None
-        
+        self.enable_hybrid_loader = enable_hybrid_loader
+        self.hybrid_loader: Optional[HybridLoader] = None
+
         # Rate limiting: semaphores per provider to limit concurrent requests
         # Limits: DeepSeek=5, Groq=10, Gemini=10, Codestral=5
         self._provider_semaphores = {
@@ -259,23 +265,42 @@ class Orchestrator:
     ) -> None:
         """
         Execute multiple independent steps in parallel using asyncio.gather().
-        
+
+        If sequential_mode is enabled, execute steps one by one with a pause between them.
+
         Args:
             batch: List of steps to execute in parallel
             context: Additional context for all steps
             results: Dictionary to store step results
         """
-        logger.info(f"Executing {len(batch)} steps in parallel")
-        
-        # Create async tasks for each step
-        tasks = [
-            self._execute_step_with_monitoring(step, context, results)
-            for step in batch
-        ]
-        
-        # Execute all steps in parallel with asyncio.gather
-        # return_exceptions=True allows other steps to continue if one fails
-        step_results = await asyncio.gather(*tasks, return_exceptions=True)
+        if self.sequential_mode:
+            logger.info(f"🔄 SEQUENTIAL MODE: Executing {len(batch)} steps ONE AT A TIME")
+            step_results = []
+            for i, step in enumerate(batch, 1):
+                logger.info(f"📍 Step {i}/{len(batch)}: {step.id}")
+                try:
+                    await self._execute_step_with_monitoring(step, context, results)
+                    step_results.append(None)  # Success (result already in dict)
+                except Exception as e:
+                    logger.error(f"Step {step.id} failed: {e}")
+                    step_results.append(e)
+
+                # Pause between steps to avoid rate limiting
+                if i < len(batch):
+                    logger.info("⏸️  Pausing 2s before next step...")
+                    await asyncio.sleep(2)
+        else:
+            logger.info(f"Executing {len(batch)} steps in parallel")
+
+            # Create async tasks for each step
+            tasks = [
+                self._execute_step_with_monitoring(step, context, results)
+                for step in batch
+            ]
+
+            # Execute all steps in parallel with asyncio.gather
+            # return_exceptions=True allows other steps to continue if one fails
+            step_results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Process results and handle errors
         for step, result in zip(batch, step_results):
@@ -642,27 +667,37 @@ class Orchestrator:
         existing_files = self._load_existing_files(step)
         surgical_mode = False
         ast_contexts = {}
-        
+
         if existing_files:
             # Check if surgical mode should be activated
-            # Surgical mode: PROD mode (BUILD or DOUBLE-CHECK) AND Python files exist
+            # Surgical mode: enabled by default for refactoring/code_generation, or explicitly via step.context
             project_root = Path(__file__).parent.parent.parent
-            
-            # First, check if we have any Python files that exist
+
+            # First, check if we have any Python files that exist AND have content
             has_python_files = False
-            for file_path_str in existing_files.keys():
-                if existing_files[file_path_str] is not None:
+            has_existing_code = False
+            for file_path_str, content in existing_files.items():
+                if content is not None and len(content.strip()) > 0:
+                    # File exists and has content
+                    has_existing_code = True
                     file_path = Path(file_path_str)
                     if not file_path.is_absolute():
                         file_path = project_root / file_path
                     if file_path.suffix == '.py' and file_path.exists():
                         has_python_files = True
                         break
-            
-            surgical_mode = (
-                self.execution_mode in ["BUILD", "DOUBLE-CHECK"] and
-                has_python_files
+
+            # Surgical mode: ONLY if files exist with content
+            # Disabled for new files (content is None or empty)
+            surgical_mode = has_existing_code and (
+                step.context.get('surgical_mode', True) or (
+                    self.execution_mode in ["BUILD", "DOUBLE-CHECK"] and
+                    has_python_files and
+                    step.type in ['refactoring', 'code_generation']
+                )
             )
+
+            logger.info(f'Surgical mode: {surgical_mode} (execution_mode={self.execution_mode}, step_type={step.type}, has_python_files={has_python_files})')
             
             files_section_parts = ["\n\nExisting code files:\n"]
             
@@ -705,9 +740,44 @@ class Orchestrator:
                 
                 # Add instructions based on step type and mode
                 if surgical_mode:
-                    files_section += "\n\nSURGICAL MODE: Instead of generating the complete file, generate structured JSON instructions with precise modifications:\n"
-                    files_section += '{\n  "operations": [\n    {\n      "type": "add_method|modify_method|add_import|replace_import|add_class|add_function",\n      "target": "ClassName or ClassName.method_name",\n      "position": "after|before|end",\n      "after_method": "method_name",  // if position=after\n      "code": "def new_method(self): ..."\n    }\n  ]\n}\n'
-                    files_section += "\nFocus on precise, minimal changes that integrate seamlessly with existing code.\n"
+                    files_section += """
+
+SURGICAL MODE INSTRUCTIONS:
+Generate ONLY these operation types (no others will work):
+- add_import: Add an import statement
+- add_function: Add a standalone function (NOT a route decorator, just the function)
+- add_class: Add a new class definition
+- add_method: Add a method to an existing class
+- modify_method: Modify an existing method
+- replace_import: Replace one import with another
+
+CRITICAL - FORBIDDEN OPERATIONS (will cause errors):
+❌ add_route (not supported)
+❌ add_to_router (not supported)
+❌ add_endpoint (not supported)
+❌ add_decorator (not supported)
+
+For FastAPI routes, use add_function with the full decorated function:
+{
+  "type": "add_function",
+  "code": "@router.get('/endpoint')\\nasync def my_endpoint():\\n    return {'status': 'ok'}"
+}
+
+JSON structure:
+{
+  "operations": [
+    {
+      "type": "add_method|modify_method|add_import|replace_import|add_class|add_function",
+      "target": "ClassName or ClassName.method_name",
+      "position": "after|before|end",
+      "after_method": "method_name",
+      "code": "def new_method(self): ..."
+    }
+  ]
+}
+
+Focus on precise, minimal changes that integrate seamlessly with existing code.
+"""
                 else:
                     if step.type == "refactoring":
                         files_section += "\nModify the existing code above according to the requirements. Preserve existing structure, imports, and patterns.\n"
@@ -727,7 +797,7 @@ class Orchestrator:
 
         # Apply surgical instructions if in surgical mode and execution succeeded
         if surgical_mode and result.success and result.output:
-            from .core.surgical_editor import SurgicalInstructionParser, SurgicalEditor
+            from .core.surgical_editor import SurgicalInstructionParser
 
             # Check if the output contains surgical instructions
             if SurgicalInstructionParser.is_surgical_output(result.output):
@@ -753,8 +823,32 @@ class Orchestrator:
                                 applied_files.append(f"{file_path} (created)")
                                 logger.info(message)
                             else:
-                                application_errors.append(f"{file_path}: {message}")
-                                logger.warning(f"Failed to create {file_path}: {message}")
+                                # FALLBACK: Extract code from surgical JSON and write directly
+                                logger.warning(f"Surgical creation failed for {file_path}: {message}")
+                                logger.info(f"Attempting fallback: extract code from operations")
+
+                                from .core.surgical_editor import SurgicalInstructionParser
+                                operations, parse_error = SurgicalInstructionParser.parse_instructions(result.output)
+
+                                if operations:
+                                    # Extract all code from operations
+                                    code_parts = []
+                                    for op in operations:
+                                        if hasattr(op, 'code') and op.code:
+                                            code_parts.append(op.code)
+
+                                    if code_parts:
+                                        fallback_code = "\n\n".join(code_parts)
+                                        file_path.parent.mkdir(parents=True, exist_ok=True)
+                                        file_path.write_text(fallback_code, encoding='utf-8')
+                                        applied_files.append(f"{file_path} (created via fallback)")
+                                        logger.info(f"✅ Fallback successful: wrote {len(fallback_code)} chars to {file_path}")
+                                    else:
+                                        application_errors.append(f"{file_path}: {message}")
+                                        logger.warning(f"Failed to create {file_path}: {message}")
+                                else:
+                                    application_errors.append(f"{file_path}: {message}")
+                                    logger.warning(f"Failed to create {file_path}: {message}")
                         except Exception as e:
                             application_errors.append(f"{file_path}: Failed to create new file: {e}")
                             logger.warning(f"Error creating new file {file_path}: {e}")
@@ -772,8 +866,28 @@ class Orchestrator:
                                         applied_files.append(f"{file_path} (modified)")
                                         logger.info(f"Applied surgical edits to {file_path}")
                                     elif not success:
-                                        application_errors.append(f"{file_path}: {modified_code}")
-                                        logger.warning(f"Failed to apply surgical edits to {file_path}: {modified_code}")
+                                        # FALLBACK: Try to extract and append code
+                                        logger.warning(f"Surgical modification failed for {file_path}: {modified_code}")
+                                        logger.info(f"Attempting fallback: extract code from operations and append")
+
+                                        from .core.surgical_editor import SurgicalInstructionParser
+                                        operations, parse_error = SurgicalInstructionParser.parse_instructions(result.output)
+
+                                        if operations and original_code:
+                                            code_parts = []
+                                            for op in operations:
+                                                if hasattr(op, 'code') and op.code:
+                                                    code_parts.append(op.code)
+
+                                            if code_parts:
+                                                fallback_code = original_code + "\n\n" + "\n\n".join(code_parts)
+                                                file_path.write_text(fallback_code, encoding='utf-8')
+                                                applied_files.append(f"{file_path} (modified via fallback - appended code)")
+                                                logger.warning(f"⚠️ Fallback used: appended {len(code_parts)} operations to {file_path}")
+                                            else:
+                                                application_errors.append(f"{file_path}: {modified_code}")
+                                        else:
+                                            application_errors.append(f"{file_path}: {modified_code}")
                             except Exception as e:
                                 application_errors.append(f"{file_path}: {e}")
                                 logger.warning(f"Error applying surgical edits to {file_path}: {e}")

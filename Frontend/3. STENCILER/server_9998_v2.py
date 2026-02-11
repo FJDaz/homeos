@@ -1551,14 +1551,25 @@ def generate_html(genome):
                 }});
             }}
             
-            // Gestion sélection de style
+            // Gestion sélection de style → Sauvegarde + Redirect vers /stenciler
             document.querySelectorAll('.style-card').forEach(card => {{
                 card.addEventListener('click', () => {{
                     // Désélectionner les autres
                     document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
                     // Sélectionner celui-ci
                     card.classList.add('selected');
-                    console.log('Style sélectionné:', card.dataset.style);
+                    
+                    const selectedStyle = card.dataset.style;
+                    console.log('Style sélectionné:', selectedStyle);
+                    
+                    // Sauvegarder dans localStorage pour /stenciler (le genome sera fetché via /api/genome)
+                    localStorage.setItem('aetherflow_selected_style', selectedStyle);
+                    localStorage.setItem('aetherflow_timestamp', Date.now().toString());
+                    
+                    console.log('💾 Données sauvegardées, redirection vers /stenciler...');
+                    
+                    // Redirection vers /stenciler
+                    window.location.href = '/stenciler';
                 }});
             }});
         }});
@@ -1771,7 +1782,7 @@ def generate_html(genome):
         
         function enterCorps(corpsData) {{
             console.log('Entrée dans:', corpsData.name);
-            alert('Entrée dans: ' + corpsData.name + '\n\nDrill-down à implémenter (Tier 3).');
+            alert('Entrée dans: ' + corpsData.name + '\\n\\nDrill-down à implémenter (Tier 3).');
         }}
         
         function updateSidebarFromSelection(e) {{
@@ -1887,6 +1898,17 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(stenciler_html.encode('utf-8'))
             return
         
+        # Route API pour le genome
+        if self.path == '/api/genome':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            genome = load_genome()
+            self.wfile.write(json.dumps(genome).encode('utf-8'))
+            return
+        
         # Route pour les fichiers statiques (CSS, JS)
         if self.path.startswith('/static/'):
             self.serve_static(self.path[8:])  # Enlever '/static/'
@@ -1925,22 +1947,30 @@ class Handler(BaseHTTPRequestHandler):
         try:
             cwd = os.path.dirname(os.path.abspath(__file__))
             full_path = os.path.join(cwd, 'static', filepath)
-            
+            print(f"📁 Serving static: {filepath} -> {full_path}")
+            print(f"   Exists: {os.path.exists(full_path)}, Is file: {os.path.isfile(full_path) if os.path.exists(full_path) else 'N/A'}")
+
             if os.path.exists(full_path) and os.path.isfile(full_path):
                 self.send_response(200)
                 if filepath.endswith('.css'):
-                    self.send_header('Content-type', 'text/css')
+                    content_type = 'text/css'
                 elif filepath.endswith('.js'):
-                    self.send_header('Content-type', 'application/javascript')
+                    content_type = 'application/javascript'
+                elif filepath.endswith('.json'):
+                    content_type = 'application/json'
                 else:
-                    self.send_header('Content-type', 'text/plain')
+                    content_type = 'text/plain'
+                print(f"   Content-Type: {content_type}")
+                self.send_header('Content-type', content_type)
                 self.end_headers()
                 with open(full_path, 'rb') as f:
                     self.wfile.write(f.read())
             else:
+                print(f"   ❌ File not found: {full_path}")
                 self.send_response(404)
                 self.end_headers()
         except Exception as e:
+            print(f"   ❌ Error: {e}")
             self.send_response(500)
             self.end_headers()
 
@@ -2215,6 +2245,52 @@ def generate_stenciler_html():
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="/static/stenciler.js"></script>
+    <script>
+        // 🚀 Récupération des données depuis la page Genome
+        document.addEventListener('DOMContentLoaded', async () => {{
+            const selectedStyle = localStorage.getItem('aetherflow_selected_style');
+            const timestamp = localStorage.getItem('aetherflow_timestamp');
+            
+            if (selectedStyle) {{
+                console.log('🎨 Style récupéré:', selectedStyle);
+                
+                // Mettre à jour l'indicateur de style dans le header
+                const styleIndicator = document.querySelector('.style-indicator');
+                if (styleIndicator) {{
+                    styleIndicator.className = 'style-indicator ' + selectedStyle;
+                    styleIndicator.querySelector('span:last-child').textContent = selectedStyle;
+                }}
+                
+                // 🧬 Fetch le genome depuis l'API
+                try {{
+                    const response = await fetch('/api/genome');
+                    const genome = await response.json();
+                    console.log('🧬 Genome chargé via API:', genome.n0_phases?.length || 0, 'corps');
+                    
+                    // Stocker pour utilisation par stenciler.js
+                    window.aetherflowState = {{
+                        genome: genome,
+                        style: selectedStyle,
+                        timestamp: parseInt(timestamp || '0')
+                    }};
+                }} catch (err) {{
+                    console.error('❌ Erreur chargement genome:', err);
+                }}
+                
+                // 🎭 Illusion : scroll vers le bas comme si on continuait la page
+                setTimeout(() => {{
+                    window.scrollTo({{
+                        top: document.body.scrollHeight,
+                        behavior: 'smooth'
+                    }});
+                    console.log('🎭 Scroll automatique vers le bas (illusion de continuité)');
+                }}, 500);
+                
+            }} else {{
+                console.log('ℹ️ Aucun style sélectionné — mode standalone');
+            }}
+        }});
+    </script>
 </body>
 </html>'''
 

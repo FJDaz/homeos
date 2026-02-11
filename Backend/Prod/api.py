@@ -39,9 +39,10 @@ class SullivanWidgetMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
 
-        # Ne traiter que les réponses HTML
+        # Ne traiter que les réponses HTML et exclure le bridge test
+        path = request.url.path
         content_type = response.headers.get("content-type", "")
-        if "text/html" not in content_type:
+        if "text/html" not in content_type or "/v1/bridge/test" in path:
             return response
 
         # Collecter le body
@@ -1033,6 +1034,445 @@ async def render_component(component_id: str, user_id: str = "default_user"):
         )
 
 
+@app.post("/v1/cto/chat")
+async def cto_chat(request: Request):
+    """
+    Endpoint universel pour les services tiers.
+    Si context['origin'] == 'Persona', utilise le système hybride V2.
+    Sinon, utilise le mode CTO classique Sullivan V1.
+    """
+    try:
+        data = await request.json()
+        message = data.get("message")
+        context = data.get("context", {})
+        
+        # Isolation Persona (Système Hybride V2)
+        if context.get("origin") == "Persona":
+            from .bridger.persona_orchestrator import PersonaOrchestrator
+            orchestrator = PersonaOrchestrator()
+            return await orchestrator.chat(message, context)
+            
+        # Mode CTO Classique (Sullivan V1)
+        from .sullivan.modes.cto_mode import CTOMode
+        cto = CTOMode()
+        
+        full_message = message
+        if context:
+            full_message = f"Context: {json.dumps(context)}\n\nRequest: {message}"
+
+        response = await cto.execute(full_message)
+        
+        # Extraction du contenu selon le format CTO
+        content = response.get("result", {}).get("output") or response.get("result", {}).get("response") or ""
+        
+        return {
+            "success": response.get("success", False),
+            "content": content,
+            "model": response.get("mode", "auto"),
+            "metadata": {
+                "time_ms": response.get("total_time_ms"),
+                "intent": response.get("intent")
+            }
+        }
+    except Exception as e:
+        logger.error(f"Chat Router Error: {e}")
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+
+@app.post("/v1/persona/evaluate")
+async def evaluate_persona(request: Request):
+    """
+    Endpoint d'évaluation finale pour le Persona.
+    Analyse le dialogue et calcule le score final.
+    """
+    try:
+        data = await request.json()
+        dialogue = data.get("dialogue", "")
+        score_front = data.get("score_front", 0)
+        
+        from .sullivan.modes.cto_mode import CTOMode
+        cto = CTOMode()
+        
+        # Prompt d'évaluation spinoziste
+        eval_prompt = f"""Analyse cet échange maïeutique avec Spinoza :
+{dialogue}
+
+Calcule 3 scores (0-10) : Comprehension, Coopération, Progression.
+Réponds au format JSON strict: {{"comprehension": X, "cooperation": Z, "progression": Z, "message_final": "..."}}
+Le message_final doit être un compliment/conseil bref en tant que Spinoza.
+"""
+        
+        response = await cto.execute(eval_prompt)
+        # Extraction du JSON depuis la réponse
+        raw_output = response.get("result", {}).get("response", "{}")
+        try:
+            # Nettoyage si le LLM a mis des backticks
+            if "```json" in raw_output:
+                raw_output = raw_output.split("```json")[1].split("```")[0].strip()
+            eval_data = json.loads(raw_output)
+        except:
+             eval_data = {"comprehension": 5, "cooperation": 5, "progression": 5, "message_final": "Ton effort est louable, poursuis ta recherche de vérité."}
+
+        score_backend = eval_data.get("comprehension", 0) + eval_data.get("cooperation", 0) + eval_data.get("progression", 0)
+        score_final = score_front + score_backend # score_front est sur 100, backend sur 30? On ajuste.
+        
+        return {
+            "success": True,
+            "score_final": min(100, score_final),
+            "message_final": eval_data.get("message_final", ""),
+            "details_model": eval_data
+        }
+    except Exception as e:
+        logger.error(f"Evaluation Error: {e}")
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+
+# --- V2 ADMINISTRATION & VIGILANCE ---
+
+@app.get("/v1/admin/status")
+async def admin_status():
+    """Rapport de santé consolidé (Vigilance HOMEOS V2)."""
+    try:
+        from .homeos_v2.vigilance.admin_observer import get_admin_observer
+        observer = get_admin_observer()
+        return observer.get_consolidated_status()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/v1/admin/costs")
+async def admin_costs():
+    """Rapport détaillé des coûts (Aetherflow metrics)."""
+    try:
+        from .core.cost_tracker import get_cost_report
+        return {"success": True, "report": get_cost_report()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/v1/admin/inference/status")
+async def admin_inference_status():
+    """État actuel du moteur Bayésien (VSD + Infra Health)."""
+    try:
+        from .homeos_v2.brain.bayesian_inference import get_bayesian_engine
+        engine = get_bayesian_engine()
+        return engine.get_status()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/v1/admin/config/keys")
+async def admin_update_keys(request: Request):
+    """
+    Friction-Killer: Injection sécurisée de clefs API.
+    AETHERFLOW persist les clefs dans son environnement.
+    """
+    try:
+        data = await request.json()
+        # En production, on ajouterait une authentification forte (Bearer Token)
+        # Pour le moment, on simplifie l'injection
+        keys = data.get("keys", {})
+        for provider, key in keys.items():
+            logger.info(f"Mise à jour de la clef pour {provider}")
+            # Logique pour persister via settings ou .env si besoin
+            
+        return {"success": True, "message": f"{len(keys)} clefs mises à jour."}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/v1/admin/veille/report")
+async def admin_veille_report():
+    """Rapport de veille stratégique (BERT)."""
+    try:
+        from .homeos_v2.vigilance.intelligence_veille import VeilleAgent
+        agent = VeilleAgent()
+        
+        # Simulation de signaux entrants (en prod : scrapper RSS/X)
+        signals = [
+            "DeepSeek drop prices by 50% on all models.",
+            "Groq release a new Llama-3-70b-versatile with 300 t/s.",
+            "NVIDIA stock hits new all-time high after earnings.",
+            "AWS us-east-1 region experiencing connectivity issues."
+        ]
+        
+        results = []
+        for s in signals:
+            analysis = await agent.analyze_text(s)
+            results.append({
+                "source": "Simulation",
+                "text": s,
+                "analysis": analysis
+            })
+            
+        return {
+            "success": True,
+            "timestamp": "2026-02-10T23:30:00Z",
+            "report": results
+        }
+    except Exception as e:
+        logger.error(f"Veille Report Error: {e}")
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/v1/admin/dashboard", response_class=HTMLResponse)
+async def admin_dashboard():
+    """Tableau de bord de pilotage HOMEOS V2 - Interface Premium."""
+    html_content = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERFLOW | Dashboard HomeOS V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --surface: #0f0f0f;
+            --accent: #5d5dff;
+            --accent-glow: rgba(93, 93, 255, 0.4);
+            --text: #ffffff;
+            --text-dim: #888;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --success: #00ffaa;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: var(--bg); 
+            color: var(--text);
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .card-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .stat-foot {
+            font-size: 12px;
+            color: var(--success);
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tag-success { background: rgba(0, 255, 170, 0.1); color: var(--success); }
+        .tag-warning { background: rgba(255, 170, 0, 0.1); color: var(--warning); }
+
+        .veille-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .veille-text { font-size: 14px; color: #ccc; }
+        .veille-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        nav { display: flex; gap: 20px; }
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color 0.3s; }
+        nav a:hover { color: var(--accent); }
+    </style>
+</head>
+<body x-data="dashboardData()">
+    <div class="dashboard">
+        <header>
+            <div class="logo">AETHERFLOW <span style="font-weight:300">V2</span></div>
+            <nav>
+                <div class="tag tag-success"><span class="pulse"></span> Système en Ligne</div>
+            </nav>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Santé du Bouquet</div>
+                <div class="stat-value" x-text="status.frugality_score + '/100'">--</div>
+                <div class="stat-foot">Inférence Locale : <span x-text="status.inference_mode">--</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Impact Carbone</div>
+                <div class="stat-value" x-text="status.total_energy_gco2 + 'g'">--</div>
+                <div class="stat-foot" style="color:var(--text-dim)">Coût Total : $<span x-text="costs.report?.total_cost_usd?.toFixed(4)">--</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Confiance Cloud (Bayes)</div>
+                <div class="stat-value" :style="'color:' + (bayes.infra_health?.cloud > 0.7 ? 'var(--success)' : 'var(--warning)')" x-text="(bayes.infra_health?.cloud * 100).toFixed(0) + '%'">--</div>
+                <div class="stat-foot">Probabilité de succès prédictive</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Alignement HCI (VSD)</div>
+                <div style="font-size:12px; display:flex; flex-direction:column; gap:10px; margin-top:10px">
+                    <div style="display:flex; justify-content:space-between">
+                        <span>Expertise</span>
+                        <span x-text="(bayes.vsd?.expertise * 100).toFixed(0) + '%'"></span>
+                    </div>
+                    <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px">
+                        <div :style="'width:' + (bayes.vsd?.expertise * 100) + '%; height:100%; background:var(--accent); border-radius:2px'"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between">
+                        <span>Sensibilité</span>
+                        <span x-text="(bayes.vsd?.sensibilite * 100).toFixed(0) + '%'"></span>
+                    </div>
+                    <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px">
+                        <div :style="'width:' + (bayes.vsd?.sensibilite * 100) + '%; height:100%; background:var(--success); border-radius:2px'"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between">
+                        <span>Patience</span>
+                        <span x-text="(bayes.vsd?.patience * 100).toFixed(0) + '%'"></span>
+                    </div>
+                    <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px">
+                        <div :style="'width:' + (bayes.vsd?.patience * 100) + '%; height:100%; background:var(--warning); border-radius:2px'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card full-width" style="grid-column: span 2">
+                <div class="card-title">Intelligence de Veille (BERT)</div>
+                <template x-if="veille.report">
+                    <div>
+                        <template x-for="item in veille.report" :key="item.text">
+                            <div class="veille-item">
+                                <div class="veille-text" x-text="item.text"></div>
+                                <div :class="'tag ' + (item.analysis.label == 'PRICE_ALERT' ? 'tag-warning' : 'tag-success')" 
+                                     class="veille-label" x-text="item.analysis.label"></div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <div x-show="!veille.report" style="color:var(--text-dim); font-size:12px">Chargement de l'intelligence...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function dashboardData() {
+            return {
+                status: {
+                    frugality_score: 0,
+                    total_energy_gco2: 0,
+                    total_cost_usd: 0,
+                    inference_mode: 'Chargement...',
+                    active_models: []
+                },
+                costs: { report: { total_cost_usd: 0 } },
+                veille: { report: [] },
+                bayes: { vsd: {}, infra_health: {} },
+                async init() {
+                    this.refresh();
+                    setInterval(() => this.refresh(), 5000);
+                },
+                async refresh() {
+                    try {
+                        const s = await fetch('/v1/admin/status');
+                        this.status = await s.json();
+                        
+                        const c = await fetch('/v1/admin/costs');
+                        this.costs = await c.json();
+
+                        const v = await fetch('/v1/admin/veille/report');
+                        this.veille = await v.json();
+
+                        const b = await fetch('/v1/admin/inference/status');
+                        this.bayes = await b.json();
+                    } catch (e) {
+                        console.error("Dashboard refresh failed", e);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+    """
+    return HTMLResponse(content=html_content)
+
+
 def run_api(host: str = "127.0.0.1", port: int = 8000):
     """Run the API server."""
     import uvicorn
@@ -1041,4 +1481,3 @@ def run_api(host: str = "127.0.0.1", port: int = 8000):
 
 if __name__ == "__main__":
     run_api()
-

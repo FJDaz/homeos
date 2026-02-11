@@ -23,6 +23,7 @@ from .deepseek_client import DeepSeekClient, StepResult
 from .groq_client import GroqClient
 from .gemini_client import GeminiClient
 from .codestral_client import CodestralClient
+from .kimi_client import KimiClient
 from .execution_router import ExecutionRouter
 from .smart_context_router import SmartContextRouter, RoutingDecision
 from .provider_fallback_cascade import ProviderFallbackCascade, CascadeConfig
@@ -140,6 +141,20 @@ class AgentRouter:
                 logger.debug("Codestral client initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize Codestral client: {e}")
+
+        # KIMI (high capacity for FRD workflow - 128K context window)
+        _kimi_ok = (
+            bool(settings.kimi_api_key)
+            and settings.kimi_api_key.isascii()
+            and not settings.kimi_api_key.startswith("your_")
+            and not settings.kimi_api_key.startswith("votre_")
+        )
+        if _kimi_ok:
+            try:
+                self._clients["kimi"] = KimiClient()
+                logger.debug("KIMI client initialized (128K context)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize KIMI client: {e}")
 
         if not self._clients:
             raise ValueError("No LLM clients could be initialized. Check API keys.")

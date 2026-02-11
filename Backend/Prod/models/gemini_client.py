@@ -15,49 +15,27 @@ class GeminiClient(BaseLLMClient):
     # Cascade de fallback pour mode FAST (priorité vitesse)
     FALLBACK_MODELS_FAST = [
         # Fastest models first
-        "gemini-2.5-flash-lite",         # Fastest and most cost-efficient
-        "gemini-2.5-flash",              # Fast, good price-performance
-        "gemini-2.0-flash",              # Fast (deprecated March 2026)
-        "gemini-2.5-flash-lite-preview-09-2025",
-        "gemini-3-flash-preview",        # Latest fast preview
-        "gemini-2.5-flash-preview-09-2025",
-        # More capable models (fallback)
-        "gemini-2.5-pro",                # More capable but slower
-        "gemini-3-pro-preview",          # Most capable preview
-        # Experimental (last resort)
-        "gemini-2.0-flash-exp",          # Experimental
+        "gemini-1.5-flash",              # Stable, fast and most cost-efficient
+        "gemini-1.5-flash-8b",           # Ultra-fast
+        "gemini-2.0-flash",              # New stable flash
+        "gemini-2.0-flash-lite",         # New stable lite
+        "gemini-1.5-pro",                # More capable but slower
     ]
     
     # Cascade de fallback pour mode BUILD/PROD (priorité vitesse)
     FALLBACK_MODELS_BUILD = [
         # Fastest models first
-        "gemini-2.5-flash-lite",         # Fastest and most cost-efficient
-        "gemini-2.5-flash",              # Fast, good price-performance
-        "gemini-2.0-flash",              # Fast (deprecated March 2026)
-        "gemini-3-flash-preview",        # Latest balanced preview
-        "gemini-2.5-flash-preview-09-2025",
-        "gemini-2.5-flash-lite-preview-09-2025",
-        # More capable models (fallback)
-        "gemini-2.5-pro",                # Most capable stable
-        "gemini-3-pro-preview",          # Most capable preview
-        # Experimental (last resort)
-        "gemini-2.0-flash-exp",          # Experimental
+        "gemini-1.5-flash",              # Stable, fast
+        "gemini-2.0-flash",              # New stable
+        "gemini-1.5-pro",                # Most capable stable
     ]
     
     # Cascade par défaut (priorité vitesse)
     FALLBACK_MODELS_DEFAULT = [
         # Fastest models first
-        "gemini-2.5-flash-lite",         # Fastest and most cost-efficient
-        "gemini-2.5-flash",              # Fast, good price-performance
-        "gemini-2.0-flash",              # Stable (deprecated March 2026)
-        "gemini-2.5-pro",                # Most capable
-        # Preview models
-        "gemini-3-flash-preview",        # Latest preview
-        "gemini-3-pro-preview",          # Latest preview (most capable)
-        "gemini-2.5-flash-preview-09-2025",
-        "gemini-2.5-flash-lite-preview-09-2025",
-        # Experimental models (last resort)
-        "gemini-2.0-flash-exp",          # Experimental
+        "gemini-1.5-flash",              # Stable
+        "gemini-2.0-flash",              # Stable
+        "gemini-1.5-pro",                # Capable
     ]
 
     def __init__(

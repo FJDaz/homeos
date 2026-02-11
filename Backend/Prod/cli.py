@@ -354,11 +354,12 @@ async def execute_plan_async(
     context: Optional[str],
     verbose: bool,
     execution_mode: Optional[str] = None,
-    use_streaming: bool = False
+    use_streaming: bool = False,
+    sequential: bool = False
 ) -> int:
     """Execute plan asynchronously."""
-    orchestrator = Orchestrator(execution_mode=execution_mode or "BUILD")
-    
+    orchestrator = Orchestrator(execution_mode=execution_mode or "BUILD", sequential_mode=sequential)
+
     try:
         with Progress(
             SpinnerColumn(),
@@ -368,7 +369,7 @@ async def execute_plan_async(
             console=console
         ) as progress:
             task = progress.add_task("[cyan]Executing plan...", total=None)
-            
+
             result = await orchestrator.execute_plan(
                 plan_path=plan_path,
                 output_dir=output_dir,
@@ -511,6 +512,27 @@ Examples:
         help="Verify & fix: Run plan, validate with Gemini, then correct reported errors and re-validate"
     )
     workflow_group.add_argument(
+        "-fq",
+        "--frd-quick",
+        action="store_true",
+        dest="frd_quick",
+        help="FRD Quick: Fast prototyping with KIMI (FRD-FAST only)"
+    )
+    workflow_group.add_argument(
+        "-ff",
+        "--frd-full",
+        action="store_true",
+        dest="frd_full",
+        help="FRD Full: Complete workflow with KIMI → DeepSeek → Gemini (FRD-FAST → TEST → REVIEW)"
+    )
+    workflow_group.add_argument(
+        "-fvfx",
+        "--frd-vfx",
+        action="store_true",
+        dest="frd_vfx",
+        help="FRD Verify-Fix: Full cycle with KIMI verification and fixes (FRD-FAST → TEST → VERIFY → FIX)"
+    )
+    workflow_group.add_argument(
         "--stats",
         action="store_true",
         help="Show cache statistics and exit"
@@ -567,7 +589,14 @@ Examples:
         default=None,
         help="Additional context for all steps"
     )
-    
+
+    parser.add_argument(
+        "--sequential",
+        "-seq",
+        action="store_true",
+        help="Execute plan steps one at a time (sequential mode) to avoid rate limiting. Recommended for large plans."
+    )
+
     parser.add_argument(
         "--verbose",
         "-v",
@@ -1282,7 +1311,6 @@ Examples:
 
     # Handle -h/--hybrid command (Hybrid FRD Mode: KIMI + DeepSeek + Sonnet)
     if args.hybrid_task:
-        import asyncio
         from .sullivan.modes.hybrid_frd_mode import HybridFRDMode
 
         async def run_hybrid_frd():
@@ -2245,7 +2273,13 @@ Examples:
         workflow_type = "PROD"
     elif getattr(args, "verify_fix", False):
         workflow_type = "VerifyFix"
-    
+    elif getattr(args, "frd_quick", False):
+        workflow_type = "frd-quick"
+    elif getattr(args, "frd_full", False):
+        workflow_type = "frd-full"
+    elif getattr(args, "frd_vfx", False):
+        workflow_type = "frd-vfx"
+
     # Debug API keys if requested (before any other action)
     if args.debug_keys:
         from .debug_keys import run_debug_keys
@@ -2371,7 +2405,82 @@ Examples:
                         display_pedagogical_feedback(validation_details)
                 return 0 if result["success"] else 1
             return asyncio.run(run_verify_fix())
-        
+
+        # FRD-QUICK workflow (--frd-quick)
+        elif workflow_type == "frd-quick":
+            async def run_frd_quick():
+                from .workflows.frd import FrdWorkflow
+                workflow = FrdWorkflow(variant="quick")
+                result = await workflow.execute(
+                    plan_path=args.plan,
+                    output_dir=output_dir,
+                    context=args.context
+                )
+
+                summary_table = Table(title="FRD-QUICK Summary", box=box.ROUNDED)
+                summary_table.add_column("Metric", style="cyan")
+                summary_table.add_column("Value", style="green")
+                summary_table.add_row("Workflow", "FRD-QUICK (KIMI fast)")
+                summary_table.add_row("Files Applied", str(result["code_applied"]["files_applied"]))
+                summary_table.add_row("Total Time", f"{result['total_time_ms']/1000:.2f}s")
+                summary_table.add_row("Total Cost", f"${result['total_cost_usd']:.4f}")
+                summary_table.add_row("Success", "✓" if result["success"] else "✗")
+                console.print(summary_table)
+
+                return 0 if result["success"] else 1
+
+            return asyncio.run(run_frd_quick())
+
+        # FRD-FULL workflow (--frd-full)
+        elif workflow_type == "frd-full":
+            async def run_frd_full():
+                from .workflows.frd import FrdWorkflow
+                workflow = FrdWorkflow(variant="full")
+                result = await workflow.execute(
+                    plan_path=args.plan,
+                    output_dir=output_dir,
+                    context=args.context
+                )
+
+                summary_table = Table(title="FRD-FULL Summary", box=box.ROUNDED)
+                summary_table.add_column("Metric", style="cyan")
+                summary_table.add_column("Value", style="green")
+                summary_table.add_row("Workflow", "FRD-FULL (KIMI → DeepSeek → Gemini)")
+                summary_table.add_row("Files Applied", str(result["code_applied"]["files_applied"]))
+                summary_table.add_row("Total Time", f"{result['total_time_ms']/1000:.2f}s")
+                summary_table.add_row("Total Cost", f"${result['total_cost_usd']:.4f}")
+                summary_table.add_row("Success", "✓" if result["success"] else "✗")
+                console.print(summary_table)
+
+                return 0 if result["success"] else 1
+
+            return asyncio.run(run_frd_full())
+
+        # FRD-VFX workflow (--frd-vfx)
+        elif workflow_type == "frd-vfx":
+            async def run_frd_vfx():
+                from .workflows.frd import FrdWorkflow
+                workflow = FrdWorkflow(variant="vfx")
+                result = await workflow.execute(
+                    plan_path=args.plan,
+                    output_dir=output_dir,
+                    context=args.context
+                )
+
+                summary_table = Table(title="FRD-VFX Summary", box=box.ROUNDED)
+                summary_table.add_column("Metric", style="cyan")
+                summary_table.add_column("Value", style="green")
+                summary_table.add_row("Workflow", "FRD-VFX (KIMI → TEST → VERIFY → FIX)")
+                summary_table.add_row("Files Applied", str(result.get("code_applied", {}).get("files_applied", 0)))
+                summary_table.add_row("Total Time", f"{result['total_time_ms']/1000:.2f}s")
+                summary_table.add_row("Total Cost", f"${result['total_cost_usd']:.4f}")
+                summary_table.add_row("Success", "✓" if result["success"] else "✗")
+                console.print(summary_table)
+
+                return 0 if result["success"] else 1
+
+            return asyncio.run(run_frd_vfx())
+
         # Run-and-Fix workflow (build/deploy then fix from errors)
         elif workflow_type == "RunAndFix":
             async def run_run_and_fix():
@@ -2406,7 +2515,8 @@ Examples:
                 context=args.context,
                 verbose=args.verbose,
                 execution_mode=args.mode,
-                use_streaming=args.streaming
+                use_streaming=args.streaming,
+                sequential=args.sequential
             ))
         else:
             console.print("[red]Error: --plan is required. Use -q / -f / -vfx or --workflow quick|full|verify-fix[/]")

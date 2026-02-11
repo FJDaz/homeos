@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STENCILER REFERENCE V1</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/Geist.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/GeistMono.css">
+    <style>
+/* STENCILER CSS - Layout cohérent Genome Viewer */
+/* Sidebar left, main right, dense, élégant */
+
+:root {
+  --sidebar-width: 200px;
+  --header-height: 48px;
+  --preview-height: 110px;
+  --components-height: 140px;
+  --z-root: 100;
+  
+  /* Mode Jour (default) */
+  --bg-primary: #f7f6f2;
+  --bg-secondary: #f0efeb;
+  --bg-tertiary: #e8e7e3;
+  --bg-hover: #e0dfdb;
+  --border-subtle: #d5d4d0;
+  --border-warm: #c5c4c0;
+  --text-primary: #3d3d3c;
+  --text-secondary: #6a6a69;
+  --text-muted: #999998;
+  
+  /* Couleurs désaturées mode jour */
+  --accent-rose: #d4b2bc;
+  --accent-bleu: #a8c5fc;
+  --accent-vert: #a8dcc9;
+  --accent-orange: #edd0b0;
+  --accent-mauve: #c4b5d4;
+  --accent-rouge: #ddb0b0;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-hover: #222222;
+  --border-subtle: #2a2a2a;
+  --border-warm: #333333;
+  --text-primary: #e5e5e5;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+  
+  /* Couleurs désaturées mode nuit */
+  --accent-rose: #c9a6b0;
+  --accent-bleu: #94bbfb;
+  --accent-vert: #9dd5c2;
+  --accent-orange: #e8c4a0;
+  --accent-mauve: #b8a9c9;
+  --accent-rouge: #d4a5a5;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== HEADER ========== */
+.stenciler-header {
+  height: var(--header-height);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+  z-index: var(--z-root);
+}
+
+.stenciler-header h1 {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.style-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.style-indicator .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+#theme-toggle {
+  padding: 4px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#theme-toggle:hover {
+  border-color: var(--border-warm);
+}
+
+/* ========== LAYOUT PRINCIPAL ========== */
+.stenciler-workspace {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+}
+
+/* Zone de droite: Preview + Canvas */
+.right-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ========== SIDEBAR (LEFT) ========== */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Sidebar Header - HomeOS Style */
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.sidebar-brand {
+  font-size: 20px;
+  font-weight: 800;
+  color: #7aca6a; /* Vert HomeOS fixe */
+  letter-spacing: -0.02em;
+}
+
+.sidebar-brand .brand-k {
+  color: #000000; /* K en noir fixe */
+  font-weight: 500;
+}
+
+[data-theme="dark"] .sidebar-brand .brand-k {
+  color: #ffffff; /* En mode sombre, K en blanc pour contraste */
+  opacity: 0.9;
+}
+
+.sidebar-tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+}
+
+.sidebar-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.sidebar-section {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+  font-size: 11px;
+  color: var(--text-primary);
+  padding: 6px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
+}
+
+.btn-back {
+  width: 100%;
+  padding: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-back:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+  color: var(--text-primary);
+}
+
+.btn-back.hidden {
+  display: none;
+}
+
+/* Palette couleurs désaturées */
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.12s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.08);
+  border-color: var(--border-warm);
+}
+
+.color-swatch.selected {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--bg-secondary), 0 0 0 2px var(--text-primary);
+}
+
+/* Slider minimal */
+.border-slider {
+  width: 100%;
+  height: 3px;
+  -webkit-appearance: none;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+}
+
+.border-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.border-value {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: center;
+}
+
+.btn-delete {
+  width: 100%;
+  padding: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.btn-delete:hover {
+  background: rgba(200, 100, 100, 0.08);
+  border-color: rgba(200, 100, 100, 0.3);
+  color: #c98484;
+}
+
+.btn-delete .delete-icon {
+  font-size: 14px;
+  font-weight: 300;
+  margin-right: 4px;
+}
+
+.kbd-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.kbd-hint kbd {
+  padding: 2px 5px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+}
+
+/* Color Mode Toggle */
+.color-mode-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-tertiary);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  transition: all 0.12s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.mode-btn.active {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.mode-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mode-label {
+  font-size: 9px;
+}
+
+/* TSL Color Picker */
+.tsl-picker {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.tsl-preview {
+  width: 100%;
+  height: 32px;
+  border-radius: 6px;
+  background: hsl(0, 70%, 50%);
+  margin-bottom: 12px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.tsl-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tsl-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tsl-row label {
+  width: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tsl-slider {
+  flex: 1;
+  min-width: 0;
+  height: 6px;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.tsl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--text-secondary);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.tsl-slider.hue {
+  background: linear-gradient(to right, 
+    hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), 
+    hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%));
+}
+
+.tsl-slider.saturation {
+  background: linear-gradient(to right, hsl(0,0%,50%), hsl(0,100%,50%));
+}
+
+.tsl-slider.lightness {
+  background: linear-gradient(to right, hsl(0,0%,0%), hsl(0,0%,50%), hsl(0,0%,100%));
+}
+
+.tsl-value {
+  width: 26px;
+  font-size: 9px;
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.btn-apply-color {
+  width: 100%;
+  padding: 6px;
+  background: var(--accent-bleu);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-apply-color:hover {
+  opacity: 0.9;
+}
+
+/* API Section */
+.api-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-dot.online {
+  background: #7aca6a;
+  box-shadow: 0 0 4px #7aca6a;
+}
+
+.status-dot.offline {
+  background: #d56363;
+}
+
+.status-text {
+  color: var(--text-secondary);
+}
+
+.btn-api {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.btn-api:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+  color: var(--text-primary);
+}
+
+.btn-api:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== MAIN (RIGHT) ========== */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ========== STICKY TOP ZONE ========== */
+.sticky-top-zone {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+/* ========== PREVIEWS BAND (TOP) ========== */
+.preview-band-wrapper {
+  position: relative;
+  height: var(--preview-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: transform 0.25s ease, margin-bottom 0.25s ease;
+}
+
+.preview-band-wrapper.collapsed {
+  transform: translateY(calc(-1 * var(--preview-height)));
+  margin-bottom: calc(-1 * var(--preview-height));
+}
+
+.preview-band-toggle {
+  position: relative;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--text-muted);
+  z-index: 1001;
+}
+
+.preview-band-toggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.preview-band {
+  height: var(--preview-height);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  overflow-x: auto;
+}
+
+/* Dragging state - 50% alpha */
+.preview-card.dragging {
+  opacity: 0.5 !important;
+}
+
+.preview-card {
+  flex-shrink: 0;
+  width: 180px;
+  min-height: 90px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 10px 12px;
+  cursor: grab;
+  transition: all 0.12s ease;
+  position: relative;
+}
+
+.preview-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+}
+
+.preview-card .preview-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.preview-card .toggle-btn {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preview-card .toggle-btn:hover {
+  color: var(--text-primary);
+}
+
+.preview-card .name {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.preview-card .count {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Collapse/expand organes */
+.preview-card .organes-preview {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+  margin-top: 0;
+  padding-left: 20px;
+}
+
+.preview-card.expanded {
+  height: auto;
+  min-height: 56px;
+}
+
+.preview-card.expanded .organes-preview {
+  max-height: 200px;
+  margin-top: 4px;
+}
+
+.preview-card .organe-mini {
+  font-size: 9px;
+  color: var(--text-secondary);
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.preview-card .organe-mini:last-child {
+  border-bottom: none;
+}
+
+.preview-card.brainstorm { border-left: 2px solid var(--accent-rose); }
+.preview-card.backend { border-left: 2px solid var(--accent-bleu); }
+.preview-card.frontend { border-left: 2px solid var(--accent-vert); }
+.preview-card.deploy { border-left: 2px solid var(--accent-orange); }
+
+.preview-band {
+  border-bottom: 1px solid var(--border-warm);
+}
+
+/* Corps Wireframes in Preview Band */
+.corps-wireframe {
+  width: 100%;
+  height: 36px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Brainstorm - Stepper */
+.wf-brainstorm {
+  gap: 3px;
+}
+.wf-step {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-rose);
+  opacity: 0.8;
+}
+.wf-step.active {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 2px var(--bg-tertiary), 0 0 0 3px var(--accent-rose);
+}
+.wf-step.dim {
+  opacity: 0.3;
+}
+.wf-step-line {
+  width: 16px;
+  height: 2px;
+  background: var(--accent-rose);
+  opacity: 0.6;
+}
+.wf-step-line.dim {
+  opacity: 0.2;
+}
+
+/* Backend - Bar Chart */
+.wf-backend {
+  align-items: flex-end;
+  padding-bottom: 2px;
+  height: 40px;
+}
+.wf-bar {
+  width: 12px;
+  background: var(--accent-bleu);
+  border-radius: 1px 1px 0 0;
+  opacity: 0.8;
+}
+.wf-bar.dim {
+  opacity: 0.3;
+}
+
+/* Frontend - Frames */
+.wf-frontend {
+  gap: 6px;
+}
+.wf-frame {
+  width: 32px;
+  height: 32px;
+  border: 1px dashed var(--accent-vert);
+  border-radius: 3px;
+  background: rgba(157, 213, 194, 0.15);
+}
+.wf-frame.accent {
+  background: rgba(157, 213, 194, 0.3);
+  border-style: solid;
+}
+
+/* Deploy - Launch Button */
+.wf-deploy {
+  gap: 8px;
+}
+.wf-launch-btn {
+  width: 70px;
+  height: 18px;
+  background: var(--accent-orange);
+  border-radius: 9px;
+  opacity: 0.8;
+}
+.wf-arrow {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid var(--accent-orange);
+  opacity: 0.6;
+}
+
+/* ========== DROPPED BAR ========== */
+.dropped-bar {
+  height: 36px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+}
+
+.dropped-bar.hidden { display: none; }
+
+.dropped-bar .toggle-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.dropped-bar .toggle-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dropped-bar .corps-title {
+  font-size: 11px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.dropped-bar .corps-badge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ========== CANVAS (CENTER) ========== */
+.canvas-zone {
+  flex: 1;
+  background: var(--bg-primary);
+  position: relative;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grille fine 20x20 - impression de champ */
+.canvas-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.canvas-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.canvas-placeholder .icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border: 1px dashed var(--border-warm);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.canvas-placeholder p {
+  font-size: 12px;
+}
+
+/* ========== COMPONENTS (BOTTOM) ========== */
+.components-zone {
+  height: var(--components-height);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  overflow-y: auto;
+}
+
+.components-title {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.components-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.component-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.component-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+}
+
+.component-card .name {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.component-card .type {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Wireframes Components - Genome-like minimalistes */
+.wireframe-button,
+.wireframe-card,
+.wireframe-input,
+.wireframe-modal,
+.wireframe-table,
+.wireframe-tabs {
+  width: 100%;
+  height: 45px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Button Wireframe */
+.wireframe-button {
+  align-items: center;
+}
+.wf-btn-bar {
+  width: 60%;
+  height: 14px;
+  background: var(--accent-bleu);
+  border-radius: 3px;
+  opacity: 0.8;
+}
+
+/* Card Wireframe */
+.wireframe-card {
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px;
+}
+.wf-card-header {
+  width: 40%;
+  height: 6px;
+  background: var(--text-muted);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+.wf-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wf-line {
+  width: 100%;
+  height: 4px;
+  background: var(--border-warm);
+  border-radius: 1px;
+  opacity: 0.4;
+}
+.wf-line.short {
+  width: 60%;
+}
+
+/* Input Wireframe */
+.wireframe-input {
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+}
+.wf-input-label {
+  width: 30%;
+  height: 4px;
+  background: var(--text-muted);
+  border-radius: 1px;
+  opacity: 0.4;
+}
+.wf-input-field {
+  width: 100%;
+  height: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-warm);
+  border-radius: 3px;
+}
+
+/* Modal Wireframe */
+.wireframe-modal {
+  position: relative;
+  padding: 6px;
+  gap: 4px;
+}
+.wf-modal-header {
+  width: 50%;
+  height: 5px;
+  background: var(--text-muted);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+.wf-modal-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.wf-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.wf-btn-mini {
+  width: 20px;
+  height: 10px;
+  background: var(--accent-bleu);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* Table Wireframe */
+.wireframe-table {
+  padding: 4px;
+  gap: 2px;
+}
+.wf-row {
+  display: flex;
+  width: 100%;
+  gap: 2px;
+}
+.wf-row.header .wf-cell {
+  background: var(--text-muted);
+  opacity: 0.3;
+}
+.wf-cell {
+  flex: 1;
+  height: 8px;
+  background: var(--border-subtle);
+  border-radius: 1px;
+}
+
+/* Tabs Wireframe */
+.wireframe-tabs {
+  padding: 4px;
+  position: relative;
+}
+.wf-tab {
+  position: absolute;
+  top: 4px;
+  width: 20px;
+  height: 10px;
+  background: var(--border-subtle);
+  border-radius: 2px 2px 0 0;
+}
+.wf-tab:nth-child(1) { left: 4px; }
+.wf-tab:nth-child(2) { left: 26px; opacity: 0.5; }
+.wf-tab.active {
+  background: var(--accent-bleu);
+  opacity: 0.7;
+}
+.wf-tab-content {
+  margin-top: 12px;
+  width: 100%;
+  height: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-warm);
+  border-radius: 0 2px 2px 2px;
+}
+
+/* Dispositions organes selon genome */
+.organes-container {
+  display: flex;
+  gap: 8px;
+}
+
+/* Arrangement: row */
+.organes-container.row {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* Arrangement: column */
+.organes-container.column {
+  flex-direction: column;
+}
+
+/* Arrangement: grid */
+.organes-container.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+/* Arrangement: stack */
+.organes-container.stack {
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Densité */
+.organes-container.compact {
+  gap: 4px;
+}
+
+.organes-container.normal {
+  gap: 8px;
+}
+
+.organes-container.airy {
+  gap: 16px;
+}
+
+/* Zoom controls */
+.zoom-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 10;
+}
+
+.zoom-controls button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-controls button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.zoom-controls span {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Scrollbar minimal */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-warm);
+  border-radius: 2px;
+}
+    </style>
+</head>
+<body>
+    <div id="stenciler-app" class="stenciler-app">
+        <!-- Header -->
+        <header class="stenciler-header">
+            <h1>Stenciler</h1>
+            <div class="header-actions">
+                <div class="style-indicator minimal">
+                    <span class="dot"></span>
+                    <span>minimal</span>
+                </div>
+                <button id="theme-toggle">Mode jour</button>
+            </div>
+        </header>
+
+        <!-- Workspace: Sidebar left, Main right -->
+        <div class="stenciler-workspace">
+            
+            <!-- Sidebar (LEFT) -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">Homé<span class="brand-k">OS</span></div>
+                    <div class="sidebar-tagline">Stenciler</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Navigation</div>
+                    <div class="breadcrumb" id="breadcrumb">Brainstorm</div>
+                    <button class="btn-back hidden" id="btn-back">← Retour</button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Actions</div>
+                    <button class="btn-delete" id="btn-delete">
+                        <span class="delete-icon">×</span>
+                        Supprimer (Del)
+                    </button>
+                    <div class="kbd-hint">
+                        <kbd>Del</kbd> ou <kbd>Backspace</kbd>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Mode Couleur</div>
+                    <div class="color-mode-toggle">
+                        <button class="mode-btn active" data-mode="border" title="Couleur sur les bords">
+                            <span class="mode-icon">▣</span>
+                            <span class="mode-label">Bordure</span>
+                        </button>
+                        <button class="mode-btn" data-mode="fill" title="Couleur de fond">
+                            <span class="mode-icon">◼</span>
+                            <span class="mode-label">Fond</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Couleur Personnalisée (TSL)</div>
+                    <div class="tsl-picker">
+                        <div class="tsl-preview" id="tsl-preview"></div>
+                        <div class="tsl-sliders">
+                            <div class="tsl-row">
+                                <label>T</label>
+                                <input type="range" class="tsl-slider hue" id="tsl-h" min="0" max="360" value="0">
+                                <span class="tsl-value" id="tsl-h-val">0°</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>S</label>
+                                <input type="range" class="tsl-slider saturation" id="tsl-s" min="0" max="100" value="70">
+                                <span class="tsl-value" id="tsl-s-val">70%</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>L</label>
+                                <input type="range" class="tsl-slider lightness" id="tsl-l" min="0" max="100" value="50">
+                                <span class="tsl-value" id="tsl-l-val">50%</span>
+                            </div>
+                        </div>
+                        <button class="btn-apply-color" id="btn-apply-tsl">Appliquer</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Préréglages</div>
+                    <div class="color-palette">
+                        <div class="color-swatch selected" style="background: var(--accent-rose);" data-color="rose"></div>
+                        <div class="color-swatch" style="background: var(--accent-bleu);" data-color="bleu"></div>
+                        <div class="color-swatch" style="background: var(--accent-vert);" data-color="vert"></div>
+                        <div class="color-swatch" style="background: var(--accent-orange);" data-color="orange"></div>
+                        <div class="color-swatch" style="background: var(--accent-mauve);" data-color="mauve"></div>
+                        <div class="color-swatch" style="background: var(--accent-rouge);" data-color="rouge"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Bordure</div>
+                    <input type="range" class="border-slider" min="0" max="10" value="2">
+                    <div class="border-value">2px</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">API Claude</div>
+                    <div class="api-status" id="api-status">
+                        <span class="status-dot offline"></span>
+                        <span class="status-text">Hors ligne</span>
+                    </div>
+                    <button class="btn-api" id="btn-fetch-genome">Charger Genome</button>
+                    <button class="btn-api" id="btn-fetch-styles">Charger Styles</button>
+                </div>
+            </aside>
+
+            <!-- Right zone (Preview + Dropped + Canvas) -->
+            <div class="right-zone">
+                <!-- Sticky top zone: Preview + Dropped bar -->
+                <div class="sticky-top-zone" id="sticky-top-zone">
+                    <!-- Previews band (TOP) - Collapsible sticky -->
+                    <div class="preview-band-wrapper" id="preview-band-wrapper">
+                        <div class="preview-band" id="preview-band">
+                            <div class="preview-card brainstorm" data-corps="brainstorm">
+                                <div class="corps-wireframe wf-brainstorm">
+                                    <div class="wf-step active"></div>
+                                    <div class="wf-step-line"></div>
+                                    <div class="wf-step"></div>
+                                    <div class="wf-step-line dim"></div>
+                                    <div class="wf-step dim"></div>
+                                </div>
+                                <span class="name">Brainstorm</span>
+                                <span class="count">2 organes</span>
+                            </div>
+                            <div class="preview-card backend" data-corps="backend">
+                                <div class="corps-wireframe wf-backend">
+                                    <div class="wf-bar" style="height:40%"></div>
+                                    <div class="wf-bar" style="height:70%"></div>
+                                    <div class="wf-bar dim" style="height:55%"></div>
+                                    <div class="wf-bar" style="height:85%"></div>
+                                </div>
+                                <span class="name">Backend</span>
+                                <span class="count">1 organe</span>
+                            </div>
+                            <div class="preview-card frontend" data-corps="frontend">
+                                <div class="corps-wireframe wf-frontend">
+                                    <div class="wf-frame"></div>
+                                    <div class="wf-frame accent"></div>
+                                    <div class="wf-frame"></div>
+                                </div>
+                                <span class="name">Frontend</span>
+                                <span class="count">7 organes</span>
+                            </div>
+                            <div class="preview-card deploy" data-corps="deploy">
+                                <div class="corps-wireframe wf-deploy">
+                                    <div class="wf-launch-btn"></div>
+                                    <div class="wf-arrow"></div>
+                                </div>
+                                <span class="name">Deploy</span>
+                                <span class="count">1 organe</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="preview-band-toggle" id="preview-band-toggle" title="Collapse/Expand">▼</button>
+
+                    <!-- Dropped corps bar -->
+                    <div class="dropped-bar hidden" id="dropped-bar">
+                        <button class="toggle-btn" id="toggle-corps">▼</button>
+                        <span class="corps-title" id="dropped-title">Frontend</span>
+                        <span class="corps-badge frontend" id="dropped-badge">7 organes</span>
+                    </div>
+                </div>
+
+                <!-- Main content: Canvas + Components -->
+                <main class="main-content">
+                    <!-- Canvas (CENTER) -->
+                    <div class="canvas-zone" id="canvas-zone">
+                        <canvas id="tarmac-canvas"></canvas>
+                        <div class="canvas-placeholder" id="canvas-placeholder">
+                            <div class="icon">+</div>
+                            <p>Glissez un Corps depuis la bande du haut</p>
+                        </div>
+                        <!-- Zoom controls -->
+                        <div class="zoom-controls">
+                            <button id="zoom-out" title="Zoom arrière">−</button>
+                            <span id="zoom-level">100%</span>
+                            <button id="zoom-in" title="Zoom avant">+</button>
+                            <button id="zoom-reset" title="Reset">⟲</button>
+                        </div>
+                    </div>
+
+                    <!-- Components (BOTTOM) - Wireframes Genome-like minimalistes -->
+                    <div class="components-zone">
+                        <div class="components-title">Composants suggérés</div>
+                        <div class="components-grid">
+                            <div class="component-card">
+                                <div class="wireframe-button"><div class="wf-btn-bar"></div></div>
+                                <div class="name">Button</div>
+                            </div>
+                            <div class="component-card">
+                                <div class="wireframe-card">
+                                    <div class="wf-card-header"></div>
+                                    <div class="wf-card-body">
+                                        <div class="wf-line"></div>
+                                        <div class="wf-line short"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Card</div>
+                            </div>
+                            <div class="component-card">
+                                <div class="wireframe-input">
+                                    <div class="wf-input-label"></div>
+                                    <div class="wf-input-field"></div>
+                                </div>
+                                <div class="name">Input</div>
+                            </div>
+                            <div class="component-card">
+                                <div class="wireframe-modal">
+                                    <div class="wf-modal-header"></div>
+                                    <div class="wf-modal-body">
+                                        <div class="wf-line"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Modal</div>
+                            </div>
+                            <div class="component-card">
+                                <div class="wireframe-table">
+                                    <div class="wf-table-row header">
+                                        <div class="wf-table-cell"></div>
+                                        <div class="wf-table-cell"></div>
+                                    </div>
+                                    <div class="wf-table-row">
+                                        <div class="wf-table-cell"></div>
+                                        <div class="wf-table-cell"></div>
+                                    </div>
+                                    <div class="wf-table-row">
+                                        <div class="wf-table-cell"></div>
+                                        <div class="wf-table-cell"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Table</div>
+                            </div>
+                            <div class="component-card">
+                                <div class="wireframe-tabs">
+                                    <div class="wf-tab active"></div>
+                                    <div class="wf-tab"></div>
+                                    <div class="wf-tab"></div>
+                                </div>
+                                <div class="name">Tabs</div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script>
+// STENCILER JS - Complet avec zoom et formes améliorées
+
+(function() {
+    'use strict';
+    
+    console.log('Stenciler v2.0 - API Ready');
+    
+    // État
+    let tarmacCanvas = null;
+    let mockCorps = [];
+    let designBundles = null;
+    let isLight = true; // Mode jour par défaut
+    let zoomLevel = 1;
+    let colorMode = 'border'; // 'border' ou 'fill'
+    let currentTSL = { h: 0, s: 70, l: 50 }; // Hue, Saturation, Lightness
+    
+    // API Configuration
+    const API_BASE = '/api'; // Claude's endpoints
+    const API = {
+        genome: `${API_BASE}/genome`,
+        styles: `${API_BASE}/styles`,
+        components: `${API_BASE}/components/elite`
+    };
+    
+    // App State (pour transitions)
+    const appState = {
+        currentView: 'stenciler', // brainstorm | style_picker | upload | stenciler
+        genome: null,
+        styleSelected: null,
+        templateData: null,
+        
+        // Transitions
+        onStyleClicked(styleId) {
+            this.styleSelected = styleId;
+            this.switchToStenciler();
+        },
+        
+        switchToStenciler() {
+            this.currentView = 'stenciler';
+            // Trigger event pour le layout parent
+            window.dispatchEvent(new CustomEvent('switchToStenciler', { 
+                detail: { style: this.styleSelected }
+            }));
+        }
+    };
+    
+    // Initialisation avec séquence sécurisée
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Étape 1: Charger données
+        await Promise.all([
+            loadMocks(),
+            loadDesignBundles()
+        ]);
+        
+        // Étape 2: DOM prêt - init UI
+        initThemeToggle();
+        initColorMode();
+        initTSL();
+        initColorSwatches();
+        initBorderSlider();
+        initDeleteButton();
+        initPreviewBandToggle();
+        initAPI();
+        initNavigation();
+        
+        // Étape 3: Attendre layout stable puis init canvas
+        requestAnimationFrame(() => {
+            initCanvas();
+            initDragDrop();
+            initZoom();
+        });
+        
+        // Étape 4: Observer les changements de visibilité du canvas
+        observeCanvasVisibility();
+    });
+    
+    // Observer quand le canvas devient visible (après transition)
+    function observeCanvasVisibility() {
+        const canvasZone = document.getElementById('canvas-zone');
+        if (!canvasZone) return;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && tarmacCanvas) {
+                    // Forcer re-render quand visible
+                    requestAnimationFrame(() => {
+                        tarmacCanvas.renderAll();
+                        console.log('Canvas rendu (devenu visible)');
+                    });
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        observer.observe(canvasZone);
+    }
+    
+    // Preview band collapse toggle
+    function initPreviewBandToggle() {
+        const toggle = document.getElementById('preview-band-toggle');
+        const wrapper = document.getElementById('preview-band-wrapper');
+        if (!toggle || !wrapper) return;
+        
+        toggle.addEventListener('click', () => {
+            togglePreviewBand(wrapper, toggle);
+        });
+    }
+    
+    function togglePreviewBand(wrapper, toggle) {
+        wrapper.classList.toggle('collapsed');
+        toggle.textContent = wrapper.classList.contains('collapsed') ? '▲' : '▼';
+    }
+    
+    function collapsePreviewBand() {
+        console.log('collapsePreviewBand called');
+        const wrapper = document.getElementById('preview-band-wrapper');
+        const toggle = document.getElementById('preview-band-toggle');
+        console.log('wrapper:', wrapper, 'toggle:', toggle);
+        if (wrapper && !wrapper.classList.contains('collapsed')) {
+            wrapper.classList.add('collapsed');
+            if (toggle) toggle.textContent = '▲';
+            console.log('Preview band collapsed');
+        } else {
+            console.log('Cannot collapse: wrapper missing or already collapsed');
+        }
+    }
+    
+    // Chargement mocks
+    async function loadMocks() {
+        try {
+            const response = await fetch('/static/4_corps_preview.json');
+            const data = await response.json();
+            mockCorps = data.corps;
+            renderPreviews();
+        } catch (e) {
+            console.error('Erreur mocks:', e);
+        }
+    }
+    
+    // Chargement design bundles
+    async function loadDesignBundles() {
+        try {
+            const response = await fetch('/static/design-bundles.json');
+            const data = await response.json();
+            designBundles = data.bundles;
+        } catch (e) {
+            console.warn('Pas de design bundles, utilisation fallback');
+        }
+    }
+    
+    // Rendu previews avec wireframes
+    function renderPreviews() {
+        const band = document.getElementById('preview-band');
+        if (!band) return;
+        
+        band.innerHTML = '';
+        mockCorps.forEach(corps => {
+            const div = document.createElement('div');
+            const corpType = corps.id.replace('n0_', '');
+            div.className = `preview-card ${corpType}`;
+            div.draggable = true;
+            
+            // Wireframe selon le type
+            let wireframeHtml = '';
+            switch(corpType) {
+                case 'brainstorm':
+                    wireframeHtml = `
+                        <div class="corps-wireframe wf-brainstorm">
+                            <div class="wf-step active"></div>
+                            <div class="wf-step-line"></div>
+                            <div class="wf-step"></div>
+                            <div class="wf-step-line dim"></div>
+                            <div class="wf-step dim"></div>
+                        </div>`;
+                    break;
+                case 'backend':
+                    wireframeHtml = `
+                        <div class="corps-wireframe wf-backend">
+                            <div class="wf-bar" style="height:40%"></div>
+                            <div class="wf-bar" style="height:70%"></div>
+                            <div class="wf-bar dim" style="height:55%"></div>
+                            <div class="wf-bar" style="height:85%"></div>
+                        </div>`;
+                    break;
+                case 'frontend':
+                    wireframeHtml = `
+                        <div class="corps-wireframe wf-frontend">
+                            <div class="wf-frame"></div>
+                            <div class="wf-frame accent"></div>
+                            <div class="wf-frame"></div>
+                        </div>`;
+                    break;
+                case 'deploy':
+                    wireframeHtml = `
+                        <div class="corps-wireframe wf-deploy">
+                            <div class="wf-launch-btn"></div>
+                            <div class="wf-arrow"></div>
+                        </div>`;
+                    break;
+            }
+            
+            div.innerHTML = `
+                ${wireframeHtml}
+                <span class="name">${corps.name}</span>
+                <span class="count">${corps.organes_count} organes</span>
+            `;
+            
+            div.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('corpsId', corps.id);
+                div.classList.add('dragging');
+            });
+            
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+            });
+            
+            band.appendChild(div);
+        });
+    }
+    
+    // Canvas avec retry pour timing
+    function initCanvas() {
+        const canvasEl = document.getElementById('tarmac-canvas');
+        const container = document.getElementById('canvas-zone');
+        if (!canvasEl || !container) {
+            console.warn('Canvas ou container non trouvé, retry dans 100ms...');
+            setTimeout(initCanvas, 100);
+            return;
+        }
+        
+        // Attendre que le container ait des dimensions
+        if (container.clientWidth === 0 || container.clientHeight === 0) {
+            console.warn('Container sans dimensions, retry dans 100ms...');
+            setTimeout(initCanvas, 100);
+            return;
+        }
+        
+        // Détruire l'ancienne instance si existe
+        if (tarmacCanvas) {
+            tarmacCanvas.dispose();
+        }
+        
+        tarmacCanvas = new fabric.Canvas('tarmac-canvas', {
+            width: container.clientWidth,
+            height: container.clientHeight,
+            backgroundColor: 'transparent',
+            selection: true
+        });
+        
+        // Fix Fabric.js textBaseline warning
+        fabric.Text.prototype.set({
+            textBaseline: 'alphabetic'
+        });
+        
+        // Resize handler avec debounce
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (tarmacCanvas && container) {
+                    tarmacCanvas.setWidth(container.clientWidth);
+                    tarmacCanvas.setHeight(container.clientHeight);
+                    tarmacCanvas.renderAll();
+                }
+            }, 100);
+        });
+        
+        console.log('Canvas initialisé:', container.clientWidth, 'x', container.clientHeight);
+    }
+    
+    // Drag & Drop avec vérification canvas
+    function initDragDrop() {
+        const zone = document.getElementById('canvas-zone');
+        if (!zone) {
+            console.warn('Canvas zone non trouvée pour DnD, retry...');
+            setTimeout(initDragDrop, 100);
+            return;
+        }
+        
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+        
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+        
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            
+            // S'assurer que le canvas est prêt
+            if (!tarmacCanvas) {
+                console.warn('Canvas non prêt, tentative de réinitialisation...');
+                initCanvas();
+                if (!tarmacCanvas) return;
+            }
+            
+            const corpsId = e.dataTransfer.getData('corpsId');
+            console.log('DROP event, corpsId:', corpsId);
+            const rect = zone.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoomLevel;
+            const y = (e.clientY - rect.top) / zoomLevel;
+            
+            addCorpsToCanvas(corpsId, x, y);
+            collapsePreviewBand(); // Auto-collapse on drop
+        });
+    }
+    
+    // Ajouter corps avec forme complète (style simple Vercel)
+    function addCorpsToCanvas(corpsId, x, y) {
+        if (!tarmacCanvas) return;
+        
+        const corps = mockCorps.find(c => c.id === corpsId);
+        if (!corps) return;
+        
+        const bundle = designBundles?.['vercel-like']?.corps || {
+            width: 320, height: 240, padding: 20,
+            organeHeight: 40, organeGap: 12
+        };
+        
+        const group = [];
+        
+        // Container principal
+        const container = new fabric.Rect({
+            left: 0, top: 0,
+            width: bundle.width,
+            height: bundle.height,
+            fill: isLight ? '#f0efeb' : bundle.background,
+            stroke: corps.color,
+            strokeWidth: 2,
+            rx: bundle.borderRadius || 12
+        });
+        group.push(container);
+        
+        // Titre
+        const title = new fabric.Text(corps.name, {
+            left: bundle.padding,
+            top: bundle.padding,
+            fontSize: 16,
+            fontWeight: '600',
+            fill: isLight ? '#3d3d3c' : '#e5e5e5'
+        });
+        group.push(title);
+        
+        // Organes
+        if (corps.organes) {
+            let orgY = bundle.padding + 30;
+            corps.organes.forEach((organe, i) => {
+                const orgRect = new fabric.Rect({
+                    left: bundle.padding,
+                    top: orgY,
+                    width: bundle.width - bundle.padding * 2,
+                    height: bundle.organeHeight,
+                    fill: isLight ? '#fafafa' : bundle.organeStyle?.background,
+                    stroke: isLight ? '#e0dfdb' : bundle.organeStyle?.borderColor,
+                    strokeWidth: 1,
+                    rx: bundle.organeStyle?.borderRadius || 8
+                });
+                group.push(orgRect);
+                
+                const orgText = new fabric.Text(organe.name, {
+                    left: bundle.padding + 12,
+                    top: orgY + 12,
+                    fontSize: 11,
+                    fill: isLight ? '#6f6f6e' : '#888888'
+                });
+                group.push(orgText);
+                
+                orgY += bundle.organeHeight + bundle.organeGap;
+            });
+        }
+        
+        // Groupe Fabric
+        const fabricGroup = new fabric.Group(group, {
+            left: x - bundle.width / 2,
+            top: y - 40,
+            selectable: true,
+            hasControls: true,
+            hasBorders: true,
+            cornerSize: 8,
+            transparentCorners: false,
+            cornerColor: corps.color
+        });
+        
+        tarmacCanvas.add(fabricGroup);
+        tarmacCanvas.setActiveObject(fabricGroup);
+        tarmacCanvas.renderAll();
+        
+        // Cacher placeholder
+        const placeholder = document.getElementById('canvas-placeholder');
+        if (placeholder) placeholder.style.display = 'none';
+        
+        // Afficher bandeau
+        showDroppedBar(corps);
+    }
+    
+    // Zoom
+    function initZoom() {
+        const zoomIn = document.getElementById('zoom-in');
+        const zoomOut = document.getElementById('zoom-out');
+        const zoomReset = document.getElementById('zoom-reset');
+        const zoomDisplay = document.getElementById('zoom-level');
+        
+        function updateZoom() {
+            if (tarmacCanvas) {
+                tarmacCanvas.setZoom(zoomLevel);
+                tarmacCanvas.renderAll();
+            }
+            if (zoomDisplay) zoomDisplay.textContent = Math.round(zoomLevel * 100) + '%';
+        }
+        
+        if (zoomIn) zoomIn.addEventListener('click', () => { zoomLevel = Math.min(zoomLevel * 1.2, 3); updateZoom(); });
+        if (zoomOut) zoomOut.addEventListener('click', () => { zoomLevel = Math.max(zoomLevel / 1.2, 0.3); updateZoom(); });
+        if (zoomReset) zoomReset.addEventListener('click', () => { zoomLevel = 1; updateZoom(); });
+        
+        // Zoom molette
+        const canvasZone = document.getElementById('canvas-zone');
+        if (canvasZone) {
+            canvasZone.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    zoomLevel = Math.max(0.3, Math.min(3, zoomLevel * delta));
+                    updateZoom();
+                }
+            });
+        }
+    }
+    
+    // Bandeau déposé
+    function showDroppedBar(corps) {
+        const bar = document.getElementById('dropped-bar');
+        const title = document.getElementById('dropped-title');
+        const badge = document.getElementById('dropped-badge');
+        
+        if (bar) {
+            bar.classList.remove('hidden');
+            if (title) title.textContent = corps.name;
+            if (badge) badge.textContent = `${corps.organes_count || 0} organes`;
+        }
+    }
+    
+    // Theme toggle - Mode jour par défaut
+    function initThemeToggle() {
+        const toggle = document.getElementById('theme-toggle');
+        if (!toggle) return;
+        
+        // Init mode jour (pas d'attribut data-theme = mode jour par défaut)
+        document.body.removeAttribute('data-theme');
+        toggle.textContent = 'Mode nuit';
+        
+        toggle.addEventListener('click', () => {
+            isLight = !isLight;
+            document.body.setAttribute('data-theme', isLight ? '' : 'dark');
+            toggle.textContent = isLight ? 'Mode nuit' : 'Mode jour';
+            if (tarmacCanvas) tarmacCanvas.renderAll();
+        });
+    }
+    
+    // Color Mode Toggle (Border vs Fill)
+    function initColorMode() {
+        const buttons = document.querySelectorAll('.mode-btn');
+        if (!buttons.length) return;
+        
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                colorMode = btn.dataset.mode;
+                console.log('Color mode switched to:', colorMode);
+            });
+        });
+    }
+    
+    // TSL Color Picker
+    function initTSL() {
+        const hSlider = document.getElementById('tsl-h');
+        const sSlider = document.getElementById('tsl-s');
+        const lSlider = document.getElementById('tsl-l');
+        const hVal = document.getElementById('tsl-h-val');
+        const sVal = document.getElementById('tsl-s-val');
+        const lVal = document.getElementById('tsl-l-val');
+        const preview = document.getElementById('tsl-preview');
+        const applyBtn = document.getElementById('btn-apply-tsl');
+        
+        if (!hSlider || !sSlider || !lSlider) return;
+        
+        function updatePreview() {
+            const h = parseInt(hSlider.value);
+            const s = parseInt(sSlider.value);
+            const l = parseInt(lSlider.value);
+            
+            currentTSL = { h, s, l };
+            
+            const color = `hsl(${h}, ${s}%, ${l}%)`;
+            if (preview) preview.style.background = color;
+            
+            if (hVal) hVal.textContent = h + '°';
+            if (sVal) sVal.textContent = s + '%';
+            if (lVal) lVal.textContent = l + '%';
+            
+            // Update slider backgrounds
+            sSlider.style.background = `linear-gradient(to right, hsl(${h},0%,${l}%), hsl(${h},100%,${l}%))`;
+            lSlider.style.background = `linear-gradient(to right, hsl(${h},${s}%,0%), hsl(${h},${s}%,50%), hsl(${h},${s}%,100%))`;
+        }
+        
+        hSlider.addEventListener('input', updatePreview);
+        sSlider.addEventListener('input', updatePreview);
+        lSlider.addEventListener('input', updatePreview);
+        
+        applyBtn?.addEventListener('click', () => {
+            const color = `hsl(${currentTSL.h}, ${currentTSL.s}%, ${currentTSL.l}%)`;
+            const active = tarmacCanvas?.getActiveObject();
+            
+            if (active?.type === 'group') {
+                const rect = active.item(0);
+                if (colorMode === 'border') {
+                    rect.set('stroke', color);
+                } else {
+                    rect.set('fill', color);
+                }
+                tarmacCanvas.renderAll();
+            }
+        });
+        
+        // Init
+        updatePreview();
+    }
+    
+    // Color swatches - applique selon le mode (border ou fill)
+    function initColorSwatches() {
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', function() {
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const active = tarmacCanvas?.getActiveObject();
+                if (active?.type === 'group') {
+                    const rect = active.item(0);
+                    // Utiliser getComputedStyle pour récupérer la couleur calculée
+                    const computedStyle = getComputedStyle(this);
+                    const color = computedStyle.backgroundColor;
+                    
+                    if (colorMode === 'border') {
+                        rect.set('stroke', color);
+                    } else {
+                        rect.set('fill', color);
+                    }
+                    tarmacCanvas.renderAll();
+                }
+            });
+        });
+    }
+    
+    // API Integration - Endpoints Claude
+    function initAPI() {
+        const statusEl = document.getElementById('api-status');
+        const btnGenome = document.getElementById('btn-fetch-genome');
+        const btnStyles = document.getElementById('btn-fetch-styles');
+        
+        // Check API status
+        checkAPIStatus();
+        
+        // Fetch Genome
+        btnGenome?.addEventListener('click', async () => {
+            try {
+                updateAPIStatus('loading');
+                const response = await fetch(API.genome);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const genome = await response.json();
+                appState.genome = genome;
+                console.log('Genome loaded:', genome);
+                loadGenomeIntoStenciler(genome);
+                updateAPIStatus('online');
+            } catch (e) {
+                console.error('Failed to fetch genome:', e);
+                updateAPIStatus('offline');
+                // Fallback: use mocks
+                loadGenomeIntoStenciler({ n0_phases: mockCorps });
+            }
+        });
+        
+        // Fetch Styles
+        btnStyles?.addEventListener('click', async () => {
+            try {
+                updateAPIStatus('loading');
+                const response = await fetch(API.styles);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const styles = await response.json();
+                console.log('Styles loaded:', styles);
+                updateAPIStatus('online');
+            } catch (e) {
+                console.error('Failed to fetch styles:', e);
+                updateAPIStatus('offline');
+            }
+        });
+    }
+    
+    function checkAPIStatus() {
+        // Ping API
+        fetch(API.genome, { method: 'HEAD' })
+            .then(() => updateAPIStatus('online'))
+            .catch(() => updateAPIStatus('offline'));
+    }
+    
+    function updateAPIStatus(status) {
+        const statusEl = document.getElementById('api-status');
+        if (!statusEl) return;
+        
+        const dot = statusEl.querySelector('.status-dot');
+        const text = statusEl.querySelector('.status-text');
+        
+        if (status === 'online') {
+            dot?.classList.add('online');
+            dot?.classList.remove('offline');
+            if (text) text.textContent = 'Connecté';
+        } else if (status === 'offline') {
+            dot?.classList.remove('online');
+            dot?.classList.add('offline');
+            if (text) text.textContent = 'Hors ligne';
+        } else if (status === 'loading') {
+            if (text) text.textContent = 'Chargement...';
+        }
+    }
+    
+    function loadGenomeIntoStenciler(genome) {
+        const corps = genome.n0_phases || genome.corps || [];
+        if (corps.length) {
+            mockCorps = corps;
+            renderPreviews();
+            console.log('Genome loaded into Stenciler:', corps.length, 'corps');
+        }
+    }
+    
+    // Border slider
+    function initBorderSlider() {
+        const slider = document.querySelector('.border-slider');
+        const display = document.querySelector('.border-value');
+        
+        if (slider) {
+            slider.addEventListener('input', function() {
+                if (display) display.textContent = this.value + 'px';
+                
+                const active = tarmacCanvas?.getActiveObject();
+                if (active?.type === 'group') {
+                    const rect = active.item(0);
+                    rect.set('strokeWidth', parseInt(this.value));
+                    tarmacCanvas.renderAll();
+                }
+            });
+        }
+    }
+    
+    // Delete - bouton et touches clavier
+    function initDeleteButton() {
+        // Clic sur bouton
+        document.querySelector('.btn-delete')?.addEventListener('click', deleteSelectedObject);
+        
+        // Touches clavier Delete / Backspace
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                // Vérifier qu'on n'est pas dans un input/texte editable
+                const activeElement = document.activeElement;
+                const isEditing = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.contentEditable === 'true'
+                );
+                
+                if (!isEditing) {
+                    e.preventDefault();
+                    deleteSelectedObject();
+                }
+            }
+        });
+    }
+    
+    function deleteSelectedObject() {
+        const active = tarmacCanvas?.getActiveObject();
+        if (active) {
+            tarmacCanvas.remove(active);
+            tarmacCanvas.renderAll();
+            console.log('Objet supprimé');
+        }
+    }
+    
+    // Navigation - Breadcrumb et bouton retour
+    function initNavigation() {
+        const breadcrumb = document.getElementById('breadcrumb');
+        const backBtn = document.getElementById('btn-back');
+        
+        if (!breadcrumb) return;
+        
+        // Écouter les changements de vue
+        window.addEventListener('switchToStenciler', (e) => {
+            updateBreadcrumb('stenciler');
+        });
+        
+        // Bouton retour
+        backBtn?.addEventListener('click', () => {
+            // Dispatcher event pour le layout parent
+            window.dispatchEvent(new CustomEvent('navigateBack'));
+        });
+        
+        // Mettre à jour selon la vue initiale
+        updateBreadcrumb(appState.currentView);
+    }
+    
+    function updateBreadcrumb(view) {
+        const breadcrumb = document.getElementById('breadcrumb');
+        const backBtn = document.getElementById('btn-back');
+        
+        const crumbs = {
+            brainstorm: 'Brainstorm',
+            style_picker: 'Brainstorm › Style',
+            upload: 'Brainstorm › Upload',
+            stenciler: 'Brainstorm › Style › Stenciler'
+        };
+        
+        if (breadcrumb) {
+            breadcrumb.textContent = crumbs[view] || view;
+        }
+        
+        // Afficher bouton retour si pas sur Brainstorm
+        if (backBtn) {
+            backBtn.classList.toggle('hidden', view === 'brainstorm');
+        }
+    }
+    
+    // Expose appState pour le layout parent
+    window.stencilerApp = appState;
+    window.updateBreadcrumb = updateBreadcrumb;
+    
+    // API publique pour timing/extérieur
+    window.stencilerAPI = {
+        // Forcer re-init canvas (après transition de vue)
+        reinitCanvas: () => {
+            requestAnimationFrame(() => {
+                initCanvas();
+            });
+        },
+        
+        // Forcer render
+        render: () => {
+            if (tarmacCanvas) tarmacCanvas.renderAll();
+        },
+        
+        // Charger genome depuis API
+        loadGenome: (genomeData) => {
+            appState.genome = genomeData;
+            loadGenomeIntoStenciler(genomeData);
+        },
+        
+        // Obtenir référence canvas
+        getCanvas: () => tarmacCanvas,
+        
+        // État actuel
+        getState: () => ({
+            isLight,
+            zoomLevel,
+            colorMode,
+            currentTSL,
+            corpsCount: mockCorps.length
+        })
+    };
+    
+})();
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{
+  "task_id": "hybrid-loader-json-forcing",
+  "description": "Intégrer Hybrid Loader par défaut et ajouter forçage JSON automatique dans Aetherflow orchestrator",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Initialiser HybridLoader dans orchestrator.py méthode execute(). CRITICAL: (1) Dans la méthode execute() (ligne ~690), après chargement du plan, initialiser self.hybrid_loader = HybridLoader(total_steps=len(plan.steps), enable_animations=True) SI self.enable_hybrid_loader est True. (2) Ajouter la logique de phase tracking : Au début du workflow QUICK (FAST only), appeler loader.start_phase(Phase.FAST, provider='auto'). Au début du workflow FULL, démarrer avec Phase.FAST puis transition vers BUILD et DOUBLE_CHECK selon le workflow. (3) Dans la boucle d'exécution des steps (ligne ~770), avant chaque step appeler loader.update_step(step_id, description, StepStatus.RUNNING, provider=provider_name). (4) Après exécution réussie, appeler loader.update_step(..., StepStatus.COMPLETED, tokens=result.tokens, cost=result.cost, time_ms=result.time). (5) À la fin de execute(), appeler loader.finish(success=True/False). IMPORTANT: Ne modifier QUE la méthode execute(), garder l'import existant ajouté précédemment.",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "HybridLoader initialisé dans execute() si enable_hybrid_loader=True",
+        "start_phase() appelé au début du workflow (FAST pour quick, phased pour full)",
+        "update_step() appelé avant et après chaque step execution",
+        "finish() appelé à la fin avec success status",
+        "Aucune modification dans __init__ (déjà fait)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_points": [
+          "Méthode execute() ligne ~690 (initialization)",
+          "Ligne ~770 (step execution loop)",
+          "Fin de execute() (finish call)"
+        ],
+        "phase_mapping": {
+          "quick": "Phase.FAST only",
+          "full": "Phase.FAST → Phase.BUILD → Phase.DOUBLE_CHECK"
+        }
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter détection automatique JSON dans _execute_step() de orchestrator.py. CRITICAL: (1) Dans la méthode _execute_step() (ligne ~720), après construction du step_context initial, ajouter une vérification : si ANY des files dans step.context['files'] se termine par '.json', ajouter au step_context le texte suivant : '\\n\\nCRITICAL: One or more target files are JSON format (.json extension). These files MUST contain ONLY pure valid JSON. Start with {{ and end with }}. NO Python code (no variable assignments like VAR = {{...}}), NO comments, NO trailing commas. Only RFC 8259 compliant JSON syntax.\\n'. (2) Cette vérification doit se faire AVANT l'appel au provider (groq_client.generate, etc.). (3) Logger la détection avec logger.info(f'JSON forcing activated for {json_files}') quand détecté. (4) Utiliser pathlib.Path pour extraire l'extension de manière robuste. IMPORTANT: Ne modifier QUE _execute_step(), ne pas toucher aux autres méthodes.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Détection automatique des fichiers .json dans step.context['files']",
+        "Ajout du message CRITICAL au step_context si .json détecté",
+        "Log de confirmation avec logger.info()",
+        "Utilisation de pathlib.Path pour extraction extension",
+        "Modification limitée à _execute_step() uniquement"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "loguru",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~720, avant appel provider",
+        "detection_logic": "Check if any file in step.context.get('files', []) ends with '.json'",
+        "import_needed": "from pathlib import Path (if not already present)"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Tester l'intégration avec la tâche Tier 1 Component Library. (1) Lancer la commande : cd /Users/francois-jeandazin/AETHERFLOW && ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_tier1_pregenerated_components.json --workflow quick --verbose. (2) Vérifier que le HybridLoader s'affiche avec la phase FAST, les steps progress bars, et les metrics (tokens, cost, time). (3) Vérifier dans les logs la présence de 'JSON forcing activated for [pregenerated_components.json]' au step_1. (4) À la fin, vérifier que Backend/Prod/sullivan/pregenerated_components.json contient du JSON pur valide (commence par '{', finit par '}', pas de 'SULLIVAN_LAYOUT_PROPOSALS ='). (5) Parser le JSON avec json.loads() pour validation syntaxique. (6) Vérifier que le fichier contient 8 styles × 6 atomes minimum.",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "HybridLoader affiche phase FAST avec progress bars",
+        "Log 'JSON forcing activated' présent pour step_1",
+        "pregenerated_components.json est du JSON valide (json.loads réussit)",
+        "Fichier commence par '{' et finit par '}'",
+        "Pas de code Python (pas de 'SULLIVAN_LAYOUT_PROPOSALS =')",
+        "Contient au minimum 48 composants (8 styles × 6 atomes)"
+      ],
+      "context": {
+        "language": "bash+python",
+        "framework": "aetherflow-cli",
+        "test_command": "cd /Users/francois-jeandazin/AETHERFLOW && ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_tier1_pregenerated_components.json --workflow quick --verbose",
+        "validation_file": "Backend/Prod/sullivan/pregenerated_components.json",
+        "expected_output": "Valid JSON with 8 styles, each containing 6 atom types (button, input, card, badge, avatar, divider)"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-10T22:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Hybrid Loader Integration + JSON Forcing",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "refactoring": "Gemini/Groq (via cascade)",
+      "tdd_qa": "DeepSeek 7B (Local)"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Orchestration",
+      "n2": "Hybrid Loader + JSON Forcing",
+      "n3": "UI Display + Format Validation"
+    },
+    "reference_files": [
+      "Backend/Prod/ui/hybrid_loader.py (already implemented)",
+      "Backend/Prod/orchestrator.py (modifications needed)"
+    ],
+    "expected_benefits": {
+      "user_experience": "Real-time visual feedback with phase tracking",
+      "json_reliability": "100% JSON format compliance for .json files",
+      "developer_visibility": "Clear provider routing and metrics display"
+    }
+  }
+}

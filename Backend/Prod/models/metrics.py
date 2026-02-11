@@ -23,6 +23,7 @@ class StepMetrics:
     input_tokens: int
     output_tokens: int
     cost_usd: float
+    energy_gco2: float = 0.0  # Estimation de l'empreinte carbone
     error: Optional[str] = None
     # Latency metrics (will be None if not available yet)
     ttft_ms: Optional[float] = None  # Time to first token
@@ -55,6 +56,7 @@ class PlanMetrics:
     total_input_tokens: int
     total_output_tokens: int
     total_cost_usd: float
+    total_energy_gco2: float
     average_step_time_ms: float
     success_rate: float
     started_at: str
@@ -133,7 +135,8 @@ class MetricsCollector:
             speculative_accept_rate=speculative_accept_rate,
             speculative_speedup_factor=speculative_speedup,
             draft_provider=draft_provider,
-            verify_provider=verify_provider
+            verify_provider=verify_provider,
+            energy_gco2=(result.tokens_used / 1000) * 0.05  # Estimation simplifiée 0.05g CO2/1k tokens
         )
         self.step_metrics.append(metrics)
         logger.debug(f"Recorded metrics for step {step.id}")
@@ -161,6 +164,7 @@ class MetricsCollector:
         total_input = sum(m.input_tokens for m in self.step_metrics)
         total_output = sum(m.output_tokens for m in self.step_metrics)
         total_cost = sum(m.cost_usd for m in self.step_metrics)
+        total_energy = sum(m.energy_gco2 for m in self.step_metrics)
         
         avg_time = total_time / len(self.step_metrics) if self.step_metrics else 0
         success_rate = successful / len(self.step_metrics) if self.step_metrics else 0
@@ -176,6 +180,7 @@ class MetricsCollector:
             total_input_tokens=total_input,
             total_output_tokens=total_output,
             total_cost_usd=total_cost,
+            total_energy_gco2=total_energy,
             average_step_time_ms=avg_time,
             success_rate=success_rate,
             started_at=self.started_at.isoformat(),

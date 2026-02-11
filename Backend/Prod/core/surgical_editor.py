@@ -874,3 +874,4 @@ class SurgicalEditor:
         if success:
             return True, result, original_code or None
         return False, result, original_code or None
+

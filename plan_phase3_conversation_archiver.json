@@ -1,0 +1,84 @@
+{
+  "task_id": "phase3_conversation_archiver",
+  "description": "Implémenter Pilier 6 ConversationArchiver : archivage automatique des échanges Claude/KIMI pour dataset ML Sullivan",
+  "steps": [
+    {
+      "id": "step_01",
+      "description": "Créer Backend/Prod/core/conversation_archiver.py : copie incrémentale des sessions Claude depuis ~/.claude/ vers ML/datasets/conversations/claude/raw/",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "context": {
+        "files": [
+          "Backend/Prod/core/conversation_archiver.py"
+        ]
+      }
+    },
+    {
+      "id": "step_02",
+      "description": "Créer Backend/Prod/homeos_v2/ML/datasets/index/conversation_index.py : index SQLite pour requêtes rapides (session_id, timestamp, agent, token_count)",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "context": {
+        "files": [
+          "Backend/Prod/homeos_v2/ML/datasets/index/conversation_index.py"
+        ]
+      }
+    },
+    {
+      "id": "step_03",
+      "description": "Créer Backend/Prod/core/kimi_converter.py : convertit exports KIMI (markdown/JSON) vers JSONL unifié",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1800,
+      "context": {
+        "files": [
+          "Backend/Prod/core/kimi_converter.py"
+        ]
+      }
+    },
+    {
+      "id": "step_04",
+      "description": "Créer scripts/cron_archive_conversations.py : script cron horaire qui exécute ConversationArchiver + mise à jour index",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "context": {
+        "files": [
+          "scripts/cron_archive_conversations.py"
+        ]
+      }
+    },
+    {
+      "id": "step_05",
+      "description": "Créer Backend/Prod/homeos_v2/ML/datasets/README.md : documentation structure datasets, format JSONL, utilisation index SQLite",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1200,
+      "context": {
+        "files": [
+          "Backend/Prod/homeos_v2/ML/datasets/README.md"
+        ]
+      }
+    },
+    {
+      "id": "step_06",
+      "description": "Tests : vérifier copie incrémentale, conversion KIMI, index SQLite, requêtes, idempotence cron",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1800,
+      "context": {
+        "files": [
+          "Backend/Prod/tests/test_conversation_archiver.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "phase": "Phase 3 Backend",
+    "pillar": "Pilier 6 - ConversationArchiver",
+    "constitution_compliance": true,
+    "integration": "Sullivan ML dataset"
+  }
+}

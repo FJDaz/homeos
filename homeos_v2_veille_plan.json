@@ -1,0 +1,52 @@
+{
+    "task_id": "homeos-v2-veille-strat",
+    "description": "Phase 2 : Intelligence de Veille (BERT) pour HOMEOS V2",
+    "steps": [
+        {
+            "id": "step_1",
+            "description": "Implémenter VeilleAgent dans intelligence_veille.py",
+            "type": "code_generation",
+            "complexity": 0.8,
+            "estimated_tokens": 2500,
+            "context": {
+                "files": [
+                    "Backend/Prod/core/intelligence_veille.py"
+                ],
+                "instructions": "Créer une classe VeilleAgent. Utiliser un modèle BERT léger (via sentence-transformers ou transformers) pour classifier des inputs textuels (RSS/X). Définir 3 classes : PRICE_ALERT, PERFORMANCE_LEAP, OPPORTUNITY. Gérer le chargement du modèle sur Mac Intel (CPU)."
+            }
+        },
+        {
+            "id": "step_2",
+            "description": "Ajouter l'endpoint de rapport de veille dans api.py",
+            "type": "patch",
+            "complexity": 0.5,
+            "estimated_tokens": 1200,
+            "context": {
+                "files": [
+                    "Backend/Prod/api.py"
+                ],
+                "instructions": "Ajouter GET /v1/admin/veille/report. Cet endpoint doit déclencher une analyse via VeilleAgent et retourner un rapport consolidé."
+            }
+        },
+        {
+            "id": "step_3",
+            "description": "Créer un script de démonstration scripts/simulate_veille.py",
+            "type": "code_generation",
+            "complexity": 0.4,
+            "estimated_tokens": 800,
+            "context": {
+                "files": [
+                    "scripts/simulate_veille.py"
+                ],
+                "instructions": "Simuler des entrées RSS/X (ex: 'DeepSeek drop prices by 50%', 'New Groq model available', 'AWS outage in us-east-1') et afficher la classification BERT."
+            }
+        }
+    ],
+    "metadata": {
+        "created_at": "2026-02-10T23:30:00Z",
+        "claude_version": "claude-code",
+        "workflow": "PROD",
+        "priority": "medium",
+        "target": "homeos-v2-phase2"
+    }
+}

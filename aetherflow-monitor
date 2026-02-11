@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""
+🔍 Aetherflow Monitor CLI - Interactive real-time monitoring
+Usage:
+    ./aetherflow-monitor                    # Monitor latest task
+    ./aetherflow-monitor <task_id>          # Monitor specific task
+    ./aetherflow-monitor --list             # List all tasks
+    ./aetherflow-monitor --follow           # Follow latest task continuously
+"""
+
+import sys
+import os
+import time
+import argparse
+from pathlib import Path
+from datetime import datetime
+from collections import deque
+
+# ANSI Colors
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    DIM = '\033[2m'
+
+OUTPUT_DIR = Path("/private/tmp/claude-501/-Users-francois-jeandazin-AETHERFLOW/tasks")
+
+
+def clear_screen():
+    """Clear terminal screen."""
+    os.system('clear' if os.name != 'nt' else 'cls')
+
+
+def format_timestamp(ts_str):
+    """Format timestamp from log."""
+    try:
+        # Extract time from "[32m21:01:02[0m"
+        if '[0m' in ts_str:
+            time_part = ts_str.split('[0m')[0].split('m')[-1]
+            return f"{Colors.DIM}{time_part}{Colors.ENDC}"
+        return ts_str
+    except:
+        return ts_str
+
+
+def extract_api_info(line):
+    """Extract API provider and action from line."""
+    providers = {
+        'groq': '🚀 Groq',
+        'deepseek': '🧠 DeepSeek',
+        'gemini': '💎 Gemini',
+        'codestral': '⚡ Codestral',
+        'kimi': '🎨 Kimi'
+    }
+
+    for key, display in providers.items():
+        if key in line.lower():
+            return display
+    return None
+
+
+def draw_progress_bar(progress, total, width=30):
+    """Draw a simple progress bar."""
+    if total == 0:
+        return f"[{'─' * width}] 0%"
+
+    filled = int(width * progress / total)
+    bar = '█' * filled + '░' * (width - filled)
+    percentage = int(100 * progress / total)
+
+    if percentage == 100:
+        return f"{Colors.OKGREEN}[{bar}] {percentage}%{Colors.ENDC}"
+    elif percentage >= 50:
+        return f"{Colors.OKCYAN}[{bar}] {percentage}%{Colors.ENDC}"
+    else:
+        return f"{Colors.WARNING}[{bar}] {percentage}%{Colors.ENDC}"
+
+
+def colorize_line(line):
+    """Colorize log line based on content."""
+    line = line.strip()
+
+    # Remove ANSI codes for analysis
+    clean_line = line
+    for code in ['[32m', '[0m', '[1m', '[33m', '[31m', '[36m', '[35m', '[37m', '[2m', '[34m', '[36m']:
+        clean_line = clean_line.replace(code, '')
+
+    # Extract API info
+    api_provider = extract_api_info(clean_line)
+    if api_provider:
+        line = f"{api_provider} {line}"
+
+    # ERROR
+    if 'ERROR' in clean_line or 'Failed' in clean_line or '❌' in clean_line:
+        return f"{Colors.FAIL}❌ {line}{Colors.ENDC}"
+
+    # WARNING
+    if 'WARNING' in clean_line or '⚠️' in clean_line:
+        return f"{Colors.WARNING}⚠️  {line}{Colors.ENDC}"
+
+    # SUCCESS / Completed
+    if 'SUCCESS' in clean_line or '✅' in clean_line or 'Completed' in clean_line:
+        return f"{Colors.OKGREEN}✅ {line}{Colors.ENDC}"
+
+    # Progress indicator
+    if 'Progress:' in clean_line and '/' in clean_line:
+        try:
+            # Extract "X/Y steps"
+            parts = clean_line.split('Progress:')[1].split('steps')[0].strip()
+            current, total = map(int, parts.split('/'))
+            bar = draw_progress_bar(current, total)
+            return f"{Colors.BOLD}📊 Progress: {bar} ({current}/{total} steps){Colors.ENDC}"
+        except:
+            pass
+
+    # Step execution
+    if 'step_' in clean_line or 'Executing batch' in clean_line:
+        return f"{Colors.OKCYAN}🔹 {line}{Colors.ENDC}"
+
+    # Running status
+    if 'Running' in clean_line or '⟳' in clean_line:
+        return f"{Colors.OKBLUE}⟳ {line}{Colors.ENDC}"
+
+    # Smart routing (API selection)
+    if 'Smart routing' in clean_line or 'routing for' in clean_line:
+        return f"{Colors.HEADER}🎯 {line}{Colors.ENDC}"
+
+    # INFO
+    if 'INFO' in clean_line:
+        return f"{Colors.DIM}ℹ️  {line}{Colors.ENDC}"
+
+    # Monitor headers
+    if '╭' in line or '╰' in line or '│' in line or '├' in line:
+        return f"{Colors.OKCYAN}{line}{Colors.ENDC}"
+
+    return line
+
+
+def get_latest_task():
+    """Get the latest task file."""
+    if not OUTPUT_DIR.exists():
+        return None
+
+    task_files = sorted(OUTPUT_DIR.glob("*.output"), key=lambda f: f.stat().st_mtime, reverse=True)
+    return task_files[0] if task_files else None
+
+
+def list_tasks():
+    """List all available tasks."""
+    if not OUTPUT_DIR.exists():
+        print(f"{Colors.FAIL}No tasks directory found: {OUTPUT_DIR}{Colors.ENDC}")
+        return
+
+    task_files = sorted(OUTPUT_DIR.glob("*.output"), key=lambda f: f.stat().st_mtime, reverse=True)
+
+    if not task_files:
+        print(f"{Colors.WARNING}No tasks found.{Colors.ENDC}")
+        return
+
+    print(f"{Colors.HEADER}{Colors.BOLD}📊 Available Aetherflow Tasks{Colors.ENDC}")
+    print(f"{Colors.DIM}{'='*60}{Colors.ENDC}\n")
+
+    for i, task_file in enumerate(task_files[:10], 1):  # Show last 10
+        task_id = task_file.stem
+        size = task_file.stat().st_size
+        mtime = datetime.fromtimestamp(task_file.stat().st_mtime)
+        age = datetime.now() - mtime
+
+        # Determine status from file content
+        try:
+            content = task_file.read_text(errors='ignore')
+            if 'ERROR' in content or 'Failed' in content:
+                status = f"{Colors.FAIL}Failed{Colors.ENDC}"
+            elif 'SUCCESS' in content or '✅' in content:
+                status = f"{Colors.OKGREEN}Success{Colors.ENDC}"
+            elif 'Running' in content or '⟳' in content:
+                status = f"{Colors.OKBLUE}Running{Colors.ENDC}"
+            else:
+                status = f"{Colors.DIM}Unknown{Colors.ENDC}"
+        except:
+            status = f"{Colors.DIM}Unknown{Colors.ENDC}"
+
+        print(f"{Colors.BOLD}{i}.{Colors.ENDC} {Colors.OKCYAN}{task_id}{Colors.ENDC}")
+        print(f"   Status: {status}")
+        print(f"   Time: {Colors.DIM}{mtime.strftime('%Y-%m-%d %H:%M:%S')} ({age.seconds}s ago){Colors.ENDC}")
+        print(f"   Size: {Colors.DIM}{size:,} bytes{Colors.ENDC}")
+        print()
+
+
+def monitor_task(task_file, follow=False, tail_lines=50):
+    """Monitor a specific task file."""
+    if not task_file.exists():
+        print(f"{Colors.FAIL}Task file not found: {task_file}{Colors.ENDC}")
+        return
+
+    task_id = task_file.stem
+
+    # Header
+    print(f"{Colors.HEADER}{Colors.BOLD}╔══════════════════════════════════════╗{Colors.ENDC}")
+    print(f"{Colors.HEADER}{Colors.BOLD}║   Aetherflow Monitor v2.0            ║{Colors.ENDC}")
+    print(f"{Colors.HEADER}{Colors.BOLD}╚══════════════════════════════════════╝{Colors.ENDC}")
+    print()
+    print(f"{Colors.OKGREEN}📊 Monitoring task: {Colors.BOLD}{task_id}{Colors.ENDC}")
+    print(f"{Colors.DIM}📁 {task_file}{Colors.ENDC}")
+    print()
+    print(f"{Colors.WARNING}{'━'*60}{Colors.ENDC}")
+    print()
+
+    if follow:
+        # Follow mode - continuously update
+        print(f"{Colors.OKCYAN}📡 Following in real-time... (Ctrl+C to stop){Colors.ENDC}\n")
+
+        # Read existing content first
+        with open(task_file, 'r', errors='ignore') as f:
+            lines = deque(f.readlines(), maxlen=tail_lines)
+            for line in lines:
+                print(colorize_line(line.rstrip()))
+
+        # Follow new lines
+        with open(task_file, 'r', errors='ignore') as f:
+            # Seek to end
+            f.seek(0, 2)
+
+            try:
+                while True:
+                    line = f.readline()
+                    if line:
+                        print(colorize_line(line.rstrip()))
+                    else:
+                        time.sleep(0.1)
+            except KeyboardInterrupt:
+                print(f"\n{Colors.OKCYAN}Monitor stopped.{Colors.ENDC}")
+    else:
+        # One-time display
+        with open(task_file, 'r', errors='ignore') as f:
+            lines = deque(f.readlines(), maxlen=tail_lines)
+            for line in lines:
+                print(colorize_line(line.rstrip()))
+
+        print()
+        print(f"{Colors.DIM}Showing last {tail_lines} lines. Use --follow to monitor in real-time.{Colors.ENDC}")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='🔍 Aetherflow Monitor - Interactive task monitoring',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  ./aetherflow-monitor                    # Monitor latest task
+  ./aetherflow-monitor b6b1b0f            # Monitor specific task
+  ./aetherflow-monitor --list             # List all tasks
+  ./aetherflow-monitor --follow           # Follow latest task continuously
+  ./aetherflow-monitor b6b1b0f --follow   # Follow specific task
+        """
+    )
+
+    parser.add_argument('task_id', nargs='?', help='Task ID to monitor (default: latest)')
+    parser.add_argument('--list', '-l', action='store_true', help='List all available tasks')
+    parser.add_argument('--follow', '-f', action='store_true', help='Follow task output in real-time')
+    parser.add_argument('--tail', '-n', type=int, default=50, help='Number of lines to show (default: 50)')
+
+    args = parser.parse_args()
+
+    # List mode
+    if args.list:
+        list_tasks()
+        return
+
+    # Determine which task to monitor
+    if args.task_id:
+        task_file = OUTPUT_DIR / f"{args.task_id}.output"
+    else:
+        task_file = get_latest_task()
+        if not task_file:
+            print(f"{Colors.FAIL}No tasks found in {OUTPUT_DIR}{Colors.ENDC}")
+            return
+
+    # Monitor the task
+    monitor_task(task_file, follow=args.follow, tail_lines=args.tail)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"\n{Colors.OKCYAN}Exited.{Colors.ENDC}")
+        sys.exit(0)

@@ -1,0 +1,277 @@
+    </style>
+</head>
+<body>
+    <div id="stenciler-app" class="stenciler-app">
+        <header class="stenciler-header">
+            <h1>Stenciler</h1>
+            <div class="header-actions">
+                <div class="style-indicator minimal"><span class="dot"></span><span>minimal</span></div>
+                <button id="theme-toggle">Mode jour</button>
+            </div>
+        </header>
+        <div class="stenciler-workspace">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">Homé<span class="brand-k">OS</span></div>
+                    <div class="sidebar-tagline">Stenciler</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Navigation</div>
+                    <div class="breadcrumb" id="breadcrumb">Brainstorm</div>
+                    <button class="btn-back hidden" id="btn-back">← Retour</button>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Actions</div>
+                    <button class="btn-delete" id="btn-delete"><span class="delete-icon">×</span>Supprimer (Del)</button>
+                    <div class="kbd-hint"><kbd>Del</kbd> ou <kbd>Backspace</kbd></div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Mode Couleur</div>
+                    <div class="color-mode-toggle">
+                        <button class="mode-btn active" data-mode="border"><span class="mode-icon">▣</span><span class="mode-label">Bordure</span></button>
+                        <button class="mode-btn" data-mode="fill"><span class="mode-icon">◼</span><span class="mode-label">Fond</span></button>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Couleur TSL</div>
+                    <div class="tsl-picker">
+                        <div class="tsl-preview" id="tsl-preview"></div>
+                        <div class="tsl-sliders">
+                            <div class="tsl-row"><label>T</label><input type="range" class="tsl-slider hue" id="tsl-h" min="0" max="360" value="0"><span class="tsl-value" id="tsl-h-val">0°</span></div>
+                            <div class="tsl-row"><label>S</label><input type="range" class="tsl-slider saturation" id="tsl-s" min="0" max="100" value="70"><span class="tsl-value" id="tsl-s-val">70%</span></div>
+                            <div class="tsl-row"><label>L</label><input type="range" class="tsl-slider lightness" id="tsl-l" min="0" max="100" value="50"><span class="tsl-value" id="tsl-l-val">50%</span></div>
+                        </div>
+                        <button class="btn-apply-color" id="btn-apply-tsl">Appliquer</button>
+                    </div>
+                </div>
+            </aside>
+            <div class="right-zone">
+                <div class="sticky-top-zone" id="sticky-top-zone">
+                    <div class="preview-band-wrapper" id="preview-band-wrapper">
+                        <div class="preview-band" id="preview-band"></div>
+                    </div>
+                    <button class="preview-band-toggle" id="preview-band-toggle">▼</button>
+                </div>
+                <main class="main-content">
+                    <div class="canvas-zone" id="canvas-zone">
+                        <canvas id="tarmac-canvas"></canvas>
+                        <div class="canvas-placeholder" id="canvas-placeholder"><div class="icon">+</div><p>Glissez un Corps</p></div>
+                        <div class="zoom-controls">
+                            <button id="zoom-out">−</button>
+                            <span id="zoom-level">100%</span>
+                            <button id="zoom-in">+</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script>
+// Données mock intégrées
+const MOCK_CORPS = [
+    { id: "n0_brainstorm", name: "Brainstorm", color: "#c9a6b0", organes_count: 2 },
+    { id: "n0_backend", name: "Backend", color: "#94bbfb", organes_count: 1 },
+    { id: "n0_frontend", name: "Frontend", color: "#9dd5c2", organes_count: 7 },
+    { id: "n0_deploy", name: "Deploy", color: "#e8c4a0", organes_count: 1 }
+];
+
+let tarmacCanvas = null;
+let zoomLevel = 1;
+let isPreviewCollapsed = false;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+    initCanvas();
+    renderPreviews();
+    initTSL();
+    initZoom();
+    initPreviewToggle();
+    initDragDrop();
+    initDelete();
+});
+
+function initCanvas() {
+    const canvasEl = document.getElementById('tarmac-canvas');
+    const container = document.getElementById('canvas-zone');
+    if (!canvasEl || !container) return;
+    
+    tarmacCanvas = new fabric.Canvas('tarmac-canvas', {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        backgroundColor: 'transparent'
+    });
+}
+
+function renderPreviews() {
+    const band = document.getElementById('preview-band');
+    if (!band) return;
+    
+    band.innerHTML = MOCK_CORPS.map(corps => {
+        let wireframe = '';
+        if (corps.id.includes('brainstorm')) {
+            wireframe = '<div class="wf-step active"></div><div class="wf-step-line"></div><div class="wf-step"></div>';
+        } else if (corps.id.includes('backend')) {
+            wireframe = '<div class="wf-bar" style="height:40%"></div><div class="wf-bar" style="height:70%"></div>';
+        } else if (corps.id.includes('frontend')) {
+            wireframe = '<div class="wf-frame"></div><div class="wf-frame accent"></div>';
+        } else {
+            wireframe = '<div class="wf-launch-btn"></div>';
+        }
+        
+        return `<div class="preview-card ${corps.id.split('_')[1]}" draggable="true" data-corps="${corps.id}">
+            <div class="corps-wireframe wf-${corps.id.split('_')[1]}">${wireframe}</div>
+            <span class="name">${corps.name}</span>
+            <span class="count">${corps.organes_count} organes</span>
+        </div>`;
+    }).join('');
+    
+    // Ajouter les événements drag
+    band.querySelectorAll('.preview-card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('corpsId', card.dataset.corps);
+            card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+        });
+    });
+}
+
+function initDragDrop() {
+    const zone = document.getElementById('canvas-zone');
+    if (!zone) return;
+    
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('drag-over');
+    });
+    
+    zone.addEventListener('dragleave', () => {
+        zone.classList.remove('drag-over');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        
+        const corpsId = e.dataTransfer.getData('corpsId');
+        if (!corpsId || !tarmacCanvas) return;
+        
+        const corps = MOCK_CORPS.find(c => c.id === corpsId);
+        if (!corps) return;
+        
+        const rect = zone.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / zoomLevel;
+        const y = (e.clientY - rect.top) / zoomLevel;
+        
+        // Créer le groupe
+        const group = new fabric.Group([], {
+            left: x - 100,
+            top: y - 75,
+            lockRotation: true
+        });
+        
+        const mainRect = new fabric.Rect({
+            width: 200, height: 150, fill: 'white', stroke: corps.color, strokeWidth: 2, rx: 8, ry: 8
+        });
+        
+        const header = new fabric.Rect({
+            width: 200, height: 30, fill: corps.color, rx: 8, ry: 8
+        });
+        
+        const title = new fabric.Text(corps.name, {
+            left: 10, top: 7, fontSize: 14, fontWeight: 'bold', fill: 'white'
+        });
+        
+        group.addWithUpdate(mainRect);
+        group.addWithUpdate(header);
+        group.addWithUpdate(title);
+        
+        tarmacCanvas.add(group);
+        tarmacCanvas.setActiveObject(group);
+        tarmacCanvas.renderAll();
+        
+        document.getElementById('canvas-placeholder').style.display = 'none';
+    });
+}
+
+function initTSL() {
+    const h = document.getElementById('tsl-h');
+    const s = document.getElementById('tsl-s');
+    const l = document.getElementById('tsl-l');
+    const preview = document.getElementById('tsl-preview');
+    
+    function update() {
+        const color = `hsl(${h.value}, ${s.value}%, ${l.value}%)`;
+        preview.style.background = color;
+        preview.dataset.color = color;
+    }
+    
+    h?.addEventListener('input', update);
+    s?.addEventListener('input', update);
+    l?.addEventListener('input', update);
+    update();
+    
+    document.getElementById('btn-apply-tsl')?.addEventListener('click', () => {
+        const color = preview.dataset.color;
+        const active = tarmacCanvas?.getActiveObject();
+        if (active?._objects) {
+            active._objects.forEach(obj => {
+                if (obj.type === 'rect' && obj.width > 100) {
+                    obj.set('stroke', color);
+                }
+            });
+            tarmacCanvas.renderAll();
+        }
+    });
+}
+
+function initZoom() {
+    document.getElementById('zoom-out')?.addEventListener('click', () => setZoom(zoomLevel - 0.1));
+    document.getElementById('zoom-in')?.addEventListener('click', () => setZoom(zoomLevel + 0.1));
+}
+
+function setZoom(z) {
+    zoomLevel = Math.max(0.3, Math.min(3, z));
+    if (tarmacCanvas) {
+        tarmacCanvas.setZoom(zoomLevel);
+        document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+    }
+}
+
+function initPreviewToggle() {
+    const btn = document.getElementById('preview-band-toggle');
+    const wrapper = document.getElementById('preview-band-wrapper');
+    
+    btn?.addEventListener('click', () => {
+        isPreviewCollapsed = !isPreviewCollapsed;
+        wrapper.style.display = isPreviewCollapsed ? 'none' : 'block';
+        btn.textContent = isPreviewCollapsed ? '▶' : '▼';
+    });
+}
+
+function initDelete() {
+    document.getElementById('btn-delete')?.addEventListener('click', () => {
+        const active = tarmacCanvas?.getActiveObject();
+        if (active) {
+            tarmacCanvas.remove(active);
+            tarmacCanvas.renderAll();
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (e.target.tagName !== 'INPUT') {
+                const active = tarmacCanvas?.getActiveObject();
+                if (active) {
+                    tarmacCanvas.remove(active);
+                    tarmacCanvas.renderAll();
+                }
+            }
+        }
+    });
+}
+    </script>
+</body>
+</html>

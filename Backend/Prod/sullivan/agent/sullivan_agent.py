@@ -94,9 +94,24 @@ class SullivanAgent:
         Returns:
             Réponse complète de l'agent
         """
-        # Ajouter le message utilisateur à l'historique
-        self.memory.add_message("user", message, metadata=context)
-        
+        # Mise à jour du VSD (HCI Inférence) via le cerveau Bayésien
+        try:
+            from ...homeos_v2.brain.bayesian_inference import get_bayesian_engine
+            engine = get_bayesian_engine()
+            
+            # Inférence de la patience (longueur du message)
+            if len(message) < 20: # Message très court
+                engine.update_vsd("patience", max(0.2, engine.vsd["patience"] - 0.1))
+            elif len(message) > 100: # Message constructif
+                engine.update_vsd("patience", min(1.0, engine.vsd["patience"] + 0.1))
+                
+            # Inférence de l'expertise (usage de mots techniques)
+            tech_keywords = ["code", "api", "json", "deploy", "architecture", "sergé", "titrage"]
+            if any(k in message.lower() for k in tech_keywords):
+                engine.update_vsd("expertise", min(1.0, engine.vsd["expertise"] + 0.15))
+        except Exception as e:
+            logger.warning(f"VSD Update failed: {e}")
+
         # Construire le contexte pour le LLM
         messages = self.memory.get_context_for_llm()
         tools_schemas = self.tools.get_schemas()
@@ -201,42 +216,83 @@ class SullivanAgent:
     ) -> str:
         """
         Appelle le LLM avec les messages et outils.
-        Fallback: Groq → Gemini si rate limit.
-        
-        Args:
-            messages: Messages formatés pour le LLM
-            tools: Schemas des outils disponibles
-            
-        Returns:
-            Réponse texte du LLM
+        Arbirtrage Bayésien: Cloud vs Local (Predictive Fallback).
         """
         prompt = self._messages_to_prompt(messages)
         
-        # Essayer le provider configuré
-        if self.llm_provider == "groq":
-            result = await self.groq.generate(
-                prompt=prompt,
-                max_tokens=2048,
-            )
+        try:
+            from ...homeos_v2.brain.bayesian_inference import get_bayesian_engine
+            from ...homeos_v2.orchestrator.local_orchestrator import LocalOrchestrator
+            engine = get_bayesian_engine()
+            local_orch = LocalOrchestrator()
             
-            # Si Groq rate limited, fallback sur Gemini
-            if not result.success and ("429" in str(result.error) or "rate_limit" in str(result.error).lower()):
-                logger.warning(f"Groq rate limited, fallback to Gemini")
-                result = await self.gemini.generate(
+            # Évaluation de la complexité
+            complexity = min(1.0, len(prompt) / 5000)
+            strategy = engine.select_strategy(task_complexity=complexity, user_intent="chat")
+            
+            # --- FRUGALITÉ: Context Pruning ---
+            if strategy.get("pruning_required") and len(self.memory.messages) > 6:
+                logger.warning(f"Frugality Activation: Pruning context for session {self.session_id}")
+                # On garde seulement le system message et les 3 derniers tours
+                system_msg = self.memory.messages[0] if self.memory.messages and self.memory.messages[0].role == "system" else None
+                tail = self.memory.messages[-6:]
+                self.memory.messages = ([system_msg] if system_msg else []) + tail
+                # Régénérer le prompt après élagage
+                prompt = self._messages_to_prompt(self.memory.get_context_for_llm())
+
+            logger.info(f"Bayesian Strategy: {strategy['target_model']} (Mode: {strategy['frugality_mode']})")
+            
+            # Cas 1: Routage Local (Ollama)
+            if "ollama" in strategy["target_model"]:
+                task_type = "logic" if strategy["target_model"] == "ollama_7b" else "syntax"
+                result = await local_orch.execute(
                     prompt=prompt,
-                    max_tokens=2048,
+                    task_type=task_type,
+                    modifiers=strategy["prompt_modifiers"]
                 )
-        else:
-            result = await self.gemini.generate(
-                prompt=prompt,
-                max_tokens=2048,
-            )
-        
-        if result.success and result.code:
-            return result.code
-        else:
-            logger.error(f"LLM call failed: {result.error}")
-            return f"Désolé, une erreur est survenue: {result.error}"
+                if result.get("success"):
+                    # Notification du Dashboard (Metrics)
+                    engine.update_infra("ollama", True, result["metrics"]["time_ms"])
+                    return result["content"]
+                else:
+                    logger.error(f"Bayesian Local Fallback failed: {result.get('error')}")
+                    # Force Cloud if Local fails
+                    strategy["target_model"] = "cloud"
+
+            # Cas 2: Routage Cloud (Groq/Gemini)
+            if strategy["target_model"] == "cloud":
+                # Appliquer les modificateurs HCI au prompt
+                if strategy["prompt_modifiers"]:
+                    mod_str = "\n".join(strategy["prompt_modifiers"])
+                    prompt = f"--- HCI ALIGNMENT ---\n{mod_str}\n\n{prompt}"
+
+                # Fallback standard Groq -> Gemini
+                provider = self.llm_provider
+                start_time = asyncio.get_event_loop().time()
+                
+                if provider == "groq":
+                    result = await self.groq.generate(prompt=prompt, max_tokens=2048)
+                    if not result.success:
+                        logger.warning(f"Groq failed, trying Gemini")
+                        provider = "gemini"
+                        result = await self.gemini.generate(prompt=prompt, max_tokens=2048)
+                else:
+                    result = await self.gemini.generate(prompt=prompt, max_tokens=2048)
+
+                if result.success and result.code:
+                    latency = (asyncio.get_event_loop().time() - start_time) * 1000
+                    engine.update_infra(provider, True, latency)
+                    return result.code
+                else:
+                    engine.update_infra(provider, False, 0)
+                    logger.error(f"LLM call failed: {result.error}")
+                    return f"Désolé, une erreur est survenue: {result.error}"
+
+        except Exception as e:
+            logger.error(f"Bayesian Orchestration Error: {e}")
+            # Fallback direct si le moteur Bayes plante
+            result = await self.gemini.generate(prompt=prompt, max_tokens=2048)
+            return result.code if result.success else f"Error: {e}"
     
     def _messages_to_prompt(self, messages: List[Dict[str, str]]) -> str:
         """Convertit les messages en prompt texte simple."""
