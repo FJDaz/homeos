@@ -1,0 +1,183 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Mock données 4 Corps pour bande de previews Stenciler",
+    "generated_at": "2026-02-11T14:30:00Z",
+    "source": "genome_inferred_kimi_innocent_v2.json"
+  },
+  "corps": [
+    {
+      "id": "n0_brainstorm",
+      "path": "n0[0]",
+      "name": "Brainstorm",
+      "semantic_role": "discovery",
+      "importance": "primary",
+      "visual_hint": "brainstorm",
+      "color": "#c9a6b0",
+      "density": "airy",
+      "arrangement": "column",
+      "organes_count": 2,
+      "organes": [
+        {
+          "id": "n1_ideation",
+          "name": "Idéation Rapide",
+          "features_count": 3,
+          "features": [
+            {"name": "Rapport IR", "atomes_count": 2},
+            {"name": "Stencils HCI", "atomes_count": 1},
+            {"name": "Visual Prompt", "atomes_count": 1}
+          ]
+        },
+        {
+          "id": "n1_arbitrage",
+          "name": "Arbitrage",
+          "features_count": 2,
+          "features": [
+            {"name": "Choix Fonctions", "atomes_count": 2},
+            {"name": "Priorisation", "atomes_count": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n0_backend",
+      "path": "n0[1]",
+      "name": "Backend",
+      "semantic_role": "infrastructure",
+      "importance": "primary",
+      "visual_hint": "backend",
+      "color": "#94bbfb",
+      "density": "compact",
+      "arrangement": "row",
+      "organes_count": 1,
+      "organes": [
+        {
+          "id": "n1_session",
+          "name": "Session Management",
+          "features_count": 4,
+          "features": [
+            {"name": "Auth", "atomes_count": 2},
+            {"name": "Gestion Session", "atomes_count": 3},
+            {"name": "Persistance", "atomes_count": 2},
+            {"name": "Rollback", "atomes_count": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n0_frontend",
+      "path": "n0[2]",
+      "name": "Frontend",
+      "semantic_role": "interface",
+      "importance": "primary",
+      "visual_hint": "frontend",
+      "color": "#9dd5c2",
+      "density": "normal",
+      "arrangement": "grid",
+      "organes_count": 7,
+      "organes": [
+        {
+          "id": "n1_navigation",
+          "name": "Navigation",
+          "features_count": 3,
+          "features": [
+            {"name": "Breadcrumb", "atomes_count": 1},
+            {"name": "Tabs", "atomes_count": 1},
+            {"name": "Menu", "atomes_count": 2}
+          ]
+        },
+        {
+          "id": "n1_layout",
+          "name": "Layout Manager",
+          "features_count": 5,
+          "features": [
+            {"name": "Grid System", "atomes_count": 2},
+            {"name": "Responsive", "atomes_count": 3},
+            {"name": "Breakpoints", "atomes_count": 1},
+            {"name": "Spacing", "atomes_count": 2},
+            {"name": "Typography", "atomes_count": 2}
+          ]
+        },
+        {
+          "id": "n1_upload",
+          "name": "Upload Zone",
+          "features_count": 2,
+          "features": [
+            {"name": "Drop Zone", "atomes_count": 2},
+            {"name": "Preview", "atomes_count": 1}
+          ]
+        },
+        {
+          "id": "n1_style",
+          "name": "Style Picker",
+          "features_count": 8,
+          "features": [
+            {"name": "Palette", "atomes_count": 2},
+            {"name": "Typo", "atomes_count": 1},
+            {"name": "Spacing", "atomes_count": 1},
+            {"name": "Radius", "atomes_count": 1},
+            {"name": "Shadows", "atomes_count": 1},
+            {"name": "Animations", "atomes_count": 1},
+            {"name": "Density", "atomes_count": 1}
+          ]
+        },
+        {
+          "id": "n1_preview",
+          "name": "Preview Band",
+          "features_count": 4,
+          "features": [
+            {"name": "Corps Cards", "atomes_count": 2},
+            {"name": "Drag Handle", "atomes_count": 1},
+            {"name": "Badge Count", "atomes_count": 1}
+          ]
+        },
+        {
+          "id": "n1_canvas",
+          "name": "Canvas Tarmac",
+          "features_count": 6,
+          "features": [
+            {"name": "Fabric.js", "atomes_count": 3},
+            {"name": "Grid 20x20", "atomes_count": 1},
+            {"name": "Zoom", "atomes_count": 1},
+            {"name": "Pan", "atomes_count": 1}
+          ]
+        },
+        {
+          "id": "n1_sidebar",
+          "name": "Sidebar Tools",
+          "features_count": 5,
+          "features": [
+            {"name": "Color Picker", "atomes_count": 2},
+            {"name": "Border Slider", "atomes_count": 1},
+            {"name": "Delete", "atomes_count": 1},
+            {"name": "Arrange", "atomes_count": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n0_deploy",
+      "path": "n0[3]",
+      "name": "Deploy",
+      "semantic_role": "delivery",
+      "importance": "primary",
+      "visual_hint": "deploy",
+      "color": "#e8c4a0",
+      "density": "compact",
+      "arrangement": "stack",
+      "organes_count": 1,
+      "organes": [
+        {
+          "id": "n1_export",
+          "name": "Export Pipeline",
+          "features_count": 3,
+          "features": [
+            {"name": "Build", "atomes_count": 2},
+            {"name": "Optimize", "atomes_count": 1},
+            {"name": "Download", "atomes_count": 2}
+          ]
+        }
+      ]
+    }
+  ]
+}

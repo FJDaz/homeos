@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Design bundles visuels pour Corps Stenciler"
+  },
+  "bundles": {
+    "vercel-like": {
+      "corps": {
+        "width": 320,
+        "height": 240,
+        "background": "#111111",
+        "borderColor": "#333333",
+        "borderWidth": 1,
+        "borderRadius": 12,
+        "padding": 20,
+        "organeHeight": 40,
+        "organeGap": 12,
+        "organeStyle": {
+          "background": "#1a1a1a",
+          "borderColor": "#2a2a2a",
+          "borderWidth": 1,
+          "borderRadius": 8
+        }
+      }
+    },
+    "minimal-light": {
+      "corps": {
+        "width": 320,
+        "height": 240,
+        "background": "#ffffff",
+        "borderColor": "#e5e5e5",
+        "borderWidth": 1,
+        "borderRadius": 8,
+        "padding": 16,
+        "organeHeight": 36,
+        "organeGap": 8,
+        "organeStyle": {
+          "background": "#fafafa",
+          "borderColor": "#f0f0f0",
+          "borderWidth": 1,
+          "borderRadius": 6
+        }
+      }
+    }
+  }
+}
