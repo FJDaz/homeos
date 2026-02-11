@@ -31,7 +31,7 @@ router = APIRouter(prefix="/api", tags=["stenciler"])
 _genome_path = Path(__file__).parent.parent / "genome_v2.json"
 genome_manager = GenomeStateManager(genome_path=str(_genome_path))
 modification_log = ModificationLog()
-drilldown_manager = DrillDownManager(genome=genome_manager.get_current_state().genome)
+drilldown_manager = DrillDownManager(genome=genome_manager.get_modified_genome())
 component_ctx = ComponentContextualizer()
 semantic_system = SemanticPropertySystem()
 
@@ -56,13 +56,13 @@ class StateResponse(BaseModel):
 async def get_genome():
     """Récupère le Genome complet"""
     try:
-        state = genome_manager.get_current_state()
+        genome = genome_manager.get_modified_genome()
         return GenomeResponse(
-            genome=state.genome,
+            genome=genome,
             metadata={
-                "modification_count": state.modification_count,
-                "last_snapshot_id": state.last_snapshot_id,
-                "last_modified": state.last_modified.isoformat()
+                "version": genome.get("version", "2.0.0"),
+                "modification_count": len(modification_log.get_events_since(datetime.min)),
+                "last_modified": datetime.now().isoformat()
             }
         )
     except Exception as e:
@@ -76,12 +76,12 @@ async def get_genome():
 async def get_state():
     """Récupère l'état actuel du Genome"""
     try:
-        state = genome_manager.get_current_state()
+        genome = genome_manager.get_modified_genome()
         return StateResponse(
-            current_state=state.genome,
-            modification_count=state.modification_count,
-            last_snapshot_id=state.last_snapshot_id,
-            last_modified=state.last_modified.isoformat()
+            current_state=genome,
+            modification_count=len(modification_log.get_events_since(datetime.min)),
+            last_snapshot_id=None,
+            last_modified=datetime.now().isoformat()
         )
     except Exception as e:
         raise HTTPException(
