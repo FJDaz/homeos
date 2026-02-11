@@ -2905,3 +2905,4 @@ ars
 3.Vertical
 5. POur le steciler
 Sion beaucoup de chsoes ont été perdues dans la bataille.             │
+ Lire MISSION_STENCILER_EXTENSION.md  

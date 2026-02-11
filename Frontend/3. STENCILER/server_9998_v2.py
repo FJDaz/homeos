@@ -2261,11 +2261,12 @@ def generate_stenciler_html():
                     styleIndicator.querySelector('span:last-child').textContent = selectedStyle;
                 }}
                 
-                // 🧬 Fetch le genome depuis l'API
+                // 🧬 Fetch le genome depuis l'API Backend (localhost:8000)
                 try {{
-                    const response = await fetch('/api/genome');
-                    const genome = await response.json();
-                    console.log('🧬 Genome chargé via API:', genome.n0_phases?.length || 0, 'corps');
+                    const response = await fetch('http://localhost:8000/api/genome');
+                    const data = await response.json();
+                    const genome = data.genome || data;  // Supporte les deux formats
+                    console.log('🧬 Genome chargé via API Backend:', genome.n0_phases?.length || 0, 'corps');
                     
                     // Stocker pour utilisation par stenciler.js
                     window.aetherflowState = {{
