@@ -60,20 +60,29 @@
 
 ---
 
-### ÉTAPE 3 : Drill-down Backend (🔴 BLOQUANT)
+### ÉTAPE 3 : Drill-down Backend (✅ TERMINÉE)
 
 **Qui** : Claude uniquement
-**Durée** : 30min
-**Bloque** : KIMI attend la fin
+**Durée** : 30min (réalisé)
+**Statut** : ✅ **TERMINÉE 14:15**
 
 **Tâches Claude** :
-- [ ] Tester endpoints existants (`POST /api/drilldown/enter`, `/exit`, `GET /api/breadcrumb`)
-- [ ] Documenter format requête/réponse avec exemples
-- [ ] Tester avec curl
+- [x] Corriger endpoints existants (`POST /api/drilldown/enter`, `/exit`, `GET /api/breadcrumb`)
+- [x] Corriger bug calcul niveau dans `DrillDownManager` → `Backend/Prod/sullivan/stenciler/drilldown_manager.py:163`
+- [x] Documenter format requête/réponse avec exemples curl
+- [x] Tester avec curl (3 endpoints OK)
+- [x] Redémarrer Backend (PID 62093+)
+- [x] Documenter pour KIMI → `docs/02-sullivan/mailbox/kimi/DRILLDOWN_BACKEND_READY.md`
 
-**Livrable** : Documentation formats + exemples curl qui fonctionnent
+**Livrable** :
+- Endpoints fonctionnels :
+  - POST http://localhost:8000/api/drilldown/enter
+  - POST http://localhost:8000/api/drilldown/exit
+  - GET http://localhost:8000/api/breadcrumb
+- Tests curl réussis (N0→N1, retour, breadcrumb)
+- Documentation complète avec exemples pour KIMI
 
-**✋ KIMI ATTEND ICI** — Ne pas commencer dblclick avant
+**✅ KIMI PEUT DÉMARRER ÉTAPE 4**
 
 ---
 
