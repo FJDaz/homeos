@@ -1,0 +1,28 @@
+COMPACT_COUNT=$(echo "$state_json" | grep -o '"compact_count": [0-9]*' | cut -d' ' -f2 || echo 0)
+
+# Déterminer ICC_PERCENT (à partir du rapport)
+    local icc_percent=0
+    if [[ -n "$ICC_PERCENT" ]]; then
+      icc_percent=$ICC_PERCENT
+    else
+      # Extraire ICC du rapport si disponible
+      local icc_line
+      icc_line=$(extract_kimi_report | grep -i "icc" | head -1)
+      if [[ -n "$icc_line" ]]; then
+        icc_percent=$(echo "$icc_line" | grep -o '[0-9]*\.?[0-9]*' | head -1)
+      fi
+    fi
+
+case "$status_icon" in
+      "🔴 ROUGE")
+        echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        ;;
+      # ... other cases
+    esac
+
+{
+      "type": "modify_method",
+      "target": "display_report",
+      "position": "before",
+      "code": "..."
+    }

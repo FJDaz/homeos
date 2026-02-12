@@ -59,16 +59,20 @@ class GenomeStateManager:
     - modification_log : Liste des modifications (géré par ModificationLog)
     """
 
-    def __init__(self, genome_path: str):
+    def __init__(self, genome_path: str, modified_genome_path: Optional[str] = None):
         """
         Initialise le manager avec le Genome de référence
 
         Args:
             genome_path: Chemin vers genome_reference.json
+            modified_genome_path: Chemin vers genome_v2_modified.json (optionnel)
         """
         self.genome_path = genome_path
+        self.modified_genome_path = modified_genome_path or genome_path.replace('.json', '_modified.json')
+
+        # Tenter de charger le genome modifié, sinon charger le base
         self.genome_base = self._load_genome(genome_path)
-        self.genome_current = copy.deepcopy(self.genome_base)
+        self.genome_current = self._load_modified_genome()
 
         # Snapshots pour rollback
         self.snapshots: Dict[str, Dict] = {}
@@ -76,7 +80,7 @@ class GenomeStateManager:
 
         # Snapshot initial
         self.last_snapshot_id = self._create_snapshot_id()
-        self.snapshots[self.last_snapshot_id] = copy.deepcopy(self.genome_base)
+        self.snapshots[self.last_snapshot_id] = copy.deepcopy(self.genome_current)
 
         print(f"✅ GenomeStateManager initialisé : {len(self.genome_base.get('n0', []))} Corps chargés")
 
@@ -109,6 +113,55 @@ class GenomeStateManager:
             raise FileNotFoundError(f"Genome non trouvé : {path}")
         except json.JSONDecodeError as e:
             raise ValueError(f"Genome JSON invalide : {e}")
+
+
+    def _load_modified_genome(self) -> Dict:
+        """
+        Tente de charger le Genome modifié depuis genome_v2_modified.json
+
+        Returns:
+            Dict du Genome modifié si existe, sinon genome de base
+        """
+        try:
+            with open(self.modified_genome_path, 'r', encoding='utf-8') as f:
+                genome = json.load(f)
+
+            # Normalisation
+            if 'n0_phases' in genome and 'n0' not in genome:
+                genome['n0'] = genome['n0_phases']
+
+            print(f"✅ Genome modifié chargé depuis : {self.modified_genome_path}")
+            return genome
+
+        except FileNotFoundError:
+            print(f"ℹ️ Aucun genome modifié trouvé, utilisation du genome de base")
+            return copy.deepcopy(self.genome_base)
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Erreur lecture genome modifié, utilisation du genome de base : {e}")
+            return copy.deepcopy(self.genome_base)
+
+
+    def save_to_file(self) -> bool:
+        """
+        Sauvegarde le Genome actuel dans genome_v2_modified.json
+
+        Returns:
+            True si succès, False sinon
+        """
+        try:
+            # Créer une copie propre du genome actuel
+            genome_to_save = copy.deepcopy(self.genome_current)
+
+            # Sauvegarder avec indentation pour lisibilité
+            with open(self.modified_genome_path, 'w', encoding='utf-8') as f:
+                json.dump(genome_to_save, f, indent=2, ensure_ascii=False)
+
+            print(f"✅ Genome sauvegardé dans : {self.modified_genome_path}")
+            return True
+
+        except Exception as e:
+            print(f"❌ Erreur sauvegarde Genome : {e}")
+            return False
 
 
     def _create_snapshot_id(self) -> str:
@@ -282,6 +335,9 @@ class GenomeStateManager:
         # 6. Log modification (sera géré par ModificationLog)
         mod_id = modification_id or f"mod_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
 
+        # 7. Sauvegarde automatique sur disque
+        self.save_to_file()
+
         return ModificationResult(
             success=True,
             modified_genome=self.genome_current,
@@ -334,6 +390,66 @@ class GenomeStateManager:
         print(f"✅ Checkpoint sauvegardé : {snapshot_id}")
         return snapshot_id
 
+
+    def undo(self, modification_log: Any) -> Tuple[bool, Optional[str]]:
+        """
+        Annule la dernière modification (ÉTAPE 7)
+
+        Args:
+            modification_log: Instance de ModificationLog
+
+        Returns:
+            (success, error_message)
+        """
+        # Récupérer la dernière modification depuis modification_log
+        modification = modification_log.undo()
+
+        if not modification:
+            return False, "Aucune modification à annuler"
+
+        # Appliquer l'inverse de la modification (old_value devient la nouvelle valeur)
+        result = self.apply_modification(
+            path=modification.path,
+            property=modification.property,
+            value=modification.old_value,
+            modification_id=f"undo_{modification.id}"
+        )
+
+        if result.success:
+            print(f"✅ Undo appliqué : {modification.property} = {modification.old_value}")
+            return True, None
+        else:
+            return False, result.error
+
+    def redo(self, modification_log: Any) -> Tuple[bool, Optional[str]]:
+        """
+        Refait la dernière modification annulée (ÉTAPE 7)
+
+        Args:
+            modification_log: Instance de ModificationLog
+
+        Returns:
+            (success, error_message)
+        """
+        # Récupérer la modification à refaire depuis modification_log
+        modification = modification_log.redo()
+
+        if not modification:
+            return False, "Aucune modification à refaire"
+
+        # Appliquer la modification (new_value)
+        result = self.apply_modification(
+            path=modification.path,
+            property=modification.property,
+            value=modification.new_value,
+            modification_id=f"redo_{modification.id}"
+        )
+
+        if result.success:
+            print(f"✅ Redo appliqué : {modification.property} = {modification.new_value}")
+            return True, None
+        else:
+            return False, result.error
 
     def get_history(self, since: Optional[datetime] = None) -> List[Modification]:
         """

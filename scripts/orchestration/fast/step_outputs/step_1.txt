@@ -1,0 +1,26 @@
+Step: step_1
+Description: Modifier scripts/orchestration/watch_kimi.sh : ajouter fonction estimate_tokens() qui compte les mots dans le CR KIMI et multiplie par 1.3 pour approximer les tokens. Stocker dans variable TOKENS_CR. Calculer ICC approximatif (exemple: TOKENS_CR / 128000 * 100 pour KIMI avec contexte 128k). Afficher dans le rapport après extraction du CR.
+Type: refactoring
+Success: True
+Tokens: 0
+Cost: $0.0000
+Time: 3ms
+
+============================================================
+
+```json
+{
+  "operations": [
+    {
+      "type": "add_function",
+      "code": "estimate_tokens() {\n  local word_count\n  word_count=$(extract_kimi_report | wc -w)\n  TOKENS_CR=$((word_count * 13 / 10))\n  ICC_PERCENT=$(bc -l <<< \"scale=2; $TOKENS_CR / 128000 * 100\")\n}"
+    },
+    {
+      "type": "modify_method",
+      "target": "display_report",
+      "position": "after",
+      "code": "echo\"\n\"\necho -e \"${YELLOW}📊 Rapport technique :${NC}\"\necho \"  Tokens estimés : $TOKENS_CR\"\necho \"  ICC approximatif : $ICC_PERCENT%\"\n"
+    }
+  ]
+}
+```

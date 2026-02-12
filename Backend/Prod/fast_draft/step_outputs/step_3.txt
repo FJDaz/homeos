@@ -1,0 +1,1072 @@
+Step: step_3
+Description: Créer test unitaire Backend/Prod/tests/test_orchestrator_fixes.py : (1) Test race condition : créer plan JSON avec 3 steps modifiant le même fichier, exécuter avec orchestrator, vérifier exécution séquentielle forcée et intégrité du fichier final. (2) Test surgical mode : exécuter plan en mode FAST, vérifier surgical_mode=False dans les logs, exécuter même plan en mode BUILD, vérifier surgical_mode=True. Utiliser pytest et fixtures appropriées.
+Type: code_generation
+Success: True
+Tokens: 22214
+Cost: $0.0043
+Time: 191306ms
+
+============================================================
+
+I'll create a comprehensive test for race conditions in the orchestrator, focusing on sequential execution when multiple steps modify the same file.
+
+```python
+"""
+Test for race condition prevention in Orchestrator.
+Verifies that steps modifying the same file execute sequentially and maintain file integrity.
+"""
+
+import json
+import asyncio
+import tempfile
+import time
+from pathlib import Path
+from typing import Dict, List
+import pytest
+
+from ..core.orchestrator import Orchestrator
+from ..core.models import Plan, Step, StepResult
+from ..core.agent_router import AgentRouter
+from ..core.metrics import MetricsCollector
+
+
+class TestRaceCondition:
+    """Test suite for race condition prevention in Orchestrator."""
+    
+    @pytest.fixture
+    def temp_test_file(self):
+        """Create a temporary Python file for testing."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write("""# Test file for race condition testing
+import time
+
+class TestClass:
+    def __init__(self):
+        self.value = 0
+    
+    def get_value(self):
+        return self.value
+    
+    def increment(self):
+        self.value += 1
+        return self.value
+
+def helper_function():
+    return "original"
+""")
+            temp_path = Path(f.name)
+        yield temp_path
+        # Cleanup
+        if temp_path.exists():
+            temp_path.unlink()
+    
+    @pytest.fixture
+    def mock_agent_router(self, mocker):
+        """Mock AgentRouter that simulates step execution with delays."""
+        router = mocker.MagicMock(spec=AgentRouter)
+        
+        # Track execution order
+        execution_order = []
+        file_modifications = {}
+        
+        async def mock_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            # Simulate processing delay
+            await asyncio.sleep(0.1)
+            
+            # Record execution order
+            execution_order.append(step.id)
+            
+            # Generate surgical instructions based on step
+            if step.id == "step_1":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_one(self):\n        return 'added by step 1'"
+                    }]
+                })
+            elif step.id == "step_2":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_two(self):\n        return 'added by step 2'"
+                    }]
+                })
+            elif step.id == "step_3":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_three(self):\n        return 'added by step 3'"
+                    }]
+                })
+            else:
+                output = "{}"
+            
+            # Track file modifications
+            if loaded_files:
+                for file_path in loaded_files:
+                    if file_path not in file_modifications:
+                        file_modifications[file_path] = []
+                    file_modifications[file_path].append(step.id)
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        router.execute_step = mock_execute_step
+        router.execution_order = execution_order
+        router.file_modifications = file_modifications
+        
+        return router
+    
+    @pytest.fixture
+    def orchestrator(self, mock_agent_router):
+        """Create an Orchestrator instance with mocked dependencies."""
+        orchestrator = Orchestrator(
+            agent_router=mock_agent_router,
+            execution_mode="BUILD"
+        )
+        orchestrator.metrics = MetricsCollector()
+        return orchestrator
+    
+    def create_race_condition_plan(self, test_file_path: Path) -> Plan:
+        """Create a plan with 3 steps that all modify the same file."""
+        return Plan(
+            task_id="race_condition_test",
+            name="Race Condition Test",
+            description="Test sequential execution when multiple steps modify the same file",
+            steps=[
+                Step(
+                    id="step_1",
+                    name="Add first method",
+                    description="Add method_one to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_2",
+                    name="Add second method",
+                    description="Add method_two to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],  # No explicit dependencies - should still execute sequentially
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_3",
+                    name="Add third method",
+                    description="Add method_three to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],  # No explicit dependencies - should still execute sequentially
+                    agent_preference=None
+                )
+            ]
+        )
+    
+    @pytest.mark.asyncio
+    async def test_sequential_execution_same_file(self, orchestrator, temp_test_file, mock_agent_router):
+        """
+        Test that steps modifying the same file execute sequentially,
+        even without explicit dependencies.
+        """
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify all steps succeeded
+        assert all(result.success for result in results.values())
+        
+        # Verify execution order matches step order
+        assert mock_agent_router.execution_order == ["step_1", "step_2", "step_3"]
+        
+        # Verify file was modified by all steps
+        assert str(temp_test_file) in mock_agent_router.file_modifications
+        assert mock_agent_router.file_modifications[str(temp_test_file)] == ["step_1", "step_2", "step_3"]
+        
+        # Verify final file content
+        final_content = temp_test_file.read_text()
+        
+        # Check all methods were added
+        assert "def method_one(self):" in final_content
+        assert "def method_two(self):" in final_content
+        assert "def method_three(self):" in final_content
+        
+        # Check original content is preserved
+        assert "def get_value(self):" in final_content
+        assert "def increment(self):" in final_content
+        assert "def helper_function():" in final_content
+        
+        # Verify no duplicate methods
+        assert final_content.count("def method_one(self):") == 1
+        assert final_content.count("def method_two(self):") == 1
+        assert final_content.count("def method_three(self):") == 1
+    
+    @pytest.mark.asyncio
+    async def test_file_integrity_parallel_attempt(self, orchestrator, temp_test_file, mocker):
+        """
+        Test that file integrity is maintained even if steps are attempted in parallel.
+        """
+        # Mock _execute_step to track concurrent access attempts
+        execution_times = []
+        file_access_times = {}
+        
+        original_execute_step = orchestrator._execute_step
+        
+        async def tracked_execute_step(step, context, previous_results):
+            start_time = time.time()
+            execution_times.append((step.id, start_time))
+            
+            # Read file at start
+            if temp_test_file.exists():
+                content_start = temp_test_file.read_text()
+                if step.id not in file_access_times:
+                    file_access_times[step.id] = {"start": content_start}
+            
+            # Execute step
+            result = await original_execute_step(step, context, previous_results)
+            
+            end_time = time.time()
+            execution_times.append((step.id, end_time))
+            
+            # Read file at end
+            if temp_test_file.exists():
+                content_end = temp_test_file.read_text()
+                if step.id in file_access_times:
+                    file_access_times[step.id]["end"] = content_end
+            
+            return result
+        
+        orchestrator._execute_step = tracked_execute_step
+        
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify no overlapping execution
+        execution_intervals = {}
+        for i in range(0, len(execution_times), 2):
+            step_id = execution_times[i][0]
+            start = execution_times[i][1]
+            end = execution_times[i + 1][1]
+            execution_intervals[step_id] = (start, end)
+        
+        # Check intervals don't overlap
+        intervals = list(execution_intervals.values())
+        for i in range(len(intervals)):
+            for j in range(i + 1, len(intervals)):
+                start_i, end_i = intervals[i]
+                start_j, end_j = intervals[j]
+                # Either i finishes before j starts, or j finishes before i starts
+                assert end_i <= start_j or end_j <= start_i
+        
+        # Verify file content evolution
+        for step_id in ["step_1", "step_2", "step_3"]:
+            if step_id in file_access_times:
+                start_content = file_access_times[step_id]["start"]
+                end_content = file_access_times[step_id]["end"]
+                
+                # File should change between start and end of each step
+                if step_id == "step_1":
+                    # step_1 adds method_one
+                    assert "def method_one(self):" not in start_content
+                    assert "def method_one(self):" in end_content
+                elif step_id == "step_2":
+                    # step_2 adds method_two (method_one should already be there)
+                    assert "def method_one(self):" in start_content
+                    assert "def method_two(self):" not in start_content
+                    assert "def method_two(self):" in end_content
+                elif step_id == "step_3":
+                    # step_3 adds method_three (method_one and two should already be there)
+                    assert "def method_one(self):" in start_content
+                    assert "def method_two(self):" in start_content
+                    assert "def method_three(self):" not in start_content
+                    assert "def method_three(self):" in end_content
+    
+    @pytest.mark.asyncio
+    async def test_with_explicit_dependencies(self, orchestrator, temp_test_file, mock_agent_router):
+        """
+        Test sequential execution with explicit dependencies.
+        """
+        plan = Plan(
+            task_id="explicit_deps_test",
+            name="Explicit Dependencies Test",
+            description="Test with explicit step dependencies",
+            steps=[
+                Step(
+                    id="step_a",
+                    name="Base modification",
+                    description="Add base method",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=[],
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_b",
+                    name="Dependent modification",
+                    description="Add method that depends on step_a",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=["step_a"],  # Explicit dependency
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_c",
+                    name="Final modification",
+                    description="Add final method",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=["step_b"],  # Explicit dependency
+                    agent_preference=None
+                )
+            ]
+        )
+        
+        # Update mock to handle these step IDs
+        original_execute = mock_agent_router.execute_step
+        
+        async def custom_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            if step.id == "step_a":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def base_method(self):\n        return 'base'"
+                    }]
+                })
+            elif step.id == "step_b":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def dependent_method(self):\n        return 'depends on base'"
+                    }]
+                })
+            elif step.id == "step_c":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def final_method(self):\n        return 'final'"
+                    }]
+                })
+            else:
+                output = "{}"
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        mock_agent_router.execute_step = custom_execute_step
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify execution order respects dependencies
+        assert mock_agent_router.execution_order == ["step_a", "step_b", "step_c"]
+        
+        # Verify final file content
+        final_content = temp_test_file.read_text()
+        assert "def base_method(self):" in final_content
+        assert "def dependent_method(self):" in final_content
+        assert "def final_method(self):" in final_content
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_same_file(self, orchestrator, temp_test_file, mocker):
+        """
+        Test that file remains consistent when a step fails.
+        """
+        # Mock agent_router to make step_2 fail
+        mock_router = mocker.MagicMock(spec=AgentRouter)
+        
+        async def failing_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            if step.id == "step_2":
+                return StepResult(
+                    step_id=step.id,
+                    success=False,
+                    output="Simulated failure",
+                    execution_time=0.1,
+                    token_usage={"input": 100, "output": 0}
+                )
+            
+            # Success for other steps
+            output = json.dumps({
+                "operations": [{
+                    "type": "add_method",
+                    "target": "TestClass",
+                    "position": "end",
+                    "code": f"    def method_{step.id}(self):\n        return '{step.id}'"
+                }]
+            })
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        mock_router.execute_step = failing_execute_step
+        orchestrator.agent_router = mock_router
+        
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify step_2 failed
+        assert not results["step_2"].success
+        assert results["step_1"].success
+        # step_3 should still execute (depends on orchestrator's error handling policy)
+        
+        # Verify file contains only successful modifications
+        final_content = temp_test_file.read_text()
+        assert "def method_step_1(self):" in final_content
+        assert "return 'step_2'" not in final_content  # step_2 failed
+        
+        # File should still be valid Python
+        import ast
+        try:
+            ast.parse(final_content)
+        except SyntaxError as e:
+            pytest.fail(f"File contains invalid Python after failed step: {e}")
+    
+    def test_plan_json_generation(self):
+        """Test generation of the race condition test plan JSON."""
+        test_file = "/tmp/test_race.py"
+        
+        plan = self.create_race_condition_plan(Path(test_file))
+        
+        # Convert to JSON-serializable dict
+        plan_dict = {
+            "task_id": plan.task_id,
+            "name": plan.name,
+            "description": plan.description,
+            "steps": [
+                {
+                    "id": step.id,
+                    "name": step.name,
+                    "description": step.description,
+                    "type": step.type,
+                    "context": step.context,
+                    "input_files": step.input_files,
+                    "output_files": step.output_files,
+                    "dependencies": step.dependencies,
+                    "agent_preference": step.agent_preference
+                }
+                for step in plan.steps
+            ]
+        }
+        
+        # Verify structure
+        assert plan_dict["task_id"] == "race_condition_test"
+        assert len(plan_dict["steps"]) == 3
+        
+        # All steps should target the same file
+        for step in plan_dict["steps"]:
+            assert step["output_files"] == [test_file]
+            assert step["type"] == "code_generation"
+            assert step["context"]["surgical_mode"] is True
+        
+        # Print JSON for manual verification
+        print("\n" + "="*80)
+        print("RACE CONDITION TEST PLAN JSON:")
+        print("="*80)
+        print(json.dumps(plan_dict, indent=2))
+        print("="*80 + "\n")
+
+
+class TestConcurrentFileAccess:
+    """Additional tests for concurrent file access scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_multiple_files_concurrent_modification(self, orchestrator, mocker):
+        """
+        Test that steps modifying different files can potentially execute concurrently,
+        but steps modifying the same file execute sequentially.
+        """
+        # Create multiple test files
+        test_files = []
+        for i in range(3):
+            temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False)
+            temp_file.write(f"# File {i}\nclass File{i}Class:\n    pass\n")
+            temp_file.close()
+            test_files.append(Path(temp_file.name))
+        
+        try:
+            # Track execution concurrency
+            active_steps = set()
+            max_concurrent = 0
+            execution_log = []
+            
+            original_execute = orchestrator._execute_step
+            
+            async def tracked_execute_step
+
+I'll create a comprehensive test to verify that surgical mode is correctly enabled/disabled based on the execution mode (FAST vs BUILD). This test will create a test plan, execute it in both modes, and verify the surgical mode status in logs.
+
+```python
+import pytest
+import asyncio
+import tempfile
+import shutil
+import json
+import logging
+from pathlib import Path
+from unittest.mock import Mock, patch, AsyncMock
+import sys
+
+# Add the project root to the path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from Backend.Prod.orchestrator import Orchestrator
+from Backend.Prod.core.plan import Plan, Step
+from Backend.Prod.core.metrics import MetricsCollector
+
+
+class TestSurgicalModeExecution:
+    """Test surgical mode activation based on execution mode."""
+    
+    @pytest.fixture
+    def temp_project_dir(self):
+        """Create a temporary project directory with Python files."""
+        temp_dir = tempfile.mkdtemp(prefix="aetherflow_test_")
+        project_dir = Path(temp_dir) / "test_project"
+        project_dir.mkdir(parents=True)
+        
+        # Create a simple Python file for testing
+        python_file = project_dir / "test_module.py"
+        python_file.write_text("""
+import os
+from typing import Optional
+
+class TestClass:
+    def existing_method(self) -> str:
+        return "existing"
+        
+def existing_function() -> int:
+    return 42
+""")
+        
+        # Create another Python file
+        another_file = project_dir / "another_module.py"
+        another_file.write_text("""
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/test")
+async def test_endpoint():
+    return {"status": "ok"}
+""")
+        
+        yield project_dir
+        
+        # Cleanup
+        shutil.rmtree(temp_dir)
+    
+    @pytest.fixture
+    def test_plan(self, temp_project_dir):
+        """Create a test plan that should trigger surgical mode."""
+        plan = Plan(
+            task_id="test_surgical_mode",
+            description="Test surgical mode activation",
+            steps=[
+                Step(
+                    id="step_1",
+                    type="code_generation",
+                    description="Add a new method to TestClass",
+                    context={
+                        "surgical_mode": True,  # Explicitly enable surgical mode
+                        "existing_files": [
+                            str(temp_project_dir / "test_module.py"),
+                            str(temp_project_dir / "another_module.py")
+                        ]
+                    },
+                    dependencies=[],
+                    agent="test_agent"
+                )
+            ]
+        )
+        return plan
+    
+    @pytest.fixture
+    def mock_agent_router(self):
+        """Create a mock agent router."""
+        router = Mock()
+        router.execute_step = AsyncMock(return_value=Mock(
+            success=True,
+            output='''{
+                "operations": [
+                    {
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "def new_method(self):\\n    return \"new method added\""
+                    }
+                ]
+            }'''
+        ))
+        return router
+    
+    @pytest.fixture
+    def mock_surgical_editor(self):
+        """Mock the SurgicalEditor to avoid actual file modifications."""
+        with patch('Backend.Prod.orchestrator.SurgicalEditor') as mock_editor:
+            # Mock the editor instance
+            editor_instance = Mock()
+            editor_instance.prepare.return_value = True
+            editor_instance.get_ast_context.return_value = "AST context for test file"
+            editor_instance.apply_instructions.return_value = (True, "modified code", "original code")
+            
+            # Mock the class methods
+            mock_editor.return_value = editor_instance
+            mock_editor.create_new_file.return_value = (True, "File created successfully")
+            
+            yield mock_editor
+    
+    @pytest.fixture
+    def mock_surgical_parser(self):
+        """Mock the SurgicalInstructionParser."""
+        with patch('Backend.Prod.orchestrator.SurgicalInstructionParser') as mock_parser:
+            mock_parser.is_surgical_output.return_value = True
+            mock_parser.parse_instructions.return_value = ([Mock(code="def new_method(self):\n    return \"new method\"")], None)
+            yield mock_parser
+    
+    def capture_logs(self, caplog, level=logging.INFO):
+        """Helper to capture and filter logs."""
+        caplog.set_level(level)
+        return caplog
+    
+    @pytest.mark.asyncio
+    async def test_surgical_mode_disabled_in_fast_mode(
+        self, 
+        temp_project_dir, 
+        test_plan, 
+        mock_agent_router,
+        mock_surgical_editor,
+        mock_surgical_parser,
+        caplog
+    ):
+        """Test that surgical mode is DISABLED when execution_mode is FAST."""
+        # Setup
+        orchestrator = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="FAST",
+            agent_router=mock_agent_router
+        )
+        
+        # Capture logs
+        self.capture_logs(caplog)
+        
+        # Execute the plan
+        results = await orchestrator.execute_plan(test_plan)
+        
+        # Verify surgical mode is disabled in logs
+        surgical_mode_logs = [
+            record for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        
+        assert len(surgical_mode_logs) > 0, "No surgical mode logs found"
+        
+        # Check that surgical mode is False
+        surgical_mode_enabled = any(
+            "Surgical mode: False" in record.message 
+            for record in surgical_mode_logs
+        )
+        
+        assert surgical_mode_enabled, f"Surgical mode should be False in FAST mode. Logs: {[r.message for r in surgical_mode_logs]}"
+        
+        # Verify execution_mode is mentioned in logs
+        fast_mode_log = next(
+            (record for record in surgical_mode_logs if "execution_mode=FAST" in record.message),
+            None
+        )
+        assert fast_mode_log is not None, "execution_mode=FAST should be in logs"
+        
+        # Verify that surgical edits were NOT applied
+        # (agent_router.execute_step should have been called with surgical_mode=False)
+        mock_agent_router.execute_step.assert_called_once()
+        call_kwargs = mock_agent_router.execute_step.call_args[1]
+        assert call_kwargs.get('surgical_mode') == False, "surgical_mode should be False when passed to agent_router"
+        
+        # Verify no AST parsing was attempted
+        mock_surgical_editor.return_value.prepare.assert_not_called()
+        
+        print("✓ FAST mode: Surgical mode correctly disabled")
+        print(f"  Log message: {surgical_mode_logs[0].message}")
+    
+    @pytest.mark.asyncio
+    async def test_surgical_mode_enabled_in_build_mode(
+        self, 
+        temp_project_dir, 
+        test_plan, 
+        mock_agent_router,
+        mock_surgical_editor,
+        mock_surgical_parser,
+        caplog
+    ):
+        """Test that surgical mode is ENABLED when execution_mode is BUILD."""
+        # Setup
+        orchestrator = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="BUILD",
+            agent_router=mock_agent_router
+        )
+        
+        # Capture logs
+        self.capture_logs(caplog)
+        
+        # Execute the plan
+        results = await orchestrator.execute_plan(test_plan)
+        
+        # Verify surgical mode is enabled in logs
+        surgical_mode_logs = [
+            record for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        
+        assert len(surgical_mode_logs) > 0, "No surgical mode logs found"
+        
+        # Check that surgical mode is True
+        surgical_mode_enabled = any(
+            "Surgical mode: True" in record.message 
+            for record in surgical_mode_logs
+        )
+        
+        assert surgical_mode_enabled, f"Surgical mode should be True in BUILD mode. Logs: {[r.message for r in surgical_mode_logs]}"
+        
+        # Verify execution_mode is mentioned in logs
+        build_mode_log = next(
+            (record for record in surgical_mode_logs if "execution_mode=BUILD" in record.message),
+            None
+        )
+        assert build_mode_log is not None, "execution_mode=BUILD should be in logs"
+        
+        # Verify that surgical edits WERE attempted to be applied
+        # (agent_router.execute_step should have been called with surgical_mode=True)
+        mock_agent_router.execute_step.assert_called_once()
+        call_kwargs = mock_agent_router.execute_step.call_args[1]
+        assert call_kwargs.get('surgical_mode') == True, "surgical_mode should be True when passed to agent_router"
+        
+        # Verify AST parsing was attempted
+        mock_surgical_editor.return_value.prepare.assert_called()
+        mock_surgical_editor.return_value.get_ast_context.assert_called()
+        
+        print("✓ BUILD mode: Surgical mode correctly enabled")
+        print(f"  Log message: {surgical_mode_logs[0].message}")
+    
+    @pytest.mark.asyncio
+    async def test_surgical_mode_enabled_in_double_check_mode(
+        self, 
+        temp_project_dir, 
+        test_plan, 
+        mock_agent_router,
+        mock_surgical_editor,
+        mock_surgical_parser,
+        caplog
+    ):
+        """Test that surgical mode is ENABLED when execution_mode is DOUBLE-CHECK."""
+        # Setup
+        orchestrator = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="DOUBLE-CHECK",
+            agent_router=mock_agent_router
+        )
+        
+        # Capture logs
+        self.capture_logs(caplog)
+        
+        # Execute the plan
+        results = await orchestrator.execute_plan(test_plan)
+        
+        # Verify surgical mode is enabled in logs
+        surgical_mode_logs = [
+            record for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        
+        assert len(surgical_mode_logs) > 0, "No surgical mode logs found"
+        
+        # Check that surgical mode is True
+        surgical_mode_enabled = any(
+            "Surgical mode: True" in record.message 
+            for record in surgical_mode_logs
+        )
+        
+        assert surgical_mode_enabled, f"Surgical mode should be True in DOUBLE-CHECK mode. Logs: {[r.message for r in surgical_mode_logs]}"
+        
+        # Verify execution_mode is mentioned in logs
+        double_check_log = next(
+            (record for record in surgical_mode_logs if "execution_mode=DOUBLE-CHECK" in record.message),
+            None
+        )
+        assert double_check_log is not None, "execution_mode=DOUBLE-CHECK should be in logs"
+        
+        print("✓ DOUBLE-CHECK mode: Surgical mode correctly enabled")
+        print(f"  Log message: {surgical_mode_logs[0].message}")
+    
+    @pytest.mark.asyncio
+    async def test_same_plan_different_modes_comparison(
+        self, 
+        temp_project_dir, 
+        test_plan, 
+        mock_agent_router,
+        mock_surgical_editor,
+        mock_surgical_parser,
+        caplog
+    ):
+        """Execute the same plan in FAST and BUILD modes and compare surgical mode status."""
+        
+        # Track surgical mode status for each execution
+        surgical_mode_results = {}
+        
+        # Test FAST mode
+        orchestrator_fast = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="FAST",
+            agent_router=mock_agent_router
+        )
+        
+        self.capture_logs(caplog)
+        await orchestrator_fast.execute_plan(test_plan)
+        
+        fast_logs = [
+            record.message for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        surgical_mode_results["FAST"] = any("Surgical mode: True" in log for log in fast_logs)
+        
+        # Reset mocks
+        mock_agent_router.reset_mock()
+        mock_surgical_editor.reset_mock()
+        
+        # Test BUILD mode
+        orchestrator_build = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="BUILD",
+            agent_router=mock_agent_router
+        )
+        
+        self.capture_logs(caplog)
+        await orchestrator_build.execute_plan(test_plan)
+        
+        build_logs = [
+            record.message for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        surgical_mode_results["BUILD"] = any("Surgical mode: True" in log for log in build_logs)
+        
+        # Verify the difference
+        assert surgical_mode_results["FAST"] == False, "Surgical mode should be False in FAST mode"
+        assert surgical_mode_results["BUILD"] == True, "Surgical mode should be True in BUILD mode"
+        
+        print("✓ Comparison test passed:")
+        print(f"  FAST mode: surgical_mode={surgical_mode_results['FAST']}")
+        print(f"  BUILD mode: surgical_mode={surgical_mode_results['BUILD']}")
+    
+    @pytest.mark.asyncio
+    async def test_surgical_mode_with_new_files_only(
+        self, 
+        temp_project_dir, 
+        mock_agent_router,
+        caplog
+    ):
+        """Test that surgical mode is disabled when only new files are involved."""
+        # Create a plan with only new files (no existing content)
+        new_file_path = temp_project_dir / "new_file.py"
+        
+        plan = Plan(
+            task_id="test_new_files",
+            description="Test with new files only",
+            steps=[
+                Step(
+                    id="step_1",
+                    type="code_generation",
+                    description="Create a new file",
+                    context={
+                        "existing_files": [str(new_file_path)],  # File doesn't exist yet
+                        "surgical_mode": True
+                    },
+                    dependencies=[],
+                    agent="test_agent"
+                )
+            ]
+        )
+        
+        # Test in BUILD mode (which normally enables surgical mode)
+        orchestrator = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="BUILD",
+            agent_router=mock_agent_router
+        )
+        
+        self.capture_logs(caplog)
+        await orchestrator.execute_plan(plan)
+        
+        # Check logs for surgical mode status
+        surgical_mode_logs = [
+            record.message for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        
+        # Surgical mode should be False because has_existing_code=False
+        assert any("Surgical mode: False" in log for log in surgical_mode_logs), \
+            f"Surgical mode should be False for new files. Logs: {surgical_mode_logs}"
+        
+        print("✓ New files test: Surgical mode correctly disabled for new files")
+    
+    @pytest.mark.asyncio
+    async def test_surgical_mode_disabled_in_context(
+        self, 
+        temp_project_dir, 
+        mock_agent_router,
+        caplog
+    ):
+        """Test that surgical mode can be explicitly disabled in step context."""
+        # Create a Python file
+        python_file = temp_project_dir / "test_disable.py"
+        python_file.write_text("class Test:\n    pass\n")
+        
+        # Create a plan with surgical_mode=False in context
+        plan = Plan(
+            task_id="test_disable_context",
+            description="Test explicit surgical mode disable",
+            steps=[
+                Step(
+                    id="step_1",
+                    type="code_generation",
+                    description="Test with surgical_mode=False",
+                    context={
+                        "existing_files": [str(python_file)],
+                        "surgical_mode": False  # Explicitly disable
+                    },
+                    dependencies=[],
+                    agent="test_agent"
+                )
+            ]
+        )
+        
+        # Test in BUILD mode
+        orchestrator = Orchestrator(
+            project_root=temp_project_dir,
+            execution_mode="BUILD",
+            agent_router=mock_agent_router
+        )
+        
+        self.capture_logs(caplog)
+        await orchestrator.execute_plan(plan)
+        
+        # Check logs
+        surgical_mode_logs = [
+            record.message for record in caplog.records 
+            if "Surgical mode:" in record.message
+        ]
+        
+        # Should show context_surgical_mode=False
+        context_disable_log = next(
+            (log for log in surgical_mode_logs if "context_surgical_mode=False" in log),
+            None
+        )
+        
+        assert context_disable_log is not None, \
+            f"Should show context_surgical_mode=False. Logs: {surgical_mode_logs}"
+        
+        # Surgical mode should be False
+        assert any("Surgical mode: False" in log for log in surgical_mode_logs), \
+            f"Surgical mode should be False when disabled in context. Logs: {surgical_mode_logs}"
+        
+        print("✓ Context disable test: Surgical mode correctly disabled via context")
+
+
+def run_surgical_mode_tests():
+    """Run the surgical mode tests and print results."""
+    import sys
+    import io
+    
+    # Capture output
+    original_stdout = sys.stdout
+    sys.stdout = io.StringIO()
+    
+    try:
+        # Create a test instance
+        tester = TestSurgicalModeExecution()
+        
+        # Create temporary directory
+        temp_dir = tempfile.mkdtemp(prefix="aetherflow_test_run_")
+        project_dir = Path(temp_dir) / "test_project"
+        project_dir.mkdir(parents=True)
+        
+        # Create test files
+        python_file = project_dir / "test_file.py"
+        python_file.write_text("class TestClass:\n    def method(self):\n        return 'test'")
+        
+        # Create test plan
+        plan = Plan(
+            task_id="manual_test",
+            description="Manual surgical mode test",
+            steps=[
+                Step(
+                    id="step_1",
+                    type="code_generation",
+                    description="Test step",
+                    context={
+                        "existing_files": [str(python_file)],
+                        "surgical_mode": True
+                    },
+                    dependencies=[],
+                    agent="test_agent"
+                )
+            ]
+        )
+        
+        print("=" * 60)
+        print("SURGICAL MODE TEST SUITE")
+        print("=" * 60)
+        
+        # Test 1: FAST mode
+        print("\n1. Testing FAST mode execution:")
+        print("-" * 40)
+        
+        # Mock dependencies
+        mock_router = Mock()
+        mock_router.execute_step = AsyncMock(return_value=Mock(
+            success

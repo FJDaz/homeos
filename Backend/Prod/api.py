@@ -26,6 +26,9 @@ from .sullivan.studio_routes import router as studio_router
 # Import agent routes (Chatbot/Agent Sullivan)
 from .sullivan.agent.api import router as agent_router
 
+# Import stenciler routes (Genome Editor)
+from .sullivan.stenciler.api import router as stenciler_router
+
 
 app = FastAPI(title="AetherFlow API", version="0.1.0")
 
@@ -71,6 +74,9 @@ app.add_middleware(SullivanWidgetMiddleware)
 
 # Include studio routes (Parcours UX Sullivan)
 app.include_router(studio_router)
+
+# Include stenciler routes (Genome Editor)
+app.include_router(stenciler_router)
 
 # Mount uploads directory for Step 5 PNG uploads
 uploads_dir = Path.home() / ".aetherflow" / "uploads" / "studio"

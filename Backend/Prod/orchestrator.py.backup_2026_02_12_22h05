@@ -1579,8 +1579,7 @@ Please provide the corrected version.
                             if step.context.get('surgical_mode', True):
                                 surgical_mode = True
 
-            context_surgical = step.context.get('surgical_mode', True)
-            logger.info(f'Surgical mode: {surgical_mode} (execution_mode={self.execution_mode}, has_existing_code={has_existing_code}, has_python_files={has_python_files}, step_type={step.type}, context_surgical_mode={context_surgical})')
+            logger.info(f'Surgical mode: {surgical_mode} (execution_mode={self.execution_mode}, has_existing_code={has_existing_code}, has_python_files={has_python_files}, step_type={step.type}, context_surgical_mode={step.context.get(\"surgical_mode\", True)})')
             
             files_section_parts = ["\n\nExisting code files:\n"]
             

@@ -35,10 +35,18 @@ class ModificationEvent():
 class ModificationLog():
     "\n    Log immutable des modifications avec event sourcing\n\n    Architecture :\n    - Chaque modification = 1 événement\n    - Événements stockés chronologiquement\n    - Persistance JSON (extensible vers SQLite)\n    - Reconstruction d'état possible\n    "
 
+    MAX_UNDO_STACK = 50  # Limite pour éviter consommation mémoire excessive
+
     def __init__(self, log_path: str='Backend/Prod/sullivan/stenciler/modification_log.json'):
         '\n        Initialise le log des modifications\n\n        Args:\n            log_path: Chemin vers le fichier de log JSON\n        '
         self.log_path = log_path
         self.events: List[ModificationEvent] = []
+
+        # Stacks Undo/Redo (ÉTAPE 7)
+        from collections import deque
+        self.undo_stack: deque = deque(maxlen=self.MAX_UNDO_STACK)
+        self.redo_stack: deque = deque(maxlen=self.MAX_UNDO_STACK)
+
         self._load_events()
         print(f'✅ ModificationLog initialisé : {len(self.events)} événements chargés')
 
@@ -68,8 +76,53 @@ class ModificationLog():
         event_id = str(uuid.uuid4())
         event = ModificationEvent(id=event_id, timestamp=datetime.now(), path=path, property=property, old_value=old_value, new_value=new_value, semantic_attributes=(semantic_attributes or {}), user_context=user_context)
         self.events.append(event)
+
+        # Ajouter à undo_stack et vider redo_stack (ÉTAPE 7)
+        self.undo_stack.append(event)
+        self.redo_stack.clear()
+
         self._save_events()
         return event_id
+
+    def undo(self) -> Optional[ModificationEvent]:
+        """
+        Annule la dernière modification
+
+        Returns:
+            L'événement annulé, ou None si undo_stack vide
+        """
+        if not self.undo_stack:
+            print("⚠️  Undo impossible : pile vide")
+            return None
+
+        modification = self.undo_stack.pop()
+        self.redo_stack.append(modification)
+        print(f"↩️  Undo : {modification.id} ({modification.property})")
+        return modification
+
+    def redo(self) -> Optional[ModificationEvent]:
+        """
+        Refait la dernière modification annulée
+
+        Returns:
+            L'événement refait, ou None si redo_stack vide
+        """
+        if not self.redo_stack:
+            print("⚠️  Redo impossible : pile vide")
+            return None
+
+        modification = self.redo_stack.pop()
+        self.undo_stack.append(modification)
+        print(f"↪️  Redo : {modification.id} ({modification.property})")
+        return modification
+
+    def can_undo(self) -> bool:
+        """Retourne True si undo est possible"""
+        return len(self.undo_stack) > 0
+
+    def can_redo(self) -> bool:
+        """Retourne True si redo est possible"""
+        return len(self.redo_stack) > 0
 
     def get_all_events(self) -> List[ModificationEvent]:
         '\n        Retourne tous les événements chronologiquement\n\n        Returns:\n            Liste des ModificationEvent\n        '

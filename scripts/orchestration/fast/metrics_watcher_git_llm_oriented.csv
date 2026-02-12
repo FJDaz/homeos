@@ -1,0 +1,21 @@
+Metric,Value
+Task ID,watcher_git_llm_oriented
+Task Description,"Ajouter capacités Git LLM Oriented au watcher : calcul ICC, création snapshots, gestion Compacts, statut visuel (Constitution V2.4 Articles 8-10)"
+Total Steps,4
+Successful Steps,4
+Failed Steps,0
+Total Execution Time (ms),165.513
+Average Step Time (ms),41.37825
+Total Tokens Used,0
+Total Input Tokens,0
+Total Output Tokens,0
+Total Cost (USD),0.0
+Success Rate,1.0
+Started At,2026-02-12T21:32:05.580169
+Completed At,2026-02-12T21:32:05.745682
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error
+step_1,Modifier scripts/orchestration/watch_kimi.sh : ajouter fonction estimate_tokens() qui compte les mots dans le CR KIMI et multiplie par 1.3 pour approximer les tokens. Stocker dans variable TOKENS_CR. Calculer ICC approximatif (exemple: TOKENS_CR / 128000 * 100 pour KIMI avec contexte 128k). Afficher dans le rapport après extraction du CR.,refactoring,True,2.9139999999999997,0,0,0,0.0,
+step_2,"Modifier scripts/orchestration/watch_kimi.sh : ajouter fonction create_snapshot() qui génère un fichier snapshots/KIMI_[TIMESTAMP]_[HASH].txt contenant : timestamp, model=KIMI, ICC, Compact#, hash du CR (md5), structure artefact (CR KIMI complet). Appeler cette fonction si ICC >= 80. Créer répertoire snapshots/ s'il n'existe pas. Afficher message 'Snapshot Git LLM créé : [nom fichier]' après création.",code_generation,True,2.6719999999999997,0,0,0,0.0,
+step_3,"Modifier scripts/orchestration/watch_kimi.sh : ajouter gestion compteur de Compacts. Créer fichier de persistence .watcher_state.json contenant {compact_count: N}. Incrémenter compact_count si snapshot créé. Ajouter fonction get_status_icon() qui retourne 🟢 VERT (ICC<80 et compacts<4), 🟠 ORANGE (ICC>=80 et compacts<4), 🟣 MAGENTA (ICC>=80 et compacts==3), 🔴 ROUGE (compacts>=4). Afficher statut dans le rapport. Si 🔴 ROUGE, afficher message alerte 'CRISE CONTEXTUELLE : Relancer nouvelle session KIMI recommandé'.",code_generation,True,3.159,0,0,0,0.0,
+step_4,"Modifier scripts/orchestration/watch_kimi.sh : mettre à jour la fonction display_report() pour inclure section 'Métriques Git LLM' avec : Tokens CR (approximation), ICC%, Compact#, Statut (icône + texte). Afficher cette section AVANT les actions requises. Formater avec bordures colorées selon le statut (vert/orange/magenta/rouge).",refactoring,True,2.754,0,0,0,0.0,

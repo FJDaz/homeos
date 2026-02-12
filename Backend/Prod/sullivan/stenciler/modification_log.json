@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "total_events": 15,
+    "last_updated": "2026-02-12T20:29:23.769153"
+  },
+  "events": [
+    {
+      "id": "e23d41ff-9e4d-43c7-975f-e4f3a14a93a4",
+      "timestamp": "2026-02-12T14:42:22.996679",
+      "path": "n0[0]",
+      "property": "accent_color",
+      "old_value": "#FF5722",
+      "new_value": "#FF5722",
+      "semantic_attributes": {},
+      "user_context": null
+    },
+    {
+      "id": "ec8aae78-43e8-4009-aa1a-64354372c09b",
+      "timestamp": "2026-02-12T14:42:53.859986",
+      "path": "n0[0]",
+      "property": "accent_color",
+      "old_value": "#FF5722",
+      "new_value": "#111111",
+      "semantic_attributes": {},
+      "user_context": null
+    },
+    {
+      "id": "e8cc8cfb-fb8f-432f-9746-e145fa436135",
+      "timestamp": "2026-02-12T14:42:53.880950",
+      "path": "n0[0]",
+      "property": "accent_color",
+      "old_value": "#111111",
+      "new_value": "#222222",
+      "semantic_attributes": {},
+      "user_context": null
+    },
+    {
+      "id": "d89a1bd7-320d-403a-8389-94cccca70b7e",
+      "timestamp": "2026-02-12T14:42:53.907839",
+      "path": "n0[0]",
+      "property": "accent_color",
+      "old_value": "#222222",
+      "new_value": "#333333",
+      "semantic_attributes": {},
+      "user_context": null
+    },
+    {
+      "id": "eddb4003-0767-44ec-94e1-0a583db2d285",
+      "timestamp": "2026-02-12T14:43:00.496960",
+      "path": "n0[0]",
+      "property": "accent_color",
+      "old_value": "#111111",
+      "new_value": "#444444",
+      "semantic_attributes": {},
+      "user_context": null
+    },
+    {
+      "id": "cb2d026b-78a0-4579-b55b-c359cff1f64c",
+      "timestamp": "2026-02-12T19:55:19.362666",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Brainstorm",
+      "new_value": "Brainstorm Édité",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "brainstorm_corps"
+      },
+      "user_context": null
+    },
+    {
+      "id": "ca31285c-a162-4d5b-b4b9-f21aa29de9b1",
+      "timestamp": "2026-02-12T19:55:43.667084",
+      "path": "n0[1]",
+      "property": "accent_color",
+      "old_value": null,
+      "new_value": "#FF0000",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "backend_corps"
+      },
+      "user_context": null
+    },
+    {
+      "id": "40992380-baf7-4e38-87fa-60f6009a420d",
+      "timestamp": "2026-02-12T19:55:59.030511",
+      "path": "n0[0].n1_sections[0]",
+      "property": "name",
+      "old_value": "Idéation Rapide",
+      "new_value": "Idéation Ultra-Rapide",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "ideation_rapide"
+      },
+      "user_context": null
+    },
+    {
+      "id": "e958497e-4cb7-432a-b69d-8e835ea47f6c",
+      "timestamp": "2026-02-12T20:14:49.976558",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Brainstorm",
+      "new_value": "Test Inline",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "ebf6c6c7-4e40-4942-995e-5e0d2c5fdd2d",
+      "timestamp": "2026-02-12T20:23:33.817221",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Test Inline",
+      "new_value": "Blabla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "0077d71b-d228-4de7-ab2f-c73ab031a3a8",
+      "timestamp": "2026-02-12T20:23:35.784007",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Blabla",
+      "new_value": "Blabla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "cc294c76-9d4c-4917-9529-f742948530c3",
+      "timestamp": "2026-02-12T20:23:38.966459",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Blabla",
+      "new_value": "Blabla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "6375425f-4c40-498e-9487-347a8828a65e",
+      "timestamp": "2026-02-12T20:23:50.308201",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Blabla",
+      "new_value": "Blabla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "bcfbaae1-774d-414a-9003-2c9662cb2432",
+      "timestamp": "2026-02-12T20:24:56.044717",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Blabla",
+      "new_value": "Blabla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    },
+    {
+      "id": "aae729e9-15c4-45df-a083-4f22be7b4983",
+      "timestamp": "2026-02-12T20:29:23.768941",
+      "path": "n0[0]",
+      "property": "name",
+      "old_value": "Blabla",
+      "new_value": "Bla",
+      "semantic_attributes": {
+        "source": "inline_edit",
+        "component_id": "n0_brainstorm"
+      },
+      "user_context": null
+    }
+  ]
+}

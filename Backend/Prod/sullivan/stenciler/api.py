@@ -17,11 +17,11 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from pathlib import Path
 
-from sullivan.stenciler.genome_state_manager import GenomeStateManager
-from sullivan.stenciler.modification_log import ModificationLog
-from sullivan.stenciler.drilldown_manager import DrillDownManager
-from sullivan.stenciler.component_contextualizer import ComponentContextualizer
-from sullivan.stenciler.semantic_property_system import SemanticPropertySystem
+from .genome_state_manager import GenomeStateManager
+from .modification_log import ModificationLog
+from .drilldown_manager import DrillDownManager
+from .component_contextualizer import ComponentContextualizer
+from .semantic_property_system import SemanticPropertySystem
 
 
 router = APIRouter(prefix="/api", tags=["stenciler"])
@@ -127,11 +127,25 @@ class ModificationResponse(BaseModel):
 async def apply_modification(request: ModificationRequest):
     """Applique une modification au Genome"""
     try:
+        # Récupérer l'ancienne valeur avant modification
+        node, error = genome_manager.get_node_by_path(request.path)
+        old_value = node.get(request.property) if node else None
+
+        # Appliquer la modification
         result = genome_manager.apply_modification(
             path=request.path,
             property=request.property,
             value=request.value
         )
+
+        # Logger la modification dans modification_log (ÉTAPE 7)
+        if result.success:
+            modification_log.append_modification(
+                path=request.path,
+                property=request.property,
+                old_value=old_value,
+                new_value=request.value
+            )
 
         return ModificationResponse(
             success=result.success,
@@ -185,6 +199,132 @@ async def create_snapshot():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur création snapshot: {str(e)}"
+        )
+
+
+@router.post("/modifications/undo")
+async def undo_modification():
+    """
+    Annule la dernière modification (ÉTAPE 7)
+
+    Returns:
+        success: bool, error si échec
+    """
+    try:
+        success, error = genome_manager.undo(modification_log)
+
+        if not success:
+            return {
+                "success": False,
+                "error": error,
+                "can_undo": modification_log.can_undo(),
+                "can_redo": modification_log.can_redo()
+            }
+
+        return {
+            "success": True,
+            "message": "Modification annulée",
+            "can_undo": modification_log.can_undo(),
+            "can_redo": modification_log.can_redo()
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur undo: {str(e)}"
+        )
+
+
+@router.post("/modifications/redo")
+async def redo_modification():
+    """
+    Refait la dernière modification annulée (ÉTAPE 7)
+
+    Returns:
+        success: bool, error si échec
+    """
+    try:
+        success, error = genome_manager.redo(modification_log)
+
+        if not success:
+            return {
+                "success": False,
+                "error": error,
+                "can_undo": modification_log.can_undo(),
+                "can_redo": modification_log.can_redo()
+            }
+
+        return {
+            "success": True,
+            "message": "Modification refaite",
+            "can_undo": modification_log.can_undo(),
+            "can_redo": modification_log.can_redo()
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur redo: {str(e)}"
+        )
+
+
+class PropertyUpdateRequest(BaseModel):
+    """Request pour mise à jour d'une propriété (ÉTAPE 10)"""
+    path: str = Field(..., description="Chemin vers l'élément (format n0[0].n1[2])")
+    property: str = Field(..., description="Propriété à modifier")
+    value: Any = Field(..., description="Nouvelle valeur")
+
+
+@router.patch("/components/{component_id}/property")
+async def update_component_property(component_id: str, request: PropertyUpdateRequest):
+    """
+    Modifie une propriété d'un composant (ÉTAPE 10 - Édition inline)
+
+    Args:
+        component_id: ID du composant (format: entity_id)
+        request: Propriété et valeur à modifier
+
+    Returns:
+        ModificationResponse avec succès/erreur
+    """
+    try:
+        # Récupérer l'ancienne valeur avant modification
+        node, error = genome_manager.get_node_by_path(request.path)
+        if error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Composant non trouvé: {error}"
+            )
+
+        old_value = node.get(request.property) if node else None
+
+        # Appliquer la modification
+        result = genome_manager.apply_modification(
+            path=request.path,
+            property=request.property,
+            value=request.value
+        )
+
+        # Logger la modification dans modification_log (pour undo/redo)
+        if result.success:
+            modification_log.append_modification(
+                path=request.path,
+                property=request.property,
+                old_value=old_value,
+                new_value=request.value,
+                semantic_attributes={"source": "inline_edit", "component_id": component_id}
+            )
+
+        return ModificationResponse(
+            success=result.success,
+            snapshot_id=result.snapshot_id,
+            error=result.error,
+            validation_errors=result.validation_errors
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur mise à jour propriété: {str(e)}"
         )
 
 

@@ -1,0 +1,19 @@
+Lot 2
+Correspondance entre les aperçussions de composants tout niveau, avec leurs aspects une fois dragué.
+Prémaquettage précis des corps avec les bons organes aux bons endroit selon les rpescritiions des Genome. Si ces propositions design par défaut en sont absente, lancement D'une réflexion sur la bonne manière de 'limllémenter.
+Quoi qu'il en soit, cela implique l'éditablitié des N1, N1 avec des composants effectifs donc la configuration fine de leur constitution.
+Modifications UI
+Breadcrumbs passent dans header class="stenciler-header" et deviennent cilquable donc disoparuon de retour. Emojis redonne indo à proscrire , picot vectos fin plutôt.
+Recentrage de <div class="canvas-placeholder" id="canvas-placeholder"> il est pour le moment relégué tout à fait à droite du cannes
+Implémentation de touch X pour raccourci toge fond/contour
+Possibilité couleur none 
+Side bar :
+Font picker 
+(API Google font 5 humanes, 
+10 garaldes, 10 réales, 10 diodes, 
+4 m'émanes morderenes , 
+4 m'émanes Classiques, 
+20 bâtons huminsitiques, 
+20 bâtons, 20 scriptes, 
+20 manucures, 20 non latines, 
+10 fraktur)

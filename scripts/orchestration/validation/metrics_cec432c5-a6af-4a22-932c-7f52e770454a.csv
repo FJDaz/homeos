@@ -1,0 +1,21 @@
+Metric,Value
+Task ID,cec432c5-a6af-4a22-932c-7f52e770454a
+Task Description,Validate FAST mode execution results - 4 steps
+Total Steps,4
+Successful Steps,4
+Failed Steps,0
+Total Execution Time (ms),155.395
+Average Step Time (ms),38.84875
+Total Tokens Used,0
+Total Input Tokens,0
+Total Output Tokens,0
+Total Cost (USD),0.0
+Success Rate,1.0
+Started At,2026-02-12T21:32:05.990653
+Completed At,2026-02-12T21:32:06.146048
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error
+step_4,"Validate code from step_4: Check compilation, security, and logic correctness",analysis,True,2.931,0,0,0,0.0,
+step_2,"Validate code from step_2: Check compilation, security, and logic correctness",analysis,True,3.5959999999999996,0,0,0,0.0,
+step_1,"Validate code from step_1: Check compilation, security, and logic correctness",analysis,True,2.5869999999999997,0,0,0,0.0,
+step_3,"Validate code from step_3: Check compilation, security, and logic correctness",analysis,True,4.074000000000001,0,0,0,0.0,
