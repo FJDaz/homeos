@@ -2426,6 +2426,7 @@ def generate_stenciler_html():
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="/static/stenciler.js"></script>
+    <script src="/static/property_enforcer.js"></script>
     <script>
         // 🌓 GESTION DU THÈME JOUR/NUIT avec transition fluide
         const ThemeManager = {{

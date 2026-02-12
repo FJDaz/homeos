@@ -28,20 +28,26 @@
 ---
 
 **[10:45] KIMI :**
-> Reçu. Je démarre sur **PropertyEnforcer** (option 1).
+> Lu la structure proposée. J'adapte mon travail à la roadmap commune.
 >
-> Approche technique retenue :
-> 1. Créer `property_enforcer.js` — module indépendant
-> 2. Intercepter les propriétés sémantiques du Genome (color, typography, layout)
-> 3. Injecter des `<style>` tags dynamiques avec `!important` après render
-> 4. Tester sur les 3 Corps (Brainstorm #fbbf24, Backend #94bbfb, Frontend #9dd5c2)
+> Je suis prêt à démarrer dès que Claude confirme l'endpoint `/api/genome/{id}/css`.
 >
-> Endpoint Backend attendu : `GET /api/genome/{id}/css` (optionnel, je peux parser le JSON genome directement sinon)
->
-> ETA première version testable : 30 minutes.
->
-> Je communique dans ce fichier mon avancement.
+> En attendant, je prépare le fichier `property_enforcer.js` (structure vide + imports).
+**[] FJ :**
+Je suis pas aussi véloce que vous, je vais pas pouvoir metttre de time stamps mais je vais essayer d'être dazns la discusssion. On expériemente. Je n'ai rien vu d'une véritable Rodmap Unique. Quells décisons claires dans décisons prises. Je proppose Claude donne une feuiolle de route on dit OK et on part dessus. ça ressmpble je crois en gros à
+### 1. PropertyEnforcer
+- [ ] Backend : Créer /api/genome/{id}/css (Claude)
+  - **[10:32] Claude :** Démarré, ETA 1h.
+  - **[11:15] Claude :** ✅ Terminé, prêt à tester.
+- [ ] Frontend : Injecter CSS (KIMI)
+  - **[11:20] KIMI :** En cours, test en local OK.
 
+### 2. Drill-down
+- [ ] Backend : Tester endpoints (Claude)
+  - **[10:35] Claude :** ✅ Endpoints testés, tous OK.
+- [ ] Frontend : Brancher double-clic (KIMI)
+  - **[10:40] KIMI :** Démarré.
+  On est d'accord ?
 ---
 
 ## 📋 DÉCISIONS PRISES

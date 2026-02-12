@@ -364,3 +364,74 @@ async def apply_tool(tool_id: str, request: ToolApplicationRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur application outil: {str(e)}"
         )
+
+
+# ============================================================================
+# PROPERTY ENFORCER : Génération CSS pour forcer propriétés Genome
+# ============================================================================
+
+@router.get("/genome/{genome_id}/css")
+async def get_genome_css(genome_id: str):
+    """
+    Génère le CSS avec !important pour forcer les propriétés du Genome.
+
+    Ce CSS est injecté côté Frontend dans un <style id="genome-enforced">
+    pour garantir que les propriétés sémantiques du Genome (couleurs, typo, layout)
+    ne soient pas écrasées par le template CSS.
+
+    Args:
+        genome_id: ID du genome (ou "default" pour le genome courant)
+
+    Returns:
+        {"css": "string contenant le CSS généré"}
+    """
+    try:
+        # Récupérer le genome modifié
+        genome = genome_manager.get_modified_genome()
+
+        css_rules = []
+
+        # Générer CSS pour chaque Corps (N0)
+        for phase in genome.get("n0_phases", []):
+            phase_id = phase.get("id")
+            color = phase.get("color", "#000000")
+            typography = phase.get("typography", "inherit")
+            layout = phase.get("layout", "flexbox-vertical")
+
+            # Règle CSS pour le Corps
+            css_rules.append(f"""
+/* Corps: {phase.get('name', phase_id)} */
+#{phase_id} {{
+    background-color: {color} !important;
+    font-family: '{typography}', sans-serif !important;
+    display: flex !important;
+    flex-direction: {'column' if 'vertical' in layout else 'row'} !important;
+}}""")
+
+            # Générer CSS pour les Organes (N1) si présents
+            for section in phase.get("n1_sections", []):
+                section_id = section.get("id")
+                section_color = section.get("color", color)  # Hérite de N0 si non défini
+
+                css_rules.append(f"""
+/* Organe: {section.get('name', section_id)} */
+#{section_id} {{
+    background-color: {section_color} !important;
+    font-family: '{typography}', sans-serif !important;
+}}""")
+
+        # Joindre toutes les règles CSS
+        css_content = "\n".join(css_rules)
+
+        return {
+            "css": css_content,
+            "genome_id": genome_id,
+            "generated_at": datetime.now().isoformat(),
+            "rules_count": len(css_rules)
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur génération CSS: {str(e)}"
+        )
