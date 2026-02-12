@@ -193,20 +193,45 @@ async def create_snapshot():
 # ============================================================================
 
 class DrillDownRequest(BaseModel):
-    path: str = Field(..., description="Chemin vers l'élément à explorer")
+    path: str = Field(..., description="Chemin actuel (ex: 'n0[0]')")
+    child_index: int = Field(0, description="Index de l'enfant à explorer (défaut: 0)")
+
+
+class DrillUpRequest(BaseModel):
+    path: str = Field(..., description="Chemin actuel (ex: 'n0[0].n1_sections[0]')")
 
 
 @router.post("/drilldown/enter")
 async def drilldown_enter(request: DrillDownRequest):
     """Descend d'un niveau dans la hiérarchie"""
     try:
-        result = drilldown_manager.drill_down(request.path)
+        new_path, error = drilldown_manager.drill_down(request.path, request.child_index)
+
+        if error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error
+            )
+
+        # Récupérer les enfants du nouveau niveau
+        children, children_error = drilldown_manager.get_children(new_path)
+        if children_error:
+            children = []
+
+        # Récupérer le contexte de navigation
+        context, context_error = drilldown_manager.get_navigation_context(new_path)
+
         return {
             "success": True,
-            "current_level": result["level"],
-            "children": result.get("children", []),
-            "breadcrumb": drilldown_manager.get_breadcrumb()
+            "new_path": new_path,
+            "current_level": context.current_level if context else len(new_path.split('.')) - 1,
+            "children": children or [],
+            "breadcrumb": context.breadcrumb if context else [],
+            "breadcrumb_paths": context.breadcrumb_paths if context else [],
+            "has_children": context.has_children if context else False
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -215,15 +240,35 @@ async def drilldown_enter(request: DrillDownRequest):
 
 
 @router.post("/drilldown/exit")
-async def drilldown_exit():
+async def drilldown_exit(request: DrillUpRequest):
     """Remonte d'un niveau dans la hiérarchie"""
     try:
-        result = drilldown_manager.drill_up()
+        parent_path, error = drilldown_manager.drill_up(request.path)
+
+        if error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error
+            )
+
+        # Récupérer les enfants du niveau parent (siblings du niveau actuel)
+        children, children_error = drilldown_manager.get_children(parent_path)
+        if children_error:
+            children = []
+
+        # Récupérer le contexte de navigation
+        context, context_error = drilldown_manager.get_navigation_context(parent_path)
+
         return {
             "success": True,
-            "current_level": result["level"],
-            "breadcrumb": drilldown_manager.get_breadcrumb()
+            "parent_path": parent_path,
+            "current_level": context.current_level if context else len(parent_path.split('.')) - 1,
+            "children": children or [],
+            "breadcrumb": context.breadcrumb if context else [],
+            "breadcrumb_paths": context.breadcrumb_paths if context else []
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -232,13 +277,27 @@ async def drilldown_exit():
 
 
 @router.get("/breadcrumb")
-async def get_breadcrumb():
-    """Récupère le fil d'Ariane de navigation"""
+async def get_breadcrumb(path: str):
+    """Récupère le fil d'Ariane de navigation pour un chemin donné"""
     try:
+        context, error = drilldown_manager.get_navigation_context(path)
+
+        if error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error
+            )
+
         return {
-            "breadcrumb": drilldown_manager.get_breadcrumb(),
-            "current_level": drilldown_manager.current_level
+            "breadcrumb": context.breadcrumb,
+            "breadcrumb_paths": context.breadcrumb_paths,
+            "current_level": context.current_level,
+            "current_path": context.current_path,
+            "has_children": context.has_children,
+            "children_count": context.children_count
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

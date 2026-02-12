@@ -158,8 +158,9 @@ class DrillDownManager:
         Returns:
             (new_path, error) : Nouveau path ou erreur
         """
-        # Vérifier le niveau actuel
-        level = len(self._parse_path(path))
+        # Vérifier le niveau actuel (0-indexed: n0=0, n1=1, n2=2, n3=3)
+        parsed = self._parse_path(path)
+        level = len(parsed) - 1
 
         if level >= self.max_level:
             return None, f"Niveau maximum atteint (n{self.max_level})"
