@@ -93,10 +93,21 @@
 **Dépend de** : Étape 3 terminée
 
 **Tâches KIMI** :
-- [ ] Écouter `dblclick` sur Canvas Fabric.js
-- [ ] Récupérer `entity_id` du composant
-- [ ] Appeler `POST /api/drilldown/enter`
-- [ ] Afficher Organes (N1) retournés
+- [x] Écouter `dblclick` sur Canvas Fabric.js
+- [x] Récupérer `entity_id` du composant
+- [x] Appeler `POST /api/drilldown/enter`
+- [x] Afficher Organes (N1) retournés
+- [x] Afficher breadcrumb dynamique
+- [x] Bouton "Retour" fonctionnel
+
+**CR KIMI** :
+- `DrillDownManager` créé (200+ lignes JS)
+- Double-clic détecté sur preview cards
+- API calls vers `/api/drilldown/enter` et `/exit`
+- Breadcrumb mis à jour dynamiquement
+- Bouton retour affiché/masqué selon niveau
+- Console: "⬇️ Drill-down réussi", "⬆️ Drill-up réussi"
+- **Status** : ✅ **TERMINÉ 14:xx**
 - [ ] Afficher breadcrumb en haut
 - [ ] Bouton "Retour" → `POST /api/drilldown/exit`
 
