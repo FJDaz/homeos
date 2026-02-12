@@ -1,0 +1,18 @@
+Aujourd'hui, objectifs : Du qui marche à du qui sert.
+Il faut avoir une interface qui permette vraimet de construire une interface. 
+Cela implique donc d'avoir un système drill down dble clic efficient, un sytème de mémoire des strucutres Html Ces en place. Un système de mémoire provisoire, des retours en arrière possibles, un système de sauvegarde, et tous les outils nécessaires à construire graphiquement une proposition. Il va sûrement falloir ajouter des outils, bouger la structure et les écueils des sessions dernières en terme de perte de temps à retourner la mémoire des modèles en bout de course me pousse à tenter de palier ces limites. Pour ce faire je propose que l'un veille sur l'autre et enregistre la structure ou le contexte, je pesais pas, les renseignements utiles à la reprise des affaires en cas d'amnésie de fin de session. 4 compacts me semblent largement assez, au-delà, c'est la misère et les erreurs assurées. Je vous mets ici ce que j'ai ramassé sur les conditions de compact de chacun. 
+
+/Users/francois-jeandazin/AETHERFLOW/docs/notes/autocompact/AUTO COMPACT LIMITS.md
+
+Que pouvez-vous me proposer de faisable pour prendre soin l'un de l'autre? Est-ce un e bonne idée ? Mettesz moi les réponses dans /Users/francois-jeandazin/AETHERFLOW/docs/notes/autocompact/
+
+Ence qui concerne l'interface, voilà ce à quoi j'ai pensé pour l'instant :
+Drill down et remontée d'le clic
+Snap mode
+Prémaquettage génome-guided implémenté pour de bon et évitable
+Épreuve d'éditabilité réelle des composants.
+Objectif : avoir sorti une page ) peu près potable en desktop ce soir
+Vos commentaire à ajouter en queue des commentaires respectifs déjà existants.
+J'attends donc :
+Propositons autocompact sécurité
+Commentaires feuille de route

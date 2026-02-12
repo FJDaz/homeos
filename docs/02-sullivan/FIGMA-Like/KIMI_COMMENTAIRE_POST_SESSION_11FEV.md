@@ -138,3 +138,164 @@ Frontend Lead — Système de Rendu
 ---
 
 **Post-scriptum** : Merci à François-Jean pour la validation "All V". C'est le carburant qui nous fait avancer. 🚀
+
+---
+
+# RÉPONSE À LA FEUILLE DE ROUTE FJ — 12 FÉVRIER 2026
+
+**Lu** : `/Users/francois-jeandazin/AETHERFLOW/docs/02-sullivan/FIGMA-Like/Feuille de route FJ.txt`
+
+---
+
+## 🎯 "Du qui marche à du qui sert"
+
+Message reçu. On passe de la preuve de concept ("ça marche") à l'outil de production ("ça sert à construire").
+
+**Ce que ça change pour moi** :
+- Fini les hacks visuels. Il me faut du solide.
+- PropertyEnforcer devient **bloquant**, pas optionnel.
+- Le drill-down doit être **réversible** (remontée d'un clic).
+
+---
+
+## 🔧 SUR LE DRILL-DOWN DOUBLE CLIC
+
+**Spécification technique** :
+
+```
+Double-clic sur Corps (N0) dans preview band
+    ↓
+POST /api/drilldown/enter {node_id: "n0_brainstorm", target_level: 1}
+    ↓
+Réponse : {n1_sections: [...], breadcrumb: ["Brainstorm"]}
+    ↓
+Animation : Corps fade out → Organes fade in (300ms)
+    ↓
+Preview band mise à jour : affiche les N1 (Organes)
+    ↓
+Breadcrumb : "Brainstorm >"
+    ↓
+Bouton retour visible (←)
+```
+
+**Remontée** : Clic bouton retour → `POST /api/drilldown/exit` → retour N0.
+
+---
+
+## 💾 SUR LA MÉMOIRE DES STRUCTURES HTML
+
+**Proposition d'architecture** :
+
+```javascript
+// Structure de sauvegarde (localStorage + Backend)
+const sessionState = {
+    timestamp: Date.now(),
+    genome_id: "genome_v2",
+    current_level: 0,  // N0, N1, N2, N3
+    current_node: "n0_brainstorm",
+    breadcrumb: ["Brainstorm"],
+    modifications: [],  // Queue des modifs non sauvegardées
+    canvas_state: {
+        zoom: 100,
+        dropped_corps: ["n0_brainstorm"],
+        selected_tool: "border"
+    }
+};
+```
+
+**Auto-save** : Toutes les 30 secondes + sur chaque action critique.
+
+---
+
+## 🛡️ SUR L'AUTO-COMPACT (SÉCURITÉ)
+
+**Lecture** : `/Users/francois-jeandazin/AETHERFLOW/docs/notes/autocompact/AUTO COMPACT LIMITS.md`
+
+**Ma proposition de mécanisme** :
+
+### KIMI Compact (Frontend)
+
+```javascript
+// À la fin de chaque session, générer automatiquement :
+const kimiCompact = {
+    date: "2026-02-12T00:30:00Z",
+    session_id: "step4-stenciler_11fev",
+    etat_rendu: {
+        fichiers_modifies: [
+            "Frontend/3. STENCILER/server_9998_v2.py",
+            "Frontend/3. STENCILER/static/stenciler.css"
+        ],
+        dependances: ["Fabric.js 5.3.1", "Geist"],
+        variables_css_actives: ["--bg-primary", "--text-primary", ...],
+        etat_canvas: "3 Corps affichés, zoom 100%"
+    },
+    points_attention: [
+        "PropertyEnforcer pas encore implémenté",
+        "CORS dépend du Backend port 8000"
+    ],
+    prochaine_action: "Drill-down N0→N1 ou PropertyEnforcer"
+};
+
+// Sauvegarder dans localStorage + fichier JSON
+localStorage.setItem('kimi_compact_last', JSON.stringify(kimiCompact));
+```
+
+### Veille Mutuelle
+
+**Claude surveille KIMI** :
+- Vérifie que je n'appelle pas directement les classes Backend
+- Vérifie que je respecte le JSON Schema
+- Alert si je produis du CSS inline (violation Constitution)
+
+**KIMI surveille Claude** :
+- Vérifie que les endpoints répondent au bon format
+- Alert si CORS down
+- Alert si structure réponse change (`data.genome` vs `data`)
+
+---
+
+## 📋 PLAN DE JOURNÉE PROPOSÉ
+
+Pour sortir "une page à peu près potable en desktop ce soir" :
+
+| Heure | Tâche | Livrable | Validation |
+|-------|-------|----------|------------|
+| H1 | PropertyEnforcer | `property_enforcer.js` + test visuel | François-Jean |
+| H2-H3 | Drill-down N0→N1 | Double-clic + animation + breadcrumb | François-Jean |
+| H4 | Snap mode | Alignement grille canvas | François-Jean |
+| H5 | Sauvegarde session | localStorage + auto-save 30s | Test auto |
+| H6 | Polish | Ajustements visuels, couleurs, typo | François-Jean |
+
+**Objectif 18h** : Page desktop potable = on peut construire une interface.
+
+---
+
+## ⚡ PRIORITÉ ABSOLUE
+
+1. **PropertyEnforcer** — Sans ça, le rendu est faux (template écrase Genome)
+2. **Drill-down** — Sans ça, on ne navigue pas (bloqué au niveau Corps)
+3. **Sauvegarde** — Sans ça, on perd le travail (amnésie de fin de session)
+
+Le reste (snap, prémaquettage, etc.) peut attendre demain.
+
+---
+
+## 🎯 ENGAGEMENT
+
+Je m'engage à :
+- ✅ Livrer PropertyEnforcer avant midi
+- ✅ Livrer Drill-down fonctionnel avant 15h
+- ✅ Documenter chaque étape dans la mailbox
+- ✅ Générer mon compact automatique à 18h
+
+**En contrepartie** :
+- Besoin que le Backend `:8000` reste stable
+- Besoin que `/api/drilldown/enter` réponde correctement
+- Besoin validation visuelle rapide (pas d'attente 2h)
+
+---
+
+Prêt à démarrer. 🚀
+
+— **KIMI 2.5**  
+*"Du qui marche à du qui sert. Allons-y."*
