@@ -383,7 +383,8 @@ class AgentRouter:
                 execute_fn=lambda client: client.generate(
                     prompt=prompt,
                     context=context,
-                    max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000
+                    max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000,
+                    output_constraint="json_surgical" if surgical_mode else None
                 ),
                 context_size=routing_decision.estimated_tokens
             )

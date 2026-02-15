@@ -1,0 +1,78 @@
+{
+  "task_id": "repair_phase4b_wire_clients",
+  "description": "Modifier les 4 clients LLM et agent_router.py pour injecter SURGICAL_SYSTEM_PROMPT quand output_constraint='json_surgical'.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Modifier gemini_client.py : dans generate(), si output_constraint=='json_surgical', injecter SURGICAL_SYSTEM_PROMPT dans system_instruction et forcer response_mime_type='application/json'.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": false,
+        "input_files": [
+          "Backend/Prod/models/gemini_client.py",
+          "Backend/Prod/core/prompts/surgical_protocol.py"
+        ],
+        "instructions": "Lis la méthode generate() dans gemini_client.py. Ajoute au début de generate(), après la signature : if output_constraint == 'json_surgical': from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT; puis dans la construction de la requête Gemini, injecter SURGICAL_SYSTEM_PROMPT dans le champ system_instruction, et ajouter generation_config={'response_mime_type': 'application/json'}. Output : uniquement la méthode generate() modifiée, code Python sans markdown."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Modifier deepseek_client.py : si output_constraint=='json_surgical', injecter SURGICAL_SYSTEM_PROMPT comme message role='system' et activer response_format={'type':'json_object'}.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": false,
+        "input_files": [
+          "Backend/Prod/models/deepseek_client.py",
+          "Backend/Prod/core/prompts/surgical_protocol.py"
+        ],
+        "instructions": "Lis la méthode generate() dans deepseek_client.py (API OpenAI-compatible). Ajoute : if output_constraint == 'json_surgical': from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT; insérer {'role': 'system', 'content': SURGICAL_SYSTEM_PROMPT} en premier dans la liste messages; ajouter response_format={'type': 'json_object'} dans les paramètres de l'appel API. Output : generate() modifiée uniquement, code Python sans markdown."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier groq_client.py et codestral_client.py : injection du system prompt surgical via message role='system' (API OpenAI-compatible pour les deux).",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": false,
+        "input_files": [
+          "Backend/Prod/models/groq_client.py",
+          "Backend/Prod/models/codestral_client.py",
+          "Backend/Prod/core/prompts/surgical_protocol.py"
+        ],
+        "instructions": "Lis generate() dans groq_client.py et generate() dans codestral_client.py. Les deux utilisent une API compatible OpenAI. Pour chacun : ajouter if output_constraint == 'json_surgical': from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT; insérer {'role': 'system', 'content': SURGICAL_SYSTEM_PROMPT} en premier dans messages. Output : les deux méthodes generate() modifiées, séparées par un commentaire '# === groq_client.py ===' et '# === codestral_client.py ==='."
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier agent_router.py : dans le lambda execute_fn de _execute_with_fallback(), passer output_constraint='json_surgical' au client.generate() quand surgical_mode=True.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1", "step_2", "step_3"],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/models/agent_router.py"],
+        "instructions": "Lis _execute_with_fallback() (L321-457). Trouve le bloc : execute_fn=lambda client: client.generate(prompt=prompt, context=context, max_tokens=...). Modifie le lambda pour ajouter output_constraint='json_surgical' if surgical_mode else None. Output : uniquement le bloc execute_fn modifié (la ligne lambda), code Python sans markdown."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "4 clients LLM + agent_router.py — repair/surgical-engine"
+  }
+}

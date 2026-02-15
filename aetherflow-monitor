@@ -29,7 +29,14 @@ class Colors:
     UNDERLINE = '\033[4m'
     DIM = '\033[2m'
 
-OUTPUT_DIR = Path("/private/tmp/claude-501/-Users-francois-jeandazin-AETHERFLOW/tasks")
+# Search in all possible claude-code task directories (path depends on CWD at launch time)
+_TMP_BASE = Path("/private/tmp/claude-501")
+_KNOWN_DIRS = [
+    _TMP_BASE / "-Users-francois-jeandazin-AETHERFLOW" / "tasks",
+    _TMP_BASE / "-Users-francois-jeandazin-Antigravity-maiathon" / "tasks",
+]
+# Use first existing dir, fall back to AETHERFLOW default
+OUTPUT_DIR = next((d for d in _KNOWN_DIRS if d.exists()), _KNOWN_DIRS[0])
 
 
 def clear_screen():
@@ -142,22 +149,38 @@ def colorize_line(line):
     return line
 
 
-def get_latest_task():
-    """Get the latest task file."""
-    if not OUTPUT_DIR.exists():
-        return None
+def _all_task_files():
+    """Return all task files from all known directories, sorted by mtime desc."""
+    all_files = []
+    for d in _KNOWN_DIRS:
+        if d.exists():
+            all_files.extend(d.glob("*.output"))
+    return sorted(all_files, key=lambda f: f.stat().st_mtime, reverse=True)
 
-    task_files = sorted(OUTPUT_DIR.glob("*.output"), key=lambda f: f.stat().st_mtime, reverse=True)
-    return task_files[0] if task_files else None
+
+def _find_task_file(task_id: str):
+    """Find a task file by ID across all known directories."""
+    for d in _KNOWN_DIRS:
+        candidate = d / f"{task_id}.output"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def get_latest_task():
+    """Get the latest task file across all known directories."""
+    files = _all_task_files()
+    return files[0] if files else None
 
 
 def list_tasks():
     """List all available tasks."""
-    if not OUTPUT_DIR.exists():
-        print(f"{Colors.FAIL}No tasks directory found: {OUTPUT_DIR}{Colors.ENDC}")
+    task_files = _all_task_files()
+    if not task_files:
+        print(f"{Colors.FAIL}No tasks found in: {', '.join(str(d) for d in _KNOWN_DIRS)}{Colors.ENDC}")
         return
 
-    task_files = sorted(OUTPUT_DIR.glob("*.output"), key=lambda f: f.stat().st_mtime, reverse=True)
+    task_files = task_files  # already sorted
 
     if not task_files:
         print(f"{Colors.WARNING}No tasks found.{Colors.ENDC}")
@@ -172,17 +195,20 @@ def list_tasks():
         mtime = datetime.fromtimestamp(task_file.stat().st_mtime)
         age = datetime.now() - mtime
 
-        # Determine status from file content
+        # Determine status from file content (check tail for final state)
         try:
             content = task_file.read_text(errors='ignore')
-            if 'ERROR' in content or 'Failed' in content:
+            tail = content[-3000:]  # only look at end of file for final status
+            if 'workflow completed' in tail or 'plan execution completed' in tail or '✓ Success' in tail:
+                status = f"{Colors.OKGREEN}Done{Colors.ENDC}"
+            elif '⟳ Running' in tail or 'Running' in tail.split('\n')[-1]:
+                status = f"{Colors.OKBLUE}Running{Colors.ENDC}"
+            elif 'Interrupted' in tail or ('Failed' in tail and 'workflow' in tail.lower()):
                 status = f"{Colors.FAIL}Failed{Colors.ENDC}"
-            elif 'SUCCESS' in content or '✅' in content:
-                status = f"{Colors.OKGREEN}Success{Colors.ENDC}"
-            elif 'Running' in content or '⟳' in content:
+            elif age.total_seconds() < 300:
                 status = f"{Colors.OKBLUE}Running{Colors.ENDC}"
             else:
-                status = f"{Colors.DIM}Unknown{Colors.ENDC}"
+                status = f"{Colors.DIM}Done{Colors.ENDC}"
         except:
             status = f"{Colors.DIM}Unknown{Colors.ENDC}"
 
@@ -275,7 +301,9 @@ Examples:
 
     # Determine which task to monitor
     if args.task_id:
-        task_file = OUTPUT_DIR / f"{args.task_id}.output"
+        task_file = _find_task_file(args.task_id)
+        if task_file is None:
+            task_file = OUTPUT_DIR / f"{args.task_id}.output"  # fallback (will show not found)
     else:
         task_file = get_latest_task()
         if not task_file:

@@ -1,0 +1,37 @@
+{
+  "task_id": "repair_phase3_surgical_guard",
+  "description": "Ajouter validate_surgical() à OutputGatekeeper : validation déterministe pre-apply sans LLM.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter validate_surgical(operations, ast_parser) à OutputGatekeeper. Trois vérifications purement déterministes (zéro appel LLM) : ambiguïté de cible AST, pureté lexicale du code, dry-run syntaxique.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Aucun appel LLM ni await dans cette méthode",
+        "Check 1 ambiguïté : pour modify_method/add_method, count des noeuds AST avec ce nom — erreur si count != 1",
+        "Check 2 pureté : regex sur op.code pour prose LLM (here is, note:, i'll, i will, ```, as requested)",
+        "Check 3 syntaxe : ast.parse(op.code) pour chaque opération",
+        "Retourne (True, []) si tout OK",
+        "Retourne (False, [liste d'erreurs]) avec messages explicites"
+      ],
+      "context": {
+        "provider": "codestral",
+        "surgical_mode": false,
+        "input_files": [
+          "Backend/Prod/core/output_gatekeeper.py",
+          "Backend/Prod/core/surgical_editor.py"
+        ],
+        "instructions": "Lis OutputGatekeeper (output_gatekeeper.py L1-80), SurgicalOperation dataclass (surgical_editor.py L38-50), ASTParser.nodes et find_node() (surgical_editor.py L207-226). Ajoute la méthode synchrone (pas async) : def validate_surgical(self, operations: List, ast_parser) -> Tuple[bool, List[str]]. Imports nécessaires en tête de méthode : import ast, import re. Trois checks : (1) Pour op.op_type in ['modify_method','add_method'] : compter ast_parser.nodes où node.name == op.target (ou la partie après '.' si target contient '.'). Si count == 0 : erreur 'Target not found'. Si count > 1 : erreur 'Ambiguous target, use ClassName.method_name'. (2) Pour op.code : re.search(r'(?i)(here is|note:|i\\'ll|i will|```|as requested|certainly)', op.code) → erreur 'Prose detected in code'. (3) try: ast.parse(op.code) except SyntaxError as e: erreur f'Syntax error: {e}'. Retourner (not bool(errors), errors). Output : code Python de la méthode uniquement."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "output_gatekeeper.py + surgical_editor.py integration — repair/surgical-engine"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "task_id": "repair_phase1_dedup",
+  "description": "Fusion des méthodes dupliquées dans orchestrator.py. Produire le code Python complet de deux méthodes fusionnées : _execute_batch_parallel et _execute_step.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Fusionner les deux copies de _execute_batch_parallel. Copie A (L260-358) : logique séquentielle + parallel. Copie B (L1331-1505) : ajoute la détection de conflits fichiers (L1349-1381). Résultat attendu : copie A enrichie avec la détection de conflits de la copie B. Output : le code Python complet de la méthode fusionnée uniquement, sans explications.",
+      "type": "refactoring",
+      "complexity": 0.8,
+      "estimated_tokens": 3500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Une seule définition de _execute_batch_parallel",
+        "Détection de conflits fichiers présente (all_target_files dict)",
+        "Mode séquentiel et parallèle présents",
+        "Pas de fallback append"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/orchestrator.py"],
+        "instructions": "Lis les deux copies de _execute_batch_parallel : lignes 260-358 (copie A, avec séquentiel/parallèle) et lignes 1331-1505 (copie B, avec détection conflits fichiers en plus). Produis UNE seule méthode fusionnée qui conserve TOUT de la copie A + ajoute la détection de conflits fichiers de la copie B (bloc all_target_files, conflict_details, file_conflict_detected). Output : uniquement le code Python de la méthode async _execute_batch_parallel, sans explications ni markdown."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Fusionner les deux copies de _execute_step. Copie A (L645-922) : stratégie VETO. Copie B (L1507-1786) : stratégie fallback append. Conserver copie A uniquement. Supprimer tout fallback append.",
+      "type": "refactoring",
+      "complexity": 0.9,
+      "estimated_tokens": 4000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Une seule définition de _execute_step",
+        "Stratégie VETO uniquement (pas d'append fallback)",
+        "Le fichier est préservé en cas d'échec",
+        "JSON fautif sauvegardé dans .gemini/debug/"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/orchestrator.py"],
+        "instructions": "Lis les deux copies de _execute_step : lignes 645-922 (copie A, stratégie VETO : échec → alerte + sauvegarde JSON fautif, PAS d'écriture) et lignes 1507-1786 (copie B, stratégie fallback append : échec → concatène le code en fin de fichier). Produis UNIQUEMENT la copie A. Supprime absolument tout code de fallback append (les blocs 'if operations and original_code: code_parts = []...'). Output : uniquement le code Python de la méthode async _execute_step, sans explications ni markdown."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Vérifier si 'from datetime import datetime' est présent dans les imports de orchestrator.py (lignes 1-30). Répondre par oui/non et fournir la ligne exacte à ajouter si absent.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": ["Confirme présence ou absence de datetime import"],
+      "context": {
+        "provider": "gemini",
+        "input_files": ["Backend/Prod/orchestrator.py"],
+        "instructions": "Lis uniquement les lignes 1-30 de orchestrator.py. Cherche 'from datetime import datetime' ou 'import datetime'. Réponds : PRESENT ou ABSENT. Si ABSENT, donne la ligne exacte à ajouter et son emplacement (ex: 'après ligne 4 : from datetime import datetime')."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "orchestrator.py deduplication — repair/surgical-engine"
+  }
+}

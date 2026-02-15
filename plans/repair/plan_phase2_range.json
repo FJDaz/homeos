@@ -1,0 +1,78 @@
+{
+  "task_id": "repair_phase2_range_replacement",
+  "description": "Implémenter apply_operations_ranged() dans SurgicalApplier : remplacement textuel indexé par AST pour préserver commentaires et formatting. Supprimer la dépendance obligatoire à astunparse.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter dans ASTParser.parse() le stockage de self.source_text = source. Ajouter la méthode get_char_range(name, node_type=None, parent=None) -> Tuple[int, int] qui convertit les coordonnées AST (lineno, col_offset, end_lineno, end_col_offset) en index de caractères dans source_text.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2000,
+      "dependencies": [],
+      "validation_criteria": [
+        "self.source_text stocké dans parse()",
+        "get_char_range() retourne (int, int) — index début et fin dans source_text",
+        "Utilise end_lineno et end_col_offset (Python 3.8+ natifs)",
+        "Lève ValueError si noeud introuvable",
+        "Algorithme : cumul des longueurs de lignes + \\n"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/core/surgical_editor.py"],
+        "instructions": "Lis ASTParser (L53-226). Produis deux choses : (1) La ligne à ajouter dans parse() après 'self.source_lines = source.splitlines()' : self.source_text = source. (2) La nouvelle méthode get_char_range(self, name: str, node_type: Optional[str] = None, parent: Optional[str] = None) -> Tuple[int, int]. Algorithme pour convertir lineno/col_offset en index : calculer line_offsets = [0] + cumul de len(line)+1 pour chaque ligne. Puis start_idx = line_offsets[node.line_start-1] + col_offset, end_idx = line_offsets[node.line_end-1] + end_col_offset. Attention : ASTNodeInfo stocke line_start/line_end mais pas col_offset — il faut les récupérer depuis self.tree via ast.walk. Output : code Python uniquement, sans markdown."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implémenter apply_operations_ranged(self, operations) dans SurgicalApplier. Algorithme bottom-up : trier par position décroissante, remplacer source[start:end] par op.code pour chaque opération. Valider avec ast.parse() sur le résultat.",
+      "type": "code_generation",
+      "complexity": 0.9,
+      "estimated_tokens": 3000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Opérations triées bottom-up (end_idx décroissant) avant application",
+        "modify_method : remplace source[start:end] par op.code (dedent ajusté)",
+        "add_method : insère op.code avant la dernière ligne dédentée de la classe",
+        "add_import : insère après le dernier import existant",
+        "add_function : insère après les imports, avant les classes",
+        "replace_import : remplace la ligne d'import exacte",
+        "ast.parse(result) validation finale avant return",
+        "Retourne (True, modified_source) ou (False, error_msg)"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/core/surgical_editor.py"],
+        "instructions": "Lis SurgicalApplier (L410-734) et ASTParser (L53-226). Implémente apply_operations_ranged(self, operations: List[SurgicalOperation]) -> Tuple[bool, str]. La méthode travaille sur self.parser.source_text (le texte source brut). Étapes : (1) Valider toutes les ops avec _validate_operation(). (2) Pour chaque op, calculer (start_idx, end_idx) via self.parser.get_char_range(). (3) Créer une liste de (start, end, new_code) triée par start décroissant. (4) Appliquer bottom-up : result = source_text; for start, end, code in sorted_ops: result = result[:start] + code + result[end:]. (5) ast.parse(result) pour validation. (6) Retourner (True, result). Cas spéciaux : add_import insère à line_offsets[last_import_line], add_function insère après imports. Output : code Python uniquement."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Modifier apply_operations() pour tenter apply_operations_ranged() en priorité, avec fallback gracieux sur l'ancien code astunparse si ranged échoue.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 800,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "apply_operations_ranged() appelée en premier",
+        "Si ranged réussit : retourner immédiatement son résultat",
+        "Si ranged échoue : logger 'RANGE_FAILED: <raison>, falling back to astunparse'",
+        "Fallback astunparse uniquement si disponible",
+        "Comportement identique à avant si astunparse fallback utilisé"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/core/surgical_editor.py"],
+        "instructions": "Lis apply_operations() (L446-498). Modifie-la : au début de la méthode, après les guards initiaux (if not self.tree, if astunparse is None, if not operations), ajouter : try: success, result = self.apply_operations_ranged(operations); if success: return True, result; logger.warning(f'RANGE_FAILED: {result}, falling back to astunparse'); except Exception as e: logger.warning(f'RANGE_FAILED: {e}, falling back to astunparse'). Puis continuer avec le code astunparse existant. Output : apply_operations() complète modifiée, code Python uniquement."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "surgical_editor.py range-based replacement — repair/surgical-engine"
+  }
+}

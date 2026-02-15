@@ -8,7 +8,9 @@ Pipeline:
 If validation fails, output goes to .generated instead of overwriting target file.
 """
 import asyncio
-from typing import Optional, Tuple
+import ast
+import re
+from typing import Optional, Tuple, List
 from pathlib import Path
 from loguru import logger
 
@@ -198,6 +200,54 @@ Respond with JSON only: {{"valid": true/false, "reason": "brief explanation"}}""
 
         ext = Path(file_path).suffix.lower()
         return ext_map.get(ext, "text")
+
+    def validate_surgical(self, operations: List, ast_parser) -> Tuple[bool, List[str]]:
+        """Deterministic pre-apply validation of surgical operations. Zero LLM calls.
+
+        Three checks:
+        1. AST ambiguity: target must match exactly 1 node (modify_method / add_method)
+        2. Lexical purity: op.code must not contain LLM prose patterns
+        3. Syntax dry-run: ast.parse(op.code) for every operation
+
+        Returns:
+            (True, [])               — all checks passed
+            (False, [error, ...])    — list of error messages
+        """
+        _PROSE_RE = re.compile(
+            r'(?i)(here is|note:|i\'ll|i will|```|as requested|certainly)',
+        )
+        errors: List[str] = []
+
+        for op in operations:
+            op_type = getattr(op, 'op_type', None)
+            target = getattr(op, 'target', None)
+            code = getattr(op, 'code', None) or ''
+
+            # Check 1 — AST ambiguity
+            if op_type in ('modify_method', 'add_method') and target and ast_parser:
+                # Resolve "ClassName.method_name" → search by name only
+                search_name = target.split('.')[-1] if '.' in target else target
+                matches = [n for n in ast_parser.nodes if n.name == search_name]
+                if len(matches) == 0:
+                    errors.append(f"Target not found in AST: '{target}'")
+                elif len(matches) > 1:
+                    errors.append(
+                        f"Ambiguous target '{target}': {len(matches)} nodes match. "
+                        f"Use 'ClassName.method_name' to qualify."
+                    )
+
+            # Check 2 — Lexical purity (no LLM prose in code)
+            if code and _PROSE_RE.search(code):
+                errors.append(f"Prose detected in op.code for '{op_type}/{target}'")
+
+            # Check 3 — Syntax dry-run
+            if code:
+                try:
+                    ast.parse(code)
+                except SyntaxError as e:
+                    errors.append(f"Syntax error in op '{op_type}/{target}': {e}")
+
+        return (not bool(errors), errors)
 
 
 # Global instance for easy access

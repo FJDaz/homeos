@@ -177,6 +177,13 @@ class GeminiClient(BaseLLMClient):
             }
         }
         
+        # Inject surgical system prompt when output_constraint == 'json_surgical'
+        if output_constraint == "json_surgical":
+            from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
+            request_data["systemInstruction"] = {
+                "parts": [{"text": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")}]
+            }
+
         # response_mime_type not supported by current Gemini REST API; rely on prompt for JSON
 
         # Try each model in fallback cascade
@@ -551,11 +558,13 @@ class GeminiClient(BaseLLMClient):
                 base_prompt += "Generate only valid JSON, no explanations."
             elif output_constraint == "No prose":
                 base_prompt += "Generate output without prose or explanations."
+            elif output_constraint == "json_surgical":
+                pass  # System prompt injected via systemInstruction in request_data
             else:
                 base_prompt += f"Output constraint: {output_constraint}"
         else:
             base_prompt += "Generate the complete code implementation."
-        
+
         if context:
             return f"Context: {context}\n\n{base_prompt}"
         return base_prompt
