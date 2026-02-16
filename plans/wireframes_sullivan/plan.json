@@ -1,0 +1,74 @@
+{
+  "task_id": "sullivan_wireframes_vfx",
+  "description": "Réécrire les 3 méthodes wireframe de sullivan_renderer.js pour améliorer leur qualité visuelle. Wireframes inline HTML/CSS, aucune dépendance externe, signatures inchangées.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Réécrire generateWireframeCorps(visualHint, color) — height:70px. 4 visual_hints + fallback. brainstorm: palette jaune/ambre, pipeline créatif évocateur. backend: graphique barres indigo, data-driven. frontend: layout de 3 colonnes pastel avec bordures dashed. deploy: bouton rocket vert, mise en ligne. Fallback: barre colorée + lignes grises.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Méthode complète generateWireframeCorps(visualHint, color = '#7aca6a')",
+        "4 branches if/else + fallback vers generateWireframeGeneral",
+        "height:70px sur chaque div racine",
+        "Inline CSS uniquement, pas de classes",
+        "Retourne une template string"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/3. STENCILER/static/js/sullivan_renderer.js"],
+        "instructions": "Lis generateWireframeCorps dans sullivan_renderer.js (L21-61). Réécris cette méthode avec des wireframes plus expressifs et soignés. Règles : (1) height:70px obligatoire sur le div racine de chaque cas, (2) inline CSS uniquement, (3) pas d'emoji dans le CSS, mais emojis OK dans le HTML si pertinent, (4) chaque hint doit immédiatement évoquer sa sémantique visuellement. brainstorm → process créatif (ambre, idée→rédaction→validation). backend → données/performance (indigo, barres verticales animées-like). frontend → layout de composants (cadres colorés dashed multicolores). deploy → action de publication (vert, bouton central proéminent). Output : UNIQUEMENT le code de la méthode generateWireframeCorps, sans explications."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Réécrire generateWireframeOrganes(visualHint, color) — height:65px. 3 visual_hints + fallback. analyse: loupe + lignes de scan avec indicateurs colorés. choix: 2 options side-by-side, une cochée verte/une grise. sauvegarde: progression par points (3 verts + 1 gris). Fallback vers generateWireframeGeneral.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Méthode complète generateWireframeOrganes(visualHint, color = '#7aca6a')",
+        "3 branches if/else + fallback",
+        "height:65px sur chaque div racine",
+        "Inline CSS uniquement"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/3. STENCILER/static/js/sullivan_renderer.js"],
+        "instructions": "Lis generateWireframeOrganes dans sullivan_renderer.js (L63-91). Réécris avec des rendus plus nets et expressifs. analyse → loupe + 3-4 lignes scan avec une barre colorée (indicateur de résultat). choix → 2 cartes côte-à-côte : gauche avec checkmark vert, droite avec cercle gris (option non-sélectionnée). sauvegarde → rangée de 4 cercles dont 3 verts et 1 vide (progression), label '3/4 sauvegardé'. Output : UNIQUEMENT le code de la méthode generateWireframeOrganes."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Réécrire generateWireframeGeneral(visualHint, color) — height:60px. Hint 'table': grille lisible avec header distinct et 3 lignes. Fallback générique: barre colorée en haut + 2 lignes de placeholder. Simple et propre.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 600,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Méthode complète generateWireframeGeneral(visualHint, color = '#7aca6a')",
+        "1 branche if 'table' + else fallback",
+        "height:60px sur chaque div racine",
+        "Inline CSS uniquement"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/3. STENCILER/static/js/sullivan_renderer.js"],
+        "instructions": "Lis generateWireframeGeneral dans sullivan_renderer.js (L93-105). Réécris avec des rendus plus propres. 'table' → mini-grille avec une ligne header (fond légèrement teinté) + 2 lignes de données alternées, 2 colonnes. fallback générique → barre colorée en haut (couleur = param color, width 100%), puis 2 lignes horizontales grises de différentes longueurs. Minimaliste mais distinct. Output : UNIQUEMENT le code de la méthode generateWireframeGeneral."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-16T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "mode": "-vfx",
+    "target": "sullivan_renderer.js wireframes"
+  }
+}

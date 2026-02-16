@@ -1,0 +1,70 @@
+{
+  "task_id": "sullivan_wireframes_vfx_v2",
+  "description": "Générer les 3 méthodes wireframe améliorées pour sullivan_renderer.js. Génération from-scratch (pas de fichier input_files), en respectant les signatures et contraintes techniques.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Générer generateWireframeCorps(visualHint, color='#7aca6a') — méthode JavaScript complète. height:70px sur chaque div racine, inline CSS uniquement, retourne une template string. 4 cas + fallback generateWireframeGeneral. brainstorm: pipeline ambre 💡→📝→✓. backend: barres indigo animées-like. frontend: 3 colonnes colorées dashed. deploy: bouton rocket vert proéminent.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Signature exacte : generateWireframeCorps(visualHint, color = '#7aca6a')",
+        "height:70px sur chaque div racine des 4 cas",
+        "Fallback : return this.generateWireframeGeneral(visualHint, color);",
+        "Template strings (backticks), inline CSS, pas de classes",
+        "Output : la méthode JS seule"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "instructions": "Écris la méthode JavaScript generateWireframeCorps(visualHint, color = '#7aca6a') pour une UI de Genome Viewer. Cette méthode retourne du HTML inline avec CSS inline (pas de classes, pas de lib externe). Chaque cas doit avoir un div racine avec height:70px. Les 4 cas : (1) 'brainstorm' → fond jaune-ambre dégradé, pipeline créatif avec emojis 💡→📝→✓ et des lignes horizontales, label 'Phase créative'. (2) 'backend' → fond indigo dégradé, 4 barres verticales de hauteurs variables (40% 70% 55% 85%) couleur #6366f1, titre '⚙️ Moteur & Données'. (3) 'frontend' → fond rose dégradé, 3 blocs côte-à-côte (30%/35%/25%) avec bordures dashed multicolores (bleu/vert/rose), titre 'Design & Interface'. (4) 'deploy' → fond vert dégradé, bouton central arrondi vert avec '🚀 Publier', sous-titre 'Mise en ligne'. Sinon : return this.generateWireframeGeneral(visualHint, color). Output : UNIQUEMENT le code de la méthode generateWireframeCorps."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Générer generateWireframeOrganes(visualHint, color='#7aca6a') — méthode JS. height:65px, 3 cas + fallback. analyse: loupe + 3 lignes scan. choix: 2 cartes côte-à-côte. sauvegarde: 4 cercles de progression.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Signature exacte : generateWireframeOrganes(visualHint, color = '#7aca6a')",
+        "height:65px sur chaque div racine des 3 cas",
+        "Fallback : return this.generateWireframeGeneral(visualHint, color);",
+        "Inline CSS uniquement"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "instructions": "Écris la méthode JavaScript generateWireframeOrganes(visualHint, color = '#7aca6a'). Chaque cas : div racine height:65px, fond #f8fafc, padding:6px, border-radius:6px. 3 cas : (1) 'analyse' → icône 🔍 + 3 lignes horizontales de scan (2 grises + 1 colored), évoque un process d'analyse. (2) 'choix' → flex row avec 2 cartes côte-à-côte : gauche fond blanc bordure verte ✓, droite fond gris bordure grise ○. (3) 'sauvegarde' → 4 cercles horizontaux (3 verts glowing + 1 gris), label '3/4 sauvegardé'. Sinon : return this.generateWireframeGeneral(visualHint, color). Output : UNIQUEMENT le code de la méthode generateWireframeOrganes."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Générer generateWireframeGeneral(visualHint, color='#7aca6a') — méthode JS. height:60px. 1 cas 'table' + fallback générique avec barre colorée.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Signature exacte : generateWireframeGeneral(visualHint, color = '#7aca6a')",
+        "height:60px sur les deux cas",
+        "Fallback utilise le param color pour la barre colorée"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "instructions": "Écris la méthode JavaScript generateWireframeGeneral(visualHint, color = '#7aca6a'). Deux cas : (1) 'table' → mini-grille avec une ligne header (fond #e2e8f0 légèrement teinté) + 2 lignes alternées, 2 colonnes flex, height:60px. (2) fallback → barre colorée en haut width:100% height:4px couleur=color, puis 2 lignes horizontales grises de longueurs différentes (80% et 60%), height:60px. Output : UNIQUEMENT le code de la méthode generateWireframeGeneral."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-16T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "mode": "-vfx",
+    "target": "sullivan_renderer.js wireframes v2"
+  }
+}

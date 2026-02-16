@@ -1,0 +1,102 @@
+{
+  "task_id": "phase3_api_rest_stenciler",
+  "description": "Créer les endpoints REST API pour exposer les 5 piliers Backend du Stenciler",
+  "steps": [
+    {
+      "id": "step_01",
+      "description": "Créer Backend/Prod/sullivan/stenciler/api.py avec Flask/FastAPI setup et routes État (GET /api/genome/<genome_id>, GET /api/genome/<genome_id>/state, GET /api/schema)",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 2000,
+      "context": {
+        "files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/genome_state_manager.py"
+        ]
+      }
+    },
+    {
+      "id": "step_02",
+      "description": "Ajouter routes Modifications à api.py : POST /api/modifications (apply modification), GET /api/modifications/history, POST /api/snapshot",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2200,
+      "context": {
+        "files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/modification_log.py"
+        ]
+      }
+    },
+    {
+      "id": "step_03",
+      "description": "Ajouter routes Navigation à api.py : POST /api/drilldown/enter, POST /api/drilldown/exit, GET /api/breadcrumb",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1800,
+      "context": {
+        "files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/drilldown_manager.py"
+        ]
+      }
+    },
+    {
+      "id": "step_04",
+      "description": "Ajouter routes Composants à api.py : GET /api/components/contextual, GET /api/components/<component_id>, GET /api/components/elite",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1800,
+      "context": {
+        "files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/component_contextualizer.py"
+        ]
+      }
+    },
+    {
+      "id": "step_05",
+      "description": "Ajouter routes Outils à api.py : GET /api/tools, POST /api/tools/<tool_id>/apply",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "context": {
+        "files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/semantic_property_system.py"
+        ]
+      }
+    },
+    {
+      "id": "step_06",
+      "description": "Créer tests/test_api_integration.py : tests pytest pour tous les endpoints (État, Modifications, Navigation, Composants, Outils), validation JSON Schema, error handling 404/400/500",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3000,
+      "context": {
+        "files": [
+          "tests/test_api_integration.py"
+        ],
+        "input_files": [
+          "Backend/Prod/sullivan/stenciler/api.py"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "phase": "Phase 3 API REST",
+    "constitution_compliance": true,
+    "integration": "Sullivan Stenciler",
+    "roadmap_reference": "ROADMAP_IMPLEMENTATION.md Phase 3"
+  }
+}

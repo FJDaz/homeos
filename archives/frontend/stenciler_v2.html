@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stenciler V2 — Full</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/Geist.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/GeistMono.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f7f6f2;
+            --bg-secondary: #ebe9e3;
+            --bg-tertiary: #e4e1da;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --text-tertiary: #999;
+            --border-subtle: #d4d2cc;
+            --border-medium: #c8c5be;
+            --accent-rose: #c9a6b0;
+            --accent-bleu: #94bbfb;
+            --accent-vert: #9dd5c2;
+            --accent-orange: #e8c4a0;
+            --accent-mauve: #c4b5e0;
+            --accent-rouge: #e8a598;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+        .app { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Header */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 20px; background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
+        }
+        .header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .style-indicator { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: white; border-radius: 20px; border: 1px solid var(--border-subtle); font-size: 13px; }
+        .style-indicator .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-bleu); }
+        #theme-toggle { padding: 6px 12px; background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: inherit; }
+        
+        /* Workspace */
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-subtle); }
+        .sidebar-brand { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .sidebar-brand .brand-k { color: var(--accent-rose); }
+        .sidebar-tagline { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+        .sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); }
+        .sidebar-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 12px; font-weight: 500; }
+        .breadcrumb { font-size: 13px; color: var(--text-secondary); padding: 8px 12px; background: var(--bg-tertiary); border-radius: var(--radius-sm); }
+        .btn-back { display: flex; align-items: center; gap: 6px; padding: 8px 12px; margin-top: 8px; background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: inherit; }
+        .btn-back.hidden { display: none; }
+        .btn-delete { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px; background: var(--accent-rouge); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: inherit; }
+        .btn-delete .delete-icon { font-size: 16px; }
+        .kbd-hint { margin-top: 8px; font-size: 11px; color: var(--text-tertiary); }
+        .kbd-hint kbd { padding: 2px 6px; background: var(--bg-tertiary); border-radius: 4px; font-family: 'GeistMono', monospace; font-size: 10px; }
+        
+        /* Color Mode Toggle */
+        .color-mode-toggle { display: flex; gap: 8px; }
+        .mode-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; background: white; border: 2px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+        .mode-btn.active { border-color: var(--accent-bleu); background: rgba(148,187,251,0.1); }
+        .mode-btn:hover:not(.active) { border-color: var(--border-medium); }
+        .mode-icon { font-size: 18px; }
+        .mode-label { font-size: 11px; color: var(--text-secondary); }
+        
+        /* TSL Picker */
+        .tsl-picker { background: white; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+        .tsl-preview { width: 100%; height: 40px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border-subtle); background: hsl(0,70%,50%); transition: background 0.1s; }
+        .tsl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .tsl-row:last-child { margin-bottom: 0; }
+        .tsl-row label { width: 16px; font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+        .tsl-row .tsl-value { width: 36px; font-size: 11px; color: var(--text-secondary); text-align: right; font-family: 'GeistMono', monospace; }
+        .tsl-slider { flex: 1; height: 6px; border-radius: 3px; outline: none; cursor: pointer; -webkit-appearance: none; }
+        .tsl-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: white; border: 2px solid var(--text-secondary); cursor: pointer; box-shadow: var(--shadow-sm); }
+        .tsl-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: white; border: 2px solid var(--text-secondary); cursor: pointer; box-shadow: var(--shadow-sm); }
+        .tsl-slider.hue { background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red); }
+        .tsl-slider.saturation { background: linear-gradient(to right, #808080, var(--tsl-color, red)); }
+        .tsl-slider.lightness { background: linear-gradient(to right, black, var(--tsl-color, red), white); }
+        .btn-apply-color { width: 100%; padding: 8px; margin-top: 10px; background: var(--accent-bleu); color: white; border: none; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: inherit; font-weight: 500; }
+        .btn-apply-color:hover { opacity: 0.9; }
+        
+        /* Color Palette */
+        .color-palette { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+        .color-swatch { width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm); cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+        .color-swatch:hover { transform: scale(1.1); }
+        .color-swatch.selected { border-color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        
+        /* Border Slider */
+        .border-slider { width: 100%; height: 4px; border-radius: 2px; background: var(--bg-tertiary); outline: none; cursor: pointer; -webkit-appearance: none; }
+        .border-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--text-primary); cursor: pointer; }
+        .border-value { margin-top: 6px; font-size: 12px; color: var(--text-secondary); text-align: center; }
+        
+        /* API Section */
+        .api-status { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+        .status-dot.online { background: #22c55e; }
+        .status-dot.offline { background: #ef4444; }
+        .btn-api { width: 100%; padding: 8px; margin-bottom: 6px; background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: inherit; }
+        .btn-api:hover { border-color: var(--border-medium); }
+        
+        /* Right Zone */
+        .right-zone { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Preview Band */
+        .preview-band { display: flex; gap: 16px; padding: 16px 20px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); overflow-x: auto; }
+        .preview-card {
+            flex-shrink: 0; width: 180px; padding: 12px; background: white; border-radius: var(--radius-md);
+            border: 2px solid transparent; cursor: grab; transition: all 0.15s;
+            box-shadow: var(--shadow-sm);
+        }
+        .preview-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-medium); }
+        .preview-card.dragging { opacity: 0.5; cursor: grabbing; }
+        .preview-card.brainstorm { border-left-color: var(--accent-rose); }
+        .preview-card.backend { border-left-color: var(--accent-bleu); }
+        .preview-card.frontend { border-left-color: var(--accent-vert); }
+        .preview-card.deploy { border-left-color: var(--accent-orange); }
+        .preview-card .name { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .preview-card .count { font-size: 11px; color: var(--text-tertiary); }
+        
+        /* Wireframes for Corps */
+        .corps-wireframe { height: 60px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+        .wf-brainstorm { display: flex; align-items: center; gap: 4px; padding: 0 12px; }
+        .wf-step { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent-rose); }
+        .wf-step.active { background: var(--accent-rose); }
+        .wf-step.dim { opacity: 0.4; }
+        .wf-step-line { width: 20px; height: 2px; background: var(--accent-rose); }
+        .wf-step-line.dim { opacity: 0.4; }
+        .wf-backend { display: flex; align-items: flex-end; gap: 6px; padding: 0 16px; }
+        .wf-bar { width: 12px; background: var(--accent-bleu); border-radius: 2px 2px 0 0; }
+        .wf-bar.dim { opacity: 0.4; }
+        .wf-frontend { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; width: 100%; }
+        .wf-frame { height: 16px; border: 2px solid var(--accent-vert); border-radius: 3px; }
+        .wf-frame.fill { background: var(--accent-vert); }
+        .wf-deploy { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        .wf-btn { padding: 6px 20px; border: 2px solid var(--accent-orange); border-radius: 4px; font-size: 10px; color: var(--accent-orange); font-weight: 500; }
+        .wf-btn.fill { background: var(--accent-orange); color: white; }
+        .wf-arrow { display: flex; align-items: center; color: var(--accent-orange); font-size: 12px; }
+        
+        /* Canvas Zone */
+        .canvas-zone {
+            flex: 1; position: relative; background: var(--bg-primary);
+            background-image: linear-gradient(to right, var(--border-subtle) 1px, transparent 1px), linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+            background-size: 20px 20px; overflow: hidden;
+        }
+        .canvas-zone canvas { display: block; }
+        
+        /* Zoom Controls */
+        .zoom-controls { position: absolute; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 8px; background: white; padding: 6px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--border-subtle); }
+        .zoom-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; color: var(--text-secondary); }
+        .zoom-btn:hover { background: var(--bg-secondary); }
+        .zoom-level { min-width: 50px; text-align: center; font-size: 12px; font-family: 'GeistMono', monospace; color: var(--text-secondary); }
+        
+        /* Component Palette */
+        .component-palette { padding: 12px 20px; background: white; border-bottom: 1px solid var(--border-subtle); }
+        .palette-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary); }
+        .component-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+        .comp-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: grab; transition: all 0.15s; width: 70px; }
+        .comp-item:hover { border-color: var(--border-medium); transform: translateY(-2px); }
+        .comp-item .wf { width: 40px; height: 30px; }
+        .comp-item span { font-size: 10px; color: var(--text-tertiary); }
+        
+        /* Component wireframes */
+        .wf-comp-button { display: flex; align-items: center; justify-content: center; }
+        .wf-comp-button-inner { width: 36px; height: 16px; border: 2px solid var(--accent-bleu); border-radius: 3px; }
+        .wf-comp-card { display: flex; flex-direction: column; gap: 3px; padding: 4px; }
+        .wf-comp-card-h { height: 6px; background: var(--accent-vert); border-radius: 1px; width: 70%; }
+        .wf-comp-card-l { height: 4px; background: var(--border-subtle); border-radius: 1px; }
+        .wf-comp-input { display: flex; align-items: center; padding: 0 4px; }
+        .wf-comp-input-box { flex: 1; height: 14px; border: 2px solid var(--border-medium); border-radius: 3px; }
+        .wf-comp-modal { display: flex; flex-direction: column; gap: 3px; padding: 3px; border: 2px solid var(--accent-orange); border-radius: 3px; }
+        .wf-comp-modal-h { height: 5px; background: var(--accent-orange); border-radius: 1px; }
+        .wf-comp-modal-l { height: 3px; background: var(--border-subtle); border-radius: 1px; }
+        .wf-comp-table { display: flex; flex-direction: column; gap: 2px; }
+        .wf-comp-table-row { display: flex; gap: 2px; }
+        .wf-comp-table-cell { flex: 1; height: 6px; border: 1px solid var(--border-medium); border-radius: 1px; }
+        .wf-comp-table-cell:first-child { background: var(--border-subtle); }
+        .wf-comp-tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--border-medium); }
+        .wf-comp-tab { flex: 1; height: 10px; background: var(--border-subtle); border-radius: 2px 2px 0 0; }
+        .wf-comp-tab.active { background: var(--accent-rose); }
+        
+        /* Sticky header toggle */
+        .sticky-toggle { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; color: var(--text-secondary); z-index: 10; }
+        .sticky-toggle:hover { background: var(--bg-secondary); }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>Stenciler</h1>
+            <div class="header-actions">
+                <div class="style-indicator minimal">
+                    <span class="dot"></span>
+                    <span>minimal</span>
+                </div>
+                <button id="theme-toggle">Mode jour</button>
+            </div>
+        </header>
+
+        <!-- Workspace -->
+        <div class="workspace">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">Homé<span class="brand-k">OS</span></div>
+                    <div class="sidebar-tagline">Stenciler</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Navigation</div>
+                    <div class="breadcrumb" id="breadcrumb">Brainstorm</div>
+                    <button class="btn-back hidden" id="btn-back">← Retour</button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Actions</div>
+                    <button class="btn-delete" id="btn-delete">
+                        <span class="delete-icon">×</span>
+                        Supprimer (Del)
+                    </button>
+                    <div class="kbd-hint">
+                        <kbd>Del</kbd> ou <kbd>Backspace</kbd>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Mode Couleur</div>
+                    <div class="color-mode-toggle">
+                        <button class="mode-btn active" data-mode="border" title="Couleur sur les bords">
+                            <span class="mode-icon">▣</span>
+                            <span class="mode-label">Bordure</span>
+                        </button>
+                        <button class="mode-btn" data-mode="fill" title="Couleur de fond">
+                            <span class="mode-icon">◼</span>
+                            <span class="mode-label">Fond</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Couleur Personnalisée (TSL)</div>
+                    <div class="tsl-picker">
+                        <div class="tsl-preview" id="tsl-preview"></div>
+                        <div class="tsl-sliders">
+                            <div class="tsl-row">
+                                <label>T</label>
+                                <input type="range" class="tsl-slider hue" id="tsl-h" min="0" max="360" value="0">
+                                <span class="tsl-value" id="tsl-h-val">0°</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>S</label>
+                                <input type="range" class="tsl-slider saturation" id="tsl-s" min="0" max="100" value="70">
+                                <span class="tsl-value" id="tsl-s-val">70%</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>L</label>
+                                <input type="range" class="tsl-slider lightness" id="tsl-l" min="0" max="100" value="50">
+                                <span class="tsl-value" id="tsl-l-val">50%</span>
+                            </div>
+                        </div>
+                        <button class="btn-apply-color" id="btn-apply-tsl">Appliquer</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Préréglages</div>
+                    <div class="color-palette">
+                        <div class="color-swatch selected" style="background: var(--accent-rose);" data-color="#c9a6b0"></div>
+                        <div class="color-swatch" style="background: var(--accent-bleu);" data-color="#94bbfb"></div>
+                        <div class="color-swatch" style="background: var(--accent-vert);" data-color="#9dd5c2"></div>
+                        <div class="color-swatch" style="background: var(--accent-orange);" data-color="#e8c4a0"></div>
+                        <div class="color-swatch" style="background: var(--accent-mauve);" data-color="#c4b5e0"></div>
+                        <div class="color-swatch" style="background: var(--accent-rouge);" data-color="#e8a598"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Bordure</div>
+                    <input type="range" class="border-slider" id="border-slider" min="0" max="10" value="2">
+                    <div class="border-value" id="border-value">2px</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">API Claude</div>
+                    <div class="api-status" id="api-status">
+                        <span class="status-dot offline"></span>
+                        <span class="status-text">Hors ligne</span>
+                    </div>
+                    <button class="btn-api" id="btn-fetch-genome">Charger Genome</button>
+                    <button class="btn-api" id="btn-fetch-styles">Charger Styles</button>
+                </div>
+            </aside>
+
+            <!-- Right Zone -->
+            <div class="right-zone">
+                <!-- Preview Band with Toggle -->
+                <div style="position: relative;">
+                    <button class="sticky-toggle" id="sticky-toggle" title="Réduire/Agrandir">▼</button>
+                    <div class="preview-band" id="preview-band">
+                        <div class="preview-card brainstorm" draggable="true" data-corps="brainstorm">
+                            <div class="corps-wireframe wf-brainstorm">
+                                <div class="wf-step active"></div>
+                                <div class="wf-step-line"></div>
+                                <div class="wf-step"></div>
+                                <div class="wf-step-line dim"></div>
+                                <div class="wf-step dim"></div>
+                            </div>
+                            <span class="name">Brainstorm</span>
+                            <span class="count">2 organes</span>
+                        </div>
+                        <div class="preview-card backend" draggable="true" data-corps="backend">
+                            <div class="corps-wireframe wf-backend">
+                                <div class="wf-bar" style="height:40%"></div>
+                                <div class="wf-bar" style="height:70%"></div>
+                                <div class="wf-bar dim" style="height:55%"></div>
+                                <div class="wf-bar" style="height:85%"></div>
+                            </div>
+                            <span class="name">Backend</span>
+                            <span class="count">1 organe</span>
+                        </div>
+                        <div class="preview-card frontend" draggable="true" data-corps="frontend">
+                            <div class="corps-wireframe wf-frontend">
+                                <div class="wf-frame fill"></div>
+                                <div class="wf-frame"></div>
+                                <div class="wf-frame"></div>
+                            </div>
+                            <span class="name">Frontend</span>
+                            <span class="count">3 organes</span>
+                        </div>
+                        <div class="preview-card deploy" draggable="true" data-corps="deploy">
+                            <div class="corps-wireframe wf-deploy">
+                                <div class="wf-btn fill">Build</div>
+                                <div class="wf-arrow">→</div>
+                                <div class="wf-btn">Deploy</div>
+                            </div>
+                            <span class="name">Deploy</span>
+                            <span class="count">2 organes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Component Palette -->
+                <div class="component-palette">
+                    <div class="palette-title">Composants UI</div>
+                    <div class="component-grid">
+                        <div class="comp-item" draggable="true" data-comp="button">
+                            <div class="wf wf-comp-button"><div class="wf-comp-button-inner"></div></div>
+                            <span>Button</span>
+                        </div>
+                        <div class="comp-item" draggable="true" data-comp="card">
+                            <div class="wf wf-comp-card">
+                                <div class="wf-comp-card-h"></div>
+                                <div class="wf-comp-card-l"></div>
+                                <div class="wf-comp-card-l"></div>
+                            </div>
+                            <span>Card</span>
+                        </div>
+                        <div class="comp-item" draggable="true" data-comp="input">
+                            <div class="wf wf-comp-input"><div class="wf-comp-input-box"></div></div>
+                            <span>Input</span>
+                        </div>
+                        <div class="comp-item" draggable="true" data-comp="modal">
+                            <div class="wf wf-comp-modal">
+                                <div class="wf-comp-modal-h"></div>
+                                <div class="wf-comp-modal-l"></div>
+                                <div class="wf-comp-modal-l"></div>
+                            </div>
+                            <span>Modal</span>
+                        </div>
+                        <div class="comp-item" draggable="true" data-comp="table">
+                            <div class="wf wf-comp-table">
+                                <div class="wf-comp-table-row"><div class="wf-comp-table-cell"></div><div class="wf-comp-table-cell"></div></div>
+                                <div class="wf-comp-table-row"><div class="wf-comp-table-cell"></div><div class="wf-comp-table-cell"></div></div>
+                                <div class="wf-comp-table-row"><div class="wf-comp-table-cell"></div><div class="wf-comp-table-cell"></div></div>
+                            </div>
+                            <span>Table</span>
+                        </div>
+                        <div class="comp-item" draggable="true" data-comp="tabs">
+                            <div class="wf wf-comp-tabs">
+                                <div class="wf-comp-tab active"></div>
+                                <div class="wf-comp-tab"></div>
+                                <div class="wf-comp-tab"></div>
+                            </div>
+                            <span>Tabs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Zone -->
+                <div class="canvas-zone" id="canvas-zone">
+                    <canvas id="tarmac-canvas"></canvas>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoom-out">−</button>
+                        <span class="zoom-level" id="zoom-level">100%</span>
+                        <button class="zoom-btn" id="zoom-in">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let tarmacCanvas = null;
+        let zoomLevel = 1;
+        let colorMode = 'border'; // 'border' | 'fill'
+        let currentTSL = { h: 0, s: 70, l: 50 };
+        let droppedCorps = [];
+        let isPreviewCollapsed = false;
+
+        // Colors for corps
+        const corpsColors = {
+            brainstorm: '#c9a6b0',
+            backend: '#94bbfb',
+            frontend: '#9dd5c2',
+            deploy: '#e8c4a0'
+        };
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            initTSL();
+            initColorMode();
+            initDragDrop();
+            initZoom();
+            initDelete();
+            initKeyboard();
+            initPreviewToggle();
+            initBorderSlider();
+            initColorPalette();
+        });
+
+        // Canvas init with retry for timing
+        function initCanvas() {
+            const canvasEl = document.getElementById('tarmac-canvas');
+            const container = document.getElementById('canvas-zone');
+            
+            if (!canvasEl || !container || container.clientWidth === 0) {
+                setTimeout(initCanvas, 100);
+                return;
+            }
+
+            if (tarmacCanvas) tarmacCanvas.dispose();
+
+            tarmacCanvas = new fabric.Canvas('tarmac-canvas', {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                backgroundColor: 'transparent',
+                selection: true,
+                preserveObjectStacking: true
+            });
+
+            // Zoom with Ctrl+wheel
+            tarmacCanvas.on('mouse:wheel', (opt) => {
+                if (opt.e.ctrlKey) {
+                    const delta = opt.e.deltaY;
+                    let newZoom = zoomLevel * (delta > 0 ? 0.95 : 1.05);
+                    newZoom = Math.max(0.3, Math.min(3, newZoom));
+                    setZoom(newZoom);
+                    opt.e.preventDefault();
+                    opt.e.stopPropagation();
+                }
+            });
+
+            // Update sidebar on selection
+            tarmacCanvas.on('selection:created', updateSidebarFromSelection);
+            tarmacCanvas.on('selection:updated', updateSidebarFromSelection);
+            tarmacCanvas.on('selection:cleared', clearSidebarSelection);
+
+            // Double-click to enter corps
+            tarmacCanvas.on('mouse:dblclick', (e) => {
+                if (e.target && e.target.corpsData) {
+                    enterCorps(e.target.corpsData);
+                }
+            });
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                if (tarmacCanvas && container) {
+                    tarmacCanvas.setDimensions({
+                        width: container.clientWidth,
+                        height: container.clientHeight
+                    });
+                    tarmacCanvas.renderAll();
+                }
+            });
+        }
+
+        // TSL Color Picker
+        function initTSL() {
+            const hSlider = document.getElementById('tsl-h');
+            const sSlider = document.getElementById('tsl-s');
+            const lSlider = document.getElementById('tsl-l');
+            const preview = document.getElementById('tsl-preview');
+            const hVal = document.getElementById('tsl-h-val');
+            const sVal = document.getElementById('tsl-s-val');
+            const lVal = document.getElementById('tsl-l-val');
+            const applyBtn = document.getElementById('btn-apply-tsl');
+
+            function updatePreview() {
+                currentTSL.h = parseInt(hSlider.value);
+                currentTSL.s = parseInt(sSlider.value);
+                currentTSL.l = parseInt(lSlider.value);
+                
+                const color = `hsl(${currentTSL.h}, ${currentTSL.s}%, ${currentTSL.l}%)`;
+                preview.style.background = color;
+                preview.dataset.color = color;
+                
+                hVal.textContent = currentTSL.h + '°';
+                sVal.textContent = currentTSL.s + '%';
+                lVal.textContent = currentTSL.l + '%';
+
+                // Update saturation/lightness slider backgrounds
+                const satColor = `hsl(${currentTSL.h}, 100%, 50%)`;
+                sSlider.style.setProperty('--tsl-color', satColor);
+                lSlider.style.setProperty('--tsl-color', satColor);
+            }
+
+            hSlider.addEventListener('input', updatePreview);
+            sSlider.addEventListener('input', updatePreview);
+            lSlider.addEventListener('input', updatePreview);
+
+            applyBtn.addEventListener('click', () => {
+                const color = preview.dataset.color || `hsl(${currentTSL.h}, ${currentTSL.s}%, ${currentTSL.l}%)`;
+                applyColorToSelection(color);
+            });
+
+            updatePreview();
+        }
+
+        // Color Mode Toggle
+        function initColorMode() {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    colorMode = btn.dataset.mode;
+                });
+            });
+        }
+
+        // Apply color to selection
+        function applyColorToSelection(color) {
+            const active = tarmacCanvas?.getActiveObject();
+            if (!active) return;
+
+            if (active.type === 'group') {
+                // Corps group - apply to container rect
+                active._objects.forEach(child => {
+                    if (child.type === 'rect') {
+                        if (child.height > 100 && colorMode === 'fill') {
+                            // Main container
+                            child.set('fill', color === 'white' || color === '#ffffff' ? 'white' : color);
+                        } else if (child.height < 50 && colorMode === 'border') {
+                            // Header - always update fill for header
+                            child.set('fill', color);
+                        } else if (child.height > 100 && colorMode === 'border') {
+                            // Border of main container
+                            child.set('stroke', color);
+                        }
+                    }
+                });
+                tarmacCanvas.renderAll();
+            } else if (active.type === 'rect') {
+                if (colorMode === 'fill') {
+                    active.set('fill', color);
+                } else {
+                    active.set('stroke', color);
+                }
+                tarmacCanvas.renderAll();
+            }
+        }
+
+        // Drag & Drop
+        function initDragDrop() {
+            // Corps cards
+            document.querySelectorAll('.preview-card').forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('corpsId', card.dataset.corps);
+                    card.classList.add('dragging');
+                });
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                });
+            });
+
+            // Component items
+            document.querySelectorAll('.comp-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('compType', item.dataset.comp);
+                    item.style.opacity = '0.5';
+                });
+                item.addEventListener('dragend', () => {
+                    item.style.opacity = '1';
+                });
+            });
+
+            // Canvas drop zone
+            const canvasZone = document.getElementById('canvas-zone');
+            canvasZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                canvasZone.style.backgroundColor = 'rgba(148,187,251,0.1)';
+            });
+            canvasZone.addEventListener('dragleave', () => {
+                canvasZone.style.backgroundColor = '';
+            });
+            canvasZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvasZone.style.backgroundColor = '';
+                
+                const corpsId = e.dataTransfer.getData('corpsId');
+                const compType = e.dataTransfer.getData('compType');
+                
+                const rect = canvasZone.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / zoomLevel;
+                const y = (e.clientY - rect.top) / zoomLevel;
+
+                if (corpsId) {
+                    addCorpsToCanvas(corpsId, x, y);
+                    // Collapse preview after drop
+                    if (!isPreviewCollapsed) {
+                        togglePreview();
+                    }
+                } else if (compType) {
+                    addComponentToCanvas(compType, x, y);
+                }
+            });
+        }
+
+        // Add Corps to Canvas
+        function addCorpsToCanvas(corpsId, x, y) {
+            const color = corpsColors[corpsId] || '#94bbfb';
+            const name = corpsId.charAt(0).toUpperCase() + corpsId.slice(1);
+            
+            const group = new fabric.Group([], {
+                left: x - 100,
+                top: y - 75,
+                hasControls: true,
+                hasBorders: true,
+                lockRotation: true
+            });
+
+            // Main container
+            const mainRect = new fabric.Rect({
+                width: 200, height: 150, fill: 'white', stroke: color, strokeWidth: 2, rx: 8, ry: 8
+            });
+
+            // Header
+            const header = new fabric.Rect({
+                width: 200, height: 30, fill: color, rx: 8, ry: 8
+            });
+
+            // Title
+            const title = new fabric.Text(name, {
+                left: 10, top: 7, fontSize: 14, fontWeight: '600', fill: 'white',
+                fontFamily: 'Geist, sans-serif'
+            });
+
+            // Organ placeholders
+            let orgY = 40;
+            ['org-1', 'org-2', 'org-3'].forEach((org, i) => {
+                const orgRect = new fabric.Rect({
+                    left: 10, top: orgY, width: 180, height: 22,
+                    fill: '#f7f6f2', stroke: 'var(--border-subtle)', strokeWidth: 1, rx: 4, ry: 4
+                });
+                const orgText = new fabric.Text(org, {
+                    left: 16, top: orgY + 5, fontSize: 10, fill: '#666',
+                    fontFamily: 'Geist, sans-serif'
+                });
+                group.addWithUpdate(orgRect);
+                group.addWithUpdate(orgText);
+                orgY += 28;
+            });
+
+            group.addWithUpdate(mainRect);
+            group.addWithUpdate(header);
+            group.addWithUpdate(title);
+
+            group.corpsData = { id: corpsId, name: name, color: color };
+            group.corpsId = corpsId;
+
+            tarmacCanvas.add(group);
+            tarmacCanvas.setActiveObject(group);
+            tarmacCanvas.renderAll();
+
+            droppedCorps.push(corpsId);
+        }
+
+        // Add Component to Canvas
+        function addComponentToCanvas(compType, x, y) {
+            const color = '#94bbfb';
+            let obj;
+
+            switch(compType) {
+                case 'button':
+                    obj = new fabric.Rect({
+                        width: 100, height: 36, fill: color, stroke: color,
+                        rx: 6, ry: 6, left: x - 50, top: y - 18
+                    });
+                    break;
+                case 'card':
+                    obj = new fabric.Rect({
+                        width: 200, height: 120, fill: 'white', stroke: '#d4d2cc',
+                        strokeWidth: 1, rx: 8, ry: 8, left: x - 100, top: y - 60
+                    });
+                    break;
+                case 'input':
+                    obj = new fabric.Rect({
+                        width: 200, height: 40, fill: 'white', stroke: '#d4d2cc',
+                        strokeWidth: 2, rx: 6, ry: 6, left: x - 100, top: y - 20
+                    });
+                    break;
+                case 'modal':
+                    obj = new fabric.Rect({
+                        width: 280, height: 180, fill: 'white', stroke: '#e8c4a0',
+                        strokeWidth: 2, rx: 12, ry: 12, left: x - 140, top: y - 90
+                    });
+                    break;
+                case 'table':
+                    obj = new fabric.Rect({
+                        width: 240, height: 100, fill: 'white', stroke: '#d4d2cc',
+                        strokeWidth: 1, rx: 4, ry: 4, left: x - 120, top: y - 50
+                    });
+                    break;
+                case 'tabs':
+                    obj = new fabric.Rect({
+                        width: 220, height: 40, fill: 'white', stroke: '#c9a6b0',
+                        strokeWidth: 2, rx: 8, ry: 8, left: x - 110, top: y - 20
+                    });
+                    break;
+            }
+
+            if (obj) {
+                obj.compType = compType;
+                tarmacCanvas.add(obj);
+                tarmacCanvas.setActiveObject(obj);
+                tarmacCanvas.renderAll();
+            }
+        }
+
+        // Zoom controls
+        function initZoom() {
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                setZoom(Math.max(0.3, zoomLevel - 0.1));
+            });
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                setZoom(Math.min(3, zoomLevel + 0.1));
+            });
+        }
+
+        function setZoom(z) {
+            zoomLevel = Math.round(z * 10) / 10;
+            if (tarmacCanvas) {
+                tarmacCanvas.setZoom(zoomLevel);
+                document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+            }
+        }
+
+        // Delete button
+        function initDelete() {
+            document.getElementById('btn-delete').addEventListener('click', deleteSelected);
+        }
+
+        function deleteSelected() {
+            const obj = tarmacCanvas?.getActiveObject();
+            if (obj) {
+                const idx = droppedCorps.indexOf(obj.corpsId);
+                if (idx > -1) droppedCorps.splice(idx, 1);
+                tarmacCanvas.remove(obj);
+                tarmacCanvas.renderAll();
+                clearSidebarSelection();
+            }
+        }
+
+        // Keyboard shortcuts
+        function initKeyboard() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    // Don't delete if typing in an input
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    deleteSelected();
+                }
+                if (e.key === 'x' || e.key === 'X') {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    // Toggle color mode
+                    const modes = ['border', 'fill'];
+                    const currentIdx = modes.indexOf(colorMode);
+                    const nextMode = modes[(currentIdx + 1) % modes.length];
+                    document.querySelector(`[data-mode="${nextMode}"]`).click();
+                }
+            });
+        }
+
+        // Preview toggle
+        function initPreviewToggle() {
+            document.getElementById('sticky-toggle').addEventListener('click', togglePreview);
+        }
+
+        function togglePreview() {
+            const band = document.getElementById('preview-band');
+            const toggle = document.getElementById('sticky-toggle');
+            isPreviewCollapsed = !isPreviewCollapsed;
+            
+            if (isPreviewCollapsed) {
+                band.style.display = 'none';
+                toggle.textContent = '▶';
+                toggle.title = 'Agrandir';
+            } else {
+                band.style.display = 'flex';
+                toggle.textContent = '▼';
+                toggle.title = 'Réduire';
+            }
+        }
+
+        // Border slider
+        function initBorderSlider() {
+            const slider = document.getElementById('border-slider');
+            const value = document.getElementById('border-value');
+            
+            slider.addEventListener('input', () => {
+                const v = slider.value;
+                value.textContent = v + 'px';
+                
+                const obj = tarmacCanvas?.getActiveObject();
+                if (obj?.type === 'group') {
+                    const mainRect = obj._objects.find(o => o.type === 'rect' && o.height > 100);
+                    if (mainRect) {
+                        mainRect.set('strokeWidth', parseInt(v));
+                        tarmacCanvas.renderAll();
+                    }
+                } else if (obj?.type === 'rect') {
+                    obj.set('strokeWidth', parseInt(v));
+                    tarmacCanvas.renderAll();
+                }
+            });
+        }
+
+        // Color palette
+        function initColorPalette() {
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                    swatch.classList.add('selected');
+                    
+                    const color = swatch.dataset.color;
+                    applyColorToSelection(color);
+                });
+            });
+        }
+
+        // Sidebar updates
+        function updateSidebarFromSelection(e) {
+            const obj = e.selected ? e.selected[0] : null;
+            const info = document.getElementById('breadcrumb');
+            if (obj?.corpsData) {
+                info.textContent = obj.corpsData.name;
+            } else if (obj?.compType) {
+                info.textContent = obj.compType.charAt(0).toUpperCase() + obj.compType.slice(1);
+            }
+        }
+
+        function clearSidebarSelection() {
+            document.getElementById('breadcrumb').textContent = 'Brainstorm';
+        }
+
+        // Drill-down (placeholder)
+        function enterCorps(corpsData) {
+            console.log('Entering:', corpsData.name);
+            document.getElementById('breadcrumb').textContent = corpsData.name + ' › Composants';
+            document.getElementById('btn-back').classList.remove('hidden');
+        }
+
+        document.getElementById('btn-back').addEventListener('click', () => {
+            document.getElementById('breadcrumb').textContent = 'Brainstorm';
+            document.getElementById('btn-back').classList.add('hidden');
+        });
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            alert('Theme toggle à implémenter');
+        });
+
+        // API buttons
+        document.getElementById('btn-fetch-genome').addEventListener('click', () => {
+            fetchGenome();
+        });
+
+        document.getElementById('btn-fetch-styles').addEventListener('click', () => {
+            fetchStyles();
+        });
+
+        async function fetchGenome() {
+            const status = document.getElementById('api-status');
+            status.innerHTML = '<span class="status-dot"></span><span class="status-text">Chargement...</span>';
+            
+            try {
+                // Simuler un appel API (à remplacer par vrai endpoint)
+                await new Promise(r => setTimeout(r, 500));
+                status.innerHTML = '<span class="status-dot online"></span><span class="status-text">Genome chargé</span>';
+            } catch (e) {
+                status.innerHTML = '<span class="status-dot offline"></span><span class="status-text">Erreur</span>';
+            }
+        }
+
+        async function fetchStyles() {
+            const status = document.getElementById('api-status');
+            status.innerHTML = '<span class="status-dot"></span><span class="status-text">Chargement...</span>';
+            
+            try {
+                await new Promise(r => setTimeout(r, 500));
+                status.innerHTML = '<span class="status-dot online"></span><span class="status-text">Styles chargés</span>';
+            } catch (e) {
+                status.innerHTML = '<span class="status-dot offline"></span><span class="status-text">Erreur</span>';
+            }
+        }
+    </script>
+</body>
+</html>

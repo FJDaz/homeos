@@ -1,0 +1,52 @@
+{
+    "task_id": "homeos_v2_foundation",
+    "description": "Implémentation des fondations de Vigilance et Monitoring pour HOMEOS V2",
+    "steps": [
+        {
+            "id": "step_1",
+            "description": "Améliorer metrics.py pour inclure l'estimation énergétique",
+            "type": "patch",
+            "complexity": 0.5,
+            "estimated_tokens": 1000,
+            "context": {
+                "files": [
+                    "Backend/Prod/models/metrics.py"
+                ],
+                "instructions": "Ajouter un champ energy_gco2 dans StepMetrics et PlanMetrics. Implémenter une méthode d'estimation simple bases sur le cost_usd ou tokens."
+            }
+        },
+        {
+            "id": "step_2",
+            "description": "Ajouter les endpoints d'administration dans api.py",
+            "type": "patch",
+            "complexity": 0.8,
+            "estimated_tokens": 2000,
+            "context": {
+                "files": [
+                    "Backend/Prod/api.py"
+                ],
+                "instructions": "Ajouter les routes POST /v1/admin/status, /v1/admin/costs et /v1/admin/config/keys. Intégrer avec AdminObserver et CostTracker."
+            }
+        },
+        {
+            "id": "step_3",
+            "description": "Créer un script de test de vigilance",
+            "type": "code_generation",
+            "complexity": 0.3,
+            "estimated_tokens": 500,
+            "context": {
+                "files": [
+                    "scripts/test_vigilance.py"
+                ],
+                "instructions": "Créer un script qui appelle les nouveaux endpoints admin et affiche un rapport console coloré."
+            }
+        }
+    ],
+    "metadata": {
+        "created_at": "2026-02-10T22:18:00Z",
+        "claude_version": "claude-code",
+        "workflow": "PROD",
+        "priority": "high",
+        "target": "homeos-v2-foundation"
+    }
+}

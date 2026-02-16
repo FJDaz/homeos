@@ -7,12 +7,14 @@
   "total_batches": 1,
   "completed_steps": [],
   "current_step_ids": [
-    "step_2"
+    "step_3",
+    "step_2",
+    "step_1"
   ],
-  "total_steps": 1,
+  "total_steps": 3,
   "status": "completed",
   "started_at": "2025-01-30T14:00:00+00:00",
-  "updated_at": "2026-02-15T20:23:55.064660+00:00",
+  "updated_at": "2026-02-16T08:14:37.589471+00:00",
   "total_time_ms": 75476.779,
   "total_cost_usd": 0.00375438,
   "error_message": "cannot import name 'apply_plan_outputs' from 'Prod.claude_helper' (/Users/francois-jeandazin/AETHERFLOW/Backend/Prod/claude_helper.py)",

@@ -217,11 +217,27 @@ AETHERFLOW vérifie automatiquement le solde de votre compte API avant chaque re
 # Génère un rapport JSON et HTML dans le répertoire courant
 ```
 
-## Documentation
+## 📚 Documentation (Digital Garden 00-99)
 
-### Guides d'installation et déploiement
+### 🏛️ Core & Vision
+- **[00 - Core](docs/00-core/)** : Constitution, PRD Central, Roadmap, Agents.
+- **[01 - Getting Started](docs/01-getting-started/)** : Installation, Setup, GitHub.
 
-- **Installation complète** : [`docs/01-getting-started/INSTALLATION.md`](docs/01-getting-started/INSTALLATION.md) - Guide détaillé avec toutes les méthodes
+### 🧠 Systèmes & Architecture
+- **[02 - Sullivan](docs/02-sullivan/)** : Frontend, Genome, Sullivan Kernel.
+- **[03 - AetherFlow](docs/03-aetherflow/)** : BKD Engine, Orchestration, Surgical Edit.
+    - 💡 **[Vision Stratégique : Deep Flow](docs/03-aetherflow/AETHERFLOW_STRATEGY_VISION.md)**
+- **[04 - HomeOS](docs/04-homeos/)** : Ecosystème Global, Homeostasis.
+
+### 🛠️ Opérations & Support
+- **[05 - Operations](docs/05-operations/)** : DevOps, Monitoring, Push Instructions.
+- **[06 - Design Assets](docs/06-design-assets/)** : UI/UX Snaps, Figma-like.
+- **[07 - Guides & Tutos](docs/07-guides-&-tutos/)** : Documentation utilisateur et développeur.
+- **[08 - Research & Notes](docs/08-research-&-notes/)** : Brainstorm, Benchmarks, Références.
+- **[09 - Support & Audits](docs/09-support-&-audits/)** : Audits techniques, Debugging.
+
+### 📦 Historique
+- **[99 - Archives](docs/99-archives/)** : Historique des sessions et documents obsolètes.
 - **PRD HOMEOS (détaillé)** : [`docs/04-homeos/PRD_HOMEOS.md`](docs/04-homeos/PRD_HOMEOS.md) - Vision, scope, architecture, Sullivan, Genome, Studio, roadmap
 - **PRD état actuel** : [`docs/04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md`](docs/04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md) - Détail des composants implémentés
 
