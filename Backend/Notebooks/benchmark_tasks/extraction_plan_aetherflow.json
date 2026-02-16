@@ -1,0 +1,67 @@
+{
+    "task_id": "phase1_aetherflow_extraction",
+    "description": "Externalisation physique des composants UI du monolithe server_9998_v2.py vers /static.",
+    "steps": [
+        {
+            "id": "step_1",
+            "description": "Extraire le contenu HTML de la fonction generate_html (lignes 1992-3325 approx) vers static/templates/viewer.html. Remplacer les variables f-string (ex: {corps_cards}) par des placeholders type {{corps_cards}} pour futur moteur de template ou simple replace Python.",
+            "type": "refactoring",
+            "complexity": 0.8,
+            "estimated_tokens": 4000,
+            "dependencies": [],
+            "context": {
+                "language": "python",
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ]
+            },
+            "validation_criteria": [
+                "Le fichier static/templates/viewer.html contient le squelette HTML complet.",
+                "Les variables f-string sont échappées ou remplacées par des markers stables."
+            ]
+        },
+        {
+            "id": "step_2",
+            "description": "Extraire le contenu HTML de generate_stenciler_html (lignes 3481-4195 approx) vers static/templates/stenciler.html.",
+            "type": "refactoring",
+            "complexity": 0.7,
+            "estimated_tokens": 3000,
+            "dependencies": [],
+            "context": {
+                "language": "python",
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ]
+            },
+            "validation_criteria": [
+                "Le fichier static/templates/stenciler.html existe et contient le code du Stenciler."
+            ]
+        },
+        {
+            "id": "step_3",
+            "description": "Nettoyage radical de server_9998_v2.py : 1. Supprimer le premier bloc de doublons (lignes 516-1975). 2. Remplacer le contenu des fonctions generate_html et generate_stenciler_html par une lecture des fichiers HTML extraits. 3. Mettre à jour do_GET pour servir ces templates.",
+            "type": "refactoring",
+            "complexity": 0.9,
+            "estimated_tokens": 5000,
+            "dependencies": [
+                "step_1",
+                "step_2"
+            ],
+            "context": {
+                "language": "python",
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ]
+            },
+            "validation_criteria": [
+                "Le fichier server_9998_v2.py ne contient plus de doublons.",
+                "La taille du fichier est divisée par au moins 2.",
+                "Le serveur lance toujours sur le port 9998."
+            ]
+        }
+    ],
+    "metadata": {
+        "created_at": "2026-02-14T15:30:00Z",
+        "project_context": "Phase 1 - Externalisation Aetherflow. Passage d'un monolithe f-string à une architecture de templates statiques."
+    }
+}

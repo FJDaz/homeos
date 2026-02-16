@@ -1,0 +1,57 @@
+{
+    "task_id": "phase2-verification-accord",
+    "description": "Verify the successful restoration of the 'Agreement' in Phase 2, ensuring clean server code and correct Sullivan script injections.",
+    "metadata": {
+        "planner": "antigravity",
+        "target": "server_9998_v2.py, viewer.html, stenciler.html"
+    },
+    "steps": [
+        {
+            "id": "step_1",
+            "type": "refactoring",
+            "complexity": 0.4,
+            "estimated_tokens": 2000,
+            "dependencies": [],
+            "description": "Double-check server_9998_v2.py for any remaining 'Ghost Code' (duplicate methods like serve_template, do_GET, or redundant if __name__ == '__main__': blocks). Ensure the Handler class is unified and clean.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ]
+            }
+        },
+        {
+            "id": "step_2",
+            "type": "refactoring",
+            "complexity": 0.3,
+            "estimated_tokens": 1500,
+            "dependencies": [
+                "step_1"
+            ],
+            "description": "Verify that viewer.html and stenciler.html contain the mandatory Sullivan placeholders ({{engine_script}} and {{bridge_script}}). Ensure these tags are placed correctly at the bottom of the body.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/templates/viewer.html",
+                    "Frontend/3. STENCILER/static/templates/stenciler.html"
+                ]
+            }
+        },
+        {
+            "id": "step_3",
+            "type": "refactoring",
+            "complexity": 0.3,
+            "estimated_tokens": 1500,
+            "dependencies": [
+                "step_2"
+            ],
+            "description": "Confirm that the server's serve_template method correctly injects sullivan_engine.js and semantic_bridge.js into the identified placeholders.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ],
+                "input_files": [
+                    "Frontend/3. STENCILER/static/js/semantic_bridge.js"
+                ]
+            }
+        }
+    ]
+}

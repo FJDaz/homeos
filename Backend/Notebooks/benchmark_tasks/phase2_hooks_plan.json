@@ -1,0 +1,86 @@
+{
+    "task_id": "phase2-sullivan-engine-hooks",
+    "description": "Implement the Sullivan Engine (Hooks) and Semantic Bridge to enforce Constitutional principles and enable modular orchestration.",
+    "metadata": {
+        "planner": "antigravity",
+        "target": "Sullivan v7.1"
+    },
+    "steps": [
+        {
+            "id": "step_1",
+            "type": "code_generation",
+            "complexity": 0.5,
+            "estimated_tokens": 2000,
+            "dependencies": [],
+            "description": "Create static/js/sullivan_engine.js: implement global Sullivan object with Hooks (add_filter/do_action) and Component base class.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/js/sullivan_engine.js"
+                ]
+            }
+        },
+        {
+            "id": "step_2",
+            "type": "code_generation",
+            "complexity": 0.5,
+            "estimated_tokens": 2000,
+            "dependencies": [
+                "step_1"
+            ],
+            "description": "Create static/js/semantic_bridge.js: implement the Fetch interceptor and constitutional validators to prevent CSS leak to backend.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/js/semantic_bridge.js"
+                ],
+                "input_files": [
+                    "Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW.md"
+                ]
+            }
+        },
+        {
+            "id": "step_3",
+            "type": "refactoring",
+            "complexity": 0.4,
+            "estimated_tokens": 1500,
+            "dependencies": [
+                "step_2"
+            ],
+            "description": "Update server_9998_v2.py to inject engine and bridge scripts into templates and implement the /api/schema endpoint.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ]
+            }
+        },
+        {
+            "id": "step_4",
+            "type": "refactoring",
+            "complexity": 0.4,
+            "estimated_tokens": 2500,
+            "dependencies": [
+                "step_3"
+            ],
+            "description": "Refactor viewer.js to register as a Sullivan.Component and use Sullivan.Bridge for data fetching.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/js/viewer.js"
+                ]
+            }
+        },
+        {
+            "id": "step_5",
+            "type": "refactoring",
+            "complexity": 0.4,
+            "estimated_tokens": 1500,
+            "dependencies": [
+                "step_4"
+            ],
+            "description": "Refactor stenciler_app.js to integrate with the Sullivan Hook system for theme changes.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/js/stenciler_app.js"
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS - Genome Viewer (Port 9998)</title>
+    <link rel="stylesheet" href="/static/css/viewer.css">
+</head>
+
+<body>
+    <div class="tabs">
+        <div class="tab" onclick="switchTab(this, 'brs')">Brainstorm</div>
+        <div class="tab" onclick="switchTab(this, 'bkd')">Backend</div>
+        <div class="tab active current" onclick="switchTab(this, 'frd')">Frontend</div>
+        <div class="tab" onclick="switchTab(this, 'dpl')">Deploy</div>
+    </div>
+
+    <div class="main">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Homé<span class="K">OS</span></div>
+                <div class="sidebar-subtitle">Architecture Genome v3.1</div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Qu'est-ce que le Genome ?</div>
+                <div style="font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 12px;">
+                    Le <strong>Genome</strong> est le plan complet de votre projet.
+                    Comme l'ADN d'un être vivant, il décrit chaque partie :
+                    les <em>grandes étapes</em> (Corps), les <em>fonctions</em> (Organes),
+                    les <em>actions</em> (Cellules) et les <em>éléments d'interface</em> (Atomes).
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Confiance globale</div>
+                <div style="font-size: 42px; font-weight: 800; color: #7aca6a; letter-spacing: -2px;">{{confidence}}%
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Statistiques</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="stat-box">
+                        <div class="stat-number" id="total_corps">0</div>
+                        <div class="stat-label">phases</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" style="color:#5a9ac6;" id="total_atomes">{{total_atomes}}</div>
+                        <div class="stat-label">composants</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" style="color:#e4bb5a;" id="total_organes">{{total_organes}}</div>
+                        <div class="stat-label">fonctions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" style="color:#64748b;" id="total_cellules">{{total_cellules}}</div>
+                        <div class="stat-label">actions</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="content">
+            <div class="container">
+                <div class="sticky-header">
+                    <div style="display: flex; gap: 14px; align-items: center;">
+                        <input type="checkbox" id="select-all"
+                            style="width: 22px; height: 22px; accent-color: #7aca6a; cursor: pointer;"
+                            onchange="toggleAll(this)">
+                        <label for="select-all"
+                            style="font-size: 15px; color: #334155; cursor: pointer; font-weight: 600;">Tout
+                            sélectionner</label>
+                    </div>
+                    <button id="validate-btn" class="validate-btn" disabled onclick="scrollToStyleChoice()">Valider
+                        (0)</button>
+                </div>
+
+                <h1>Architecture Genome</h1>
+                <p class="subtitle">Visualisation hiérarchique avec explications</p>
+
+                <!-- ROW 1: Corps (Les 4 grandes étapes) -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">🎯 Les 4 Grandes Étapes (Corps)</span>
+                        <span class="section-count" id="count_corps">{{count_corps}}</span>
+                        <span class="section-desc">Vision stratégique de votre projet</span>
+                    </div>
+                    <div class="section-content" id="section-corps">
+                        <div class="row">
+                            <!-- Rendu par sullivan_renderer.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Organes (Les fonctions principales) -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">🫀 Les Fonctions Principales (Organes)</span>
+                        <span class="section-count" id="count_organes">{{count_organes}}</span>
+                        <span class="section-desc">Ce que fait chaque partie du système</span>
+                    </div>
+                    <div class="section-content" id="section-organes">
+                        <div class="row">
+                            <!-- Rendu par sullivan_renderer.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3: Cellules (Les actions concrètes) -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">🔬 Les Actions Concrètes (Cellules)</span>
+                        <span class="section-count" id="count_cellules">{{count_cellules}}</span>
+                        <span class="section-desc">Tâches spécifiques à réaliser</span>
+                    </div>
+                    <div class="section-content" id="section-cellules">
+                        <div class="row">
+                            <!-- Rendu par sullivan_renderer.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 4: Atomes (Les composants techniques) -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">⚛️ Les Composants Techniques (Atomes)</span>
+                        <span class="section-count" id="count_atomes">{{count_atomes}}</span>
+                        <span class="section-desc">Éléments finaux de l'interface</span>
+                    </div>
+                    <div class="section-content" id="section-atomes">
+                        <div class="row">
+                            <!-- Rendu par sullivan_renderer.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Style Choice (caché par défaut) -->
+                <div class="section" id="section-style-choice" style="display: none; margin-top: 40px;">
+                    <div class="section-header" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <span class="wingding-arrow"></span>
+                        <span class="section-title">Etape 2 : Choisir le Style</span>
+                        <span class="section-desc">Selectionnez une option pour continuer</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="row" style="justify-content: center; gap: 32px;">
+
+                            <!-- Option A: Upload -->
+                            <div class="style-option-card">
+                                <div class="style-option-header">Importer ma Maquette</div>
+                                <div class="upload-zone" id="upload-zone">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8"
+                                        stroke-width="1.5" style="margin-bottom: 12px;">
+                                        <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                                    </svg>
+                                    <p style="font-size: 14px; color: #64748b; margin-bottom: 8px;">
+                                        Glisser-déposer ou cliquer
+                                    </p>
+                                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                                    <button class="btn-secondary"
+                                        onclick="document.getElementById('file-input').click()">
+                                        Parcourir
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Option B: Styles par défaut -->
+                            <div class="style-option-card" style="width: 500px;">
+                                <div class="style-option-header">Choisir un Style</div>
+                                <div class="styles-grid">
+                                    <div class="style-card" data-style="minimal">
+                                        <div class="style-preview minimal-preview">
+                                            <span class="sp-title">Minimal</span>
+                                            <span class="sp-sub">Clean & Light</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="corporate">
+                                        <div class="style-preview corporate-preview">
+                                            <span class="sp-title">Corporate</span>
+                                            <span class="sp-sub">Professional</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="creative">
+                                        <div class="style-preview creative-preview">
+                                            <span class="sp-title">Créatif</span>
+                                            <span class="sp-sub">Bold & Art</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="tech">
+                                        <div class="style-preview tech-preview">
+                                            <span class="sp-title">Tech</span>
+                                            <span class="sp-sub">Modern Code</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="elegant">
+                                        <div class="style-preview elegant-preview">
+                                            <span class="sp-title">Élégant</span>
+                                            <span class="sp-sub">Refined</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="playful">
+                                        <div class="style-preview playful-preview">
+                                            <span class="sp-title">Ludique</span>
+                                            <span class="sp-sub">Friendly</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="dark">
+                                        <div class="style-preview dark-preview">
+                                            <span class="sp-title">Dark</span>
+                                            <span class="sp-sub">Night Mode</span>
+                                        </div>
+                                    </div>
+                                    <div class="style-card" data-style="colorful">
+                                        <div class="style-preview colorful-preview">
+                                            <span class="sp-title">Coloré</span>
+                                            <span class="sp-sub">Vibrant</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div style="height: 40px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/viewer.js"></script>
+    <script src="/static/js/genome_engine.js"></script>
+    <script src="/static/js/sullivan_renderer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.sullivanRenderer) {
+                window.sullivanRenderer.render();
+            }
+        });
+    </script>
+    <script src="/static/js/semantic_bridge.js"></script>
+    {{custom_injection}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('✅ Service Worker enregistré !'))
+                    .catch(err => console.error('❌ Erreur Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

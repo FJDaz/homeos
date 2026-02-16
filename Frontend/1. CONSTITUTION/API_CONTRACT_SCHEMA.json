@@ -3,34 +3,56 @@
   "title": "AETHERFLOW API Contract Schema",
   "version": "1.0.0",
   "description": "Contrat d'interface entre Système Cognitif (Backend) et Système de Rendu (Frontend) - Conforme à CONSTITUTION_AETHERFLOW v1.0.0",
-
   "definitions": {
     "Path": {
       "type": "string",
       "pattern": "^(n\\d+\\[\\d+\\]\\.)*n\\d+\\[\\d+\\]$",
       "description": "Format standardisé: n0[0].n1[2].n2[3].n3[1]",
-      "examples": ["n0[0]", "n0[0].n1[2]", "n0[1].n1[0].n2[3]"]
+      "examples": [
+        "n0[0]",
+        "n0[0].n1[2]",
+        "n0[1].n1[0].n2[3]"
+      ]
     },
-
     "SemanticAttributes": {
       "type": "object",
       "description": "Attributs sémantiques autorisés (JAMAIS de CSS)",
       "properties": {
         "layout_type": {
           "type": "string",
-          "enum": ["grid", "flex", "stack", "absolute"]
+          "enum": [
+            "grid",
+            "flex",
+            "stack",
+            "absolute"
+          ]
         },
         "density": {
           "type": "string",
-          "enum": ["compact", "normal", "airy"]
+          "enum": [
+            "compact",
+            "normal",
+            "airy"
+          ]
         },
         "importance": {
           "type": "string",
-          "enum": ["primary", "secondary", "tertiary"]
+          "enum": [
+            "primary",
+            "secondary",
+            "tertiary"
+          ]
         },
         "semantic_role": {
           "type": "string",
-          "enum": ["navigation", "content", "action", "feedback", "header", "footer"]
+          "enum": [
+            "navigation",
+            "content",
+            "action",
+            "feedback",
+            "header",
+            "footer"
+          ]
         },
         "accent_color": {
           "type": "string",
@@ -45,15 +67,25 @@
         },
         "visibility": {
           "type": "string",
-          "enum": ["visible", "hidden", "collapsed"]
+          "enum": [
+            "visible",
+            "hidden",
+            "collapsed"
+          ]
         }
       },
       "additionalProperties": false
     },
-
     "Event": {
       "type": "object",
-      "required": ["id", "timestamp", "actor", "target_path", "operation", "payload"],
+      "required": [
+        "id",
+        "timestamp",
+        "actor",
+        "target_path",
+        "operation",
+        "payload"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -67,14 +99,25 @@
         },
         "actor": {
           "type": "string",
-          "enum": ["user", "system", "ai"]
+          "enum": [
+            "user",
+            "system",
+            "ai"
+          ]
         },
         "target_path": {
           "$ref": "#/definitions/Path"
         },
         "operation": {
           "type": "string",
-          "enum": ["update_property", "component_swap", "layout_change", "delete", "duplicate", "insert"]
+          "enum": [
+            "update_property",
+            "component_swap",
+            "layout_change",
+            "delete",
+            "duplicate",
+            "insert"
+          ]
         },
         "payload": {
           "type": "object",
@@ -82,10 +125,11 @@
         }
       }
     },
-
     "ModificationResult": {
       "type": "object",
-      "required": ["success"],
+      "required": [
+        "success"
+      ],
       "properties": {
         "success": {
           "type": "boolean"
@@ -104,10 +148,15 @@
         }
       }
     },
-
     "GraphicNode": {
       "type": "object",
-      "required": ["id", "level", "path", "type", "properties"],
+      "required": [
+        "id",
+        "level",
+        "path",
+        "type",
+        "properties"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -123,7 +172,12 @@
         },
         "type": {
           "type": "string",
-          "enum": ["Corps", "Organe", "Cell", "Atomset"]
+          "enum": [
+            "Corps",
+            "Organe",
+            "Cell",
+            "Atomset"
+          ]
         },
         "properties": {
           "$ref": "#/definitions/SemanticAttributes"
@@ -143,10 +197,13 @@
         }
       }
     },
-
     "ComponentSuggestion": {
       "type": "object",
-      "required": ["id", "semantic_type", "importance"],
+      "required": [
+        "id",
+        "semantic_type",
+        "importance"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -165,7 +222,10 @@
           "$ref": "#/definitions/SemanticAttributes"
         },
         "elite_component_id": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Référence à la librairie Elite (Tier 1)"
         },
         "confidence_score": {
@@ -175,15 +235,23 @@
         },
         "tier": {
           "type": "integer",
-          "enum": [1, 2, 3],
+          "enum": [
+            1,
+            2,
+            3
+          ],
           "description": "1=cache, 2=adapt, 3=generate"
         }
       }
     },
-
     "ToolDefinition": {
       "type": "object",
-      "required": ["id", "name", "category", "config"],
+      "required": [
+        "id",
+        "name",
+        "category",
+        "config"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -197,15 +265,27 @@
         },
         "category": {
           "type": "string",
-          "enum": ["color", "dimension", "action", "transform"]
+          "enum": [
+            "color",
+            "dimension",
+            "action",
+            "transform"
+          ]
         },
         "config": {
           "type": "object",
-          "required": ["type"],
+          "required": [
+            "type"
+          ],
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["color_picker", "slider", "button", "input"]
+              "enum": [
+                "color_picker",
+                "slider",
+                "button",
+                "input"
+              ]
             }
           },
           "additionalProperties": true
@@ -221,10 +301,16 @@
         }
       }
     },
-
     "DrillDownContext": {
       "type": "object",
-      "required": ["level", "node", "children", "components", "tools", "breadcrumb"],
+      "required": [
+        "level",
+        "node",
+        "children",
+        "components",
+        "tools",
+        "breadcrumb"
+      ],
       "properties": {
         "level": {
           "type": "integer",
@@ -256,7 +342,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["label", "path"],
+            "required": [
+              "label",
+              "path"
+            ],
             "properties": {
               "label": {
                 "type": "string"
@@ -270,13 +359,16 @@
       }
     }
   },
-
   "endpoints": {
     "GET /api/genome/:id": {
       "description": "Récupère le genome complet",
       "response": {
         "type": "object",
-        "required": ["genome_id", "version", "nodes"],
+        "required": [
+          "genome_id",
+          "version",
+          "nodes"
+        ],
         "properties": {
           "genome_id": {
             "type": "string"
@@ -296,26 +388,35 @@
         }
       }
     },
-
     "GET /api/genome/:id/state": {
       "description": "État courant reconstruit depuis les events",
       "response": {
         "$ref": "#/endpoints/GET /api/genome/:id/response"
       }
     },
-
     "POST /api/modifications": {
       "description": "Applique une modification",
       "request": {
         "type": "object",
-        "required": ["path", "operation", "payload"],
+        "required": [
+          "path",
+          "operation",
+          "payload"
+        ],
         "properties": {
           "path": {
             "$ref": "#/definitions/Path"
           },
           "operation": {
             "type": "string",
-            "enum": ["update_property", "component_swap", "layout_change", "delete", "duplicate", "insert"]
+            "enum": [
+              "update_property",
+              "component_swap",
+              "layout_change",
+              "delete",
+              "duplicate",
+              "insert"
+            ]
           },
           "payload": {
             "type": "object",
@@ -323,7 +424,10 @@
             "oneOf": [
               {
                 "description": "update_property payload",
-                "required": ["property", "value"],
+                "required": [
+                  "property",
+                  "value"
+                ],
                 "properties": {
                   "property": {
                     "type": "string"
@@ -335,7 +439,10 @@
               },
               {
                 "description": "component_swap payload",
-                "required": ["old_component_id", "new_component_id"],
+                "required": [
+                  "old_component_id",
+                  "new_component_id"
+                ],
                 "properties": {
                   "old_component_id": {
                     "type": "string"
@@ -347,7 +454,9 @@
               },
               {
                 "description": "layout_change payload",
-                "required": ["property"],
+                "required": [
+                  "property"
+                ],
                 "properties": {
                   "property": {
                     "type": "string"
@@ -374,7 +483,6 @@
         "$ref": "#/definitions/ModificationResult"
       }
     },
-
     "GET /api/modifications/history": {
       "description": "Historique des modifications",
       "query": {
@@ -392,7 +500,9 @@
       },
       "response": {
         "type": "object",
-        "required": ["events"],
+        "required": [
+          "events"
+        ],
         "properties": {
           "events": {
             "type": "array",
@@ -403,12 +513,14 @@
         }
       }
     },
-
     "POST /api/snapshot": {
       "description": "Crée un checkpoint",
       "response": {
         "type": "object",
-        "required": ["snapshot_id", "timestamp"],
+        "required": [
+          "snapshot_id",
+          "timestamp"
+        ],
         "properties": {
           "snapshot_id": {
             "type": "string"
@@ -420,12 +532,14 @@
         }
       }
     },
-
     "POST /api/drilldown/enter": {
       "description": "Entre dans un niveau (drill-down)",
       "request": {
         "type": "object",
-        "required": ["node_id", "target_level"],
+        "required": [
+          "node_id",
+          "target_level"
+        ],
         "properties": {
           "node_id": {
             "$ref": "#/definitions/Path"
@@ -441,21 +555,22 @@
         "$ref": "#/definitions/DrillDownContext"
       }
     },
-
     "POST /api/drilldown/exit": {
       "description": "Sort d'un niveau (remonte)",
       "response": {
         "$ref": "#/definitions/DrillDownContext"
       }
     },
-
     "GET /api/breadcrumb": {
       "description": "Breadcrumb actuel",
       "response": {
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["label", "path"],
+          "required": [
+            "label",
+            "path"
+          ],
           "properties": {
             "label": {
               "type": "string"
@@ -467,7 +582,6 @@
         }
       }
     },
-
     "GET /api/components/contextual": {
       "description": "Composants disponibles selon le contexte",
       "query": {
@@ -486,7 +600,9 @@
       },
       "response": {
         "type": "object",
-        "required": ["components"],
+        "required": [
+          "components"
+        ],
         "properties": {
           "level": {
             "type": "integer"
@@ -506,19 +622,19 @@
         }
       }
     },
-
     "GET /api/components/:id": {
       "description": "Détails d'un composant spécifique",
       "response": {
         "$ref": "#/definitions/ComponentSuggestion"
       }
     },
-
     "GET /api/components/elite": {
       "description": "Liste des composants Elite (Tier 1 - pré-générés)",
       "response": {
         "type": "object",
-        "required": ["components"],
+        "required": [
+          "components"
+        ],
         "properties": {
           "components": {
             "type": "array",
@@ -533,7 +649,6 @@
         }
       }
     },
-
     "GET /api/tools": {
       "description": "Outils disponibles selon le contexte",
       "query": {
@@ -547,7 +662,9 @@
       },
       "response": {
         "type": "object",
-        "required": ["tools"],
+        "required": [
+          "tools"
+        ],
         "properties": {
           "tools": {
             "type": "array",
@@ -558,12 +675,14 @@
         }
       }
     },
-
     "POST /api/tools/:id/apply": {
       "description": "Applique un outil sur un nœud",
       "request": {
         "type": "object",
-        "required": ["target_id", "params"],
+        "required": [
+          "target_id",
+          "params"
+        ],
         "properties": {
           "target_id": {
             "$ref": "#/definitions/Path"
@@ -576,11 +695,16 @@
       },
       "response": {
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["modified", "error"]
+            "enum": [
+              "modified",
+              "error"
+            ]
           },
           "entity": {
             "$ref": "#/definitions/GraphicNode"
@@ -594,7 +718,6 @@
         }
       }
     },
-
     "GET /api/schema": {
       "description": "JSON Schema du contrat (ce fichier)",
       "response": {
@@ -603,7 +726,6 @@
       }
     }
   },
-
   "constitutional_constraints": {
     "description": "Contraintes constitutionnelles IMMUABLES",
     "rules": [
