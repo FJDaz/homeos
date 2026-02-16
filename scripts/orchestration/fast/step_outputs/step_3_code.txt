@@ -1,0 +1,38 @@
+{
+  "operations": [
+    {
+      "type": "add_function",
+      "code": "load_state() {\n  local state_file=\".watcher_state.json\"\n  if [[ -f \"$state_file\" ]]; then\n    local content\n    content=$(cat \"$state_file\" 2>/dev/null || echo '{\"compact_count\": 0}')\n    echo \"$content\"\n  else\n    echo '{\"compact_count\": 0}'\n  fi\n}"
+    },
+    {
+      "type": "add_function",
+      "code": "save_state() {\n  local state_file=\".watcher_state.json\"\n  local state_json\n  state_json=$(jq -c . <<< \"{\\\"compact_count\\\": $COMPACT_COUNT}\" 2>/dev/null || echo \"{\\\"compact_count\\\": $COMPACT_COUNT}\")\n  echo \"$state_json\" > \"$state_file\"\n  log_info \"État sauvegardé: $state_json\"\n}"
+    },
+    {
+      "type": "add_function",
+      "code": "increment_compact_count() {\n  COMPACT_COUNT=$((COMPACT_COUNT + 1))\n  save_state\n  log_success \"Compteur Compact incrémenté: $COMPACT_COUNT\"\n}"
+    },
+    {
+      "type": "add_function",
+      "code": "get_status_icon() {\n  local icc_percent=$1\n  local compact_count=$2\n  \n  if [[ $compact_count -ge 4 ]]; then\n    echo \"🔴 ROUGE\"\n  elif [[ $compact_count -eq 3 ]] && (( $(echo \"$icc_percent >= 80\" | bc -l) )); then\n    echo \"🟣 MAGENTA\"\n  elif (( $(echo \"$icc_percent >= 80\" | bc -l) )); then\n    echo \"🟠 ORANGE\"\n  else\n    echo \"🟢 VERT\"\n  fi\n}"
+    },
+    {
+      "type": "modify_method",
+      "target": "create_snapshot",
+      "position": "end",
+      "code": "  increment_compact_count"
+    },
+    {
+      "type": "modify_method",
+      "target": "display_report",
+      "position": "after",
+      "code": "  # Charger l'état\n  local state_json\n  state_json=$(load_state)\n  COMPACT_COUNT=$(echo \"$state_json\" | grep -o '\"compact_count\": [0-9]*' | cut -d' ' -f2 || echo 0)\n  \n  # Déterminer ICC_PERCENT (à partir du rapport)\n  local icc_percent=0\n  if [[ -n \"$ICC_PERCENT\" ]]; then\n    icc_percent=$ICC_PERCENT\n  else\n    # Extraire ICC du rapport si disponible\n    local icc_line\n    icc_line=$(extract_kimi_report | grep -i \"icc\" | head -1)\n    if [[ -n \"$icc_line\" ]]; then\n      icc_percent=$(echo \"$icc_line\" | grep -o '[0-9]*\\.\\?[0-9]*' | head -1)\n    fi\n  fi\n  \n  # Obtenir statut\n  local status_icon\n  status_icon=$(get_status_icon \"$icc_percent\" \"$COMPACT_COUNT\")\n  \n  # Afficher statut\n  echo \"\"\n  echo \"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\"\n  echo -e \"${YELLOW}📊 ÉTAT CONTEXTUEL: $status_icon${NC}\"\n  echo \"Compacts créés: $COMPACT_COUNT\"\n  echo \"ICC: ${icc_percent}%\"\n  echo \"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\"\n  \n  # Alerte CRISE si ROUGE\n  if [[ \"$status_icon\" == \"🔴 ROUGE\" ]]; then\n    echo \"\"\n    echo -e \"${RED}🚨 CRISE CONTEXTUELLE :${NC}\"\n    echo -e \"${RED}   Relancer nouvelle session KIMI recommandé${NC}\"\n    echo -e \"${RED}   (Compacts ≥ 4 - Contexte saturé)${NC}\"\n    echo \"\"\n  fi"
+    },
+    {
+      "type": "modify_method",
+      "target": "check_prerequisites",
+      "position": "end",
+      "code": "  # Initialiser l'état si nécessaire\n  if [[ ! -f \".watcher_state.json\" ]]; then\n    echo '{\"compact_count\": 0}' > \".watcher_state.json\"\n    log_info \"Fichier d'état créé: .watcher_state.json\"\n  fi"
+    }
+  ]
+}

@@ -131,16 +131,16 @@
     },
     "metadata": {
       "type": "object",
-      "required": ["created_at", "claude_version"],
+      "required": [],
       "properties": {
         "created_at": {
           "type": "string",
           "format": "date-time",
-          "description": "ISO 8601 timestamp when the plan was created"
+          "description": "ISO 8601 timestamp when the plan was created (optional for manual plans)"
         },
         "claude_version": {
           "type": "string",
-          "description": "Version identifier for Claude Code (e.g., 'claude-code')"
+          "description": "Version identifier for Claude Code (e.g., 'claude-code', optional)"
         },
         "project_context": {
           "type": "string",

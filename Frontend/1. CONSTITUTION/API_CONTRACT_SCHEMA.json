@@ -1,0 +1,740 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AETHERFLOW API Contract Schema",
+  "version": "1.0.0",
+  "description": "Contrat d'interface entre Système Cognitif (Backend) et Système de Rendu (Frontend) - Conforme à CONSTITUTION_AETHERFLOW v1.0.0",
+  "definitions": {
+    "Path": {
+      "type": "string",
+      "pattern": "^(n\\d+\\[\\d+\\]\\.)*n\\d+\\[\\d+\\]$",
+      "description": "Format standardisé: n0[0].n1[2].n2[3].n3[1]",
+      "examples": [
+        "n0[0]",
+        "n0[0].n1[2]",
+        "n0[1].n1[0].n2[3]"
+      ]
+    },
+    "SemanticAttributes": {
+      "type": "object",
+      "description": "Attributs sémantiques autorisés (JAMAIS de CSS)",
+      "properties": {
+        "layout_type": {
+          "type": "string",
+          "enum": [
+            "grid",
+            "flex",
+            "stack",
+            "absolute"
+          ]
+        },
+        "density": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "normal",
+            "airy"
+          ]
+        },
+        "importance": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "tertiary"
+          ]
+        },
+        "semantic_role": {
+          "type": "string",
+          "enum": [
+            "navigation",
+            "content",
+            "action",
+            "feedback",
+            "header",
+            "footer"
+          ]
+        },
+        "accent_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Hex color (interprété librement par le rendu)"
+        },
+        "border_weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Mappé librement par le rendu"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "visible",
+            "hidden",
+            "collapsed"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Event": {
+      "type": "object",
+      "required": [
+        "id",
+        "timestamp",
+        "actor",
+        "target_path",
+        "operation",
+        "payload"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^evt_[a-z0-9]+$",
+          "description": "Identifiant unique de l'événement"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO8601 timestamp"
+        },
+        "actor": {
+          "type": "string",
+          "enum": [
+            "user",
+            "system",
+            "ai"
+          ]
+        },
+        "target_path": {
+          "$ref": "#/definitions/Path"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "update_property",
+            "component_swap",
+            "layout_change",
+            "delete",
+            "duplicate",
+            "insert"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "description": "Spécifique à l'opération"
+        }
+      }
+    },
+    "ModificationResult": {
+      "type": "object",
+      "required": [
+        "success"
+      ],
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "updated_node": {
+          "type": "object",
+          "description": "Nœud mis à jour (si success=true)"
+        },
+        "modification_id": {
+          "type": "string",
+          "pattern": "^evt_[a-z0-9]+$"
+        },
+        "error": {
+          "type": "string",
+          "description": "Message d'erreur (si success=false)"
+        }
+      }
+    },
+    "GraphicNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "level",
+        "path",
+        "type",
+        "properties"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "0=Corps, 1=Organe, 2=Cell, 3=Atomset"
+        },
+        "path": {
+          "$ref": "#/definitions/Path"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Corps",
+            "Organe",
+            "Cell",
+            "Atomset"
+          ]
+        },
+        "properties": {
+          "$ref": "#/definitions/SemanticAttributes"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GraphicNode"
+          }
+        },
+        "modifiable_properties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Liste des propriétés modifiables pour ce nœud"
+        }
+      }
+    },
+    "ComponentSuggestion": {
+      "type": "object",
+      "required": [
+        "id",
+        "semantic_type",
+        "importance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "semantic_type": {
+          "type": "string",
+          "description": "Type sémantique (button, navigation, hero, etc.)"
+        },
+        "importance": {
+          "$ref": "#/definitions/SemanticAttributes/properties/importance"
+        },
+        "attributes": {
+          "$ref": "#/definitions/SemanticAttributes"
+        },
+        "elite_component_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Référence à la librairie Elite (Tier 1)"
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "tier": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "description": "1=cache, 2=adapt, 3=generate"
+        }
+      }
+    },
+    "ToolDefinition": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "category",
+        "config"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Emoji ou nom d'icône"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "color",
+            "dimension",
+            "action",
+            "transform"
+          ]
+        },
+        "config": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "color_picker",
+                "slider",
+                "button",
+                "input"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "requires_selection": {
+          "type": "boolean"
+        },
+        "allowed_levels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DrillDownContext": {
+      "type": "object",
+      "required": [
+        "level",
+        "node",
+        "children",
+        "components",
+        "tools",
+        "breadcrumb"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "node": {
+          "$ref": "#/definitions/GraphicNode"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GraphicNode"
+          }
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ComponentSuggestion"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ToolDefinition"
+          }
+        },
+        "breadcrumb": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "path"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "path": {
+                "$ref": "#/definitions/Path"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "GET /api/genome/:id": {
+      "description": "Récupère le genome complet",
+      "response": {
+        "type": "object",
+        "required": [
+          "genome_id",
+          "version",
+          "nodes"
+        ],
+        "properties": {
+          "genome_id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "base_snapshot": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GraphicNode"
+            }
+          }
+        }
+      }
+    },
+    "GET /api/genome/:id/state": {
+      "description": "État courant reconstruit depuis les events",
+      "response": {
+        "$ref": "#/endpoints/GET /api/genome/:id/response"
+      }
+    },
+    "POST /api/modifications": {
+      "description": "Applique une modification",
+      "request": {
+        "type": "object",
+        "required": [
+          "path",
+          "operation",
+          "payload"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "#/definitions/Path"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "update_property",
+              "component_swap",
+              "layout_change",
+              "delete",
+              "duplicate",
+              "insert"
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "description": "Contient les détails de l'opération",
+            "oneOf": [
+              {
+                "description": "update_property payload",
+                "required": [
+                  "property",
+                  "value"
+                ],
+                "properties": {
+                  "property": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Valeur sémantique (JAMAIS de CSS)"
+                  }
+                }
+              },
+              {
+                "description": "component_swap payload",
+                "required": [
+                  "old_component_id",
+                  "new_component_id"
+                ],
+                "properties": {
+                  "old_component_id": {
+                    "type": "string"
+                  },
+                  "new_component_id": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "description": "layout_change payload",
+                "required": [
+                  "property"
+                ],
+                "properties": {
+                  "property": {
+                    "type": "string"
+                  },
+                  "old_order": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "new_order": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "$ref": "#/definitions/ModificationResult"
+      }
+    },
+    "GET /api/modifications/history": {
+      "description": "Historique des modifications",
+      "query": {
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO8601 timestamp"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 100
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Event"
+            }
+          }
+        }
+      }
+    },
+    "POST /api/snapshot": {
+      "description": "Crée un checkpoint",
+      "response": {
+        "type": "object",
+        "required": [
+          "snapshot_id",
+          "timestamp"
+        ],
+        "properties": {
+          "snapshot_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "POST /api/drilldown/enter": {
+      "description": "Entre dans un niveau (drill-down)",
+      "request": {
+        "type": "object",
+        "required": [
+          "node_id",
+          "target_level"
+        ],
+        "properties": {
+          "node_id": {
+            "$ref": "#/definitions/Path"
+          },
+          "target_level": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        }
+      },
+      "response": {
+        "$ref": "#/definitions/DrillDownContext"
+      }
+    },
+    "POST /api/drilldown/exit": {
+      "description": "Sort d'un niveau (remonte)",
+      "response": {
+        "$ref": "#/definitions/DrillDownContext"
+      }
+    },
+    "GET /api/breadcrumb": {
+      "description": "Breadcrumb actuel",
+      "response": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "label",
+            "path"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "path": {
+              "$ref": "#/definitions/Path"
+            }
+          }
+        }
+      }
+    },
+    "GET /api/components/contextual": {
+      "description": "Composants disponibles selon le contexte",
+      "query": {
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "parent_id": {
+          "$ref": "#/definitions/Path"
+        },
+        "style": {
+          "type": "string",
+          "description": "Style choisi (minimal, elegant, etc.)"
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": [
+          "components"
+        ],
+        "properties": {
+          "level": {
+            "type": "integer"
+          },
+          "parent_id": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ComponentSuggestion"
+            }
+          }
+        }
+      }
+    },
+    "GET /api/components/:id": {
+      "description": "Détails d'un composant spécifique",
+      "response": {
+        "$ref": "#/definitions/ComponentSuggestion"
+      }
+    },
+    "GET /api/components/elite": {
+      "description": "Liste des composants Elite (Tier 1 - pré-générés)",
+      "response": {
+        "type": "object",
+        "required": [
+          "components"
+        ],
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ComponentSuggestion"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Nombre total de composants Elite"
+          }
+        }
+      }
+    },
+    "GET /api/tools": {
+      "description": "Outils disponibles selon le contexte",
+      "query": {
+        "level": {
+          "type": "string",
+          "description": "corps, organe, cell, atome"
+        },
+        "has_selection": {
+          "type": "boolean"
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": [
+          "tools"
+        ],
+        "properties": {
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ToolDefinition"
+            }
+          }
+        }
+      }
+    },
+    "POST /api/tools/:id/apply": {
+      "description": "Applique un outil sur un nœud",
+      "request": {
+        "type": "object",
+        "required": [
+          "target_id",
+          "params"
+        ],
+        "properties": {
+          "target_id": {
+            "$ref": "#/definitions/Path"
+          },
+          "params": {
+            "type": "object",
+            "description": "Paramètres spécifiques à l'outil"
+          }
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "modified",
+              "error"
+            ]
+          },
+          "entity": {
+            "$ref": "#/definitions/GraphicNode"
+          },
+          "modification": {
+            "$ref": "#/definitions/Event"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "GET /api/schema": {
+      "description": "JSON Schema du contrat (ce fichier)",
+      "response": {
+        "type": "object",
+        "description": "Le schéma JSON complet de l'API"
+      }
+    }
+  },
+  "constitutional_constraints": {
+    "description": "Contraintes constitutionnelles IMMUABLES",
+    "rules": [
+      "Le backend ne produit JAMAIS de CSS, HTML, ou classes Tailwind",
+      "Le frontend ne manipule JAMAIS GenomeStateManager, ModificationLog, ou règles métier",
+      "Tous les attributs traversant l'API sont SÉMANTIQUES (layout_type, importance, etc.)",
+      "Le JSON Modifs est l'unique source de vérité",
+      "L'historique est immutable (append-only)",
+      "Format de path standardisé: n0[i].n1[j].n2[k].n3[l]"
+    ]
+  }
+}

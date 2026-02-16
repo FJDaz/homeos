@@ -1,0 +1,43 @@
+{
+    "task_id": "maiathon_bridge_v2",
+    "description": "Implémentation d'une API universelle 'CTO' pour ouvrir Aetherflow aux services tiers comme Maïathon.",
+    "steps": [
+        {
+            "id": "step_1",
+            "description": "Ajouter l'endpoint /v1/cto/chat dans api.py avec support multi-modèle (Groq/DeepSeek).",
+            "type": "patch",
+            "complexity": 0.7,
+            "estimated_tokens": 1500,
+            "context": {
+                "files": [
+                    "Backend/Prod/api.py"
+                ],
+                "patch": {
+                    "marker": "def run_api",
+                    "position": "before"
+                },
+                "instructions": "Créer une route POST /v1/cto/chat qui accepte un message et un contexte. Utiliser le CTOMode existant pour le routage intelligent. S'assurer que la réponse est propre et utilisable par une API externe."
+            }
+        },
+        {
+            "id": "step_2",
+            "description": "Créer un script de test 'scripts/simulate_maiathon.py' pour valider le pont.",
+            "type": "code_generation",
+            "complexity": 0.4,
+            "estimated_tokens": 800,
+            "context": {
+                "files": [
+                    "scripts/simulate_maiathon.py"
+                ],
+                "instructions": "Écrire un client HTTP asynchrone simple qui simule une requête de Maïathon vers l'API Aetherflow, avec un persona de philosophe (Spinoza)."
+            }
+        }
+    ],
+    "metadata": {
+        "created_at": "2026-02-10T20:50:00Z",
+        "claude_version": "claude-code",
+        "workflow": "PROD",
+        "priority": "high",
+        "target": "integration-maiathon"
+    }
+}

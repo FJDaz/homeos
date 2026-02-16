@@ -1,0 +1,83 @@
+{
+  "task_id": "cec432c5-a6af-4a22-932c-7f52e770454a",
+  "description": "Validate FAST mode execution results - 4 steps",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Validate code from step_1: Check compilation, security, and logic correctness",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid",
+        "No obvious security vulnerabilities",
+        "Logic is sound and correct",
+        "Code follows basic best practices"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```json\n{\n  \"operations\": [\n    {\n      \"type\": \"add_function\",\n      \"code\": \"estimate_tokens() {\\n  local word_count\\n  word_count=$(extract_kimi_report | wc -w)\\n  TOKENS_CR=$((word_count * 13 / 10))\\n  ICC_PERCENT=$(bc -l <<< \\\"scale=2; $TOKENS_CR / 128000 * 100\\\")\\n}\"\n    },\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"display_report\",\n      \"position\": \"after\",\n      \"code\": \"echo\\\"\\n\\\"\\necho -e \\\"${YELLOW}\ud83d\udcca Rapport technique :${NC}\\\"\\necho \\\"  Tokens estim\u00e9s : $TOKENS_CR\\\"\\necho \\\"  ICC approximatif : $ICC_PERCENT%\\\"\\n\"\n    }\n  ]\n}\n```"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Validate code from step_2: Check compilation, security, and logic correctness",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid",
+        "No obvious security vulnerabilities",
+        "Logic is sound and correct",
+        "Code follows basic best practices"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```json\n{\n  \"operations\": [\n    {\n      \"type\": \"add_function\",\n      \"code\": \"create_snapshot() {\\n  local timestamp\\n  local hash\\n  local icc_percent\\n  local compact_number\\n  local artefact\\n  timestamp=$(date -u +'%Y-%m-%dT%H:%M:%S%z')\\n  hash=$(md5 -q \\\"$HUB_FILE\\\" 2>/dev/null || md5sum \\\"$HUB_FILE\\\" 2>/dev/null | awk '{print \\$1}')\\n  icc_percent=$ICC_PERCENT\\n  compact_number=$TOKENS_CR\\n  artefact=$(extract_kimi_report)\\n  local filename\\n  filename=\\\"snapshots/KIMI_${timestamp}_${hash}.txt\\\"\\n  mkdir -p \\\"snapshots\\\"\\n  echo \\\"Timestamp: $timestamp\\\" > \\\"$filename\\\"\\n  echo \\\"Model: KIMI\\\" >> \\\"$filename\\\"\\n  echo \\\"ICC: $icc_percent%\\\" >> \\\"$filename\\\"\\n  echo \\\"Compact#: $compact_number\\\" >> \\\"$filename\\\"\\n  echo \\\"Hash: $hash\\\" >> \\\"$filename\\\"\\n  echo \\\"Artefact:\\\" >> \\\"$filename\\\"\\n  echo \\\"$artefact\\\" >> \\\"$filename\\\"\\n  log_success \\\"Snapshot Git LLM cr\u00e9\u00e9 : $filename\\\"\\n}\"\n    },\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"display_report\",\n      \"position\": \"after\",\n      \"code\": \"if (( $(echo \\\"$ICC_PERCENT >= 80\\\" | bc -l) )); then\\n  create_snapshot\\nfi\"\n    }\n  ]\n}\n```"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Validate code from step_3: Check compilation, security, and logic correctness",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid",
+        "No obvious security vulnerabilities",
+        "Logic is sound and correct",
+        "Code follows basic best practices"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```json\n{\n  \"operations\": [\n    {\n      \"type\": \"add_function\",\n      \"code\": \"load_state() {\\n  local state_file=\\\".watcher_state.json\\\"\\n  if [[ -f \\\"$state_file\\\" ]]; then\\n    local content\\n    content=$(cat \\\"$state_file\\\" 2>/dev/null || echo '{\\\"compact_count\\\": 0}')\\n    echo \\\"$content\\\"\\n  else\\n    echo '{\\\"compact_count\\\": 0}'\\n  fi\\n}\"\n    },\n    {\n      \"type\": \"add_function\",\n      \"code\": \"save_state() {\\n  local state_file=\\\".watcher_state.json\\\"\\n  local state_json\\n  state_json=$(jq -c . <<< \\\"{\\\\\\\"compact_count\\\\\\\": $COMPACT_COUNT}\\\" 2>/dev/null || echo \\\"{\\\\\\\"compact_count\\\\\\\": $COMPACT_COUNT}\\\")\\n  echo \\\"$state_json\\\" > \\\"$state_file\\\"\\n  log_info \\\"\u00c9tat sauvegard\u00e9: $state_json\\\"\\n}\"\n    },\n    {\n      \"type\": \"add_function\",\n      \"code\": \"increment_compact_count() {\\n  COMPACT_COUNT=$((COMPACT_COUNT + 1))\\n  save_state\\n  log_success \\\"Compteur Compact incr\u00e9ment\u00e9: $COMPACT_COUNT\\\"\\n}\"\n    },\n    {\n      \"type\": \"add_function\",\n      \"code\": \"get_status_icon() {\\n  local icc_percent=$1\\n  local compact_count=$2\\n  \\n  if [[ $compact_count -ge 4 ]]; then\\n    echo \\\"\ud83d\udd34 ROUGE\\\"\\n  elif [[ $compact_count -eq 3 ]] && (( $(echo \\\"$icc_percent >= 80\\\" | bc -l) )); then\\n    echo \\\"\ud83d\udfe3 MAGENTA\\\"\\n  elif (( $(echo \\\"$icc_percent >= 80\\\" | bc -l) )); then\\n    echo \\\"\ud83d\udfe0 ORANGE\\\"\\n  else\\n    echo \\\"\ud83d\udfe2 VERT\\\"\\n  fi\\n}\"\n    },\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"create_snapshot\",\n      \"position\": \"end\",\n      \"code\": \"  increment_compact_count\"\n    },\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"display_report\",\n      \"position\": \"after\",\n      \"code\": \"  # Charger l'\u00e9tat\\n  local state_json\\n  state_json=$(load_state)\\n  COMPACT_COUNT=$(echo \\\"$state_json\\\" | grep -o '\\\"compact_count\\\": [0-9]*' | cut -d' ' -f2 || echo 0)\\n  \\n  # D\u00e9terminer ICC_PERCENT (\u00e0 partir du rapport)\\n  local icc_percent=0\\n  if [[ -n \\\"$ICC_PERCENT\\\" ]]; then\\n    icc_percent=$ICC_PERCENT\\n  else\\n    # Extraire ICC du rapport si disponible\\n    local icc"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Validate code from step_4: Check compilation, security, and logic correctness",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid",
+        "No obvious security vulnerabilities",
+        "Logic is sound and correct",
+        "Code follows basic best practices"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```json\n{\n  \"operations\": [\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"display_report\",\n      \"position\": \"before\",\n      \"code\": \"\n        # Charger l\\'\u00e9tat\n        local state_json\n        state_json=$(load_state)\n        COMPACT_COUNT=$(echo \\\"$state_json\\\" | grep -o '\\\"compact_count\\\": [0-9]*' | cut -d' ' -f2 || echo 0)\n\n        # D\u00e9terminer ICC_PERCENT (\u00e0 partir du rapport)\n        local icc_percent=0\n        if [[ -n \\\"$ICC_PERCENT\\\" ]]; then\n          icc_percent=$ICC_PERCENT\n        else\n          # Extraire ICC du rapport si disponible\n          local icc_line\n          icc_line=$(extract_kimi_report | grep -i \\\"icc\\\" | head -1)\n          if [[ -n \\\"$icc_line\\\" ]]; then\n            icc_percent=$(echo \\\"$icc_line\\\" | grep -o '[0-9]*\\\\.\\\\?[0-9]*' | head -1)\n          fi\n        fi\n\n        # Obtenir statut\n        local status_icon\n        status_icon=$(get_status_icon \\\"$icc_percent\\\" \\\"$COMPACT_COUNT\\\")\n\n        # Afficher section M\u00e9triques Git LLM\n        echo \\\"\\\"\n        echo \\\"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\\\"\n        echo -e \\\"${YELLOW}\ud83d\udcca M\u00c9TRIQUES GIT LLM:${NC}\\\"\n        echo -e \\\"  Tokens CR (approx.): ${TOKENS_CR}\\\"\n        echo -e \\\"  ICC%: $icc_percent%\\\"\n        echo -e \\\"  Compact#: $COMPACT_COUNT\\\"\n        echo -e \\\"  Statut: $status_icon\\\"\n\n        # Formatage color\u00e9 selon statut\n        case \\\"$status_icon\\\" in\n          \\\"\ud83d\udd34 ROUGE\\\")\n            echo -e \\\"${RED}\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501${NC}\\\"\n            ;;\n          \\\"\ud83d\udfe3 MAGENTA\\\")\n            echo -e \\\"${MAGENTA}\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501${NC}\\\"\n            ;;\n          \\\"\ud83d\udfe0 ORANGE\\\")\n            echo -e \\\"${ORANGE}\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501${NC}\\\"\n            ;;\n          \\\"\ud83d\udfe2 VERT\\\")\n            echo -e \\\"${GREEN}\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501${NC}\\\"\n            ;;\n        esac\n      \"\n    }\n  ]\n}\n```"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-12T21:32:05.975716",
+    "claude_version": "claude-code",
+    "project_context": "DOUBLE-CHECK validation of FAST mode execution"
+  }
+}

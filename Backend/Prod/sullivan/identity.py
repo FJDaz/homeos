@@ -574,6 +574,292 @@ class Distiller:
         return placement
 
 
+class Stenciler:
+    """
+    Génère les schémas filaires (Stencils) depuis le Genome pour l'étape 4.
+    
+    Le Stenciler lit le Genome enrichi et génère des SVG wireframes pour chaque Corps (N0),
+    permettant à l'utilisateur de marquer les composants comme 'keep' ou 'reserve'.
+    """
+    
+    def __init__(self, genome_path: Optional[str] = None):
+        """
+        Charge le genome enrichi.
+        
+        Args:
+            genome_path: Chemin vers le fichier genome JSON. Si None, utilise le chemin par défaut.
+        """
+        self.genome_path = genome_path or "docs/02-sullivan/Genome_Enrichi/Genome_OPTIMISE_2026-02-06/genome_inferred_kimi_innocent.json"
+        self.genome = self._load_genome()
+        self.selections = {}  # {component_id: 'keep' | 'reserve'}
+        
+    def _load_genome(self) -> Dict[str, Any]:
+        """Charge le fichier genome JSON."""
+        try:
+            with open(self.genome_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Erreur chargement genome: {e}")
+            return {"n0_phases": []}
+    
+    def get_corps(self) -> List[Dict[str, Any]]:
+        """
+        Retourne la liste des 9 Corps (N0) depuis le genome.
+        
+        Returns:
+            Liste des Corps avec id, name, description, order
+        """
+        phases = self.genome.get("n0_phases", [])
+        return [
+            {
+                "id": phase.get("id", f"phase_{i}"),
+                "name": phase.get("name", f"Phase {i}"),
+                "description": phase.get("description", ""),
+                "order": phase.get("order", i),
+                "n_sections": len(phase.get("n1_sections", []))
+            }
+            for i, phase in enumerate(phases)
+        ]
+    
+    def get_components_for_corps(self, corps_id: str) -> List[Dict[str, Any]]:
+        """
+        Retourne tous les composants (N3) pour un Corps donné (N0).
+        
+        Args:
+            corps_id: ID du Corps (ex: 'phase_1_ir')
+            
+        Returns:
+            Liste des composants avec id, name, endpoint, method, visual_hint
+        """
+        components = []
+        phases = self.genome.get("n0_phases", [])
+        
+        for phase in phases:
+            if phase.get("id") == corps_id:
+                for section in phase.get("n1_sections", []):
+                    for feature in section.get("n2_features", []):
+                        for comp in feature.get("n3_components", []):
+                            components.append({
+                                "id": comp.get("id", ""),
+                                "name": comp.get("name", "Composant"),
+                                "endpoint": comp.get("endpoint", ""),
+                                "method": comp.get("method", "GET"),
+                                "visual_hint": comp.get("visual_hint", "default"),
+                                "description_ui": comp.get("description_ui", "")
+                            })
+                break
+        
+        return components
+    
+    def generate_stencil_svg(self, corps_id: str, width: int = 200, height: int = 120) -> str:
+        """
+        Génère le SVG wireframe pour un Corps donné.
+        
+        Args:
+            corps_id: ID du Corps
+            width: Largeur du SVG
+            height: Hauteur du SVG
+            
+        Returns:
+            SVG en string
+        """
+        # Mapping des phases vers les types visuels
+        phase_to_type = {
+            'phase_1_ir': 'table',
+            'phase_2_arbiter': 'card',
+            'phase_3_session': 'status',
+            'phase_4_navigation': 'breadcrumb',
+            'phase_5_layout': 'grid',
+            'phase_6_upload': 'upload',
+            'phase_7_chat': 'chat',
+            'phase_8_validation': 'dashboard',
+            'phase_9_zoom': 'preview'
+        }
+        
+        visual_type = phase_to_type.get(corps_id, 'default')
+        
+        # Générer le contenu SVG selon le type
+        svg_content = self._get_svg_content_by_type(visual_type, width, height)
+        
+        return f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">{svg_content}</svg>'
+    
+    def _get_svg_content_by_type(self, visual_type: str, w: int, h: int) -> str:
+        """Génère le contenu SVG selon le type visuel."""
+        
+        if visual_type == 'table':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.1}" width="{w*0.9}" height="{h*0.15}" rx="4" fill="#475569"/>
+                <rect x="{w*0.05}" y="{h*0.35}" width="{w*0.9}" height="{h*0.12}" rx="2" fill="#e2e8f0"/>
+                <rect x="{w*0.05}" y="{h*0.52}" width="{w*0.9}" height="{h*0.12}" rx="2" fill="#f1f5f9"/>
+                <rect x="{w*0.05}" y="{h*0.69}" width="{w*0.9}" height="{h*0.12}" rx="2" fill="#e2e8f0"/>
+            '''
+        elif visual_type == 'dashboard':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.1}" width="{w*0.9}" height="{h*0.15}" rx="4" fill="#475569"/>
+                <rect x="{w*0.05}" y="{h*0.35}" width="{w*0.28}" height="{h*0.25}" rx="4" fill="#22c55e" opacity="0.8"/>
+                <rect x="{w*0.36}" y="{h*0.35}" width="{w*0.28}" height="{h*0.25}" rx="4" fill="#3b82f6" opacity="0.8"/>
+                <rect x="{w*0.67}" y="{h*0.35}" width="{w*0.28}" height="{h*0.25}" rx="4" fill="#f59e0b" opacity="0.8"/>
+                <rect x="{w*0.05}" y="{h*0.68}" width="{w*0.9}" height="{h*0.22}" rx="4" fill="#e2e8f0"/>
+            '''
+        elif visual_type == 'grid':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.1}" width="{w*0.27}" height="{h*0.35}" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                <rect x="{w*0.36}" y="{h*0.1}" width="{w*0.27}" height="{h*0.35}" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+                <rect x="{w*0.67}" y="{h*0.1}" width="{w*0.28}" height="{h*0.35}" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                <rect x="{w*0.05}" y="{h*0.52}" width="{w*0.27}" height="{h*0.35}" rx="4" fill="#f3e8ff" stroke="#a855f7" stroke-width="2"/>
+                <rect x="{w*0.36}" y="{h*0.52}" width="{w*0.27}" height="{h*0.35}" rx="4" fill="#ffe4e6" stroke="#f43f5e" stroke-width="2"/>
+            '''
+        elif visual_type == 'card':
+            return f'''
+                <rect x="{w*0.1}" y="{h*0.1}" width="{w*0.8}" height="{h*0.8}" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+                <rect x="{w*0.2}" y="{h*0.25}" width="{w*0.6}" height="{h*0.15}" rx="4" fill="#1e293b"/>
+                <rect x="{w*0.2}" y="{h*0.5}" width="{w*0.4}" height="{h*0.1}" rx="2" fill="#64748b"/>
+                <circle cx="{w*0.75}" cy="{h*0.7}" r="{h*0.12}" fill="#22c55e"/>
+            '''
+        elif visual_type == 'upload':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.1}" width="{w*0.9}" height="{h*0.8}" rx="4" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" stroke-dasharray="6,3"/>
+                <rect x="{w*0.35}" y="{h*0.25}" width="{w*0.3}" height="{h*0.3}" rx="4" fill="#dcfce7"/>
+                <path d="M {w*0.42} {h*0.45} L {w*0.5} {h*0.35} L {w*0.58} {h*0.45}" stroke="#22c55e" stroke-width="3" fill="none"/>
+                <line x1="{w*0.5}" y1="{h*0.35}" x2="{w*0.5}" y2="{h*0.55}" stroke="#22c55e" stroke-width="3"/>
+            '''
+        elif visual_type == 'chat':
+            return f'''
+                <rect x="{w*0.08}" y="{h*0.15}" width="{w*0.55}" height="{h*0.25}" rx="10" fill="#dbeafe"/>
+                <rect x="{w*0.37}" y="{h*0.45}" width="{w*0.55}" height="{h*0.25}" rx="10" fill="#dcfce7"/>
+                <rect x="{w*0.08}" y="{h*0.75}" width="{w*0.4}" height="{h*0.15}" rx="8" fill="#e2e8f0"/>
+            '''
+        elif visual_type == 'status':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.1}" width="{w*0.9}" height="{h*0.8}" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+                <circle cx="{w*0.2}" cy="{h*0.35}" r="{h*0.12}" fill="#22c55e"/>
+                <rect x="{w*0.35}" y="{h*0.28}" width="{w*0.55}" height="{h*0.14}" rx="4" fill="#e2e8f0"/>
+                <circle cx="{w*0.2}" cy="{h*0.7}" r="{h*0.12}" fill="#3b82f6"/>
+                <rect x="{w*0.35}" y="{h*0.63}" width="{w*0.4}" height="{h*0.14}" rx="4" fill="#e2e8f0"/>
+            '''
+        elif visual_type == 'breadcrumb':
+            return f'''
+                <rect x="{w*0.05}" y="{h*0.35}" width="{w*0.25}" height="{h*0.2}" rx="6" fill="#3b82f6"/>
+                <text x="{w*0.175}" y="{h*0.48}" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">1</text>
+                <rect x="{w*0.32}" y="{h*0.35}" width="{w*0.25}" height="{h*0.2}" rx="6" fill="#e2e8f0"/>
+                <text x="{w*0.445}" y="{h*0.48}" text-anchor="middle" fill="#64748b" font-size="12">2</text>
+                <rect x="{w*0.59}" y="{h*0.35}" width="{w*0.25}" height="{h*0.2}" rx="6" fill="#e2e8f0"/>
+                <text x="{w*0.715}" y="{h*0.48}" text-anchor="middle" fill="#64748b" font-size="12">3</text>
+            '''
+        elif visual_type == 'preview':
+            return f'''
+                <rect x="{w*0.1}" y="{h*0.1}" width="{w*0.8}" height="{h*0.75}" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+                <rect x="{w*0.2}" y="{h*0.25}" width="{w*0.6}" height="{h*0.4}" rx="2" fill="#e2e8f0"/>
+                <circle cx="{w*0.5}" cy="{h*0.78}" r="4" fill="#cbd5e1"/>
+            '''
+        else:  # default
+            return f'''
+                <rect x="{w*0.15}" y="{h*0.15}" width="{w*0.7}" height="{h*0.7}" rx="4" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+                <rect x="{w*0.25}" y="{h*0.35}" width="{w*0.5}" height="{h*0.12}" rx="2" fill="#cbd5e1"/>
+                <rect x="{w*0.25}" y="{h*0.55}" width="{w*0.3}" height="{h*0.08}" rx="2" fill="#e2e8f0"/>
+            '''
+    
+    def set_selection(self, component_id: str, status: str) -> None:
+        """
+        Marque un composant comme 'keep' ou 'reserve'.
+        
+        Args:
+            component_id: ID du composant
+            status: 'keep' ou 'reserve'
+        """
+        if status not in ('keep', 'reserve'):
+            raise ValueError("Status doit être 'keep' ou 'reserve'")
+        self.selections[component_id] = status
+    
+    def get_selection(self, component_id: str) -> Optional[str]:
+        """
+        Retourne la sélection d'un composant.
+        
+        Args:
+            component_id: ID du composant
+            
+        Returns:
+            'keep', 'reserve' ou None
+        """
+        return self.selections.get(component_id)
+    
+    def get_all_selections(self) -> Dict[str, str]:
+        """
+        Retourne toutes les sélections.
+        
+        Returns:
+            Dict {component_id: status}
+        """
+        return self.selections.copy()
+    
+    def get_validated_genome(self) -> Dict[str, Any]:
+        """
+        Retourne le genome filtré (seulement les composants 'keep').
+        
+        Returns:
+            Genome filtré
+        """
+        validated = {
+            "metadata": self.genome.get("metadata", {}),
+            "genome_version": self.genome.get("genome_version", "3.0"),
+            "n0_phases": []
+        }
+        
+        for phase in self.genome.get("n0_phases", []):
+            validated_phase = {
+                "id": phase.get("id"),
+                "name": phase.get("name"),
+                "description": phase.get("description"),
+                "n1_sections": []
+            }
+            
+            for section in phase.get("n1_sections", []):
+                validated_section = {
+                    "id": section.get("id"),
+                    "name": section.get("name"),
+                    "n2_features": []
+                }
+                
+                for feature in section.get("n2_features", []):
+                    validated_feature = {
+                        "id": feature.get("id"),
+                        "name": feature.get("name"),
+                        "n3_components": []
+                    }
+                    
+                    for comp in feature.get("n3_components", []):
+                        comp_id = comp.get("id", "")
+                        # Garder uniquement si 'keep' ou pas encore sélectionné
+                        if self.selections.get(comp_id, 'keep') == 'keep':
+                            validated_feature["n3_components"].append(comp)
+                    
+                    if validated_feature["n3_components"]:
+                        validated_section["n2_features"].append(validated_feature)
+                
+                if validated_section["n2_features"]:
+                    validated_phase["n1_sections"].append(validated_section)
+            
+            if validated_phase["n1_sections"]:
+                validated["n0_phases"].append(validated_phase)
+        
+        return validated
+    
+    def get_stats(self) -> Dict[str, int]:
+        """
+        Retourne les statistiques de sélection.
+        
+        Returns:
+            Dict avec 'total', 'keep', 'reserve'
+        """
+        keep_count = sum(1 for s in self.selections.values() if s == 'keep')
+        reserve_count = sum(1 for s in self.selections.values() if s == 'reserve')
+        return {
+            'total': len(self.selections),
+            'keep': keep_count,
+            'reserve': reserve_count
+        }
+
+
 class LayoutProposals:
     """
     Gère les 8 propositions de layout pour l'étape 5.
@@ -752,6 +1038,7 @@ navigator = SullivanNavigator()
 auditor = SullivanAuditor()
 distiller = Distiller()
 layout_proposals = LayoutProposals()
+stenciler = Stenciler()  # Étape 4 : Composants Défaut
 
 
 # Export pour compatibilité
@@ -762,6 +1049,7 @@ __all__ = [
     "SullivanAuditor",
     "Distiller",
     "LayoutProposals",
+    "Stenciler",  # Étape 4 : Composants Défaut
     "VisualIntentReport",
     "VisualZone",
     "SULLIVAN_HCI_STENCILS",
@@ -773,5 +1061,6 @@ __all__ = [
     "navigator",
     "auditor",
     "distiller",
-    "layout_proposals"
+    "layout_proposals",
+    "stenciler"
 ]

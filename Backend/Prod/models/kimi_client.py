@@ -181,3 +181,146 @@ Respond with JSON only:
             # If KIMI didn't return valid JSON, be permissive
             logger.debug(f"KIMI returned non-JSON: {content[:100]}")
             return {"valid": True, "reason": "Could not parse KIMI response, allowing through", "detected_issue": None}
+
+    async def execute_step(self, step, context: Optional[str] = None):
+        """
+        Execute a step using KIMI API.
+
+        Args:
+            step: Step to execute (must have .description and .type attributes)
+            context: Additional context for the step
+
+        Returns:
+            StepResult with execution results
+        """
+        from .deepseek_client import StepResult
+        import time
+
+        if not self.available:
+            return StepResult(
+                step_id=step.id,
+                success=False,
+                output="",
+                tokens_used=0,
+                input_tokens=0,
+                output_tokens=0,
+                execution_time_ms=0,
+                error="KIMI API key not configured",
+                cost_usd=0.0
+            )
+
+        start_time = time.time()
+
+        try:
+            # Build prompt from step description and context
+            prompt_parts = []
+
+            if context:
+                prompt_parts.append(context)
+                prompt_parts.append("\n\n")
+
+            prompt_parts.append(f"Task: {step.description}\n")
+            prompt_parts.append(f"Type: {step.type}\n\n")
+
+            # Add step-specific instructions
+            if step.type == "code_generation":
+                prompt_parts.append("Generate complete, production-ready code.\n")
+            elif step.type == "refactoring":
+                prompt_parts.append("Refactor the code while preserving functionality.\n")
+            elif step.type == "analysis":
+                prompt_parts.append("Analyze the code and provide detailed insights.\n")
+
+            prompt = "".join(prompt_parts)
+
+            # Call KIMI API
+            async with httpx.AsyncClient(timeout=120) as client:  # Longer timeout for code generation
+                response = await client.post(
+                    self.api_url,
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": [
+                            {"role": "system", "content": "You are an expert software engineer. Generate clean, well-structured code."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.3,
+                        "max_tokens": 8000  # KIMI supports large outputs
+                    }
+                )
+
+                execution_time_ms = (time.time() - start_time) * 1000
+
+                if response.status_code != 200:
+                    error_msg = f"KIMI API error: {response.status_code}"
+                    logger.error(error_msg)
+                    return StepResult(
+                        step_id=step.id,
+                        success=False,
+                        output="",
+                        tokens_used=0,
+                        input_tokens=0,
+                        output_tokens=0,
+                        execution_time_ms=execution_time_ms,
+                        error=error_msg,
+                        cost_usd=0.0
+                    )
+
+                result = response.json()
+                output = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+                # Extract token usage
+                usage = result.get("usage", {})
+                input_tokens = usage.get("prompt_tokens", 0)
+                output_tokens = usage.get("completion_tokens", 0)
+                total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
+
+                # Calculate cost (KIMI pricing: ~$0.012 per 1M tokens)
+                cost_usd = (total_tokens / 1_000_000) * 0.012
+
+                logger.info(f"KIMI step {step.id} completed: {total_tokens} tokens, ${cost_usd:.4f}")
+
+                return StepResult(
+                    step_id=step.id,
+                    success=True,
+                    output=output,
+                    tokens_used=total_tokens,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    execution_time_ms=execution_time_ms,
+                    error=None,
+                    cost_usd=cost_usd
+                )
+
+        except httpx.TimeoutException:
+            execution_time_ms = (time.time() - start_time) * 1000
+            error_msg = f"KIMI request timeout after {execution_time_ms/1000:.1f}s"
+            logger.error(error_msg)
+            return StepResult(
+                step_id=step.id,
+                success=False,
+                output="",
+                tokens_used=0,
+                input_tokens=0,
+                output_tokens=0,
+                execution_time_ms=execution_time_ms,
+                error=error_msg,
+                cost_usd=0.0
+            )
+        except Exception as e:
+            execution_time_ms = (time.time() - start_time) * 1000
+            error_msg = f"KIMI execution error: {e}"
+            logger.error(error_msg)
+            return StepResult(
+                step_id=step.id,
+                success=False,
+                output="",
+                tokens_used=0,
+                input_tokens=0,
+                output_tokens=0,
+                execution_time_ms=execution_time_ms,
+                error=error_msg,
+                cost_usd=0.0
+            )

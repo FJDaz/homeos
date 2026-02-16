@@ -1,0 +1,167 @@
+{
+  "task_id": "workload-analyzer-autoselect",
+  "description": "Implémenter le système d'analyse de charge et de sélection automatique du workflow optimal selon des seuils",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le module workload_analyzer.py avec WorkloadMetrics et WorkloadAnalysis. CRITICAL: (1) Créer Backend/Prod/core/workload_analyzer.py. (2) Définir une dataclass WorkloadMetrics avec les champs: total_components (int), total_files (int), estimated_tokens (int), has_dependencies (bool), has_state_management (bool), has_animations (bool), avg_file_size (int), max_file_size (int). (3) Définir une dataclass WorkloadAnalysis avec: metrics (WorkloadMetrics), recommended_workflow (str), reason (str), estimated_cost_usd (float), estimated_duration_minutes (float). (4) Importer dataclass, typing, Path, re.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier workload_analyzer.py créé",
+        "WorkloadMetrics dataclass avec 8 champs",
+        "WorkloadAnalysis dataclass avec 5 champs",
+        "Imports corrects (dataclass, typing, Path, re)"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "dataclasses",
+        "files": ["Backend/Prod/core/workload_analyzer.py"],
+        "operation": "create",
+        "structure": "dataclasses + analyzer class"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Implémenter WorkloadAnalyzer avec les seuils de workflow. CRITICAL: (1) Dans workload_analyzer.py, créer la classe WorkloadAnalyzer. (2) Définir WORKFLOW_THRESHOLDS comme dict constant avec les seuils pour 'backend' (quick: max_files=5, max_tokens=10000, max_components=10 | full: 20/50000/50 | vfx: inf) et 'frd' (frd-quick: 20/50000/50/parallel=10 | frd-full: 100/200000/200/parallel=50 | frd-vfx: inf/inf/inf/parallel=100). (3) Ajouter méthode analyze_plan(self, plan: Dict) -> WorkloadAnalysis qui extrait les métriques, recommande le workflow et retourne WorkloadAnalysis. (4) Méthode _extract_metrics() qui parse le plan et compte files, components, tokens. (5) Méthode _recommend_workflow() qui compare aux seuils et retourne le workflow optimal.",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "WORKFLOW_THRESHOLDS défini avec seuils backend + frd",
+        "WorkloadAnalyzer.analyze_plan() implémentée",
+        "_extract_metrics() compte correctement files/components/tokens",
+        "_recommend_workflow() compare aux seuils",
+        "Retourne WorkloadAnalysis complet"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "typing",
+        "files": ["Backend/Prod/core/workload_analyzer.py"],
+        "logic": "Extraction regex pour composants, sum pour tokens, len pour files",
+        "thresholds": "quick < full < vfx, frd a des limites plus élevées"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Ajouter méthodes d'estimation de coût et durée. CRITICAL: (1) Dans WorkloadAnalyzer, ajouter _estimate_cost(self, metrics: WorkloadMetrics, workflow: str) -> float qui calcule le coût basé sur estimated_tokens × pricing par provider (Groq: $0.00006/1K output, DeepSeek: $0.00014/1K output, KIMI: $0.0001/1K output, Gemini: free). (2) Ajouter _estimate_duration(self, metrics: WorkloadMetrics, workflow: str) -> float qui estime la durée en minutes basée sur total_files × avg_time_per_file (quick: 0.5min, full: 1.5min, vfx: 3min, frd-*: /2 car parallèle). (3) Ajouter _explain_recommendation() qui génère un texte explicatif. (4) Utiliser ces méthodes dans analyze_plan() pour remplir WorkloadAnalysis.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "_estimate_cost() calcule avec pricing réaliste",
+        "_estimate_duration() estime avec temps moyens",
+        "_explain_recommendation() génère texte clair",
+        "WorkloadAnalysis rempli avec estimations correctes"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "math",
+        "files": ["Backend/Prod/core/workload_analyzer.py"],
+        "pricing": "Groq cheapest, DeepSeek medium, KIMI medium, Gemini free",
+        "timing": "FRD workflows 2x faster grâce au parallélisme KIMI"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Intégrer WorkloadAnalyzer dans orchestrator.py. CRITICAL: (1) Dans Backend/Prod/orchestrator.py, importer WorkloadAnalyzer. (2) Dans __init__, ajouter self.workload_analyzer = WorkloadAnalyzer(). (3) Dans la méthode execute() (ligne ~690), avant le début du workflow, si workflow_mode is None, appeler analysis = self.workload_analyzer.analyze_plan(plan). (4) Logger les résultats: workflow recommandé, raison, coût estimé, durée estimée. (5) Si workflow contient 'vfx' ET pas en mode auto_approve, demander confirmation avec input(). (6) Utiliser le workflow sélectionné pour self.workflow_mode. (7) Préserver le flow existant si workflow explicitement fourni.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2800,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "WorkloadAnalyzer importé et initialisé",
+        "Auto-select activé si workflow_mode is None",
+        "Logging des recommandations et estimations",
+        "Demande de confirmation pour vfx si pas auto_approve",
+        "Workflow appliqué correctement après sélection"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "loguru",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode execute() ligne ~690, avant workflow start",
+        "import_needed": "from .core.workload_analyzer import WorkloadAnalyzer, WorkloadAnalysis"
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Ajouter support CLI pour --auto et affichage des estimations. CRITICAL: (1) Dans le script aetherflow (CLI), ajouter un flag --auto pour activer l'auto-select explicite. (2) Passer ce flag à l'orchestrator avec auto_select=True. (3) Si workflow n'est pas spécifié ET pas de --auto, utiliser auto-select par défaut. (4) Avant de lancer l'exécution, afficher un résumé formaté avec rich.console: 🔍 Analyzing workload, 📊 Workload Analysis (composants, files, tokens), 💡 Recommended workflow + reason, 📈 Estimates (cost, duration, provider). (5) Préserver les flags existants --quick, --full, --vfx, --frd-*.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2200,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Flag --auto ajouté au CLI",
+        "Auto-select par défaut si aucun workflow spécifié",
+        "Affichage formaté avec rich.console des estimations",
+        "Flags manuels préservés et prioritaires",
+        "Output clair et informatif pour l'utilisateur"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "argparse + rich",
+        "files": ["aetherflow"],
+        "display": "Use rich.console.print with colors and emojis",
+        "priority": "Manual flags > --auto > default auto-select"
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Tester l'auto-select avec le plan Tier 1. (1) Lancer ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_tier1_pregenerated_components.json (sans flag de workflow). (2) Vérifier que l'analyse de charge s'affiche avec les métriques. (3) Vérifier que le workflow recommandé est affiché (probablement 'full' ou 'vfx' selon les seuils). (4) Confirmer la sélection si demandé. (5) Vérifier que l'exécution utilise bien le workflow auto-sélectionné. (6) Comparer le temps réel avec l'estimation. (7) Tester aussi avec --auto explicite et avec --quick (override manuel).",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_5"],
+      "validation_criteria": [
+        "Auto-select fonctionne sans flag de workflow",
+        "Affichage des métriques et recommandation",
+        "Workflow auto-sélectionné utilisé correctement",
+        "Override manuel avec --quick fonctionne",
+        "Estimations cohérentes avec le réel (±30%)"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "aetherflow-cli",
+        "test_commands": [
+          "./aetherflow --plan plan_tier1.json",
+          "./aetherflow --plan plan_tier1.json --auto",
+          "./aetherflow --plan plan_tier1.json --quick"
+        ],
+        "expected": "Auto-select recommande 'full' ou 'vfx' pour Tier 1"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-11T00:35:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Workload Analyzer & Auto-Select",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "code_generation": "Groq",
+      "refactoring": "Codestral",
+      "validation": "Gemini"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Core",
+      "n2": "Workload Analysis",
+      "n3": "Auto-Select Intelligence"
+    },
+    "reference_files": [
+      "Backend/Prod/core/workload_analyzer.py (new file)",
+      "Backend/Prod/orchestrator.py (integration)",
+      "aetherflow (CLI support)"
+    ],
+    "expected_benefits": {
+      "intelligence": "Auto-select optimal workflow based on workload",
+      "transparency": "Cost and time estimates before execution",
+      "ux": "No more guessing which mode to use"
+    }
+  }
+}

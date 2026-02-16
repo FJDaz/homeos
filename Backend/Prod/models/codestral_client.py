@@ -109,15 +109,20 @@ class CodestralClient(BaseLLMClient):
         # Build full prompt
         full_prompt = self._build_prompt(prompt, context, output_constraint)
 
+        # Prepare messages; inject surgical system prompt if needed
+        messages = []
+        if output_constraint == "json_surgical":
+            from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
+            messages.append({
+                "role": "system",
+                "content": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")
+            })
+        messages.append({"role": "user", "content": full_prompt})
+
         # Prepare request
         request_data = {
             "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": full_prompt
-                }
-            ],
+            "messages": messages,
             "max_tokens": max_tokens or settings.max_tokens,
             "temperature": temperature or settings.temperature
         }

@@ -1,0 +1,14 @@
+{
+  "operations": [
+    {
+      "type": "add_function",
+      "code": "create_snapshot() {\n  local timestamp\n  local hash\n  local icc_percent\n  local compact_number\n  local artefact\n  timestamp=$(date -u +'%Y-%m-%dT%H:%M:%S%z')\n  hash=$(md5 -q \"$HUB_FILE\" 2>/dev/null || md5sum \"$HUB_FILE\" 2>/dev/null | awk '{print \$1}')\n  icc_percent=$ICC_PERCENT\n  compact_number=$TOKENS_CR\n  artefact=$(extract_kimi_report)\n  local filename\n  filename=\"snapshots/KIMI_${timestamp}_${hash}.txt\"\n  mkdir -p \"snapshots\"\n  echo \"Timestamp: $timestamp\" > \"$filename\"\n  echo \"Model: KIMI\" >> \"$filename\"\n  echo \"ICC: $icc_percent%\" >> \"$filename\"\n  echo \"Compact#: $compact_number\" >> \"$filename\"\n  echo \"Hash: $hash\" >> \"$filename\"\n  echo \"Artefact:\" >> \"$filename\"\n  echo \"$artefact\" >> \"$filename\"\n  log_success \"Snapshot Git LLM créé : $filename\"\n}"
+    },
+    {
+      "type": "modify_method",
+      "target": "display_report",
+      "position": "after",
+      "code": "if (( $(echo \"$ICC_PERCENT >= 80\" | bc -l) )); then\n  create_snapshot\nfi"
+    }
+  ]
+}

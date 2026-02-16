@@ -23,6 +23,7 @@ from .deepseek_client import DeepSeekClient, StepResult
 from .groq_client import GroqClient
 from .gemini_client import GeminiClient
 from .codestral_client import CodestralClient
+from .kimi_client import KimiClient
 from .execution_router import ExecutionRouter
 from .smart_context_router import SmartContextRouter, RoutingDecision
 from .provider_fallback_cascade import ProviderFallbackCascade, CascadeConfig
@@ -140,6 +141,20 @@ class AgentRouter:
                 logger.debug("Codestral client initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize Codestral client: {e}")
+
+        # KIMI (high capacity for FRD workflow - 128K context window)
+        _kimi_ok = (
+            bool(settings.kimi_api_key)
+            and settings.kimi_api_key.isascii()
+            and not settings.kimi_api_key.startswith("your_")
+            and not settings.kimi_api_key.startswith("votre_")
+        )
+        if _kimi_ok:
+            try:
+                self._clients["kimi"] = KimiClient()
+                logger.debug("KIMI client initialized (128K context)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize KIMI client: {e}")
 
         if not self._clients:
             raise ValueError("No LLM clients could be initialized. Check API keys.")
@@ -368,7 +383,8 @@ class AgentRouter:
                 execute_fn=lambda client: client.generate(
                     prompt=prompt,
                     context=context,
-                    max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000
+                    max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000,
+                    output_constraint="json_surgical" if surgical_mode else None
                 ),
                 context_size=routing_decision.estimated_tokens
             )

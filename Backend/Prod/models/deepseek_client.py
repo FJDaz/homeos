@@ -169,19 +169,27 @@ class DeepSeekClient(BaseLLMClient):
         
         # Build full prompt (context may be cacheable block)
         full_prompt = self._build_simple_prompt(prompt, context)
-        
+
+        # Prepare messages list; inject surgical system prompt if needed
+        messages = []
+        if output_constraint == "json_surgical":
+            from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
+            messages.append({
+                "role": "system",
+                "content": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")
+            })
+        messages.append({"role": "user", "content": full_prompt})
+
         # Prepare request
         request_data = {
             "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": full_prompt
-                }
-            ],
+            "messages": messages,
             "max_tokens": min(max_tokens or settings.deepseek_max_tokens, settings.deepseek_max_tokens),
             "temperature": temperature or settings.temperature
         }
+
+        if output_constraint == "json_surgical":
+            request_data["response_format"] = {"type": "json_object"}
         
         # Add cache control if provided (DeepSeek API support)
         if cache_params:

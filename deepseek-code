@@ -1,0 +1,13 @@
+#!/bin/bash
+# Wrapper pour DeepSeek Code Assistant
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Activer venv si existe
+if [ -d "venv" ]; then
+    source venv/bin/activate
+fi
+
+# Lancer l'assistant
+python3 scripts/deepseek_code_assistant.py "$@"

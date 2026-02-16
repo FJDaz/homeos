@@ -27,7 +27,7 @@ class Component(BaseModel):
     popularity_score: int  # Score de popularité (0-100)
     validation_score: int  # Score de validation (0-100)
     size_kb: int
-    created_at: Optional[datetime]
+    created_at: Optional[datetime] = None
     user_id: str
     category: Optional[str] = None  # Catégorie (core, complex, domain)
     last_used: Optional[datetime] = None  # Date de dernière utilisation

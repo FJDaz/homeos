@@ -1,0 +1,20 @@
+Metric,Value
+Task ID,fix_orchestrator_race_condition_surgical_mode
+Task Description,"Corriger les 2 bugs majeurs de l'orchestrateur : (1) Race condition lors de l'exécution parallèle sur le même fichier, (2) Activation incorrecte du Surgical Mode en mode FAST (-q). Conformément au rapport d'audit ORCHESTRATOR_AUDIT_REPORT.md."
+Total Steps,3
+Successful Steps,3
+Failed Steps,0
+Total Execution Time (ms),519430.35299999994
+Average Step Time (ms),173143.45099999997
+Total Tokens Used,751161
+Total Input Tokens,375580
+Total Output Tokens,375580
+Total Cost (USD),0.01161132
+Success Rate,1.0
+Started At,2026-02-12T22:01:49.807067
+Completed At,2026-02-12T22:10:29.237420
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error
+step_1,"Modifier Backend/Prod/orchestrator.py, méthode _execute_batch_parallel : Ajouter détection de conflits de fichiers avant exécution parallèle. Collecter tous les chemins de fichiers cibles (step.context.get('files', [])) pour chaque étape du lot. Vérifier doublons. Si conflit détecté (même fichier ciblé par plusieurs étapes), forcer exécution séquentielle pour le lot entier. Ajouter logger.warning('Conflit détecté : exécution séquentielle forcée pour éviter corruption'). Cela garantit l'intégrité des fichiers sans modifier les plans JSON.",refactoring,True,107086.484,307652,153826,153826,0.0,
+step_2,"Modifier Backend/Prod/orchestrator.py, méthode _execute_step : Corriger condition d'activation du surgical_mode (lignes 690-698). Rendre la condition plus restrictive : surgical_mode doit être True UNIQUEMENT si toutes ces conditions sont remplies : (1) has_existing_code est True, (2) self.execution_mode est 'BUILD' ou 'DOUBLE-CHECK' (PAS 'FAST'), (3) has_python_files est True, (4) step.type est 'refactoring' ou 'code_generation', (5) step.context.get('surgical_mode', True) ne force pas à False. Réorganiser l'expression logique pour vérifier self.execution_mode EN PREMIER. Cela empêche Surgical Mode en mode -q et le réserve à -f.",refactoring,True,97823.373,368763,184381,184381,0.0,
+step_3,"Créer test unitaire Backend/Prod/tests/test_orchestrator_fixes.py : (1) Test race condition : créer plan JSON avec 3 steps modifiant le même fichier, exécuter avec orchestrator, vérifier exécution séquentielle forcée et intégrité du fichier final. (2) Test surgical mode : exécuter plan en mode FAST, vérifier surgical_mode=False dans les logs, exécuter même plan en mode BUILD, vérifier surgical_mode=True. Utiliser pytest et fixtures appropriées.",code_generation,True,314267.147,74746,37373,37373,0.01161132,

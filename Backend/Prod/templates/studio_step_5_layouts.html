@@ -1,0 +1,79 @@
+<div id="studio-main-zone" class="p-8 max-w-6xl mx-auto animate-fade-in">
+    <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-slate-800">8 Styles de Layout</h2>
+        <p class="text-slate-600 mt-2">Choisissez le style qui correspond à l'identité de votre projet.</p>
+    </div>
+
+    <!-- Grille des 8 styles -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for proposal in proposals %}
+        <div class="bg-white rounded-xl border-2 {% if selected_style == proposal.id %}border-indigo-500 ring-2 ring-indigo-200{% else %}border-slate-100{% endif %} overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
+             hx-post="/studio/step/5/layouts/select"
+             hx-vals='{"style_id": "{{ proposal.id }}"}'
+             hx-target="#studio-main-zone">
+            
+            <!-- Aperçu visuel miniature -->
+            <div class="h-32 {{ proposal.preview_bg }} flex items-center justify-center p-4">
+                <div class="w-full h-full {{ proposal.preview_elements }} rounded-lg p-2 space-y-2">
+                    <div class="h-2 w-3/4 {{ proposal.preview_accent }} rounded"></div>
+                    <div class="h-2 w-1/2 {{ proposal.preview_accent }} rounded opacity-60"></div>
+                    <div class="flex gap-1 mt-2">
+                        <div class="h-8 w-8 {{ proposal.preview_card }} rounded"></div>
+                        <div class="h-8 w-8 {{ proposal.preview_card }} rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info style -->
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-semibold text-slate-800">{{ proposal.name }}</h3>
+                    {% if selected_style == proposal.id %}
+                    <span class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">{{ proposal.description }}</p>
+                
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-1 mt-3">
+                    {% for tag in proposal.tags %}
+                    <span class="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <button hx-get="/studio/step/5" 
+                hx-target="#studio-main-zone"
+                class="text-slate-500 hover:text-slate-700 text-sm font-medium inline-flex items-center gap-1 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Retour au choix
+        </button>
+
+        {% if selected_style %}
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-slate-600">
+                Style sélectionné: <strong class="text-indigo-600">{{ proposals|selectattr('id', 'eq', selected_style)|map(attribute='name')|first }}</strong>
+            </span>
+            <button hx-post="/studio/step/5/validate" 
+                    hx-target="#studio-main-zone"
+                    class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors inline-flex items-center gap-2">
+                Générer le design
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>

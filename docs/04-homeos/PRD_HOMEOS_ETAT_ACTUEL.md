@@ -1,8 +1,8 @@
 # PRD - Homeos (AETHERFLOW) - État Actuel
 
-**Version** : 2.2 "Sullivan"  
-**Date** : 28 janvier 2026  
-**Statut** : Beta S1 - En développement actif
+**Version** : 2.3 "Genome"  
+**Date** : 11 février 2026  
+**Statut** : Beta S2 - Genome Viewer + Stenciler en développement
 
 ---
 
@@ -10,12 +10,12 @@
 
 1. [Vision Produit](#vision-produit)
 2. [Positionnement](#positionnement)
-3. [Architecture Globale](#architecture-globale)
+3. [Architecture Genome N0-N3](#architecture-genome-n0-n3)
 4. [État Actuel - Fonctionnalités Implémentées](#état-actuel---fonctionnalités-implémentées)
 5. [Sullivan Kernel - État d'Implémentation](#sullivan-kernel---état-dimplémentation)
-6. [Composants Techniques](#composants-techniques)
+6. [Composants Elite & Stratégie Hybride](#composants-elite--stratégie-hybride)
 7. [Workflows Disponibles](#workflows-disponibles)
-8. [API et Interfaces](#api-et-interfaces)
+8. [Séparation des Rôles KIMI/Backend](#séparation-des-rôles-kimibackend)
 9. [Points d'Amélioration Identifiés](#points-damélioration-identifiés)
 10. [Roadmap](#roadmap)
 
@@ -23,20 +23,22 @@
 
 ## 🎯 Vision Produit
 
-**Homeos** est une **agence de design numérique complète** automatisée par IA, qui accompagne les utilisateurs de la conception à la mise en production :
+**Homeos** est une **agence de design numérique complète** automatisée par IA, structurée selon l'architecture biologique Genome (N0-N3) :
 
 ```
-Brainstorm → Backend → Frontend → Deploy
+N0 Corps (Phases) → N1 Organes (Sections) → N2 Cellules (Features) → N3 Atomes (Composants)
+     Brainstorm    →    Backend/Frontend   →    Upload/Layout      →    Button/Card/Form
 ```
 
-**AETHERFLOW** (nom interne du code) est l'orchestrateur d'agents IA qui génère du code de haute qualité en maintenant un équilibre homéostatique entre qualité, performance et maintenabilité.
+**AETHERFLOW** est l'orchestrateur d'agents IA qui maintient l'homéostasie entre qualité, performance et maintenabilité.
 
 ### Valeur Proposée
 
 - **Génération de code automatisée** : Backend Python/APIs et Frontend HTML/CSS/JS
-- **Qualité garantie** : Workflows structurés avec validation automatique
-- **Économie de coûts** : Utilisation optimale de modèles LLM économiques (DeepSeek, Gemini, Groq)
-- **Intelligence contextuelle** : Analyse automatique du backend pour inférer le frontend correspondant
+- **Architecture Genome** : Structure hiérarchique biologique (Corps > Organes > Cellules > Atomes)
+- **Qualité garantie** : Workflows structurés avec validation automatique et scoring Sullivan
+- **Stratégie hybride** : Cache Elite (Tier 1/2/3) pour 0ms à <5s selon complexité
+- **Intelligence contextuelle** : Analyse backend pour inférer frontend via UIInferenceEngine
 
 ---
 
@@ -44,58 +46,77 @@ Brainstorm → Backend → Frontend → Deploy
 
 ### Homeos = Agence de Design Numérique
 
-**Fonctions principales** :
-1. **Brainstorm** : Génération d'idées et concepts (à venir)
-2. **Backend** : Génération de code backend Python/APIs via AETHERFLOW
-3. **Frontend** : Génération de frontend HTML/CSS/JS via Sullivan Kernel
-4. **Deploy** : Déploiement automatisé (à venir)
+**Fonctions principales (4 Corps)** :
+1. **Brainstorm** (N0) : Intent Refactoring, Arbitrage, Génome
+2. **Backend** (N1) : Session Management, API, Distillation
+3. **Frontend** (N1) : Navigation, Layout, Upload, Analyse, Dialogue, Validation, Adaptation
+4. **Deploy** (N1) : Export, Finalisation
 
 ### AETHERFLOW = Orchestrateur d'Agents IA
 
-**Rôle** : Coordonner l'exécution de plans JSON via différents workflows (PROTO/PROD) en utilisant des modèles LLM économiques.
+**Rôle** : Coordonner l'exécution via workflows PROTO/PROD avec modèles LLM économiques.
 
 ### Sullivan Kernel = Intelligence Frontend
 
-**Rôle** : Analyser un backend existant, comprendre sa fonction globale métier, et générer le frontend correspondant de manière intelligente.
+**Rôle** : Analyser backend, comprendre fonction globale métier, générer frontend adapté.
+
+### KIMI = Chef Frontend
+
+**Rôle** : 100% du rendu visuel (CSS, HTML, animations). Reçoit données du backend, ne reçoit jamais d'instructions de layout.
 
 ---
 
-## 🏗️ Architecture Globale
+## 🧬 Architecture Genome N0-N3
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Claude Code (Cursor)                     │
-│              Architecte & Orchestrateur Principal          │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        │ Génère plan.json
-                        │
-        ┌───────────────┴───────────────┐
-        │                               │
-        ▼                               ▼
-┌───────────────┐              ┌──────────────────┐
-│  AETHERFLOW   │              │ Sullivan Kernel   │
-│ Orchestrator  │              │                   │
-│               │              │ - BackendAnalyzer │
-│ - Workflows   │              │ - UIInference     │
-│ - AgentRouter │              │ - ComponentGen   │
-│ - Metrics     │              │ - Evaluators     │
-└───────┬───────┘              └──────────────────┘
-        │
-        │ Exécute via LLM
-        │
-┌───────┴───────────────────────────────────────┐
-│         Modèles LLM (DeepSeek, Gemini,        │
-│              Groq, Codestral)                 │
-└───────────────────────────────────────────────┘
+│                         N0 - CORPS                          │
+│                    (4 Phases/Template)                      │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
+│  │ Brainstorm  │ │   Backend   │ │  Frontend   │ │ Deploy │ │
+│  │   🟡 N0     │ │   🔵 N0     │ │   🟣 N0     │ │  🟢 N0 │ │
+│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └───┬────┘ │
+│         │               │               │            │      │
+├─────────┴───────────────┴───────────────┴────────────┤      │
+│                      N1 - ORGANES                        │      │
+│                   (Sections Fonctionnelles)               │      │
+├─────────────────────────────────────────────────────────┤      │
+│  Brainstorm:          Backend:        Frontend:         │      │
+│  - IR (N1)            - Session (N1)  - Navigation (N1) │      │
+│  - Arbitrage (N1)     - Génome (N1)   - Layout (N1)     │      │
+│                                       - Upload (N1)     │      │
+│                                       - Analyse (N1)    │      │
+│                                       - Dialogue (N1)   │      │
+│                                       - Validation (N1) │      │
+│                                       - Adaptation (N1) │      │
+├─────────────────────────────────────────────────────────┤      │
+│                      N2 - CELLULES                        │      │
+│                      (Features/Modules)                   │      │
+├─────────────────────────────────────────────────────────┤      │
+│  Ex: Navigation → Stepper (N2), Breadcrumb (N2)         │      │
+│  Ex: Layout → Grid (N2), Cards (N2)                     │      │
+├─────────────────────────────────────────────────────────┤      │
+│                      N3 - ATOMES                          │      │
+│                   (Composants UI Primitifs)               │      │
+├─────────────────────────────────────────────────────────┤      │
+│  Button, Input, Card, Badge, Modal, Table, Form...      │      │
+└─────────────────────────────────────────────────────────┘      │
 ```
 
-### Séparation des Responsabilités
+### Genome Viewer (Port 9998)
 
-- **Claude Code** : Génère les plans, orchestre l'exécution, valide les résultats
-- **AETHERFLOW** : Exécute les plans via workflows structurés
-- **Sullivan Kernel** : Analyse backend et génère frontend intelligemment
-- **LLM Providers** : Génèrent le code selon les instructions
+- **Visualisation** : 4 Corps alignés avec collapses N0-N3
+- **Wireframes** : Par niveau avec emojis et Wingdings3
+- **Interactions** : Clic pour expand/collapse, checkboxes
+- **Technos** : Python HTTP server, HTML/CSS vanilla, Fabric.js
+
+### Stenciler (Intégration en cours)
+
+- **Canvas Figma-like** : Drag & drop Corps, grille magnétique
+- **Sidebar minimale** : Outils couleur/bordure/fond/supprimer
+- **Lazy loading** : Tier 1/2/3 selon profondeur
+- **Scroll automatique** : Au clic sur style/upload
 
 ---
 
@@ -104,400 +125,248 @@ Brainstorm → Backend → Frontend → Deploy
 ### 1. AETHERFLOW Core ✅ **COMPLET**
 
 #### Orchestrator (`Backend/Prod/orchestrator.py`)
-- ✅ Exécution de plans JSON
-- ✅ Workflows PROTO (FAST → DOUBLE-CHECK)
-- ✅ Workflows PROD (FAST → BUILD → DOUBLE-CHECK)
-- ✅ Parallélisation des étapes indépendantes
+- ✅ Exécution plans JSON avec workflows PROTO/PROD
+- ✅ Parallélisation étapes indépendantes
 - ✅ Rate limiting par provider
-- ✅ Métriques complètes (temps, coûts, tokens)
-- ✅ Support RAG (enrichissement contexte)
+- ✅ Métriques (temps, coûts, tokens)
 - ✅ Cache sémantique et prompt cache
 
 #### AgentRouter (`Backend/Prod/models/agent_router.py`)
-- ✅ Routage intelligent vers providers (DeepSeek, Gemini, Groq, Codestral)
-- ✅ Sélection automatique "smartest for least money"
-- ✅ Gestion cache sémantique et prompt cache
-- ✅ Injection guidelines en mode BUILD
-- ✅ Fallback cascade pour Gemini (gestion rate limits)
+- ✅ Routage intelligent (DeepSeek, Gemini, Groq, Codestral)
+- ✅ "Smartest for least money"
+- ✅ Fallback cascade Gemini
 
 #### Workflows
-- ✅ **ProtoWorkflow** (`Backend/Prod/workflows/proto.py`)
-  - FAST → DOUBLE-CHECK (prototypage rapide)
-- ✅ **ProdWorkflow** (`Backend/Prod/workflows/prod.py`)
-  - FAST → BUILD → DOUBLE-CHECK (qualité maximale)
-
-#### Plan Reader (`Backend/Prod/models/plan_reader.py`)
-- ✅ Lecture et validation de plans JSON
-- ✅ Support schéma Pydantic
-- ✅ Gestion dépendances entre étapes
-
-#### Métriques (`Backend/Prod/models/metrics.py`)
-- ✅ `StepMetrics` : Métriques par étape
-- ✅ `PlanMetrics` : Métriques agrégées du plan
-- ✅ Temps, coûts, tokens, cache hits, latence
+- ✅ **ProtoWorkflow** : FAST → DOUBLE-CHECK
+- ✅ **ProdWorkflow** : FAST → BUILD → DOUBLE-CHECK
 
 ### 2. API FastAPI ✅ **OPÉRATIONNELLE**
 
 #### Endpoints Principaux (`Backend/Prod/api.py`)
-- ✅ `POST /execute` : Exécute un plan JSON
+- ✅ `POST /execute` : Exécute plan JSON
 - ✅ `GET /health` : Health check
-- ✅ `POST /sullivan/search` : Recherche de composants
-- ✅ `GET /sullivan/components` : Liste des composants
-- ✅ `POST /sullivan/dev/analyze` : Analyse backend (DevMode)
-- ✅ `POST /sullivan/designer/analyze` : Analyse design (DesignerMode)
-- ✅ CORS activé pour développement
-- ✅ Servir fichiers statiques frontend
+- ✅ `POST /sullivan/dev/analyze` : DevMode
+- ✅ `POST /sullivan/designer/analyze` : DesignerMode
+- ✅ `GET /sullivan/components` : Liste composants
+- ✅ CORS activé, fichiers statiques
 
 ### 3. CLI ✅ **FONCTIONNEL**
 
-#### Commandes (`Backend/Prod/cli.py`)
-- ✅ `-q` / `--quick` : Workflow PROTO
-- ✅ `-f` / `--full` : Workflow PROD
-- ✅ `--plan` : Spécifier plan JSON
-- ✅ `--output-dir` : Répertoire de sortie
-- ✅ `--mentor` : Mode mentor avec feedback pédagogique
+```bash
+python -m Backend.Prod.cli -q --plan plan.json    # PROTO
+python -m Backend.Prod.cli -f --plan plan.json    # PROD
+python -m Backend.Prod.cli -f --plan plan.json --mentor
+```
 
-### 4. Sullivan Kernel ✅ **PHASE 1-5 COMPLÈTES**
+### 4. Sullivan Kernel ✅ **PHASES 1-5 COMPLÈTES**
 
 #### Phase 1 : Analyse Backend ✅
-- ✅ **BackendAnalyzer** (`Backend/Prod/sullivan/analyzer/backend_analyzer.py`)
-  - Analyse structure projet backend
-  - Détection routes API (FastAPI/Flask)
-  - Analyse modèles de données (Pydantic/SQLAlchemy)
-  - Détection intents automatique
-  - Inférence fonction globale métier (type produit, acteurs, flux métier)
-
-- ✅ **UIInferenceEngine** (`Backend/Prod/sullivan/analyzer/ui_inference_engine.py`)
-  - Inférence besoins UI depuis fonction globale
-  - Approche top-down (Intention → Corps → Organes → Molécules → Atomes)
-  - Propose structure d'intention (Niveau 0)
-  - Infère Corps (zones de contenu)
-  - Infère Organes, Molécules, Atomes
-
-- ✅ **DevMode** (`Backend/Prod/sullivan/modes/dev_mode.py`)
-  - Workflow "Collaboration Heureuse"
-  - Analyse backend → Inférence fonction globale → Génération frontend
-  - Dialogue stratégique (proposition étapes)
-  - Maillage des Corps
-  - Inférence technique (Organes → Molécules → Atomes)
-  - HCI Mentor (surveillance charge cognitive)
+- ✅ **BackendAnalyzer** : Analyse structure, routes, modèles
+- ✅ **UIInferenceEngine** : Inférence top-down (Intention → Corps → Organes → Molécules → Atomes)
+- ✅ **DevMode** : Workflow "Collaboration Heureuse"
 
 #### Phase 2 : Analyse Design ✅
-- ✅ **DesignAnalyzer** (`Backend/Prod/sullivan/analyzer/design_analyzer.py`)
-  - Analyse designs PNG/Figma/Sketch
-  - Extraction structure visuelle
-  - Mapping sur structure logique
-
-- ✅ **DesignerMode** (`Backend/Prod/sullivan/modes/designer_mode.py`)
-  - Workflow "Génération Miroir"
-  - Analyse design → Extraction structure → Mapping logique → Génération frontend
+- ✅ **DesignAnalyzer** : Analyse PNG/Figma
+- ✅ **DesignerMode** : Workflow "Génération Miroir"
 
 #### Phase 3 : Génération Composants ✅
-- ✅ **ComponentGenerator** (`Backend/Prod/sullivan/generator/component_generator.py`)
-  - Génération réelle de composants HTML/CSS/JS via AETHERFLOW
-  - Création plans JSON automatiques
-  - Exécution via workflows PROTO/PROD
-  - Parsing code généré depuis outputs
-  - Structuration composants avec métadonnées
-
-- ✅ **ComponentRegistry** (`Backend/Prod/sullivan/registry.py`)
-  - Orchestration LocalCache → EliteLibrary → Génération
-  - Recherche intelligente de composants
-  - Génération si non trouvé
-  - Évaluation automatique après génération
+- ✅ **ComponentGenerator** : Génération HTML/CSS/JS
+- ✅ **ComponentRegistry** : Orchestration LocalCache → EliteLibrary
 
 #### Phase 4 : Évaluation et Scoring ✅
-- ✅ **PerformanceEvaluator** (`Backend/Prod/sullivan/evaluators/performance_evaluator.py`)
-  - Évaluation performance via Lighthouse CI
-  - Score Performance (0-100)
-
-- ✅ **AccessibilityEvaluator** (`Backend/Prod/sullivan/evaluators/accessibility_evaluator.py`)
-  - Évaluation accessibilité via axe-core/WCAG
-  - Score Accessibilité (0-100)
-
-- ✅ **ValidationEvaluator** (`Backend/Prod/sullivan/evaluators/validation_evaluator.py`)
-  - Évaluation validation via AETHERFLOW DOUBLE-CHECK
-  - Vérification TDD, DRY, SOLID
-  - Score Validation (0-100)
-
-- ✅ **SullivanScore** (`Backend/Prod/sullivan/models/sullivan_score.py`)
-  - Calcul score composite (Performance 30%, Accessibilité 30%, Écologie 20%, Popularité 10%, Validation 10%)
-  - Seuil Elite Library (85)
+- ✅ **SullivanScore** : Composite (Perf 30%, Access 30%, Éco 20%, Pop 10%, Val 10%)
+- ✅ Seuil Elite Library : 85
 
 #### Phase 5 : Fonctionnalités Avancées ✅
-- ✅ **Catégorisation** (`Backend/Prod/sullivan/models/categories.py`)
-  - Classification composants (core, complex, domain)
-  - Basée sur taille (KB)
+- ✅ **Elite Library** : Composants validés (score ≥ 85)
+- ✅ **PatternAnalyzer** : Analyse patterns
+- ✅ **ContextualRecommender** : Recommandations contextuelles
+- ✅ **KnowledgeBase** : Patterns HCI (Fogg, Norman)
 
-- ✅ **Elite Library** (`Backend/Prod/sullivan/library/elite_library.py`)
-  - Bibliothèque composants validés (score >= 85)
-  - Archivage automatique (> 6 mois sans usage)
-  - Retrait composants score < 85
-  - Tracking `last_used`
+### 5. Genome & Composants ✅ **NOUVEAU**
 
-- ✅ **SharingTUI** (`Backend/Prod/sullivan/library/sharing_tui.py`)
-  - Interface TUI pour confirmation partage
-  - Affichage métriques composant
-  - Confirmation interactive avant ajout Elite Library
+#### Genome Viewer (`server_9998_v2.py`)
+- ✅ Structure N0-N3 inférée
+- ✅ 4 Corps avec wireframes par niveau
+- ✅ Wingdings3 + emojis
+- ✅ Collapses interactifs
+- ✅ Sidebar avec stats
 
-- ✅ **PatternAnalyzer** (`Backend/Prod/sullivan/analyzer/pattern_analyzer.py`)
-  - Analyse patterns dans Elite Library
-  - Insights automatiques (fréquences, tendances, corrélations)
+#### Stenciler (En développement)
+- ✅ Architecture classes définie (voir `ARCHITECTURE_CLASSES_STENCILER.md`)
+- ✅ Canvas Fabric.js
+- ✅ Drag & drop Corps
+- ✅ Sidebar outils (couleur, bordure, fond)
+- ✅ Grille magnétique
 
-- ✅ **ContextualRecommender** (`Backend/Prod/sullivan/recommender/contextual_recommender.py`)
-  - Recommandations contextuelles basées sur intent
-  - Recherche sémantique via KnowledgeBase
-  - Filtrage par catégorie
-  - Tri par score Sullivan
+### 6. Elite Components ✅ **66 COMPOSANTS**
 
-- ✅ **KnowledgeBase** (`Backend/Prod/sullivan/knowledge/knowledge_base.py`)
-  - Base de connaissances patterns HCI
-  - Principes Fogg Behavior Model, Norman Affordances
-  - Analytics et métriques
+Bibliothèque pré-générée dans `Backend/Prod/sullivan/library/elite_components/` :
+- Atome_Carte_Layout.json
+- Atome_Galerie_Layouts.json
+- Atome_Resume_Genome.json
+- ... (66 composants au total)
 
-#### Cache et Stockage ✅
-- ✅ **LocalCache** (`Backend/Prod/sullivan/cache/local_cache.py`)
-  - Cache local par utilisateur (`~/.aetherflow/components/{user_id}/`)
-  - Recherche par intent
-  - Sauvegarde composants
-
-- ✅ **Elite Library** (`Backend/Prod/sullivan/library/elite_library.py`)
-  - Stockage composants validés (`components/elite/`)
-  - Archivage automatique
-  - Gestion expiration
-
-### 5. Frontend Sullivan ✅ **OPÉRATIONNEL**
-
-#### Interface HTML (`Frontend/`)
-- ✅ **Chatbox interactive** : Interface web pour communiquer avec Sullivan
-- ✅ **Toggle minimisé/overlay** : Barre minimisée en bas, overlay fullscreen
-- ✅ **API intégrée** : Communication avec FastAPI backend
-- ✅ **Gestion erreurs** : Messages clairs pour problèmes API
-- ✅ `index.html`, `css/styles.css`, `js/app.js`
-- ✅ Affichage scores et métriques, liste composants (Cache Local / Elite Library)
-
-### 6. Portabilité ✅ **RÉCEMMENT COMPLÉTÉ**
-
-#### Méthodes d'installation
-- ✅ **Script universel** (`scripts/install.sh`) : Détection OS automatique
-- ✅ **pip** (`pyproject.toml`) : Package Python installable
-- ✅ **Docker** (`docker-compose.yml`) : Profils (cli, api, dev, prod)
-- ✅ **DMG macOS** (`scripts/packaging/pyinstaller_mac.sh`) : Bundle autonome
-
-#### Documentation
-- ✅ **README.md** : Mis à jour avec toutes les méthodes d'installation
-- ✅ **docs/01-getting-started/INSTALLATION.md** : Guide complet multi-plateforme
-- ✅ **Dockerfile** : Multi-stage optimisé (< 500MB)
+Scores : 85-95 (Sullivan Score)
 
 ---
 
-## 🔧 Composants Techniques
+## 🏆 Composants Elite & Stratégie Hybride
 
-### Modèles de Données
-
-#### Component (`Backend/Prod/sullivan/models/component.py`)
-```python
-class Component(BaseModel):
-    name: str
-    sullivan_score: float
-    performance_score: int
-    accessibility_score: int
-    ecology_score: int
-    popularity_score: int
-    validation_score: int
-    size_kb: int
-    created_at: datetime
-    user_id: str
-    category: Optional[str]  # core, complex, domain
-    last_used: Optional[datetime]
+### Tier 1 : CORE LIBRARY (0ms)
+```
+[Atomes + Molécules de base] → Pré-générés, testés, optimisés
+Usage : 60% des composants
+Latence : 0ms (cache)
+Qualité : ✅✅✅✅✅ (Elite Library)
 ```
 
-#### GlobalFunction (`Backend/Prod/sullivan/analyzer/backend_analyzer.py`)
-```python
-class GlobalFunction:
-    product_type: str  # e-commerce, SaaS, dashboard, etc.
-    actors: List[str]  # admin, client, vendeur, etc.
-    business_flows: List[str]  # CRUD, Search, etc.
-    use_cases: List[str]
+### Tier 2 : PATTERN LIBRARY (< 100ms)
+```
+[Organismes courants] → Pré-générés, légèrement adaptables
+Usage : 30% des composants
+Latence : < 100ms (adaptation)
+Qualité : ✅✅✅✅ (Score > 85)
 ```
 
-### Structure des Outputs
+### Tier 3 : CUSTOM GENERATION (1-5s)
+```
+[Composants uniques] → Générés à la volée
+Usage : 10% des composants
+Latence : 1-5s (génération complète)
+Qualité : ✅✅✅ (Dépend du contexte)
+```
 
-Voir `docs/references/technique/REPERTOIRE_OUTPUTS_SULLIVAN.md` pour détails complets.
-
-**Principaux répertoires** :
-- `/tmp/sullivan_outputs/` : Outputs temporaires génération
-- `/tmp/sullivan_plans/` : Plans JSON temporaires
-- `~/.aetherflow/components/` : Cache local utilisateur
-- `components/elite/` : Elite Library
-- `output/{path}/sullivan_result.json` : Résultats DevMode
-- `output/{path}/sullivan_designer_result.json` : Résultats DesignerMode
+### Fichier Genome
+- **Source** : `docs/02-sullivan/Genome_Enrichi/Genome_OPTIMISE_2026-02-06/genome_inferred_kimi_innocent_v2.json`
+- **Structure** : 4 N0 Phases → 10 N1 Sections → 14 N2 Features → 32 N3 Components
+- **Confiance globale** : 85%
 
 ---
 
 ## 🔄 Workflows Disponibles
 
-### AETHERFLOW Workflows
+### AETHERFLOW
 
 #### PROTO (`-q` / `--quick`)
 ```
 FAST → DOUBLE-CHECK
+Durée : ~2-5 minutes
+Qualité : Bonne
 ```
-- **Usage** : Prototypage rapide
-- **Durée** : ~2-5 minutes
-- **Qualité** : Bonne (validation basique)
 
 #### PROD (`-f` / `--full`)
 ```
 FAST → BUILD → DOUBLE-CHECK
+Durée : ~5-15 minutes
+Qualité : Excellente
 ```
-- **Usage** : Qualité production
-- **Durée** : ~5-15 minutes
-- **Qualité** : Excellente (validation complète + guidelines)
 
-### Sullivan Workflows
+### Sullivan
 
 #### DevMode
 ```
 Analyse Backend → Inférence Fonction Globale → 
-Propose Structure Intention → Infère Corps → 
-Infère Organes → Infère Molécules → Infère Atomes →
-Génération Composants
+Propose Structure → Infère Corps → Infère Organes → 
+Infère Molécules → Infère Atomes → Génération
 ```
 
 #### DesignerMode
 ```
 Upload Design → Analyse Visuelle → 
-Extraction Structure → Mapping Logique →
-Génération Composants
+Extraction Structure → Mapping Logique → Génération
 ```
 
 ---
 
-## 🌐 API et Interfaces
+## 👥 Séparation des Rôles KIMI/Backend
 
-### Endpoints API
+### Territoire KIMI (SANCTUAIRE)
+- ✅ HTML sémantique
+- ✅ CSS / Tailwind / Variables
+- ✅ Layout (flex, grid, position)
+- ✅ Animations et transitions
+- ✅ Responsive et breakpoints
+- ✅ Typographie (polices, tailles)
 
-#### AETHERFLOW
-- `POST /execute` : Exécute plan JSON
-- `GET /health` : Health check
+### Territoire Backend (Python)
+- ✅ Logique métier (Corps/Organe/Cellule/Atome)
+- ✅ Données JSON pures
+- ✅ Suggestions de composants (IDs)
+- ✅ Attributs sémantiques (`layout_type: "grid"`)
+- ✅ Actions possibles (`can_be_colored: true`)
+- ✅ Cache et persistance
 
-#### Sullivan Kernel
-- `POST /sullivan/search` : Recherche composant par intent
-- `GET /sullivan/components` : Liste composants disponibles
-- `POST /sullivan/dev/analyze` : Analyse backend (DevMode)
-- `POST /sullivan/designer/analyze` : Analyse design (DesignerMode)
+### Interface Contract
+```python
+# Backend fournit
+data = {
+    "id": "n0_frontend",
+    "name": "Frontend",
+    "color": "#ec4899",  # Thématique, pas CSS
+    "organes": [...],
+    "tier": 1
+}
 
-### CLI
-
-```bash
-# Workflow PROTO
-python -m Backend.Prod.cli -q --plan plan.json
-
-# Workflow PROD
-python -m Backend.Prod.cli -f --plan plan.json
-
-# Mode mentor
-python -m Backend.Prod.cli -f --plan plan.json --mentor
+# KIMI traduit en CSS
+.style-frontend {
+    border-left: 4px solid #ec4899;
+}
 ```
-
-### Frontend Web
-
-Chatbox Sullivan dans `Frontend/` : toggle minimisé/overlay, recherche et visualisation de composants, intégration API FastAPI.
 
 ---
 
 ## ⚠️ Points d'Amélioration Identifiés
 
-### 1. Inférence Top-Down Sullivan ⚠️ **EN COURS**
+### 1. Intégration Stenciler 🔴 **HAUTE PRIORITÉ**
+**État** : Architecture définie, implémentation en cours  
+**Besoin** : Fusionner Genome Viewer + Stenciler sur même page  
+**Approche** : Extension verticale (pas fusion)
 
-**Problème** : Les résultats actuels montrent des structures génériques ("generic_organe", "generic_molecule") au lieu d'une inférence réelle depuis le backend.
+### 2. Classes Abstraction Métier 🟡 **EN COURS**
+**Document** : `docs/02-sullivan/Analyses/ARCHITECTURE_CLASSES_STENCILER.md`  
+**Classes** : CorpsEntity, ModificationLog, ComponentContextEngine, DrillDownManager, PNGSemanticAnalyzer, ToolRegistry  
+**Status** : En attente implémentation Python
 
-**Cause** : L'inférence des intents depuis le code n'est pas encore complètement fonctionnelle.
+### 3. Persistance Modifications 🟡 **À IMPLÉMENTER**
+**Besoin** : JSON Modifs, localStorage, éventuellement SQLite  
+**Format** : Event sourcing light (journal des changements)
 
-**Impact** : Sullivan ne génère pas encore de frontend vraiment adapté au backend analysé.
+### 4. Analyse PNG Sémantique 🟡 **À IMPLÉMENTER**
+**Besoin** : Gemini Vision → Attributs sémantiques (pas CSS)  
+**Output** : `{layout_type: "grid", dominant_colors: [...], zones: [...]}`
 
-**Priorité** : 🔴 **HAUTE**
-
-### 2. Système STAR ❌ **NON IMPLÉMENTÉ**
-
-**Contexte** : Document de référence créé pour la traduction d'intentions utilisateur.
-
-**Besoin** : Implémenter la traduction d'intentions (Système STAR) pour enrichir l'inférence Sullivan.
-
-**Priorité** : 🟡 **MOYENNE**
-
-### 3. Génération Réelle de Composants ⚠️ **PARTIELLEMENT**
-
-**État** : `ComponentGenerator` existe et fonctionne, mais les composants générés ne sont pas encore sauvegardés avec leur code HTML/CSS/JS.
-
-**Besoin** : Sauvegarder les fichiers générés dans un format accessible.
-
-**Priorité** : 🟡 **MOYENNE**
-
-### 4. Frontend Homeos Studio ❌ **BASIQUE**
-
-**État** : Interface HTML basique pour Sullivan existe, mais pas d'interface complète pour AETHERFLOW.
-
-**Besoin** : Interface complète pour :
-- Upload plans JSON
-- Visualisation workflows
-- Affichage code généré
-- Métriques détaillées
-
-**Priorité** : 🟡 **MOYENNE**
-
-### 5. Système de Comptes ❌ **MANQUANT**
-
-**Besoin** : Authentification utilisateurs, gestion sessions, quotas.
-
-**Priorité** : 🟢 **BASSE** (pour beta interne)
-
-### 6. Tests Automatisés ⚠️ **LIMITÉS**
-
-**État** : Quelques tests unitaires, pas de suite complète.
-
-**Besoin** : Tests unitaires, tests d'intégration, tests E2E.
-
-**Priorité** : 🟡 **MOYENNE**
+### 5. Système de Comptes 🟢 **BASSE**
+**Besoin** : Auth, sessions, quotas  
+**Priorité** : Post-beta interne
 
 ---
 
 ## 🗺️ Roadmap
 
-### Phase 6 : Amélioration Inférence (EN COURS)
+### Phase 6 : Stenciler & Classes (EN COURS - Février 2026)
+- [x] Architecture classes définie
+- [ ] Implémentation CorpsEntity + ModificationLog
+- [ ] Implémentation ComponentContextEngine
+- [ ] Intégration Stenciler dans Viewer 9998
+- [ ] Tests drag & drop Canvas
 
-- [ ] Améliorer détection intents depuis code backend
-- [ ] Affiner inférence fonction globale
-- [ ] Générer structures frontend réellement adaptées (plus de "generic_*")
-- [ ] Intégrer système STAR pour traduction intentions utilisateur
-- [ ] Tests avec backends réels
+### Phase 7 : Analyse & Contexte (Mars 2026)
+- [ ] PNGSemanticAnalyzer (Gemini Vision)
+- [ ] Traduction PNG → Attributs sémantiques
+- [ ] KIMI : Traduction attributs → CSS
+- [ ] Tests workflows upload + analyse
 
-### Phase 7 : Génération Complète
+### Phase 8 : Persistance & Export (Avril 2026)
+- [ ] JSON Modifs temps réel
+- [ ] LocalStorage / SQLite
+- [ ] Export final (zip, git)
+- [ ] Intégration Deploy
 
-- [ ] Sauvegarder fichiers HTML/CSS/JS générés
-- [ ] Créer fichiers de prévisualisation
-- [ ] Intégration avec frontend web
-
-### Phase 8 : Interface Complète
-
-- [ ] Interface AETHERFLOW complète
-- [ ] Upload plans JSON
-- [ ] Visualisation workflows temps réel
-- [ ] Export fichiers générés
-
-### Phase 9 : Production Ready
-
+### Phase 9 : Production (Mai-Juin 2026)
 - [ ] Système de comptes
-- [ ] Gestion quotas
 - [ ] Monitoring et analytics
 - [ ] Documentation complète
-
-### Phase 10 : Extensions Futures
-
-- [ ] Mode Brainstorm
-- [ ] Mode Deploy
-- [ ] Intégration CI/CD
 - [ ] Marketplace composants
 
 ---
@@ -506,50 +375,47 @@ Chatbox Sullivan dans `Frontend/` : toggle minimisé/overlay, recherche et visua
 
 ### AETHERFLOW
 - ✅ Taux de succès exécution plans : > 95%
-- ✅ Temps moyen génération : < 10 minutes (PROD)
+- ✅ Temps moyen génération PROD : < 10 minutes
 - ✅ Coût moyen par génération : < $0.50
 
 ### Sullivan Kernel
-- ✅ Score moyen composants générés : > 75
-- ✅ Taux composants Elite Library : > 20%
-- ✅ Temps moyen génération composant : < 5 minutes
+- ✅ Score moyen composants : > 75
+- ✅ Taux Elite Library : > 20%
+- ✅ Temps génération composant : < 5 minutes
+
+### Genome/Stenciler
+- 🎯 Latence Tier 1 : 0ms
+- 🎯 Latence Tier 2 : < 100ms
+- 🎯 Latence Tier 3 : < 5s
 
 ---
 
 ## 📝 Notes Techniques
 
-### Stack Technique
-
+### Stack
 - **Backend** : Python 3.9+, FastAPI, Pydantic
-- **LLM Providers** : DeepSeek, Gemini, Groq, Codestral
+- **LLM** : DeepSeek, Gemini, Groq, Codestral
+- **Frontend** : HTML/CSS Vanilla, Fabric.js, HTMX
 - **Cache** : Cache sémantique, prompt cache
-- **Frontend** : HTML/CSS/JS Vanilla (compatibilité Mac 2016)
-- **Logging** : loguru
-- **TUI** : Rich, Textual
 
-### Dépendances Principales
-
-- `fastapi` : API REST
-- `pydantic` : Validation données
-- `loguru` : Logging
-- `rich` : TUI
-- `textual` : TUI avancée
-- Clients LLM (DeepSeek, Gemini, Groq, Codestral)
+### Fichiers Clés
+- **Genome** : `docs/02-sullivan/Genome_Enrichi/Genome_OPTIMISE_2026-02-06/genome_inferred_kimi_innocent_v2.json`
+- **Viewer** : `server_9998_v2.py` (port 9998)
+- **Architecture** : `docs/02-sullivan/Analyses/ARCHITECTURE_CLASSES_STENCILER.md`
+- **Mission** : `docs/02-sullivan/mailbox/kimi/MISSION_STENCILER_EXTENSION.md`
 
 ---
 
 ## 🔗 Références
 
-- **PRD Sullivan (exclusif)** : `docs/02-sullivan/PRD_SULLIVAN.md`
-- **Documentation complète** : `docs/guides/`
-- **Résumé contexte** : `docs/01-getting-started/RESUME_CONTEXTE.md`
-- **Répertoire outputs** : `docs/references/technique/REPERTOIRE_OUTPUTS_SULLIVAN.md`
-- **Décomposition sémantique** : `docs/references/technique/Décomposition Sémantique (Comprendre l'intention)**.md`
-- **Plan d'implémentation** : `.cursor/plans/sullivan_kernel_-_implémentation_complète_971ef366.plan.md`
-- **Synthèse Sullivan** : `docs/guides/Synthèse Finale - AetherFlow 2.2 "Sullivan"**.md`
+- **Architecture Classes** : `docs/02-sullivan/Analyses/ARCHITECTURE_CLASSES_STENCILER.md`
+- **Mission Stenciler** : `docs/02-sullivan/mailbox/kimi/MISSION_STENCILER_EXTENSION.md`
+- **Genome** : `docs/02-sullivan/Genome_Enrichi/`
+- **Stratégie Hybride** : `docs/02-sullivan/Composants/STRATEGIE HYBRIDES DE PREGENRATION DES COMPOSANTS.md`
+- **PRD Sullivan** : `docs/02-sullivan/PRD_SULLIVAN.md`
 
 ---
 
-**Document généré automatiquement**  
-**Dernière mise à jour** : 28 janvier 2026  
-**Version** : 2.2 "Sullivan"
+**Document mis à jour** : 11 février 2026  
+**Version** : 2.3 "Genome"  
+**Prochaine milestone** : Intégration Stenciler + Classes Abstraction

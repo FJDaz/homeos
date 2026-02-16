@@ -1,0 +1,146 @@
+{
+  "task_id": "performance-optimization-critical",
+  "description": "Optimisations critiques de performance pour régler 'ça va tuer le produit' - Context window, timeouts, KIMI routing",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Implémenter context window optimization dans orchestrator. CRITICAL: (1) Dans Backend/Prod/orchestrator.py, dans _execute_step() ligne ~720, avant de lire un fichier avec Read tool, vérifier la taille du fichier. (2) Si le fichier fait >500 lignes ET qu'il y a un insertion_point dans step.context, ne charger que ±100 lignes autour de insertion_point au lieu du fichier entier. (3) Ajouter une méthode _load_file_context(file_path: str, insertion_point: Optional[int] = None, context_lines: int = 100) -> str qui retourne soit le fichier complet (<500 lignes) soit seulement la fenêtre contextuelle. (4) Logger le nombre de lignes chargées vs total: 'Loaded 200/1422 lines around L712'. (5) Cela devrait réduire les contextes de 30K+ tokens à ~5-10K tokens.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Méthode _load_file_context() ajoutée et fonctionnelle",
+        "Détection automatique des gros fichiers (>500 lignes)",
+        "Chargement partiel si insertion_point fourni",
+        "Logging du ratio lignes chargées/total",
+        "Réduction des contextes de 30K à 5-10K tokens"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "pathlib",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _execute_step() ligne ~720",
+        "problem": "server_9998_v2.py fait 1422 lignes = 67KB = 30K+ tokens, timeout garanti",
+        "solution": "Ne charger que la zone pertinente autour de l'insertion_point"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Router automatiquement les gros contextes vers KIMI. CRITICAL: (1) Dans la méthode _get_provider_for_step() ligne ~600, après avoir estimé les tokens, vérifier: if estimated_tokens > 15000 and 'kimi' in self.clients. (2) Si true, logger 'Large context detected ({estimated_tokens} tokens), routing to KIMI' et retourner 'kimi'. (3) KIMI est maintenant intégré avec 100 workers parallèles, il gère mieux les gros contextes que DeepSeek. (4) Cette règle doit s'appliquer AVANT le smart routing normal. (5) Si KIMI n'est pas disponible, continuer avec le smart routing habituel mais logger un warning.",
+      "type": "refactoring",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Détection automatique des contextes >15K tokens",
+        "Routing vers KIMI si disponible",
+        "Logging clair de la décision de routing",
+        "Fallback au smart routing si KIMI indisponible",
+        "Règle appliquée AVANT smart routing normal"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "asyncio",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "insertion_point": "Méthode _get_provider_for_step() ligne ~600, début de méthode",
+        "reasoning": "KIMI a 100 workers parallèles, DeepSeek timeout sur gros contextes"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Augmenter les timeouts DeepSeek et ajouter timeout adaptatif. CRITICAL: (1) Dans Backend/Prod/models/deepseek_client.py (ou équivalent), trouver la valeur de timeout actuelle (probablement 120s). (2) Implémenter un timeout adaptatif basé sur estimated_tokens: base_timeout = 120; adaptive_timeout = base_timeout + (estimated_tokens / 1000) * 2. (3) Capper le max à 300s pour éviter les attentes infinies. (4) Logger le timeout utilisé: 'DeepSeek timeout: {adaptive_timeout}s for {estimated_tokens} tokens'. (5) Passer ce timeout à la requête API.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2000,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Timeout adaptatif implémenté (base 120s + tokens/1000*2)",
+        "Max timeout cappé à 300s",
+        "Logging du timeout utilisé",
+        "Timeout passé correctement à l'API",
+        "Fonctionne pour tous les appels DeepSeek"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "httpx/aiohttp",
+        "files": ["Backend/Prod/models/deepseek_client.py"],
+        "current_timeout": "120s (trop court pour contextes >20K tokens)",
+        "formula": "timeout = min(300, 120 + estimated_tokens/1000*2)"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Optimiser le chunking pour éviter les duplications. CRITICAL: (1) Dans la méthode _chunk_step() qui gère le chunking iterative, vérifier si on charge plusieurs fois le même fichier. (2) Si step nécessite 2 chunks d'un même fichier, charger le fichier UNE SEULE FOIS et le partager entre les chunks au lieu de le recharger 2 fois. (3) Ajouter un cache simple: self._file_cache = {} dans __init__, clear après chaque step. (4) Dans _chunk_step(), avant de lire un fichier, vérifier if file_path in self._file_cache. (5) Logger 'Using cached file content for {file_path}' si trouvé.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 2200,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Cache de fichiers implémenté dans orchestrator",
+        "Fichiers chargés UNE SEULE FOIS par step",
+        "Cache vidé après chaque step",
+        "Logging des hits de cache",
+        "Réduction du nombre de lectures I/O"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "dict cache",
+        "files": ["Backend/Prod/orchestrator.py"],
+        "problem": "Chunking charge le même fichier 2-3 fois pour différents chunks",
+        "solution": "Cache simple avec clear après chaque step"
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Tester les optimisations avec le plan surgical mode. (1) Relancer ./aetherflow --plan Backend/Notebooks/benchmark_tasks/plan_surgical_mode_create_support.json --full. (2) Vérifier que les contextes sont réduits: chercher dans les logs 'Loaded X/Y lines' avec X << Y. (3) Vérifier que KIMI est utilisé pour les gros contextes: chercher 'routing to KIMI'. (4) Vérifier que DeepSeek ne timeout plus: pas de 'timeout after 120s'. (5) Mesurer le temps total et comparer avec le run précédent (était ~18+ minutes avec échecs). (6) Objectif: <5 minutes, 100% success rate.",
+      "type": "analysis",
+      "complexity": 0.3,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Plan surgical mode réussi sans timeouts",
+        "Contextes réduits visibles dans les logs",
+        "KIMI utilisé pour gros contextes",
+        "Pas de timeouts DeepSeek",
+        "Temps total <5 minutes (vs 18+ avant)",
+        "100% success rate"
+      ],
+      "context": {
+        "language": "bash",
+        "framework": "aetherflow-cli",
+        "test_command": "./aetherflow --plan plan_surgical_mode_create_support.json --full",
+        "baseline": "18+ minutes avec timeouts et échecs",
+        "target": "<5 minutes, 100% success"
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-11T01:20:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW - Performance Optimization (Product-Critical)",
+    "mode": "refactoring",
+    "priority": "CRITICAL - User feedback: 'ça va tuer le produit'",
+    "agents": {
+      "architect": "Claude",
+      "refactoring": "Codestral",
+      "validation": "Gemini"
+    },
+    "genome_hierarchy": {
+      "n0": "Backend",
+      "n1": "Orchestration",
+      "n2": "Performance",
+      "n3": "Context & Timeout Optimization"
+    },
+    "reference_files": [
+      "Backend/Prod/orchestrator.py (context loading + provider routing)",
+      "Backend/Prod/models/deepseek_client.py (timeout adaptation)"
+    ],
+    "expected_benefits": {
+      "performance": "Réduction des temps d'exécution de 18+ min à <5 min",
+      "reliability": "Élimination des timeouts DeepSeek",
+      "scalability": "Gestion correcte des gros projets via KIMI",
+      "cost": "Réduction des tokens inutiles (30K → 5-10K)"
+    }
+  }
+}

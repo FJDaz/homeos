@@ -1,151 +1,149 @@
-# Interface HTML - Sullivan Kernel
+# FRONTEND — Sullivan Stenciler
 
-Interface web simple pour rechercher et gérer des composants via Sullivan Kernel.
+**Projet** : AETHERFLOW / Homeos / Sullivan
+**Statut** : Phase 1 — Définition du Contrat ✅
+**Conformité** : CONSTITUTION_AETHERFLOW v1.0.0
 
-## 🚀 Démarrage rapide
-
-### 1. Démarrer l'API
-
-```bash
-cd /Users/francois-jeandazin/AETHERFLOW
-python -m Backend.Prod.api
-```
-
-L'API sera disponible sur `http://127.0.0.1:8000`
-
-### 2. Ouvrir l'interface HTML
-
-Ouvrez simplement `frontend/index.html` dans votre navigateur.
-
-**Note** : Pour éviter les problèmes CORS, vous pouvez aussi servir les fichiers statiques via l'API FastAPI (voir ci-dessous).
-
-### 3. Utiliser l'interface
-
-1. **Rechercher un composant** :
-   - Entrez une description du composant recherché (ex: "Un bouton de connexion avec validation")
-   - Optionnellement, spécifiez un User ID
-   - Cliquez sur "Rechercher"
-
-2. **Voir les résultats** :
-   - Le composant trouvé s'affiche avec ses scores (Sullivan, Performance, Accessibilité, etc.)
-   - Un badge indique où le composant a été trouvé (Cache Local, Elite Library, ou Généré)
-
-3. **Consulter les composants disponibles** :
-   - Cliquez sur l'onglet "Cache Local" ou "Elite Library"
-   - Cliquez sur "Actualiser" pour recharger la liste
-   - Cliquez sur un composant pour remplir automatiquement le champ de recherche
+---
 
 ## 📁 Structure
 
 ```
-frontend/
-├── index.html          # Page principale
-├── css/
-│   └── styles.css      # Styles CSS
-├── js/
-│   └── app.js          # Logique JavaScript
-└── README.md           # Ce fichier
+Frontend/
+├── 1. CONSTITUTION/           ← Documents constitutionnels
+│   ├── CONSTITUTION_AETHERFLOW.md
+│   ├── API_CONTRACT_SCHEMA.json
+│   └── ROADMAP_IMPLEMENTATION.md
+│
+├── 2. GENOME/                 ← Structure de données
+│   ├── genome_reference.json  (25KB)
+│   └── README.md
+│
+├── 3. STENCILER/              ← Application principale
+│   └── server_9998_v2.py      (1913 lignes)
+│
+└── 4. COMMUNICATION/          ← Canal Claude ↔ KIMI
+    └── CANAL_CLAUDE_KIMI.md
 ```
 
-## 🔌 API Endpoints utilisés
+---
 
-### POST `/sullivan/search`
-Recherche un composant par intention.
+## 🎯 Objectif
 
-**Request** :
-```json
-{
-  "intent": "Un bouton de connexion avec validation",
-  "user_id": "default_user"
-}
+Créer un **Stenciler** (interface de design) qui permet :
+1. Afficher 4 Corps en preview (20%)
+2. Drag & drop vers canvas Figma-like
+3. Drill-down hiérarchique (Corps → Organes → Cells → Atomsets)
+4. Modification visuelle (couleurs, borders, etc.)
+5. Persistance via API REST
+
+---
+
+## 🏛️ Principes Constitutionnels
+
+### Frontière Hermétique
+
+```
+┌────────────────────────────────┬────────────────────────────────┐
+│  BACKEND (Claude)              │  FRONTEND (KIMI)               │
+├────────────────────────────────┼────────────────────────────────┤
+│  État sémantique               │  Rendu visuel                  │
+│  Validation métier             │  HTML/CSS/Fabric.js            │
+│  Persistance                   │  Interactions                  │
+│  Event sourcing                │  Animations                    │
+├────────────────────────────────┼────────────────────────────────┤
+│        JSON MODIFS = CONTRAT DE COMMUNICATION                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Response** :
-```json
-{
-  "success": true,
-  "component": {
-    "name": "component_bouton_connexion",
-    "sullivan_score": 75.0,
-    "performance_score": 80,
-    "accessibility_score": 70,
-    "ecology_score": 75,
-    "popularity_score": 60,
-    "validation_score": 80,
-    "size_kb": 10,
-    "created_at": "2026-01-27T22:00:00",
-    "user_id": "default_user"
-  },
-  "found_in": "generated",
-  "message": "Component found in generated"
-}
+### 3 Règles d'Or
+
+1. **Frontière hermétique** : Backend = Cerveau, Frontend = Mains
+2. **Aucun empiétement** : Pas de CSS dans le backend, pas de logique métier dans le frontend
+3. **Single Source of Truth** : JSON Modifs est l'unique source de vérité
+
+---
+
+## 🚀 Quick Start
+
+### Lancer le Stenciler (actuel)
+
+```bash
+cd "Frontend/3. STENCILER"
+python3 server_9998_v2.py
+# Ouvrir http://localhost:9998
 ```
 
-### GET `/sullivan/components`
-Liste tous les composants disponibles.
+**Note** : Le fichier actuel (1913 lignes) est le Viewer. Le Stenciler sera ajouté après la ligne 1422 (voir MISSION_STENCILER_EXTENSION.md).
 
-**Query Parameters** :
-- `user_id` (optionnel) : Filtrer par utilisateur
+---
 
-**Response** :
-```json
-{
-  "local_cache": [
-    {
-      "name": "component_1",
-      "sullivan_score": 75.0,
-      ...
-    }
-  ],
-  "elite_library": [
-    {
-      "name": "component_2",
-      "sullivan_score": 90.0,
-      ...
-    }
-  ]
-}
-```
+## 📋 Roadmap
 
-## 🎨 Personnalisation
+**Phase actuelle** : Phase 1 — Définir le Contrat ✅
 
-### Changer l'URL de l'API
+**Prochaines phases** :
+- Phase 2 : Implémenter classes Backend (3-5j) ⏳
+- Phase 3 : Créer API REST (2-3j) ⏳
+- Phase 4 : Intégration Frontend (3-5j) 🚀 KIMI Lead
+- Phase 5 : Optimisations (2-3j) ⏳
 
-Modifiez la constante `API_BASE_URL` dans `js/app.js` :
+**Durée totale** : 11-18 jours
 
-```javascript
-const API_BASE_URL = 'http://127.0.0.1:8000';  // Changez ici
-```
+**Voir** : [ROADMAP_IMPLEMENTATION.md](1.%20CONSTITUTION/ROADMAP_IMPLEMENTATION.md)
 
-### Styles
+---
 
-Les styles sont dans `css/styles.css`. Vous pouvez modifier :
-- Les couleurs (gradient dans `body`, couleurs des badges)
-- La mise en page (grid, flexbox)
-- Les tailles de police
+## 👥 Acteurs
 
-## 🐛 Dépannage
+| Rôle | Instance | Responsabilité |
+|------|----------|----------------|
+| **CTO** | François-Jean Dazin | Autorité suprême |
+| **Backend Lead** | Claude Sonnet 4.5 | Système Cognitif |
+| **Frontend Lead** | KIMI 2.5 | Système de Rendu |
+| **Arbitre** | Claude Opus 4.5 | Interprétation Constitution |
 
-### Erreur CORS
+---
 
-Si vous voyez des erreurs CORS, assurez-vous que :
-1. L'API FastAPI est démarrée avec CORS activé (déjà configuré dans `api.py`)
-2. Vous ouvrez l'interface depuis `http://127.0.0.1:8000` si vous servez les fichiers via FastAPI
+## 📞 Communication
 
-### L'API ne répond pas
+**Canal asynchrone** : [4. COMMUNICATION/CANAL_CLAUDE_KIMI.md](4.%20COMMUNICATION/CANAL_CLAUDE_KIMI.md)
 
-1. Vérifiez que l'API est démarrée : `curl http://127.0.0.1:8000/health`
-2. Vérifiez les logs de l'API pour voir les erreurs
-3. Assurez-vous que Sullivan Kernel est correctement initialisé
+**Protocole** :
+- Chaque message a timestamp + statut
+- Numérotation (#001, #002, etc.)
+- Décisions tracées dans tableau de suivi
 
-### Les composants ne s'affichent pas
+---
 
-1. Vérifiez que des composants existent dans `~/.aetherflow/components/` (cache local)
-2. Vérifiez que des composants existent dans `components/elite/` (elite library)
-3. Utilisez la recherche pour générer un premier composant
+## 🔗 Liens Importants
 
-## 📝 Notes
+- **Constitution** : [1. CONSTITUTION/CONSTITUTION_AETHERFLOW.md](1.%20CONSTITUTION/CONSTITUTION_AETHERFLOW.md)
+- **API Schema** : [1. CONSTITUTION/API_CONTRACT_SCHEMA.json](1.%20CONSTITUTION/API_CONTRACT_SCHEMA.json)
+- **Genome** : [2. GENOME/genome_reference.json](2.%20GENOME/genome_reference.json)
+- **Canal** : [4. COMMUNICATION/CANAL_CLAUDE_KIMI.md](4.%20COMMUNICATION/CANAL_CLAUDE_KIMI.md)
 
-- L'interface est en HTML/CSS/JS vanilla (pas de framework) pour compatibilité Mac 2016
-- Les composants sont stockés en JSON dans le système de fichiers
-- Le score Sullivan est calculé avec les poids : Performance 30%, Accessibilité 30%, Écologie 20%, Popularité 10%, Validation 10%
+---
+
+## ✅ Checklist Phase 1
+
+- [x] Constitution créée et ratifiée
+- [x] JSON Schema du contrat défini
+- [x] Roadmap établie
+- [x] Structure Frontend/ organisée
+- [x] Genome copié au bon endroit
+- [x] Server stenciler copié
+- [x] Canal de communication initialisé
+- [x] François-Jean a signé Constitution (ligne 493)
+- [x] Claude Sonnet 4.5 signe Constitution (ligne 497-500) — 11 fév 18:45
+- [x] KIMI 2.5 signe Constitution (ligne 502) — 11 fév 02:36
+- [x] KIMI valide le contrat — GO Phase 2 🚀
+- [x] Elite Library copiée (65 composants Tier 1)
+- [x] Protocole Validation Visuelle créé (Article 10)
+- [x] Système Détection Mission Frontend créé
+- [x] Phase 1 COMPLÉTÉE ✅
+
+---
+
+**Version** : 1.0.0
+**Dernière mise à jour** : 11 février 2026, 18:40

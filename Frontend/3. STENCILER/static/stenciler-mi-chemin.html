@@ -1,0 +1,133 @@
+<!-- STENCILER HTML - Mi-chemin -->
+<!-- Structure complète, visuel statique, sans JS complexe -->
+
+<div id="stenciler-app" class="stenciler-app">
+  <!-- Header -->
+  <header class="stenciler-header">
+    <h1>🏠 Stenciler</h1>
+    <select class="style-selector">
+      <option value="minimal">Style: Minimal</option>
+      <option value="elegant">Style: Elegant</option>
+      <option value="corporate">Style: Corporate</option>
+    </select>
+  </header>
+
+  <!-- Conteneur principal -->
+  <div class="stenciler-container">
+    
+    <!-- Bande previews (4 Corps) -->
+    <div class="preview-band" id="preview-band">
+      <div class="preview-card brainstorm" data-corps="brainstorm" data-id="n0_brainstorm">
+        <span class="emoji">🧠</span>
+        <span class="name">Brainstorm</span>
+        <span class="count">2 organes</span>
+      </div>
+      
+      <div class="preview-card backend" data-corps="backend" data-id="n0_backend">
+        <span class="emoji">⚙️</span>
+        <span class="name">Backend</span>
+        <span class="count">1 organe</span>
+      </div>
+      
+      <div class="preview-card frontend" data-corps="frontend" data-id="n0_frontend">
+        <span class="emoji">🎨</span>
+        <span class="name">Frontend</span>
+        <span class="count">7 organes</span>
+      </div>
+      
+      <div class="preview-card deploy" data-corps="deploy" data-id="n0_deploy">
+        <span class="emoji">🚀</span>
+        <span class="name">Deploy</span>
+        <span class="count">1 organe</span>
+      </div>
+    </div>
+
+    <!-- Bandeau Corps déposé (sticky, hidden par défaut) -->
+    <div class="dropped-bar hidden" id="dropped-bar">
+      <button class="toggle-btn" id="toggle-corps">▼</button>
+      <span class="corps-title" id="dropped-title">Frontend</span>
+      <span class="corps-badge frontend" id="dropped-badge">7 organes</span>
+    </div>
+
+    <!-- Zone principale -->
+    <div class="main-zone">
+      
+      <!-- Sidebar outils -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">🎨 Couleur</div>
+          <div class="color-palette">
+            <div class="color-swatch selected" style="background: #ec4899;" data-color="#ec4899"></div>
+            <div class="color-swatch" style="background: #10b981;" data-color="#10b981"></div>
+            <div class="color-swatch" style="background: #3b82f6;" data-color="#3b82f6"></div>
+            <div class="color-swatch" style="background: #f59e0b;" data-color="#f59e0b"></div>
+            <div class="color-swatch" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+            <div class="color-swatch" style="background: #f97316;" data-color="#f97316"></div>
+            <div class="color-swatch" style="background: #ffffff; border: 1px solid #e2e8f0;" data-color="#ffffff"></div>
+            <div class="color-swatch" style="background: #1e293b;" data-color="#1e293b"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">📏 Bordure</div>
+          <input type="range" class="border-slider" min="0" max="10" value="2">
+          <div class="border-preview"></div>
+        </div>
+
+        <div class="sidebar-section">
+          <button class="btn-delete">🗑️ Supprimer</button>
+        </div>
+      </aside>
+
+      <!-- Canvas -->
+      <main class="canvas-zone" id="canvas-zone">
+        <div class="canvas-placeholder">
+          <div class="big-emoji">🎯</div>
+          <p>Glissez un Corps depuis la bande du haut</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Zone composants (grille 4×2) -->
+    <div class="components-zone">
+      <div class="components-title">📋 Composants suggérés</div>
+      <div class="components-grid">
+        <div class="component-card">
+          <div class="name">Button</div>
+          <div class="type">Primary</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Card</div>
+          <div class="type">Minimal</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Input</div>
+          <div class="type">Form</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Modal</div>
+          <div class="type">Dialog</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Table</div>
+          <div class="type">Data</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Tabs</div>
+          <div class="type">Navigation</div>
+        </div>
+        <div class="component-card">
+          <div class="name">Select</div>
+          <div class="type">Dropdown</div>
+        </div>
+        <div class="component-card">
+          <div class="name">+58</div>
+          <div class="type">Elite Library</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Styles -->
+<link rel="stylesheet" href="/static/stenciler.css">

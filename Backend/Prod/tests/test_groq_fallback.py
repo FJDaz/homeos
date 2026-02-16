@@ -11,16 +11,17 @@ async def test_groq_rate_limit_fallback_to_gemini():
     """Test que le fallback vers Gemini fonctionne quand Groq retourne 429."""
     
     # Créer un step de test
-    step = Step(
-        id="step_1",
-        description="Test step",
-        type="code_generation",
-        complexity=0.5,
-        estimated_tokens=100,
-        dependencies=[],
-        validation_criteria=[],
-        context={"language": "python"}
-    )
+    step_data = {
+        "id": "step_1",
+        "description": "Test step",
+        "type": "code_generation",
+        "complexity": 0.5,
+        "estimated_tokens": 100,
+        "dependencies": [],
+        "validation_criteria": [],
+        "context": {"language": "python"}
+    }
+    step = Step(step_data)
     
     # Mock des clients
     mock_groq_client = AsyncMock()
@@ -83,16 +84,17 @@ async def test_groq_rate_limit_fallback_to_gemini():
 async def test_groq_rate_limit_fallback_to_deepseek():
     """Test que le fallback vers DeepSeek fonctionne quand Groq retourne 429 et Gemini n'est pas disponible."""
     
-    step = Step(
-        id="step_1",
-        description="Test step",
-        type="code_generation",
-        complexity=0.5,
-        estimated_tokens=100,
-        dependencies=[],
-        validation_criteria=[],
-        context={"language": "python"}
-    )
+    step_data = {
+        "id": "step_1",
+        "description": "Test step",
+        "type": "code_generation",
+        "complexity": 0.5,
+        "estimated_tokens": 100,
+        "dependencies": [],
+        "validation_criteria": [],
+        "context": {"language": "python"}
+    }
+    step = Step(step_data)
     
     # Mock des clients
     mock_groq_client = AsyncMock()
@@ -153,16 +155,17 @@ async def test_groq_rate_limit_fallback_to_deepseek():
 async def test_groq_success_no_fallback():
     """Test que le fallback n'est pas déclenché quand Groq réussit."""
     
-    step = Step(
-        id="step_1",
-        description="Test step",
-        type="code_generation",
-        complexity=0.5,
-        estimated_tokens=100,
-        dependencies=[],
-        validation_criteria=[],
-        context={"language": "python"}
-    )
+    step_data = {
+        "id": "step_1",
+        "description": "Test step",
+        "type": "code_generation",
+        "complexity": 0.5,
+        "estimated_tokens": 100,
+        "dependencies": [],
+        "validation_criteria": [],
+        "context": {"language": "python"}
+    }
+    step = Step(step_data)
     
     # Mock des clients
     mock_groq_client = AsyncMock()

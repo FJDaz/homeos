@@ -1,0 +1,216 @@
+{
+  "styles": {
+    "minimal": {
+      "button": {
+        "primary": {
+          "html": "<button class='btn btn-primary'>{{text}}</button>",
+          "css_classes": ["btn", "btn-primary"],
+          "accessibility": {
+            "role": "button",
+            "aria-label": "Primary button"
+          },
+          "props": {
+            "customizable_fields": ["text", "color"]
+          }
+        },
+        "secondary": {
+          "html": "<button class='btn btn-secondary'>{{text}}</button>",
+          "css_classes": ["btn", "btn-secondary"],
+          "accessibility": {
+            "role": "button",
+            "aria-label": "Secondary button"
+          },
+          "props": {
+            "customizable_fields": ["text", "color"]
+          }
+        },
+        "danger": {
+          "html": "<button class='btn btn-danger'>{{text}}</button>",
+          "css_classes": ["btn", "btn-danger"],
+          "accessibility": {
+            "role": "button",
+            "aria-label": "Danger button"
+          },
+          "props": {
+            "customizable_fields": ["text", "color"]
+          }
+        }
+      },
+      "input": {
+        "text": {
+          "html": "<input type='text' class='form-control' placeholder='{{placeholder}}'>",
+          "css_classes": ["form-control"],
+          "accessibility": {
+            "role": "textbox",
+            "aria-label": "Text input"
+          },
+          "props": {
+            "customizable_fields": ["placeholder", "value"]
+          }
+        },
+        "email": {
+          "html": "<input type='email' class='form-control' placeholder='{{placeholder}}'>",
+          "css_classes": ["form-control"],
+          "accessibility": {
+            "role": "textbox",
+            "aria-label": "Email input"
+          },
+          "props": {
+            "customizable_fields": ["placeholder", "value"]
+          }
+        },
+        "password": {
+          "html": "<input type='password' class='form-control' placeholder='{{placeholder}}'>",
+          "css_classes": ["form-control"],
+          "accessibility": {
+            "role": "textbox",
+            "aria-label": "Password input"
+          },
+          "props": {
+            "customizable_fields": ["placeholder", "value"]
+          }
+        }
+      },
+      "card": {
+        "simple": {
+          "html": "<div class='card'><div class='card-body'>{{content}}</div></div>",
+          "css_classes": ["card"],
+          "accessibility": {
+            "role": "region",
+            "aria-label": "Card"
+          },
+          "props": {
+            "customizable_fields": ["content"]
+          }
+        },
+        "with-header": {
+          "html": "<div class='card'><div class='card-header'>{{header}}</div><div class='card-body'>{{content}}</div></div>",
+          "css_classes": ["card"],
+          "accessibility": {
+            "role": "region",
+            "aria-label": "Card with header"
+          },
+          "props": {
+            "customizable_fields": ["header", "content"]
+          }
+        },
+        "with-footer": {
+          "html": "<div class='card'><div class='card-body'>{{content}}</div><div class='card-footer'>{{footer}}</div></div>",
+          "css_classes": ["card"],
+          "accessibility": {
+            "role": "region",
+            "aria-label": "Card with footer"
+          },
+          "props": {
+            "customizable_fields": ["content", "footer"]
+          }
+        }
+      },
+      "badge": {
+        "info": {
+          "html": "<span class='badge badge-info'>{{text}}</span>",
+          "css_classes": ["badge", "badge-info"],
+          "accessibility": {
+            "role": "status",
+            "aria-label": "Info badge"
+          },
+          "props": {
+            "customizable_fields": ["text"]
+          }
+        },
+        "success": {
+          "html": "<span class='badge badge-success'>{{text}}</span>",
+          "css_classes": ["badge", "badge-success"],
+          "accessibility": {
+            "role": "status",
+            "aria-label": "Success badge"
+          },
+          "props": {
+            "customizable_fields": ["text"]
+          }
+        },
+        "warning": {
+          "html": "<span class='badge badge-warning'>{{text}}</span>",
+          "css_classes": ["badge", "badge-warning"],
+          "accessibility": {
+            "role": "status",
+            "aria-label": "Warning badge"
+          },
+          "props": {
+            "customizable_fields": ["text"]
+          }
+        },
+        "error": {
+          "html": "<span class='badge badge-error'>{{text}}</span>",
+          "css_classes": ["badge", "badge-error"],
+          "accessibility": {
+            "role": "status",
+            "aria-label": "Error badge"
+          },
+          "props": {
+            "customizable_fields": ["text"]
+          }
+        }
+      },
+      "avatar": {
+        "small": {
+          "html": "<img class='avatar avatar-sm' src='{{src}}' alt='{{alt}}'>",
+          "css_classes": ["avatar", "avatar-sm"],
+          "accessibility": {
+            "role": "img",
+            "aria-label": "Small avatar"
+          },
+          "props": {
+            "customizable_fields": ["src", "alt"]
+          }
+        },
+        "medium": {
+          "html": "<img class='avatar avatar-md' src='{{src}}' alt='{{alt}}'>",
+          "css_classes": ["avatar", "avatar-md"],
+          "accessibility": {
+            "role": "img",
+            "aria-label": "Medium avatar"
+          },
+          "props": {
+            "customizable_fields": ["src", "alt"]
+          }
+        },
+        "large": {
+          "html": "<img class='avatar avatar-lg' src='{{src}}' alt='{{alt}}'>",
+          "css_classes": ["avatar", "avatar-lg"],
+          "accessibility": {
+            "role": "img",
+            "aria-label": "Large avatar"
+          },
+          "props": {
+            "customizable_fields": ["src", "alt"]
+          }
+        }
+      },
+      "divider": {
+        "horizontal": {
+          "html": "<hr class='divider divider-horizontal'>",
+          "css_classes": ["divider", "divider-horizontal"],
+          "accessibility": {
+            "role": "separator",
+            "aria-label": "Horizontal divider"
+          },
+          "props": {
+            "customizable_fields": []
+          }
+        },
+        "vertical": {
+          "html": "<div class='divider divider-vertical'></div>",
+          "css_classes": ["divider", "divider-vertical"],
+          "accessibility": {
+            "role": "separator",
+            "aria-label": "Vertical divider"
+          },
+          "props": {
+            "customizable_fields": []
+          }
+        }
+      }
+    }
+  }
+}

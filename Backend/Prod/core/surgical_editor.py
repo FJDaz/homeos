@@ -63,6 +63,7 @@ class ASTParser:
         self.file_path = file_path
         self.tree: Optional[ast.Module] = None
         self.source_lines: List[str] = []
+        self.source_text: str = ""
         self.nodes: List[ASTNodeInfo] = []
         
     def parse(self) -> bool:
@@ -80,6 +81,7 @@ class ASTParser:
             # Read source code
             with open(self.file_path, 'r', encoding='utf-8') as f:
                 source = f.read()
+                self.source_text = source
                 self.source_lines = source.splitlines()
             
             # Parse AST
@@ -224,6 +226,40 @@ class ASTParser:
                     continue
                 return node
         return None
+
+    def get_char_range(self, name: str, node_type: Optional[str] = None, parent: Optional[str] = None) -> Tuple[int, int]:
+        """Convert AST node coordinates to character index range in source_text.
+
+        Returns (start_idx, end_idx) for use in substring replacement.
+        Raises ValueError if node not found or source_text empty.
+        """
+        if not self.source_text:
+            raise ValueError("No source text. Call parse() first.")
+        node_info = self.find_node(name, node_type, parent)
+        if not node_info:
+            raise ValueError(f"Node '{name}' not found (node_type={node_type!r}, parent={parent!r})")
+        offsets = self._calculate_line_offsets()
+        start_line = node_info.line_start  # 1-based
+        end_line = node_info.line_end      # 1-based, inclusive
+        if start_line - 1 >= len(offsets):
+            raise ValueError(f"Line {start_line} out of range")
+        start_char = offsets[start_line - 1]
+        end_char = offsets[end_line] if end_line < len(offsets) else len(self.source_text)
+        return start_char, end_char
+
+    def _calculate_line_offsets(self) -> list:
+        """Return list where index i is char offset of line i start (0-based). Length = lines+1 (sentinel at end)."""
+        offsets = [0]
+        pos = 0
+        while pos < len(self.source_text):
+            nl = self.source_text.find('\n', pos)
+            if nl == -1:
+                break
+            offsets.append(nl + 1)
+            pos = nl + 1
+        offsets.append(len(self.source_text))
+        return offsets
+
 
 
 class SurgicalInstructionParser:
@@ -459,15 +495,34 @@ class SurgicalApplier:
         """
         if not self.tree:
             return False, "AST not parsed"
-        
-        if astunparse is None:
-            return False, "astunparse not available. Install it: pip install astunparse"
-        
+
         if not operations:
             return False, "No operations to apply"
-        
+
+        # Validate all operations first — deterministic, no fallback
+        for i, op in enumerate(operations):
+            err = self._validate_operation(op)
+            if err:
+                return False, f"Operation {i + 1} invalid: {err}"
+
+        # Try range-based replacement (preserves comments and formatting)
+        if self.parser.source_text:
+            try:
+                success, result = self.apply_operations_ranged(operations)
+                if success:
+                    return True, result
+                # Semantic errors (node/class not found) are terminal — astunparse won't fix them
+                if 'not found' in result.lower() or result.startswith('Op '):
+                    return False, result
+                logger.warning(f"RANGE_FAILED: {result}, falling back to astunparse")
+            except Exception as e:
+                logger.warning(f"RANGE_FAILED: {e}, falling back to astunparse")
+
+        if astunparse is None:
+            return False, "astunparse not available. Install it: pip install astunparse"
+
         try:
-            # Validate all operations before applying any
+            # Re-validate (belt and suspenders for astunparse path)
             for i, op in enumerate(operations):
                 err = self._validate_operation(op)
                 if err:
@@ -497,6 +552,120 @@ class SurgicalApplier:
             logger.exception("Surgical apply failed")
             return False, f"Error applying operations: {e}"
     
+    def apply_operations_ranged(self, operations) -> Tuple[bool, str]:
+        """Apply operations via text-range substitution (preserves comments/formatting).
+
+        Algorithm: for each op compute (start, end) char indices via parser.get_char_range(),
+        sort bottom-up (descending start) to avoid index drift, apply substitutions,
+        validate with ast.parse(). Returns (True, modified_source) or (False, error_msg).
+        """
+        source = self.parser.source_text
+        if not source:
+            return False, "No source_text in parser. Call parser.parse() first."
+
+        for i, op in enumerate(operations):
+            err = self._validate_operation(op)
+            if err:
+                return False, f"Op {i+1} invalid: {err}"
+
+        replacements = []  # list of (start_idx, end_idx, new_text)
+
+        for op in operations:
+            try:
+                if op.op_type == 'modify_method':
+                    if op.target and '.' in op.target:
+                        parent_cls, method_name = op.target.split('.', 1)
+                        start, end = self.parser.get_char_range(method_name, 'method', parent_cls)
+                    else:
+                        start, end = self.parser.get_char_range(op.target)
+                    # Re-indent op.code to match existing method indentation
+                    indent_str = ''
+                    for ch in source[start:]:
+                        if ch in (' ', '\t'):
+                            indent_str += ch
+                        else:
+                            break
+                    code_lines = op.code.splitlines()
+                    if code_lines:
+                        code_indent = len(code_lines[0]) - len(code_lines[0].lstrip())
+                        reindented = '\n'.join(
+                            indent_str + line[code_indent:] if line.strip() else line
+                            for line in code_lines
+                        )
+                    else:
+                        reindented = op.code
+                    replacements.append((start, end, reindented))
+
+                elif op.op_type == 'add_method':
+                    class_node = self.parser.find_node(op.target, 'class')
+                    if not class_node:
+                        return False, f"Class '{op.target}' not found"
+                    offsets = self.parser._calculate_line_offsets()
+                    # Insert AFTER last line of class (not before it)
+                    insert_pos = offsets[class_node.line_end] if class_node.line_end < len(offsets) else len(source)
+                    # Detect method indentation from the class (look for existing methods)
+                    method_nodes = [n for n in self.parser.nodes if n.node_type == 'method' and n.parent == op.target]
+                    if method_nodes:
+                        m_line = source.splitlines()[method_nodes[0].line_start - 1]
+                        indent_str = m_line[:len(m_line) - len(m_line.lstrip())]
+                    else:
+                        indent_str = '    '  # default 4 spaces
+                    code_lines = op.code.splitlines()
+                    code_indent = len(code_lines[0]) - len(code_lines[0].lstrip()) if code_lines else 0
+                    reindented = '\n'.join(
+                        indent_str + line[code_indent:] if line.strip() else line
+                        for line in code_lines
+                    )
+                    # Ensure there's a preceding newline if inserting at EOF
+                    prefix = '' if source[insert_pos - 1:insert_pos] == '\n' else '\n'
+                    replacements.append((insert_pos, insert_pos, prefix + reindented.rstrip() + '\n'))
+
+                elif op.op_type == 'add_import':
+                    imports = [n for n in self.parser.nodes if n.node_type == 'import']
+                    offsets = self.parser._calculate_line_offsets()
+                    if imports:
+                        last_line = max(n.line_end for n in imports)
+                        insert_pos = offsets[last_line] if last_line < len(offsets) else len(source)
+                    else:
+                        insert_pos = 0
+                    new_import = (op.new_import or op.code or '').rstrip() + '\n'
+                    replacements.append((insert_pos, insert_pos, new_import))
+
+                elif op.op_type == 'replace_import':
+                    old = op.old_import or ''
+                    if old not in source:
+                        return False, f"Import not found: {old!r}"
+                    idx = source.index(old)
+                    replacements.append((idx, idx + len(old), op.new_import or ''))
+
+                elif op.op_type in ('add_function', 'add_class'):
+                    imports = [n for n in self.parser.nodes if n.node_type == 'import']
+                    offsets = self.parser._calculate_line_offsets()
+                    if imports:
+                        last_line = max(n.line_end for n in imports)
+                        insert_pos = offsets[last_line] if last_line < len(offsets) else len(source)
+                    else:
+                        insert_pos = 0
+                    replacements.append((insert_pos, insert_pos, '\n' + op.code.rstrip() + '\n\n'))
+
+            except ValueError as e:
+                return False, f"Range error on op {op.op_type}/{op.target}: {e}"
+
+        # Bottom-up: sort by start descending to avoid index drift
+        replacements.sort(key=lambda x: x[0], reverse=True)
+
+        result = source
+        for start, end, new_text in replacements:
+            result = result[:start] + new_text + result[end:]
+
+        try:
+            ast.parse(result)
+        except SyntaxError as e:
+            return False, f"Syntax error after ranged apply: {e}"
+
+        return True, result
+
+
     def _apply_operation(self, op: SurgicalOperation) -> Tuple[bool, Optional[str]]:
         """
         Apply a single surgical operation.
@@ -874,3 +1043,4 @@ class SurgicalEditor:
         if success:
             return True, result, original_code or None
         return False, result, original_code or None
+

@@ -1,0 +1,51 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Mock 4 Corps avec organes"
+  },
+  "corps": [
+    {
+      "id": "n0_brainstorm",
+      "name": "Brainstorm",
+      "color": "#c9a6b0",
+      "organes_count": 2,
+      "organes": [
+        {"name": "Idéation Rapide"},
+        {"name": "Arbitrage"}
+      ]
+    },
+    {
+      "id": "n0_backend",
+      "name": "Backend",
+      "color": "#94bbfb",
+      "organes_count": 1,
+      "organes": [
+        {"name": "Session Management"}
+      ]
+    },
+    {
+      "id": "n0_frontend",
+      "name": "Frontend",
+      "color": "#9dd5c2",
+      "organes_count": 7,
+      "organes": [
+        {"name": "Navigation"},
+        {"name": "Layout Manager"},
+        {"name": "Upload Zone"},
+        {"name": "Style Picker"},
+        {"name": "Preview Band"},
+        {"name": "Canvas Tarmac"},
+        {"name": "Sidebar Tools"}
+      ]
+    },
+    {
+      "id": "n0_deploy",
+      "name": "Deploy",
+      "color": "#e8c4a0",
+      "organes_count": 1,
+      "organes": [
+        {"name": "Export Pipeline"}
+      ]
+    }
+  ]
+}

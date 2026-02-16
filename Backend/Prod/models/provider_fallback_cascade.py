@@ -313,6 +313,11 @@ class ProviderFallbackCascade:
                     timeout=timeout
                 )
                 
+                # --- NEW CHECK HERE ---
+                if hasattr(result, 'success') and result.success is False:
+                    raise Exception(f"Provider returned success=False: {result.error}")
+                # --- END NEW CHECK ---
+                
                 # Record success
                 self.circuit_breaker.record_success(provider)
                 

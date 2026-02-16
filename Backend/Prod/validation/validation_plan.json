@@ -1,0 +1,83 @@
+{
+  "task_id": "0d21bb01-2690-4225-9103-b520034ffc43",
+  "description": "Comprehensive validation of BUILD mode execution - 3 steps with guidelines compliance",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Comprehensive validation of step_1: Check compilation, security, logic, and guidelines compliance (TDD, DRY, SOLID)",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid and compiles",
+        "No security vulnerabilities (SQL injection, XSS, unsafe operations)",
+        "Logic is correct and handles edge cases",
+        "Follows TDD: includes comprehensive unit tests",
+        "Follows DRY: no repeated code blocks",
+        "Follows SOLID: single responsibility per function/class",
+        "Structure: Models/Services/Controllers separation (if applicable)",
+        "Type hints present for all functions",
+        "Docstrings present for public functions"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```python\n\"\"\"Orchestrator for executing AetherFlow plans.\"\"\"\nimport asyncio\nimport json\nimport time\nfrom pathlib import Path\nfrom typing import List, Dict, Any, Optional, Tuple\nfrom loguru import logger\n\n# #region agent log\n_DEBUG_LOG = \"/Users/francois-jeandazin/AETHERFLOW/.cursor/debug.log\"\ndef _dbg(hy: str, loc: str, msg: str, data: Optional[Dict] = None):\n    with open(_DEBUG_LOG, \"a\") as f:\n        f.write(json.dumps({\"timestamp\": int(time.time() * 1000), \"hypothesisId\": hy, \"location\": loc, \"message\": msg, \"data\": data or {}, \"sessionId\": \"debug-session\"}) + \"\\n\")\n# #endregion\n\nfrom .models.plan_reader import PlanReader, Plan, Step, PlanValidationError\nfrom .models.deepseek_client import StepResult\nfrom .models.agent_router import AgentRouter\nfrom .models.metrics import MetricsCollector\nfrom .models.claude_validator import ClaudeCodeValidator\nfrom .models.execution_monitor import ExecutionMonitor\nfrom .config.settings import settings\nfrom .rag import PageIndexRetriever\nfrom .core.surgical_editor import SurgicalEditor\nfrom .core.plan_status import update_plan_status\nfrom .claude_helper import split_structure_and_code\nfrom .ui.hybrid_loader import HybridLoader, Phase, StepStatus\n\n\nclass ExecutionError(Exception):\n    \"\"\"Raised when execution fails.\"\"\"\n    pass\n\n\nclass Orchestrator:\n    \"\"\"Orchestrates plan execution using AgentRouter (multi-provider support).\"\"\"\n\n    def __init__(\n        self,\n        plan_reader: Optional[PlanReader] = None,\n        agent_router: Optional[AgentRouter] = None,\n        claude_validator: Optional[ClaudeCodeValidator] = None,\n        rag_enabled: bool = True,\n        execution_mode: str = \"BUILD\",\n        enable_hybrid_loader: bool = True,\n        sequential_mode: bool = False\n    ):\n        \"\"\"\n        Initialize orchestrator.\n\n        Args:\n            plan_reader: PlanReader instance (creates new if None)\n            agent_router: AgentRouter instance (creates new if None)\n            claude_validator: ClaudeValidator instance (creates new if None)\n            rag_enabled: Whether to enable RAG for context enrichment (default True)\n            execution_mode: Execution mode (FAST, BUILD, DOUBLE-CHECK)\n        \"\"\"\n        self.plan_reader = plan_reader or PlanReader()\n        self.execution_mode = execution_mode.upper()\n        self.sequential_mode = sequential_mode\n        # Initialize AgentRouter with prompt cache, semantic cache, and execution mode\n        from .cache import PromptCache, SemanticCache\n        prompt_cache = PromptCache()\n        semantic_cache = SemanticCache()\n        self.agent_router = agent_router or AgentRouter(\n            prompt_cache=prompt_cache,\n            semantic_cache=semantic_cache,\n            execution_mode=self.execution_mode\n        )\n        self.claude_validator = claude_validator or ClaudeCodeValidator()\n        self.metrics: Optional[MetricsCollector] = None\n        self.monitor: Optional[ExecutionMonitor] = None\n        self.enable_hybrid_loader = enable_hybrid_load",
+        "guidelines_applied": true
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Comprehensive validation of step_2: Check compilation, security, logic, and guidelines compliance (TDD, DRY, SOLID)",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid and compiles",
+        "No security vulnerabilities (SQL injection, XSS, unsafe operations)",
+        "Logic is correct and handles edge cases",
+        "Follows TDD: includes comprehensive unit tests",
+        "Follows DRY: no repeated code blocks",
+        "Follows SOLID: single responsibility per function/class",
+        "Structure: Models/Services/Controllers separation (if applicable)",
+        "Type hints present for all functions",
+        "Docstrings present for public functions"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "```json\n{\n  \"operations\": [\n    {\n      \"type\": \"modify_method\",\n      \"target\": \"Orchestrator._execute_step\",\n      \"position\": \"replace\",\n      \"code\": \"    async def _execute_step(\\n        self,\\n        step: Step,\\n        context: Optional[str],\\n        previous_results: Dict[str, StepResult]\\n    ) -> StepResult:\\n        \\\"\\\"\\\"\\n        Execute a single step.\\n        \\n        Args:\\n            step: Step to execute\\n            context: Additional context\\n            previous_results: Results from previous steps\\n            \\n        Returns:\\n            StepResult with execution results\\n        \\\"\\\"\\\"\\n        # Build context from previous results if needed\\n        step_context = context or \\\"\\\"\\n        \\n        if step.dependencies:\\n            # Add outputs from dependent steps to context\\n            dep_outputs = []\\n            for dep_id in step.dependencies:\\n                if dep_id in previous_results:\\n                    dep_result = previous_results[dep_id]\\n                    if dep_result.success:\\n                        dep_outputs.append(f\\\"Previous step {dep_id} output:\\\\n{dep_result.output}\\\")\\n            \\n            if dep_outputs:\\n                step_context = \\\"\\\\n\\\\n\\\".join([step_context] + dep_outputs) if step_context else \\\"\\\\n\\\\n\\\".join(dep_outputs)\\n        \\n        # Load input_files (read-only) and inject as reference data\\n        input_files = self._load_input_files(step)\\n        if input_files:\\n            ref_parts = [\\\"\\\\n\\\\nReference data (read-only, do not modify):\\\\n\\\"]\\n            for path, content in input_files.items():\\n                if content is not None:\\n                    ref_parts.append(f\\\"=== File: {path} ===\\\\n{content}\\\\n\\\")\\n            step_context = \\\"\\\\n\\\\n\\\".join([step_context] + ref_parts) if step_context else \\\"\\\".join(ref_parts)\\n        \\n        # Load existing files and inject into context\\n        existing_files = self._load_existing_files(step)\\n        surgical_mode = False\\n        ast_contexts = {}\\n\\n        if existing_files:\\n            # Check if surgical mode should be activated\\n            # Surgical mode: enabled by default for refactoring/code_generation, or explicitly via step.context\\n            project_root = Path(__file__).parent.parent.parent\\n\\n            # First, check if we have any Python files that exist AND have content\\n            has_python_files = False\\n            has_existing_code = False\\n            for file_path_str, content in existing_files.items():\\n                if content is not None and len(content.strip()) > 0:\\n                    # File exists and has content\\n                    has_existing_code = True\\n                    file_path = Path(file_path_str)\\n                    if not file_path.is_absolute():\\n                        file_path = project_root / file_path\\n                    if file_path.suffix == '.py' and file_path.exists():\\n                        has_python_files = True\\n           ",
+        "guidelines_applied": true
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Comprehensive validation of step_3: Check compilation, security, logic, and guidelines compliance (TDD, DRY, SOLID)",
+      "type": "analysis",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Code syntax is valid and compiles",
+        "No security vulnerabilities (SQL injection, XSS, unsafe operations)",
+        "Logic is correct and handles edge cases",
+        "Follows TDD: includes comprehensive unit tests",
+        "Follows DRY: no repeated code blocks",
+        "Follows SOLID: single responsibility per function/class",
+        "Structure: Models/Services/Controllers separation (if applicable)",
+        "Type hints present for all functions",
+        "Docstrings present for public functions"
+      ],
+      "context": {
+        "language": "python",
+        "code_to_validate": "I'll create a comprehensive test suite for race condition prevention in the orchestrator, following TDD principles and the refactoring guidelines. Let me structure this properly:\n\n```python\n\"\"\"\nTest suite for race condition prevention in Orchestrator.\nTests that steps modifying the same file execute sequentially and maintain file integrity.\n\"\"\"\n\nimport json\nimport asyncio\nimport tempfile\nimport time\nfrom pathlib import Path\nfrom typing import Dict, List, Optional, Set, Tuple\nimport pytest\nfrom unittest.mock import Mock, AsyncMock, patch\n\n# Models\nfrom ..core.models import Plan, Step, StepResult\nfrom ..core.orchestrator import Orchestrator\nfrom ..core.agent_router import AgentRouter\nfrom ..core.metrics import MetricsCollector\n\n\n# ============================================================================\n# MODELS\n# ============================================================================\n\nclass TestFile:\n    \"\"\"Represents a test file for race condition testing.\"\"\"\n    \n    def __init__(self, content: str = \"\", suffix: str = \".py\"):\n        \"\"\"Initialize a test file.\n        \n        Args:\n            content: Initial file content\n            suffix: File extension\n        \"\"\"\n        self.content = content\n        self.suffix = suffix\n        self.path: Optional[Path] = None\n        self._temp_file = None\n    \n    def __enter__(self) -> 'TestFile':\n        \"\"\"Context manager entry.\"\"\"\n        self._temp_file = tempfile.NamedTemporaryFile(\n            mode='w', \n            suffix=self.suffix, \n            delete=False,\n            encoding='utf-8'\n        )\n        self._temp_file.write(self.content)\n        self._temp_file.close()\n        self.path = Path(self._temp_file.name)\n        return self\n    \n    def __exit__(self, exc_type, exc_val, exc_tb):\n        \"\"\"Context manager exit - cleanup.\"\"\"\n        if self.path and self.path.exists():\n            self.path.unlink()\n    \n    def read(self) -> str:\n        \"\"\"Read file content.\"\"\"\n        if self.path:\n            return self.path.read_text(encoding='utf-8')\n        return \"\"\n    \n    def write(self, content: str):\n        \"\"\"Write content to file.\"\"\"\n        if self.path:\n            self.path.write_text(content, encoding='utf-8')\n\n\nclass ExecutionTracker:\n    \"\"\"Tracks execution order and concurrency for testing.\"\"\"\n    \n    def __init__(self):\n        \"\"\"Initialize execution tracker.\"\"\"\n        self.execution_order: List[str] = []\n        self.active_steps: Set[str] = set()\n        self.max_concurrent: int = 0\n        self.execution_intervals: Dict[str, Tuple[float, float]] = {}\n    \n    def start_step(self, step_id: str) -> None:\n        \"\"\"Record step start.\n        \n        Args:\n            step_id: Step identifier\n        \"\"\"\n        self.execution_order.append(step_id)\n        self.active_steps.add(step_id)\n        self.max_concurrent = max(self.max_concurrent, len(self.active_steps))\n        self.execution_intervals[step_id] = (time.time(), 0)\n    \n    def end_step(self, step_id",
+        "guidelines_applied": true
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-12T22:10:29.600699",
+    "claude_version": "claude-code",
+    "project_context": "DOUBLE-CHECK validation of BUILD mode execution with guidelines compliance (TDD, DRY, SOLID)"
+  }
+}

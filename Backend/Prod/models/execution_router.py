@@ -9,11 +9,14 @@ from ..config.settings import settings
 class ExecutionRouter:
     """
     Routes execution to appropriate provider stack based on execution mode.
-    
+
     Modes:
     - FAST: Ultra-fast execution for simple tasks (Gemini Flash/Groq)
     - BUILD: Balanced execution for production code (DeepSeek-V3, Codestral for small tasks)
     - DOUBLE-CHECK: High-quality execution with audit (DeepSeek-V3 + Gemini Flash audit)
+    - FRD-FAST: Fast Render Design mode with KIMI for large contexts (>15K tokens, 128K window)
+    - FRD-TEST: FRD testing phase with DeepSeek
+    - FRD-REVIEW: FRD review phase with Gemini
     """
     
     def __init__(self):
@@ -24,8 +27,8 @@ class ExecutionRouter:
         """Detect which providers are available."""
         providers = {
             "deepseek": bool(settings.deepseek_api_key),
-            "codestral": bool(settings.mistral_api_key and 
-                            settings.mistral_api_key.isascii() and 
+            "codestral": bool(settings.mistral_api_key and
+                            settings.mistral_api_key.isascii() and
                             not settings.mistral_api_key.startswith("your_") and
                             not settings.mistral_api_key.startswith("votre_")),
             "gemini": bool(settings.google_api_key and
@@ -35,7 +38,11 @@ class ExecutionRouter:
             "groq": bool(settings.groq_api_key and
                         settings.groq_api_key.isascii() and
                         not settings.groq_api_key.startswith("your_") and
-                        not settings.groq_api_key.startswith("votre_"))
+                        not settings.groq_api_key.startswith("votre_")),
+            "kimi": bool(settings.kimi_api_key and
+                        settings.kimi_api_key.isascii() and
+                        not settings.kimi_api_key.startswith("your_") and
+                        not settings.kimi_api_key.startswith("votre_"))
         }
         return providers
     
@@ -62,13 +69,19 @@ class ExecutionRouter:
             }
         """
         mode = mode.upper()
-        
+
         if mode == "FAST":
             return self._get_fast_stack(step, task_size)
         elif mode == "BUILD":
             return self._get_build_stack(step, task_size)
         elif mode == "DOUBLE-CHECK":
             return self._get_double_check_stack(step, task_size)
+        elif mode == "FRD-FAST":
+            return self._get_frd_fast_stack(step, task_size)
+        elif mode == "FRD-TEST":
+            return self._get_frd_test_stack(step, task_size)
+        elif mode == "FRD-REVIEW":
+            return self._get_frd_review_stack(step, task_size)
         else:
             logger.warning(f"Unknown execution mode: {mode}, defaulting to BUILD")
             return self._get_build_stack(step, task_size)
@@ -188,14 +201,85 @@ class ExecutionRouter:
         stack = self.get_stack(mode, step)
         return stack["execution"] or "deepseek"
     
+    def _get_frd_fast_stack(self, step: Optional[Step], task_size: Optional[int]) -> Dict[str, str]:
+        """
+        Get FRD-FAST mode stack: KIMI for large contexts (>15K tokens, 128K window).
+
+        Stack:
+        - Plan: KIMI (128K context)
+        - Execution: KIMI for large contexts, fallback to Gemini/DeepSeek
+        - Audit: None (fast mode, no verification)
+        """
+        stack = {
+            "plan": None,
+            "execution": None,
+            "audit": None
+        }
+
+        # Prefer KIMI for execution (large context support)
+        if self.available_providers.get("kimi"):
+            stack["execution"] = "kimi"
+            stack["plan"] = "kimi"
+        elif self.available_providers.get("gemini"):
+            # Fallback to Gemini (1M context)
+            stack["execution"] = "gemini"
+            stack["plan"] = "gemini"
+        else:
+            # Last resort: DeepSeek
+            stack["execution"] = "deepseek"
+            stack["plan"] = "deepseek"
+
+        return stack
+
+    def _get_frd_test_stack(self, step: Optional[Step], task_size: Optional[int]) -> Dict[str, str]:
+        """
+        Get FRD-TEST mode stack: DeepSeek for quality testing.
+
+        Stack:
+        - Plan: DeepSeek
+        - Execution: DeepSeek
+        - Audit: None
+        """
+        return {
+            "plan": "deepseek",
+            "execution": "deepseek",
+            "audit": None
+        }
+
+    def _get_frd_review_stack(self, step: Optional[Step], task_size: Optional[int]) -> Dict[str, str]:
+        """
+        Get FRD-REVIEW mode stack: Gemini for validation.
+
+        Stack:
+        - Plan: Gemini
+        - Execution: Gemini
+        - Audit: Gemini
+        """
+        stack = {
+            "plan": "gemini",
+            "execution": "gemini",
+            "audit": "gemini"
+        }
+
+        # Fallback to Groq if Gemini not available
+        if not self.available_providers.get("gemini"):
+            if self.available_providers.get("groq"):
+                stack["execution"] = "groq"
+                stack["audit"] = "groq"
+            else:
+                stack["execution"] = "deepseek"
+                stack["audit"] = None
+
+        return stack
+
     def should_use_audit(self, mode: str) -> bool:
         """Check if audit should be used for the given mode."""
-        return mode.upper() == "DOUBLE-CHECK"
-    
+        return mode.upper() in ["DOUBLE-CHECK", "FRD-REVIEW"]
+
     def get_audit_provider(self, mode: str) -> Optional[str]:
         """Get the audit provider for the given mode."""
         if not self.should_use_audit(mode):
             return None
-        
+
         stack = self.get_stack(mode)
         return stack.get("audit")

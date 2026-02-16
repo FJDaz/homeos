@@ -1,0 +1,73 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Mock données pour la bande de previews des 4 Corps (20%)",
+    "conformite": "CONSTITUTION_AETHERFLOW v1.0.0"
+  },
+  "corps": [
+    {
+      "id": "n0_brainstorm",
+      "path": "n0[0]",
+      "name": "Brainstorm",
+      "semantic_role": "discovery",
+      "importance": "primary",
+      "visual_hint": "brainstorm",
+      "accent_color": "#ec4899",
+      "density": "airy",
+      "layout_type": "flex",
+      "description": "Phase créative : comprendre vos besoins et structurer votre projet",
+      "organes_count": 2,
+      "confidence": 0.87,
+      "modifiable_properties": ["accent_color", "border_weight", "density"],
+      "preview_scale": 0.2
+    },
+    {
+      "id": "n0_backend",
+      "path": "n0[1]",
+      "name": "Backend",
+      "semantic_role": "infrastructure",
+      "importance": "primary",
+      "visual_hint": "backend",
+      "accent_color": "#3b82f6",
+      "density": "compact",
+      "layout_type": "grid",
+      "description": "Moteur invisible : gestion des données et logique métier",
+      "organes_count": 1,
+      "confidence": 0.92,
+      "modifiable_properties": ["accent_color", "border_weight", "density"],
+      "preview_scale": 0.2
+    },
+    {
+      "id": "n0_frontend",
+      "path": "n0[2]",
+      "name": "Frontend",
+      "semantic_role": "interface",
+      "importance": "primary",
+      "visual_hint": "frontend",
+      "accent_color": "#10b981",
+      "density": "normal",
+      "layout_type": "flex",
+      "description": "Ce que vous voyez : interface, design et expérience utilisateur",
+      "organes_count": 7,
+      "confidence": 0.89,
+      "modifiable_properties": ["accent_color", "border_weight", "density"],
+      "preview_scale": 0.2
+    },
+    {
+      "id": "n0_deploy",
+      "path": "n0[3]",
+      "name": "Deploy",
+      "semantic_role": "delivery",
+      "importance": "primary",
+      "visual_hint": "deploy",
+      "accent_color": "#f59e0b",
+      "density": "compact",
+      "layout_type": "stack",
+      "description": "Mise en ligne : publication et livraison de votre projet",
+      "organes_count": 1,
+      "confidence": 0.85,
+      "modifiable_properties": ["accent_color", "border_weight", "density"],
+      "preview_scale": 0.2
+    }
+  ]
+}

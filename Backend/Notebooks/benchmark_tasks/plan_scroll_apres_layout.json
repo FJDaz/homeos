@@ -1,0 +1,141 @@
+{
+  "task_id": "frd-scroll-after-layout-validation",
+  "description": "Frontend : Ajouter scroll automatique vers choix de style après validation du layout (serveur 9998)",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter la section HTML cachée 'section-style-choice' après la section Atomes. Cette section doit contenir : (1) Un header '📐 Étape 2 : Choisir le Style' ; (2) Deux cards côte à côte (style-option-card) : Card A 'Importer ma Maquette' avec zone drag & drop (id=upload-zone), input file caché (id=file-input accept=image/*), bouton 'Parcourir' ; Card B 'Choisir un Style' avec grille 4x2 (styles-grid) contenant 8 miniatures de styles (data-style: minimal, corporate, creative, tech, elegant, playful, dark, colorful). La section doit être cachée par défaut (style='display: none;').",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Section section-style-choice existe dans le HTML",
+        "Section contient 2 cards : upload et styles",
+        "Card upload contient zone drag & drop et input file",
+        "Card styles contient grille 4x2 avec 8 miniatures",
+        "Section cachée par défaut (display: none)"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["server_9998_v2.py"],
+        "insertion_point": "Ligne 943, après la dernière section (Atomes)",
+        "target_section": "generate_html() function"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Ajouter les styles CSS pour la section style choice. Dans la balise <style> (avant </style>) : (1) .style-option-card : width 450px, background white, border 2px solid #e2e8f0, border-radius 16px, padding 24px, transition 0.3s ; hover : border #7aca6a, box-shadow. (2) .style-option-header : font-size 18px, font-weight 700, color #1e293b, margin-bottom 20px, text-align center. (3) .upload-zone : border 2px dashed #cbd5e1, border-radius 12px, padding 40px 20px, text-align center, cursor pointer ; hover : border #7aca6a, background #f0fdf4. (4) .styles-grid : display grid, grid-template-columns repeat(4, 1fr), gap 12px. (5) .style-card : height 80px, background #f8fafc, border 2px solid #e2e8f0, border-radius 8px, display flex center, font-size 11px, font-weight 600, cursor pointer ; hover et selected : border #7aca6a, background #7aca6a, color white, transform scale(1.05). (6) .btn-secondary : padding 8px 24px, background #f1f5f9, border 1px solid #e2e8f0, border-radius 6px, font-size 13px.",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Styles CSS ajoutés dans la balise <style>",
+        "Classes style-option-card, upload-zone, styles-grid, style-card, btn-secondary définies",
+        "Effets hover et selected implémentés",
+        "Design cohérent avec le reste (couleurs #7aca6a, #e2e8f0, etc.)"
+      ],
+      "context": {
+        "language": "css",
+        "framework": "vanilla",
+        "files": ["server_9998_v2.py"],
+        "insertion_point": "Ligne 819, avant </style>",
+        "color_palette": {
+          "primary": "#7aca6a",
+          "border": "#e2e8f0",
+          "text": "#1e293b",
+          "gray": "#64748b"
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Ajouter la fonction JavaScript scrollToStyleChoice() et les event listeners. Dans la balise <script> (avant </script>) : (1) Fonction scrollToStyleChoice() : récupérer getElementById('section-style-choice'), style.display = 'block', setTimeout 100ms puis scrollIntoView({ behavior: 'smooth', block: 'start' }). (2) Event listeners pour upload-zone : dragover (preventDefault, border green), dragleave (reset), drop (preventDefault, handleFileUpload). (3) Event listener pour file-input : change → handleFileUpload. (4) Fonction handleFileUpload(file) : console.log, alert temporaire 'Maquette uploadée (à implémenter: Gemini)'. (5) Event listeners pour .style-card : click → désélectionner les autres (remove class selected), sélectionner celui-ci (add class selected), console.log style.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Fonction scrollToStyleChoice() définie et fonctionnelle",
+        "Event listeners drag & drop sur upload-zone",
+        "Event listener sur file-input",
+        "Event listeners sur .style-card pour sélection",
+        "Console.log pour debug (fichier uploadé, style sélectionné)"
+      ],
+      "context": {
+        "language": "javascript",
+        "framework": "vanilla",
+        "files": ["server_9998_v2.py"],
+        "insertion_point": "Ligne 1007, avant </script>",
+        "target_elements": ["section-style-choice", "upload-zone", "file-input", ".style-card"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Modifier le bouton 'Valider' pour appeler scrollToStyleChoice() au clic. Localiser la ligne 878 contenant le bouton id='validate-btn'. Ajouter l'attribut onclick='scrollToStyleChoice()' à ce bouton. Le bouton doit déclencher le scroll uniquement quand il n'est pas disabled (count > 0).",
+      "type": "refactoring",
+      "complexity": 0.1,
+      "estimated_tokens": 300,
+      "dependencies": ["step_3"],
+      "validation_criteria": [
+        "Bouton validate-btn a l'attribut onclick='scrollToStyleChoice()'",
+        "Le scroll se déclenche uniquement si le bouton est enabled",
+        "Aucune régression sur la fonctionnalité existante (updateValidateButton)"
+      ],
+      "context": {
+        "language": "html",
+        "framework": "vanilla",
+        "files": ["server_9998_v2.py"],
+        "insertion_point": "Ligne 878",
+        "target_element": "validate-btn"
+      }
+    },
+    {
+      "id": "step_5_tdd",
+      "description": "Tests manuels de validation (TDD DeepSeek). Vérifier que : (1) Au démarrage, section-style-choice est cachée (display: none). (2) Après sélection d'au moins 1 composant et clic sur 'Valider (X)', la page scroll smooth vers section-style-choice et la section devient visible. (3) Drag & drop d'une image PNG/JPG sur upload-zone affiche l'alert 'Maquette uploadée'. (4) Clic sur un .style-card le sélectionne (background vert, border vert) et désélectionne les autres. (5) Aucune erreur console JavaScript. (6) Responsivité : les 2 cards restent côte à côte sur desktop, empilées sur mobile (<768px).",
+      "type": "testing",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": ["step_4"],
+      "validation_criteria": [
+        "Section cachée au démarrage",
+        "Scroll déclenché après validation",
+        "Drag & drop fonctionnel",
+        "Sélection de style fonctionnelle",
+        "Aucune erreur console",
+        "Responsive design vérifié"
+      ],
+      "context": {
+        "language": "manual_testing",
+        "framework": "browser",
+        "files": ["server_9998_v2.py"],
+        "test_url": "http://localhost:9998",
+        "test_scenarios": [
+          "Scroll après validation",
+          "Upload maquette (drag & drop + bouton)",
+          "Sélection style (8 options)",
+          "Responsive mobile/desktop"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-10T18:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AETHERFLOW HOMEOS V2 - Frontend (FRD) - Carrefour Créatif Step 2",
+    "mode": "hybrid",
+    "agents": {
+      "architect": "Claude",
+      "frontend_generation": "Kimi (API Cloud)",
+      "tdd_qa": "DeepSeek 7B (Local)"
+    },
+    "genome_hierarchy": {
+      "n0": "Frontend",
+      "n1": "Layout Selection",
+      "n2": "Validation & Style Choice",
+      "n3": "Scroll trigger, Upload zone, Style grid"
+    }
+  }
+}

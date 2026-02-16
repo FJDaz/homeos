@@ -1,0 +1,46 @@
+{
+    "task_id": "phase1-verification-vfx",
+    "description": "Verify the Phase 1 Externalization of Aetherflow and fix any regressions in the modular server architecture.",
+    "metadata": {
+        "planner": "antigravity",
+        "target": "server_9998_v2.py and static assets"
+    },
+    "steps": [
+        {
+            "id": "step_1",
+            "type": "refactoring",
+            "complexity": 0.3,
+            "estimated_tokens": 1500,
+            "dependencies": [],
+            "description": "Verify that server_9998_v2.py correctly implements the serve_template and serve_static methods without monolithic HTML strings. Ensure placeholders like {{confidence}} are correctly injected.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/server_9998_v2.py"
+                ],
+                "input_files": [
+                    "Frontend/3. STENCILER/static/templates/viewer.html",
+                    "Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW.md"
+                ]
+            }
+        },
+        {
+            "id": "step_2",
+            "type": "code_generation",
+            "complexity": 0.2,
+            "estimated_tokens": 1000,
+            "dependencies": [
+                "step_1"
+            ],
+            "description": "Verify consistency of static assets (JS/CSS) with the Constitution. No business logic in JS, no CSS in Python.",
+            "context": {
+                "files": [
+                    "Frontend/3. STENCILER/static/js/viewer.js",
+                    "Frontend/3. STENCILER/static/css/viewer.css"
+                ],
+                "input_files": [
+                    "Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW.md"
+                ]
+            }
+        }
+    ]
+}

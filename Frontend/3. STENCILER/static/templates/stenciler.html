@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stenciler — Mi-chemin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/Geist.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/geist/GeistMono.css">
+    <link rel="stylesheet" href="/static/stenciler.css">
+    <link rel="stylesheet" href="/static/css/stenciler.css">
+</head>
+
+<body>
+    <div id="stenciler-app" class="stenciler-app">
+        <!-- Header -->
+        <header class="stenciler-header">
+            <h1>Stenciler</h1>
+            <div class="header-actions">
+                <div class="style-indicator minimal">
+                    <span class="dot"></span>
+                    <span>minimal</span>
+                </div>
+                <button id="theme-toggle" title="Basculer entre jour et nuit">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Mode nuit</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Workspace: Sidebar left, Main right -->
+        <div class="stenciler-workspace">
+
+            <!-- Sidebar (LEFT) -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">Homé<span class="brand-k">OS</span></div>
+                    <div class="sidebar-tagline">Stenciler</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Navigation</div>
+                    <div class="breadcrumb" id="breadcrumb">Brainstorm</div>
+                    <button class="btn-back hidden" id="btn-back">← Retour</button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Actions</div>
+                    <button class="btn-delete">
+                        <span class="delete-icon">×</span>
+                        Supprimer (Del)
+                    </button>
+                    <div class="kbd-hint">
+                        <kbd>Del</kbd> ou <kbd>Backspace</kbd>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Mode Couleur</div>
+                    <div class="color-mode-toggle">
+                        <button class="mode-btn active" data-mode="border" title="Couleur sur les bords">
+                            <span class="mode-icon">▣</span>
+                            <span class="mode-label">Bordure</span>
+                        </button>
+                        <button class="mode-btn" data-mode="fill" title="Couleur de fond">
+                            <span class="mode-icon">◼</span>
+                            <span class="mode-label">Fond</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Couleur Personnalisée (TSL)</div>
+                    <div class="tsl-picker">
+                        <div class="tsl-preview" id="tsl-preview"></div>
+                        <div class="tsl-sliders">
+                            <div class="tsl-row">
+                                <label>T</label>
+                                <input type="range" class="tsl-slider hue" id="tsl-h" min="0" max="360" value="0">
+                                <span class="tsl-value" id="tsl-h-val">0°</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>S</label>
+                                <input type="range" class="tsl-slider saturation" id="tsl-s" min="0" max="100"
+                                    value="70">
+                                <span class="tsl-value" id="tsl-s-val">70%</span>
+                            </div>
+                            <div class="tsl-row">
+                                <label>L</label>
+                                <input type="range" class="tsl-slider lightness" id="tsl-l" min="0" max="100"
+                                    value="50">
+                                <span class="tsl-value" id="tsl-l-val">50%</span>
+                            </div>
+                        </div>
+                        <button class="btn-apply-color" id="btn-apply-tsl">Appliquer</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Préréglages</div>
+                    <div class="color-palette">
+                        <div class="color-swatch selected" style="background: var(--accent-rose);" data-color="rose">
+                        </div>
+                        <div class="color-swatch" style="background: var(--accent-bleu);" data-color="bleu"></div>
+                        <div class="color-swatch" style="background: var(--accent-vert);" data-color="vert"></div>
+                        <div class="color-swatch" style="background: var(--accent-orange);" data-color="orange"></div>
+                        <div class="color-swatch" style="background: var(--accent-mauve);" data-color="mauve"></div>
+                        <div class="color-swatch" style="background: var(--accent-rouge);" data-color="rouge"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Bordure</div>
+                    <input type="range" class="border-slider" min="0" max="10" value="2">
+                    <div class="border-value">2px</div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">API Claude</div>
+                    <div class="api-status" id="api-status">
+                        <span class="status-dot offline"></span>
+                        <span class="status-text">Hors ligne</span>
+                    </div>
+                    <button class="btn-api" id="btn-fetch-genome">Charger Genome</button>
+                    <button class="btn-api" id="btn-fetch-styles">Charger Styles</button>
+                </div>
+            </aside>
+
+            <!-- Right zone (Preview + Dropped + Canvas) -->
+            <div class="right-zone">
+                <!-- Sticky top zone: Preview + Dropped bar -->
+                <div class="sticky-top-zone" id="sticky-top-zone">
+                    <!-- Previews band (TOP) - Collapsible sticky -->
+                    <div class="preview-band-wrapper" id="preview-band-wrapper">
+                        <div class="preview-band" id="preview-band">
+                            <div class="preview-card brainstorm" data-corps="brainstorm">
+                                <div class="corps-wireframe wf-brainstorm">
+                                    <div class="wf-step active"></div>
+                                    <div class="wf-step-line"></div>
+                                    <div class="wf-step"></div>
+                                    <div class="wf-step-line dim"></div>
+                                    <div class="wf-step dim"></div>
+                                </div>
+                                <span class="name">Brainstorm</span>
+                                <span class="count">2 organes</span>
+                            </div>
+                            <div class="preview-card backend" data-corps="backend">
+                                <div class="corps-wireframe wf-backend">
+                                    <div class="wf-bar" style="height:40%"></div>
+                                    <div class="wf-bar" style="height:70%"></div>
+                                    <div class="wf-bar dim" style="height:55%"></div>
+                                    <div class="wf-bar" style="height:85%"></div>
+                                </div>
+                                <span class="name">Backend</span>
+                                <span class="count">1 organe</span>
+                            </div>
+                            <div class="preview-card frontend" data-corps="frontend">
+                                <div class="corps-wireframe wf-frontend">
+                                    <div class="wf-frame"></div>
+                                    <div class="wf-frame accent"></div>
+                                    <div class="wf-frame"></div>
+                                </div>
+                                <span class="name">Frontend</span>
+                                <span class="count">7 organes</span>
+                            </div>
+                            <div class="preview-card deploy" data-corps="deploy">
+                                <div class="corps-wireframe wf-deploy">
+                                    <div class="wf-launch-btn"></div>
+                                    <div class="wf-arrow"></div>
+                                </div>
+                                <span class="name">Deploy</span>
+                                <span class="count">1 organe</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="preview-band-toggle" id="preview-band-toggle" title="Collapse/Expand">▼</button>
+
+                    <!-- Dropped corps bar -->
+                    <div class="dropped-bar hidden" id="dropped-bar">
+                        <button class="toggle-btn" id="toggle-corps">▼</button>
+                        <span class="corps-title" id="dropped-title">Frontend</span>
+                        <span class="corps-badge" id="dropped-badge">7 organes</span>
+                    </div>
+                </div>
+
+                <!-- Main content: Canvas + Components -->
+                <main class="main-content">
+                    <!-- Canvas (CENTER) -->
+                    <div class="canvas-zone" id="canvas-zone">
+                        <canvas id="tarmac-canvas"></canvas>
+                        <div class="canvas-placeholder" id="canvas-placeholder">
+                            <div class="icon">+</div>
+                            <p>Glissez un Corps depuis la bande du haut</p>
+                        </div>
+                        <!-- Zoom controls -->
+                        <div class="zoom-controls">
+                            <button id="zoom-out" title="Zoom arrière">−</button>
+                            <span id="zoom-level">100%</span>
+                            <button id="zoom-in" title="Zoom avant">+</button>
+                            <button id="zoom-reset" title="Reset">⟲</button>
+                        </div>
+                    </div>
+
+                    <!-- Components (BOTTOM) - Wireframes Genome-like minimalistes -->
+                    <div class="components-zone">
+                        <div class="components-title">Composants</div>
+                        <div class="components-grid">
+                            <!-- Button Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-button">
+                                    <div class="wf-btn-bar"></div>
+                                </div>
+                                <div class="name">Button</div>
+                            </div>
+                            <!-- Card Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-card">
+                                    <div class="wf-card-header"></div>
+                                    <div class="wf-card-body">
+                                        <div class="wf-line"></div>
+                                        <div class="wf-line short"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Card</div>
+                            </div>
+                            <!-- Input Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-input">
+                                    <div class="wf-input-label"></div>
+                                    <div class="wf-input-field"></div>
+                                </div>
+                                <div class="name">Input</div>
+                            </div>
+                            <!-- Modal Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-modal">
+                                    <div class="wf-modal-header"></div>
+                                    <div class="wf-modal-body">
+                                        <div class="wf-line"></div>
+                                    </div>
+                                    <div class="wf-modal-footer">
+                                        <div class="wf-btn-mini"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Modal</div>
+                            </div>
+                            <!-- Table Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-table">
+                                    <div class="wf-row header">
+                                        <div class="wf-cell"></div>
+                                        <div class="wf-cell"></div>
+                                    </div>
+                                    <div class="wf-row">
+                                        <div class="wf-cell"></div>
+                                        <div class="wf-cell"></div>
+                                    </div>
+                                </div>
+                                <div class="name">Table</div>
+                            </div>
+                            <!-- Tabs Wireframe -->
+                            <div class="component-card">
+                                <div class="wireframe-tabs">
+                                    <div class="wf-tab active"></div>
+                                    <div class="wf-tab"></div>
+                                    <div class="wf-tab-content"></div>
+                                </div>
+                                <div class="name">Tabs</div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="/static/stenciler.js"></script>
+    <script src="/static/property_enforcer.js"></script>
+    <script src="/static/js/stenciler_app.js"></script>
+    <script src="/static/js/semantic_bridge.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('✅ Service Worker enregistré !'))
+                    .catch(err => console.error('❌ Erreur Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

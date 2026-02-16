@@ -1,0 +1,530 @@
+"""
+Test for race condition prevention in Orchestrator.
+Verifies that steps modifying the same file execute sequentially and maintain file integrity.
+"""
+
+import json
+import asyncio
+import tempfile
+import time
+from pathlib import Path
+from typing import Dict, List
+import pytest
+
+from ..core.orchestrator import Orchestrator
+from ..core.models import Plan, Step, StepResult
+from ..core.agent_router import AgentRouter
+from ..core.metrics import MetricsCollector
+
+
+class TestRaceCondition:
+    """Test suite for race condition prevention in Orchestrator."""
+    
+    @pytest.fixture
+    def temp_test_file(self):
+        """Create a temporary Python file for testing."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write("""# Test file for race condition testing
+import time
+
+class TestClass:
+    def __init__(self):
+        self.value = 0
+    
+    def get_value(self):
+        return self.value
+    
+    def increment(self):
+        self.value += 1
+        return self.value
+
+def helper_function():
+    return "original"
+""")
+            temp_path = Path(f.name)
+        yield temp_path
+        # Cleanup
+        if temp_path.exists():
+            temp_path.unlink()
+    
+    @pytest.fixture
+    def mock_agent_router(self, mocker):
+        """Mock AgentRouter that simulates step execution with delays."""
+        router = mocker.MagicMock(spec=AgentRouter)
+        
+        # Track execution order
+        execution_order = []
+        file_modifications = {}
+        
+        async def mock_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            # Simulate processing delay
+            await asyncio.sleep(0.1)
+            
+            # Record execution order
+            execution_order.append(step.id)
+            
+            # Generate surgical instructions based on step
+            if step.id == "step_1":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_one(self):\n        return 'added by step 1'"
+                    }]
+                })
+            elif step.id == "step_2":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_two(self):\n        return 'added by step 2'"
+                    }]
+                })
+            elif step.id == "step_3":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def method_three(self):\n        return 'added by step 3'"
+                    }]
+                })
+            else:
+                output = "{}"
+            
+            # Track file modifications
+            if loaded_files:
+                for file_path in loaded_files:
+                    if file_path not in file_modifications:
+                        file_modifications[file_path] = []
+                    file_modifications[file_path].append(step.id)
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        router.execute_step = mock_execute_step
+        router.execution_order = execution_order
+        router.file_modifications = file_modifications
+        
+        return router
+    
+    @pytest.fixture
+    def orchestrator(self, mock_agent_router):
+        """Create an Orchestrator instance with mocked dependencies."""
+        orchestrator = Orchestrator(
+            agent_router=mock_agent_router,
+            execution_mode="BUILD"
+        )
+        orchestrator.metrics = MetricsCollector()
+        return orchestrator
+    
+    def create_race_condition_plan(self, test_file_path: Path) -> Plan:
+        """Create a plan with 3 steps that all modify the same file."""
+        return Plan(
+            task_id="race_condition_test",
+            name="Race Condition Test",
+            description="Test sequential execution when multiple steps modify the same file",
+            steps=[
+                Step(
+                    id="step_1",
+                    name="Add first method",
+                    description="Add method_one to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_2",
+                    name="Add second method",
+                    description="Add method_two to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],  # No explicit dependencies - should still execute sequentially
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_3",
+                    name="Add third method",
+                    description="Add method_three to TestClass",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(test_file_path)],
+                    dependencies=[],  # No explicit dependencies - should still execute sequentially
+                    agent_preference=None
+                )
+            ]
+        )
+    
+    @pytest.mark.asyncio
+    async def test_sequential_execution_same_file(self, orchestrator, temp_test_file, mock_agent_router):
+        """
+        Test that steps modifying the same file execute sequentially,
+        even without explicit dependencies.
+        """
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify all steps succeeded
+        assert all(result.success for result in results.values())
+        
+        # Verify execution order matches step order
+        assert mock_agent_router.execution_order == ["step_1", "step_2", "step_3"]
+        
+        # Verify file was modified by all steps
+        assert str(temp_test_file) in mock_agent_router.file_modifications
+        assert mock_agent_router.file_modifications[str(temp_test_file)] == ["step_1", "step_2", "step_3"]
+        
+        # Verify final file content
+        final_content = temp_test_file.read_text()
+        
+        # Check all methods were added
+        assert "def method_one(self):" in final_content
+        assert "def method_two(self):" in final_content
+        assert "def method_three(self):" in final_content
+        
+        # Check original content is preserved
+        assert "def get_value(self):" in final_content
+        assert "def increment(self):" in final_content
+        assert "def helper_function():" in final_content
+        
+        # Verify no duplicate methods
+        assert final_content.count("def method_one(self):") == 1
+        assert final_content.count("def method_two(self):") == 1
+        assert final_content.count("def method_three(self):") == 1
+    
+    @pytest.mark.asyncio
+    async def test_file_integrity_parallel_attempt(self, orchestrator, temp_test_file, mocker):
+        """
+        Test that file integrity is maintained even if steps are attempted in parallel.
+        """
+        # Mock _execute_step to track concurrent access attempts
+        execution_times = []
+        file_access_times = {}
+        
+        original_execute_step = orchestrator._execute_step
+        
+        async def tracked_execute_step(step, context, previous_results):
+            start_time = time.time()
+            execution_times.append((step.id, start_time))
+            
+            # Read file at start
+            if temp_test_file.exists():
+                content_start = temp_test_file.read_text()
+                if step.id not in file_access_times:
+                    file_access_times[step.id] = {"start": content_start}
+            
+            # Execute step
+            result = await original_execute_step(step, context, previous_results)
+            
+            end_time = time.time()
+            execution_times.append((step.id, end_time))
+            
+            # Read file at end
+            if temp_test_file.exists():
+                content_end = temp_test_file.read_text()
+                if step.id in file_access_times:
+                    file_access_times[step.id]["end"] = content_end
+            
+            return result
+        
+        orchestrator._execute_step = tracked_execute_step
+        
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify no overlapping execution
+        execution_intervals = {}
+        for i in range(0, len(execution_times), 2):
+            step_id = execution_times[i][0]
+            start = execution_times[i][1]
+            end = execution_times[i + 1][1]
+            execution_intervals[step_id] = (start, end)
+        
+        # Check intervals don't overlap
+        intervals = list(execution_intervals.values())
+        for i in range(len(intervals)):
+            for j in range(i + 1, len(intervals)):
+                start_i, end_i = intervals[i]
+                start_j, end_j = intervals[j]
+                # Either i finishes before j starts, or j finishes before i starts
+                assert end_i <= start_j or end_j <= start_i
+        
+        # Verify file content evolution
+        for step_id in ["step_1", "step_2", "step_3"]:
+            if step_id in file_access_times:
+                start_content = file_access_times[step_id]["start"]
+                end_content = file_access_times[step_id]["end"]
+                
+                # File should change between start and end of each step
+                if step_id == "step_1":
+                    # step_1 adds method_one
+                    assert "def method_one(self):" not in start_content
+                    assert "def method_one(self):" in end_content
+                elif step_id == "step_2":
+                    # step_2 adds method_two (method_one should already be there)
+                    assert "def method_one(self):" in start_content
+                    assert "def method_two(self):" not in start_content
+                    assert "def method_two(self):" in end_content
+                elif step_id == "step_3":
+                    # step_3 adds method_three (method_one and two should already be there)
+                    assert "def method_one(self):" in start_content
+                    assert "def method_two(self):" in start_content
+                    assert "def method_three(self):" not in start_content
+                    assert "def method_three(self):" in end_content
+    
+    @pytest.mark.asyncio
+    async def test_with_explicit_dependencies(self, orchestrator, temp_test_file, mock_agent_router):
+        """
+        Test sequential execution with explicit dependencies.
+        """
+        plan = Plan(
+            task_id="explicit_deps_test",
+            name="Explicit Dependencies Test",
+            description="Test with explicit step dependencies",
+            steps=[
+                Step(
+                    id="step_a",
+                    name="Base modification",
+                    description="Add base method",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=[],
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_b",
+                    name="Dependent modification",
+                    description="Add method that depends on step_a",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=["step_a"],  # Explicit dependency
+                    agent_preference=None
+                ),
+                Step(
+                    id="step_c",
+                    name="Final modification",
+                    description="Add final method",
+                    type="code_generation",
+                    context={"surgical_mode": True},
+                    input_files={},
+                    output_files=[str(temp_test_file)],
+                    dependencies=["step_b"],  # Explicit dependency
+                    agent_preference=None
+                )
+            ]
+        )
+        
+        # Update mock to handle these step IDs
+        original_execute = mock_agent_router.execute_step
+        
+        async def custom_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            if step.id == "step_a":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def base_method(self):\n        return 'base'"
+                    }]
+                })
+            elif step.id == "step_b":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def dependent_method(self):\n        return 'depends on base'"
+                    }]
+                })
+            elif step.id == "step_c":
+                output = json.dumps({
+                    "operations": [{
+                        "type": "add_method",
+                        "target": "TestClass",
+                        "position": "end",
+                        "code": "    def final_method(self):\n        return 'final'"
+                    }]
+                })
+            else:
+                output = "{}"
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        mock_agent_router.execute_step = custom_execute_step
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify execution order respects dependencies
+        assert mock_agent_router.execution_order == ["step_a", "step_b", "step_c"]
+        
+        # Verify final file content
+        final_content = temp_test_file.read_text()
+        assert "def base_method(self):" in final_content
+        assert "def dependent_method(self):" in final_content
+        assert "def final_method(self):" in final_content
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_same_file(self, orchestrator, temp_test_file, mocker):
+        """
+        Test that file remains consistent when a step fails.
+        """
+        # Mock agent_router to make step_2 fail
+        mock_router = mocker.MagicMock(spec=AgentRouter)
+        
+        async def failing_execute_step(step, context, surgical_mode=False, loaded_files=None):
+            if step.id == "step_2":
+                return StepResult(
+                    step_id=step.id,
+                    success=False,
+                    output="Simulated failure",
+                    execution_time=0.1,
+                    token_usage={"input": 100, "output": 0}
+                )
+            
+            # Success for other steps
+            output = json.dumps({
+                "operations": [{
+                    "type": "add_method",
+                    "target": "TestClass",
+                    "position": "end",
+                    "code": f"    def method_{step.id}(self):\n        return '{step.id}'"
+                }]
+            })
+            
+            return StepResult(
+                step_id=step.id,
+                success=True,
+                output=output,
+                execution_time=0.1,
+                token_usage={"input": 100, "output": 50}
+            )
+        
+        mock_router.execute_step = failing_execute_step
+        orchestrator.agent_router = mock_router
+        
+        # Create plan
+        plan = self.create_race_condition_plan(temp_test_file)
+        
+        # Execute plan
+        results = await orchestrator.execute_plan(plan)
+        
+        # Verify step_2 failed
+        assert not results["step_2"].success
+        assert results["step_1"].success
+        # step_3 should still execute (depends on orchestrator's error handling policy)
+        
+        # Verify file contains only successful modifications
+        final_content = temp_test_file.read_text()
+        assert "def method_step_1(self):" in final_content
+        assert "return 'step_2'" not in final_content  # step_2 failed
+        
+        # File should still be valid Python
+        import ast
+        try:
+            ast.parse(final_content)
+        except SyntaxError as e:
+            pytest.fail(f"File contains invalid Python after failed step: {e}")
+    
+    def test_plan_json_generation(self):
+        """Test generation of the race condition test plan JSON."""
+        test_file = "/tmp/test_race.py"
+        
+        plan = self.create_race_condition_plan(Path(test_file))
+        
+        # Convert to JSON-serializable dict
+        plan_dict = {
+            "task_id": plan.task_id,
+            "name": plan.name,
+            "description": plan.description,
+            "steps": [
+                {
+                    "id": step.id,
+                    "name": step.name,
+                    "description": step.description,
+                    "type": step.type,
+                    "context": step.context,
+                    "input_files": step.input_files,
+                    "output_files": step.output_files,
+                    "dependencies": step.dependencies,
+                    "agent_preference": step.agent_preference
+                }
+                for step in plan.steps
+            ]
+        }
+        
+        # Verify structure
+        assert plan_dict["task_id"] == "race_condition_test"
+        assert len(plan_dict["steps"]) == 3
+        
+        # All steps should target the same file
+        for step in plan_dict["steps"]:
+            assert step["output_files"] == [test_file]
+            assert step["type"] == "code_generation"
+            assert step["context"]["surgical_mode"] is True
+        
+        # Print JSON for manual verification
+        print("\n" + "="*80)
+        print("RACE CONDITION TEST PLAN JSON:")
+        print("="*80)
+        print(json.dumps(plan_dict, indent=2))
+        print("="*80 + "\n")
+
+
+class TestConcurrentFileAccess:
+    """Additional tests for concurrent file access scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_multiple_files_concurrent_modification(self, orchestrator, mocker):
+        """
+        Test that steps modifying different files can potentially execute concurrently,
+        but steps modifying the same file execute sequentially.
+        """
+        # Create multiple test files
+        test_files = []
+        for i in range(3):
+            temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False)
+            temp_file.write(f"# File {i}\nclass File{i}Class:\n    pass\n")
+            temp_file.close()
+            test_files.append(Path(temp_file.name))
+        
+        try:
+            # Track execution concurrency
+            active_steps = set()
+            max_concurrent = 0
+            execution_log = []
+            
+            original_execute = orchestrator._execute_step
+            
+            async def tracked_execute_step
+
+I'll create a comprehensive test to verify that surgical mode is correctly enabled/disabled based on the execution mode (FAST vs BUILD). This test will create a test plan, execute it in both modes, and verify the surgical mode status in logs.

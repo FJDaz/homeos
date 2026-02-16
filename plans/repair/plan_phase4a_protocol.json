@@ -1,0 +1,35 @@
+{
+  "task_id": "repair_phase4a_master_protocol",
+  "description": "Créer Backend/Prod/core/prompts/surgical_protocol.py contenant SURGICAL_SYSTEM_PROMPT : le prompt système unifié pour tous les LLM en mode surgical.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Écrire surgical_protocol.py avec la constante SURGICAL_SYSTEM_PROMPT. Le prompt impose : silence absolu (JSON only), les 6 types d'opérations, qualification obligatoire des cibles, vérification contre le résumé AST fourni.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 1000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Fichier Python valide avec SURGICAL_SYSTEM_PROMPT: str",
+        "Règle de silence : output JSON uniquement, zéro prose",
+        "6 types listés : add_method, modify_method, add_import, replace_import, add_class, add_function",
+        "Règle target qualifié : toujours 'ClassName.method_name' pour les méthodes",
+        "Règle de vérification AST : vérifier que chaque target existe dans le résumé AST fourni",
+        "Exemple de JSON valide inclus dans le prompt",
+        "Types interdits listés : add_route, add_to_router, add_endpoint, add_decorator"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/core/surgical_editor.py"],
+        "instructions": "Lis SUPPORTED_OPERATIONS (surgical_editor.py L31-35). Crée un fichier Python complet : Backend/Prod/core/prompts/surgical_protocol.py. Ce fichier contient une seule constante SURGICAL_SYSTEM_PROMPT: str = '''...'''. Le contenu du prompt doit : (1) Ouvrir par 'You are a surgical code instrument. Output ONLY valid JSON. Any prose is a syntax error and will be rejected.' (2) Définir le format JSON attendu avec un exemple. (3) Lister les 6 types supportés avec leurs champs requis. (4) Règle de qualification : pour modify_method et add_method, target DOIT être 'ClassName.method_name'. (5) Règle AST : 'Before outputting, verify each target exists in the AST summary provided in the prompt. If not found, raise an AmbiguityError comment inside the JSON as {\"error\": \"target X not found in AST\"}.' (6) Types interdits listés. Output : fichier Python complet avec uniquement la constante SURGICAL_SYSTEM_PROMPT."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "Backend/Prod/core/prompts/surgical_protocol.py (NEW) — repair/surgical-engine"
+  }
+}
