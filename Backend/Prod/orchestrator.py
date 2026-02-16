@@ -720,7 +720,98 @@ class Orchestrator:
         if files_content:
             logger.info(f"Loaded {sum(1 for v in files_content.values() if v is not None)} input_files for step {step.id}")
         return files_content
-    
+
+    def _build_reasoning_prompt(
+        self,
+        step: Step,
+        step_context: str,
+        ast_contexts: Dict[str, str]
+    ) -> str:
+        """Build a prompt for the reasoning pre-pass."""
+        context_preview = step_context[:1000] + "..." if len(step_context) > 1000 else step_context
+
+        ast_summary = ""
+        if ast_contexts:
+            ast_summary_parts = ["AST Structure Summary:"]
+            for file_path, ast_context in ast_contexts.items():
+                ast_summary_parts.append(f"\n=== File: {file_path} ===")
+                ast_preview = ast_context[:500] + "..." if len(ast_context) > 500 else ast_context
+                ast_summary_parts.append(ast_preview)
+            ast_summary = "\n".join(ast_summary_parts)
+
+        return f"""TASK ANALYSIS AND REASONING REQUEST
+
+TASK DESCRIPTION:
+{step.description}
+
+CONTEXT (PREVIEW):
+{context_preview}
+
+{ast_summary if ast_summary else "No AST structure available."}
+
+REASONING INSTRUCTIONS:
+1. Analyze the task requirements and how they relate to the existing code structure
+2. Identify which files need modifications and what type of changes are needed
+3. Consider dependencies between different parts of the code
+4. Think about potential edge cases or conflicts
+5. Plan the sequence of operations for surgical editing
+6. Consider how to maintain code consistency and follow existing patterns
+
+OUTPUT FORMAT:
+Provide a concise, step-by-step reasoning plan. Focus on:
+- What needs to be changed
+- Where to make changes (specific files/classes/methods)
+- How to integrate changes with existing code
+- Any potential issues to watch out for
+
+Your reasoning will be used to guide the actual code generation step.
+"""
+
+    async def _reasoning_pre_pass(
+        self,
+        step: Step,
+        step_context: str,
+        ast_contexts: Dict[str, str]
+    ) -> str:
+        """
+        Perform a reasoning pre-pass using DeepSeek-Reasoner (R1) model.
+
+        Analyzes task + AST structure before the main code generation step.
+        Returns reasoning text to inject into step_context, or '' on any failure.
+        """
+        try:
+            from .models.deepseek_client import DeepSeekClient
+            reasoner_client = DeepSeekClient(model='deepseek-reasoner')
+
+            reasoning_prompt = self._build_reasoning_prompt(step, step_context, ast_contexts)
+
+            try:
+                reasoning_result = await asyncio.wait_for(
+                    reasoner_client.generate(
+                        prompt=reasoning_prompt,
+                        max_tokens=1000,
+                        temperature=0.3
+                    ),
+                    timeout=120.0
+                )
+            except asyncio.TimeoutError:
+                logger.warning(f"Reasoning pre-pass timeout for step {step.id}")
+                return ""
+            finally:
+                await reasoner_client.close()
+
+            if reasoning_result.success and reasoning_result.code:
+                reasoning_text = reasoning_result.code
+                logger.info(f"Reasoning pre-pass completed for step {step.id} ({len(reasoning_text)} chars)")
+                return reasoning_text
+            else:
+                logger.warning(f"Reasoning pre-pass returned no output for step {step.id}: {reasoning_result.error}")
+                return ""
+
+        except Exception as e:
+            logger.warning(f"Reasoning pre-pass failed for step {step.id}: {e}")
+            return ""
+
     async def _execute_step(
         self,
         step: Step,
@@ -887,6 +978,17 @@ Focus on precise, minimal changes that integrate seamlessly with existing code.
                 
                 step_context = "\n\n".join([step_context, files_section]) if step_context else files_section
         
+        # Reasoning pre-pass (opt-in via step.context.pre_reasoning: true)
+        if step.context and isinstance(step.context, dict) and step.context.get('pre_reasoning', False):
+            logger.info(f"Starting reasoning pre-pass for step {step.id}")
+            reasoning_text = await self._reasoning_pre_pass(step, step_context, ast_contexts)
+            if reasoning_text:
+                reasoning_block = f"\n\n[REASONING - DeepSeek R1]\n{reasoning_text}\n[/REASONING]\n\n"
+                step_context = step_context + reasoning_block if step_context else reasoning_block
+                logger.info(f"Injected reasoning block ({len(reasoning_text)} chars) into step context")
+            else:
+                logger.warning(f"Reasoning pre-pass returned empty text for step {step.id}")
+
         # Execute step via AgentRouter (multi-provider)
         # Pass surgical_mode flag to agent_router
         # Pass loaded_files for smart context estimation

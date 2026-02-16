@@ -1,0 +1,56 @@
+{
+  "task_id": "reasoning_writing_split",
+  "description": "Implémenter le split raisonnement/écriture dans AetherFlow : une passe DeepSeek-R1 de raisonnement avant la génération de code chirurgicale. Deux modifications : (1) nouvelle méthode _reasoning_pre_pass() dans AetherFlowOrchestrator, (2) injection conditionnelle dans _execute_step() avant agent_router.execute_step().",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Écrire la méthode async _reasoning_pre_pass(self, step, step_context, ast_contexts) dans AetherFlowOrchestrator. Cette méthode instancie DeepSeekClient(model='deepseek-reasoner'), construit un prompt de raisonnement (description de la tâche + résumé AST), appelle generate(), retourne le texte de raisonnement. Si la passe échoue, retourne '' sans lever d'exception.",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Signature : async def _reasoning_pre_pass(self, step: Step, step_context: str, ast_contexts: Dict[str, str]) -> str",
+        "Instancie DeepSeekClient(model='deepseek-reasoner')",
+        "Construit reasoning_prompt avec step.description + ast_summary",
+        "Appelle generate() avec max_tokens=2000, temperature=0.1",
+        "Retourne result.code si success, '' sinon",
+        "finally: await reasoning_client.close()",
+        "Toutes les exceptions capturées avec logger.warning, retour ''"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/orchestrator.py"],
+        "instructions": "Lis AetherFlowOrchestrator dans Backend/Prod/orchestrator.py. Identifie les imports existants (asyncio, DeepSeekClient est dans models/deepseek_client.py, Step est dans models/plan_reader.py). Produis UNIQUEMENT le code Python de la méthode _reasoning_pre_pass(self, step, step_context, ast_contexts). La méthode doit : (1) faire `from .models.deepseek_client import DeepSeekClient` en haut du bloc try, (2) instancier `reasoning_client = DeepSeekClient(model='deepseek-reasoner')`, (3) construire ast_summary depuis ast_contexts (jointure des valeurs), (4) écrire reasoning_prompt avec step.description, step.id, et ast_summary, (5) appeler await reasoning_client.generate(prompt=reasoning_prompt, max_tokens=2000, temperature=0.1), (6) retourner result.code si result.success else '', (7) block finally avec await reasoning_client.close(). Wrapper externe try/except Exception qui log warning et retourne ''. Output : le code Python de la méthode uniquement."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Produire le bloc d'injection à insérer dans _execute_step() de orchestrator.py, immédiatement avant la ligne 'result = await self.agent_router.execute_step(...)'. Le bloc doit : vérifier step.context.get('pre_reasoning', False), appeler _reasoning_pre_pass() si True, et injecter la sortie dans step_context avec un bloc [REASONING]...[/REASONING].",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Condition : step.context.get('pre_reasoning', False)",
+        "Appel : reasoning_output = await self._reasoning_pre_pass(step, step_context, ast_contexts)",
+        "Injection dans step_context si reasoning_output non vide",
+        "Log info du nombre de chars injectés",
+        "Pas de modification du comportement si pre_reasoning=False"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Backend/Prod/orchestrator.py"],
+        "instructions": "Produis le bloc Python de 8-12 lignes à insérer dans _execute_step() avant la ligne 893 'result = await self.agent_router.execute_step(step, step_context, surgical_mode=surgical_mode, loaded_files=existing_files)'. Le bloc doit : (1) vérifier 'if step.context.get(\"pre_reasoning\", False):', (2) logger.info 'Starting reasoning pre-pass for step {step.id}', (3) appeler 'reasoning_output = await self._reasoning_pre_pass(step, step_context, ast_contexts)', (4) 'if reasoning_output: reasoning_block = f\"\\n\\n[REASONING - DeepSeek R1]\\n{reasoning_output}\\n[/REASONING]\\n\"', (5) step_context += reasoning_block, (6) logger.info 'Injected reasoning block ({len(reasoning_output)} chars)'. Output : le bloc Python avec son indentation (12 espaces = 3 niveaux d'indentation), rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-15T00:00:00Z",
+    "claude_version": "claude-opus-4-6",
+    "workflow": "BUILD",
+    "target": "orchestrator.py reasoning/writing split"
+  }
+}
