@@ -4,7 +4,7 @@ Serveur HTTP pour visualisation du Genome - Port 9998
 Version 7.0 - Sullivan Architecture (Modular Templates)
 """
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import json
 import os
 import re
@@ -57,6 +57,11 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_template('stenciler.html')
             return
         
+        # Route Stenciler V3 (Modular)
+        if self.path == '/stenciler_v3':
+            self.serve_template('stenciler_v3.html')
+            return
+        
         # Route pour le Service Worker (doit être à la racine pour le scope)
         if self.path == '/sw.js':
             self.serve_sw()
@@ -65,6 +70,16 @@ class Handler(BaseHTTPRequestHandler):
         # Route API pour le genome
         if self.path == '/api/genome':
             self.send_json(load_genome())
+            return
+        
+        # Route API pour le lexique de design
+        if self.path == '/api/lexicon':
+            lexicon_path = os.path.join(cwd, "../1. CONSTITUTION/LEXICON_DESIGN.json")
+            if os.path.exists(lexicon_path):
+                with open(lexicon_path, 'r') as f:
+                    self.send_json(json.load(f))
+            else:
+                self.send_error_json(404, "Lexicon not found")
             return
         
         # Route API pour le genome contextuel (Pruning)
@@ -82,9 +97,32 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith('/static/'):
             self.serve_static(self.path[8:])
             return
+
+        # Route API pour le CSS (PropertyEnforcer)
+        if self.path.endswith('/css') and '/api/genome/' in self.path:
+            self.send_json({"css": "/* Genome Enforced Styles */\n:root { --accent-rose: #ff0080; }"})
+            return
         
-        self.send_response(404)
+        self.send_error_json(404, f"Route {self.path} not found")
+
+    def do_HEAD(self):
+        """Support pour les requêtes HEAD (ping API)"""
+        if self.path == '/api/genome' or self.path.startswith('/api/'):
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def send_error_json(self, code, message):
+        """Envoie une erreur au format JSON pour satisfaire le Semantic Bridge"""
+        self.send_response(code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
+        self.wfile.write(json.dumps({"error": message, "code": code}).encode('utf-8'))
 
     def serve_template(self, template_name):
         """Lit, remplit et sert un template HTML avec injection de scripts"""
@@ -251,7 +289,7 @@ def get_api_schema() -> dict:
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    server = HTTPServer(('0.0.0.0', PORT), Handler)
+    server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
     print(f"🧬 Genome Viewer v7.0 (Sullivan) running at http://localhost:{PORT}")
     print(f"🎨 Stenciler at http://localhost:{PORT}/stenciler")
     print(f"📁 Serving templates from: {TEMPLATES_DIR}")

@@ -1,0 +1,32 @@
+{
+  "task_id": "stenciler_v3_final_html",
+  "description": "Produire stenciler_v3.html final avec classes CSS correctes + Fabric.js + slots alignés avec stenciler_v3_main.js.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Produire stenciler_v3.html final complet et correct",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "body a class='stenciler-app'",
+        "Fabric.js chargé avant le module JS",
+        "Slots IDs alignés avec FEATURE_CONFIG du main.js",
+        "< 55L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/js/stenciler_v3_main.js"
+        ],
+        "instructions": "Produis le fichier HTML final stenciler_v3.html. Tu dois utiliser EXACTEMENT la structure suivante (copie et adapte, ne modifie que les slot IDs pour qu'ils matchent FEATURE_CONFIG dans stenciler_v3_main.js que tu peux lire) :\n\n<!DOCTYPE html>\n<html lang='fr'>\n<head>\n    <meta charset='UTF-8'>\n    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n    <title>Stenciler V3</title>\n    <link rel='stylesheet' href='/static/css/stenciler.css'>\n    <script src='https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js'></script>\n</head>\n<body class='stenciler-app'>\n    <header class='stenciler-header' id='slot-header'></header>\n    <div class='stenciler-workspace'>\n        <aside class='sidebar' id='slot-sidebar-left'></aside>\n        <div class='right-zone'>\n            <div id='slot-preview-band'></div>\n            <main class='main-content' id='slot-main'>\n                <div class='canvas-zone' id='slot-canvas-zone'></div>\n                <div id='slot-components-zone'></div>\n            </main>\n        </div>\n        <aside class='sidebar' id='slot-sidebar-right'>\n            <div id='slot-tsl-picker'></div>\n            <div id='slot-color-palette'></div>\n            <div id='slot-border-slider'></div>\n        </aside>\n    </div>\n    <footer id='slot-footer'></footer>\n    <script type='module' src='/static/js/stenciler_v3_main.js'></script>\n</body>\n</html>\n\nEn lisant stenciler_v3_main.js, vérifie que les slot IDs dans FEATURE_CONFIG correspondent bien aux IDs du HTML ci-dessus. Si un ID dans FEATURE_CONFIG ne correspond pas (ex: canvas mappe sur #slot-canvas-zone), ajuste le HTML pour correspondre. Ne change pas le JS. Output : UNIQUEMENT le code HTML complet, rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-16T00:00:00Z",
+    "note": "CCI: appliquer output vers Frontend/3. STENCILER/static/templates/stenciler_v3.html"
+  }
+}

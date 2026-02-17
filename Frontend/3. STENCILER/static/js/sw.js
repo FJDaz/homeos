@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sullivan-cache-v1';
+const CACHE_NAME = 'sullivan-cache-v2';
 const STATIC_ASSETS = [
     '/',
     '/stenciler',
@@ -41,7 +41,10 @@ self.addEventListener('fetch', event => {
             caches.open(CACHE_NAME).then(cache => {
                 return cache.match(event.request).then(cachedResponse => {
                     const fetchPromise = fetch(event.request).then(networkResponse => {
-                        cache.put(event.request, networkResponse.clone());
+                        // On ne peut mettre en cache que les requêtes GET réussies
+                        if (event.request.method === 'GET' && networkResponse.ok) {
+                            cache.put(event.request, networkResponse.clone());
+                        }
                         return networkResponse;
                     }).catch(() => {
                         // Offline : retourner le cache si disponible

@@ -1,0 +1,56 @@
+{
+  "task_id": "stenciler_lexicon_js",
+  "description": "Créer Lexicon.js — module JS qui exporte les constantes du LEXICON_DESIGN.json. Source de vérité partagée pour tous les acteurs frontend. Empêche le désalignement CSS.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Générer Lexicon.js depuis LEXICON_DESIGN.json",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Export nommés : Lexicon.slots, Lexicon.classes, Lexicon.data, Lexicon.tokens",
+        "Valeurs copiées exactement depuis LEXICON_DESIGN.json",
+        "window.Lexicon = Lexicon pour usage sans module bundler",
+        "< 60L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json"
+        ],
+        "instructions": "Lis LEXICON_DESIGN.json et produis Lexicon.js — un module ES6 qui exporte les mêmes valeurs sous forme de constantes JS. Structure attendue :\n\nconst Lexicon = {\n  slots: {\n    header: '#slot-header',\n    sidebar_left: '#slot-sidebar-left',\n    sidebar_right: '#slot-sidebar-right',\n    main: '#slot-main',\n    canvas: '#slot-canvas-zone',\n    preview: '#slot-preview-band',\n    footer: '#slot-footer'\n  },\n  classes: {\n    containers: { ... },\n    components: { ... },\n    typography: { ... }\n  },\n  data: {\n    corps: 'data-corps',\n    level: 'data-level',\n    theme: 'data-theme',\n    style: 'data-style'\n  },\n  tokens: {\n    accent_rose: '--accent-rose',\n    accent_bleu: '--accent-bleu',\n    accent_vert: '--accent-vert',\n    accent_orange: '--accent-orange'\n  }\n};\n\nexport default Lexicon;\nwindow.Lexicon = Lexicon;\n\nCopie les valeurs EXACTEMENT depuis le JSON lu. Ne pas inventer de valeurs. Output : UNIQUEMENT le code JS du fichier Lexicon.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Mettre à jour stenciler_v3_main.js pour importer Lexicon et utiliser ses slots",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "import Lexicon from './Lexicon.js'",
+        "FEATURE_CONFIG utilise Lexicon.slots.xxx au lieu de strings hardcodées",
+        "< 100L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/js/stenciler_v3_main.js",
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json"
+        ],
+        "instructions": "Lis stenciler_v3_main.js et modifie-le pour utiliser Lexicon au lieu de slot IDs hardcodés. Ajoute en premier import : import Lexicon from './Lexicon.js'; Remplace dans FEATURE_CONFIG : '#slot-header' → Lexicon.slots.header, '#slot-sidebar-left' → Lexicon.slots.sidebar_left, '#slot-sidebar-right' → Lexicon.slots.sidebar_right, '#slot-canvas-zone' → Lexicon.slots.canvas, '#slot-preview-band' → Lexicon.slots.preview, '#slot-footer' → Lexicon.slots.footer, '#slot-main' → Lexicon.slots.main. Ne change rien d'autre. Output : UNIQUEMENT le code JS complet du fichier stenciler_v3_main.js modifié, rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-17T00:00:00Z",
+    "workflow": "BUILD",
+    "target": "Frontend/3. STENCILER/static/js/",
+    "note": "CCI: Lexicon.js → /js/Lexicon.js. stenciler_v3_main.js → /js/stenciler_v3_main.js"
+  }
+}

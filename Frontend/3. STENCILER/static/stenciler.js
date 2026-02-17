@@ -213,8 +213,21 @@
                 div.classList.remove('dragging');
             });
             
+            // 🔽 DRILL-DOWN : Double-clic pour descendre dans le Corps
+            div.addEventListener('dblclick', () => {
+                console.log(`[DRILL] Double-clic sur ${corps.name}`);
+                if (window.DrillDownManager) {
+                    window.DrillDownManager.drillToCorps(corps.id, corps.name);
+                } else {
+                    console.error('[DRILL] DrillDownManager non disponible');
+                }
+            });
+            
             band.appendChild(div);
         });
+        
+        // Exporter globalement pour le DrillDownManager
+        window.renderPreviews = renderPreviews;
     }
     
     // Canvas avec retry pour timing

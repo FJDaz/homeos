@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stenciler V3</title>
+    <link rel="stylesheet" href="/static/css/stenciler.css">
+    <link rel="stylesheet" href="/static/css/viewer.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+</head>
+
+<body class="stenciler-app">
+    <header class="stenciler-header" id="slot-header"></header>
+    <div class="stenciler-workspace">
+        <aside class="sidebar" id="slot-sidebar-left">
+            <div id="slot-navigation"></div>
+            <div id="slot-genome"></div>
+            <div id="slot-style" class="hidden"></div>
+        </aside>
+        <div class="right-zone">
+            <div id="slot-preview-band"></div>
+            <main class="main-content" id="slot-main">
+                <div class="canvas-zone" id="slot-canvas-zone"></div>
+            </main>
+        </div>
+        <aside class="sidebar" id="slot-sidebar-right">
+            <div id="slot-tsl-picker"></div>
+            <div id="slot-color-palette"></div>
+            <div id="slot-border-slider"></div>
+        </aside>
+    </div>
+    <footer id="slot-footer"></footer>
+    <script type="module" src="/static/js/stenciler_v3_main.js"></script>
+</body>
+
+</html>

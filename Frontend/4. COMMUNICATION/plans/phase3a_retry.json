@@ -1,0 +1,148 @@
+{
+  "task_id": "stenciler_factory_retry",
+  "description": "Retry des 7 steps échoués de phase3a. Aucune dépendance (les deps ont déjà tourné). Chaque step produit un fichier JS autonome.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Générer Header.feature.js",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Étend StencilerFeature",
+        "render() produit HTML du .main-header",
+        "init() branche theme-toggle + tabs vers navigationFeature",
+        "< 100L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis Header.feature.js. Classe HeaderFeature extends StencilerFeature. render() retourne string HTML du header : div.main-header avec div.header-brand contenant 'Homé<span>OS</span>', div.header-tabs avec 4 buttons.header-tab (data-section=genome texte BRS active, data-section=style texte BKD, data-section=stenciler texte FRD, disabled texte DPL), button#theme-toggle texte 'Mode nuit'. mount('slot-header') : getElementById('slot-header').innerHTML = this.render(). init() : querySelectorAll('.header-tab').forEach(tab => tab.addEventListener('click', () => window.navigationFeature.scrollToSection('section-'+tab.dataset.section))). getElementById('theme-toggle').addEventListener('click', () => document.body.toggleAttribute('data-theme', !document.body.hasAttribute('data-theme'))). window.headerFeature = new HeaderFeature('header'). Output : UNIQUEMENT le code JS du fichier Header.feature.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Générer StyleSection.feature.js",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "8 style-cards avec data-style rendus",
+        "click → scrollToSection stenciler + initStenciler",
+        "< 100L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis StyleSection.feature.js. Classe StyleSectionFeature extends StencilerFeature. render() retourne string HTML section#section-style.section.style-section avec h1 'Choisir un Style', p sous-titre, div.style-grid avec 8 div.style-card (data-style: minimal/vercel/brutalist/glass/elegant/playful/dark/colorful) chacun contenant div.style-preview avec style background inline approprié et span.style-name. mount('slot-section-style'). init() : querySelectorAll('.style-card').forEach(card => card.addEventListener('click', () => { window.navigationFeature.scrollToSection('section-stenciler'); window.stencilerOrchestratorFeature?.initStenciler(); })). window.styleSectionFeature = new StyleSectionFeature('style-section'). Output : UNIQUEMENT le code JS du fichier StyleSection.feature.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Générer PreviewBand.feature.js",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 700,
+      "dependencies": [],
+      "validation_criteria": [
+        "renderBand() lit window.genomeSectionFeature.selectedCorps",
+        "4 wireframes corps en inline CSS",
+        "dragstart/dragend handlers",
+        "< 150L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis PreviewBand.feature.js. Classe PreviewBandFeature extends StencilerFeature. render() retourne '<div id=\"preview-band\" class=\"preview-band\"></div>'. renderBand() : lire window.genomeSectionFeature.selectedCorps + genomeData.n0_phases, filtrer, générer HTML des .preview-card draggables avec wireframes INLINE CSS pour chaque corps (brainstorm=stepper rosé, backend=barres indigo alignées flex-end, frontend=3 frames en dashes, deploy=bouton+flèche orange), .name et .count. Après innerHTML, ajouter dragstart/dragend listeners. mount('slot-preview-band'). init() appelle renderBand(). window.previewBandFeature = new PreviewBandFeature('preview-band'). Output : UNIQUEMENT le code JS du fichier PreviewBand.feature.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Générer Canvas.feature.js (inclut ZoomControls + Delete)",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 900,
+      "dependencies": [],
+      "validation_criteria": [
+        "fabric.Canvas initialisé depuis #canvas-zone",
+        "dragover/drop handlers avec création fabric.Group",
+        "zoom +/-/reset + Ctrl+wheel",
+        "Delete/Backspace + #btn-delete",
+        "< 180L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis Canvas.feature.js. Classe CanvasFeature extends StencilerFeature. constructor() : super('canvas'); this.canvas=null; this.zoomLevel=1. render() retourne string HTML div#canvas-zone.canvas-zone avec canvas#tarmac-canvas, div#canvas-placeholder.canvas-placeholder (icon + texte 'Glissez un Corps'), div.zoom-controls (button#zoom-out '−', span#zoom-level '100%', button#zoom-in '+', button#zoom-reset '⟲'). mount('slot-canvas-zone'). initCanvas() : new fabric.Canvas('tarmac-canvas', {width:getElementById('canvas-zone').clientWidth, height:getElementById('canvas-zone').clientHeight, backgroundColor:'transparent'}); getElementById('canvas-placeholder').style.display='none'. Drop : dragover preventDefault, drop → getData('corpsId') → trouver corp dans window.genomeSectionFeature.genomeData → fabric.Group([fabric.Rect({...corp.color}), fabric.Text(corp.name)]) → canvas.add. initZoom() : #zoom-in click → zoomLevel=Math.min(zoomLevel*1.2,3); updateZoom(). #zoom-out → /1.2 max 0.3. #zoom-reset → 1. wheel ctrlKey/metaKey → delta. updateZoom() : canvas.setZoom(zoomLevel); canvas.renderAll(); #zoom-level.textContent=Math.round(zoomLevel*100)+'%'. initDelete() : keydown Delete/Backspace (si pas INPUT/TEXTAREA) + #btn-delete click → canvas.remove(canvas.getActiveObject()); canvas.renderAll(). init() : this.initCanvas(); initZoom(); initDelete(). window.canvasFeature = new CanvasFeature(). Output : UNIQUEMENT le code JS du fichier Canvas.feature.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Générer StencilerOrchestrator.feature.js",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "initStenciler() chaîne toutes les features dans l'ordre",
+        "< 60L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis StencilerOrchestrator.feature.js. Classe StencilerOrchestratorFeature extends StencilerFeature. initStenciler() : if(this._inited) return; this._inited=true; window.previewBandFeature.renderBand(); if(!window.canvasFeature.canvas) window.canvasFeature.init(); window.tslPickerFeature.init(); window.colorPaletteFeature.init(); window.borderSliderFeature.init(); window.apiStatusFeature.init(). init() { this.initStenciler() }. render() { return '' }. window.stencilerOrchestratorFeature = new StencilerOrchestratorFeature('orchestrator'). Output : UNIQUEMENT le code JS du fichier StencilerOrchestrator.feature.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_6",
+      "description": "Générer registry.js — FeatureRegistry map id→classe",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Object map avec les 12 IDs features",
+        "< 30L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis registry.js. Contenu : const FeatureRegistry = { 'navigation': NavigationFeature, 'header': HeaderFeature, 'genome-section': GenomeSectionFeature, 'style-section': StyleSectionFeature, 'preview-band': PreviewBandFeature, 'canvas': CanvasFeature, 'tsl-picker': TSLPickerFeature, 'color-palette': ColorPaletteFeature, 'border-slider': BorderSliderFeature, 'api-status': APIStatusFeature, 'components-zone': ComponentsZoneFeature, 'orchestrator': StencilerOrchestratorFeature }; window.FeatureRegistry = FeatureRegistry; Output : UNIQUEMENT le code JS du fichier registry.js, rien d'autre."
+      }
+    },
+    {
+      "id": "step_7",
+      "description": "Générer manager.js — FeatureManager.load(config)",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 350,
+      "dependencies": [],
+      "validation_criteria": [
+        "FeatureManager.load(config) instancie les features du registry",
+        "Une feature cassée ne bloque pas les autres (try/catch par feature)",
+        "< 60L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": ["Frontend/4. COMMUNICATION/feature_manifest.md"],
+        "instructions": "Produis manager.js. class FeatureManager { static load(config) { const ids = config?.features || Object.keys(window.FeatureRegistry); ids.forEach(id => { try { const Cls = window.FeatureRegistry[id]; if(!Cls) return; const inst = new Cls(id); const slotId = 'slot-' + id; const slot = document.getElementById(slotId); if(slot) { slot.innerHTML = inst.render ? inst.render() : ''; } inst.init && inst.init(); } catch(e) { console.error('FeatureManager: error loading '+id, e) } }) } }; window.FeatureManager = FeatureManager; Output : UNIQUEMENT le code JS du fichier manager.js, rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-16T00:00:00Z",
+    "claude_version": "claude-sonnet-4-5-20250929",
+    "workflow": "BUILD",
+    "target": "Frontend/3. STENCILER/static/js/features/",
+    "note": "Retry des steps 3,5,6,7,13,14,15 du plan original. Dépendances supprimées (déjà exécutées). CCI: appliquer manuellement."
+  }
+}

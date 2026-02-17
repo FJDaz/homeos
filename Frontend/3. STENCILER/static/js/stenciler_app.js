@@ -48,22 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
 });
 
-// 🔽 DRILL-DOWN MANAGER — Navigation hiérarchique N0→N1→N2→N3
+// 🔽 DRILL-DOWN MANAGER — Navigation hiérarchique N0→N1→N2→N3 (CLIENT-SIDE)
 const DrillDownManager = {
-    API_BASE_URL: 'http://localhost:8000',
-    currentPath: null,
-    currentLevel: 0,
+    genome: null,
+    currentLevel: 0, // 0 = Corps, 1 = Organes, 2 = Cellules, 3 = Atomes
+    currentEntity: null, // L'entité actuellement sélectionnée
     breadcrumb: [],
-    breadcrumbPaths: [],
+    originalRenderPreviews: null, // Sauvegarde de la fonction originale
 
     // Initialiser avec le genome
     async init(genome) {
-        console.log('🔽 DrillDownManager initialisé');
+        console.log('🔽 DrillDownManager initialisé (CLIENT-SIDE)');
         this.genome = genome;
-        this.currentPath = 'n0[0]'; // Commencer au premier Corps
         this.currentLevel = 0;
-        this.breadcrumb = [genome.n0_phases[0]?.name || 'Brainstorm'];
-        this.breadcrumbPaths = ['n0[0]'];
+        this.currentEntity = null; // null = niveau racine (tous les corps)
+        this.breadcrumb = ['Genome'];
 
         // Afficher le breadcrumb initial
         this.renderBreadcrumb();
@@ -74,96 +73,192 @@ const DrillDownManager = {
         console.log('✅ DrillDown prêt — Niveau 0 (Corps)');
     },
 
-    // Double-clic sur un composant
-    async handleDoubleClick(entityId, entityName) {
-        console.log(`🔍 Double-clic sur: ${entityName} (${entityId})`);
-
-        // Trouver le path à partir de l'ID
-        const path = this.findPathFromId(entityId);
-        if (!path) {
-            console.warn('❌ Path non trouvé pour:', entityId);
+    // 🔽 DESCENDRE dans un Corps spécifique
+    drillToCorps(corpsId, corpsName) {
+        console.log(`[DRILL] Descente dans ${corpsName} (${corpsId})`);
+        
+        // Trouver le corps dans le genome
+        const corps = this.genome.n0_phases.find(c => c.id === corpsId);
+        if (!corps) {
+            console.error('[DRILL] Corps non trouvé:', corpsId);
             return;
         }
 
-        console.log('📍 Path trouvé:', path);
+        // Mettre à jour l'état
+        this.currentLevel = 1;
+        this.currentEntity = corps;
+        this.breadcrumb.push(corpsName);
 
-        // Vérifier si on peut descendre
-        if (this.currentLevel >= 3) {
-            console.log('⛔ Niveau maximum atteint (N3)');
-            return;
-        }
+        // Afficher les organes de ce corps
+        this.renderOrganes(corps);
+        this.renderBreadcrumb();
+        this.updateBackButtonVisibility();
 
-        // Appeler l'API drill-down
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/api/drilldown/enter`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path: path, child_index: 0 })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                console.warn('⚠️ Pas d\'enfant:', error.detail);
-                return;
-            }
-
-            const data = await response.json();
-            console.log('⬇️ Drill-down réussi:', data);
-
-            // Mettre à jour l'état
-            this.currentPath = data.new_path || path;
-            this.currentLevel = data.current_level;
-            this.breadcrumb = data.breadcrumb;
-            this.breadcrumbPaths = data.breadcrumb_paths;
-
-            // Rafraîchir l'affichage
-            this.renderBreadcrumb();
-            this.renderChildren(data.children);
-            this.updateBackButtonVisibility();
-
-        } catch (err) {
-            console.error('❌ Erreur drill-down:', err);
-        }
+        console.log(`[DRILL] Niveau 1 - ${corps.n1_sections?.length || 0} organes`);
     },
 
-    // Remonter d'un niveau
-    async goBack() {
-        if (this.currentLevel <= 0) {
-            console.log('⛔ Déjà au niveau racine');
+    // 🔽 DESCENDRE dans un Organe
+    drillToOrgane(organeId, organeName) {
+        console.log(`[DRILL] Descente dans ${organeName} (${organeId})`);
+        
+        const organe = this.currentEntity?.n1_sections?.find(o => o.id === organeId);
+        if (!organe) {
+            console.error('[DRILL] Organe non trouvé:', organeId);
             return;
         }
 
-        console.log('⬆️ Remontée au niveau précédent');
+        this.currentLevel = 2;
+        this.currentEntity = organe;
+        this.breadcrumb.push(organeName);
 
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/api/drilldown/exit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path: this.currentPath })
-            });
+        this.renderCellules(organe);
+        this.renderBreadcrumb();
+        this.updateBackButtonVisibility();
 
-            if (!response.ok) {
-                console.error('❌ Erreur exit:', await response.text());
-                return;
-            }
+        console.log(`[DRILL] Niveau 2 - ${organe.n2_features?.length || 0} cellules`);
+    },
 
-            const data = await response.json();
-            console.log('⬆️ Drill-up réussi:', data);
-
-            // Mettre à jour l'état
-            this.currentPath = data.parent_path;
-            this.currentLevel = data.current_level;
-            this.breadcrumb = data.breadcrumb;
-            this.breadcrumbPaths = data.breadcrumb_paths;
-
-            // Rafraîchir l'affichage
-            this.renderBreadcrumb();
-            this.renderChildren(data.children);
-            this.updateBackButtonVisibility();
-
-        } catch (err) {
-            console.error('❌ Erreur drill-up:', err);
+    // 🔽 DESCENDRE dans une Cellule
+    drillToCellule(celluleId, celluleName) {
+        console.log(`[DRILL] Descente dans ${celluleName} (${celluleId})`);
+        
+        const cellule = this.currentEntity?.n2_features?.find(c => c.id === celluleId);
+        if (!cellule) {
+            console.error('[DRILL] Cellule non trouvée:', celluleId);
+            return;
         }
+
+        this.currentLevel = 3;
+        this.currentEntity = cellule;
+        this.breadcrumb.push(celluleName);
+
+        this.renderAtomes(cellule);
+        this.renderBreadcrumb();
+        this.updateBackButtonVisibility();
+
+        console.log(`[DRILL] Niveau 3 - ${cellule.n3_components?.length || 0} atomes`);
+    },
+
+    // ⬆️ REMONTER d'un niveau
+    goBack() {
+        console.log('[DRILL] Remontée au niveau', this.currentLevel - 1);
+        
+        if (this.currentLevel <= 1) {
+            // Retour au niveau 0 (tous les corps)
+            this.currentLevel = 0;
+            this.currentEntity = null;
+            this.breadcrumb = ['Genome'];
+            
+            // Restaurer l'affichage original des 4 corps
+            if (window.renderPreviews) {
+                window.renderPreviews();
+            }
+        } else if (this.currentLevel === 2) {
+            // Retour au niveau 1 (organes du corps parent)
+            const corps = this.genome.n0_phases.find(c => 
+                c.n1_sections?.some(o => o.id === this.currentEntity.id)
+            );
+            this.currentLevel = 1;
+            this.currentEntity = corps;
+            this.breadcrumb.pop();
+            this.renderOrganes(corps);
+        } else if (this.currentLevel === 3) {
+            // Retour au niveau 2 (cellules de l'organe parent)
+            const corps = this.genome.n0_phases.find(c => 
+                c.n1_sections?.some(o => 
+                    o.n2_features?.some(c => c.id === this.currentEntity.id)
+                )
+            );
+            const organe = corps?.n1_sections?.find(o => 
+                o.n2_features?.some(c => c.id === this.currentEntity.id)
+            );
+            this.currentLevel = 2;
+            this.currentEntity = organe;
+            this.breadcrumb.pop();
+            this.renderCellules(organe);
+        }
+
+        this.renderBreadcrumb();
+        this.updateBackButtonVisibility();
+    },
+
+    // Afficher les organes d'un corps
+    renderOrganes(corps) {
+        const band = document.getElementById('preview-band');
+        if (!band) return;
+
+        const organes = corps.n1_sections || [];
+        
+        band.innerHTML = organes.map(organe => `
+            <div class="preview-card organe" data-id="${organe.id}">
+                <div class="corps-wireframe wf-generic">
+                    <div class="wf-icon">⚙️</div>
+                </div>
+                <span class="name">${organe.name}</span>
+                <span class="count">${organe.n2_features?.length || 0} cellules</span>
+            </div>
+        `).join('');
+
+        // Ajouter les écouteurs
+        band.querySelectorAll('.preview-card').forEach(card => {
+            const organeId = card.dataset.id;
+            const organe = organes.find(o => o.id === organeId);
+            
+            card.addEventListener('dblclick', () => {
+                this.drillToOrgane(organeId, organe?.name);
+            });
+        });
+
+        console.log(`[DRILL] ${organes.length} organes affichés`);
+    },
+
+    // Afficher les cellules d'un organe
+    renderCellules(organe) {
+        const band = document.getElementById('preview-band');
+        if (!band) return;
+
+        const cellules = organe.n2_features || [];
+        
+        band.innerHTML = cellules.map(cellule => `
+            <div class="preview-card cellule" data-id="${cellule.id}">
+                <div class="corps-wireframe wf-generic">
+                    <div class="wf-icon">🔧</div>
+                </div>
+                <span class="name">${cellule.name}</span>
+                <span class="count">${cellule.n3_components?.length || 0} atomes</span>
+            </div>
+        `).join('');
+
+        band.querySelectorAll('.preview-card').forEach(card => {
+            const celluleId = card.dataset.id;
+            const cellule = cellules.find(c => c.id === celluleId);
+            
+            card.addEventListener('dblclick', () => {
+                this.drillToCellule(celluleId, cellule?.name);
+            });
+        });
+
+        console.log(`[DRILL] ${cellules.length} cellules affichées`);
+    },
+
+    // Afficher les atomes d'une cellule
+    renderAtomes(cellule) {
+        const band = document.getElementById('preview-band');
+        if (!band) return;
+
+        const atomes = cellule.n3_components || [];
+        
+        band.innerHTML = atomes.map(atome => `
+            <div class="preview-card atome" data-id="${atome.id}">
+                <div class="corps-wireframe wf-generic">
+                    <div class="wf-icon">⚛️</div>
+                </div>
+                <span class="name">${atome.name}</span>
+                <span class="count">${atome.method || 'GET'}</span>
+            </div>
+        `).join('');
+
+        console.log(`[DRILL] ${atomes.length} atomes affichés`);
     },
 
     // Trouver le path à partir d'un ID
@@ -300,3 +395,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('ℹ️ Aucun style sélectionné — mode standalone');
     }
 });
+
+// Exporter DrillDownManager globalement pour stenciler.js
+window.DrillDownManager = DrillDownManager;

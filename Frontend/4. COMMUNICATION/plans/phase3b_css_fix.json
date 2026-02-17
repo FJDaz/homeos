@@ -1,0 +1,59 @@
+{
+  "task_id": "stenciler_v3_css_fix",
+  "description": "Corriger stenciler_v3.html pour utiliser les classes CSS existantes de stenciler.css. Corriger les slot IDs dans stenciler_v3_main.js. KIMI avait créé une architecture .stenciler-layout inexistante dans le CSS.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Recréer stenciler_v3.html avec les classes CSS existantes",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Utilise .stenciler-app, .stenciler-header, .stenciler-workspace, .sidebar, .main-content, .right-zone",
+        "Chaque div de layout a aussi un id slot-* pour les features JS",
+        "< 60L",
+        "Lien CSS : /static/css/stenciler.css",
+        "Script : <script type='module' src='/static/js/stenciler_v3_main.js'></script>"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/css/stenciler.css",
+          "Frontend/3. STENCILER/static/js/stenciler_v3_main.js"
+        ],
+        "instructions": "Le fichier stenciler_v3.html actuel est cassé : il utilise .stenciler-layout qui n'existe pas dans stenciler.css. Tu dois le refaire. En lisant stenciler.css, identifie les classes de layout principales : .stenciler-app (body wrapper), .stenciler-header (header), .stenciler-workspace (flex row principal), .sidebar (aside gauche ~200px), .main-content (zone centrale flex:1), .canvas-zone, .preview-band, .right-zone (aside droit). En lisant stenciler_v3_main.js, identifie les IDs de slots attendus dans FEATURE_CONFIG : #slot-header, #slot-navigation, #slot-sidebar-left, #slot-main, #slot-canvas, #slot-preview-band, #slot-sidebar-right, #slot-footer. Produis stenciler_v3.html qui COMBINE les deux : chaque élément de layout porte SA classe CSS existante + son id slot-*. Structure attendue : <!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Stenciler V3</title><link rel='stylesheet' href='/static/css/stenciler.css'></head><body class='stenciler-app'><header class='stenciler-header' id='slot-header'></header><div class='stenciler-workspace'><aside class='sidebar' id='slot-sidebar-left'></aside><main class='main-content' id='slot-main'><div class='canvas-zone' id='slot-canvas-zone'></div><div class='preview-band' id='slot-preview-band'></div></main><aside class='right-zone' id='slot-sidebar-right'><div id='slot-tsl-picker'></div><div id='slot-color-palette'></div><div id='slot-border-slider'></div></aside></div><footer id='slot-footer'></footer><script type='module' src='/static/js/stenciler_v3_main.js'></script></body></html>. Output : UNIQUEMENT le code HTML complet du fichier, rien d'autre."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Corriger les slot IDs dans stenciler_v3_main.js",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "FEATURE_CONFIG utilise #slot-canvas-zone (pas #slot-canvas)",
+        "genome et style ont des slots distincts ou le même #slot-sidebar-left",
+        "Pas d'import circulaire",
+        "< 100L"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/js/stenciler_v3_main.js"
+        ],
+        "instructions": "Le fichier stenciler_v3_main.js a des slot IDs incorrects dans FEATURE_CONFIG. Corrections à apporter : 1) Le slot canvas est '#slot-canvas-zone' (pas '#slot-canvas'). 2) genome et style sont tous les deux mappés sur '#slot-sidebar-left' — c'est OK, ils s'empilent verticalement. 3) Ajouter les imports manquants : importer StencilerOrchestratorFeature et l'ajouter à FEATURE_CONFIG avec slot='#slot-main'. Produis le fichier stenciler_v3_main.js complet corrigé. Output : UNIQUEMENT le code JS complet, rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-16T00:00:00Z",
+    "claude_version": "claude-sonnet-4-5-20250929",
+    "workflow": "BUILD",
+    "target": "Frontend/3. STENCILER/static/templates/",
+    "note": "CCI: appliquer manuellement. stenciler_v3.html va dans /templates/, stenciler_v3_main.js va dans /js/."
+  }
+}
