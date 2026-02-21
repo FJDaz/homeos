@@ -6,16 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stenciler V3</title>
     <link rel="stylesheet" href="/static/css/stenciler.css">
-    <link rel="stylesheet" href="/static/css/viewer.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <link rel="stylesheet" href="/static/css/stenciler_v3_additions.css">
 </head>
 
 <body class="stenciler-app">
     <header class="stenciler-header" id="slot-header"></header>
     <div class="stenciler-workspace">
         <aside class="sidebar" id="slot-sidebar-left">
-            <div id="slot-navigation"></div>
-            <div id="slot-genome"></div>
+            <div class="sidebar-header">
+                <div class="sidebar-brand">Homé<span class="brand-k">OS</span></div>
+                <div class="sidebar-tagline">Stenciler</div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Navigation</div>
+                <div id="slot-navigation"></div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Genome</div>
+                <div id="slot-genome"></div>
+            </div>
             <div id="slot-style" class="hidden"></div>
         </aside>
         <div class="right-zone">

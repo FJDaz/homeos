@@ -1,0 +1,25 @@
+{
+  "task_id": "test_preapply_validation_001",
+  "description": "Plan de test : génère une fonction get_config() avec des valeurs hardcodées intentionnellement discutables pour observer le comportement du pipeline check → apply.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter une fonction get_config() au fichier target_config.py. Cette fonction doit retourner un dictionnaire Python de configuration avec des valeurs en dur (host, port, api_key, timeout). Inclure aussi un commentaire JSON inline comme exemple de config — genre # config: {\"env\": \"prod\", \"debug\": false}. La fonction doit être valide Python.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "La fonction get_config() est définie et retourne un dict",
+        "Le code est du Python valide",
+        "Pas de chaînes JSON brutes injectées comme valeurs de config"
+      ],
+      "context": {
+        "files": ["Backend/Prod/tests/sandbox/target_config.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "project_context": "Test sandbox — validation du pipeline pre-apply. Ne pas supprimer."
+  }
+}

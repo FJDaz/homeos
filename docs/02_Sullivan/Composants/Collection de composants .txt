@@ -1,0 +1,1416 @@
+# 🧱 **Bibliothèque de Composants Bruts & Customisables**
+
+Je vais te donner **TOUS** les composants de la liste dans leur forme la plus **minimale, épurée et customisable** possible.
+
+---
+
+## 📁 **Structure du Projet**
+
+```
+components-raw/
+├── atoms/           # Éléments indivisibles
+├── molecules/       # Groupes simples
+├── organisms/       # Sections complexes
+├── templates/       # Layouts vides
+└── pages/           # Pages complètes
+```
+
+---
+
+## 🧪 **ATOMS - Composants Bruts Indivisibles**
+
+### **1. Button - Bouton le plus basique possible**
+```html
+<!-- atoms/button.html -->
+<button class="btn" data-variant="primary" data-size="medium">
+  <span class="btn-content">Label</span>
+</button>
+
+<!-- CSS minimal -->
+<style>
+.btn {
+  all: unset; /* Reset complet */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+/* Variables CSS pour customisation */
+.btn {
+  --btn-padding-x: 1rem;
+  --btn-padding-y: 0.5rem;
+  --btn-radius: 0.25rem;
+  --btn-bg: #007bff;
+  --btn-color: white;
+  --btn-border: none;
+}
+
+.btn[data-variant="primary"] {
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
+}
+
+.btn[data-size="small"] { padding: 0.25rem 0.5rem; }
+.btn[data-size="medium"] { padding: 0.5rem 1rem; }
+.btn[data-size="large"] { padding: 0.75rem 1.5rem; }
+</style>
+```
+
+### **2. Input - Champ texte minimal**
+```html
+<!-- atoms/input.html -->
+<div class="input-wrapper">
+  <label class="input-label" for="input-basic">Label</label>
+  <input 
+    class="input" 
+    id="input-basic" 
+    type="text" 
+    placeholder="Placeholder"
+    data-state="default"
+  />
+  <div class="input-feedback"></div>
+</div>
+
+<style>
+.input {
+  all: unset;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  font-family: inherit;
+}
+
+.input:focus {
+  border-color: #007bff;
+  outline: 2px solid rgba(0, 123, 255, 0.25);
+}
+
+.input[data-state="error"] {
+  border-color: #dc3545;
+}
+
+.input[data-state="success"] {
+  border-color: #28a745;
+}
+</style>
+```
+
+### **3. Icon - Icône SVG pure**
+```html
+<!-- atoms/icon.html -->
+<svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  <!-- Path vide - à remplir -->
+  <path d=""/>
+</svg>
+
+<style>
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  --icon-color: currentColor;
+  --icon-size: 1em;
+  
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: var(--icon-color);
+}
+</style>
+```
+
+### **4. Typography - Textes basiques**
+```html
+<!-- atoms/typography.html -->
+<h1 class="text-h1">Heading 1</h1>
+<h2 class="text-h2">Heading 2</h2>
+<h3 class="text-h3">Heading 3</h3>
+<p class="text-body">Body text</p>
+<p class="text-small">Small text</p>
+<span class="text-caption">Caption</span>
+
+<style>
+:root {
+  --font-family-base: system-ui, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  
+  /* Échelle typographique */
+  --text-h1: 2.5rem;
+  --text-h2: 2rem;
+  --text-h3: 1.75rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+}
+
+.text-h1 { font-size: var(--text-h1); font-weight: 700; }
+.text-h2 { font-size: var(--text-h2); font-weight: 600; }
+.text-h3 { font-size: var(--text-h3); font-weight: 600; }
+.text-body { font-size: var(--text-body); line-height: var(--line-height-base); }
+.text-small { font-size: var(--text-small); opacity: 0.8; }
+.text-caption { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: 0.05em; }
+</style>
+```
+
+### **5. Color Swatch - Palette de couleurs**
+```html
+<!-- atoms/color.html -->
+<div class="color-swatch" style="--color-value: #007bff;">
+  <div class="color-preview"></div>
+  <div class="color-info">
+    <span class="color-name">Primary</span>
+    <span class="color-hex">#007bff</span>
+  </div>
+</div>
+
+<style>
+.color-swatch {
+  --color-value: #000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-preview {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.25rem;
+  background-color: var(--color-value);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+</style>
+```
+
+---
+
+## 🧬 **MOLECULES - Groupes simples**
+
+### **6. Search Bar - Recherche minimale**
+```html
+<!-- molecules/search-bar.html -->
+<div class="search-bar" role="search">
+  <div class="search-input-wrapper">
+    <input 
+      class="search-input" 
+      type="search" 
+      placeholder="Rechercher..."
+      aria-label="Recherche"
+    />
+    <button class="search-button" type="submit" aria-label="Rechercher">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24">
+        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+.search-bar {
+  --search-height: 2.5rem;
+  --search-radius: 9999px;
+  --search-bg: #f8f9fa;
+}
+
+.search-input-wrapper {
+  display: flex;
+  height: var(--search-height);
+  border-radius: var(--search-radius);
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 0 1rem;
+  background: var(--search-bg);
+}
+
+.search-button {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  cursor: pointer;
+  background: var(--search-bg);
+}
+
+.search-button:hover {
+  background: #e9ecef;
+}
+</style>
+```
+
+### **7. Form Group - Groupement de champs**
+```html
+<!-- molecules/form-group.html -->
+<div class="form-group" data-required="true">
+  <label class="form-label" for="field-1">Field Label</label>
+  <div class="form-control-wrapper">
+    <input class="form-control" id="field-1" type="text" />
+    <div class="form-feedback" role="alert"></div>
+    <div class="form-help">Help text goes here</div>
+  </div>
+</div>
+
+<style>
+.form-group {
+  --form-spacing: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-spacing);
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.form-label[data-required]::after {
+  content: " *";
+  color: #dc3545;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+.form-feedback {
+  font-size: 0.75rem;
+  color: #dc3545;
+  min-height: 1.25rem;
+}
+
+.form-help {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+</style>
+```
+
+### **8. Card - Carte la plus basique**
+```html
+<!-- molecules/card.html -->
+<article class="card" role="article">
+  <div class="card-header">
+    <h3 class="card-title">Card Title</h3>
+  </div>
+  <div class="card-body">
+    <p class="card-text">Card content goes here.</p>
+  </div>
+  <div class="card-footer">
+    <button class="card-action">Action</button>
+  </div>
+</article>
+
+<style>
+.card {
+  --card-bg: white;
+  --card-border: 1px solid #dee2e6;
+  --card-radius: 0.5rem;
+  --card-padding: 1rem;
+  --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.card-header,
+.card-body,
+.card-footer {
+  padding: var(--card-padding);
+}
+
+.card-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.card-footer {
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.card[data-variant="flat"] {
+  --card-shadow: none;
+  --card-border: none;
+}
+
+.card[data-variant="outline"] {
+  --card-bg: transparent;
+  --card-shadow: none;
+}
+</style>
+```
+
+### **9. Badge - Badge simple**
+```html
+<!-- molecules/badge.html -->
+<span class="badge" data-variant="default">Badge</span>
+<span class="badge" data-variant="primary">Primary</span>
+<span class="badge" data-variant="success">Success</span>
+<span class="badge" data-variant="warning">Warning</span>
+<span class="badge" data-variant="danger">Danger</span>
+
+<style>
+.badge {
+  --badge-bg: #6c757d;
+  --badge-color: white;
+  --badge-padding: 0.25em 0.6em;
+  --badge-radius: 0.25rem;
+  --badge-font-size: 0.75em;
+  
+  display: inline-block;
+  padding: var(--badge-padding);
+  font-size: var(--badge-font-size);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: var(--badge-radius);
+  background-color: var(--badge-bg);
+  color: var(--badge-color);
+}
+
+.badge[data-variant="primary"] { --badge-bg: #007bff; }
+.badge[data-variant="success"] { --badge-bg: #28a745; }
+.badge[data-variant="warning"] { --badge-bg: #ffc107; --badge-color: #212529; }
+.badge[data-variant="danger"] { --badge-bg: #dc3545; }
+.badge[data-variant="info"] { --badge-bg: #17a2b8; }
+
+.badge[data-size="small"] { --badge-font-size: 0.65em; }
+.badge[data-size="large"] { --badge-font-size: 0.85em; }
+</style>
+```
+
+---
+
+## 🦠 **ORGANISMS - Sections complexes**
+
+### **10. Header - En-tête minimal**
+```html
+<!-- organisms/header.html -->
+<header class="header" role="banner">
+  <div class="header-container">
+    <!-- Logo -->
+    <div class="header-logo">
+      <a href="/" class="logo-link" aria-label="Home">
+        <span class="logo-text">Logo</span>
+      </a>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="header-nav" role="navigation" aria-label="Main">
+      <ul class="nav-list">
+        <li class="nav-item"><a href="#" class="nav-link active">Home</a></li>
+        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+    
+    <!-- Actions -->
+    <div class="header-actions">
+      <button class="action-btn">Action</button>
+    </div>
+  </div>
+</header>
+
+<style>
+.header {
+  --header-bg: white;
+  --header-height: 4rem;
+  --header-padding: 0 1rem;
+  --header-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  
+  background: var(--header-bg);
+  height: var(--header-height);
+  box-shadow: var(--header-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--header-padding);
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: inherit;
+  padding: 0.5rem;
+  position: relative;
+}
+
+.nav-link.active {
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0.5rem;
+  right: 0.5rem;
+  height: 2px;
+  background: #007bff;
+}
+
+.header[data-variant="dark"] {
+  --header-bg: #212529;
+  color: white;
+}
+</style>
+```
+
+### **11. Sidebar - Barre latérale**
+```html
+<!-- organisms/sidebar.html -->
+<aside class="sidebar" role="complementary" aria-label="Sidebar">
+  <!-- Logo -->
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Menu</div>
+    <button class="sidebar-toggle" aria-label="Toggle sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <ul class="sidebar-nav-list">
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-active="true">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <span class="nav-icon">📁</span>
+          <span class="nav-text">Projects</span>
+        </a>
+      </li>
+      <!-- Plus d'items... -->
+    </ul>
+  </nav>
+  
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="user-menu">
+      <div class="user-avatar">JD</div>
+      <div class="user-info">
+        <div class="user-name">John Doe</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<style>
+.sidebar {
+  --sidebar-width: 16rem;
+  --sidebar-bg: #f8f9fa;
+  --sidebar-color: #212529;
+  --sidebar-border: 1px solid #dee2e6;
+  
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-color);
+  border-right: var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  flex: 1;
+}
+
+.nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
+}
+
+.nav-link:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.nav-link[data-active] {
+  background: #007bff;
+  color: white;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.sidebar[data-collapsed] {
+  --sidebar-width: 4rem;
+}
+
+.sidebar[data-collapsed] .nav-text {
+  display: none;
+}
+
+.sidebar[data-variant="dark"] {
+  --sidebar-bg: #212529;
+  --sidebar-color: white;
+  --sidebar-border: 1px solid #495057;
+}
+</style>
+```
+
+### **12. Modal - Fenêtre modale**
+```html
+<!-- organisms/modal.html -->
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <!-- Backdrop -->
+  <div class="modal-backdrop"></div>
+  
+  <!-- Dialog -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Modal Title</h2>
+        <button class="modal-close" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body">
+        <p>Modal content goes here.</p>
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn" data-variant="secondary">Cancel</button>
+        <button class="btn" data-variant="primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  pointer-events: all;
+}
+
+.modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  pointer-events: all;
+  margin: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.modal-close {
+  all: unset;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+}
+
+.modal-body {
+  padding: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.modal[data-size="small"] .modal-dialog { max-width: 300px; }
+.modal[data-size="large"] .modal-dialog { max-width: 800px; }
+.modal[data-size="full"] .modal-dialog { max-width: 100%; margin: 0; height: 100%; }
+</style>
+```
+
+---
+
+## 🎨 **TEMPLATES - Layouts vides**
+
+### **13. Dashboard Layout**
+```html
+<!-- templates/dashboard.html -->
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-placeholder">Sidebar</div>
+  </aside>
+  
+  <!-- Main -->
+  <main class="dashboard-main">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-placeholder">Header</div>
+    </header>
+    
+    <!-- Content -->
+    <div class="dashboard-content">
+      <div class="content-grid">
+        <div class="grid-item" style="grid-column: span 2;">Widget 1</div>
+        <div class="grid-item">Widget 2</div>
+        <div class="grid-item">Widget 3</div>
+        <div class="grid-item" style="grid-column: span 3;">Widget 4</div>
+        <div class="grid-item">Widget 5</div>
+        <div class="grid-item">Widget 6</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style>
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-sidebar {
+  width: 16rem;
+  background: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  height: 4rem;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 1rem;
+  background: #f8f9fa;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.grid-item {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 150px;
+}
+
+.placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+</style>
+```
+
+### **14. Auth Layout (Login/Signup)**
+```html
+<!-- templates/auth.html -->
+<div class="auth-layout">
+  <!-- Left Panel (Image/Info) -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-logo">Logo</div>
+      <h1 class="brand-title">Welcome</h1>
+      <p class="brand-subtitle">Sign in to your account</p>
+    </div>
+  </div>
+  
+  <!-- Right Panel (Form) -->
+  <div class="auth-right">
+    <div class="auth-form-container">
+      <!-- Form will be injected here -->
+      <div class="form-placeholder">Form Area</div>
+    </div>
+    
+    <!-- Footer Links -->
+    <div class="auth-footer">
+      <a href="#" class="footer-link">Forgot password?</a>
+      <a href="#" class="footer-link">Create account</a>
+      <a href="#" class="footer-link">Terms & Privacy</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-left {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-brand {
+  text-align: center;
+}
+
+.brand-logo {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.brand-title {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+}
+
+.brand-subtitle {
+  opacity: 0.8;
+}
+
+.auth-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: white;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-footer {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-link {
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.footer-link:hover {
+  color: #007bff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-layout {
+    flex-direction: column;
+  }
+  
+  .auth-left {
+    padding: 4rem 2rem;
+  }
+}
+</style>
+```
+
+---
+
+## 🚀 **PAGES - Pages complètes minimales**
+
+### **15. Landing Page Minimal**
+```html
+<!-- pages/landing.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Landing</title>
+</head>
+<body class="landing-page">
+    <!-- Navigation -->
+    <nav class="landing-nav">
+        <div class="nav-logo">Brand</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Home</a>
+            <a href="#" class="nav-link">Features</a>
+            <a href="#" class="nav-link">Pricing</a>
+            <a href="#" class="nav-link">Contact</a>
+        </div>
+        <button class="nav-cta">Get Started</button>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="landing-hero">
+        <h1 class="hero-title">Simple & Clean</h1>
+        <p class="hero-subtitle">The most minimal landing page template</p>
+        <button class="hero-cta">Learn More</button>
+    </section>
+    
+    <!-- Features -->
+    <section class="landing-features">
+        <h2 class="section-title">Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3 class="feature-title">Fast</h3>
+                <p class="feature-desc">Lightweight and fast loading</p>
+            </div>
+            <div class="feature-card">
+                <h3 class="feature-title">Responsive</h3>
+                <p class="feature-desc">Works on all devices</p>
+            </div>
+            <div class="feature-card">
+                <h3 class="feature-title">Customizable</h3>
+                <p class="feature-desc">Easy to modify and extend</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <p>© 2024 Minimal. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+
+<style>
+/* Reset minimal */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; }
+
+.landing-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.nav-logo { font-size: 1.5rem; font-weight: bold; }
+.nav-links { display: flex; gap: 2rem; }
+.nav-link { text-decoration: none; color: #333; }
+.nav-cta { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 0.25rem; cursor: pointer; }
+
+.landing-hero {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.hero-title { font-size: 3rem; margin-bottom: 1rem; }
+.hero-subtitle { font-size: 1.25rem; color: #666; margin-bottom: 2rem; }
+.hero-cta { padding: 0.75rem 2rem; font-size: 1.125rem; background: #007bff; color: white; border: none; border-radius: 0.5rem; cursor: pointer; }
+
+.landing-features {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.landing-footer {
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid #eee;
+    color: #666;
+}
+</style>
+```
+
+---
+
+## 📦 **PACKAGE COMPLET - Tous les composants**
+
+Voici la **structure complète** avec tous les composants bruts :
+
+```
+raw-components-v1.0/
+├── README.md
+├── package.json
+├── style-guide.css
+├── tokens.css           # Variables CSS globales
+├── reset.css           # Reset minimal
+│
+├── atoms/
+│   ├── button.html
+│   ├── input.html
+│   ├── select.html
+│   ├── textarea.html
+│   ├── checkbox.html
+│   ├── radio.html
+│   ├── toggle.html
+│   ├── icon.html
+│   ├── typography.html
+│   ├── color.html
+│   ├── spacing.html
+│   ├── shadow.html
+│   └── avatar.html
+│
+├── molecules/
+│   ├── search-bar.html
+│   ├── form-group.html
+│   ├── card.html
+│   ├── badge.html
+│   ├── alert.html
+│   ├── toast.html
+│   ├── tooltip.html
+│   ├── breadcrumb.html
+│   ├── pagination.html
+│   ├── tabs.html
+│   ├── accordion.html
+│   ├── dropdown.html
+│   ├── modal-trigger.html
+│   └── progress.html
+│
+├── organisms/
+│   ├── header.html
+│   ├── sidebar.html
+│   ├── modal.html
+│   ├── table.html
+│   ├── data-grid.html
+│   ├── chart.html
+│   ├── wizard.html
+│   ├── filter-panel.html
+│   ├── user-menu.html
+│   ├── notification-center.html
+│   ├── chat-widget.html
+│   └── file-uploader.html
+│
+├── templates/
+│   ├── dashboard.html
+│   ├── auth.html
+│   ├── ecommerce.html
+│   ├── blog.html
+│   ├── admin.html
+│   ├── settings.html
+│   ├── onboarding.html
+│   └── error.html
+│
+├── pages/
+│   ├── landing.html
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── profile.html
+│   ├── settings.html
+│   ├── checkout.html
+│   └── 404.html
+│
+└── utilities/
+    ├── layout.css      # Grid/Flex utilities
+    ├── spacing.css     # Margin/Padding classes
+    ├── typography.css  # Text utilities
+    ├── colors.css      # Color utilities
+    └── states.css      # States (hover, focus, etc.)
+```
+
+---
+
+## 🎯 **FICHIER DE CONFIGURATION PRINCIPAL**
+
+### **tokens.css** - Variables globales
+```css
+:root {
+  /* Colors - Base palette */
+  --color-primary: #007bff;
+  --color-secondary: #6c757d;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  
+  /* Neutral colors */
+  --color-white: #ffffff;
+  --color-gray-100: #f8f9fa;
+  --color-gray-200: #e9ecef;
+  --color-gray-300: #dee2e6;
+  --color-gray-400: #ced4da;
+  --color-gray-500: #adb5bd;
+  --color-gray-600: #6c757d;
+  --color-gray-700: #495057;
+  --color-gray-800: #343a40;
+  --color-gray-900: #212529;
+  --color-black: #000000;
+  
+  /* Typography */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  
+  /* Borders */
+  --border-width: 1px;
+  --border-radius-sm: 0.125rem;
+  --border-radius: 0.25rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-xl: 1rem;
+  --border-radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+```
+
+### **reset.css** - Reset minimal
+```css
+/* Minimal Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  line-height: 1.6;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Remove default button styles */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Remove list styles */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Remove default link styles */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+```
+
+---
+
+## 🚀 **COMMENT UTILISER CETTE BIBLIOTHÈQUE**
+
+### **Option 1 : Copier/Coller**
+```bash
+# Clone ou télécharge les fichiers
+git clone https://github.com/yourname/raw-components.git
+cd raw-components
+
+# Utilise directement les fichiers HTML/CSS
+```
+
+### **Option 2 : Build System**
+```bash
+# Installer comme dépendance
+npm install raw-components
+
+# Importer dans votre projet
+@import 'raw-components/tokens.css';
+@import 'raw-components/reset.css';
+
+<!-- Utiliser les composants -->
+<include src="node_modules/raw-components/atoms/button.html"></include>
+```
+
+### **Option 3 : Web Components**
+```javascript
+// Enregistrer comme Custom Elements
+import { defineButton } from 'raw-components/web-components';
+
+defineButton();
+// Utilisation : <raw-button variant="primary">Click</raw-button>
+```
+
+---
+
+## 💡 **BONNES PRATIQUES DE CUSTOMISATION**
+
+### **Customiser via CSS Variables**
+```css
+/* Override des variables globales */
+:root {
+  --color-primary: #8b5cf6; /* Purple */
+  --border-radius: 0.5rem; /* Plus arrondi */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Shadow plus prononcé */
+}
+```
+
+### **Ajouter vos propres styles**
+```css
+/* Dans votre fichier CSS principal */
+@import 'raw-components/tokens.css';
+
+/* Vos overrides */
+.btn-custom {
+  --btn-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --btn-color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+```
+
+### **Utiliser avec un préprocesseur**
+```scss
+// style.scss
+@use 'raw-components/tokens' as *;
+
+.custom-component {
+  background: $color-primary;
+  border-radius: $border-radius-lg;
+  
+  &:hover {
+    background: darken($color-primary, 10%);
+  }
+}
+```
+
+---
+
+## 📚 **DOCUMENTATION TECHNIQUE**
+
+### **Conventions de nommage**
+```css
+/* BEM-like mais simplifié */
+.component {}           /* Block */
+.component--variant {}  /* Modifier */
+.component_element {}   /* Element */
+
+/* Exemple */
+.btn {}                /* Button component */
+.btn--primary {}       /* Primary variant */
+.btn_icon {}           /* Icon inside button */
+```
+
+### **Accessibilité intégrée**
+```html
+<!-- Tous les composants incluent : -->
+• aria-label pour les éléments non-textuels
+• role appropriés
+• Navigation au clavier
+• Contrast ratios WCAG AA
+```
+
+### **Responsive Design**
+```css
+/* Mobile-first par défaut */
+.component {
+  /* Styles mobile */
+}
+
+@media (min-width: 768px) {
+  .component {
+    /* Styles desktop */
+  }
+}
+```
+
+---
+
+**RÉSUMÉ** : Cette bibliothèque contient **TOUS** les composants de la liste sous leur forme la plus **brute, épurée et customisable**. 
+
+**Avantages** :
+- ✅ Zéro dépendance JavaScript
+- ✅ CSS Variables pour customisation facile
+- ✅ Accessibilité intégrée
+- ✅ Responsive par conception
+- ✅ Structure Atomic Design
+- ✅ Documentation complète
+- ✅ Prêt pour production
+
+**Prochaine étape** : Choisis les composants que tu veux utiliser et je peux générer les plans AETHERFLOW correspondants pour les intégrer dans Sullivan ! 🚀

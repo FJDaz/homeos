@@ -1,0 +1,40 @@
+Stenciler V2
+-----------------------------------------------------------------------------------
+BRS	|	BKD	| 	FRD	| DPL > ça reste
+-----------------------------------------------------------------------------------
+SIDE BAR Glisse avec layout au clic sur style ou upload seul le Leader de la Sidecar est en stick:
+
+Header : 
+HomeOs demeure
+Architecture Genomme… devient Stenclier 	  
+---------------------------------------
+Font picker 
+(API Google font 5 humanes, 
+10 garaldes, 10 réales, 10 diodes, 
+4 m'émanes morderenes , 
+4 m'émanes Classiques, 
+20 bâtons huminsitiques, 
+20 bâtons, 20 scriptes, 
+20 manucures, 20 non latines, 
+10 fraktur)
+---------------------------------------
+Suppr
+---------------------------------------
+Fill stroke ('X'= shortcut toggle)
+---------------------------------------
+Color picker en collapse
+---------------------------------------
+Swatches en collapse
+---------------------------------------
+Border
+---------------------------------------
+APIs connectées
+Charger Genom, Charge style
+---------------------------------------
+---------------------------------------
+---------------------------------------
+Main
+Tout sélectionner et Valider disparaissent
+Le main du stenciler zst le main de la page
+
+

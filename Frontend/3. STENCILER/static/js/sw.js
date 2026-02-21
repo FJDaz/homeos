@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sullivan-cache-v2';
+const CACHE_NAME = 'sullivan-dev-v3';
 const STATIC_ASSETS = [
     '/',
     '/stenciler',
@@ -12,6 +12,7 @@ const STATIC_ASSETS = [
 
 // Installation : Mise en cache des assets statiques
 self.addEventListener('install', event => {
+    self.skipWaiting(); // Activation immédiate du nouveau SW
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
             console.log('🧬 SW: Caching static assets');
@@ -57,12 +58,10 @@ self.addEventListener('fetch', event => {
             })
         );
     }
-    // Stratégie Cache-First pour les assets statiques
+    // Stratégie Network-First pour les assets statiques (dev mode)
     else {
         event.respondWith(
-            caches.match(event.request).then(response => {
-                return response || fetch(event.request);
-            })
+            fetch(event.request).catch(() => caches.match(event.request))
         );
     }
 });

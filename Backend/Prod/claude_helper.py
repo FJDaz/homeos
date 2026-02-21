@@ -308,21 +308,11 @@ def apply_generated_code(
                 target_file.write_text(code_content, encoding="utf-8")
                 logger.info(f"Created {target_file} (refactoring)")
         else:
-            # For code_generation, create new file or append
-            if target_file.exists():
-                # Check if code already exists (avoid duplicates)
-                existing_code = target_file.read_text(encoding="utf-8")
-                if code_content.strip() not in existing_code:
-                    # Append new code
-                    new_content = existing_code + "\n\n" + code_content
-                    target_file.write_text(new_content, encoding="utf-8")
-                    logger.info(f"Appended to {target_file}")
-                else:
-                    logger.info(f"Code already exists in {target_file}, skipping")
-            else:
-                # Create new file
-                target_file.write_text(code_content, encoding="utf-8")
-                logger.info(f"Created {target_file}")
+            # For code_generation: LLM generates the full file content → overwrite directly
+            # (LLM has existing file in context, produces complete new version)
+            target_file.write_text(code_content, encoding="utf-8")
+            action = "Overwrote" if target_file.exists() else "Created"
+            logger.info(f"{action} {target_file}")
         
         return True
         

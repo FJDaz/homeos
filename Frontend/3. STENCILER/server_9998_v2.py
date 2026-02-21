@@ -52,9 +52,9 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_template('viewer.html')
             return
         
-        # Route Stenciler
+        # Route Stenciler (V3 modulaire — référence active)
         if self.path == '/stenciler':
-            self.serve_template('stenciler.html')
+            self.serve_template('stenciler_v3.html')
             return
         
         # Route Stenciler V3 (Modular)
@@ -147,6 +147,7 @@ class Handler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
+            self.send_header('Cache-Control', 'no-store, must-revalidate')
             self.end_headers()
             self.wfile.write(content.encode('utf-8'))
         except Exception as e:
@@ -167,12 +168,14 @@ class Handler(BaseHTTPRequestHandler):
                 elif filename.endswith('.css'): content_type = 'text/css'
                 elif filename.endswith('.png'): content_type = 'image/png'
                 elif filename.endswith('.svg'): content_type = 'image/svg+xml'
+                elif filename.endswith('.html'): content_type = 'text/html'
                 else: content_type = 'text/plain'
             
             self.send_response(200)
             self.send_header('Content-type', content_type)
+            self.send_header('Cache-Control', 'no-store, must-revalidate')
             self.end_headers()
-            
+
             with open(filepath, 'rb') as f:
                 self.wfile.write(f.read())
         except Exception as e:
@@ -190,8 +193,9 @@ class Handler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-type', 'application/javascript')
+            self.send_header('Cache-Control', 'no-store, must-revalidate')
             self.end_headers()
-            
+
             with open(filepath, 'rb') as f:
                 self.wfile.write(f.read())
         except Exception as e:

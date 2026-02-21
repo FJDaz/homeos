@@ -1,0 +1,101 @@
+{
+  "task_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "description": "Créer une API REST simple avec authentification JWT pour gérer des utilisateurs",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer le modèle User avec les champs: id, email, password_hash, created_at",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Modèle contient tous les champs requis",
+        "Utilise Pydantic pour la validation",
+        "Inclut méthodes de hashage de mot de passe"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["models/user.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Créer le middleware d'authentification JWT avec fonctions generate_token et verify_token",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Génère des tokens JWT valides",
+        "Vérifie et décode les tokens",
+        "Gère les erreurs d'expiration"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["middleware/auth.py"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Créer les endpoints POST /register et POST /login",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1", "step_2"],
+      "validation_criteria": [
+        "POST /register crée un nouvel utilisateur",
+        "POST /login retourne un token JWT",
+        "Gestion des erreurs appropriée"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["api/auth.py"]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "Créer l'endpoint GET /users/me protégé par authentification JWT",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 400,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "Requiert un token JWT valide",
+        "Retourne les informations de l'utilisateur connecté",
+        "Retourne 401 si non authentifié"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["api/users.py"]
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "Ajouter la documentation OpenAPI et les tests de base",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": ["step_3", "step_4"],
+      "validation_criteria": [
+        "Documentation OpenAPI générée automatiquement",
+        "Tests pour chaque endpoint",
+        "Couverture minimale de 80%"
+      ],
+      "context": {
+        "language": "python",
+        "framework": "fastapi",
+        "files": ["tests/test_auth.py", "tests/test_users.py"]
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-25T10:30:00Z",
+    "claude_version": "claude-code",
+    "project_context": "API REST FastAPI pour gestion d'utilisateurs avec authentification JWT"
+  }
+}

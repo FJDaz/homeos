@@ -1,0 +1,486 @@
+/* === KIMI DA V3 — Layout 3 Colonnes (Correction) === */
+
+/* ---------- CONTENEUR PRINCIPAL ---------- */
+.stenciler-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- HEADER ---------- */
+#slot-header {
+  height: var(--header-height, 48px);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+#slot-header .main-header {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+#slot-header .header-logo {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+#slot-header .header-nav {
+  display: flex;
+  gap: 8px;
+}
+
+#slot-header .header-tab {
+  padding: 4px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+#slot-header .header-tab:hover,
+#slot-header .header-tab.active {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+  color: var(--text-primary);
+}
+
+/* ---------- WORKSPACE (3 colonnes) ---------- */
+.stenciler-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---------- SIDEBAR GAUCHE (220px) ---------- */
+#slot-sidebar-left {
+  width: 220px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#slot-sidebar-left .sidebar-section,
+#slot-navigation,
+#slot-genome,
+#slot-style {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+#slot-navigation .main-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#slot-navigation .nav-link {
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.12s ease;
+}
+
+#slot-navigation .nav-link:hover,
+#slot-navigation .nav-link.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Genome section */
+#slot-genome h3,
+#slot-style h3 {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+#slot-genome .phases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#slot-genome .phase-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+#slot-genome .phase-item:hover {
+  background: var(--bg-hover);
+}
+
+#slot-genome .phase-item.selected {
+  background: var(--bg-tertiary);
+}
+
+#slot-genome .phase-name {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+#slot-genome .phase-confidence {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* Style section */
+#slot-style.hidden {
+  display: none;
+}
+
+#slot-style .styles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#slot-style .style-item {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+#slot-style .style-item:hover,
+#slot-style .style-item.active {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+}
+
+/* ---------- ZONE DROITE (Preview + Main) ---------- */
+.right-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ---------- PREVIEW BAND ---------- */
+#slot-preview-band {
+  height: 110px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+#slot-preview-band .preview-band {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+#slot-preview-band .preview-card {
+  flex-shrink: 0;
+  width: 180px;
+  height: 90px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 10px 12px;
+  cursor: grab;
+  transition: all 0.12s ease;
+}
+
+#slot-preview-band .preview-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+}
+
+#slot-preview-band .preview-card.dragging {
+  opacity: 0.5;
+}
+
+#slot-preview-band .preview-card .name {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+#slot-preview-band .preview-card .count {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Corps colors */
+#slot-preview-band .preview-card.brainstorm { border-left: 2px solid var(--accent-rose); }
+#slot-preview-band .preview-card.backend { border-left: 2px solid var(--accent-bleu); }
+#slot-preview-band .preview-card.frontend { border-left: 2px solid var(--accent-vert); }
+#slot-preview-band .preview-card.deploy { border-left: 2px solid var(--accent-orange); }
+
+/* Wireframes */
+#slot-preview-band .corps-wireframe {
+  width: 100%;
+  height: 36px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+#slot-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Canvas Zone */
+#slot-canvas-zone {
+  flex: 1;
+  background: var(--bg-primary);
+  position: relative;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grille 20x20 */
+#slot-canvas-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Canvas container */
+#slot-canvas-zone #canvas-zone {
+  position: relative;
+  width: 90%;
+  height: 80%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#slot-canvas-zone #stenciler-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* Zoom controls */
+#slot-canvas-zone .zoom-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 10;
+}
+
+#slot-canvas-zone .zoom-controls button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#slot-canvas-zone .zoom-controls button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+#slot-canvas-zone .zoom-controls span {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ---------- SIDEBAR DROITE (220px) ---------- */
+#slot-sidebar-right {
+  width: 220px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding: 12px 16px;
+  gap: 16px;
+}
+
+/* TSL Picker */
+#slot-tsl-picker .tsl-picker {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+#slot-tsl-picker label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+#slot-tsl-picker input[type="range"] {
+  width: 100%;
+  height: 6px;
+  margin-bottom: 8px;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  background: var(--bg-hover);
+}
+
+#slot-tsl-picker input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--text-secondary);
+  cursor: pointer;
+}
+
+#slot-tsl-picker .color-preview {
+  width: 100%;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  margin-top: 8px;
+}
+
+/* Color Palette */
+#slot-color-palette .color-palette {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+#slot-color-palette .color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.12s ease;
+}
+
+#slot-color-palette .color-swatch:hover {
+  transform: scale(1.08);
+  border-color: var(--border-warm);
+}
+
+#slot-color-palette .color-swatch.active {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--bg-secondary), 0 0 0 2px var(--text-primary);
+}
+
+/* Border Slider */
+#slot-border-slider label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+#slot-border-slider input[type="range"] {
+  width: 100%;
+  height: 3px;
+  -webkit-appearance: none;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+}
+
+#slot-border-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ---------- FOOTER ---------- */
+#slot-footer {
+  height: 32px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+#slot-footer .api-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#slot-footer .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+#slot-footer .status-dot.online {
+  background: #7aca6a;
+  box-shadow: 0 0 4px #7aca6a;
+}
+
+#slot-footer .status-dot.offline {
+  background: #d56363;
+}

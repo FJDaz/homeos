@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wireframe Test 7A — Sullivan SVG Library</title>
+    <link rel="stylesheet" href="/static/css/stenciler.css">
+    <style>
+        /* Layout page uniquement — pas de design système */
+        body {
+            background: var(--bg-primary);
+            padding: 32px;
+            font-family: 'Geist', -apple-system, sans-serif;
+            color: var(--text-primary);
+        }
+
+        .header-content {
+            margin-bottom: 40px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 280px);
+            gap: 24px;
+        }
+
+        .test-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cell-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .cell-meta {
+            font-size: 9px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .svg-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 280px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .svg-container:hover {
+            border-color: var(--accent-bleu);
+            transform: translateY(-2px);
+        }
+
+        .group-divider {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 24px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        svg {
+            display: block;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 24px;
+            border-radius: 30px;
+            background: var(--accent-bleu);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+            font-family: 'Geist', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Radio Score Styling */
+        .score-ui {
+            display: flex;
+            gap: 12px;
+            background: var(--bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            width: fit-content;
+        }
+
+        .score-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            opacity: 0.3;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .score-option:hover {
+            opacity: 1;
+        }
+
+        .score-option input {
+            display: none;
+        }
+
+        .score-option.selected {
+            opacity: 1;
+            font-weight: 700;
+            transform: scale(1.1);
+        }
+
+        .emoji {
+            font-style: normal;
+        }
+    </style>
+</head>
+
+<body onload="initScores()">
+    <button class="theme-switch" onclick="toggleTheme()">🌓 Thème</button>
+    <button class="export-btn" onclick="exportScores()">📋 Copier les scores pour Gemini</button>
+
+    <div class="header-content">
+        <h1 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Wireframe Test 7A — Sullivan SVG Library</h1>
+        <p style="font-size: 12px; color: var(--text-muted);">Groupe A : Traduction HTML → SVG | Groupe B : Création ex
+            nihilo | Scoring Interactif</p>
+    </div>
+
+    <div class="test-grid">
+        <div class="group-divider">Groupe A — Traduction (références sullivan_renderer.js)</div>
+
+        <!-- A1 Table -->
+        <div class="test-cell" data-wf-id="A1">
+            <div class="cell-label">A1 — table</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="30" width="240" height="120" rx="8" fill="var(--bg-tertiary)" />
+                    <!-- Row 1 -->
+                    <rect x="35" y="45" width="140" height="10" rx="2" fill="var(--border-subtle)" />
+                    <rect x="185" y="45" width="60" height="10" rx="2" fill="var(--border-subtle)" />
+                    <!-- Row 2 (Green) -->
+                    <rect x="35" y="65" width="140" height="10" rx="2" fill="var(--border-subtle)" />
+                    <rect x="185" y="65" width="60" height="10" rx="2" fill="var(--accent-vert)" />
+                    <text x="215" y="73" font-size="7" fill="black" text-anchor="middle" font-family="Geist, sans-serif"
+                        font-weight="700">ACCEPT</text>
+                    <!-- Row 3 -->
+                    <rect x="35" y="85" width="140" height="10" rx="2" fill="var(--border-subtle)" />
+                    <rect x="185" y="85" width="60" height="10" rx="2" fill="var(--border-subtle)" />
+                    <!-- Row 4 -->
+                    <rect x="35" y="105" width="140" height="10" rx="2" fill="var(--border-subtle)" />
+                    <rect x="185" y="105" width="60" height="10" rx="2" fill="var(--border-subtle)" />
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A1" value="✅"
+                        onclick="setScore('A1', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A1" value="⚠️"
+                        onclick="setScore('A1', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A1" value="❌"
+                        onclick="setScore('A1', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_ir_table | Vue Rapport IR</div>
+        </div>
+
+        <!-- A2 Stepper -->
+        <div class="test-cell" data-wf-id="A2">
+            <div class="cell-label">A2 — stepper</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Lines -->
+                    <line x1="60" y1="90" x2="220" y2="90" stroke="var(--border-subtle)" stroke-width="2" />
+                    <line x1="60" y1="90" x2="140" y2="90" stroke="var(--accent-bleu)" stroke-width="2" />
+
+                    <!-- Steps -->
+                    <circle cx="60" cy="90" r="10" fill="var(--accent-bleu)" />
+                    <text x="60" y="93.5" font-size="8" fill="white" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="700">✓</text>
+
+                    <circle cx="100" cy="90" r="10" fill="var(--accent-bleu)" />
+                    <text x="100" y="93.5" font-size="8" fill="white" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="700">✓</text>
+
+                    <circle cx="140" cy="90" r="10" fill="var(--accent-bleu)" />
+                    <text x="140" y="93.5" font-size="8" fill="white" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="700">3</text>
+
+                    <circle cx="180" cy="90" r="10" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
+                    <text x="180" y="93.5" font-size="8" fill="var(--text-muted)" text-anchor="middle"
+                        font-family="Geist, sans-serif">4</text>
+
+                    <circle cx="220" cy="90" r="10" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
+                    <text x="220" y="93.5" font-size="8" fill="var(--text-muted)" text-anchor="middle"
+                        font-family="Geist, sans-serif">5</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A2" value="✅"
+                        onclick="setScore('A2', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A2" value="⚠️"
+                        onclick="setScore('A2', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A2" value="❌"
+                        onclick="setScore('A2', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_stepper | 5 / 9 étapes</div>
+        </div>
+
+        <!-- A3 Chat/Bubble -->
+        <div class="test-cell" data-wf-id="A3">
+            <div class="cell-label">A3 — chat/bubble</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <!-- System Bubble -->
+                    <rect x="30" y="40" width="140" height="30" rx="12" fill="var(--bg-tertiary)" />
+                    <path d="M30 70 L30 75 L40 70 Z" fill="var(--bg-tertiary)" />
+                    <rect x="45" y="52" width="100" height="6" rx="1" fill="var(--text-muted)" opacity="0.4" />
+
+                    <!-- User Bubble -->
+                    <rect x="110" y="85" width="140" height="30" rx="12" fill="var(--accent-bleu)" />
+                    <path d="M250 115 L250 120 L240 115 Z" fill="var(--accent-bleu)" />
+                    <rect x="125" y="97" width="100" height="6" rx="1" fill="white" opacity="0.6" />
+
+                    <!-- System Bubble 2 -->
+                    <rect x="30" y="130" width="100" height="20" rx="10" fill="var(--bg-tertiary)" />
+                    <path d="M30 150 L30 155 L40 150 Z" fill="var(--bg-tertiary)" />
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A3" value="✅"
+                        onclick="setScore('A3', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A3" value="⚠️"
+                        onclick="setScore('A3', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A3" value="❌"
+                        onclick="setScore('A3', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_chat_bubbles | Bulles Dialogue</div>
+        </div>
+
+        <!-- A4 Stencil Card -->
+        <div class="test-cell" data-wf-id="A4">
+            <div class="cell-label">A4 — stencil-card</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="40" y="30" width="200" height="120" rx="6" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+
+                    <rect x="55" y="45" width="100" height="10" rx="2" fill="var(--accent-rose)" />
+                    <rect x="55" y="62" width="160" height="6" rx="1" fill="var(--text-muted)" opacity="0.4" />
+                    <rect x="55" y="72" width="140" height="6" rx="1" fill="var(--text-muted)" opacity="0.4" />
+
+                    <!-- Left Button -->
+                    <rect x="55" y="110" width="80" height="24" rx="4" fill="var(--accent-vert)" />
+                    <text x="95" y="125" font-size="8" fill="white" text-anchor="middle" font-family="Geist, sans-serif"
+                        font-weight="700">GARDER</text>
+
+                    <!-- Right Button -->
+                    <rect x="145" y="110" width="80" height="24" rx="4" fill="var(--border-warm)" />
+                    <text x="185" y="125" font-size="8" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="700">RÉSERVE</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A4" value="✅"
+                        onclick="setScore('A4', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A4" value="⚠️"
+                        onclick="setScore('A4', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A4" value="❌"
+                        onclick="setScore('A4', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_stencil_card | Arbitrage Forms</div>
+        </div>
+
+        <!-- A5 Upload -->
+        <div class="test-cell" data-wf-id="A5">
+            <div class="cell-label">A5 — upload</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="30" y="30" width="220" height="120" rx="8" fill="none" stroke="var(--border-warm)"
+                        stroke-width="1.5" stroke-dasharray="6,4" />
+
+                    <!-- Polished Cloud Icon -->
+                    <path
+                        d="M140 65 C120 65 115 80 115 85 C108 85 105 90 105 97 C105 106 112 112 120 112 L160 112 C168 112 175 106 175 97 C175 90 172 85 165 85 C165 80 160 65 140 65 Z"
+                        fill="var(--text-muted)" opacity="0.25" />
+
+                    <text x="140" y="125" font-size="11" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="600">DÉPOSER FICHIERS</text>
+                    <text x="140" y="138" font-size="8" fill="var(--text-muted)" text-anchor="middle"
+                        font-family="Geist, sans-serif">PDF, PNG (Max 10MB)</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A5" value="✅"
+                        onclick="setScore('A5', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A5" value="⚠️"
+                        onclick="setScore('A5', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A5" value="❌"
+                        onclick="setScore('A5', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_upload_dropzone | Zone Drag & Drop</div>
+        </div>
+
+        <!-- A6 Dashboard -->
+        <div class="test-cell" data-wf-id="A6">
+            <div class="cell-label">A6 — dashboard</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Mini Widget 1 -->
+                    <rect x="30" y="40" width="105" height="45" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <rect x="30" y="40" width="105" height="8" rx="4 4 0 0" fill="var(--accent-bleu)" />
+                    <rect x="40" y="58" width="85" height="4" rx="1" fill="var(--border-subtle)" />
+                    <rect x="40" y="68" width="60" height="4" rx="1" fill="var(--border-subtle)" />
+
+                    <!-- Mini Widget 2 -->
+                    <rect x="145" y="40" width="105" height="45" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <rect x="145" y="40" width="105" height="8" rx="4 4 0 0" fill="var(--accent-vert)" />
+                    <rect x="155" y="58" width="85" height="4" rx="1" fill="var(--border-subtle)" />
+                    <rect x="155" y="68" width="60" height="4" rx="1" fill="var(--border-subtle)" />
+
+                    <!-- Mini Widget 3 -->
+                    <rect x="30" y="95" width="105" height="45" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <rect x="30" y="95" width="105" height="8" rx="4 4 0 0" fill="var(--accent-rose)" />
+
+                    <!-- Mini Widget 4 -->
+                    <rect x="145" y="95" width="105" height="45" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <rect x="145" y="95" width="105" height="8" rx="4 4 0 0" fill="var(--accent-orange)" />
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-A6" value="✅"
+                        onclick="setScore('A6', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-A6" value="⚠️"
+                        onclick="setScore('A6', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-A6" value="❌"
+                        onclick="setScore('A6', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_session_status | Status Session</div>
+        </div>
+
+        <div class="group-divider">Groupe B — Création (descriptions texte genome)</div>
+
+        <!-- B1 Accordion -->
+        <div class="test-cell" data-wf-id="B1">
+            <div class="cell-label">B1 — accordion</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Item 1 (Expanded) -->
+                    <rect x="30" y="30" width="220" height="30" rx="4" fill="var(--accent-bleu)" />
+                    <text x="45" y="50" font-size="10" fill="white" font-family="Geist, sans-serif"
+                        font-weight="600">ZONES VALIDÉES</text>
+                    <text x="230" y="50" font-size="12" fill="white" font-family="Geist, sans-serif">▼</text>
+                    <rect x="30" y="60" width="220" height="40" fill="var(--bg-tertiary)" opacity="0.5" />
+                    <rect x="45" y="70" width="190" height="4" rx="1" fill="var(--text-muted)" opacity="0.3" />
+                    <rect x="45" y="80" width="150" height="4" rx="1" fill="var(--text-muted)" opacity="0.3" />
+                    <rect x="45" y="90" width="170" height="4" rx="1" fill="var(--text-muted)" opacity="0.3" />
+
+                    <!-- Item 2 (Collapsed) -->
+                    <rect x="30" y="105" width="220" height="30" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <text x="45" y="125" font-size="10" fill="var(--text-secondary)" font-family="Geist, sans-serif"
+                        font-weight="600">AJUSTEMENTS</text>
+                    <text x="230" y="125" font-size="12" fill="var(--text-muted)"
+                        font-family="Geist, sans-serif">▶</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B1" value="✅"
+                        onclick="setScore('B1', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B1" value="⚠️"
+                        onclick="setScore('B1', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B1" value="❌"
+                        onclick="setScore('B1', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_validation_accordion | Sections dépliables</div>
+        </div>
+
+        <!-- B2 Color Palette -->
+        <div class="test-cell" data-wf-id="B2">
+            <div class="cell-label">B2 — color-palette</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <text x="40" y="50" font-size="11" fill="var(--text-primary)" font-family="Geist, sans-serif"
+                        font-weight="700">PALETTE EXTRAITE</text>
+
+                    <circle cx="60" cy="90" r="20" fill="var(--accent-bleu)" stroke="var(--border-warm)"
+                        stroke-width="1" />
+                    <circle cx="110" cy="90" r="20" fill="var(--accent-rose)" stroke="var(--border-warm)"
+                        stroke-width="1" />
+                    <circle cx="160" cy="90" r="20" fill="var(--accent-vert)" stroke="var(--border-warm)"
+                        stroke-width="1" />
+                    <circle cx="210" cy="90" r="20" fill="var(--accent-orange)" stroke="var(--border-warm)"
+                        stroke-width="1" />
+
+                    <rect x="40" y="130" width="60" height="18" rx="9" fill="var(--bg-tertiary)" />
+                    <text x="70" y="142" font-size="8" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif">Rounded</text>
+
+                    <rect x="110" y="130" width="60" height="18" rx="9" fill="var(--bg-tertiary)" />
+                    <text x="140" y="142" font-size="8" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif">Geist Sans</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B2" value="✅"
+                        onclick="setScore('B2', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B2" value="⚠️"
+                        onclick="setScore('B2', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B2" value="❌"
+                        onclick="setScore('B2', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_color_palette | Swatches & Components Style</div>
+        </div>
+
+        <!-- B3 Editor -->
+        <div class="test-cell" data-wf-id="B3">
+            <div class="cell-label">B3 — editor</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="280" height="180" fill="#1e1e1e" />
+                    <!-- Toolbar -->
+                    <rect x="0" y="0" width="280" height="25" fill="#2d2d2d" />
+                    <circle cx="15" cy="12.5" r="3" fill="#ff5f56" />
+                    <circle cx="27" cy="12.5" r="3" fill="#ffbd2e" />
+                    <circle cx="39" cy="12.5" r="3" fill="#27c93f" />
+                    <text x="140" y="16" font-size="8" fill="#888" text-anchor="middle"
+                        font-family="monospace">genome_v3.json</text>
+
+                    <!-- Code -->
+                    <rect x="20" y="45" width="40" height="6" rx="1" fill="#c678dd" /> <!-- keyword -->
+                    <rect x="65" y="45" width="80" height="6" rx="1" fill="#61afef" /> <!-- function -->
+
+                    <rect x="20" y="60" width="20" height="6" rx="1" fill="#abb2bf" /> <!-- indent -->
+                    <rect x="45" y="60" width="120" height="6" rx="1" fill="#98c379" /> <!-- string -->
+
+                    <rect x="20" y="75" width="20" height="6" rx="1" fill="#abb2bf" />
+                    <rect x="45" y="75" width="60" height="6" rx="1" fill="#d19a66" /> <!-- number -->
+
+                    <rect x="20" y="90" width="40" height="6" rx="1" fill="#c678dd" />
+
+                    <!-- Line Numbers -->
+                    <rect x="0" y="25" width="35" height="155" fill="#1e1e1e" stroke="#333" stroke-width="0.5" />
+                    <text x="17" y="51" font-size="7" fill="#555" text-anchor="middle" font-family="monospace">1</text>
+                    <text x="17" y="66" font-size="7" fill="#555" text-anchor="middle" font-family="monospace">2</text>
+                    <text x="17" y="81" font-size="7" fill="#555" text-anchor="middle" font-family="monospace">3</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B3" value="✅"
+                        onclick="setScore('B3', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B3" value="⚠️"
+                        onclick="setScore('B3', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B3" value="❌"
+                        onclick="setScore('B3', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_code_editor | Syntax Highlighting</div>
+        </div>
+
+        <!-- B4 Modal -->
+        <div class="test-cell" data-wf-id="B4">
+            <div class="cell-label">B4 — modal</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Overlay -->
+                    <rect width="280" height="180" fill="black" opacity="0.3" />
+
+                    <!-- Modal Box -->
+                    <rect x="50" y="40" width="180" height="100" rx="8" fill="var(--bg-primary)"
+                        stroke="var(--border-warm)" />
+
+                    <text x="70" y="65" font-size="12" fill="var(--text-primary)" font-family="Geist, sans-serif"
+                        font-weight="700">CONFIRMER EXPORT</text>
+                    <text x="70" y="85" font-size="9" fill="var(--text-secondary)"
+                        font-family="Geist, sans-serif">Voulez-vous générer le package ZIP ?</text>
+
+                    <!-- Buttons -->
+                    <rect x="70" y="105" width="65" height="22" rx="4" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+                    <text x="102.5" y="119" font-size="8" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif">ANNULER</text>
+
+                    <rect x="145" y="105" width="65" height="22" rx="4" fill="var(--accent-bleu)" />
+                    <text x="177.5" y="119" font-size="8" fill="white" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="700">CONFIRMER</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B4" value="✅"
+                        onclick="setScore('B4', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B4" value="⚠️"
+                        onclick="setScore('B4', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B4" value="❌"
+                        onclick="setScore('B4', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_confirm_modal | Fenêtre de confirmation</div>
+        </div>
+
+        <!-- B5 Breadcrumb -->
+        <div class="test-cell" data-wf-id="B5">
+            <div class="cell-label">B5 — breadcrumb</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="25" y="75" width="230" height="30" rx="6" fill="var(--bg-tertiary)"
+                        stroke="var(--border-subtle)" />
+
+                    <text x="40" y="94" font-size="10" fill="var(--accent-bleu)" font-family="Geist, sans-serif"
+                        font-weight="600">Phase</text>
+                    <text x="75" y="94" font-size="10" fill="var(--text-muted)" font-family="Geist, sans-serif">›</text>
+
+                    <text x="90" y="94" font-size="10" fill="var(--accent-rose)" font-family="Geist, sans-serif"
+                        font-weight="600">Étape</text>
+                    <text x="125" y="94" font-size="10" fill="var(--text-muted)"
+                        font-family="Geist, sans-serif">›</text>
+
+                    <text x="140" y="94" font-size="10" fill="var(--text-primary)" font-family="Geist, sans-serif"
+                        font-weight="700">Section Active</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B5" value="✅"
+                        onclick="setScore('B5', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B5" value="⚠️"
+                        onclick="setScore('B5', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B5" value="❌"
+                        onclick="setScore('B5', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_breadcrumb | Navigation Hiérarchique</div>
+        </div>
+
+        <!-- B6 Zoom Controls -->
+        <div class="test-cell" data-wf-id="B6">
+            <div class="cell-label">B6 — zoom-controls</div>
+            <div class="svg-container">
+                <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="40" y="75" width="200" height="30" rx="15" fill="var(--bg-primary)"
+                        stroke="var(--border-warm)" />
+
+                    <text x="60" y="94" font-size="14" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif">←</text>
+                    <line x1="80" y1="80" x2="80" y2="100" stroke="var(--border-subtle)" stroke-width="1" />
+
+                    <text x="140" y="94" font-size="10" fill="var(--text-primary)" text-anchor="middle"
+                        font-family="Geist, sans-serif" font-weight="600">🔍 CORPS ▼</text>
+
+                    <line x1="200" y1="80" x2="200" y2="100" stroke="var(--border-subtle)" stroke-width="1" />
+                    <text x="220" y="94" font-size="14" fill="var(--text-secondary)" text-anchor="middle"
+                        font-family="Geist, sans-serif">→</text>
+                </svg>
+            </div>
+            <div class="score-ui">
+                <label class="score-option"><input type="radio" name="score-B6" value="✅"
+                        onclick="setScore('B6', '✅')"><i class="emoji">✅</i></label>
+                <label class="score-option"><input type="radio" name="score-B6" value="⚠️"
+                        onclick="setScore('B6', '⚠️')"><i class="emoji">⚠️</i></label>
+                <label class="score-option"><input type="radio" name="score-B6" value="❌"
+                        onclick="setScore('B6', '❌')"><i class="emoji">❌</i></label>
+            </div>
+            <div class="cell-meta">comp_zoom_controls | Navigation & Zoom</div>
+        </div>
+    </div>
+
+    <script>
+        const scores = {};
+
+        function initScores() {
+            document.querySelectorAll('.test-cell').forEach(cell => {
+                scores[cell.dataset.wfId] = '[ ]';
+            });
+        }
+
+        function setScore(id, score) {
+            scores[id] = score;
+            const cell = document.querySelector(`.test-cell[data-wf-id="${id}"]`);
+            cell.querySelectorAll('.score-option').forEach(opt => {
+                const input = opt.querySelector('input');
+                if (input.value === score) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        }
+
+        function exportScores() {
+            let result = "### REVUE MISSION 7A\n\n| ID | Score |\n|---|---|\n";
+            for (const id in scores) {
+                result += `| ${id} | ${scores[id]} |\n`;
+            }
+
+            navigator.clipboard.writeText(result).then(() => {
+                const btn = document.querySelector('.export-btn');
+                const oldText = btn.innerText;
+                btn.innerText = "✅ Scores Copiés !";
+                btn.style.background = "#22c55e";
+                setTimeout(() => {
+                    btn.innerText = oldText;
+                    btn.style.background = "";
+                }, 2000);
+            });
+            alert("Les scores ont été copiés dans le presse-papier.\nColle-les simplement dans le chat pour Gemini.");
+        }
+    </script>
+</body>
+
+</html>

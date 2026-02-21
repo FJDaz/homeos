@@ -1,0 +1,311 @@
+{
+  "$schema": "https://aetherflow.homeos.io/schemas/constitution/v1.0.0",
+  "protocol_version": "1.0.0",
+  "protocol_name": "AETHERFLOW_BOOTSTRAP_PROTOCOL",
+  "ratification_date": "2026-02-11",
+  "arbiter": "Claude Opus 4.5",
+
+  "constitution_hash": "constitution_v1.0.0_2026-02-11",
+  "required_reading": [
+    "CONSTITUTION_AETHERFLOW.md",
+    "LETTRE_CTO_CLAUDE_SONNET_4_5.md",
+    "ARCHITECTURE_SEPARATION_CLAUDE_KIMI.md"
+  ],
+
+  "roles": {
+    "SYSTEM_COGNITIF": {
+      "name": "Système Cognitif (Backend)",
+      "primary_actors": ["Claude"],
+      "responsibilities": [
+        "modele_abstrait_genome",
+        "etat_canonique_json_modifs",
+        "validation_coherence",
+        "persistance",
+        "logique_metier",
+        "inference_semantique",
+        "event_sourcing",
+        "gestion_conflits"
+      ],
+      "forbidden_outputs": [
+        "css_classes",
+        "css_properties",
+        "html_elements",
+        "tailwind_classes",
+        "layout_instructions",
+        "pixel_values",
+        "responsive_breakpoints"
+      ],
+      "allowed_attributes": [
+        "layout_type",
+        "density",
+        "importance",
+        "semantic_role",
+        "accent_color",
+        "border_weight",
+        "visibility"
+      ]
+    },
+    "SYSTEM_RENDU": {
+      "name": "Système de Rendu (Frontend)",
+      "primary_actors": ["KIMI"],
+      "responsibilities": [
+        "html_semantique",
+        "css_styling",
+        "layout_flex_grid",
+        "responsive_design",
+        "typographie",
+        "canvas_fabricjs",
+        "event_handlers",
+        "feedback_visuel",
+        "animations_transitions"
+      ],
+      "forbidden_actions": [
+        "manipulate_GenomeStateManager",
+        "manipulate_ModificationLog",
+        "manipulate_CorpsEntity",
+        "implement_business_rules",
+        "persist_business_state",
+        "validate_data_coherence",
+        "interpret_genome_structure"
+      ],
+      "allowed_actions": [
+        "receive_json_from_api",
+        "interpret_semantic_attributes",
+        "render_visually",
+        "capture_user_events",
+        "send_json_to_api",
+        "optimistic_updates_with_rollback"
+      ]
+    },
+    "ARBITRE": {
+      "name": "Arbitre Constitutionnel",
+      "primary_actors": ["Claude Opus 4.5"],
+      "responsibilities": [
+        "interpret_constitution",
+        "resolve_conflicts",
+        "validate_amendments",
+        "enforce_eternal_clauses"
+      ]
+    }
+  },
+
+  "golden_rules": {
+    "rule_1_hermetic_frontier": {
+      "id": "GOLDEN_RULE_001",
+      "name": "Frontière Hermétique",
+      "description": "Il existe une frontière inviolable entre Système Cognitif et Système de Rendu",
+      "eternal": true,
+      "checks": [
+        {
+          "actor": "SYSTEM_COGNITIF",
+          "assertion": "output_contains_no_css",
+          "violation_level": "CRITICAL"
+        },
+        {
+          "actor": "SYSTEM_RENDU",
+          "assertion": "code_contains_no_business_logic",
+          "violation_level": "CRITICAL"
+        }
+      ]
+    },
+    "rule_2_no_encroachment": {
+      "id": "GOLDEN_RULE_002",
+      "name": "Aucun Empiètement",
+      "description": "Communication uniquement via API REST JSON",
+      "eternal": true,
+      "checks": [
+        {
+          "assertion": "all_communication_via_rest_api",
+          "violation_level": "MAJOR"
+        },
+        {
+          "assertion": "no_direct_class_access_across_frontier",
+          "violation_level": "CRITICAL"
+        }
+      ]
+    },
+    "rule_3_single_source_of_truth": {
+      "id": "GOLDEN_RULE_003",
+      "name": "Single Source of Truth",
+      "description": "JSON Modifs est l'unique source de vérité",
+      "eternal": true,
+      "checks": [
+        {
+          "assertion": "json_modifs_immutable_history",
+          "violation_level": "CRITICAL"
+        },
+        {
+          "assertion": "rollback_always_possible",
+          "violation_level": "MAJOR"
+        }
+      ]
+    }
+  },
+
+  "api_contract": {
+    "base_path": "/api",
+    "endpoints": {
+      "state": [
+        {"method": "GET", "path": "/genome/:id", "description": "JSON du genome complet"},
+        {"method": "GET", "path": "/genome/:id/state", "description": "État courant reconstruit"},
+        {"method": "GET", "path": "/schema", "description": "JSON Schema du contrat"}
+      ],
+      "modifications": [
+        {"method": "POST", "path": "/modifications", "description": "Applique une modification"},
+        {"method": "GET", "path": "/modifications/history", "description": "Historique"},
+        {"method": "POST", "path": "/snapshot", "description": "Crée un checkpoint"}
+      ],
+      "navigation": [
+        {"method": "POST", "path": "/drilldown/enter", "description": "Entre dans un niveau"},
+        {"method": "POST", "path": "/drilldown/exit", "description": "Sort d'un niveau"},
+        {"method": "GET", "path": "/breadcrumb", "description": "Breadcrumb actuel"}
+      ],
+      "components": [
+        {"method": "GET", "path": "/components/contextual", "description": "Composants disponibles"},
+        {"method": "GET", "path": "/components/:id", "description": "Détails composant"},
+        {"method": "GET", "path": "/components/elite", "description": "Composants Tier 1"}
+      ]
+    },
+    "path_format": {
+      "pattern": "n0[i].n1[j].n2[k].n3[l]",
+      "regex": "^(n\\d+\\[\\d+\\]\\.?)+$",
+      "example": "n0[0].n1[2].n2[1]"
+    }
+  },
+
+  "semantic_properties": {
+    "layout_type": {
+      "type": "enum",
+      "values": ["grid", "flex", "stack", "absolute"],
+      "levels": ["N0", "N1", "N2"]
+    },
+    "density": {
+      "type": "enum",
+      "values": ["compact", "normal", "airy"],
+      "levels": ["N0", "N1", "N2", "N3"]
+    },
+    "importance": {
+      "type": "enum",
+      "values": ["primary", "secondary", "tertiary"],
+      "levels": ["N1", "N2", "N3"]
+    },
+    "semantic_role": {
+      "type": "enum",
+      "values": ["navigation", "content", "action", "feedback", "header", "footer"],
+      "levels": ["N0", "N1", "N2"]
+    },
+    "accent_color": {
+      "type": "string",
+      "format": "hex_color",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "levels": ["N0", "N1", "N2", "N3"]
+    },
+    "border_weight": {
+      "type": "integer",
+      "min": 0,
+      "max": 10,
+      "levels": ["N1", "N2", "N3"]
+    },
+    "visibility": {
+      "type": "enum",
+      "values": ["visible", "hidden", "collapsed"],
+      "levels": ["N0", "N1", "N2", "N3"]
+    }
+  },
+
+  "bootstrap_checklist": {
+    "phase_1_reading": {
+      "required": true,
+      "items": [
+        {"document": "CONSTITUTION_AETHERFLOW.md", "mandatory": true},
+        {"document": "LETTRE_CTO_CLAUDE_SONNET_4_5.md", "mandatory": true},
+        {"document": "ARCHITECTURE_SEPARATION_CLAUDE_KIMI.md", "mandatory": true},
+        {"document": "LETTRE_ANALYSES_POUR_KIMI.md", "mandatory": false, "condition": "role == SYSTEM_RENDU"}
+      ]
+    },
+    "phase_2_declaration": {
+      "required": true,
+      "template": {
+        "model_name": "string",
+        "declared_role": "SYSTEM_COGNITIF | SYSTEM_RENDU | ARBITRE",
+        "territory": ["array of responsibilities"],
+        "forbidden_actions": ["array of forbidden actions"],
+        "timestamp": "ISO8601"
+      }
+    },
+    "phase_3_oath": {
+      "required": true,
+      "commitments": [
+        "respect_hermetic_frontier",
+        "no_css_if_cognitif",
+        "no_business_logic_if_rendu",
+        "use_rest_api_only",
+        "report_violations_immediately"
+      ]
+    }
+  },
+
+  "compliance_verification": {
+    "system_cognitif_checks": [
+      {"id": "CC001", "assertion": "output_contains_no_css", "severity": "CRITICAL"},
+      {"id": "CC002", "assertion": "output_contains_no_html", "severity": "CRITICAL"},
+      {"id": "CC003", "assertion": "output_contains_no_tailwind", "severity": "CRITICAL"},
+      {"id": "CC004", "assertion": "uses_only_semantic_attributes", "severity": "MAJOR"}
+    ],
+    "system_rendu_checks": [
+      {"id": "CR001", "assertion": "no_direct_access_GenomeStateManager", "severity": "CRITICAL"},
+      {"id": "CR002", "assertion": "no_business_rules_implemented", "severity": "CRITICAL"},
+      {"id": "CR003", "assertion": "no_local_business_state_persistence", "severity": "MAJOR"},
+      {"id": "CR004", "assertion": "all_api_calls_via_rest", "severity": "MAJOR"}
+    ]
+  },
+
+  "violation_levels": {
+    "MINOR": {
+      "description": "Violation légère, correction immédiate requise",
+      "action": "correct_and_continue"
+    },
+    "MAJOR": {
+      "description": "Violation significative, review requise",
+      "action": "stop_review_correct"
+    },
+    "CRITICAL": {
+      "description": "Violation de clause d'éternité, rollback immédiat",
+      "action": "stop_rollback_escalate"
+    }
+  },
+
+  "eternal_clauses": [
+    "Article 1 — Frontière Ontologique",
+    "Article 2 — Single Source of Truth",
+    "Article 3 — Attributs Sémantiques vs Attributs de Rendu",
+    "Article 9 — Les 3 Règles d'Or"
+  ],
+
+  "governance": {
+    "hierarchy": [
+      {"rank": 1, "role": "CTO Humain", "actor": "François-Jean Dazin", "authority": "decisions_strategiques_finales"},
+      {"rank": 2, "role": "Arbitre Constitutionnel", "actor": "Claude Opus 4.5", "authority": "interpretation_constitution"},
+      {"rank": 3, "role": "Lead Technique Backend", "actor": "Claude Sonnet", "authority": "decisions_implementation_backend"},
+      {"rank": 3, "role": "Lead Technique Frontend", "actor": "KIMI", "authority": "decisions_implementation_frontend"},
+      {"rank": 4, "role": "Contributeur", "actor": "autres instances", "authority": "propositions_only"}
+    ],
+    "conflict_resolution": [
+      {"step": 1, "action": "escalate_to_arbiter"},
+      {"step": 2, "action": "if_unresolved_escalate_to_cto"},
+      {"step": 3, "action": "cto_decision_final_and_executory"}
+    ]
+  },
+
+  "amendment_procedure": {
+    "steps": [
+      {"step": 1, "action": "written_proposal_documented"},
+      {"step": 2, "action": "impact_analysis"},
+      {"step": 3, "action": "arbiter_approval"},
+      {"step": 4, "action": "cto_validation"},
+      {"step": 5, "action": "version_increment"}
+    ],
+    "protected_articles": ["Article 1", "Article 2", "Article 3", "Article 9"],
+    "protection_type": "eternal_clause_no_amendment_possible"
+  }
+}

@@ -877,13 +877,13 @@ Your reasoning will be used to guide the actual code generation step.
                         has_python_files = True
                         break
 
-            # Surgical mode: ONLY if files exist with content AND in BUILD/DOUBLE-CHECK mode
-            # Disabled for new files (content is None or empty) and FAST mode
+            # Surgical mode: ONLY for refactoring (modifying existing code).
+            # code_generation = new file or full rewrite → overwrite direct, no surgical JSON needed.
             surgical_mode = (
                 has_existing_code and
                 self.execution_mode in ["BUILD", "DOUBLE-CHECK"] and
                 has_python_files and
-                step.type in ['refactoring', 'code_generation'] and
+                step.type == 'refactoring' and
                 step.context.get('surgical_mode', True)  # Allow disabling via context
             )
 

@@ -82,32 +82,8 @@ class VerifyFixWorkflow:
         finally:
             await self.orchestrator.close()
 
-        # Phase 2: Application du code aux fichiers
-        logger.info("Phase 2: Applying generated code to source files")
-        apply_result = await proto._apply_generated_code(
-            plan=plan,
-            fast_result=build_result,
-            output_dir=build_dir,
-        )
-        if not apply_result.get("success", True):
-            logger.warning(f"Some files could not be applied: {apply_result.get('failed_files', [])}")
-            for file_path in apply_result.get("failed_files", []):
-                try:
-                    from ..core.error_survey import log_aetherflow_error
-                    log_aetherflow_error(
-                        title=f"Apply failed (VerifyFix): {Path(file_path).name}",
-                        nature="apply_failed",
-                        proposed_solution="Vérifier le step output et le mapping bloc→fichier (claude_helper).",
-                        raw_error=f"Failed to apply code to {file_path}",
-                        file_path=file_path,
-                        plan_path=str(plan_path),
-                        workflow="VerifyFix",
-                    )
-                except Exception as survey_err:
-                    logger.debug(f"Error survey log failed: {survey_err}")
-
-        # Phase 3: Validation DOUBLE-CHECK
-        logger.info("Phase 3: Validating with DOUBLE-CHECK (Gemini)")
+        # Phase 2: Validation DOUBLE-CHECK (avant apply)
+        logger.info("Phase 2: Validating with DOUBLE-CHECK before apply")
         update_plan_status(phase="validation")
         self.orchestrator = Orchestrator(execution_mode="DOUBLE-CHECK")
         proto.orchestrator = self.orchestrator  # _validate_results uses proto.orchestrator
@@ -129,11 +105,39 @@ class VerifyFixWorkflow:
             + validation_result.get("cost_usd", 0.0)
         )
 
+        apply_result = {"success": False, "files_applied": 0, "applied_files": [], "failed_files": []}
         fix_rounds_done = 0
         fix_result = None
         validation_after_fix = None
 
-        # Phase 4–6: Correction si nécessaire (jusqu’à max_fix_rounds)
+        # Phase 3: Apply si validation OK, sinon on passe au fix
+        if validation_result.get("success", False):
+            logger.info("Phase 3: Validation OK — applying code to source files")
+            apply_result = await proto._apply_generated_code(
+                plan=plan,
+                fast_result=build_result,
+                output_dir=build_dir,
+            )
+            if not apply_result.get("success", True):
+                logger.warning(f"Some files could not be applied: {apply_result.get('failed_files', [])}")
+                for file_path in apply_result.get("failed_files", []):
+                    try:
+                        from ..core.error_survey import log_aetherflow_error
+                        log_aetherflow_error(
+                            title=f"Apply failed (VerifyFix): {Path(file_path).name}",
+                            nature="apply_failed",
+                            proposed_solution="Vérifier le step output et le mapping bloc→fichier (claude_helper).",
+                            raw_error=f"Failed to apply code to {file_path}",
+                            file_path=file_path,
+                            plan_path=str(plan_path),
+                            workflow="VerifyFix",
+                        )
+                    except Exception as survey_err:
+                        logger.debug(f"Error survey log failed: {survey_err}")
+        else:
+            logger.info("Phase 3: Validation KO — apply bloqué, passage au fix")
+
+        # Phase 4–6: Correction si nécessaire (jusqu'à max_fix_rounds)
         invalid_details = [
             d
             for d in validation_result.get("validation_details", [])
@@ -179,22 +183,9 @@ class VerifyFixWorkflow:
                 finally:
                     await self.orchestrator.close()
 
-                # Phase 5: Application des corrections
-                if fix_result and fix_result.get("results"):
-                    logger.info("Phase 5: Applying corrections to source files")
-                    fix_plan_obj = Plan(fix_plan)
-                    apply_fix = await proto._apply_generated_code(
-                        plan=fix_plan_obj,
-                        fast_result=fix_result,
-                        output_dir=fix_dir,
-                    )
-                    logger.info(
-                        f"Applied corrections: {apply_fix.get('files_applied', 0)} file(s)"
-                    )
-
-                # Phase 6: Re-validation
+                # Phase 5: Re-validation du fix (avant apply)
                 if fix_result:
-                    logger.info("Phase 6: Re-validating after corrections")
+                    logger.info("Phase 5: Re-validating fix before apply")
                     self.orchestrator = Orchestrator(execution_mode="DOUBLE-CHECK")
                     proto.orchestrator = self.orchestrator
                     try:
@@ -212,6 +203,20 @@ class VerifyFixWorkflow:
                         total_cost_usd += validation_after_fix.get("cost_usd", 0.0)
                     finally:
                         await self.orchestrator.close()
+
+                    # Phase 6: Apply fix si re-validation OK
+                    if validation_after_fix and validation_after_fix.get("success", False) and fix_result.get("results"):
+                        logger.info("Phase 6: Fix validation OK — applying corrections")
+                        fix_plan_obj = Plan(fix_plan)
+                        apply_fix = await proto._apply_generated_code(
+                            plan=fix_plan_obj,
+                            fast_result=fix_result,
+                            output_dir=fix_dir,
+                        )
+                        apply_result = apply_fix
+                        logger.info(f"Applied corrections: {apply_fix.get('files_applied', 0)} file(s)")
+                    else:
+                        logger.warning("Phase 6: Fix validation KO — apply bloqué")
 
         all_valid = validation_result.get("success", False)
         if validation_after_fix is not None:

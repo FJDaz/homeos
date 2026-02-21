@@ -94,7 +94,7 @@ Ne connaît **jamais** : Tailwind, breakpoints, flex/grid, animations, pixels.
 
 Contrôle exclusif :
 - HTML sémantique, CSS, layout, responsive
-- Canvas (Fabric.js), drag & drop, sélection
+- **SVG natif**, drag & drop, sélection
 - Animations, transitions, états visuels
 - Events DOM (click, hover, drag, drop)
 
@@ -412,7 +412,7 @@ RÈGLES NON-NÉGOCIABLES :
 | **ROADMAP_ACHIEVED.md** | Archive append-only des phases terminées |
 | **ACTOR** | Qui exécute la mission : CLAUDE, KIMI, ou BOTH |
 | **MODE** | Mode AetherFlow obligatoire pour la mission |
-| **CODE DIRECT — FJD** | Seule exception à l'obligation des modes AetherFlow |
+| **CODE DIRECT — FJD** | Seule exception à l'obligation des modes AetherFlow. Autorise Claude à intervenir sur du code Frontend pour des refontes structurelles complexes (ex: Pivot SVG) sous signature explicite de François-Jean. |
 
 ---
 

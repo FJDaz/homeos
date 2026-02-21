@@ -180,3 +180,78 @@ project_output/
 | 4 | Adaptation 8 styles | Phase 2 | Haute |
 | 5 | Cockpit Sullivan (Fabric.js) | Phase 2+4 | Moyenne |
 | 6 | Render final en local | Phase 4+5 | Basse (aboutissement) |
+
+---
+
+## PHASE 5D (Stenciler V3) — Enrichissement Sémantique Genome N1
+STATUS: BACKLOG
+DÉPEND DE: Phase 5C validée par FJD
+DATE NOTÉE: 2026-02-20
+PROPOSÉ PAR: Gemini (Antigravity) — session 2026-02-20
+
+### Contexte
+
+En Mission 5C, Gemini infère le layout depuis `corps.id` (pattern matching). Cette inférence fonctionne mais est fragile — elle repose sur des noms connus.
+
+Gemini a identifié les champs sémantiques qui lui permettraient de passer de "devinette" à "exécution précise" :
+- `importance` (primary|secondary|tertiary) : quel organe prend 60% de l'espace
+- `structural_role` (dashboard|form|feed|gallery) : quel pattern de layout
+- `density_hint` (compact|normal|airy) : espacement et taille des micro-wireframes
+- `intent` (analytical|creative|transactional) : "vibe" visuelle (froid backend vs chaud brainstorm)
+
+Ces champs existent dans `API_CONTRACT_SCHEMA.json` mais ne sont pas peuplés dans le genome réel.
+
+### Ce qui doit être fait
+
+1. **Backend** : Enrichir `genome_generator.py` pour peupler ces champs au niveau N1 à chaque session
+2. **Ou** : Script one-shot pour enrichir `Frontend/2. GENOME/genome_reference.json` (fixture dev) manuellement
+3. Une fois peuplés → Canvas.feature.js peut utiliser ces attributs au lieu de l'inférence
+
+### Bénéfice
+
+Gemini devient un pur exécuteur de la vision UX de FJD — chaque organe a son rôle déclaré, pas inféré.
+
+---
+
+## PHASE 6 (Stenciler V3) — Enrichissement Genome : Garantir la granularité N0→N3
+
+STATUS: BACKLOG
+DÉPEND DE: Phase 5 Stenciler V3 (drill-down fonctionnel)
+ACTOR: CLAUDE (Backend)
+DATE NOTÉE: 2026-02-19
+
+### Contexte
+
+Audit 2026-02-19 révèle que le genome live (`/api/genome`) est très sparse :
+- Brainstorm : 2 organes (N1), 1 N2 chacun, 2 N3 par N2
+- Backend : 1 organe seulement
+- Frontend / Deploy : structure similaire
+
+Le stenciler V3 (Phase 5) a été codé avec des fallbacks gracieux pour ce cas.
+Mais la richesse du drill-down dépend directement de la richesse du genome.
+
+### Problème
+
+Le `genome_generator.py` produit un genome aussi riche que les sessions d'orchestration traitées.
+Un projet en début de vie → genome maigre → drill-down pauvre.
+
+Par ailleurs, les champs sémantiques utiles (`visual_hint`, `layout_hint`, `description_ui`) n'existent
+qu'au niveau N3 — ils ne sont pas propagés/résumés aux niveaux N1/N2.
+
+### Ce qui doit être fait
+
+1. **Vérifier `genome_generator.py`** : s'assure-t-il de peupler N1, N2, N3 à chaque session ?
+   Ou ne peuple-t-il que N0 et quelques N1 au fil des sessions ?
+
+2. **Ajouter un champ `visual_category` en N1** (optionnel) : permettrait au stenciler d'inférer
+   le type de mini-wireframe sans descendre jusqu'en N3.
+   Valeurs possibles : `"table"`, `"form"`, `"navigation"`, `"dashboard"`, `"flow"`
+
+3. **Genome de dev** : documenter l'usage de `Frontend/2. GENOME/genome_reference.json`
+   comme fixture de test pour le stenciler (genome riche, stable, pas dépendant de la prod).
+
+### Fichiers concernés
+
+- `Backend/Prod/core/genome_generator.py`
+- `Frontend/2. GENOME/genome_reference.json` (fixture dev)
+- `Backend/Prod/sullivan/stenciler/api.py` (endpoint `/api/genome`)

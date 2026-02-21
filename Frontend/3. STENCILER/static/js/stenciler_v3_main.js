@@ -12,6 +12,7 @@ import ColorPaletteFeature from './features/ColorPalette.feature.js';
 import BorderSliderFeature from './features/BorderSlider.feature.js';
 import APIStatusFeature from './features/APIStatus.feature.js';
 import ComponentsZoneFeature from './features/ComponentsZone.feature.js';
+import PersistenceFeature from './features/Persistence.feature.js';
 
 console.log('[DEBUG] Imports completed');
 
@@ -22,8 +23,9 @@ const FEATURE_CONFIG = [
   { id: 'style', class: StyleSectionFeature, slot: Lexicon.slots.style },
   { id: 'canvas', class: CanvasFeature, slot: Lexicon.slots.canvas },
   { id: 'preview', class: PreviewBandFeature, slot: Lexicon.slots.preview },
-  { id: 'components', class: ComponentsZoneFeature, slot: Lexicon.slots.main },
+  { id: 'components', class: ComponentsZoneFeature, slot: Lexicon.slots.sidebar_right },
   { id: 'status', class: APIStatusFeature, slot: Lexicon.slots.footer },
+  { id: 'persistence', class: PersistenceFeature, slot: 'body' },
 ];
 
 class StencilerApp {
@@ -55,8 +57,10 @@ class StencilerApp {
     console.log('[DEBUG] Loading Genome...');
     try {
       const resp = await fetch('/api/genome');
-      this.genome = await resp.json();
-      console.log('[DEBUG] Genome loaded');
+      const data = await resp.json();
+      // Supporte le format {genome: {...}} ou le genome direct
+      this.genome = data.genome || data;
+      console.log('[DEBUG] Genome loaded', this.genome);
     } catch (e) {
       console.error('[DEBUG] Genome load failed', e);
       this.genome = { n0_phases: [] };

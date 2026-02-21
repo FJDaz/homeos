@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AETHERFLOW API Contract Schema",
-  "version": "1.0.0",
-  "description": "Contrat d'interface entre Système Cognitif (Backend) et Système de Rendu (Frontend) - Conforme à CONSTITUTION_AETHERFLOW v1.0.0",
+  "version": "1.1.0",
+  "description": "Contrat d'interface Pristine Mode (Sullivan) - Conforme à CONSTITUTION_AETHERFLOW v3.1.0",
   "definitions": {
     "Path": {
       "type": "string",
@@ -390,6 +390,18 @@
     },
     "GET /api/genome/:id/state": {
       "description": "État courant reconstruit depuis les events",
+      "response": {
+        "$ref": "#/endpoints/GET /api/genome/:id/response"
+      }
+    },
+    "GET /api/genome/pruned/:id": {
+      "description": "Récupère le genome élagué (pruned) pour un niveau spécifique",
+      "query": {
+        "level": {
+          "type": "integer",
+          "description": "Niveau d'élagage (0=Corps, 1=Organe, etc.)"
+        }
+      },
       "response": {
         "$ref": "#/endpoints/GET /api/genome/:id/response"
       }

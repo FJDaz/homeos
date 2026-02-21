@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Step 4 - IR + Genome</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f0f0f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background: white;
+            padding: 12px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+        }
+        
+        h1 { font-size: 18px; }
+        
+        .stats {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .stat {
+            background: #e0e0e0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+        
+        .main {
+            display: flex;
+            height: calc(100vh - 100px);
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        .col {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        /* Cards */
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        /* HTTP Methods - Colors */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .GET { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .POST { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .PUT { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+        .PATCH { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+        .DELETE { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .endpoint-path {
+            font-family: monospace;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .meta {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .wireframe {
+            margin-top: 6px;
+            padding: 6px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .component {
+            margin-top: 6px;
+            text-align: right;
+            font-size: 11px;
+            color: #999;
+        }
+        
+        /* Tree */
+        .tree-item {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .tree-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .sub-item {
+            margin-left: 15px;
+            padding-left: 10px;
+            border-left: 2px solid #ddd;
+            margin-top: 6px;
+        }
+        
+        .sub-sub-item {
+            margin-left: 15px;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        
+        .sub-sub-info {
+            font-size: 11px;
+            color: #999;
+            margin-left: 15px;
+        }
+        
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #ddd;
+            padding: 12px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        button:hover { background: #0056b3; }
+        
+        @media (max-width: 768px) {
+            .main { flex-direction: column; }
+            .col { flex: none; height: 50%; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Step 4: IR + Genome View</h1>
+        <div class="stats">
+            <span class="stat">{{ ir_count }} endpoints</span>
+            <span class="stat">{{ corps_count }} corps</span>
+        </div>
+    </header>
+
+    <div class="main">
+        <div class="col">
+            <h2>IR Visuel</h2>
+            {% for ep in ir_endpoints %}
+            <div class="card">
+                <span class="badge {{ ep.method }}">{{ ep.method }}</span>
+                <span class="endpoint-path">{{ ep.path }}</span>
+                <div class="meta">{{ ep.visual_hint }}</div>
+                {% if ep.wireframe %}
+                <div class="wireframe">{{ ep.wireframe }}</div>
+                {% endif %}
+                <div class="component">-> {{ ep.component_ref }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col">
+            <h2>Genome Structure</h2>
+            {% for corps in genome_corps %}
+            <div class="tree-item">
+                <div class="tree-header">
+                    <span>C: {{ corps.name }}</span>
+                    <span class="stat">{{ corps.organes|length }} organes</span>
+                </div>
+                {% for organe in corps.organes %}
+                <div class="sub-item">
+                    <div>O: {{ organe.name }}</div>
+                    {% for atome in organe.atomes %}
+                    <div class="sub-sub-item">
+                        A: {{ atome.name }}
+                    </div>
+                    <div class="sub-sub-info">
+                        {{ atome.method }} {{ atome.endpoint }} -> {{ atome.component_ref }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <button onclick="alert('Valider et passer au step 5')">VALIDER -></button>
+    </footer>
+</body>
+</html>

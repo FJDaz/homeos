@@ -1,0 +1,142 @@
+{
+  "task_id": "stenciler_v3_6c_canvas_sidebar_sync",
+  "description": "Mission 6C — Synchronisation Canvas ↔ Sidebar lors des drill-down double-click. Quand le Canvas drille N+1 par double-click, la Sidebar (ComponentsZone) doit suivre automatiquement. Deux fichiers touchés : Canvas.feature.js (dispatch events depuis _drillInto et _drillUp) + ComponentsZone.feature.js (listeners cellule:selected et corps:drill-back).",
+  "metadata": {
+    "created_at": "2026-02-20T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Stenciler V3 — Modular Feature Architecture. SVG natif (pas Fabric.js). Genome N0→N1→N2→N3. Event bus CustomEvent pour communication inter-features.",
+    "mission": "6C",
+    "phase": "Phase 6 — Navigation Canvas Interactive",
+    "actor": "GEMINI",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire Canvas.feature.js et ComponentsZone.feature.js pour confirmer l'état actuel des méthodes _drillInto, _drillUp et init avant de patcher.",
+      "type": "analysis",
+      "complexity": 0.2,
+      "estimated_tokens": 400,
+      "dependencies": [],
+      "validation_criteria": [
+        "_drillInto(id, level) identifié dans Canvas.feature.js (lignes 249-254)",
+        "_drillUp() identifié dans Canvas.feature.js (lignes 256-266)",
+        "init(genome) identifié dans ComponentsZone.feature.js avec les listeners existants"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js",
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "PATCH Canvas.feature.js — Remplacer les méthodes _drillInto et _drillUp pour dispatcher des CustomEvents vers la Sidebar après chaque changement de niveau. _drillInto level 1 dispatche 'organe:selected', level 2 dispatche 'cellule:selected'. _drillUp dispatche 'corps:drill-back' si stack vide, ou 'organe:selected' si retour level 1.",
+      "type": "patch",
+      "complexity": 0.6,
+      "estimated_tokens": 900,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "_drillInto dispatche 'organe:selected' avec { organeId, genome } après _renderOrgane()",
+        "_drillInto dispatche 'cellule:selected' avec { celluleId } après _renderCellule()",
+        "_drillUp dispatche 'corps:drill-back' avec { corpsId } quand drillStack vide",
+        "_drillUp dispatche 'organe:selected' avec { organeId, genome } quand retour level 1",
+        "Guard anti-doublon drillStack.some() préservé",
+        "Canvas.feature.js reste < 300 lignes",
+        "Aucune régression : single click toujours fonctionnel via _setupSelectionHandlers"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js"
+        ],
+        "input_files": [
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json",
+          "Frontend/3. STENCILER/static/css/stenciler.css"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "patch": {
+          "position": "replace",
+          "marker_start": "    _drillInto(id, level) {",
+          "marker_end": "    _selectNode(node) {"
+        },
+        "replacement": "_drillInto(id, level) {\n        if (this.drillStack.some(s => s.id === id)) return;\n        this.drillStack.push({ level, id });\n        if (level === 1) {\n            this._renderOrgane(id);\n            document.dispatchEvent(new CustomEvent('organe:selected', {\n                detail: { organeId: id, genome: window.stencilerApp?.genome }\n            }));\n        }\n        if (level === 2) {\n            this._renderCellule(id);\n            document.dispatchEvent(new CustomEvent('cellule:selected', {\n                detail: { celluleId: id }\n            }));\n        }\n    }\n\n    _drillUp() {\n        if (this.drillStack.length === 0) return;\n        this.drillStack.pop();\n\n        if (this.drillStack.length === 0) {\n            if (this.currentCorpsId) {\n                this._renderCorps(this.currentCorpsId);\n                document.dispatchEvent(new CustomEvent('corps:drill-back', {\n                    detail: { corpsId: this.currentCorpsId }\n                }));\n            }\n        } else {\n            const prev = this.drillStack[this.drillStack.length - 1];\n            if (prev.level === 1) {\n                this._renderOrgane(prev.id);\n                document.dispatchEvent(new CustomEvent('organe:selected', {\n                    detail: { organeId: prev.id, genome: window.stencilerApp?.genome }\n                }));\n            }\n        }\n    }\n\n    "
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "PATCH ComponentsZone.feature.js — Ajouter deux listeners dans init() : 'cellule:selected' → onCelluleSelected(celluleId) et 'corps:drill-back' → onCorpsOpen(corpsId). Insérer avant le console.log de fin d'init. ComponentsZone doit rester < 200 lignes.",
+      "type": "patch",
+      "complexity": 0.4,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Listener 'cellule:selected' ajouté dans init()",
+        "Listener 'corps:drill-back' ajouté dans init()",
+        "onCelluleSelected() et onCorpsOpen() déjà existants — aucun ajout de méthode nécessaire",
+        "ComponentsZone.feature.js reste < 200 lignes",
+        "Listeners 'corps:open' et 'organe:selected' existants préservés (aucune régression)"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "input_files": [
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json",
+          "Frontend/3. STENCILER/static/css/stenciler.css"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "patch": {
+          "position": "before",
+          "marker": "    console.log('Components Zone initialized (Canvas-Centric)');",
+          "idempotent": true
+        },
+        "replacement": "    // Sync avec drill Canvas (6C)\n    document.addEventListener('cellule:selected', (e) => {\n      const { celluleId } = e.detail;\n      this.onCelluleSelected(celluleId);\n    });\n\n    document.addEventListener('corps:drill-back', (e) => {\n      const { corpsId } = e.detail;\n      this.onCorpsOpen(corpsId);\n    });\n\n"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "VALIDATION — Vérifier que les deux fichiers patchés sont cohérents : compter les lignes (< 300L Canvas, < 200L ComponentsZone), confirmer que les nouveaux events ('cellule:selected', 'corps:drill-back') sont bien dispatchers ET écoutés, et que les events existants ('organe:selected', 'corps:open') sont préservés.",
+      "type": "analysis",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "Canvas.feature.js : _drillInto dispatche 2 events, _drillUp dispatche 2 events",
+        "ComponentsZone.feature.js : 4 listeners total (corps:open, organe:selected, cellule:selected, corps:drill-back)",
+        "Canvas.feature.js < 300 lignes",
+        "ComponentsZone.feature.js < 200 lignes",
+        "Aucun import ajouté (vanilla JS, event bus natif DOM)"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js",
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm"
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "Double click organe sur canvas → sidebar affiche immédiatement la vue N2 cells de cet organe",
+      "Double click cellule sur canvas → sidebar affiche immédiatement la vue N3 atomes de cette cellule",
+      "Double click fond canvas (drill-up) → sidebar retourne à la vue du niveau précédent",
+      "Simple click sur organe → sidebar mise à jour (aucune régression 6A/6B)",
+      "Level indicator SVG toujours synchrone avec le niveau canvas"
+    ],
+    "constraints": [
+      "Canvas.feature.js < 300 lignes",
+      "ComponentsZone.feature.js < 200 lignes",
+      "Aucune nouvelle dépendance externe",
+      "Aucune modification des fichiers .py serveur",
+      "Communication inter-features via CustomEvent uniquement (pas d'import direct)"
+    ],
+    "rapport_dans_roadmap": "Remplacer la section 'Mission 6C' dans ROADMAP.md par le rapport d'exécution. NE PAS écrire la mission suivante (rôle de Claude)."
+  }
+}

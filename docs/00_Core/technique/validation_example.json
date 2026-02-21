@@ -1,0 +1,13 @@
+{
+  "is_valid": false,
+  "score": 0.65,
+  "feedback": "Le code généré est fonctionnel mais présente quelques problèmes :\n\n1. La gestion d'erreurs est basique - pas de gestion des cas limites\n2. Les docstrings sont incomplètes\n3. Pas de validation des types d'entrée\n4. Performance : l'agrégation pourrait être optimisée pour de grandes listes",
+  "suggestions": [
+    "Ajouter une validation des types d'entrée avec isinstance()",
+    "Améliorer les docstrings avec des exemples",
+    "Ajouter une gestion d'erreurs pour les cas limites (liste vide, None)",
+    "Optimiser l'agrégation avec des générateurs pour de grandes listes"
+  ],
+  "needs_correction": true,
+  "correction_prompt": "Corrige le code pour :\n1. Ajouter une validation des types d'entrée\n2. Améliorer les docstrings avec exemples\n3. Gérer les cas limites (liste vide, None)\n4. Optimiser l'agrégation pour de grandes listes"
+}

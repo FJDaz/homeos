@@ -1,0 +1,52 @@
+{
+  "temporary_outputs": [],
+  "local_cache": [],
+  "elite_library": {
+    "path": "/Users/francois-jeandazin/AETHERFLOW/components/elite",
+    "active_count": 0,
+    "archived_count": 0,
+    "components": []
+  },
+  "devmode_results": [
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/output/homeos_frontend/sullivan_result.json",
+      "name": "homeos_frontend",
+      "size": 1363,
+      "modified": "2026-01-28T00:34:29.434093"
+    }
+  ],
+  "designermode_results": [],
+  "plans": [
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/sullivan_phase2_designer_mode.json",
+      "name": "sullivan_phase2_designer_mode.json",
+      "size": 6881,
+      "type": "source"
+    },
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/sullivan_phase4_scoring.json",
+      "name": "sullivan_phase4_scoring.json",
+      "size": 7251,
+      "type": "source"
+    },
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/sullivan_phase1_dev_mode.json",
+      "name": "sullivan_phase1_dev_mode.json",
+      "size": 9556,
+      "type": "source"
+    },
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/sullivan_phase3_generator.json",
+      "name": "sullivan_phase3_generator.json",
+      "size": 4446,
+      "type": "source"
+    },
+    {
+      "path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Notebooks/benchmark_tasks/sullivan_phase5_features.json",
+      "name": "sullivan_phase5_features.json",
+      "size": 8447,
+      "type": "source"
+    }
+  ],
+  "validation_outputs": []
+}
