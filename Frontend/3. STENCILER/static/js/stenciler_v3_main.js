@@ -1,5 +1,10 @@
 console.log('[DEBUG] Script stenciler_v3_main.js LOADED');
 
+import { G } from './GRID.js';
+import { resolveSubstyle } from './features/Nuance.feature.js';
+window.G = G; // Exposé globalement pour les features et le debug console
+window.resolveSubstyle = resolveSubstyle;
+
 import Lexicon from './Lexicon.js';
 import HeaderFeature from './features/Header.feature.js';
 import NavigationFeature from './features/Navigation.feature.js';

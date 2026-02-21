@@ -11,9 +11,10 @@ export const WireframeLibrary = {
      * @param {string} color - Couleur d'accentuation (hex ou var)
      * @param {number} width - Largeur cible
      * @param {number} height - Hauteur cible
+     * @param {string} label - Label text to display (optional)
      * @returns {string|null} - Snippet SVG ou null
      */
-    getSVG(hint, color = 'var(--accent-bleu)', width = 280, height = 180) {
+    getSVG(hint, color = 'var(--accent-bleu)', width = 280, height = 180, label = '') {
         // Ratio de scale proportionnel par rapport à la base 280x180
         const scale = Math.min(width / 280, height / 180);
 
@@ -85,9 +86,16 @@ export const WireframeLibrary = {
             case 'export':
             case 'download':
             case 'launch-button':
+            case 'launch':
+                const btnLabel = label || hint || 'ACTION';
+                const fontSize = btnLabel.length > 12 ? Math.max(12, 32 - (btnLabel.length - 12) * 1.5) : 32;
                 return wrapper(`
+                    <!-- Shadow / Volume -->
+                    <rect x="0" y="55" width="280" height="80" rx="40" fill="rgba(0,0,0,0.15)" />
                     <rect x="0" y="50" width="280" height="80" rx="40" fill="${color}" />
-                    <text x="140" y="98" font-size="32" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">${hint.toUpperCase()}</text>
+                    <!-- Inset highlight -->
+                    <rect x="5" y="55" width="270" height="70" rx="35" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+                    <text x="140" y="98" font-size="${fontSize}" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">${btnLabel}</text>
                 `);
 
             case 'upload':
@@ -102,17 +110,17 @@ export const WireframeLibrary = {
             case 'session':
                 return wrapper(`
                     <rect x="30" y="40" width="105" height="45" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <rect x="30" y="40" width="105" height="8" rx="4 4 0 0" fill="${color}" />
+                    <rect x="30" y="40" width="105" height="8" rx="4" fill="${color}" />
                     <rect x="40" y="58" width="85" height="4" rx="1" fill="var(--border-subtle)" />
                     <rect x="40" y="68" width="60" height="4" rx="1" fill="var(--border-subtle)" />
                     <rect x="145" y="40" width="105" height="45" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <rect x="145" y="40" width="105" height="8" rx="4 4 0 0" fill="var(--accent-vert)" />
+                    <rect x="145" y="40" width="105" height="8" rx="4" fill="var(--accent-vert)" />
                     <rect x="155" y="58" width="85" height="4" rx="1" fill="var(--border-subtle)" />
                     <rect x="155" y="68" width="60" height="4" rx="1" fill="var(--border-subtle)" />
                     <rect x="30" y="95" width="105" height="45" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <rect x="30" y="95" width="105" height="8" rx="4 4 0 0" fill="var(--accent-rose)" />
+                    <rect x="30" y="95" width="105" height="8" rx="4" fill="var(--accent-rose)" />
                     <rect x="145" y="95" width="105" height="45" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <rect x="145" y="95" width="105" height="8" rx="4 4 0 0" fill="var(--accent-orange)" />
+                    <rect x="145" y="95" width="105" height="8" rx="4" fill="var(--accent-orange)" />
                 `);
 
             case 'accordion':
@@ -144,16 +152,26 @@ export const WireframeLibrary = {
 
             case 'editor':
                 return wrapper(`
-                    <rect width="280" height="180" fill="#1e1e1e" />
+                    <rect width="280" height="180" rx="8" fill="#1e1e1e" />
+                    <path d="M0 8 Q0 0 8 0 L272 0 Q280 0 280 8 L280 180 Q280 180 272 180 L8 180 Q0 180 0 180 Z" fill="#1e1e1e" />
                     <rect x="0" y="0" width="280" height="25" fill="#2d2d2d" />
                     <circle cx="15" cy="12.5" r="3" fill="#ff5f56" />
                     <circle cx="27" cy="12.5" r="3" fill="#ffbd2e" />
                     <circle cx="39" cy="12.5" r="3" fill="#27c93f" />
-                    <text x="140" y="16" font-size="8" fill="#888" text-anchor="middle" font-family="monospace">genome_v3.json</text>
-                    <rect x="20" y="45" width="40" height="6" rx="1" fill="#c678dd" />
-                    <rect x="65" y="45" width="80" height="6" rx="1" fill="#61afef" />
-                    <rect x="20" y="60" width="20" height="6" rx="1" fill="#abb2bf" />
-                    <rect x="45" y="60" width="120" height="6" rx="1" fill="#98c379" />
+                    <text x="140" y="16" font-size="8" fill="#888" text-anchor="middle" font-family="Geist Mono, monospace">${label || 'script.js'}</text>
+                    <!-- Code Lines -->
+                    <g opacity="0.8">
+                        <rect x="45" y="45" width="40" height="4" rx="1" fill="#c678dd" />
+                        <rect x="90" y="45" width="80" height="4" rx="1" fill="#61afef" />
+                        <rect x="45" y="55" width="120" height="4" rx="1" fill="#98c379" />
+                        <rect x="45" y="65" width="20" height="4" rx="1" fill="#abb2bf" />
+                        <rect x="70" y="65" width="60" height="4" rx="1" fill="#e06c75" />
+                        
+                        <rect x="45" y="85" width="30" height="4" rx="1" fill="#c678dd" />
+                        <rect x="80" y="85" width="100" height="4" rx="1" fill="#61afef" />
+                        <rect x="45" y="95" width="60" height="4" rx="1" fill="#abb2bf" />
+                        <rect x="110" y="95" width="40" height="4" rx="1" fill="#d19a66" />
+                    </g>
                     <rect x="0" y="25" width="35" height="155" fill="#1e1e1e" stroke="#333" stroke-width="0.5" />
                 `);
 

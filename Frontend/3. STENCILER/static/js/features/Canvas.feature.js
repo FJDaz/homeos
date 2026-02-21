@@ -1,4 +1,6 @@
 import StencilerFeature from './base.feature.js';
+import { WireframeLibrary } from '../WireframeLibrary.js';
+import { InlineEditUI } from './InlineEdit.feature.js';
 import CanvasLayout from './Canvas.layout.js';
 import Renderer from '../Canvas.renderer.js';
 import { LayoutEngine } from '../LayoutEngine.js';
@@ -35,7 +37,11 @@ class CanvasFeature extends StencilerFeature {
 
         // --- Mission 8D-BIS : Modular Snap Engine ---
         this.snapEnabled = true;
-        this.snapSize = 20;
+        this.snapSize = 8; // Clef 8px universelle (GRID.js G.U1)
+
+        // --- Mission 11A : Illustrator Mode (Group Edit) ---
+        this.groupEditMode = false;
+        this.groupEditTarget = null;
     }
 
     mount(parentSelector) {
@@ -165,7 +171,7 @@ class CanvasFeature extends StencilerFeature {
         const CORPS_COLORS = { n0_brainstorm: '#d4b2bc', n0_backend: '#a8c5fc', n0_frontend: '#a8dcc9', n0_deploy: '#edd0b0' };
         const accentColor = CORPS_COLORS[corps?.id] || '#cbd5e1';
 
-        const layout = CanvasLayout.calculate('n0_backend', organe.n2_features, { cardW: 240, cardH: 100 });
+        const layout = CanvasLayout.calculate('n0_backend', organe.n2_features, { cardW: 240, cardH: 96 }); // G.U12
         this._applyLayout(layout);
 
         organe.n2_features.forEach((cell, i) => {
@@ -205,7 +211,7 @@ class CanvasFeature extends StencilerFeature {
         const accentColor = CORPS_COLORS[corps?.id] || '#cbd5e1';
 
         const components = cellule.n3_components || [];
-        const layout = CanvasLayout.calculate('n0_backend', components, { cardW: 240, cardH: 45 });
+        const layout = CanvasLayout.calculate('n0_backend', components, { cardW: 240, cardH: 96 }); // G.U12 — compact, même hauteur que cellules
         this._applyLayout(layout);
 
         components.forEach((comp, i) => {
@@ -573,7 +579,40 @@ class CanvasFeature extends StencilerFeature {
     }
 
     _setupSelectionHandlers() {
+        // Mission 9D : Edition en ligne (N3)
+        this.svg.addEventListener('dblclick', (e) => {
+            const atomNode = e.target.closest('.atom-node');
+            if (!atomNode || e.target.tagName !== 'text') return;
+
+            // On ne veut pas déclencher le drill up/down par erreur
+            e.stopPropagation();
+
+            const dataId = atomNode.dataset.id;
+            const nodeData = this._findInGenome(dataId);
+            if (!nodeData) return;
+
+            // Le wireframe édite uniquement le nom — method/endpoint = détail technique, hors scope DA
+            InlineEditUI.mount(e.target, nodeData, 'name', () => {
+                // Refresh local rendering
+                Renderer.updateNode(atomNode, atomNode._layout?.w || 280, atomNode._layout?.h || 60);
+
+                // Persistence
+                document.dispatchEvent(new CustomEvent('genome:updated', {
+                    detail: { type: 'n3', id: dataId, genome: this.genome }
+                }));
+            });
+        });
+
         this.svg.addEventListener('click', (e) => {
+            // --- Mission 11A : Sortie Illustrator Mode ---
+            if (this.groupEditMode) {
+                const node = e.target.closest('.svg-node');
+                if (!node || node !== this.groupEditTarget) {
+                    this._exitGroupEdit();
+                    return;
+                }
+            }
+
             const node = e.target.closest('.svg-node');
             if (node) {
                 this._selectNode(node);
@@ -592,6 +631,13 @@ class CanvasFeature extends StencilerFeature {
         this.svg.addEventListener('dblclick', (e) => {
             const node = e.target.closest('.svg-node');
             if (node) {
+                // --- Mission 11A : Interception Illustrator Mode ---
+                if (node.classList.contains('atom-node')) {
+                    e.stopPropagation();
+                    this.groupEditMode ? this._exitGroupEdit() : this._enterGroupEdit(node);
+                    return;
+                }
+
                 const level = node.classList.contains('corps-node') ? 1 : (node.classList.contains('cell-node') ? 2 : null);
                 if (level) this._drillInto(node.dataset.id, level);
             } else if (e.target === this.svg || e.target.classList.contains('grid-layer')) {
@@ -639,6 +685,319 @@ class CanvasFeature extends StencilerFeature {
         }
     }
 
+    // --- MISSION 11A : Illustrator Mode (Group Edit) ---
+
+    _enterGroupEdit(node) {
+        this.groupEditMode = true;
+        this.groupEditTarget = node;
+
+        // Feedback visuel sur le conteneur
+        const bg = node.querySelector('.node-bg');
+        if (bg) {
+            bg.setAttribute('stroke', 'var(--accent-bleu)');
+            bg.setAttribute('stroke-dasharray', '5 3');
+            bg.setAttribute('stroke-width', '2');
+        }
+
+        // Estomper les autres nodes
+        this.viewport.querySelectorAll('.svg-node').forEach(n => {
+            if (n !== node) n.style.opacity = '0.25';
+        });
+
+        // Activer les events sur le contenu du wireframe
+        const content = node.querySelector('.atom-wf-content') || node.querySelector('.wf-content');
+        if (!content) return;
+
+        content.setAttribute('pointer-events', 'all');
+        content.querySelectorAll('rect, text, circle, path').forEach(prim => {
+            prim.style.cursor = 'move';
+            prim.setAttribute('pointer-events', 'all');
+            // Monkey-patch pour stocker le handler et pouvoir le retirer
+            prim._gc = (e) => {
+                e.stopPropagation();
+                this._selectPrimitive(prim, node);
+            };
+            prim.addEventListener('click', prim._gc);
+        });
+
+        // --- Mission 11B : Open Inspector Panel ---
+        this._openAtomInspector(node);
+
+        console.log('🎨 [11A] Illustrator Mode: Entered group edit for', node.dataset.id);
+    }
+
+    _selectPrimitive(prim, parentNode) {
+        // Nettoyer la sélection précédente
+        parentNode.querySelectorAll('.prim-sel').forEach(el => el.remove());
+
+        const bb = prim.getBBox();
+        const ov = Renderer._el('rect', {
+            x: bb.x - 2, y: bb.y - 2,
+            width: bb.width + 4, height: bb.height + 4,
+            fill: 'none', stroke: 'var(--accent-bleu)',
+            'stroke-width': '1.5', 'stroke-dasharray': '3 2',
+            'pointer-events': 'none',
+            class: 'prim-sel'
+        });
+        parentNode.appendChild(ov);
+
+        this._setupPrimitiveDrag(prim, ov);
+    }
+
+    _setupPrimitiveDrag(prim, overlay) {
+        const getXY = () => {
+            const isCircle = prim.tagName === 'circle';
+            return {
+                x: parseFloat(prim.getAttribute(isCircle ? 'cx' : 'x') || 0),
+                y: parseFloat(prim.getAttribute(isCircle ? 'cy' : 'y') || 0)
+            };
+        };
+
+        const setXY = (x, y) => {
+            const isCircle = prim.tagName === 'circle';
+            prim.setAttribute(isCircle ? 'cx' : 'x', x);
+            prim.setAttribute(isCircle ? 'cy' : 'y', y);
+        };
+
+        let dragging = false;
+        let startMouse = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+
+        const onMouseDown = (e) => {
+            dragging = true;
+            startMouse = this._getMousePos(e);
+            startPos = getXY();
+            e.stopPropagation();
+        };
+
+        const onMouseMove = (e) => {
+            if (!dragging) return;
+            const currentMouse = this._getMousePos(e);
+            const dx = currentMouse.x - startMouse.x;
+            const dy = currentMouse.y - startMouse.y;
+
+            setXY(startPos.x + dx, startPos.y + dy);
+
+            // Mettre à jour l'overlay
+            const bb = prim.getBBox();
+            overlay.setAttribute('x', bb.x - 2);
+            overlay.setAttribute('y', bb.y - 2);
+            overlay.setAttribute('width', bb.width + 4);
+            overlay.setAttribute('height', bb.height + 4);
+        };
+
+        const onMouseUp = () => {
+            dragging = false;
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        prim.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    _exitGroupEdit() {
+        // --- Mission 11B : Close Inspector Panel ---
+        this._closeAtomInspector();
+
+        const node = this.groupEditTarget;
+        if (!node) return;
+
+        // Restaurer le conteneur
+        const bg = node.querySelector('.node-bg');
+        if (bg) {
+            bg.setAttribute('stroke', 'var(--border-subtle)');
+            bg.removeAttribute('stroke-dasharray');
+            bg.setAttribute('stroke-width', '1.5');
+        }
+
+        // Restaurer les autres nodes
+        this.viewport.querySelectorAll('.svg-node').forEach(n => {
+            n.style.opacity = '1';
+        });
+
+        // Désactiver les events sur le contenu
+        const content = node.querySelector('.atom-wf-content') || node.querySelector('.wf-content');
+        if (content) {
+            content.setAttribute('pointer-events', 'none');
+            content.querySelectorAll('rect, text, circle, path').forEach(prim => {
+                if (prim._gc) {
+                    prim.removeEventListener('click', prim._gc);
+                    delete prim._gc;
+                }
+                prim.setAttribute('pointer-events', 'none');
+                prim.style.cursor = '';
+            });
+        }
+
+        // Supprimer la sélection
+        node.querySelectorAll('.prim-sel').forEach(el => el.remove());
+
+        this.groupEditMode = false;
+        this.groupEditTarget = null;
+        console.log('🎨 [11A] Illustrator Mode: Exited group edit');
+    }
+
+    // --- MISSION 11B : Atom Inspector Panel (Pleine Taille) ---
+
+    _openAtomInspector(node) {
+        this._closeAtomInspector();
+        const atomData = this._findInGenome(node.dataset.id);
+        if (!atomData) return;
+
+        // On affiche le wireframe de la library au format natif (280x180)
+        // Mapping interaction_type -> hint de library
+        const WF_MAP = {
+            'click': 'action-button',
+            'submit': 'action-button',
+            'drag': 'selection',
+            'view': 'table'
+        };
+        const wfKey = WF_MAP[atomData.interaction_type] || 'accordion';
+
+        const stripe = node.querySelector('rect[fill]:not(.node-bg)');
+        const color = stripe ? stripe.getAttribute('fill') : 'var(--accent-bleu)';
+
+        const wfSVG = WireframeLibrary.getSVG(wfKey, color, 280, 180, atomData.name);
+        if (!wfSVG) return;
+
+        const panel = document.createElement('div');
+        panel.id = 'atom-inspector';
+        panel.style.cssText = `
+            position: fixed;
+            right: 16px;
+            top: 80px;
+            width: 312px;
+            background: var(--bg-primary, #f7f6f2);
+            border: 1px solid var(--border-warm, #d4cfc8);
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            font-family: Geist, sans-serif;
+            display: flex;
+            flex-direction: column;
+        `;
+
+        panel.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border-subtle);">
+                <span style="font-size:11px; font-weight:700; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.05em;">${atomData.name}</span>
+                <button id="atom-inspector-close" style="background:none; border:none; cursor:pointer; font-size:14px; color:var(--text-muted); padding:4px;">✕</button>
+            </div>
+            <div style="padding:16px; background:var(--bg-secondary, #eeede8); margin:8px; border-radius:6px; overflow:hidden;">
+                <svg id="atom-inspector-svg" width="280" height="180" viewBox="0 0 280 180">${wfSVG}</svg>
+            </div>
+            <div style="padding:4px 16px 16px; font-size:10px; color:var(--text-muted); font-style:italic;">
+                Mode Inspecteur : Chaque primitive est éditable par drag & drop.
+            </div>
+        `;
+
+        document.body.appendChild(panel);
+        this._inspectorPanel = panel;
+
+        // Bind closure
+        panel.querySelector('#atom-inspector-close').addEventListener('click', () => {
+            this._exitGroupEdit();
+        });
+
+        // Setup primitives interaction in inspector
+        const inspSVG = panel.querySelector('#atom-inspector-svg');
+        inspSVG.querySelectorAll('rect, text, circle, path, line').forEach(prim => {
+            prim.style.cursor = 'move';
+            prim.setAttribute('pointer-events', 'all');
+
+            prim._ic = (e) => {
+                e.stopPropagation();
+                this._selectInspectorPrimitive(prim, inspSVG);
+            };
+            prim.addEventListener('click', prim._ic);
+
+            // Drag handler in inspector
+            prim.addEventListener('mousedown', (e) => {
+                this._startInspectorDrag(prim, e, inspSVG);
+            });
+        });
+    }
+
+    _selectInspectorPrimitive(prim, svgEl) {
+        // Clear previous selection
+        svgEl.querySelectorAll('.insp-sel').forEach(el => el.remove());
+
+        const bb = prim.getBBox();
+        const ov = Renderer._el('rect', {
+            x: bb.x - 2, y: bb.y - 2,
+            width: bb.width + 4, height: bb.height + 4,
+            fill: 'none', stroke: '#a8c5fc',
+            'stroke-width': '1.5', 'stroke-dasharray': '3 2',
+            'pointer-events': 'none',
+            class: 'insp-sel'
+        });
+        svgEl.appendChild(ov);
+    }
+
+    _startInspectorDrag(prim, e, svgEl) {
+        e.stopPropagation();
+
+        const CTM = svgEl.getScreenCTM();
+        const getMousePos = (ev) => ({
+            x: (ev.clientX - CTM.e) / CTM.a,
+            y: (ev.clientY - CTM.f) / CTM.d
+        });
+
+        const isCircle = prim.tagName === 'circle';
+        let startMouse = getMousePos(e);
+        let startPos = {
+            x: parseFloat(prim.getAttribute(isCircle ? 'cx' : 'x') || 0),
+            y: parseFloat(prim.getAttribute(isCircle ? 'cy' : 'y') || 0)
+        };
+
+        const onMouseMove = (ev) => {
+            const currentMouse = getMousePos(ev);
+            const dx = currentMouse.x - startMouse.x;
+            const dy = currentMouse.y - startMouse.y;
+
+            prim.setAttribute(isCircle ? 'cx' : 'x', startPos.x + dx);
+            prim.setAttribute(isCircle ? 'cy' : 'y', startPos.y + dy);
+
+            // Update selection handle
+            this._selectInspectorPrimitive(prim, svgEl);
+        };
+
+        const onMouseUp = () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    _closeAtomInspector() {
+        if (this._inspectorPanel) {
+            this._inspectorPanel.remove();
+            this._inspectorPanel = null;
+        }
+    }
+
+    /**
+     * Recherche un node dans le génome local par son ID.
+     */
+    _findInGenome(id) {
+        let found = null;
+        const search = (items) => {
+            if (found) return;
+            for (const item of items) {
+                if (item.id === id) { found = item; return; }
+                if (item.n1_sections) search(item.n1_sections);
+                if (item.n2_features) search(item.n2_features);
+                if (item.n3_components) search(item.n3_components);
+                if (item.n0_phases) search(item.n0_phases);
+            }
+        };
+        search(this.genome?.n0_phases || []);
+        return found;
+    }
+
     _selectNode(node) {
         this._deselectAll();
         this.selectedObject = node;
@@ -652,6 +1011,11 @@ class CanvasFeature extends StencilerFeature {
         const content = node.querySelector('.wf-content');
         if (label) label.style.opacity = '1';
         if (content) content.style.opacity = '0.4';
+
+        // Mission 9C : Dispatch selection event
+        document.dispatchEvent(new CustomEvent('canvas:node:selected', {
+            detail: { id: node.dataset.id, nodeData: { ...node.dataset } }
+        }));
 
         // Mission 8E : Show selection handles
         this._showHandles(node);
@@ -673,6 +1037,9 @@ class CanvasFeature extends StencilerFeature {
         if (this.handlesGroup) this.handlesGroup.remove();
         this.handlesGroup = null;
         this.selectedObject = null;
+
+        // Mission 9C : Dispatch selection cleared
+        document.dispatchEvent(new CustomEvent('canvas:selection:cleared'));
     }
 
     _setupZoomControls() {

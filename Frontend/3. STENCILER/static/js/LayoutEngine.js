@@ -2,6 +2,20 @@
  * LayoutEngine.js
  * Intelligence de placement spatial pour le Stenciler.
  * Basé sur une classification sémantique par zones (TOP, CENTER, RIGHT, BOTTOM, FLOATING).
+ *
+ * AUDIT GRILLE 8PX (2026-02-21 — Mission 9A) :
+ * Valeurs actuelles vs cibles G.* (voir GRID.js) :
+ *   padding = 20    → G.PAD = 16    ⚠ delta -4px (FJD valide avant apply)
+ *   hTop    = 60    → G.TOP_H = 56  ⚠ delta -4px
+ *   wCell   = 180   → G.CELL_W=176  ⚠ delta -4px
+ *   hCell   = 110   → G.CELL_H=112  ⚠ delta +2px (très proche)
+ *   h(RIGHT)= 100   → G.RIGHT_H=96  ⚠ delta -4px
+ *   wRight  = 200   → G.RIGHT_W=200 ✓ aligné exactement
+ *   wBottom = 160   → G.BTN_W=160   ✓ aligné exactement
+ *   hBottom = 40    → G.BTN=40      ✓ aligné exactement
+ *   MODAL_W = 400   → G.MODAL_W=400 ✓ aligné exactement
+ *   MODAL_H = 250   → G.U32=256     ⚠ delta +6px
+ * Les valeurs non-alignées sont conservées telles quelles en attente de validation FJD.
  */
 
 export const LayoutEngine = {

@@ -1,4 +1,5 @@
 import StencilerFeature from './base.feature.js';
+import { NuanceUI } from './Nuance.feature.js';
 
 /**
  * ComponentsZoneFeature (Mission 5B)
@@ -62,6 +63,15 @@ class ComponentsZoneFeature extends StencilerFeature {
     document.addEventListener('snap:config-changed', (e) => {
       const { snapSize } = e.detail;
       this._updateTransformSteps(snapSize);
+    });
+
+    // --- Mission 9C : Selection-driven Sidebar Updates ---
+    document.addEventListener('canvas:node:selected', (e) => {
+      const { nodeData } = e.detail;
+      console.log(`[ComponentsZone] Node selected for Nuance: ${nodeData.id}`);
+      // If we are already in the right view, we can just re-render panels
+      // but it's safer to ensure we have the right context.
+      this.render(); // This will call _renderSidebarPanels which now includes Nuance
     });
 
     console.log('Components Zone initialized (Canvas-Centric)');
@@ -356,6 +366,9 @@ class ComponentsZoneFeature extends StencilerFeature {
             </div>
         </div>
 
+        <!-- Panel Nuance (Mission 9C) -->
+        ${NuanceUI.render(obj)}
+
         <!-- Panel Snapping -->
         <div class="cz-panel" id="panel-snapping">
             <div class="panel-header">
@@ -428,6 +441,13 @@ class ComponentsZoneFeature extends StencilerFeature {
   }
 
   _setupPanelHandlers(obj) {
+    const container = this.el.querySelector('#transform-panel-container');
+
+    // Mission 9C : Nuance Handlers
+    NuanceUI.setupHandlers(container, obj, () => {
+      document.dispatchEvent(new CustomEvent('genome:updated'));
+    });
+
     // Collapsible logic
     this.el.querySelectorAll('.panel-header').forEach(header => {
       header.addEventListener('click', () => {
