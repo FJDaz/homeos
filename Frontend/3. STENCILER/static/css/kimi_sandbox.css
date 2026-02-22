@@ -1,0 +1,19 @@
+/* 
+ * KIMI SANDBOX CSS 
+ * Overrides for experimental Design Systems 
+ */
+
+#svg-bg.sandbox-mode {
+    fill: #fdfcf8 !important;
+    /* Test d'un blanc plus chaud */
+}
+
+.atom-node.sandbox-mode .atom-bg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+    transition: all 0.3s ease;
+}
+
+.atom-node.sandbox-mode:hover .atom-bg {
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+}

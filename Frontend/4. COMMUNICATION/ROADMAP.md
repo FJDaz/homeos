@@ -639,48 +639,56 @@ VALIDATION: FJD — "La grille est top maintenant"
 
 ---
 
-## Mission 13A-DESIGN — Design System & Layouts (PARTIEL)
-STATUS: RAPPORT
+## Mission 13A-DESIGN — Design System & Layouts (STABILISÉ)
+STATUS: ARCHIVÉ
 MODE: CODE DIRECT — FJD
 ACTOR: GEMINI (Exécuteur Frontend)
+DATE: 2026-02-22
 
 ---
 
-### Ce qui a été fait et LIVRÉ
+### État actuel (STABLE)
 
-**1. Toggle Grid (caché par défaut)**
-- `this.gridVisible = false` dans constructor
-- Bouton ⊞ à 40% opacity par défaut
-- Grille SVG masquée au chargement
-
-**2. Typographie bas de casse + bold**
-- `AtomRenderer.js` : `safeName.toLowerCase()`, `font-weight="700"`
-- `Canvas.renderer.js` : labels en bas de casse
-- `WireframeLibrary.js` : boutons "garder"/"réserve"/`"confirmer"` en bas de casse
-
-**3. Fond inversé (page vs canvas)**
-- `#slot-canvas-zone` : `--bg-secondary` (gris)
-- SVG `#svg-bg` : `--bg-primary` (clair)
-- Meilleure lisibilité, moins de "flottement"
-
-**4. Backend — Stack vertical simple**
-- 1 seul organe = centré, taille fixe (320×256px)
-- Sans fioritures (pas de grid, pas de split)
+Le système est revenu à sa configuration stable. Toute modification du layout Frontend est **suspendue** jusqu'à résolution du problème de cache Service Worker.
 
 ---
 
-### Ce qui a été ABANDONNÉ (cache bloquant)
+### Ce qui fonctionne (LIVRÉ)
 
-**Layouts Frontend spécifiques par étape :**
-- Navigation : Stepper horizontal + breadcrumb
-- Layout : Galerie 3 cols + preview  
-- Upload : Dropzone centré + palette
-- Analyse : Image + confiance + boutons
-- Dialogue : Chat bubbles + input
+| Feature | Fichier | État |
+|---------|---------|------|
+| Toggle grid | `Canvas.feature.js` | ✅ Caché par défaut |
+| Typo bas de casse | `AtomRenderer.js`, `WireframeLibrary.js` | ✅ Bold 700 |
+| Fond inversé | CSS + SVG | ✅ --bg-secondary / --bg-primary |
+| Backend stack | `Canvas.layout.js` | ✅ Vertical simple |
 
-**Raison :** Service Worker + cache modules ES6 impossible à invalider proprement. Toute tentative de cache-busting (`?v=2`) a cassé le chargement. Restauration complète des fichiers à leur état antérieur.
+---
 
-**Leçon :** Les layouts spécifiques nécessitent une architecture sans cache SW, ou un rebuild complet du bundle.
+### Ce qui est BLOQUÉ
+
+**Layouts Frontend fancy :**
+- Timeline élégante avec rail
+- Cartes fines (280×100px)
+- Boutons pills (32px, radius 16px)
+- Zigzag des positions
+
+**Raison du blocage :**
+Service Worker met en cache agressivement les modules ES6. Toute modification du code JS n'est pas prise en compte même après hard refresh. Les tentatives de cache-busting cassent le chargement.
+
+**Solution nécessaire :**
+- Soit désactiver le SW en dev
+- Soit implémenter un système de version/hashing des bundles
+- Soit utiliser un bundler (Vite/Webpack) qui gère le cache
+
+---
+
+### Décision
+
+**FJD :** "Rien ne paraît. Retour à l'état stable."
+
+**Action :** Restauration complète des fichiers JS à leur état antérieur (commit `46fb03c`).
+
+**Prochaine étape :** Investigation du cache SW avant toute nouvelle feature de layout.
 
 ---
 
@@ -693,6 +701,36 @@ ACTOR: GEMINI (Exécuteur Frontend)
 - `stenciler_v3_additions.css` — fond slot-canvas-zone
 
 ---
+
+## Mission 13A-PRE — Protocole KIMI Sandbox & SVG-First
+**DATE : 2026-02-22**
+**ACTOR : GEMINI & KIMI (DA Prototypeur)**
+**STATUS : OPÉRATIONNEL**
+
+### 🧩 Le Problème : Cache & Fidélité
+Les itérations rapides de KIMI étaient bloquées par un Service Worker trop agressif et un moteur de rendu (`AtomRenderer`) nécessitant des modifications de code pour chaque nouveau style.
+
+### 🛡️ La Solution : Le Sandbox Protocol
+Un environnement de prototypage isolé a été créé pour permettre à KIMI d'injecter des designs haute fidélité sans risque et sans latence de cache.
+
+#### 1. Accès au Sandbox
+L'environnement est activable via l'URL :
+`http://localhost:9998/stenciler?mode=sandbox`
+*Note : Cette URL bypass le cache pour les fichiers de prototypage et charge les surcharges KIMI.*
+
+#### 2. Flux de Travail "SVG-First"
+KIMI ne modifie plus le code logique du renderer. Elle injecte directement du SVG pur :
+- **Injection** : Utilisation du champ `svg_payload` (ou `custom_svg`) dans le génome N3.
+- **Rendu** : `AtomRenderer.js` détecte le payload et l'affiche tel quel (WYSIWYG total).
+- **Provisions** : Les fichiers `static/js/AtomPrototypes.js` et `static/css/kimi_sandbox.css` sont réservés aux drafts de KIMI.
+
+#### 3. Cycle de Validation
+1. **KIMI** pousse ses payloads SVG dans le génome/sandbox.
+2. **FJD** valide visuellement dans l'URL sandbox.
+3. **GEMINI** effectue le "Surgical Merge" vers les fichiers de production une fois le design figé.
+
+---
+
 
 ## PHASE 13A — Semantic UI & Design System (Suite)
 STATUS: MISSION
