@@ -28,37 +28,38 @@ export function renderAtom(nodeData, availableWidth, color) {
         else importance = 'secondary'; // Par defaut tout le reste est secondary pour etre visible
     }
 
-    const safeName = (nodeData.name || '').substring(0, 24).toUpperCase();
+    const safeName = (nodeData.name || '').substring(0, 24).toLowerCase();
     const density = nodeData.density || 'normal';
 
     // --- Moteurs de Styling ---
 
-    // 1. Moteur de Tone (Importance)
+    // 1. Moteur de Tone (Importance) — Palette Hype Minimaliste (désaturée)
+    // Pas de vert saturé. Tons ardoise/terra/mauve selon intent du corps parent
     const tones = {
         primary: {
-            fill: color,
+            fill: 'var(--accent-ardoise, #5A6B7C)',  // Bleu ardoise (pas de vert)
             text: '#ffffff',
             stroke: 'none',
-            shadow: 'premium-shadow', // filter class
-            weight: '700'
+            shadow: 'premium-shadow',
+            weight: '700'  // Bold
         },
         secondary: {
-            fill: 'var(--bg-primary, #ffffff)',
-            text: 'var(--text-primary)',
-            stroke: 'var(--border-strong)',
+            fill: 'var(--bg-tertiary, #e8e7e3)',
+            text: 'var(--text-primary, #3d3d3c)',
+            stroke: 'var(--border-warm, #c5c4c0)',
             shadow: 'subtle-shadow',
-            weight: '600'
+            weight: '700'  // Bold même en secondary
         },
         tertiary: {
             fill: 'transparent',
-            text: 'var(--text-secondary)',
-            stroke: 'var(--border-subtle)',
+            text: 'var(--text-secondary, #6a6a69)',
+            stroke: 'var(--border-subtle, #d5d4d0)',
             shadow: '',
-            weight: '500'
+            weight: '600'
         },
         ghost: {
             fill: 'transparent',
-            text: 'var(--text-muted)',
+            text: 'var(--text-muted, #999998)',
             stroke: 'none',
             shadow: '',
             weight: '500'
@@ -132,12 +133,12 @@ export function renderAtom(nodeData, availableWidth, color) {
             
             <rect x="0" y="24" width="${availableWidth}" height="1" fill="var(--border-subtle)"/>
             <text x="8" y="40" font-size="10" fill="var(--text-primary)">OBJ-01</text>
-            <rect x="${colW}" y="32" width="40" height="12" rx="6" fill="#22c55e20"/><text x="${colW + 20}" y="40" font-size="8" fill="#22c55e" text-anchor="middle">ACTIF</text>
+            <rect x="${colW}" y="32" width="40" height="12" rx="6" fill="var(--accent-terra, #C4A589)" opacity="0.3"/><text x="${colW + 20}" y="40" font-size="8" fill="var(--accent-terra, #C4A589)" text-anchor="middle" font-weight="700">actif</text>
             <text x="${colW * 2}" y="40" font-size="10" fill="${color}">Détails →</text>
 
             <rect x="0" y="50" width="${availableWidth}" height="1" fill="var(--border-subtle)"/>
             <text x="8" y="66" font-size="10" fill="var(--text-primary)">OBJ-02</text>
-            <rect x="${colW}" y="58" width="40" height="12" rx="6" fill="#eab30820"/><text x="${colW + 20}" y="66" font-size="8" fill="#eab308" text-anchor="middle">WAIT</text>
+            <rect x="${colW}" y="58" width="40" height="12" rx="6" fill="var(--accent-ocre, #B87B5C)" opacity="0.3"/><text x="${colW + 20}" y="66" font-size="8" fill="var(--accent-ocre, #B87B5C)" text-anchor="middle" font-weight="700">wait</text>
             <text x="${colW * 2}" y="66" font-size="10" fill="${color}">Détails →</text>
         `;
     }
@@ -192,21 +193,21 @@ export function renderAtom(nodeData, availableWidth, color) {
         height = 24;
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="24" rx="12" fill="var(--bg-tertiary)"/>
-            <circle cx="12" cy="12" r="4" fill="#22c55e" filter="drop-shadow(0 0 2px #22c55e)"/>
-            <text x="24" y="16" font-size="10" fill="var(--text-secondary)" font-weight="500">${safeName} (Actif)</text>
+            <circle cx="12" cy="12" r="4" fill="var(--accent-terra, #C4A589)"/>
+            <text x="24" y="16" font-size="10" fill="var(--text-secondary)" font-weight="700">${safeName} (actif)</text>
         `;
     }
     // 10. Dashboard Cards
     else if (hint === 'dashboard' || hint === 'detail-card' || hint === 'stencil-card') {
-        height = 80;
+        height = 88; // Légèrement plus haut pour la marge
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="${height}" rx="8" fill="var(--bg-primary)" stroke="var(--border-subtle)" class="subtle-shadow"/>
             <rect x="12" y="12" width="24" height="24" rx="6" fill="${color}20"/>
             <text x="24" y="28" font-size="14" text-anchor="middle">📊</text>
-            <text x="44" y="24" font-size="12" fill="var(--text-primary)" font-weight="bold">${safeName}</text>
-            <text x="44" y="40" font-size="20" fill="${color}" font-weight="800" letter-spacing="-1">1,234</text>
-            <rect x="12" y="60" width="${availableWidth - 24}" height="4" rx="2" fill="var(--bg-tertiary)"/>
-            <rect x="12" y="60" width="${(availableWidth - 24) * 0.6}" height="4" rx="2" fill="${color}"/>
+            <text x="44" y="22" font-size="12" fill="var(--text-primary)" font-weight="700">${safeName}</text>
+            <text x="44" y="50" font-size="20" fill="${color}" font-weight="800" letter-spacing="-1">1,234</text>
+            <rect x="12" y="68" width="${availableWidth - 24}" height="4" rx="2" fill="var(--bg-tertiary)"/>
+            <rect x="12" y="68" width="${(availableWidth - 24) * 0.6}" height="4" rx="2" fill="${color}"/>
         `;
     }
     // 11. Editor (Code)

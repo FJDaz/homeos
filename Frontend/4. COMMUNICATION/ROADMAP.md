@@ -639,14 +639,65 @@ VALIDATION: FJD — "La grille est top maintenant"
 
 ---
 
-## PHASE 13A — Semantic UI & Design System
+## Mission 13A-DESIGN — Design System & Layouts (PARTIEL)
+STATUS: RAPPORT
+MODE: CODE DIRECT — FJD
+ACTOR: GEMINI (Exécuteur Frontend)
+
+---
+
+### Ce qui a été fait et LIVRÉ
+
+**1. Toggle Grid (caché par défaut)**
+- `this.gridVisible = false` dans constructor
+- Bouton ⊞ à 40% opacity par défaut
+- Grille SVG masquée au chargement
+
+**2. Typographie bas de casse + bold**
+- `AtomRenderer.js` : `safeName.toLowerCase()`, `font-weight="700"`
+- `Canvas.renderer.js` : labels en bas de casse
+- `WireframeLibrary.js` : boutons "garder"/"réserve"/`"confirmer"` en bas de casse
+
+**3. Fond inversé (page vs canvas)**
+- `#slot-canvas-zone` : `--bg-secondary` (gris)
+- SVG `#svg-bg` : `--bg-primary` (clair)
+- Meilleure lisibilité, moins de "flottement"
+
+**4. Backend — Stack vertical simple**
+- 1 seul organe = centré, taille fixe (320×256px)
+- Sans fioritures (pas de grid, pas de split)
+
+---
+
+### Ce qui a été ABANDONNÉ (cache bloquant)
+
+**Layouts Frontend spécifiques par étape :**
+- Navigation : Stepper horizontal + breadcrumb
+- Layout : Galerie 3 cols + preview  
+- Upload : Dropzone centré + palette
+- Analyse : Image + confiance + boutons
+- Dialogue : Chat bubbles + input
+
+**Raison :** Service Worker + cache modules ES6 impossible à invalider proprement. Toute tentative de cache-busting (`?v=2`) a cassé le chargement. Restauration complète des fichiers à leur état antérieur.
+
+**Leçon :** Les layouts spécifiques nécessitent une architecture sans cache SW, ou un rebuild complet du bundle.
+
+---
+
+### Fichiers modifiés (LIVRÉS)
+- `Canvas.feature.js` — toggle grid + fond + typo labels
+- `Canvas.renderer.js` — labels bas de casse
+- `AtomRenderer.js` — typo boutons + couleurs terra/ocre
+- `WireframeLibrary.js` — labels bas de casse
+- `stenciler.css` — grille CSS commentée
+- `stenciler_v3_additions.css` — fond slot-canvas-zone
+
+---
+
+## PHASE 13A — Semantic UI & Design System (Suite)
 STATUS: MISSION
 MODE: aetherflow -f
 ACTOR: KIMI
-
----
-⚠️ BOOTSTRAP KIMI
-Constitution : Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md
 Règles absolues :
 1. Jamais CSS/HTML dans le backend
 2. Jamais GenomeStateManager côté frontend

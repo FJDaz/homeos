@@ -32,7 +32,7 @@ export const WireframeLibrary = {
                     <rect x="185" y="45" width="60" height="10" rx="2" fill="var(--border-subtle)" />
                     <rect x="35" y="65" width="140" height="10" rx="2" fill="var(--border-subtle)" />
                     <rect x="185" y="65" width="60" height="10" rx="2" fill="${color}" />
-                    <text x="215" y="73" font-size="7" fill="black" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">ACCEPT</text>
+                    <text x="215" y="73" font-size="7" fill="black" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">accept</text>
                     <rect x="35" y="85" width="140" height="10" rx="2" fill="var(--border-subtle)" />
                     <rect x="185" y="85" width="60" height="10" rx="2" fill="var(--border-subtle)" />
                     <rect x="35" y="105" width="140" height="10" rx="2" fill="var(--border-subtle)" />
@@ -76,9 +76,9 @@ export const WireframeLibrary = {
                     <rect x="55" y="62" width="160" height="6" rx="1" fill="var(--text-muted)" opacity="0.4" />
                     <rect x="55" y="72" width="140" height="6" rx="1" fill="var(--text-muted)" opacity="0.4" />
                     <rect x="55" y="110" width="80" height="24" rx="4" fill="var(--accent-vert)" />
-                    <text x="95" y="125" font-size="8" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">GARDER</text>
+                    <text x="95" y="125" font-size="8" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">garder</text>
                     <rect x="145" y="110" width="80" height="24" rx="4" fill="var(--border-warm)" />
-                    <text x="185" y="125" font-size="8" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">RÉSERVE</text>
+                    <text x="185" y="125" font-size="8" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">réserve</text>
                 `);
 
             case 'action-button':
@@ -102,7 +102,7 @@ export const WireframeLibrary = {
                 return wrapper(`
                     <rect x="30" y="30" width="220" height="120" rx="8" fill="none" stroke="var(--border-warm)" stroke-width="1.5" stroke-dasharray="6,4" />
                     <path d="M140 65 C120 65 115 80 115 85 C108 85 105 90 105 97 C105 106 112 112 120 112 L160 112 C168 112 175 106 175 97 C175 90 172 85 165 85 C165 80 160 65 140 65 Z" fill="var(--text-muted)" opacity="0.25" />
-                    <text x="140" y="125" font-size="11" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif" font-weight="600">DÉPOSER FICHIERS</text>
+                    <text x="140" y="125" font-size="11" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">déposer fichiers</text>
                     <text x="140" y="138" font-size="8" fill="var(--text-muted)" text-anchor="middle" font-family="Geist, sans-serif">PDF, PNG (Max 10MB)</text>
                 `);
 
@@ -127,19 +127,19 @@ export const WireframeLibrary = {
             case 'validation':
                 return wrapper(`
                     <rect x="30" y="30" width="220" height="30" rx="4" fill="${color}" />
-                    <text x="45" y="50" font-size="10" fill="white" font-family="Geist, sans-serif" font-weight="600">ZONES VALIDÉES</text>
+                    <text x="45" y="50" font-size="10" fill="white" font-family="Geist, sans-serif" font-weight="700">zones validées</text>
                     <text x="230" y="50" font-size="12" fill="white" font-family="Geist, sans-serif">▼</text>
                     <rect x="30" y="60" width="220" height="40" fill="var(--bg-tertiary)" opacity="0.5" />
                     <rect x="45" y="70" width="190" height="4" rx="1" fill="var(--text-muted)" opacity="0.3" />
                     <rect x="45" y="80" width="150" height="4" rx="1" fill="var(--text-muted)" opacity="0.3" />
                     <rect x="45" y="105" width="220" height="30" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <text x="45" y="125" font-size="10" fill="var(--text-secondary)" font-family="Geist, sans-serif" font-weight="600">AJUSTEMENTS</text>
+                    <text x="45" y="125" font-size="10" fill="var(--text-secondary)" font-family="Geist, sans-serif" font-weight="700">ajustements</text>
                     <text x="230" y="125" font-size="12" fill="var(--text-muted)" font-family="Geist, sans-serif">▶</text>
                 `);
 
             case 'color-palette':
                 return wrapper(`
-                    <text x="40" y="50" font-size="11" fill="var(--text-primary)" font-family="Geist, sans-serif" font-weight="700">PALETTE EXTRAITE</text>
+                    <text x="40" y="50" font-size="11" fill="var(--text-primary)" font-family="Geist, sans-serif" font-weight="700">palette extraite</text>
                     <circle cx="60" cy="90" r="20" fill="var(--accent-bleu)" stroke="var(--border-warm)" stroke-width="1" />
                     <circle cx="110" cy="90" r="20" fill="var(--accent-rose)" stroke="var(--border-warm)" stroke-width="1" />
                     <circle cx="160" cy="90" r="20" fill="var(--accent-vert)" stroke="var(--border-warm)" stroke-width="1" />
@@ -179,11 +179,11 @@ export const WireframeLibrary = {
                 return wrapper(`
                     <rect width="280" height="180" fill="black" opacity="0.3" />
                     <rect x="50" y="40" width="180" height="100" rx="8" fill="var(--bg-primary)" stroke="var(--border-warm)" />
-                    <text x="70" y="65" font-size="12" fill="var(--text-primary)" font-family="Geist, sans-serif" font-weight="700">CONFIRMER</text>
+                    <text x="70" y="65" font-size="12" fill="var(--text-primary)" font-family="Geist, sans-serif" font-weight="700">confirmer</text>
                     <rect x="70" y="105" width="65" height="22" rx="4" fill="var(--bg-tertiary)" stroke="var(--border-subtle)" />
-                    <text x="102.5" y="119" font-size="8" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif">ANNULER</text>
+                    <text x="102.5" y="119" font-size="8" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">annuler</text>
                     <rect x="145" y="105" width="65" height="22" rx="4" fill="${color}" />
-                    <text x="177.5" y="119" font-size="8" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">OK</text>
+                    <text x="177.5" y="119" font-size="8" fill="white" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700">ok</text>
                 `);
 
             case 'breadcrumb':
