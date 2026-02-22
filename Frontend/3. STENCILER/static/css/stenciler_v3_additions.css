@@ -223,6 +223,8 @@
   justify-content: center;
 }
 
+/* Grid désactivée - gérée par SVG (Canvas.feature.js) */
+/*
 #slot-canvas-zone.canvas-zone::before {
   content: '';
   position: absolute;
@@ -237,6 +239,7 @@
   opacity: 0.4;
   pointer-events: none;
 }
+*/
 
 /* Canvas placeholder (V3) */
 .canvas-placeholder {

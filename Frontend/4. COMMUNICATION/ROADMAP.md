@@ -260,6 +260,7 @@ if (isAtom) {
 | 11A | Atom Group Edit — Mode Illustrateur | Gemini | ✅ Livré |
 | 11B | Primitive Style Panel (couleur, typo) | Gemini | ✅ Livré |
 | 12A | Pivot Bottom-Up SVG (Vrai WYSIWYG) | Gemini | ✅ Livré |
+| 13A-PRE | Toggle Grid & Fond Dense SVG | Gemini | ✅ Livré |
 | 13A | Semantic UI & Design System (Vrai Generative UI) | Gemini | 🔄 EN COURS |
 | 11C | Export final HTML/CSS | — | ⏳ Backlog |
 
@@ -587,6 +588,38 @@ L'objectif est de reconstruire le moteur de rendu (`Canvas.renderer.js` et `Atom
 
 ### Critères d'acceptation
 - [x] "Ce qui est au-dessus demeure en dessous".
+
+---
+
+## Mission 13A-PRE — Toggle Grid & Fond Dense SVG
+STATUS: RAPPORT
+MODE: CODE DIRECT — FJD
+ACTOR: GEMINI (Exécuteur Frontend)
+
+---
+
+### Ce qui a été fait
+
+**1. Toggle Grid / No Grid**
+- Ajout bouton `⊞` (grid toggle) dans les zoom-controls de `Canvas.feature.js`
+- État `this.gridVisible` dans le constructor
+- Handler clic : toggle `display: block/none` sur `#svg-grid`
+- Feedback visuel : bouton à 40% d'opacité quand grille masquée
+
+**2. Fond SVG plus dense**
+- Ajout `<rect id="svg-bg">` sous la grille avec `fill="var(--bg-secondary)"`
+- Le fond hérite automatiquement du thème (jour/nuit) via CSS variables
+- Mode jour : `#f0efeb` (dense, moins flottant)
+- Mode nuit : `#111111` (encore plus dense, "accident heureux")
+
+### Fichiers modifiés
+- `Frontend/3. STENCILER/static/js/features/Canvas.feature.js` (L46-47, L63-64, L72, L963-975)
+
+### Validation
+- URL : http://localhost:9998/stenciler
+- Commande : `cd "Frontend/3. STENCILER" && python3 server_9998_v2.py`
+- À tester : clic sur bouton ⊞ pour masquer/afficher la grille
+- Le fond doit être visible en mode jour (gris chaud --bg-secondary)
 
 ---
 

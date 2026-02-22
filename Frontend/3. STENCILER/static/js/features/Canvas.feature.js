@@ -42,6 +42,9 @@ class CanvasFeature extends StencilerFeature {
         // --- Mission 11A : Illustrator Mode (Group Edit) ---
         this.groupEditMode = false;
         this.groupEditTarget = null;
+
+        // --- Toggle Grid ---
+        this.gridVisible = true;
     }
 
     mount(parentSelector) {
@@ -54,10 +57,11 @@ class CanvasFeature extends StencilerFeature {
             <svg id="stenciler-svg" width="100%" height="100%" viewBox="${this.viewBox.x} ${this.viewBox.y} ${this.viewBox.w} ${this.viewBox.h}" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--grid-line, #e2e8f0)" stroke-width="0.5"/>
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--border-subtle, #d5d4d0)" stroke-width="1"/>
                     </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" pointer-events="none" class="grid-layer"/>
+                <rect id="svg-bg" width="100%" height="100%" fill="var(--bg-secondary, #f0efeb)" pointer-events="none"/>
+                <rect id="svg-grid" width="100%" height="100%" fill="url(#grid)" pointer-events="none" class="grid-layer"/>
                 <text id="svg-level-indicator" x="20" y="30" font-size="11" fill="var(--text-muted)" font-family="Geist, sans-serif" pointer-events="none"></text>
                 <g id="svg-viewport"></g>
                 <text id="svg-placeholder" x="500" y="400" text-anchor="middle" font-size="18" fill="var(--text-muted, #94a3b8)" font-family="Inter, sans-serif" pointer-events="none">
@@ -65,6 +69,7 @@ class CanvasFeature extends StencilerFeature {
                 </text>
             </svg>
             <div class="zoom-controls">
+                <button id="btn-grid-toggle" title="Toggle Grid">⊞</button>
                 <button id="btn-zoom-out">-</button>
                 <span id="zoom-level">100%</span>
                 <button id="btn-zoom-in">+</button>
@@ -953,6 +958,19 @@ class CanvasFeature extends StencilerFeature {
             link.href = URL.createObjectURL(new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' }));
             link.download = 'stenciler_export.svg';
             link.click();
+        });
+
+        // Toggle Grid
+        this.el.querySelector('#btn-grid-toggle')?.addEventListener('click', () => {
+            this.gridVisible = !this.gridVisible;
+            const gridRect = this.svg.querySelector('#svg-grid');
+            const btn = this.el.querySelector('#btn-grid-toggle');
+            if (gridRect) {
+                gridRect.style.display = this.gridVisible ? 'block' : 'none';
+            }
+            if (btn) {
+                btn.style.opacity = this.gridVisible ? '1' : '0.4';
+            }
         });
     }
 

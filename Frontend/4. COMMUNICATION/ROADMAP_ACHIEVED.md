@@ -750,3 +750,33 @@ VALIDATION: FJD ✅
 - Editer method/endpoint depuis un wireframe = hors scope DA. Le wireframe affiche l'info, ne l'édite pas.
 
 ---
+---
+
+## Mission 13A-PRE — Toggle Grid & Fond Dense SVG
+STATUS: ARCHIVÉ
+DATE: 2026-02-22
+ACTOR: GEMINI (Antigravity)
+VALIDATION: FJD — "OK, tout va bien"
+
+### Ce qui a été fait
+
+**1. Toggle Grid / No Grid**
+- Bouton `⊞` (grid toggle) ajouté dans les zoom-controls
+- État `this.gridVisible` dans le constructor de CanvasFeature
+- Handler clic : toggle `display: block/none` sur `#svg-grid`
+- Feedback visuel : bouton à 40% d'opacité quand grille masquée
+
+**2. Fond SVG plus dense**
+- Ajout `<rect id="svg-bg">` sous la grille avec `fill="var(--bg-secondary)"`
+- Le fond hérite automatiquement du thème via CSS variables
+- Mode jour : `#f0efeb` (dense, moins flottant)
+- Mode nuit : `#111111` (encore plus dense, "accident heureux")
+- Structure SVG : `#svg-bg` → `#svg-grid` → `#svg-viewport`
+
+### Fichiers modifiés
+- `Frontend/3. STENCILER/static/js/features/Canvas.feature.js` (+24L)
+
+### Observation FJD
+Le mode nuit est "beaucoup plus accurate" — on voit le véritable encadrement d'une page web, on flotte moins. Le `#stenciler-svg rect` est plus dense en couleur en mode nuit et c'est un accident heureux.
+
+---

@@ -1129,7 +1129,8 @@ body {
   justify-content: center;
 }
 
-/* Grille fine 20x20 - impression de champ */
+/* Grille fine 20x20 - DÉSACTIVÉE (gérée par SVG Canvas.feature.js) */
+/*
 .canvas-zone::before {
   content: '';
   position: absolute;
@@ -1144,6 +1145,7 @@ body {
   opacity: 0.4;
   pointer-events: none;
 }
+*/
 
 .canvas-placeholder {
   text-align: center;
