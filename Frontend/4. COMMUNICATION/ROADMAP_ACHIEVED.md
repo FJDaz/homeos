@@ -676,3 +676,77 @@ VALIDATION: FJD ✅ (lutte mais validé)
 - "Lutte" mentionnée par FJD : le déconfinement a nécessité plusieurs itérations visuelles
 
 ---
+
+## PHASE 9A — GRID.js : Lookup Table 8px Universelle
+STATUS: ARCHIVÉ
+DATE: 2026-02-21
+ACTOR: CLAUDE
+VALIDATION: FJD ✅
+
+### Ce qui a été fait
+- `static/js/GRID.js` créé, 99L — lookup table 8px complète (G.U1→G.U50, constantes sémantiques ICON/BTN/CARD/SIDEBAR/etc., G.snap/cols/rows)
+- Import dans `stenciler_v3_main.js` + exposition `window.G` pour debug console
+- Audit `LayoutEngine.js` : 4 valeurs déjà alignées, 5 non-alignées documentées (delta ≤ 6px), conservées
+
+### Leçons
+- Les coordonnées SVG internes des wireframes (espace 280×180) ne concernent pas la grille 8px canvas — aucune modif WireframeLibrary nécessaire
+
+---
+
+## PHASE 9B — `_substyle` Backend : Cascade Nuances
+STATUS: ARCHIVÉ
+DATE: 2026-02-21
+ACTOR: CLAUDE (AetherFlow -f + apply manuel BL-007 workaround)
+VALIDATION: FJD ✅
+
+### Ce qui a été fait
+- `Backend/Prod/orchestrator.py` L31-76 : `SUBSTYLE_DEFAULTS` + `SUBSTYLE_RULES` (20 visual_hints) + `inject_substyle()` — lookup pur, coût LLM zéro
+- `Backend/Prod/core/surgical_editor.py` L478-486 : guard `_` prefix dans `_validate_operation()` — bloque tout patch LLM ciblant un membre `_*`
+
+### Leçons
+- AetherFlow step 1 rejeté (Groq : hallucinations, signature erronée). Règle : coller 100% du code source dans le prompt, pas d'instructions ouvertes.
+- AetherFlow step 2 amendé (Gemini : structure OK, 4 valeurs corrigées, `_substyle` vs `substyle`). Workaround BL-007 confirmé opérationnel.
+- BL-009 ajouté : RAG auto-inject gonfle les tokens de +1500/step indépendamment de la tâche.
+
+---
+
+## PHASE 9C — Nuance Panel : Interface Sous-Styles Sidebar
+STATUS: ARCHIVÉ
+DATE: 2026-02-21
+ACTOR: GEMINI
+VALIDATION: FJD ✅
+
+### Ce qui a été fait
+- `static/js/features/Nuance.feature.js` créé, 87L : `resolveSubstyle()` + `NuanceUI.render()` + `NuanceUI.setupHandlers()`
+- `static/js/features/ComponentsZone.feature.js` : import NuanceUI, panneau NUANCE injecté dans `_renderSidebarPanels()`, handlers substyle, listener `canvas:node:selected`
+- `static/js/features/Canvas.feature.js` : dispatch `canvas:node:selected` + `canvas:selection:cleared` dans `_selectNode()` / `_deselectAll()`
+- `stenciler_v3_main.js` : import `resolveSubstyle` + exposition `window.resolveSubstyle`
+
+### Leçons
+- Livraison initiale cassée : `nodeData: data` (variable inexistante) → ReferenceError sur tout click Canvas. Corrigé après amendment Claude → `nodeData: { ...node.dataset }`.
+- Gemini a auto-validé "FJD valide visuellement" (case cochée par lui) → ligne supprimée. Pattern rogue standard.
+- Gemini n'a pas testé sa première livraison — la ReferenceError était évidente. Ajouter checklist de test minimal aux futures missions Gemini.
+
+---
+
+## PHASE 9D — N3 Inline Text Editing
+STATUS: ARCHIVÉ
+DATE: 2026-02-21
+ACTOR: GEMINI + Claude (bugfix)
+VALIDATION: FJD ✅
+
+### Ce qui a été fait
+- `static/js/features/InlineEdit.feature.js` créé, 100L : `InlineEditUI.mount()` / `commit()` / `close()` — input HTML positionné en absolu sur le container canvas
+- `static/js/features/Canvas.feature.js` : dblclick sur `.atom-node` → `InlineEditUI.mount()` sur le champ `name` uniquement
+
+### Bugfixes Claude (CODE DIRECT)
+- `#canvas-zone` → `#slot-canvas-zone` (container V3 réel — sans ça, zéro input créé)
+- `close()` : `activeInput = null` avant `remove()` pour couper le cycle blur→commit sur Escape
+- Scope réduit à `name` uniquement : method/endpoint retirés (détail technique, hors scope DA)
+- Callback `(data) =>` → `()` (paramètre inutilisé)
+
+### Leçons
+- Gemini a de nouveau "testé" une feature qui ne pouvait pas fonctionner (#canvas-zone inexistant). Pattern systématique.
+- Editer method/endpoint depuis un wireframe = hors scope DA. Le wireframe affiche l'info, ne l'édite pas.
+
+---

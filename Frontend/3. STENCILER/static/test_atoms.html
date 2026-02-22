@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stenciler V3 - 39 Atoms Verification</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f1f5f9; padding: 40px; color: #334155; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+        .atom-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
+        .atom-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #0f172a; width: 100%; }
+        .atom-role { font-size: 11px; color: #64748b; margin-bottom: 16px; width: 100%; font-family: monospace; }
+        .svg-container { width: 100%; display: flex; justify-content: center; }
+    </style>
+    <script type="module">
+        import { renderAtom } from './js/AtomRenderer.js';
+        
+        async function load() {
+            const res = await fetch('/api/genome');
+            const data = await res.json();
+            
+            const atoms = [];
+            data.n0_phases?.forEach(p => p.n1_sections?.forEach(s => s.n2_features?.forEach(f => f.n3_components?.forEach(a => atoms.push(a)))));
+            
+            const grid = document.getElementById('grid');
+            document.getElementById('count').textContent = atoms.length;
+            
+            atoms.forEach(a => {
+                const hint = a.visual_hint || 'general';
+                const type = a.interaction_type || 'default';
+                const role = a.semantic_role || 'none';
+                
+                // Color map hack for demo
+                const method = a.method || 'GET';
+                const colors = { "GET": "#7aca6a", "POST": "#5a9ac6", "PUT": "#e4bb5a", "DELETE": "#d56363" };
+                const color = colors[method] || "#64748b";
+                
+                const svgRes = renderAtom(a, 220, color);
+                
+                const card = document.createElement('div');
+                card.className = 'atom-card';
+                card.innerHTML = `
+                    <div class="atom-title">${a.name || a.id}</div>
+                    <div class="atom-role">hint:${hint} | role:${role} | type:${type}</div>
+                    <div class="svg-container">
+                        <svg width="220" height="${svgRes.h}" viewBox="0 0 220 ${svgRes.h}" style="overflow:visible;">
+                            <defs>
+                                <filter id="premium-shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.15"/></filter>
+                                <filter id="subtle-shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.05"/></filter>
+                            </defs>
+                            ${svgRes.svg}
+                        </svg>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        load();
+    </script>
+</head>
+<body>
+    <h1>Stenciler V3 - SVG Primitives Verification</h1>
+    <p>This page strictly applies <strong>AtomRenderer.js</strong> to the <span id="count">0</span> atoms from the Genome.<br>
+    It proves that the generative UI logic correctly converts <code>visual_hint</code> and <code>interaction_type</code> into high-fidelity SVGs, without touching the reference <code>studio.html</code>.</p>
+    <div id="grid" class="grid"></div>
+</body>
+</html>

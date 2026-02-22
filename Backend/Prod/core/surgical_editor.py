@@ -477,6 +477,14 @@ class SurgicalApplier:
             return "add_function requires 'code'"
         if op.op_type == "modify_method" and (not op.target or not op.code):
             return "modify_method requires 'target' and 'code'"
+        # Guard : protège les membres système (préfixe '_') contre écrasement LLM.
+        # Les noms préfixés '_' sont des métadonnées système (_layout, _substyle…).
+        # Utiliser CODE DIRECT pour les modifier intentionnellement.
+        if op.op_type in ('modify_method', 'add_method') and op.target:
+            target_name = op.target.split('.', 1)[-1]
+            if target_name.startswith('_'):
+                return (f"Protected target '{op.target}': LLM patches may not target "
+                        f"'_'-prefixed members (system metadata). Use CODE DIRECT instead.")
         return None
 
     def apply_operations(self, operations: List[SurgicalOperation]) -> Tuple[bool, str]:

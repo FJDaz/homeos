@@ -28,6 +28,52 @@ from .claude_helper import split_structure_and_code
 from .ui.hybrid_loader import HybridLoader, Phase, StepStatus
 
 
+# Phase 9B — SUBSTYLE_RULES : injection automatique de sous-styles par visual_hint.
+# Coût LLM : zéro. Lookup pur, appliqué avant rendu Stenciler.
+# Terminologie : grain (densité) | registre (typographie) | presence (accent)
+SUBSTYLE_DEFAULTS = {"grain": "standard", "registre": "body", "presence": "neutre"}
+
+SUBSTYLE_RULES: Dict[str, Dict[str, str]] = {
+    "header":       {"grain": "standard", "registre": "heading", "presence": "actif"},
+    "nav":          {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "navigation":   {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "breadcrumb":   {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "card":         {"grain": "standard", "registre": "body",    "presence": "neutre"},
+    "stencil-card": {"grain": "standard", "registre": "body",    "presence": "neutre"},
+    "dashboard":    {"grain": "standard", "registre": "body",    "presence": "neutre"},
+    "action":       {"grain": "compact",  "registre": "caption", "presence": "actif"},
+    "button":       {"grain": "compact",  "registre": "caption", "presence": "actif"},
+    "deploy":       {"grain": "compact",  "registre": "caption", "presence": "actif"},
+    "export":       {"grain": "compact",  "registre": "caption", "presence": "actif"},
+    "form":         {"grain": "standard", "registre": "body",    "presence": "neutre"},
+    "upload":       {"grain": "standard", "registre": "body",    "presence": "neutre"},
+    "data-table":   {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "table":        {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "modal":        {"grain": "standard", "registre": "body",    "presence": "actif"},
+    "confirm":      {"grain": "standard", "registre": "body",    "presence": "actif"},
+    "stepper":      {"grain": "compact",  "registre": "caption", "presence": "actif"},
+    "editor":       {"grain": "compact",  "registre": "caption", "presence": "neutre"},
+    "session":      {"grain": "standard", "registre": "body",    "presence": "neutre"},
+}
+
+
+def inject_substyle(sections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Injecte _substyle dans chaque section qui n'en a pas encore, basé sur visual_hint.
+
+    Le champ _substyle est préfixé '_' : métadonnée système, jamais écrasée par patch LLM.
+    Fallback sur SUBSTYLE_DEFAULTS si visual_hint inconnu.
+    """
+    for section in sections:
+        if "_substyle" not in section:
+            hint = str(section.get("visual_hint", "")).lower()
+            # Exact match d'abord, puis match partiel sur les clés connues
+            rule = SUBSTYLE_RULES.get(hint)
+            if rule is None:
+                rule = next((v for k, v in SUBSTYLE_RULES.items() if k in hint), SUBSTYLE_DEFAULTS)
+            section["_substyle"] = rule
+    return sections
+
+
 class ExecutionError(Exception):
     """Raised when execution fails."""
     pass

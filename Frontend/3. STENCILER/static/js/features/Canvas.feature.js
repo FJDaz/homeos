@@ -248,14 +248,14 @@ class CanvasFeature extends StencilerFeature {
             g.style.cursor = 'pointer';
 
             g.addEventListener('mouseenter', () => {
-                rect.setAttribute('fill', 'var(--bg-hover)');
-                rect.setAttribute('stroke', 'var(--accent-bleu, #3b82f6)');
-                rect.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))';
+                rect.setAttribute('fill', 'transparent');
+                rect.setAttribute('stroke', 'transparent'); // No more stuck blue borders
+                rect.style.filter = '';
 
                 const label = g.querySelector('.node-label');
                 const content = g.querySelector('.wf-content');
                 if (label) label.style.opacity = '1';
-                if (content) content.style.opacity = '0.4';
+                if (content) content.style.opacity = '0.7';
 
                 // Mission 8E : Show selection handles
                 this._showHandles(g);
@@ -264,10 +264,10 @@ class CanvasFeature extends StencilerFeature {
                 const label = g.querySelector('.node-label');
                 const content = g.querySelector('.wf-content');
                 if (!g.classList.contains('selected')) {
-                    rect.setAttribute('fill', 'var(--bg-tertiary)');
-                    rect.setAttribute('stroke', 'var(--border-subtle)');
-                    rect.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))';
-                    if (label) label.style.opacity = '0';
+                    rect.setAttribute('fill', 'transparent');
+                    rect.setAttribute('stroke', 'transparent');
+                    rect.style.filter = '';
+                    if (label) label.style.opacity = '0.3';
                     if (content) content.style.opacity = '1';
                 }
             });
@@ -631,15 +631,23 @@ class CanvasFeature extends StencilerFeature {
         this.svg.addEventListener('dblclick', (e) => {
             const node = e.target.closest('.svg-node');
             if (node) {
-                // --- Mission 11A : Interception Illustrator Mode ---
-                if (node.classList.contains('atom-node')) {
-                    e.stopPropagation();
-                    this.groupEditMode ? this._exitGroupEdit() : this._enterGroupEdit(node);
-                    return;
-                }
+                e.stopPropagation();
 
-                const level = node.classList.contains('corps-node') ? 1 : (node.classList.contains('cell-node') ? 2 : null);
-                if (level) this._drillInto(node.dataset.id, level);
+                // --- Restauration du Vrai Drill-Down ---
+                // On détecte le niveau actuel et on descend
+                const id = node.dataset.id;
+                if (node.classList.contains('corps-node')) {
+                    this._drillInto(id, 1); // Descend dans l'Organe
+                } else if (node.classList.contains('cell-node')) {
+                    this._drillInto(id, 2); // Descend dans la Cellule
+                } else if (node.classList.contains('atom-node')) {
+                    // Les atomes sont le niveau le plus bas, on peut déclencher un event
+                    document.dispatchEvent(new CustomEvent('atom:selected', { detail: { atomId: id } }));
+                } else {
+                    // Repli: on tente de déterminer par l'ID ou on monte d'un niveau générique
+                    // Sur les Canvas N0: nodes sont des Organes (donc level 1)
+                    this._drillInto(id, 1);
+                }
             } else if (e.target === this.svg || e.target.classList.contains('grid-layer')) {
                 this._drillUp();
             }
@@ -649,6 +657,9 @@ class CanvasFeature extends StencilerFeature {
     _drillInto(id, level) {
         if (this.drillStack.some(s => s.id === id)) return;
         this.drillStack.push({ level, id });
+
+        console.log(`[Canvas] Drill down level ${level} -> ${id}`);
+
         if (level === 1) {
             this._renderOrgane(id);
             document.dispatchEvent(new CustomEvent('organe:selected', {
@@ -667,6 +678,8 @@ class CanvasFeature extends StencilerFeature {
         if (this.drillStack.length === 0) return;
         this.drillStack.pop();
 
+        console.log(`[Canvas] Drill up. Remaining stack:`, this.drillStack);
+
         if (this.drillStack.length === 0) {
             if (this.currentCorpsId) {
                 this._renderCorps(this.currentCorpsId);
@@ -680,6 +693,12 @@ class CanvasFeature extends StencilerFeature {
                 this._renderOrgane(prev.id);
                 document.dispatchEvent(new CustomEvent('organe:selected', {
                     detail: { organeId: prev.id, genome: window.stencilerApp?.genome }
+                }));
+            }
+            if (prev.level === 2) {
+                this._renderCellule(prev.id);
+                document.dispatchEvent(new CustomEvent('cellule:selected', {
+                    detail: { celluleId: prev.id }
                 }));
             }
         }
@@ -704,24 +723,27 @@ class CanvasFeature extends StencilerFeature {
             if (n !== node) n.style.opacity = '0.25';
         });
 
-        // Activer les events sur le contenu du wireframe
-        const content = node.querySelector('.atom-wf-content') || node.querySelector('.wf-content');
-        if (!content) return;
+        // --- Mission 11A : Mode Illustrateur ---
+        // Activation events internes sur les primitives SVG
+        const content = node.querySelector('.bottom-up-composition');
+        if (content) {
+            content.setAttribute('pointer-events', 'all');
+            // On rend toutes les primitives profondes cliquables
+            content.querySelectorAll('rect, text, circle, path').forEach(prim => {
+                prim.setAttribute('pointer-events', 'all');
+                prim.style.cursor = 'move';
 
-        content.setAttribute('pointer-events', 'all');
-        content.querySelectorAll('rect, text, circle, path').forEach(prim => {
-            prim.style.cursor = 'move';
-            prim.setAttribute('pointer-events', 'all');
-            // Monkey-patch pour stocker le handler et pouvoir le retirer
-            prim._gc = (e) => {
-                e.stopPropagation();
-                this._selectPrimitive(prim, node);
-            };
-            prim.addEventListener('click', prim._gc);
-        });
+                // Mémoriser la callback pour la nettoyer à l'exit
+                prim._gc = (e) => {
+                    e.stopPropagation();
+                    this._selectPrimitive(prim, node);
+                };
+                prim.addEventListener('click', prim._gc);
 
-        // --- Mission 11B : Open Inspector Panel ---
-        this._openAtomInspector(node);
+                // Setup drag pour chaque primitive
+                this._setupPrimitiveDrag(prim, node);
+            });
+        }
 
         console.log('🎨 [11A] Illustrator Mode: Entered group edit for', node.dataset.id);
     }
@@ -798,13 +820,10 @@ class CanvasFeature extends StencilerFeature {
     }
 
     _exitGroupEdit() {
-        // --- Mission 11B : Close Inspector Panel ---
-        this._closeAtomInspector();
-
         const node = this.groupEditTarget;
         if (!node) return;
 
-        // Restaurer le conteneur
+        // Reset visual feedback
         const bg = node.querySelector('.node-bg');
         if (bg) {
             bg.setAttribute('stroke', 'var(--border-subtle)');
@@ -812,13 +831,13 @@ class CanvasFeature extends StencilerFeature {
             bg.setAttribute('stroke-width', '1.5');
         }
 
-        // Restaurer les autres nodes
+        // Restore opacity of other elements
         this.viewport.querySelectorAll('.svg-node').forEach(n => {
             n.style.opacity = '1';
         });
 
         // Désactiver les events sur le contenu
-        const content = node.querySelector('.atom-wf-content') || node.querySelector('.wf-content');
+        const content = node.querySelector('.bottom-up-composition');
         if (content) {
             content.setAttribute('pointer-events', 'none');
             content.querySelectorAll('rect, text, circle, path').forEach(prim => {
@@ -839,145 +858,7 @@ class CanvasFeature extends StencilerFeature {
         console.log('🎨 [11A] Illustrator Mode: Exited group edit');
     }
 
-    // --- MISSION 11B : Atom Inspector Panel (Pleine Taille) ---
 
-    _openAtomInspector(node) {
-        this._closeAtomInspector();
-        const atomData = this._findInGenome(node.dataset.id);
-        if (!atomData) return;
-
-        // On affiche le wireframe de la library au format natif (280x180)
-        // Mapping interaction_type -> hint de library
-        const WF_MAP = {
-            'click': 'action-button',
-            'submit': 'action-button',
-            'drag': 'selection',
-            'view': 'table'
-        };
-        const wfKey = WF_MAP[atomData.interaction_type] || 'accordion';
-
-        const stripe = node.querySelector('rect[fill]:not(.node-bg)');
-        const color = stripe ? stripe.getAttribute('fill') : 'var(--accent-bleu)';
-
-        const wfSVG = WireframeLibrary.getSVG(wfKey, color, 280, 180, atomData.name);
-        if (!wfSVG) return;
-
-        const panel = document.createElement('div');
-        panel.id = 'atom-inspector';
-        panel.style.cssText = `
-            position: fixed;
-            right: 16px;
-            top: 80px;
-            width: 312px;
-            background: var(--bg-primary, #f7f6f2);
-            border: 1px solid var(--border-warm, #d4cfc8);
-            border-radius: 8px;
-            z-index: 1000;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-            font-family: Geist, sans-serif;
-            display: flex;
-            flex-direction: column;
-        `;
-
-        panel.innerHTML = `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border-subtle);">
-                <span style="font-size:11px; font-weight:700; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.05em;">${atomData.name}</span>
-                <button id="atom-inspector-close" style="background:none; border:none; cursor:pointer; font-size:14px; color:var(--text-muted); padding:4px;">✕</button>
-            </div>
-            <div style="padding:16px; background:var(--bg-secondary, #eeede8); margin:8px; border-radius:6px; overflow:hidden;">
-                <svg id="atom-inspector-svg" width="280" height="180" viewBox="0 0 280 180">${wfSVG}</svg>
-            </div>
-            <div style="padding:4px 16px 16px; font-size:10px; color:var(--text-muted); font-style:italic;">
-                Mode Inspecteur : Chaque primitive est éditable par drag & drop.
-            </div>
-        `;
-
-        document.body.appendChild(panel);
-        this._inspectorPanel = panel;
-
-        // Bind closure
-        panel.querySelector('#atom-inspector-close').addEventListener('click', () => {
-            this._exitGroupEdit();
-        });
-
-        // Setup primitives interaction in inspector
-        const inspSVG = panel.querySelector('#atom-inspector-svg');
-        inspSVG.querySelectorAll('rect, text, circle, path, line').forEach(prim => {
-            prim.style.cursor = 'move';
-            prim.setAttribute('pointer-events', 'all');
-
-            prim._ic = (e) => {
-                e.stopPropagation();
-                this._selectInspectorPrimitive(prim, inspSVG);
-            };
-            prim.addEventListener('click', prim._ic);
-
-            // Drag handler in inspector
-            prim.addEventListener('mousedown', (e) => {
-                this._startInspectorDrag(prim, e, inspSVG);
-            });
-        });
-    }
-
-    _selectInspectorPrimitive(prim, svgEl) {
-        // Clear previous selection
-        svgEl.querySelectorAll('.insp-sel').forEach(el => el.remove());
-
-        const bb = prim.getBBox();
-        const ov = Renderer._el('rect', {
-            x: bb.x - 2, y: bb.y - 2,
-            width: bb.width + 4, height: bb.height + 4,
-            fill: 'none', stroke: '#a8c5fc',
-            'stroke-width': '1.5', 'stroke-dasharray': '3 2',
-            'pointer-events': 'none',
-            class: 'insp-sel'
-        });
-        svgEl.appendChild(ov);
-    }
-
-    _startInspectorDrag(prim, e, svgEl) {
-        e.stopPropagation();
-
-        const CTM = svgEl.getScreenCTM();
-        const getMousePos = (ev) => ({
-            x: (ev.clientX - CTM.e) / CTM.a,
-            y: (ev.clientY - CTM.f) / CTM.d
-        });
-
-        const isCircle = prim.tagName === 'circle';
-        let startMouse = getMousePos(e);
-        let startPos = {
-            x: parseFloat(prim.getAttribute(isCircle ? 'cx' : 'x') || 0),
-            y: parseFloat(prim.getAttribute(isCircle ? 'cy' : 'y') || 0)
-        };
-
-        const onMouseMove = (ev) => {
-            const currentMouse = getMousePos(ev);
-            const dx = currentMouse.x - startMouse.x;
-            const dy = currentMouse.y - startMouse.y;
-
-            prim.setAttribute(isCircle ? 'cx' : 'x', startPos.x + dx);
-            prim.setAttribute(isCircle ? 'cy' : 'y', startPos.y + dy);
-
-            // Update selection handle
-            this._selectInspectorPrimitive(prim, svgEl);
-        };
-
-        const onMouseUp = () => {
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
-        };
-
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-    }
-
-    _closeAtomInspector() {
-        if (this._inspectorPanel) {
-            this._inspectorPanel.remove();
-            this._inspectorPanel = null;
-        }
-    }
 
     /**
      * Recherche un node dans le génome local par son ID.
@@ -1004,8 +885,8 @@ class CanvasFeature extends StencilerFeature {
         node.classList.add('selected');
         const rect = node.querySelector('.node-bg');
         if (rect) {
-            rect.setAttribute('stroke', 'var(--accent-bleu, #3b82f6)');
-            rect.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))';
+            rect.setAttribute('stroke', 'transparent'); // Alpha 0 pour selection
+            rect.style.filter = '';
         }
         const label = node.querySelector('.node-label');
         const content = node.querySelector('.wf-content');

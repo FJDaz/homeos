@@ -31,25 +31,23 @@ export const LayoutEngine = {
         const distribution = { TOP: [], CENTER: [], RIGHT: [], BOTTOM: [], FLOATING: [], UNKNOWN: [] };
 
         sections.forEach(sec => {
+            const role = sec.semantic_role || 'content';
+
+            // Si on n'a qu'un rôle 'content' par défaut, on peut tenter un fallback lexical léger (legacy)
             const searchPool = `${sec.id} ${sec.name || ''} ${sec.visual_hint || ''}`.toLowerCase();
+            const legacyTop = ['stepper', 'breadcrumb', 'navigation', 'nav', 'zoom'];
+            const legacyRight = ['dashboard', 'session', 'status', 'accordion', 'validation', 'palette', 'color', 'detail'];
+            const legacyBottom = ['download', 'export', 'launch', 'button', 'deploy'];
+            const legacyFloating = ['modal', 'confirm'];
 
-            const mapping = {
-                TOP: ['stepper', 'breadcrumb', 'navigation', 'nav', 'zoom'],
-                RIGHT: ['dashboard', 'session', 'status', 'accordion', 'validation', 'palette', 'color', 'detail'],
-                BOTTOM: ['download', 'export', 'launch', 'button', 'deploy'],
-                FLOATING: ['modal', 'confirm']
-            };
-
-            let zoneFound = null;
-            for (const [zone, keys] of Object.entries(mapping)) {
-                if (keys.some(k => searchPool.includes(k))) {
-                    zoneFound = zone;
-                    break;
-                }
-            }
-
-            if (zoneFound) {
-                distribution[zoneFound].push(sec);
+            if (role === 'header' || role === 'navigation' || legacyTop.some(k => searchPool.includes(k))) {
+                distribution.TOP.push(sec);
+            } else if (role === 'feedback' || legacyRight.some(k => searchPool.includes(k))) {
+                distribution.RIGHT.push(sec);
+            } else if (role === 'footer' || role === 'action' || legacyBottom.some(k => searchPool.includes(k))) {
+                distribution.BOTTOM.push(sec);
+            } else if (role === 'modal' || legacyFloating.some(k => searchPool.includes(k))) {
+                distribution.FLOATING.push(sec);
             } else {
                 distribution.CENTER.push(sec);
             }

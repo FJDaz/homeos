@@ -4,7 +4,7 @@
  * Responsabilités : Construction des éléments SVG, injection des wireframes.
  */
 
-import { WireframeLibrary } from './WireframeLibrary.js';
+import { G } from './GRID.js';
 import { renderAtom } from './AtomRenderer.js';
 
 const Renderer = {
@@ -101,17 +101,96 @@ const Renderer = {
         const filter = this._el('filter', { id: 'premium-shadow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
         filter.append(this._el('feDropShadow', { dx: 0, dy: 3, stdDeviation: 4, 'flood-opacity': 0.15 }));
 
+        // Filtre Ombre Portée (Subtle)
+        const filterSubtle = this._el('filter', { id: 'subtle-shadow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
+        filterSubtle.append(this._el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2, 'flood-opacity': 0.05 }));
+
         // Dégradé Inset (Refleur)
         const grad = this._el('linearGradient', { id: 'premium-grad', x1: '0', y1: '0', x2: '0', y2: '1' });
         grad.append(this._el('stop', { offset: '0%', 'stop-color': 'white', 'stop-opacity': 0.1 }));
         grad.append(this._el('stop', { offset: '100%', 'stop-color': 'black', 'stop-opacity': 0.05 }));
 
-        defs.append(filter, grad);
+        defs.append(filter, filterSubtle, grad);
         svg.prepend(defs);
     },
 
+    _getSpacing(density) {
+        if (density === 'compact') return { gap: G.GAP_S, pad: G.PAD_S };
+        if (density === 'airy') return { gap: G.GAP * 1.5, pad: G.PAD_L };
+        return { gap: G.GAP, pad: G.PAD };
+    },
+
+    _buildComposition(data, availableWidth, color) {
+        // Est-ce un Atome (N3) ?
+        if ((data.id && data.id.startsWith('comp_')) || data.interaction_type) {
+            return renderAtom(data, availableWidth, color);
+        }
+
+        // Sinon c'est une Cellule (N2) ou Sous-groupe
+        const { gap, pad } = this._getSpacing(data.density);
+        const children = data.n2_features || data.n3_components || [];
+
+        let childHTML = '';
+        let layoutType = data.layout_type;
+        if (!layoutType && data.layout_hint) {
+            if (data.layout_hint.includes('row')) layoutType = 'flex';
+            else if (data.layout_hint.includes('grid')) layoutType = 'grid';
+        }
+        layoutType = layoutType || 'stack';
+
+        let currentY = 0;
+        let currentX = 0;
+        let rowHeight = 0;
+
+        children.forEach((child) => {
+            let childAvailWidth = availableWidth;
+            let colsCount = 1;
+
+            if (layoutType === 'grid') {
+                colsCount = Math.min(children.length, 3); // Max 3 cols par défaut
+                if (child.visual_hint === 'color-palette') colsCount = 4;
+                childAvailWidth = G.cols(availableWidth, colsCount, gap);
+            } else if (layoutType === 'flex') {
+                colsCount = children.length;
+                childAvailWidth = G.cols(availableWidth, colsCount, gap);
+            }
+
+            // --- Wrap Logic (Retour à la ligne) ---
+            if ((layoutType === 'flex' || layoutType === 'grid') && (currentX + childAvailWidth > availableWidth + 1)) {
+                currentX = 0;
+                currentY += rowHeight + gap;
+                rowHeight = 0;
+            }
+
+            // Génération de l'enfant N3
+            const res = this._buildComposition(child, childAvailWidth, color);
+
+            // Wrap dans un <g> positionné
+            childHTML += `<g class="composition-wrapper" transform="translate(${currentX}, ${currentY})">${res.svg}</g>`;
+
+            // Avancement des curseurs Layout
+            if (layoutType === 'flex' || layoutType === 'grid') {
+                currentX += childAvailWidth + gap;
+                rowHeight = Math.max(rowHeight, res.h);
+            } else {
+                currentY += res.h + gap;
+            }
+        });
+
+        // Calcul hauteur finale
+        let totalH = currentY;
+        if (layoutType === 'flex' || layoutType === 'grid') {
+            totalH = currentY + rowHeight;
+        } else if (currentY > 0) {
+            totalH = currentY - gap; // Retrait du dernier gap en mode stack
+        }
+
+        const svgStr = `<g data-id="${data.id}" class="cell-group">${childHTML}</g>`;
+        return { svg: svgStr, h: totalH, w: availableWidth };
+    },
+
     /**
-     * Rendu d'un nœud (Corps, Organe ou Cellule)
+     * Rendu d'un nœud (Corps, Organe ou Cellule) au niveau Canvas.
      */
     renderNode(data, pos, color, level = 0) {
         const isCell = level === 1;
@@ -123,158 +202,53 @@ const Renderer = {
             'data-id': data.id
         });
 
-        // Background
+        // Background (Carte englobante de l'Organe/Cellule sur le canvas)
         const style = data._style || {};
         const rect = this._el('rect', {
-            width: pos.w, height: pos.h, rx: 6,
-            fill: style.fill || 'var(--bg-tertiary)',
-            stroke: style.stroke || 'var(--border-subtle)',
-            'stroke-width': style.strokeWidth || 1.5,
+            width: pos.w, height: pos.h, rx: 8,
+            fill: 'transparent', // Arrêt de mort officiel des boîtes (Alpha 0)
+            stroke: 'transparent',
+            'stroke-width': 1,
             class: 'interactive-node node-bg'
         });
-        rect.style.cssText = 'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.05))';
+        rect.style.cssText = ''; // Plus de drop-shadow pour fusionner avec le fond de la page
 
-        // --- Mission 10A-TER : Injection des filtres Premium ---
         const svgElement = document.querySelector('.stenciler-canvas');
         if (svgElement) this._injectDefs(svgElement);
 
-        // Stripe colorée
-        const stripe = this._el('rect', { width: 6, height: pos.h - 16, x: 0, y: 8, fill: color, rx: 2 });
+        // Suppression explicite de la barre de couleur verticale demandée par l'utilisateur
+        // (stripe retirée)
 
-        // Titre - Mission 8D Refinement : Centrage absolu
-        const title = this._el('text', {
-            x: pos.w / 2, y: pos.h / 2,
-            'font-size': isAtom ? 14 : 16, // Légèrement plus grand pour la lisibilité
-            fill: 'var(--text-primary)',
-            'font-family': style.font || 'Geist, sans-serif',
-            'font-weight': '800',
+        // Suppression explicite du title statique (node-label) demandée par l'utilisateur
+
+        g.append(rect);
+
+        // --- PIVOT BOTTOM-UP : Composition dynamique ---
+        // Padding réduit à 8px selon demande, sauf PAD_TOP pour le petit titre
+        const PAD_LEFT = 8, PAD_TOP = 20, PAD_RIGHT = 8, PAD_BOTTOM = 8;
+        const innerW = pos.w - PAD_LEFT - PAD_RIGHT;
+
+        const compGroup = this._el('g', {
+            class: 'wf-content bottom-up-composition',
             'pointer-events': 'none',
-            'text-anchor': 'middle',
-            'dominant-baseline': 'middle',
-            class: 'node-label'
-        }, data.name.toUpperCase());
-        title.style.opacity = '0'; // Masqué par défaut (Mission 8D)
-        title.style.transition = 'opacity 0.2s ease';
+            transform: `translate(${PAD_LEFT}, ${PAD_TOP})`
+        });
 
-        g.append(rect, stripe, title);
+        const res = this._buildComposition(data, innerW, color);
 
-        // --- MISSION 10A-FRAME : Restauration Cartouche Atome ---
-        // On ne passe plus par _matchHint pour les atomes (keyword matching trop fragile)
-        if (isAtom) {
-            const PAD_LEFT = 14, PAD_TOP = 24, PAD_RIGHT = 8, PAD_BOTTOM = 8;
-            const innerW = pos.w - PAD_LEFT - PAD_RIGHT;
-            const innerH = pos.h - PAD_TOP - PAD_BOTTOM;
-
-            if (data.visual_hint) {
-                // Priorité au wireframe explicite du génome (ex: 'editor', 'chat')
-                const wfSVG = WireframeLibrary.getSVG(data.visual_hint, color, innerW, innerH, data.name);
-                if (wfSVG) {
-                    const wfGroup = this._el('g', {
-                        class: 'wf-content', 'pointer-events': 'none',
-                        transform: `translate(${PAD_LEFT}, ${PAD_TOP})`
-                    });
-                    wfGroup.innerHTML = wfSVG;
-                    g.append(wfGroup);
-                    // rect et stripe RESTENT VISIBLES
-                    title.style.opacity = '0.7';
-                    title.setAttribute('y', '16');
-                    title.setAttribute('font-size', '9');
-                    return g;
-                }
-            }
-
-            // Fallback ou rendu générique via interaction_type
-            const svgStr = renderAtom(data.interaction_type, data.name, { w: innerW, h: innerH }, color);
-            if (svgStr) {
-                const atomGroup = this._el('g', {
-                    class: 'atom-wf-content', 'pointer-events': 'none',
-                    transform: `translate(${PAD_LEFT}, ${PAD_TOP})`
-                });
-                atomGroup.innerHTML = svgStr;
-                g.append(atomGroup);
-                // rect et stripe RESTENT VISIBLES
-                title.style.opacity = '0.7';
-                title.setAttribute('y', '16');
-                title.setAttribute('font-size', '9');
-            }
-            return g; // Fin du rendu pour l'Atome
+        // --- Redimensionnement dynamique ---
+        const expectedH = res.h + PAD_TOP + PAD_BOTTOM;
+        if (expectedH > pos.h) {
+            pos.h = expectedH;
+            rect.setAttribute('height', pos.h);
         }
 
-        // --- SECTION MISSION 8A : Injection Wireframe Library (Organes & Cellules) ---
-        const hint = this._matchHint(data);
-        const pad = style.padding || 0;
+        const innerH = pos.h - PAD_TOP - PAD_BOTTOM;
+        const offsetY = Math.max(0, (innerH - res.h) / 2);
 
-        if (hint) {
-            const wfSVG = WireframeLibrary.getSVG(hint, color, pos.w - (pad * 2), pos.h - (pad * 2), data.name);
-            if (wfSVG) {
-                const wfGroup = this._el('g', {
-                    class: 'wf-content',
-                    'pointer-events': 'none',
-                    transform: `translate(${pad}, ${pad})`
-                });
-                wfGroup.innerHTML = wfSVG;
-                g.append(wfGroup);
-
-                // --- MISSION 10A-FRAME : Unification Card-First ---
-                // Le wireframe s'insère DANS la carte, il ne la remplace plus.
-                // rect.style.opacity = '1'; // Règle par défaut
-                // stripe.style.opacity = '1';
-                title.style.opacity = '0.7';
-                title.setAttribute('y', '16');
-                title.setAttribute('font-size', '9');
-            }
-        } else if (level === 0) {
-            // Fallback icônes si pas de wireframe (Précédent Mission 6D)
-            const ID_ICONS = {
-                'backend': '⚡', 'frontend': '◈', 'brainstorm': '◆', 'deploy': '↗'
-            };
-            const idKey = data.id.replace(/^n\d+_/, '').toLowerCase();
-            const icon = ID_ICONS[idKey] || '◆';
-            const iconEl = this._el('text', {
-                x: pos.w - 18, y: 20, 'font-size': 18, fill: color,
-                'font-family': 'serif', 'text-anchor': 'middle', 'pointer-events': 'none',
-                'dominant-baseline': 'middle'
-            }, icon);
-            g.append(iconEl);
-        }
-
-        // Description (si pas de wireframe ou en complément)
-        if (!hint && data.description && level < 2) {
-            const desc = this._el('text', {
-                x: 15, y: 40, 'font-size': 10, fill: 'var(--text-muted)',
-                'font-family': 'Inter, sans-serif', 'pointer-events': 'none'
-            }, data.description);
-            g.append(desc);
-        }
-
-        // --- SPECIFIQUE N3 (Atomes) ---
-        // Mission 10A-BIS : Retrait des mentions techniques (method/endpoint) demandées par FJD
-        // On ne garde que l'id dans le dataset et le comportement interactif
-
-        // Les atomes ne passent plus par ici (forkés en tête de fonction)
-
-        // Micro-previews (Mission 10A : Cascade de détail)
-        if (!hint) {
-            // N1 -> N2 preview (Organe affiche ses Cellules)
-            if (level === 0 && data.n2_features) {
-                data.n2_features.slice(0, 3).forEach((c, i) => {
-                    const y = 55 + (i * 14);
-                    if (y + 12 > pos.h) return;
-                    const text = this._el('text', { x: 15, y: y, 'font-size': 9, fill: 'var(--text-secondary)', opacity: 0.8 }, `• ${c.name.substring(0, 24)}`);
-                    g.append(text);
-                });
-            }
-            // N2 -> N3 preview (Cellule affiche ses Atomes) - Tâche 2
-            if (level === 1 && data.n3_components) {
-                data.n3_components.slice(0, 4).forEach((a, i) => {
-                    const y = 40 + (i * 12);
-                    if (y + 10 > pos.h) return;
-                    const label = `${a.interaction_type || 'atome'} : ${a.name}`;
-                    const text = this._el('text', { x: 15, y: y, 'font-size': 8, fill: 'var(--text-muted)', opacity: 0.7 }, `› ${label.substring(0, 28)}`);
-                    g.append(text);
-                });
-            }
-        }
+        compGroup.setAttribute('transform', `translate(${PAD_LEFT}, ${PAD_TOP + offsetY})`);
+        compGroup.innerHTML = res.svg;
+        g.append(compGroup);
 
         return g;
     },

@@ -1,0 +1,55 @@
+{
+  "task_id": "9B_substyle_backend",
+  "description": "Phase 9B : (1) Guard '_' prefix dans _validate_operation() de SurgicalApplier — protège les membres système contre écrasement LLM. (2) Constante SUBSTYLE_RULES dans orchestrator.py — lookup visuel_hint → substyle, injection coût-zéro.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter guard '_' prefix dans _validate_operation() de SurgicalApplier",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Guard ajouté AVANT le check final 'return None'",
+        "Appliqué uniquement sur op_type modify_method et add_method",
+        "Extrait le nom bare depuis 'Class.method' via split('.', 1)[-1]",
+        "Retourne un message d'erreur clair si target commence par '_'",
+        "Aucun autre changement dans la méthode"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [],
+        "instructions": "Voici _validate_operation() actuelle de SurgicalApplier (surgical_editor.py L462-480) :\n\n    def _validate_operation(self, op: SurgicalOperation) -> Optional[str]:\n        \"\"\"Validate operation has required fields and supported type. Returns error message or None.\"\"\"\n        if not op or not getattr(op, \"op_type\", None):\n            return \"Operation missing type\"\n        if op.op_type not in SUPPORTED_OPERATIONS:\n            return f\"Unsupported operation type: {op.op_type!r}. Supported: {sorted(SUPPORTED_OPERATIONS)}\"\n        if op.op_type == \"add_method\" and (not op.target or not op.code):\n            return \"add_method requires 'target' and 'code'\"\n        if op.op_type == \"add_import\" and not (op.new_import or op.code or getattr(op, \"import\", None)):\n            return \"add_import requires 'import' or 'code'\"\n        if op.op_type == \"replace_import\" and (not op.old_import or not op.new_import):\n            return \"replace_import requires 'old' and 'new'\"\n        if op.op_type == \"add_class\" and not op.code:\n            return \"add_class requires 'code'\"\n        if op.op_type == \"add_function\" and not op.code:\n            return \"add_function requires 'code'\"\n        if op.op_type == \"modify_method\" and (not op.target or not op.code):\n            return \"modify_method requires 'target' and 'code'\"\n        return None\n\nTâche : Produis la version COMPLÈTE modifiée de _validate_operation() avec ce guard ajouté AVANT le 'return None' final :\n\n        # Guard : protège les membres système (préfixe '_') contre écrasement LLM\n        if op.op_type in ('modify_method', 'add_method') and op.target:\n            target_name = op.target.split('.', 1)[-1]  # 'SurgicalApplier._validate' -> '_validate'\n            if target_name.startswith('_'):\n                return f\"Protected target '{op.target}': LLM patches may not target '_'-prefixed members (system metadata). Use explicit CODE DIRECT instead.\"\n\nOutput : code Python de la méthode complète uniquement, sans markdown, sans texte autour."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Générer la constante SUBSTYLE_RULES pour orchestrator.py",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Dict Python valide nommé SUBSTYLE_RULES",
+        "Clés = visual_hint strings (header, nav, card, action, form, data-table, modal, stepper, editor, upload)",
+        "Valeurs = dict avec 3 champs : grain (compact/standard), registre (caption/body/heading), presence (neutre/actif/muted)",
+        "Commentaire header expliquant l'usage",
+        "Fonction inject_substyle(sections: list) -> list qui itère sur les sections et injecte le substyle si absent",
+        "Lookup basé sur visual_hint.lower() avec fallback sur SUBSTYLE_DEFAULTS si non trouvé"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [],
+        "instructions": "Génère un bloc Python autonome pour orchestrator.py. Ce bloc sera ajouté après les imports, avant la définition de classe Orchestrator.\n\nLe bloc doit contenir :\n1. Un dict SUBSTYLE_DEFAULTS (fallback) : {'grain': 'standard', 'registre': 'body', 'presence': 'neutre'}\n2. Un dict SUBSTYLE_RULES (lookup par visual_hint) avec au moins ces entrées :\n   - 'header' : grain=standard, registre=heading, presence=actif\n   - 'nav' / 'navigation' / 'breadcrumb' : grain=compact, registre=caption, presence=neutre\n   - 'card' / 'stencil-card' / 'dashboard' : grain=standard, registre=body, presence=neutre\n   - 'action' / 'button' / 'deploy' / 'export' : grain=compact, registre=caption, presence=actif\n   - 'form' / 'upload' : grain=standard, registre=body, presence=neutre\n   - 'data-table' / 'table' : grain=compact, registre=caption, presence=neutre\n   - 'modal' / 'confirm' : grain=standard, registre=body, presence=actif\n   - 'stepper' : grain=compact, registre=caption, presence=actif\n   - 'editor' : grain=compact, registre=caption, presence=neutre\n3. Une fonction inject_substyle(sections: list) -> list :\n   - Pour chaque section dans sections\n   - Si '_substyle' absent dans la section\n   - Chercher visual_hint.lower() dans SUBSTYLE_RULES (match exact puis match partiel)\n   - Injecter section['_substyle'] = SUBSTYLE_RULES[matched_hint] ou SUBSTYLE_DEFAULTS\n   - Retourner la liste modifiée\n\nCommentaire en tête : # Phase 9B — SUBSTYLE_RULES : injection automatique de sous-styles par visual_hint.\n# Coût LLM : zéro. Lookup pur, appliqué avant rendu Stenciler.\n# Terminologie : grain (densité) | registre (typographie) | presence (accent)\n\nOutput : code Python uniquement, sans markdown."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-02-21T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "workflow": "BUILD",
+    "target": "surgical_editor.py + orchestrator.py — Phase 9B substyle backend"
+  }
+}
