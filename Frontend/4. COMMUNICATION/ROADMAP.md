@@ -260,8 +260,9 @@ if (isAtom) {
 | 11A | Atom Group Edit — Mode Illustrateur | Gemini | ✅ Livré |
 | 11B | Primitive Style Panel (couleur, typo) | Gemini | ✅ Livré |
 | 12A | Pivot Bottom-Up SVG (Vrai WYSIWYG) | Gemini | ✅ Livré |
-| 13A-PRE | Toggle Grid & Fond Dense SVG | Gemini | ✅ Livré |
-| 13A | Semantic UI & Design System (Vrai Generative UI) | Gemini | 🔄 EN COURS |
+| 13A-PRE | Toggle Grid & Fond Dense SVG | Gemini | ✅ ARCHIVÉ |
+| 13A-DESIGN | Proposition Design System (Hype Minimaliste) | Gemini | 🔄 EN COURS |
+| 13A | Semantic UI & Design System (Implémentation) | Gemini | ⏳ EN ATTENTE |
 | 11C | Export final HTML/CSS | — | ⏳ Backlog |
 
 ---
@@ -592,9 +593,10 @@ L'objectif est de reconstruire le moteur de rendu (`Canvas.renderer.js` et `Atom
 ---
 
 ## Mission 13A-PRE — Toggle Grid & Fond Dense SVG
-STATUS: RAPPORT
+STATUS: ARCHIVÉ
 MODE: CODE DIRECT — FJD
 ACTOR: GEMINI (Exécuteur Frontend)
+VALIDATION: FJD — "La grille est top maintenant"
 
 ---
 
@@ -606,20 +608,34 @@ ACTOR: GEMINI (Exécuteur Frontend)
 - Handler clic : toggle `display: block/none` sur `#svg-grid`
 - Feedback visuel : bouton à 40% d'opacité quand grille masquée
 
-**2. Fond SVG plus dense**
+**2. Déduplication de la grille**
+- Grille CSS `::before` sur `#slot-canvas-zone` commentée dans :
+  - `stenciler.css` (L1132-1146)
+  - `stenciler_v3_additions.css` (L226-239)
+- Grille unique = SVG pattern dans `Canvas.feature.js`
+- Toggle fonctionne maintenant sur toute la grille
+
+**3. Grille plus visible**
+- Couleur : `var(--border-subtle, #d5d4d0)` (au lieu de `--grid-line`)
+- Épaisseur : `1px` (au lieu de `0.5px`)
+- Contraste suffisant en mode jour et nuit
+
+**4. Fond SVG plus dense**
 - Ajout `<rect id="svg-bg">` sous la grille avec `fill="var(--bg-secondary)"`
 - Le fond hérite automatiquement du thème (jour/nuit) via CSS variables
 - Mode jour : `#f0efeb` (dense, moins flottant)
 - Mode nuit : `#111111` (encore plus dense, "accident heureux")
 
 ### Fichiers modifiés
-- `Frontend/3. STENCILER/static/js/features/Canvas.feature.js` (L46-47, L63-64, L72, L963-975)
+- `Frontend/3. STENCILER/static/js/features/Canvas.feature.js` (pattern grid + toggle)
+- `Frontend/3. STENCILER/static/css/stenciler.css` (commenté .canvas-zone::before)
+- `Frontend/3. STENCILER/static/css/stenciler_v3_additions.css` (commenté ::before)
 
 ### Validation
 - URL : http://localhost:9998/stenciler
-- Commande : `cd "Frontend/3. STENCILER" && python3 server_9998_v2.py`
-- À tester : clic sur bouton ⊞ pour masquer/afficher la grille
-- Le fond doit être visible en mode jour (gris chaud --bg-secondary)
+- Hard refresh (Cmd+Shift+R) nécessaire
+- Toggle ⊞ masque/affiche toute la grille
+- Grille bien visible en mode jour (stroke 1px + --border-subtle)
 
 ---
 

@@ -780,3 +780,40 @@ VALIDATION: FJD — "OK, tout va bien"
 Le mode nuit est "beaucoup plus accurate" — on voit le véritable encadrement d'une page web, on flotte moins. Le `#stenciler-svg rect` est plus dense en couleur en mode nuit et c'est un accident heureux.
 
 ---
+
+---
+
+## Mission 13A-PRE — Toggle Grid & Fond Dense SVG (FINAL)
+STATUS: ARCHIVÉ
+DATE: 2026-02-22
+ACTOR: GEMINI (Antigravity)
+VALIDATION: FJD — "La grille est top maintenant"
+
+### Résumé des itérations
+
+**Itération 1** — Toggle grid + fond dense
+- Toggle bouton `⊞` ajouté
+- Fond `--bg-secondary` sous la grille
+- Problème : toggle ne masquait que la grille centrale (grille CSS en double)
+
+**Itération 2** — Déduplication
+- Grille CSS `::before` commentée dans `stenciler.css` et `additions.css`
+- Grille unique = SVG pattern
+- Problème : grille trop légère en mode jour
+
+**Itération 3** — Visibilité améliorée
+- Stroke-width : 0.5px → 1px
+- Couleur : `--grid-line` → `--border-subtle` (#d5d4d0)
+- Résultat : grille visible jour et nuit
+
+### Fichiers finaux modifiés
+- `Canvas.feature.js` — pattern grid + toggle handler
+- `stenciler.css` — .canvas-zone::before commenté
+- `stenciler_v3_additions.css` — ::before commenté
+
+### Leçons
+- Le serveur avait un service worker agressif (cache-first) → require hard refresh
+- Grille CSS + SVG grid = conflit visuel → une seule source de vérité
+- Tokens CSS variables garantissent cohérence jour/nuit
+
+---
