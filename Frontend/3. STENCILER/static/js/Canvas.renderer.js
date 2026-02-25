@@ -6,6 +6,7 @@
 
 import { G } from './GRID.js';
 import { renderAtom } from './AtomRenderer.js';
+import { PrimOverlay } from './PrimOverlay.js';
 
 const Renderer = {
     /**
@@ -224,29 +225,20 @@ const Renderer = {
         g.append(rect);
 
         // --- PIVOT BOTTOM-UP : Composition dynamique ---
-        // Padding réduit à 8px selon demande, sauf PAD_TOP pour le petit titre
-        const PAD_LEFT = 8, PAD_TOP = 20, PAD_RIGHT = 8, PAD_BOTTOM = 8;
-        const innerW = pos.w - PAD_LEFT - PAD_RIGHT;
-
+        // Zéro padding — node-bg = dimensions exactes du contenu (CODE DIRECT FJD 2026-02-25)
         const compGroup = this._el('g', {
             class: 'wf-content bottom-up-composition',
-            'pointer-events': 'none',
-            transform: `translate(${PAD_LEFT}, ${PAD_TOP})`
+            'pointer-events': 'none'
         });
 
-        const res = this._buildComposition(data, innerW, color);
+        const res = this._buildComposition(data, pos.w, color);
 
-        // --- Redimensionnement dynamique ---
-        const expectedH = res.h + PAD_TOP + PAD_BOTTOM;
-        if (expectedH > pos.h) {
-            pos.h = expectedH;
-            rect.setAttribute('height', pos.h);
-        }
+        // Shrink-wrap exact : node-bg épouse le contenu, zéro espace mort
+        pos.h = res.h;
+        pos.w = res.w;
+        rect.setAttribute('height', pos.h);
+        rect.setAttribute('width', pos.w);
 
-        const innerH = pos.h - PAD_TOP - PAD_BOTTOM;
-        const offsetY = Math.max(0, (innerH - res.h) / 2);
-
-        compGroup.setAttribute('transform', `translate(${PAD_LEFT}, ${PAD_TOP + offsetY})`);
         compGroup.innerHTML = res.svg;
         g.append(compGroup);
 

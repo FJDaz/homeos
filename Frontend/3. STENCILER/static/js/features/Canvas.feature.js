@@ -616,10 +616,12 @@ class CanvasFeature extends StencilerFeature {
                     this._exitGroupEdit();
                     return;
                 }
+                return;
             }
 
             const node = e.target.closest('.svg-node');
             if (node) {
+                e.stopPropagation(); // BUG E: Stop propagation to prevent multiple triggers
                 this._selectNode(node);
                 if (node.classList.contains('corps-node')) {
                     document.dispatchEvent(new CustomEvent('organe:selected', {
@@ -646,8 +648,8 @@ class CanvasFeature extends StencilerFeature {
                 } else if (node.classList.contains('cell-node')) {
                     this._drillInto(id, 2); // Descend dans la Cellule
                 } else if (node.classList.contains('atom-node')) {
-                    // Les atomes sont le niveau le plus bas, on peut déclencher un event
-                    document.dispatchEvent(new CustomEvent('atom:selected', { detail: { atomId: id } }));
+                    // Mode Illustrateur : intercept le dblclick pour entrer dans le groupe
+                    this.groupEditMode ? this._exitGroupEdit() : this._enterGroupEdit(node);
                 } else {
                     // Repli: on tente de déterminer par l'ID ou on monte d'un niveau générique
                     // Sur les Canvas N0: nodes sont des Organes (donc level 1)
@@ -766,9 +768,25 @@ class CanvasFeature extends StencilerFeature {
             'pointer-events': 'none',
             class: 'prim-sel'
         });
-        parentNode.appendChild(ov);
+        prim.parentNode.appendChild(ov);
 
-        this._setupPrimitiveDrag(prim, ov);
+        // 14A : Notifier PrimitiveEditor
+        document.dispatchEvent(new CustomEvent('primitive:selected', {
+            detail: {
+                el: prim,
+                fill: prim.getAttribute('fill') || 'none',
+                stroke: prim.getAttribute('stroke') || 'none',
+                strokeWidth: parseFloat(prim.getAttribute('stroke-width') || 1.5),
+                tag: prim.tagName
+            }
+        }));
+
+        // 14A : Setup drag avec update de l'overlay s'il ne l'est pas déjà
+        if (prim._dragHandlers) {
+            // Remplacer l'ancien handler avec l'overlay (si on le voulait)
+            // Mais pour l'instant, le drag setup dans _enterGroupEdit suffit
+            // On évite le double appel qui causait les leaks (BUG 14A-FIX)
+        }
     }
 
     _setupPrimitiveDrag(prim, overlay) {
@@ -790,13 +808,6 @@ class CanvasFeature extends StencilerFeature {
         let startMouse = { x: 0, y: 0 };
         let startPos = { x: 0, y: 0 };
 
-        const onMouseDown = (e) => {
-            dragging = true;
-            startMouse = this._getMousePos(e);
-            startPos = getXY();
-            e.stopPropagation();
-        };
-
         const onMouseMove = (e) => {
             if (!dragging) return;
             const currentMouse = this._getMousePos(e);
@@ -805,12 +816,14 @@ class CanvasFeature extends StencilerFeature {
 
             setXY(startPos.x + dx, startPos.y + dy);
 
-            // Mettre à jour l'overlay
-            const bb = prim.getBBox();
-            overlay.setAttribute('x', bb.x - 2);
-            overlay.setAttribute('y', bb.y - 2);
-            overlay.setAttribute('width', bb.width + 4);
-            overlay.setAttribute('height', bb.height + 4);
+            // Mettre à jour l'overlay s'il existe
+            if (overlay) {
+                const bb = prim.getBBox();
+                overlay.setAttribute('x', bb.x - 2);
+                overlay.setAttribute('y', bb.y - 2);
+                overlay.setAttribute('width', bb.width + 4);
+                overlay.setAttribute('height', bb.height + 4);
+            }
         };
 
         const onMouseUp = () => {
@@ -819,9 +832,21 @@ class CanvasFeature extends StencilerFeature {
             window.removeEventListener('mouseup', onMouseUp);
         };
 
+        const onMouseDown = (e) => {
+            dragging = true;
+            startMouse = this._getMousePos(e);
+            startPos = getXY();
+            e.stopPropagation();
+
+            // Attacher les events window uniquement pendant le drag
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        };
+
         prim.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
+
+        // Stocker les références pour le nettoyage
+        prim._dragHandlers = { down: onMouseDown, move: onMouseMove, up: onMouseUp };
     }
 
     _exitGroupEdit() {
@@ -846,10 +871,20 @@ class CanvasFeature extends StencilerFeature {
         if (content) {
             content.setAttribute('pointer-events', 'none');
             content.querySelectorAll('rect, text, circle, path').forEach(prim => {
+                // Nettoyage click
                 if (prim._gc) {
                     prim.removeEventListener('click', prim._gc);
                     delete prim._gc;
                 }
+
+                // Nettoyage drag (BUG 14A-FIX)
+                if (prim._dragHandlers) {
+                    prim.removeEventListener('mousedown', prim._dragHandlers.down);
+                    window.removeEventListener('mousemove', prim._dragHandlers.move);
+                    window.removeEventListener('mouseup', prim._dragHandlers.up);
+                    delete prim._dragHandlers;
+                }
+
                 prim.setAttribute('pointer-events', 'none');
                 prim.style.cursor = '';
             });
@@ -857,6 +892,9 @@ class CanvasFeature extends StencilerFeature {
 
         // Supprimer la sélection
         node.querySelectorAll('.prim-sel').forEach(el => el.remove());
+
+        // 14A : Fermer PrimitiveEditor
+        document.dispatchEvent(new CustomEvent('primitive:deselected'));
 
         this.groupEditMode = false;
         this.groupEditTarget = null;

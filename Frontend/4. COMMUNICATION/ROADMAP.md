@@ -753,5 +753,493 @@ Transformer l'`AtomRenderer` et le système de layout pour traduire formellement
 - **Fichiers** : `AtomRenderer.js`, `Canvas.renderer.js`, `LayoutEngine.js`.
 - Suite logique du Pivot Bottom-Up (12A).
 
+---
+
+## PHASE 14 — Édition Opérationnelle User
+> **Vision FJD :** L'utilisateur crée et modifie directement le design. Déplacer, copier, modifier couleur/épaisseur des primitives en N3. Ces modifications persistent dans le génome et remontent en N2 puis N1 (bottom-up). La valise = palette contextuelle = Sullivan scoped au Corps courant.
+
+---
+
+### 14-CACHE — Fix Cache ES6 [LIVRÉ]
+**ACTOR: Claude CODE DIRECT | DATE: 2026-02-23 | STATUS: LIVRÉ**
+
+`stenciler_v3.html` L43 : `?v=20260223` ajouté sur stenciler_v3_main.js.
+→ Incrémenter la version (`?v=YYYYMMDD`) à chaque session de dev majeure.
+
+---
+
+### Mission 14A — Panel Édition Primitives
+**ACTOR: Claude (CODE DIRECT — FJD) | DATE: 2026-02-23 | STATUS: LIVRÉ**
+
+#### ✅ COMPTE-RENDU DE LIVRAISON : MISSION 14A
+**Implémentation directe (AetherFlow auto-apply non fonctionnel).**
+
+**Fichiers créés :**
+- `static/js/features/PrimitiveEditor.feature.js` (186L) — Panel flottant attaché à `body`
+
+**Fichiers modifiés :**
+- `Canvas.feature.js` — `_selectPrimitive()` dispatche `primitive:selected` + `_exitGroupEdit()` dispatche `primitive:deselected`
+- `stenciler_v3_main.js` — import + FEATURE_CONFIG entry pour PrimitiveEditor (slot `body`)
+
+**Architecture :**
+- Panel `position: fixed`, bottom-left (216px = sidebar + margin), z-index 1000
+- 4 contrôles : fill (color picker), stroke (color picker), stroke-width (range), opacity (range)
+- Boutons "none" pour supprimer fill/stroke
+- `_syncFromPrim()` lit les attributs SVG courants au moment de la sélection
+- Modifications en temps réel via `setAttribute` direct sur `prim.el`
+- `hidden` par défaut → visible à `primitive:selected` → hidden à `primitive:deselected`
+
+**Critères validation :**
+- DblClick atom → mode illustrateur → clic primitive → panel apparaît
+- Contrôles modifient la primitive en temps réel
+- Sortie mode → panel se ferme
+
+---
+⚠️ BOOTSTRAP GEMINI
+Constitution : `Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md`
+Input files obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+Règles : SVG natif uniquement, tokens CSS stenciler.css, < 200L par fichier.
+Validation humaine (FJD) obligatoire avant "terminé" — URL + port.
+---
+
+#### Contexte
+La sidebar droite de `stenciler_v3.html` expose 3 slots vides, prévus pour l'édition :
+- `slot-tsl-picker` → color picker (fill + stroke)
+- `slot-color-palette` → swatches prédéfinis
+- `slot-border-slider` → sliders épaisseur + opacité
+
+Le Mode Illustrateur (11A) est opérationnel : dblclick atom-node → primitives cliquables/draggables. Ce qui manque : un panel réactif dans la sidebar droite qui expose les propriétés de la primitive sélectionnée.
+
+#### Fichiers à lire AVANT (OBLIGATOIRE)
+1. `static/js/features/Canvas.feature.js` — sections `_selectPrimitive`, `_enterGroupEdit`, `_exitGroupEdit`.
+2. `static/templates/stenciler_v3.html` — structure sidebar-right, slots disponibles (L36-40).
+3. `static/js/features/base.feature.js` — pattern mount/unmount.
+4. `static/css/stenciler.css` — tokens CSS (accents, sidebar, panel).
+
+#### Fichiers à créer
+- `static/js/features/PrimitiveEditor.feature.js` (< 200L)
+
+#### Fichiers à modifier
+- `static/js/stenciler_v3_main.js` — import + mount PrimitiveEditor dans sidebar droite
+- `static/js/features/Canvas.feature.js` — `_selectPrimitive()` dispatche `primitive:selected`
+
+#### Protocole événements
+
+**Canvas.feature.js — dans `_selectPrimitive()`, ajouter après la création de l'overlay :**
+```js
+document.dispatchEvent(new CustomEvent('primitive:selected', {
+    detail: {
+        prim,                // référence directe à l'élément SVG
+        fill: prim.getAttribute('fill') || 'none',
+        stroke: prim.getAttribute('stroke') || 'none',
+        strokeWidth: parseFloat(prim.getAttribute('stroke-width') || '1'),
+        opacity: parseFloat(prim.getAttribute('opacity') || '1'),
+        tag: prim.tagName
+    }
+}));
+```
+
+**PrimitiveEditor écoute `primitive:selected` → active le panel + affiche les valeurs.**
+**PrimitiveEditor dispatche `primitive:update` avec `{fill, stroke, strokeWidth, opacity}` à chaque changement → Canvas.feature.js écoute et applique sur `detail.prim` directement.**
+**`_exitGroupEdit()` dispatche `primitive:deselected` → panel revient à l'état inactif.**
+
+#### UI attendue (sidebar droite)
+
+```
+[ slot-tsl-picker ]
+  Fill   : [ ████ ] #a8c5fc     ← <input type="color">
+  Stroke : [ ████ ] #3d3d3c     ← <input type="color">
+
+[ slot-color-palette ]
+  ● ● ● ● ● ●                   ← 6 swatches accents stenciler.css
+  Clic → applique comme fill sur la primitive active
+
+[ slot-border-slider ]
+  Épaisseur : ══●════ 2px       ← <input type="range" min="0.5" max="10" step="0.5">
+  Opacité   : ══════● 1.0       ← <input type="range" min="0.1" max="1"  step="0.1">
+```
+
+**État inactif** (opacity 0.4, pointer-events: none) tant qu'aucune primitive n'est sélectionnée.
+
+#### Contraintes
+- Zéro lib externe. HTML natif : `input[type=color]`, `input[type=range]`, swatches `<button>`.
+- Tokens accents stenciler.css : `--accent-bleu`, `--accent-terra`, `--accent-vert`, `--accent-rose`, `--accent-violet`, `--accent-ambre`.
+- Ne pas modifier `Canvas.renderer.js`.
+- Ne pas modifier `AtomRenderer.js`.
+- Ne pas toucher à la logique de drill ou de genome loading.
+
+#### Critères d'acceptation
+- [ ] DblClick atom-node → Mode Illustrateur actif (existant, non régressé)
+- [ ] Clic primitive → overlay bleu (existant) + panel editor activé (opacity 1, pointer-events all)
+- [ ] Color picker fill → primitive change de couleur en temps réel
+- [ ] Color picker stroke → stroke change en temps réel
+- [ ] Swatches → applique la couleur comme fill
+- [ ] Slider épaisseur → stroke-width change en temps réel
+- [ ] Slider opacité → opacity change en temps réel
+- [ ] DblClick sortie → panel revient inactif
+- [ ] FJD valide visuellement sur http://localhost:9998/stenciler
+
+---
+
+### Mission 14A-FIX — Deux bugs Mode Illustrateur [MISSION ACTIVE]
+**ACTOR: GEMINI | MODE: CODE DIRECT | FICHIER UNIQUE: `Canvas.feature.js`**
+
+---
+⚠️ BOOTSTRAP GEMINI
+Constitution : `Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md`
+Input files obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+Règles : SVG natif uniquement, tokens CSS stenciler.css.
+Validation humaine (FJD) obligatoire avant "terminé" — URL http://localhost:9998/stenciler + hard refresh Cmd+Shift+R.
+---
+
+#### Contexte
+Deux bugs dans le Mode Illustrateur (11A) identifiés par FJD lors du test de 14A :
+
+---
+
+#### BUG 1 — prim-sel overlay à la mauvaise position
+
+**Symptôme :** Le cadre de sélection bleu pointillé (`.prim-sel`) apparaît en (0,0) de l'atom-node au lieu d'entourer la primitive cliquée.
+
+**Cause :** Dans `_selectPrimitive(prim, parentNode)`, `prim.getBBox()` retourne les coordonnées dans l'espace local du parent direct de `prim` (`atom-pure`). Mais l'overlay est appendé à `parentNode` (l'`atom-node`), dont l'espace inclut le `translate(8, 30)` de `.bottom-up-composition`. Résultat : décalage systématique de (-8, -30).
+
+**Fix — 1 ligne :**
+```js
+// AVANT (ligne ~770 dans _selectPrimitive) :
+parentNode.appendChild(ov);
+
+// APRÈS :
+prim.parentNode.appendChild(ov);
+```
+Les `querySelectorAll('.prim-sel')` dans `_selectPrimitive` et `_exitGroupEdit` cherchent sur `parentNode` (atom-node) — ils trouvent `.prim-sel` même dans les sous-groupes → cleanup inchangé.
+
+---
+
+#### BUG 2 — `_selectNode` appelé en mode group edit
+
+**Symptôme :** L'atom-node reçoit la classe `selected` et son `.wf-content` passe à `opacity: 0.4` lors du clic en Mode Illustrateur.
+
+**Cause :** Dans le handler `svg.addEventListener('click', ...)` (vers L611), quand `groupEditMode === true` ET que le clic est sur le `groupEditTarget`, la condition ne `return` pas → exécution continue → `_selectNode(node)` est appelé.
+
+```js
+// CODE ACTUEL (bugué) :
+if (this.groupEditMode) {
+    const node = e.target.closest('.svg-node');
+    if (!node || node !== this.groupEditTarget) {
+        this._exitGroupEdit();
+        return;
+    }
+    // PAS DE RETURN ICI → tombe sur _selectNode ci-dessous
+}
+const node = e.target.closest('.svg-node');
+if (node) { this._selectNode(node); ... }
+```
+
+**Fix — 1 ligne :**
+```js
+// APRÈS (ajouter return en fin du bloc groupEditMode) :
+if (this.groupEditMode) {
+    const node = e.target.closest('.svg-node');
+    if (!node || node !== this.groupEditTarget) {
+        this._exitGroupEdit();
+        return;
+    }
+    return; // ← AJOUTER CETTE LIGNE
+}
+```
+
+---
+
+#### Fichiers à lire AVANT (OBLIGATOIRE)
+1. `static/js/features/Canvas.feature.js` — sections `_selectPrimitive` (L756-789), svg click handler (L611-633), `_exitGroupEdit` (L851-901).
+
+#### Fichiers à modifier
+- `static/js/features/Canvas.feature.js` **uniquement** — 2 changements chirurgicaux.
+
+#### Critères d'acceptation
+- [x] DblClick atom → clic sur primitive → cadre bleu pointillé ENTOUR la primitive (pas coin supérieur gauche)
+- [x] DblClick atom → clic primitive → atom-node NE reçoit PAS la classe `selected`
+- [x] `.wf-content` reste à son opacity normale (1.0) en mode illustrateur (pas 0.4)
+- [x] PrimitiveEditor panel (14A) apparaît bien avec les vraies valeurs fill/stroke de la primitive
+- [x] Sortie mode illustrateur (clic extérieur) → panel ferme, opacités restaurées
+- [x] Zéro régression drill N1→N2→N3
+- [x] FJD valide visuellement sur http://localhost:9998/stenciler
+
+#### ✅ COMPTE-RENDU DE LIVRAISON : MISSION 14A-FIX
+**DATE : 2026-02-25**
+**STATUS : DÉPLOYÉ & VALIDÉ**
+
+1. **Correction des Coordonnées (Bug 1)** : L'overlay de sélection `.prim-sel` est désormais rattaché au parent direct de la primitive (`atom-pure`). Cela résout le décalage de positionnement en restant dans le référentiel SVG local de la composition.
+2. **Isolation des Événements (Bug 2)** : Ajout d'une garde `return` dans le handler de clic global du SVG pour le mode `groupEditMode`. Cela stoppe la propagation vers `_selectNode` et évite la sélection accidentelle du conteneur parent (atom-node) lors de l'édition granulée.
+3. **Stabilité UI** : L'opacité du contenu et les classes de sélection sont préservées correctement pendant et après l'édition.
+
+---
+
+### Mission 14A-SHRINK — Shrink-Wrap des conteneurs SVG [MISSION ACTIVE]
+**ACTOR: GEMINI | MODE: CODE DIRECT | FICHIER UNIQUE: `Canvas.renderer.js`**
+
+---
+⚠️ BOOTSTRAP GEMINI
+Constitution : `Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md`
+Input files obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+Règles : SVG natif uniquement, tokens CSS stenciler.css.
+Validation humaine (FJD) obligatoire avant "terminé" — URL http://localhost:9998/stenciler + hard refresh Cmd+Shift+R.
+---
+
+#### Contexte
+
+Les nœuds SVG (N3 atomes, N2 cellules, N1 organes) ont tous un `<rect class="node-bg">` dont les dimensions (`pos.w × pos.h`) proviennent du LayoutEngine — une case budgétée de taille fixe. Le contenu réel issu de `_buildComposition()` (`res.h`) est souvent bien plus petit. L'écart = espace mort invisible qui :
+- Fausse les poignées de sélection (Mode Illustrateur)
+- Fausse le drag & drop (cible plus grande que le visuel)
+- Viole le principe Bottom-Up 12A (le parent doit émerger des enfants, pas l'inverse)
+
+**Vision FJD :** chaque nœud SVG doit avoir exactement les dimensions de son contenu + padding. Zéro espace mort.
+
+---
+
+#### Fix — `Canvas.renderer.js`, méthode `renderNode()`
+
+**Localisation :** après le bloc `_buildComposition` + redimensionnement dynamique (vers L239-244 actuels).
+
+**Principe :** remplacer le `if (expectedH > pos.h)` (qui ne shrink jamais) par une affectation inconditionnelle :
+
+```js
+// AVANT (croissance uniquement) :
+const expectedH = res.h + PAD_TOP + PAD_BOTTOM;
+if (expectedH > pos.h) {
+    pos.h = expectedH;
+    rect.setAttribute('height', pos.h);
+}
+
+// APRÈS (shrink-wrap symétrique) :
+const actualH = res.h + PAD_TOP + PAD_BOTTOM;
+pos.h = actualH;
+rect.setAttribute('height', actualH);
+// Width : garder pos.w (largeur de colonne LayoutEngine — cohérente)
+```
+
+C'est la seule modification. Le `rect.setAttribute('width', pos.w)` existant reste intact (la largeur de colonne est intentionnelle).
+
+---
+
+#### Fichiers à lire AVANT (OBLIGATOIRE)
+1. `static/js/Canvas.renderer.js` — entier. Focus sur `renderNode()` (L195-254) et `_buildComposition()` (L123-190).
+
+#### Fichiers à modifier
+- `static/js/Canvas.renderer.js` **uniquement** — 3 lignes remplacées dans `renderNode()`.
+
+#### Critères d'acceptation
+- [x] Un atome (N3) dont le contenu fait 48px de haut → son `node-bg` fait exactement 48 + PAD_TOP + PAD_BOTTOM px (pas 96 ou 80)
+- [x] Une cellule (N2) → son `node-bg` = hauteur réelle de ses atomes empilés + gaps + padding
+- [x] Un organe (N1) → même principe
+- [x] En Mode Illustrateur, le cadre de sélection (`.prim-sel`) est visuellement cohérent avec l'encombrement du nœud
+- [x] Drag & drop d'un nœud → la zone de clic = zone visible exacte
+- [x] Zéro régression sur drill N1→N2→N3
+- [x] FJD valide visuellement sur http://localhost:9998/stenciler
+
+#### ✅ COMPTE-RENDU DE LIVRAISON : MISSION 14A-SHRINK
+**DATE : 2026-02-25**
+**STATUS : DÉPLOYÉ & VALIDÉ FJD**
+
+**Fix appliqué (CODE DIRECT — FJD) :** Suppression de tous les paddings (`PAD_LEFT/TOP/RIGHT/BOTTOM`) dans `renderNode()`. `node-bg` = dimensions exactes du contenu (`res.w × res.h`), sans aucune marge ajoutée. `compGroup` à `translate(0,0)`.
+
+Raison : l'approche précédente (`actualH = res.h + PAD_TOP + PAD_BOTTOM`) ajoutait 28px à des atomes dont le `node-label` avait été supprimé — le node **grandissait** au lieu de shrink. Zéro padding = zero espace mort = hitbox précise.
+
+1. **Shrink-Wrap Exact** : `pos.h = res.h`, `pos.w = res.w` — node-bg épouse le bounding box du contenu sans marge.
+2. **Poignées précises** : `_showHandles` lit `node-bg` attributes → handles = contenu exact, validé FJD.
+3. **Zéro dette** : aucun padding fantôme, aucun centrage `offsetY` superflu.
+
+---
+
+### Mission 14B — Mémoire des modifications (PrimOverlay → Re-render N0)
+**ACTOR: GEMINI | MODE: CODE DIRECT | DATE: 2026-02-25 | STATUS: MISSION ACTIVE**
+
+---
+⚠️ BOOTSTRAP GEMINI
+Constitution : `Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md`
+Input files obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+Règles : SVG natif uniquement, tokens CSS stenciler.css.
+Validation humaine (FJD) obligatoire avant "terminé" — URL http://localhost:9998/stenciler + hard refresh Cmd+Shift+R.
+---
+
+#### Contexte
+
+`PrimOverlay.js` est déjà créé (`static/js/PrimOverlay.js`) — singleton `Map<nodeId, {svg, h, w}>`.
+`Canvas.renderer.js` importe déjà `PrimOverlay` (L9).
+
+L'objectif : quand l'utilisateur sort du Mode Illustrateur (`_exitGroupEdit`), les modifications de primitives survivent au re-render et remontent la hiérarchie N3→N2→N1→N0.
+
+#### Fichiers à lire AVANT (OBLIGATOIRE)
+1. `static/js/PrimOverlay.js` — entier (15L). Comprendre l'API : `set`, `get`, `clear`, `clearAll`.
+2. `static/js/Canvas.renderer.js` — `_buildComposition()` (L123-190). Localiser le fork atome (L125-127).
+3. `static/js/features/Canvas.feature.js` — `_exitGroupEdit()` (L852-902). Localiser `content = node.querySelector('.bottom-up-composition')`.
+
+#### Fichiers à modifier
+
+**Fichier 1 : `static/js/Canvas.renderer.js`**
+
+Dans `_buildComposition()`, **après** la ligne `if ((data.id && data.id.startsWith('comp_')) || data.interaction_type) {` :
+
+```js
+// PrimOverlay : SVG modifié par l'utilisateur en Mode Illustrateur
+const cached = PrimOverlay.get(data.id);
+if (cached) return cached;
+```
+
+Juste avant le `return renderAtom(...)` existant. Une seule insertion, 2 lignes.
+
+---
+
+**Fichier 2 : `static/js/features/Canvas.feature.js`**
+
+**Étape A — Import en tête de fichier** (après les imports existants L1-6) :
+```js
+import { PrimOverlay } from '../PrimOverlay.js';
+```
+
+**Étape B — Dans `_exitGroupEdit()`**, insérer **juste avant** `this.groupEditMode = false;` (L899) :
+
+```js
+// Capture SVG modifié + dimensions → PrimOverlay
+const nodeId = node.dataset.id;
+if (nodeId && content) {
+    const bb = content.getBBox();
+    PrimOverlay.set(nodeId, content.innerHTML, bb.height, bb.width);
+}
+
+// Re-render N0 complet (cascade N3→N2→N1→N0 automatique via _buildComposition)
+const corpsId = this.currentCorpsId;
+if (corpsId) {
+    this.drillStack = [];
+    this._renderCorps(corpsId);
+}
+```
+
+Note : `content` est déjà déclaré L870 dans `_exitGroupEdit()`. Ne pas re-déclarer.
+
+#### Critères d'acceptation
+- [ ] DblClick atom → éditer une primitive (couleur, position) → clic extérieur pour sortir
+- [ ] Canvas re-render depuis N0 : les organes du corps courant réapparaissent
+- [ ] Re-drill vers l'atome modifié : la modification est visible (PrimOverlay servi)
+- [ ] Deuxième sortie de mode illustrateur sur le même atome : modification précédente préservée
+- [ ] Hard refresh → overlay perdu (attendu, RAM seulement)
+- [ ] Zéro régression drill N1→N2→N3
+- [ ] FJD valide visuellement sur http://localhost:9998/stenciler
+
+---
+
+### Mission 14C — Copie/Duplication Atomes (EN ATTENTE)
+**STATUS: EN ATTENTE (après 14A) | ACTOR: GEMINI**
+
+Depuis le canvas, clic droit sur un atome N3 → menu contextuel : Dupliquer, Supprimer.
+La copie est ajoutée à la cell N2 courante (génome en mémoire). Write-back via 14B.
+
+---
+
+### Mission 14D — Valise (Sullivan Embedded) (EN ATTENTE)
+**STATUS: EN ATTENTE (après 14B) | ACTOR: GEMINI**
+
+`slot-preview-band` (zone basse) = Sullivan scoped filtré par Corps courant.
+- Hiérarchie en scroll horizontal : Organes N1 → Cells N2 → Atomes N3
+- Clic item → focus nœud dans le Canvas + ouvre PrimitiveEditor (14A)
+- Synchro via `genome:corps-changed` dispatché par Canvas quand `currentCorpsId` change
+
+---
+
+### Mission 14E-ICONS — Icônes SVG dans AtomRenderer
+**ACTOR: Claude (CODE DIRECT — FJD) | DATE: 2026-02-23 | STATUS: LIVRÉ**
+
+#### ✅ COMPTE-RENDU DE LIVRAISON : MISSION 14E-ICONS
+
+---
+⚠️ BOOTSTRAP GEMINI
+Constitution : `Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md`
+Input files obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+Règles : SVG natif uniquement, tokens CSS stenciler.css, < 200L par fichier.
+Validation humaine (FJD) obligatoire avant "terminé" — URL + port.
+---
+
+#### Contexte
+Enrichir `AtomRenderer.js` avec des icônes SVG issues de bibliothèques open source (Lucide MIT, Tabler MIT). Les `<path>` sont copiés directement comme strings statiques — zéro CDN, zéro dépendance runtime.
+
+Actuellement, les atomes `click`, `upload`, `view`, `drag` affichent des formes SVG basiques (rect + text). La mission est d'ajouter une icône reconnaissable à chaque `interaction_type` dominant, incrustée dans la composition SVG existante.
+
+#### Fichiers à lire AVANT (OBLIGATOIRE)
+1. `static/js/AtomRenderer.js` — entier. Comprendre la signature `renderAtom(nodeData, availableWidth, color)`, les cases existantes par `interaction_type`, le système de retour `{svg, h, w}`.
+2. `static/js/GRID.js` — constantes `G.U4`, `G.U5`, `G.U6`, `G.BTN`, `G.GAP_S`.
+3. `Frontend/2. GENOME/genome_reference.json` — identifier tous les `interaction_type` utilisés.
+
+#### Mapping icônes → interaction_type
+
+Les icônes sont des `<path>` SVG Lucide (viewBox 24×24, stroke-linecap="round", stroke-linejoin="round"). Ils sont réduits à 16×16 par transform `scale(0.667)` et positionnés dans la composition.
+
+| `interaction_type` | Icône Lucide | Path SVG |
+|---|---|---|
+| `click` / `submit` | `arrow-right` | `M5 12h14M12 5l7 7-7 7` |
+| `drag` | `move` | `M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20` |
+| `view` | `eye` | `M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z` |
+| `upload` | `upload-cloud` | `M16 16l-4-4-4 4M12 12v9M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3` |
+| `input` / `edit` | `pen-line` | `M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z` |
+| `select` / `toggle` | `check-square` | `M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11` |
+| default | `layout` | `M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z` |
+
+#### Intégration dans renderAtom()
+
+Pour chaque case, après le SVG principal (rect/text), ajouter l'icône en bas à droite de l'espace disponible :
+
+```js
+// Icône 16×16, positionnée à (w-20, h-20), stroke = color, fill=none
+const iconSVG = `<g transform="translate(${w-20}, ${h-20}) scale(0.667)"
+    stroke="${color}" fill="none" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+    <path d="${ICON_PATH}"/>
+</g>`;
+```
+
+#### Fichiers à modifier
+- `static/js/AtomRenderer.js` — enrichir les cases `interaction_type` avec icônes
+
+#### Contraintes
+- Ne pas modifier `Canvas.renderer.js`, `Canvas.feature.js`, `WireframeLibrary.js`.
+- Respecter `svg_payload` guard (L13-16) — ne pas toucher.
+- Icône en `opacity: 0.6` pour ne pas dominer le label principal.
+- Taille icône fixe 16×16 (= G.U2, non défini mais 2×8px).
+- Pas de régression sur les atomes existants qui ont un `visual_hint`.
+
+#### Critères d'acceptation
+- [ ] Atome `click` → icône `arrow-right` visible en bas à droite
+- [ ] Atome `upload` → icône `upload-cloud`
+- [ ] Atome `view` → icône `eye`
+- [ ] Atome `drag` → icône `move`
+- [ ] Atome `input` → icône `pen-line`
+- [ ] Icônes à opacity 0.6, stroke = color de l'organe parent
+- [ ] Zéro régression sur les atomes avec `visual_hint` ou `svg_payload`
+- [ ] FJD valide visuellement sur http://localhost:9998/stenciler
+
+---
+
+### Mission 14E-WF — Nouveaux Wireframes (POST-14A, via KIMI Sandbox)
+**STATUS: EN ATTENTE (après 14E-ICONS) | ACTOR: KIMI → GEMINI**
+
+Nouveaux types dans WireframeLibrary.js : `tabs`, `dropdown`, `card-media`, `stepper`, `badge-group`, `timeline`.
+Cycle : KIMI génère `svg_payload` dans génome sandbox → FJD valide → GEMINI merge dans WireframeLibrary.
+Sources d'inspiration : Flowbite Blocks, Radix Primitives, shadcn/ui (layouts, pas les implémentations React).
+
+---
+
+### Backlog Phase 14
+
+| ID | Mission | Actor | Statut |
+|----|---------|-------|--------|
+| 14-CACHE | Fix cache ES6 | Claude | ✅ Livré |
+| 14A | Panel Édition Primitives | Claude | ✅ Livré |
+| 14E-ICONS | Icônes SVG AtomRenderer | Claude | ✅ Livré |
+| 14B | Write-back Génome | Claude + Gemini | ⏳ EN ATTENTE |
+| 14C | Copie/Duplication | Gemini | ⏳ EN ATTENTE |
+| 14D | Valise (Sullivan Embedded) | Gemini | ⏳ EN ATTENTE |
+| 14E-WF | Nouveaux Wireframes (sandbox) | KIMI → Gemini | ⏳ EN ATTENTE |
+
+---
+
 ## Archives
 *(Voir [ROADMAP_ACHIEVED.md](file:///Users/francois-jeandazin/AETHERFLOW/Frontend/4. COMMUNICATION/ROADMAP_ACHIEVED.md) pour Phases 1 à 9D)*

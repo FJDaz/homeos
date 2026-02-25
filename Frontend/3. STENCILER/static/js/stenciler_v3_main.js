@@ -18,6 +18,7 @@ import BorderSliderFeature from './features/BorderSlider.feature.js';
 import APIStatusFeature from './features/APIStatus.feature.js';
 import ComponentsZoneFeature from './features/ComponentsZone.feature.js';
 import PersistenceFeature from './features/Persistence.feature.js';
+import PrimitiveEditorFeature from './features/PrimitiveEditor.feature.js';
 
 console.log('[DEBUG] Imports completed');
 
@@ -30,7 +31,8 @@ const FEATURE_CONFIG = [
   { id: 'preview', class: PreviewBandFeature, slot: Lexicon.slots.preview },
   { id: 'components', class: ComponentsZoneFeature, slot: Lexicon.slots.sidebar_right },
   { id: 'status', class: APIStatusFeature, slot: Lexicon.slots.footer },
-  { id: 'persistence', class: PersistenceFeature, slot: 'body' },
+  // { id: 'persistence', class: PersistenceFeature, slot: 'body' }, // HOTFIX 14D: Desactive suite crash Not Implemented
+  { id: 'primitive-editor', class: PrimitiveEditorFeature, slot: 'body' },
 ];
 
 class StencilerApp {

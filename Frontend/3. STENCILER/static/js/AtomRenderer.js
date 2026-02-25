@@ -10,6 +10,11 @@ import { G } from './GRID.js';
  */
 
 export function renderAtom(nodeData, availableWidth, color) {
+    // --- SVG-First : Payload direct depuis le génome (KIMI sandbox) ---
+    if (nodeData.svg_payload) {
+        return { svg: nodeData.svg_payload, h: nodeData.svg_h || G.U6, w: availableWidth };
+    }
+
     let role = nodeData.semantic_role;
     let type = nodeData.interaction_type || 'default';
 
@@ -260,10 +265,27 @@ export function renderAtom(nodeData, availableWidth, color) {
         `;
     }
 
+    const ICONS = {
+        'click': 'M5 12h14M12 5l7 7-7 7',
+        'submit': 'M5 12h14M12 5l7 7-7 7',
+        'drag': 'M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20',
+        'view': 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z',
+        'upload': 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
+        'input': 'M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z',
+        'select': 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+        'edit': 'M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z',
+        'default': 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z'
+    };
+    const iconPath = ICONS[type] || ICONS['default'];
+    const safeColor = color || 'var(--text-primary, #3d3d3c)';
+    const iconSVG = iconPath
+        ? `<g transform="translate(${availableWidth - 20}, ${Math.max(2, height - 20)}) scale(0.583)" stroke="${safeColor}" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" pointer-events="none"><path d="${iconPath}"/></g>`
+        : '';
+
     // Le wrapper garantit que l'atome est interactif et repérable localement
     // Ajout d'une subtle shadow native SVG pour que les atomes ressortent (vu que N1/N2 n'ont plus de fond)
     return {
-        svg: `<g data-id="${nodeData.id}" class="atom-pure" style="opacity: 1; transition: opacity 0.2s; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));">${svgContent}</g>`,
+        svg: `<g data-id="${nodeData.id}" class="atom-pure" style="opacity: 1; transition: opacity 0.2s; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));">${svgContent}${iconSVG}</g>`,
         h: height,
         w: availableWidth
     };
