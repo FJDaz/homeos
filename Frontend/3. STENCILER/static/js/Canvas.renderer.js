@@ -222,6 +222,19 @@ const Renderer = {
             'pointer-events': 'none'
         });
 
+        // Mission 17A — N0 Organic Wireframe Rendering
+        if (level === 0) {
+            const organHint = this._matchHint(data);
+            if (organHint) {
+                const wfSvg = WireframeLibrary.getSVG(organHint, color, pos.w, pos.h, data.name);
+                if (wfSvg) {
+                    compGroup.innerHTML = wfSvg;
+                    g.append(compGroup);
+                    return g;
+                }
+            }
+        }
+
         const res = this._buildComposition(data, pos.w, color);
 
         // Shrink-wrap : W = availableWidth (preservé depuis _layout.w si défini)

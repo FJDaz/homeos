@@ -2094,5 +2094,498 @@ Ajouter 3 nouveaux cas dans le `switch(hint?.toLowerCase())` :
 
 ---
 
+## Mission 16A — Brancher /api/infer_layout dans Canvas.feature.js [MISSION ACTIVE]
+
+**ACTOR : GEMINI**
+**DATE : 2026-03-01**
+**STATUS : LIVRÉ — EN ATTENTE VALIDATION FJD**
+
+### Bootstrap Gemini (obligatoire)
+```
+Tu travailles sur AetherFlow Stenciler V3. Lis les fichiers suivants AVANT de coder :
+1. Frontend/3. STENCILER/static/js/features/Canvas.feature.js — focus _renderCorps() L.144-168
+2. Frontend/3. STENCILER/static/js/LayoutEngine.js — comprendre proposeLayout()
+3. Frontend/1. CONSTITUTION/LEXICON_DESIGN.json — contrat CSS
+4. Frontend/1. CONSTITUTION/CONSTITUTION_AETHERFLOW_V3.md — frontières acteurs
+
+input_files obligatoires : stenciler.css, LEXICON_DESIGN.json
+```
+
+### Contexte
+
+La route `/api/infer_layout` (POST) est opérationnelle sur `server_9998_v2.py`.
+
+Elle prend en entrée une liste d'organes N1 et retourne leurs paramètres de layout sémantique :
+```json
+{
+  "result": {
+    "n1_navigation": { "role": "navigation", "zone": "header", "w": 1024, "h": 48, "layout": "flex" },
+    "n1_canvas":     { "role": "canvas",     "zone": "canvas", "w": 1024, "h": "full", "layout": "free" }
+  },
+  "tier": "heuristic"
+}
+```
+
+**Modes disponibles :** `heuristic` (offline, défaut) | `llm` (Gemini 3 Flash) | `llm_context` (LLM + contexte projet).
+
+Actuellement, `_renderCorps()` utilise `LayoutEngine.proposeLayout()` — une heuristique JS embarquée.
+L'objectif est de **remplacer cet appel par `/api/infer_layout`** pour des positions sémantiquement informées.
+
+### Tâche unique — Modifier `_renderCorps()` dans Canvas.feature.js
+
+**Fichier cible :** `Frontend/3. STENCILER/static/js/features/Canvas.feature.js`
+
+**Modification de `_renderCorps(corpsId)`** (actuellement L.144-168) :
+
+1. Extraire la liste d'organes depuis `phaseData.n1_sections`
+2. Appeler `POST /api/infer_layout` avec `mode: "heuristic"` (sync via `await fetch(...)`)
+3. Mapper la réponse en `positions[]` compatibles avec l'existant (x/y/w/h/id)
+4. Conserver le fallback `LayoutEngine.proposeLayout()` si l'API est indisponible (try/catch)
+5. Ajouter un bouton `#btn-infer-llm` dans le markup `.zoom-controls` : "✨ LLM Layout"
+   - Ce bouton appelle la même route avec `mode: "llm"` et `model: "gemini-3-flash-preview"`
+   - Puis re-render le corps courant avec le nouveau layout
+
+**Mapping zone → coordonnées SVG (référence 1200×900 existant dans LayoutEngine.js) :**
+```
+header       → x: 20,    y: 10,   w: infer_w ou 1160, h: infer_h ou 48
+sidebar_left → x: 20,    y: 70,   w: infer_w ou 200,  h: auto (fill)
+sidebar_right→ x: 980,   y: 70,   w: infer_w ou 200,  h: auto
+main         → x: 240,   y: 70,   w: infer_w ou 720,  h: infer_h ou 400
+canvas       → x: 20,    y: 70,   w: 1160,            h: 760
+preview_band → x: 20,    y: 820,  w: 1160,            h: infer_h ou 120
+footer       → x: 20,    y: 870,  w: 1160,            h: infer_h ou 48
+```
+
+Pour `h: "auto"` → utiliser la hauteur calculée par le nombre de N2 : `60 + organe.n2_features.length * 20`
+Pour `h: "full"` → utiliser la hauteur max disponible (760)
+Pour `w: "full"` → utiliser 1160
+
+**Signature de `_renderCorps` après modification :**
+```javascript
+async _renderCorps(corpsId) {
+    // ... setup existant ...
+    let positions;
+    try {
+        const organs = phaseData.n1_sections.map(o => ({
+            id: o.id,
+            name: o.name || '',
+            n2_count: (o.n2_features || []).length
+        }));
+        const res = await fetch('/api/infer_layout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organs, mode: 'heuristic' })
+        });
+        const { result } = await res.json();
+        positions = this._inferResultToPositions(result, phaseData.n1_sections);
+    } catch (e) {
+        console.warn('[16A] infer_layout fallback:', e);
+        const layout = LayoutEngine.proposeLayout(phaseData);
+        positions = layout.positions;
+        this._applyLayout(layout);
+    }
+    // ... render loop existant ...
+}
+```
+
+**Méthode helper à ajouter `_inferResultToPositions(result, sections)` :**
+```javascript
+_inferResultToPositions(result, sections) {
+    const ZONE_X = {
+        header: 20, sidebar_left: 20, sidebar_right: 980,
+        main: 240, canvas: 20, preview_band: 20, footer: 20
+    };
+    const ZONE_Y = {
+        header: 10, sidebar_left: 70, sidebar_right: 70,
+        main: 70, canvas: 70, preview_band: 820, footer: 870
+    };
+    // stack multiple sections dans la même zone (offset vertical)
+    const zoneCounters = {};
+    return sections.map(s => {
+        const inf = result[s.id] || { zone: 'main', w: 240, h: 'auto', layout: 'stack' };
+        const zone = inf.zone || 'main';
+        zoneCounters[zone] = zoneCounters[zone] || 0;
+        const gap = zoneCounters[zone] * 130;
+        zoneCounters[zone]++;
+        const rawW = inf.w === 'full' ? 1160 : (typeof inf.w === 'number' ? inf.w : 240);
+        const n2 = (s.n2_features || []).length;
+        const rawH = inf.h === 'full' ? 760 : (inf.h === 'auto' ? 60 + n2 * 20 : (typeof inf.h === 'number' ? inf.h : 96));
+        return {
+            id: s.id,
+            x: ZONE_X[zone] ?? 240,
+            y: (ZONE_Y[zone] ?? 70) + gap,
+            w: rawW,
+            h: rawH,
+            zone
+        };
+    });
+}
+```
+
+**Bouton LLM à ajouter dans `mount()`** — dans le bloc `zoom-controls` existant, après `#btn-export-svg` :
+```html
+<button id="btn-infer-llm" title="Re-inférer layout via LLM">✨</button>
+```
+
+**Handler du bouton** dans `init()` :
+```javascript
+this.el.querySelector('#btn-infer-llm')?.addEventListener('click', async () => {
+    if (!this.currentCorpsId) return;
+    const phaseData = this.genome?.n0_phases?.find(p => p.id === this.currentCorpsId);
+    if (!phaseData) return;
+    const organs = phaseData.n1_sections.map(o => ({
+        id: o.id, name: o.name || '', n2_count: (o.n2_features || []).length
+    }));
+    try {
+        const res = await fetch('/api/infer_layout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organs, mode: 'llm', model: 'gemini-3-flash-preview' })
+        });
+        const { result, tier } = await res.json();
+        console.log(`[16A] LLM layout tier: ${tier}`, result);
+        this.viewport.innerHTML = '';
+        const positions = this._inferResultToPositions(result, phaseData.n1_sections);
+        // update viewBox
+        this.viewBox = { x: 0, y: 0, w: 1200, h: 900 };
+        this.svg.setAttribute('viewBox', '0 0 1200 900');
+        const CORPS_COLORS = { n0_brainstorm: '#d4b2bc', n0_backend: '#a8c5fc', n0_frontend: '#a8dcc9', n0_deploy: '#edd0b0' };
+        const accentColor = CORPS_COLORS[this.currentCorpsId] || '#cbd5e1';
+        phaseData.n1_sections.forEach((organe) => {
+            let pos = positions.find(p => p.id === organe.id);
+            if (organe._layout) pos = { ...pos, ...organe._layout };
+            if (pos) this._renderNode(organe, pos, accentColor, 0);
+        });
+    } catch (e) {
+        console.error('[16A] LLM infer failed:', e);
+    }
+});
+```
+
+### Contraintes
+
+- `_renderCorps` devient `async` → tous les appelants qui utilisent `await this._renderCorps(...)` doivent être vérifiés (notamment `_drillUp`)
+- Ne pas supprimer l'import `LayoutEngine` (fallback)
+- Ne pas modifier `_renderOrgane()` ni `_renderCellule()` (hors scope)
+- `input_files` obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+- Ne rien modifier dans `Canvas.renderer.js`, `AtomRenderer.js`, `WireframeLibrary.js`
+
+### Critères d'acceptation
+
+- [ ] `_renderCorps()` est `async` et appelle `/api/infer_layout?mode=heuristic`
+- [ ] Les organes se positionnent dans leurs zones sémantiques (nav en haut, sidebar à droite, etc.)
+- [ ] Bouton `✨` visible dans la barre de zoom
+- [ ] Click `✨` → re-layout via LLM → organes se repositionnent
+- [ ] Fallback silencieux si serveur down (LayoutEngine.proposeLayout() reprend la main)
+- [ ] FJD valide visuellement sur http://localhost:9998/stenciler (Cmd+Shift+R obligatoire)
+
+---
+
+## Mission 16B — Zone Layout Resolver : Placement sans collision [MISSION ACTIVE]
+
+**ACTOR : GEMINI**
+**DATE : 2026-03-01**
+**STATUS : LIVRÉ — EN ATTENTE VALIDATION FJD**
+
+### Bootstrap Gemini (obligatoire)
+```
+Tu travailles sur AetherFlow Stenciler V3. Lis avant de coder :
+1. Frontend/3. STENCILER/static/js/features/Canvas.feature.js — focus _inferResultToPositions() L.191-220
+2. Frontend/1. CONSTITUTION/LEXICON_DESIGN.json
+
+input_files obligatoires : stenciler.css, LEXICON_DESIGN.json
+```
+
+### Contexte
+
+`_inferResultToPositions()` (Mission 16A) place les organes zone par zone mais ignore les collisions :
+- Plusieurs organes dans `sidebar_right` → superposés à x:980 avec seulement 130px de gap
+- Zones `canvas` et `main` se chevauchent (même x:20/240, même y:70)
+- Hauteur fixe à `130px` indépendante du contenu réel
+
+L'objectif est de remplacer `_inferResultToPositions` par `_zoneTemplateToPositions` — un **layout resolver** inspiré des page templates Flowbite/shadcn qui élimine les collisions.
+
+### Tâche unique — Remplacer `_inferResultToPositions` dans Canvas.feature.js
+
+**Fichier cible :** `Frontend/3. STENCILER/static/js/features/Canvas.feature.js`
+
+#### Constantes de layout (canvas SVG = 1200 × 900)
+
+```javascript
+// Zones fixes (priority order)
+const ZONE_DEFS = {
+    header:       { x: 0,    y: 0,   w: 1200, fixedH: 56  },
+    footer:       { x: 0,    y: 840, w: 1200, fixedH: 48  },
+    preview_band: { x: 0,    y: 720, w: 1200, fixedH: 120 },
+    sidebar_left: { x: 0,    y: 56,  w: 240,  fixedH: null }, // h = fill
+    sidebar_right:{ x: 960,  y: 56,  w: 240,  fixedH: null }, // h = fill
+    main:         { x: null, y: 56,  w: null,  fixedH: null }, // x/w = computed
+    canvas:       { x: null, y: 56,  w: null,  fixedH: null }, // x/w = computed
+};
+```
+
+`main` et `canvas` sont des zones "élastiques" : leur x et w dépendent des sidebars présentes.
+
+#### Algorithme `_zoneTemplateToPositions(result, sections)`
+
+**Étape 1 — Grouper les organes par zone :**
+```javascript
+const byZone = {};
+sections.forEach(s => {
+    const zone = result[s.id]?.zone || 'main';
+    if (!byZone[zone]) byZone[zone] = [];
+    byZone[zone].push({ section: s, inf: result[s.id] || {} });
+});
+```
+
+**Étape 2 — Calculer la hauteur d'un organe (contenu réel) :**
+```javascript
+const organH = (s, inf) => {
+    if (inf.h === 'full') return 640;
+    if (typeof inf.h === 'number' && inf.h > 0) return inf.h;
+    return Math.max(72, 48 + (s.n2_features?.length || 0) * 24); // 48px base + 24px/N2
+};
+```
+
+**Étape 3 — Calculer x/w des zones élastiques selon sidebars présentes :**
+```javascript
+const hasLeft  = !!(byZone.sidebar_left?.length);
+const hasRight = !!(byZone.sidebar_right?.length);
+const mainX = hasLeft  ? 248 : 8;
+const mainW = 1200 - mainX - (hasRight ? 248 : 8);
+// canvas occupe le même espace que main (mutuellement exclusifs en pratique)
+```
+
+**Étape 4 — Distribuer les organes dans chaque zone sans collision :**
+
+Règles par zone :
+- **`header`** : distribution horizontale (flex). Diviser `w:1200` en N parts égales, h = `fixedH: 56`. Si 1 seul organe → `w:1200`.
+- **`footer`** : idem header, `fixedH:48`.
+- **`preview_band`** : idem header, `fixedH:120`.
+- **`sidebar_left` / `sidebar_right`** : stack vertical. Chaque organe à son `w` (240 max), `h = organH(s, inf)`. Y cumulatif depuis `y:56` avec `gap:8`.
+- **`main`** : si ≤ 3 organes → stack vertical avec `gap:16`. Si > 3 → grille 2 colonnes, `colW = floor(mainW/2) - 8`, `gap:16`.
+- **`canvas`** : 1 seul organe attendu → prend tout l'espace elastic (`x:mainX, y:56, w:mainW, h:640`).
+- **`unknown`/autres** : stack dans `main`.
+
+**Étape 5 — Retourner le tableau `positions[]` :**
+Format identique à l'existant : `{ id, x, y, w, h, zone }`.
+
+#### Code complet de la méthode
+
+```javascript
+_zoneTemplateToPositions(result, sections) {
+    const GAP = 8;
+
+    // Grouper par zone
+    const byZone = {};
+    sections.forEach(s => {
+        const zone = result[s.id]?.zone || 'main';
+        (byZone[zone] = byZone[zone] || []).push({ s, inf: result[s.id] || {} });
+    });
+
+    // Hauteur adaptative d'un organe
+    const organH = (s, inf) => {
+        if (inf.h === 'full') return 640;
+        if (typeof inf.h === 'number' && inf.h > 0) return inf.h;
+        return Math.max(72, 48 + (s.n2_features?.length || 0) * 24);
+    };
+
+    // Zones élastiques
+    const hasLeft  = !!(byZone.sidebar_left?.length);
+    const hasRight = !!(byZone.sidebar_right?.length);
+    const mainX = hasLeft  ? 248 : 8;
+    const mainW = 1200 - mainX - (hasRight ? 248 : 8);
+
+    const positions = [];
+
+    // --- HEADER (flex horizontal) ---
+    (byZone.header || []).forEach((item, i, arr) => {
+        const colW = Math.floor(1200 / arr.length);
+        positions.push({ id: item.s.id, x: i * colW, y: 0, w: colW, h: 56, zone: 'header' });
+    });
+
+    // --- FOOTER (flex horizontal) ---
+    (byZone.footer || []).forEach((item, i, arr) => {
+        const colW = Math.floor(1200 / arr.length);
+        positions.push({ id: item.s.id, x: i * colW, y: 840, w: colW, h: 48, zone: 'footer' });
+    });
+
+    // --- PREVIEW BAND (flex horizontal) ---
+    (byZone.preview_band || []).forEach((item, i, arr) => {
+        const colW = Math.floor(1200 / arr.length);
+        positions.push({ id: item.s.id, x: i * colW, y: 720, w: colW, h: 120, zone: 'preview_band' });
+    });
+
+    // --- SIDEBAR LEFT (stack vertical) ---
+    let sy = 56;
+    (byZone.sidebar_left || []).forEach(item => {
+        const h = organH(item.s, item.inf);
+        positions.push({ id: item.s.id, x: 0, y: sy, w: 240, h, zone: 'sidebar_left' });
+        sy += h + GAP;
+    });
+
+    // --- SIDEBAR RIGHT (stack vertical) ---
+    sy = 56;
+    (byZone.sidebar_right || []).forEach(item => {
+        const h = organH(item.s, item.inf);
+        positions.push({ id: item.s.id, x: 960, y: sy, w: 240, h, zone: 'sidebar_right' });
+        sy += h + GAP;
+    });
+
+    // --- CANVAS (prend tout l'espace élastique) ---
+    (byZone.canvas || []).forEach(item => {
+        positions.push({ id: item.s.id, x: mainX, y: 56, w: mainW, h: 640, zone: 'canvas' });
+    });
+
+    // --- MAIN (stack vertical ou 2-col si > 3) ---
+    const mainItems = [...(byZone.main || []), ...(byZone.unknown || [])];
+    if (mainItems.length <= 3) {
+        let my = 56;
+        mainItems.forEach(item => {
+            const h = organH(item.s, item.inf);
+            const w = typeof item.inf.w === 'number' ? Math.min(item.inf.w, mainW) : mainW;
+            positions.push({ id: item.s.id, x: mainX, y: my, w, h, zone: 'main' });
+            my += h + 16;
+        });
+    } else {
+        const colW = Math.floor(mainW / 2) - GAP;
+        let col0y = 56, col1y = 56;
+        mainItems.forEach((item, i) => {
+            const col = i % 2;
+            const h = organH(item.s, item.inf);
+            const x = col === 0 ? mainX : mainX + colW + GAP * 2;
+            const y = col === 0 ? col0y : col1y;
+            positions.push({ id: item.s.id, x, y, w: colW, h, zone: 'main' });
+            if (col === 0) col0y += h + 16;
+            else col1y += h + 16;
+        });
+    }
+
+    return positions;
+}
+```
+
+**Remplacer aussi les 2 appels à `_inferResultToPositions` par `_zoneTemplateToPositions` :**
+- L.167 : `positions = this._inferResultToPositions(result, phaseData.n1_sections);`
+- L.1169 : `const positions = this._inferResultToPositions(result, phaseData.n1_sections);`
+
+**Supprimer** l'ancienne méthode `_inferResultToPositions` (L.191-220).
+
+**Mettre à jour le viewBox** en fin de `_zoneTemplateToPositions` : le canvas est toujours `1200 × 900`. Pas de changement à faire, le viewBox est déjà `0 0 1200 900` dans `_renderCorps`.
+
+### Contraintes
+
+- Ne toucher que `Canvas.feature.js`
+- Ne pas modifier `_renderOrgane()`, `_renderCellule()`, `Canvas.renderer.js`, `AtomRenderer.js`
+- Ne pas modifier l'import `LayoutEngine` (fallback toujours actif)
+- `input_files` obligatoires : `stenciler.css`, `LEXICON_DESIGN.json`
+
+### Critères d'acceptation
+
+- [ ] Plus aucun organe superposé sur le canvas N0 (Corps view)
+- [ ] Navigation/toolbar → bande horizontale haute
+- [ ] Sidebars → colonne droite ou gauche sans overflow
+- [ ] Main/editor/dashboard → zone centrale, stack ou grille selon count
+- [ ] Footer/deploy → bande basse
+- [ ] Bouton `✨` re-layout LLM fonctionne toujours
+- [ ] Fallback LayoutEngine toujours actif si fetch échoue
+- [ ] FJD valide visuellement sur http://localhost:9998/stenciler (Cmd+Shift+R obligatoire)
+
+---
+
+## Mission 17A — Real Wireframes at N0 : Organes en Composants Reconnaissables [MISSION ACTIVE]
+
+**ACTOR: GEMINI | MODE: CODE DIRECT — FJD | DATE: 2026-03-01 | STATUS: LIVRÉ — EN ATTENTE VALIDATION FJD**
+
+---
+
+### Contexte
+
+Au niveau N0 (vue Corps → organes visibles), les organes s'affichent comme des compositions bottom-up récursives abstraites — sans aucun sens visuel reconnaissable.
+La librairie `WireframeLibrary.js` contient déjà 20+ composants UI vectoriels (navbar, chat, dashboard, form, modal, accordion…).
+Le `SemanticMatcher.js` sait déjà mapper des keywords vers ces wireframes (mais uniquement pour les atomes N3).
+
+**Objectif :** Au niveau N0, chaque organe doit afficher un wireframe reconnaissable de `WireframeLibrary` à la place de la composition récursive.
+
+---
+
+### Fichiers à lire AVANT de coder (OBLIGATOIRE)
+
+1. `static/js/Canvas.renderer.js` — entier. Focus sur `renderNode()` (L.187-239) et `_matchHint()` (L.38-40).
+2. `static/js/WireframeLibrary.js` — entier. Connaître tous les hints disponibles et le return format (string).
+3. `static/js/SemanticMatcher.js` — entier. Comprendre `resolveHint()` et `_keywordFallback()`.
+
+---
+
+### Tâche 1 — `SemanticMatcher.js` : Étendre `_keywordFallback` pour les N1 organs
+
+Dans la fonction `_keywordFallback(data)`, dans l'objet `keywords`, **fusionner** les entrées suivantes avec celles déjà présentes :
+
+```javascript
+// Fusionner dans l'objet keywords (ne pas supprimer les entrées existantes) :
+'preview'      : [...existants, 'analys', 'analysis', 'png', 'image', 'inspect', 'render', 'viewer'],
+'stencil-card' : [...existants, 'intent', 'refactor', 'ir', 'tile', 'item'],
+'breadcrumb'   : [...existants, 'nav', 'navbar', 'menu', 'header', 'toolbar'],
+'chat-input'   : [...existants, 'message', 'conversation', 'prompt'],
+'form'         : [...existants, 'login', 'signup', 'register', 'auth', 'password', 'credential'],
+```
+
+⚠️ Ne pas supprimer les entrées existantes. Fusionner avec celles déjà présentes.
+
+**Vérification Tâche 1 :**
+- `resolveHint({ id: 'n1_analysis', name: 'Analyse PNG' })` → doit retourner `'preview'`
+- `resolveHint({ id: 'n1_ir', name: 'Intent Refactoring' })` → doit retourner `'stencil-card'`
+
+---
+
+### Tâche 2 — `Canvas.renderer.js` : Wireframe au niveau N0
+
+Dans `renderNode(data, pos, color, level = 0)`, **insérer le bloc suivant AVANT** la ligne `const res = this._buildComposition(data, pos.w, color);` :
+
+```javascript
+// Mission 17A — N0 Organic Wireframe Rendering
+if (level === 0) {
+    const organHint = this._matchHint(data);
+    if (organHint) {
+        const wfSvg = WireframeLibrary.getSVG(organHint, color, pos.w, pos.h, data.name);
+        if (wfSvg) {
+            compGroup.innerHTML = wfSvg;
+            g.append(compGroup);
+            return g;
+        }
+    }
+}
+```
+
+Ce bloc :
+1. N'est exécuté que pour `level === 0` (organes N1 au niveau corps — pas les cells N1 ni les atomes N2)
+2. Essaie `_matchHint(data)` sur l'organe (id + name du N1 via SemanticMatcher)
+3. Si hint trouvé : `WireframeLibrary.getSVG` génère le SVG **à la bonne taille** (`pos.w × pos.h`)
+4. Retourne immédiatement avec wireframe, skip `_buildComposition()`
+5. Si pas de hint (ou wfSvg null) : tombe dans le comportement existant → **zéro régression**
+
+**Contrainte critique :** `WireframeLibrary.getSVG()` retourne une **string SVG** (pas un objet `{svg, h, w}`). L'utiliser directement comme `compGroup.innerHTML = wfSvg` — **pas** `wfSvg.svg`.
+
+**Ne pas modifier `pos.h`** dans le bloc 17A — la hauteur vient de `_zoneTemplateToPositions()` et est déjà correcte par zone.
+
+---
+
+### Critères d'acceptation
+
+- [ ] `n1_navigation` (Navigation) → wireframe `breadcrumb` visible au N0
+- [ ] `n1_dialogue` (Dialogue Utilisateur) → wireframe `chat-input` visible au N0
+- [ ] `n1_session` (Session Management) → wireframe `dashboard` visible au N0
+- [ ] `n1_upload` (Upload Design) → wireframe `upload` visible au N0
+- [ ] `n1_validation` (Validation Composants) → wireframe `accordion` visible au N0
+- [ ] `n1_export` (Export / Téléchargement) → wireframe `action-button` visible au N0
+- [ ] `n1_layout` (Layout Selection) → wireframe `grid` visible au N0
+- [ ] `n1_ir` (Intent Refactoring) → wireframe `stencil-card` visible au N0
+- [ ] `n1_analysis` (Analyse PNG) → wireframe `preview` visible au N0
+- [ ] Drill dans un organe → N1/N2/N3 non affectés (comportement inchangé)
+- [ ] Organe sans match → bottom-up composition (régression zéro)
+- [ ] Cmd+Shift+R → http://localhost:9998/stenciler
+
+---
+
 ## Archives
 *(Voir [ROADMAP_ACHIEVED.md](file:///Users/francois-jeandazin/AETHERFLOW/Frontend/4. COMMUNICATION/ROADMAP_ACHIEVED.md) pour Phases 1 à 9D)*

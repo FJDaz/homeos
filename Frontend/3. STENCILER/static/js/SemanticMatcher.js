@@ -8,18 +8,18 @@
 // Mapping visual_hint génome → WireframeLibrary hint
 const VISUAL_HINT_MAP = {
     // Aliases (genome → library)
-    'detail-card'   : 'stencil-card',
-    'card'          : 'stencil-card',
-    'choice-card'   : 'selection',
-    'button'        : 'action-button',
-    'launch-button' : 'action-button',
-    'apply-changes' : 'action-button',
-    'download'      : 'action-button',
-    'status'        : 'dashboard',
-    'list'          : 'accordion',
-    'chat-input'    : 'chat-input',
-    'preview'       : 'preview',
-    'form'          : 'form',
+    'detail-card': 'stencil-card',
+    'card': 'stencil-card',
+    'choice-card': 'selection',
+    'button': 'action-button',
+    'launch-button': 'action-button',
+    'apply-changes': 'action-button',
+    'download': 'action-button',
+    'status': 'dashboard',
+    'list': 'accordion',
+    'chat-input': 'chat-input',
+    'preview': 'preview',
+    'form': 'form',
     // Identité (passthrough — hints déjà couverts)
     'table': 'table', 'stencil-card': 'stencil-card', 'dashboard': 'dashboard',
     'stepper': 'stepper', 'breadcrumb': 'breadcrumb', 'grid': 'grid',
@@ -32,9 +32,9 @@ const VISUAL_HINT_MAP = {
 
 // Fallback interaction_type → hint
 const INTERACTION_MAP = {
-    'submit' : 'action-button',
-    'drag'   : 'upload',
-    'click'  : null, // pas assez précis → keyword fallback
+    'submit': 'action-button',
+    'drag': 'upload',
+    'click': null, // pas assez précis → keyword fallback
 };
 
 export function resolveHint(data) {
@@ -65,12 +65,16 @@ function _keywordFallback(data) {
         'color-palette': ['palette', 'theme', 'color', 'style'],
         'upload': ['upload', 'import', 'deposit'],
         'action-button': ['deploy', 'export', 'download', 'launch', 'button'],
-        'stencil-card': ['card', 'arbitrage'],
+        'stencil-card': ['card', 'arbitrage', 'intent', 'refactor', 'ir', 'tile', 'item'],
         'selection': ['selection', 'choice', 'picker'],
         'modal': ['modal', 'confirm', 'popup'],
         'grid': ['layout', 'grid', 'view', 'gallery'],
         'brainstorm': ['brainstorm', 'search', 'idea'],
         'zoom-controls': ['zoom', 'ctrl'],
+        'preview': ['preview', 'analys', 'analysis', 'png', 'image', 'inspect', 'render', 'viewer'],
+        'chat-input': ['chat-input', 'message', 'conversation', 'prompt'],
+        'form': ['form', 'login', 'signup', 'register', 'auth', 'password', 'credential'],
+        'breadcrumb': ['breadcrumb', 'navigation', 'nav', 'navbar', 'menu', 'header', 'toolbar']
     };
     for (const [hint, kws] of Object.entries(keywords)) {
         if (kws.some(k => pool.includes(k))) return hint;
