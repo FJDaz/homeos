@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 
 # Ajout du chemin pour importer les modules Backend
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,95 @@ GENOME_FILE = "../2. GENOME/genome_reference.json"
 FONTS_DIR = "../fonts"
 STATIC_DIR = "static"
 TEMPLATES_DIR = os.path.join(STATIC_DIR, "templates")
+
+# =============================================================================
+# INFER LAYOUT — Heuristique + LLM 3-tier
+# =============================================================================
+
+_ROLE_KEYWORDS = {
+    "navigation":      ["nav", "navigation", "menu", "breadcrumb"],
+    "toolbar":         ["toolbar", "tools", "controls", "palette"],
+    "sidebar_controls":["sidebar", "panel", "controls", "settings"],
+    "editor":          ["editor", "code", "script", "json", "analyse"],
+    "canvas":          ["canvas", "board", "drawing", "stencil"],
+    "chat":            ["chat", "dialogue", "message", "input"],
+    "preview":         ["preview", "render", "viewer", "output"],
+    "dashboard":       ["dashboard", "session", "summary", "status", "report"],
+    "deploy_pipeline": ["deploy", "pipeline", "export", "build", "publish"],
+}
+
+_ROLE_LAYOUT = {
+    "navigation":       {"zone": "header",        "w": 1024, "h": 48,    "layout": "flex"},
+    "toolbar":          {"zone": "header",        "w": 1024, "h": 40,    "layout": "flex"},
+    "sidebar_controls": {"zone": "sidebar_right", "w": 240,  "h": "auto","layout": "stack"},
+    "editor":           {"zone": "main",          "w": 640,  "h": "auto","layout": "stack"},
+    "canvas":           {"zone": "canvas",        "w": 1024, "h": "full","layout": "free"},
+    "chat":             {"zone": "sidebar_right", "w": 336,  "h": "auto","layout": "stack"},
+    "preview":          {"zone": "preview_band",  "w": 1024, "h": 120,   "layout": "flex"},
+    "dashboard":        {"zone": "main",          "w": 1024, "h": 320,   "layout": "grid"},
+    "deploy_pipeline":  {"zone": "footer",        "w": 1024, "h": 48,    "layout": "flex"},
+}
+
+_LAYOUT_SYSTEM_PROMPT = """Tu es un expert UX/layout. Pour chaque organe N1 d'un genome JSON, tu inféres ses paramètres de layout SVG.
+Règles : reference_width=1024px, grid_unit=8px (toutes les valeurs en multiples de 8).
+Zones : header, sidebar_left, sidebar_right, main, canvas, preview_band, footer.
+Layout types : flex, stack, grid, free. h = nombre|"auto"|"full", w = nombre|"full".
+Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans explication.
+Format : { "organ_id": { "role": "...", "zone": "...", "w": ..., "h": ..., "layout": "..." }, ... }"""
+
+
+def _load_env():
+    """Charge le .env AetherFlow dans os.environ (setdefault)."""
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            if "=" in line and not line.startswith("#"):
+                k, _, v = line.partition("=")
+                os.environ.setdefault(k.strip(), v.strip())
+
+
+def infer_layout_heuristic(organs):
+    """Tier 1 — heuristique offline, toujours disponible."""
+    result = {}
+    for o in organs:
+        pool = f"{o.get('id','')} {o.get('name','')}".lower()
+        role = next((r for r, kws in _ROLE_KEYWORDS.items() if any(k in pool for k in kws)), None)
+        if role:
+            result[o["id"]] = {"role": role, **_ROLE_LAYOUT[role]}
+        else:
+            w = min(320 + o.get("n2_count", 0) * 32, 800)
+            result[o["id"]] = {"role": "unknown", "zone": "main", "w": round(w/8)*8, "h": "auto", "layout": "stack"}
+    return result
+
+
+def infer_layout_llm(organs, project_context="", model_name="gemini-2.0-flash"):
+    """Tier 2/3 — LLM Gemini. project_context = tier 3."""
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        return None, "google-generativeai not installed", None
+
+    _load_env()
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return None, "GOOGLE_API_KEY not set", None
+
+    genai.configure(api_key=api_key)
+    system = _LAYOUT_SYSTEM_PROMPT
+    if project_context:
+        system += f"\n\nContexte projet : {project_context}"
+
+    model = genai.GenerativeModel(model_name=model_name, system_instruction=system)
+    organs_summary = [{"id": o["id"], "name": o.get("name",""), "n2_count": o.get("n2_count", 0)} for o in organs]
+    user_msg = f"Genome organs N1 :\n{json.dumps(organs_summary, ensure_ascii=False, indent=2)}"
+
+    try:
+        response = model.generate_content(user_msg)
+        raw = re.sub(r"^```json\s*|\s*```$", "", response.text.strip(), flags=re.MULTILINE).strip()
+        return json.loads(raw), None, model_name
+    except Exception as e:
+        return None, str(e), model_name
+
 
 def load_genome():
     """Charge le genome depuis le fichier JSON"""
@@ -105,6 +195,56 @@ class Handler(BaseHTTPRequestHandler):
         
         self.send_error_json(404, f"Route {self.path} not found")
 
+    def do_OPTIONS(self):
+        """CORS preflight — nécessaire pour fetch() depuis le frontend."""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+    def do_POST(self):
+        if self.path == '/api/infer_layout':
+            self._handle_infer_layout()
+            return
+        self.send_error_json(404, f"POST route {self.path} not found")
+
+    def _handle_infer_layout(self):
+        """Route POST /api/infer_layout
+        Body : { organs: [...], mode: "heuristic"|"llm"|"llm_context", context: "", model: "" }
+        Response : { result: {...}, tier: "...", model: "..." }
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+        except Exception as e:
+            self.send_error_json(400, f"Invalid JSON body: {e}")
+            return
+
+        organs = body.get('organs', [])
+        mode   = body.get('mode', 'heuristic')
+        context = body.get('context', '')
+        model_name = body.get('model', 'gemini-2.0-flash')
+
+        if mode == 'heuristic':
+            self.send_json({"result": infer_layout_heuristic(organs), "tier": "heuristic"})
+
+        elif mode in ('llm', 'llm_context'):
+            ctx = context if mode == 'llm_context' else ''
+            result, err, used_model = infer_layout_llm(organs, ctx, model_name)
+            if err:
+                # Fallback automatique → heuristique
+                self.send_json({
+                    "result": infer_layout_heuristic(organs),
+                    "tier": "heuristic_fallback",
+                    "error": err
+                })
+            else:
+                self.send_json({"result": result, "tier": "llm", "model": used_model})
+
+        else:
+            self.send_error_json(400, f"Unknown mode: {mode}. Use heuristic|llm|llm_context")
+
     def do_HEAD(self):
         """Support pour les requêtes HEAD (ping API)"""
         if self.path == '/api/genome' or self.path.startswith('/api/'):
@@ -185,7 +325,7 @@ class Handler(BaseHTTPRequestHandler):
         """Sert le Service Worker depuis la racine du serveur."""
         try:
             cwd = os.path.dirname(os.path.abspath(__file__))
-            filepath = os.path.join(cwd, STATIC_DIR, 'js', 'sw.js') # Assurez-vous que le chemin est correct
+            filepath = os.path.join(cwd, STATIC_DIR, 'js', 'sw.js')
             
             if not os.path.exists(filepath):
                 self.send_error(404, "Service Worker file not found")
@@ -201,101 +341,52 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
 
-    def serve_font(self, font_name):
-        """Sert les fichiers de font"""
-        font_path = os.path.join(FONTS_DIR, font_name)
-        if not os.path.exists(font_path):
+    def serve_font(self, filename):
+        """Sert une police depuis le dossier fonts"""
+        try:
             cwd = os.path.dirname(os.path.abspath(__file__))
-            font_path = os.path.join(cwd, FONTS_DIR, font_name)
-        
-        if os.path.exists(font_path):
+            filepath = os.path.join(cwd, FONTS_DIR, filename)
+            
+            if not os.path.exists(filepath):
+                self.send_error(404, f"Font {filename} not found")
+                return
+            
             self.send_response(200)
-            self.send_header('Content-type', 'font/woff2' if font_name.endswith('.woff2') else 'font/woff')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            with open(font_path, 'rb') as f:
-                self.wfile.write(f.read())
-        else:
-            self.send_response(404)
+            self.send_header('Content-type', 'font/woff2')
             self.end_headers()
 
+            with open(filepath, 'rb') as f:
+                self.wfile.write(f.read())
+        except Exception as e:
+            self.send_error(500, str(e))
+
     def send_json(self, data):
+        """Envoie une réponse JSON"""
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        self.wfile.write(json.dumps(data).encode('utf-8'))
+        self.wfile.write(json.dumps(data, indent=2).encode('utf-8'))
 
-    def log_message(self, format, *args):
-        pass
 
-def load_custom_injection() -> str:
-    """Charge un script d'injection personnalisé pour les tests Sullivan"""
+def load_custom_injection():
+    """Charge le script d'injection personnalisé s'il existe"""
     try:
         cwd = os.path.dirname(os.path.abspath(__file__))
-        custom_path = os.path.join(cwd, STATIC_DIR, 'js', 'custom_injection.js')
-        
-        if os.path.exists(custom_path):
-            with open(custom_path, 'r', encoding='utf-8') as f:
-                return f'<script>\n{f.read()}\n</script>'
-        return "<!-- No custom injection found -->"
-    except Exception as e:
-        return f"<!-- Error loading custom injection: {str(e)} -->"
-
-def get_api_schema() -> dict:
-    """Retourne le schéma de l'API pour le endpoint /api/schema"""
-    return {
-        "api_version": "1.0.0",
-        "endpoints": {
-            "/api/genome": {
-                "method": "GET",
-                "description": "Retourne le genome complet",
-                "response_format": {
-                    "n0_phases": "list",
-                    "metadata": "dict"
-                }
-            },
-            "/api/genome/pruned/{id}": {
-                "method": "GET",
-                "description": "Retourne un fragment du genome (Extreme Contextualization)",
-                "response_format": "dict (subset of genome)"
-            },
-            "/api/schema": {
-                "method": "GET",
-                "description": "Retourne ce schéma d'API",
-                "response_format": "dict"
-            }
-        },
-        "templates": {
-            "/": {
-                "name": "Genome Viewer",
-                "description": "Interface de visualisation du genome",
-                "injected_scripts": ["engine", "semantic_bridge", "viewer"]
-            },
-            "/stenciler": {
-                "name": "Stenciler",
-                "description": "Interface de génération de code",
-                "injected_scripts": ["stenciler"]
-            }
-        },
-        "static_files": {
-            "css": ["/static/css/viewer.css", "/static/css/stenciler.css"],
-            "js": ["/static/js/semantic_bridge.js", "/static/js/viewer.js", "/static/js/stenciler.js"]
-        },
-        "metadata": {
-            "server_version": "7.0 Sullivan",
-            "port": PORT,
-            "genome_file": GENOME_FILE,
-            "templates_dir": TEMPLATES_DIR
-        }
-    }
+        injection_path = os.path.join(cwd, STATIC_DIR, 'js', 'custom_injection.js')
+        if os.path.exists(injection_path):
+            with open(injection_path, 'r') as f:
+                return f"<script>{f.read()}</script>"
+    except:
+        pass
+    return ""
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
-    print(f"🧬 Genome Viewer v7.0 (Sullivan) running at http://localhost:{PORT}")
-    print(f"🎨 Stenciler at http://localhost:{PORT}/stenciler")
-    print(f"📁 Serving templates from: {TEMPLATES_DIR}")
-    print("Press Ctrl+C to stop")
+    print(f"🧬 Serveur Genome lancé sur http://localhost:{PORT}")
+    print(f"   - Viewer:        http://localhost:{PORT}/")
+    print(f"   - Stenciler:     http://localhost:{PORT}/stenciler")
+    print(f"   - API Genome:    http://localhost:{PORT}/api/genome")
+    print(f"   - InferLayout:   http://localhost:{PORT}/api/infer_layout  (POST)")
     server.serve_forever()
