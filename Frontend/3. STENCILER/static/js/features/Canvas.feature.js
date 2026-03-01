@@ -1,5 +1,5 @@
 import StencilerFeature from './base.feature.js';
-import { WireframeLibrary } from '../WireframeLibrary.js';
+import { PrimOverlay } from '../PrimOverlay.js';
 import { InlineEditUI } from './InlineEdit.feature.js';
 import CanvasLayout from './Canvas.layout.js';
 import Renderer from '../Canvas.renderer.js';
@@ -333,6 +333,15 @@ class CanvasFeature extends StencilerFeature {
                 if (id.includes('l')) { nx += dx; nw -= dx; }
                 if (id.includes('t')) { ny += dy; nh -= dy; }
 
+                // Shift = homothétie (aspect ratio constant)
+                if (e.shiftKey && this.resizeStart.ratio > 0) {
+                    const ratio = this.resizeStart.ratio;
+                    const isCorner = id.length === 2; // 'tl','tr','bl','br'
+                    const isH = id === 'l' || id === 'r';
+                    if (isCorner || isH) nh = nw / ratio;
+                    else nw = nh * ratio;
+                }
+
                 // Snap the dimensions
                 nw = Math.max(40, this._snap(nw));
                 nh = Math.max(20, this._snap(nh));
@@ -459,7 +468,8 @@ class CanvasFeature extends StencilerFeature {
                     mx: mouse.x,
                     my: mouse.y,
                     x: x, y: y,
-                    w: w, h: h
+                    w: w, h: h,
+                    ratio: h > 0 ? w / h : 1
                 };
 
                 e.stopPropagation();
@@ -770,6 +780,11 @@ class CanvasFeature extends StencilerFeature {
         });
         prim.parentNode.appendChild(ov);
 
+        // Poignées de redimensionnement uniquement sur les <rect> (14B-RESIZE)
+        if (prim.tagName === 'rect') {
+            this._setupPrimitiveResize(prim, ov);
+        }
+
         // 14A : Notifier PrimitiveEditor
         document.dispatchEvent(new CustomEvent('primitive:selected', {
             detail: {
@@ -849,6 +864,99 @@ class CanvasFeature extends StencilerFeature {
         prim._dragHandlers = { down: onMouseDown, move: onMouseMove, up: onMouseUp };
     }
 
+    _setupPrimitiveResize(prim, ov) {
+        // Nettoyer les poignées précédentes
+        prim.parentNode.querySelectorAll('.resize-handle').forEach(h => h.remove());
+
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const HS = 6; // handle size
+
+        const corners = [
+            { id: 'tl', cursor: 'nw-resize' },
+            { id: 'tr', cursor: 'ne-resize' },
+            { id: 'br', cursor: 'se-resize' },
+            { id: 'bl', cursor: 'sw-resize' },
+        ];
+
+        const updateHandlePositions = () => {
+            const x = parseFloat(ov.getAttribute('x'));
+            const y = parseFloat(ov.getAttribute('y'));
+            const w = parseFloat(ov.getAttribute('width'));
+            const h = parseFloat(ov.getAttribute('height'));
+            const pts = { tl: [x, y], tr: [x + w, y], br: [x + w, y + h], bl: [x, y + h] };
+            corners.forEach(({ id }) => {
+                const hdl = prim.parentNode.querySelector(`.resize-handle[data-corner="${id}"]`);
+                if (hdl) {
+                    hdl.setAttribute('x', pts[id][0] - HS / 2);
+                    hdl.setAttribute('y', pts[id][1] - HS / 2);
+                }
+            });
+        };
+
+        corners.forEach(({ id, cursor }) => {
+            const hdl = document.createElementNS(SVG_NS, 'rect');
+            hdl.setAttribute('width', HS);
+            hdl.setAttribute('height', HS);
+            hdl.setAttribute('fill', 'white');
+            hdl.setAttribute('stroke', 'var(--accent-bleu)');
+            hdl.setAttribute('stroke-width', '1.5');
+            hdl.setAttribute('class', 'resize-handle');
+            hdl.setAttribute('data-corner', id);
+            hdl.setAttribute('pointer-events', 'all');
+            hdl.style.cursor = cursor;
+
+            let startMouse, startRect;
+
+            hdl.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                startMouse = this._getMousePos(e);
+                const bbox = prim.getBBox();
+                startRect = { x: bbox.x, y: bbox.y, w: bbox.width, h: bbox.height };
+                console.log('📐 [14B-RESIZE] Start Resize:', startRect);
+
+                const onMove = (ev) => {
+                    const m = this._getMousePos(ev);
+                    const dx = m.x - startMouse.x;
+                    const dy = m.y - startMouse.y;
+                    let { x, y, w, h } = startRect;
+
+                    if (id === 'tl') { x += dx; y += dy; w -= dx; h -= dy; }
+                    if (id === 'tr') { y += dy; w += dx; h -= dy; }
+                    if (id === 'br') { w += dx; h += dy; }
+                    if (id === 'bl') { x += dx; w -= dx; h += dy; }
+
+                    w = Math.max(8, w);
+                    h = Math.max(8, h);
+
+                    prim.setAttribute('x', x);
+                    prim.setAttribute('y', y);
+                    prim.setAttribute('width', w);
+                    prim.setAttribute('height', h);
+
+                    // Mettre à jour l'overlay prim-sel
+                    const bb = prim.getBBox();
+                    ov.setAttribute('x', bb.x - 2);
+                    ov.setAttribute('y', bb.y - 2);
+                    ov.setAttribute('width', bb.width + 4);
+                    ov.setAttribute('height', bb.height + 4);
+                    updateHandlePositions();
+                };
+
+                const onUp = () => {
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                };
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+            });
+
+            prim.parentNode.appendChild(hdl);
+        });
+
+        updateHandlePositions();
+    }
+
     _exitGroupEdit() {
         const node = this.groupEditTarget;
         if (!node) return;
@@ -892,9 +1000,29 @@ class CanvasFeature extends StencilerFeature {
 
         // Supprimer la sélection
         node.querySelectorAll('.prim-sel').forEach(el => el.remove());
+        node.querySelectorAll('.resize-handle').forEach(el => el.remove());
 
         // 14A : Fermer PrimitiveEditor
         document.dispatchEvent(new CustomEvent('primitive:deselected'));
+
+        // Capture SVG modifié + dimensions → PrimOverlay (14B) + génome (14F-P4)
+        const nodeId = node.dataset.id;
+        if (nodeId && content) {
+            const bb = content.getBBox();
+            PrimOverlay.set(nodeId, content.innerHTML, bb.height, bb.width);
+            const genomeNode = this._findInGenome(nodeId);
+            if (genomeNode) {
+                genomeNode.svg_payload = content.innerHTML;
+                genomeNode.svg_h = Math.round(bb.height) || 80;
+            }
+        }
+
+        // Re-render N0 complet (cascade N3→N2→N1→N0 automatique via _buildComposition)
+        const corpsId = this.currentCorpsId;
+        if (corpsId) {
+            this.drillStack = [];
+            this._renderCorps(corpsId);
+        }
 
         this.groupEditMode = false;
         this.groupEditTarget = null;

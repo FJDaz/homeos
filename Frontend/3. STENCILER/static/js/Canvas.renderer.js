@@ -7,6 +7,10 @@
 import { G } from './GRID.js';
 import { renderAtom } from './AtomRenderer.js';
 import { PrimOverlay } from './PrimOverlay.js';
+import { WireframeLibrary } from './WireframeLibrary.js';
+import { resolveHint } from './SemanticMatcher.js';
+
+console.log('📦 [Debug] WireframeLibrary imported:', !!WireframeLibrary);
 
 const Renderer = {
     /**
@@ -32,47 +36,7 @@ const Renderer = {
      * Tente de trouver un wireframe correspondant aux données du nœud.
      */
     _matchHint(data) {
-        let hint = data.visual_hint;
-
-        // --- Bug n°1 : Aliases pour visual_hint courts ---
-        const HINT_ALIASES = {
-            'nav': 'breadcrumb',
-            'layout': 'grid',
-            'search': 'brainstorm',
-            'navigation': 'breadcrumb',
-            'selection': 'selection' // Fix Bug n°3 : Priorité au wireframe selection
-        };
-
-        if (hint) return HINT_ALIASES[hint] || hint;
-
-        const searchPool = `${data.id} ${data.name || ''}`.toLowerCase();
-        const mapping = {
-            'table': ['table', 'ir', 'listing'],
-            'stepper': ['stepper', 'sequence', 'workflow'],
-            'chat/bubble': ['chat', 'dialogue', 'bubble', 'user'],
-            'editor': ['editor', 'code', 'analyse', 'adaptation', 'json'],
-            'breadcrumb': ['breadcrumb', 'navigation', 'nav'],
-            'dashboard': ['dashboard', 'session', 'status', 'summary'],
-            'accordion': ['accordion', 'validation', 'list'],
-            'color-palette': ['palette', 'theme', 'color', 'style'],
-            'upload': ['upload', 'import', 'deposit'],
-            'action-button': ['deploy', 'export', 'download', 'launch', 'button'],
-            'stencil-card': ['card', 'arbitrage'], // Retrait de 'selection' ici
-            'selection': ['selection', 'choice', 'picker'],
-            'zoom-controls': ['zoom', 'ctrl'],
-            'modal': ['modal', 'confirm', 'popup'],
-            'grid': ['layout', 'grid', 'view', 'gallery'],
-            'brainstorm': ['brainstorm', 'search', 'idea']
-        };
-
-        for (const [hint, keywords] of Object.entries(mapping)) {
-            if (keywords.some(k => searchPool.includes(k))) {
-                // Fix Mission 10A-TER: "analyse" matche "editor" trop violemment pour les atomes
-                if (hint === 'editor' && data.id.startsWith('comp_') && !searchPool.includes('code')) continue;
-                return hint;
-            }
-        }
-        return null;
+        return resolveHint(data);
     },
 
     /**
@@ -124,6 +88,19 @@ const Renderer = {
     _buildComposition(data, availableWidth, color) {
         // Est-ce un Atome (N3) ?
         if ((data.id && data.id.startsWith('comp_')) || data.interaction_type) {
+            // PrimOverlay : SVG modifié par l'utilisateur en Mode Illustrateur (14B)
+            const cached = PrimOverlay.get(data.id);
+            if (cached) return cached;
+
+            // 14F-BUGS : Tenter WireframeLibrary avant renderAtom (Bottom-Up)
+            const hint = this._matchHint(data);
+            if (hint) {
+                const wfResult = WireframeLibrary.getSVG(hint, color, availableWidth, 180, data.name);
+                if (wfResult && wfResult.svg) {
+                    return { svg: wfResult.svg, h: wfResult.h || 180, w: availableWidth };
+                }
+            }
+
             return renderAtom(data, availableWidth, color);
         }
 
@@ -142,6 +119,8 @@ const Renderer = {
         let currentY = 0;
         let currentX = 0;
         let rowHeight = 0;
+        let maxPositionedY = 0;
+        const CANVAS_REF_W = 1024; // Largeur de référence du canvas N2
 
         children.forEach((child) => {
             let childAvailWidth = availableWidth;
@@ -166,10 +145,20 @@ const Renderer = {
             // Génération de l'enfant N3
             const res = this._buildComposition(child, childAvailWidth, color);
 
-            // Wrap dans un <g> positionné
-            childHTML += `<g class="composition-wrapper" transform="translate(${currentX}, ${currentY})">${res.svg}</g>`;
+            // Mémoire bottom-up : cellules (N2) uniquement — pas les atomes (N3).
+            // Les coords N3 canvas ne sont pas compatibles avec les coords locales.
+            const isAtomChild = child.id?.startsWith('comp_') || !!child.interaction_type;
+            let tx = currentX;
+            let ty = currentY;
+            if (!isAtomChild && child._layout?.x !== undefined && child._layout?.y !== undefined) {
+                tx = Math.round((child._layout.x / CANVAS_REF_W) * availableWidth);
+                ty = child._layout.y;
+                maxPositionedY = Math.max(maxPositionedY, ty + res.h);
+            }
 
-            // Avancement des curseurs Layout
+            childHTML += `<g class="composition-wrapper" transform="translate(${tx}, ${ty})">${res.svg}</g>`;
+
+            // Avancement des curseurs Layout (auto-layout, toujours calculé pour totalH)
             if (layoutType === 'flex' || layoutType === 'grid') {
                 currentX += childAvailWidth + gap;
                 rowHeight = Math.max(rowHeight, res.h);
@@ -178,13 +167,15 @@ const Renderer = {
             }
         });
 
-        // Calcul hauteur finale
+        // Calcul hauteur finale (max entre auto-stack et enfants positionnés librement)
         let totalH = currentY;
         if (layoutType === 'flex' || layoutType === 'grid') {
             totalH = currentY + rowHeight;
         } else if (currentY > 0) {
             totalH = currentY - gap; // Retrait du dernier gap en mode stack
         }
+
+        totalH = Math.max(totalH, maxPositionedY);
 
         const svgStr = `<g data-id="${data.id}" class="cell-group">${childHTML}</g>`;
         return { svg: svgStr, h: totalH, w: availableWidth };
@@ -233,8 +224,10 @@ const Renderer = {
 
         const res = this._buildComposition(data, pos.w, color);
 
-        // Shrink-wrap exact : node-bg épouse le contenu, zéro espace mort
-        pos.h = res.h;
+        // Shrink-wrap : W = availableWidth (preservé depuis _layout.w si défini)
+        // H suit le contenu SAUF si l'utilisateur a défini une H explicite via _layout
+        const userH = data._layout?.h;
+        pos.h = userH || res.h;
         pos.w = res.w;
         rect.setAttribute('height', pos.h);
         rect.setAttribute('width', pos.w);
@@ -250,8 +243,6 @@ const Renderer = {
      */
     updateNode(g, w, h) {
         const rect = g.querySelector('.node-bg');
-        const stripe = g.querySelector('rect[rx="2"]'); // Stripe colorée
-        const label = g.querySelector('.node-label');
         const wfContent = g.querySelector('.wf-content');
 
         if (rect) {
@@ -259,47 +250,16 @@ const Renderer = {
             rect.setAttribute('height', h);
         }
 
-        if (stripe) {
-            stripe.setAttribute('height', Math.max(0, h - 16));
-        }
-
-        if (label) {
-            label.setAttribute('x', w / 2);
-            label.setAttribute('y', h / 2);
-            // Refresh text content if it changed in genome
-            const dataId = g.dataset.id;
-            const nodeData = this._findDataById(dataId);
-            if (nodeData) label.textContent = nodeData.name.toUpperCase();
-        }
-
-        // --- Mission 9D & 10A-BIS : Refresh Atom labels ---
-        // On ne refresh plus la méthode/endpoint (retirés du rendu)
-
-        // --- Mise à jour du wireframe ---
+        // --- Bottom-up : re-render content at new width, scale to new height ---
         if (wfContent) {
-            const dataId = g.dataset.id;
-            const genome = window.stencilerApp?.genome;
-            let nodeData = null;
-            const findNode = (list) => {
-                for (const item of list) {
-                    if (item.id === dataId) { nodeData = item; return true; }
-                    if (item.n1_sections && findNode(item.n1_sections)) return true;
-                    if (item.n2_features && findNode(item.n2_features)) return true;
-                    if (item.n3_components && findNode(item.n3_components)) return true;
-                }
-                return false;
-            };
-            findNode(genome?.n0_phases || []);
-
+            const nodeData = this._findDataById(g.dataset.id);
             if (nodeData) {
-                const hint = this._matchHint(nodeData);
-                const color = stripe ? stripe.getAttribute('fill') : 'var(--accent-bleu)';
-                const pad = nodeData._style?.padding || 0;
-
-                wfContent.setAttribute('transform', `translate(${pad}, ${pad})`);
-                const newSVG = WireframeLibrary.getSVG(hint, color, w - (pad * 2), h - (pad * 2), nodeData.name);
-                if (newSVG) {
-                    wfContent.innerHTML = newSVG;
+                const res = this._buildComposition(nodeData, w, 'var(--accent-bleu)');
+                wfContent.innerHTML = res.svg;
+                if (res.h > 0 && h > 0 && Math.abs(h - res.h) > 1) {
+                    wfContent.setAttribute('transform', `scale(1, ${h / res.h})`);
+                } else {
+                    wfContent.removeAttribute('transform');
                 }
             }
         }

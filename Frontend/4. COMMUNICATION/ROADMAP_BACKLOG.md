@@ -5,6 +5,30 @@
 
 ---
 
+## PHASE 14G — Mémoire de position N3 → N1 (coordonnées normalisées cross-niveaux)
+STATUS: BACKLOG PRIORITAIRE
+DÉPEND DE: Phase 14F complète (mémoire N2→N1 cellules)
+
+### Problème
+La mémoire de position bottom-up est implémentée pour les **cellules (N2)** uniquement.
+Les **atomes (N3)** déplacés dans leur cellule ne remontent pas au N1.
+Root cause : le canvas N3 utilise un espace de coordonnées (1024px wide, y démarrant à 32)
+incompatible avec l'espace local des compositions (0 à availableWidth, y=0 en haut).
+
+### Solution proposée
+Introduire un système de **coordonnées normalisées** (0.0–1.0) pour `_layout` :
+- `_layout.nx` = x normalisé dans l'espace canvas du niveau courant (0.0 = gauche, 1.0 = droite)
+- `_layout.ny` = y normalisé de même
+- À la sauvegarde (`_updateLayoutInGenome`) : calculer nx = x / canvasW, ny = y / canvasH
+- Dans `_buildComposition` : `tx = nx * availableWidth`, `ty = ny * compositionH`
+
+### Impact
+- Canvas.feature.js : `_updateLayoutInGenome` → calculer + stocker nx/ny
+- Canvas.renderer.js : `_buildComposition` → utiliser nx/ny si disponibles (tous niveaux)
+- Retro-compatibilité : si nx/ny absents, fallback sur comportement actuel
+
+---
+
 ## PHASE 3 — Analyse Upload + Fulfillement Auto
 STATUS: BACKLOG
 DÉPEND DE: Phase 2 complète (drill-down + wireframes fixes)

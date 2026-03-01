@@ -14,6 +14,7 @@ class ComponentsZoneFeature extends StencilerFeature {
     this.currentCellule = null;
     this.el = null;
     this.currentStyleTarget = 'fill'; // 'fill' or 'stroke'
+    this.currentCanvasSelection = null; // Nœud sélectionné sur le canvas (14F-FIX)
   }
 
   mount(parentSelector) {
@@ -67,11 +68,10 @@ class ComponentsZoneFeature extends StencilerFeature {
 
     // --- Mission 9C : Selection-driven Sidebar Updates ---
     document.addEventListener('canvas:node:selected', (e) => {
-      const { nodeData } = e.detail;
-      console.log(`[ComponentsZone] Node selected for Nuance: ${nodeData.id}`);
-      // If we are already in the right view, we can just re-render panels
-      // but it's safer to ensure we have the right context.
-      this.render(); // This will call _renderSidebarPanels which now includes Nuance
+      const { id } = e.detail;
+      const node = this._findNodeById(id);
+      if (node) this.currentCanvasSelection = node;
+      this.render();
     });
 
     console.log('Components Zone initialized (Canvas-Centric)');
@@ -85,6 +85,7 @@ class ComponentsZoneFeature extends StencilerFeature {
     this.currentCorps = corps;
     this.currentOrgane = null;
     this.currentCellule = null;
+    this.currentCanvasSelection = null;
     this.render();
   }
 
@@ -103,6 +104,7 @@ class ComponentsZoneFeature extends StencilerFeature {
 
     this.currentOrgane = organe;
     this.currentCellule = null;
+    this.currentCanvasSelection = null;
     this.render();
   }
 
@@ -112,6 +114,7 @@ class ComponentsZoneFeature extends StencilerFeature {
     if (!cellule) return;
 
     this.currentCellule = cellule;
+    this.currentCanvasSelection = null;
     this.render();
   }
 
@@ -125,6 +128,22 @@ class ComponentsZoneFeature extends StencilerFeature {
     } else {
       this._renderCorpsView();
     }
+  }
+
+  _findNodeById(id) {
+    if (!this.genome || !id) return null;
+    let found = null;
+    const search = (items) => {
+      if (found) return;
+      for (const item of items) {
+        if (item.id === id) { found = item; return; }
+        if (item.n1_sections) search(item.n1_sections);
+        if (item.n2_features) search(item.n2_features);
+        if (item.n3_components) search(item.n3_components);
+      }
+    };
+    search(this.genome.n0_phases || []);
+    return found;
   }
 
   _renderCorpsView() {
@@ -155,6 +174,7 @@ class ComponentsZoneFeature extends StencilerFeature {
             <h3>${this.currentOrgane.name.toUpperCase()}</h3>
             <span class="count">${cells.length} cellules (N2)</span>
         </div>
+        <div id="transform-panel-container"></div>
         <div class="components-grid clickable">
             <div class="component-card">
                 <div class="cells-list">
@@ -170,7 +190,6 @@ class ComponentsZoneFeature extends StencilerFeature {
                 </div>
             </div>
         </div>
-        <div id="transform-panel-container"></div>
     `;
 
     this._renderSidebarPanels(this.currentOrgane);
@@ -194,33 +213,23 @@ class ComponentsZoneFeature extends StencilerFeature {
         <div class="components-zone-header">
             <div class="cz-breadcrumb">
                 <span class="cz-back" id="cz-back-to-organe">← ${organeName}</span>
-                <span class="cz-separator">›</span>
-            </div>
-            <div class="header-title-row">
-                <h3>${this.currentCellule.name.toUpperCase()}</h3>
-                <div class="cz-led idle" id="persistence-led" title="Sauvegarde automatique active"></div>
+                <div class="header-title-row">
+                    <h3>${this.currentCellule.name.toUpperCase()}</h3>
+                    <div class="cz-led idle" id="persistence-led" title="Sauvegarde automatique active"></div>
+                </div>
             </div>
         </div>
+        <div id="transform-panel-container"></div>
         <div class="components-grid n3-view">
             ${atoms.length ? atoms.map(atom => `
-                <div class="component-card atom-card edit-mode" data-id="${atom.id}">
+                <div class="component-card atom-card" data-id="${atom.id}">
                     <div class="atom-header">
-                        <select class="atom-method-select ${atom.method ? atom.method.toLowerCase() : 'get'}">
-                            ${['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].map(m => `
-                                <option value="${m}" ${atom.method === m ? 'selected' : ''}>${m}</option>
-                            `).join('')}
-                        </select>
                         <input type="text" class="atom-name-input" value="${atom.name}" spellcheck="false" placeholder="Nom de l'atome">
-                    </div>
-                    <div class="atom-endpoint-row">
-                        <span class="endpoint-label">URL:</span>
-                        <input type="text" class="atom-endpoint-input" value="${atom.endpoint || ''}" placeholder="/api/endpoint" spellcheck="false">
                     </div>
                     <textarea class="atom-desc-input" placeholder="Description UI...">${atom.description_ui || ''}</textarea>
                 </div>
             `).join('') : '<div class="empty-text">Aucun atome (N3) défini</div>'}
         </div>
-        <div id="transform-panel-container"></div>
     `;
 
     this._renderSidebarPanels(this.currentCellule);
@@ -241,20 +250,15 @@ class ComponentsZoneFeature extends StencilerFeature {
       if (!atom) return;
 
       const inputs = {
-        method: card.querySelector('.atom-method-select'),
         name: card.querySelector('.atom-name-input'),
-        endpoint: card.querySelector('.atom-endpoint-input'),
         desc: card.querySelector('.atom-desc-input')
       };
 
       const updateFn = () => {
-        atom.method = inputs.method.value;
         atom.name = inputs.name.value;
-        atom.endpoint = inputs.endpoint.value;
         atom.description_ui = inputs.desc.value;
 
         // Visual feedback
-        inputs.method.className = `atom-method-select ${atom.method.toLowerCase()}`;
         if (led) {
           led.className = 'cz-led saving';
           setTimeout(() => { if (led) led.className = 'cz-led idle'; }, 2000);
@@ -284,10 +288,11 @@ class ComponentsZoneFeature extends StencilerFeature {
     const container = this.el.querySelector('#transform-panel-container');
     if (!container || !obj) return;
 
-    const x = Math.round(obj._layout?.x || 0);
-    const y = Math.round(obj._layout?.y || 0);
-    const w = Math.round(obj._layout?.w || 280);
-    const h = Math.round(obj._layout?.h || 60);
+    const transformTarget = this.currentCanvasSelection || obj;
+    const x = Math.round(transformTarget._layout?.x || 0);
+    const y = Math.round(transformTarget._layout?.y || 0);
+    const w = Math.round(transformTarget._layout?.w || 280);
+    const h = Math.round(transformTarget._layout?.h || 60);
     const step = window.stencilerApp?.canvas?.snapSize || 20;
 
     const fonts = ['Geist', 'Inter', 'monospace', 'serif', 'system-ui'];
@@ -313,7 +318,7 @@ class ComponentsZoneFeature extends StencilerFeature {
                         <label>Y</label>
                         <input type="number" id="tr-y" value="${y}" step="${step}">
                     </div>
-                    
+
                     <div class="input-group">
                         <label>LARGEUR (L)</label>
                         <div class="inc-dec-group">
@@ -335,8 +340,40 @@ class ComponentsZoneFeature extends StencilerFeature {
             </div>
         </div>
 
+        <!-- Panel Style -->
+        <div class="cz-panel collapsed" id="panel-style">
+            <div class="panel-header">
+                <span>STYLE & COULEURS</span>
+                <span class="chevron">▼</span>
+            </div>
+            <div class="panel-content">
+                <div class="style-grid">
+                    <div class="fill-stroke-switch">
+                        <button class="fs-btn ${this.currentStyleTarget === 'fill' ? 'active' : ''}" data-target="fill">FOND</button>
+                        <button class="fs-btn ${this.currentStyleTarget === 'stroke' ? 'active' : ''}" data-target="stroke">CONTOUR</button>
+                    </div>
+
+                    <div class="color-nuancier">
+                        ${['#ffffff', '#101115', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'].map(c => `
+                            <div class="color-chip" style="background:${c}" data-color="${c}"></div>
+                        `).join('')}
+                    </div>
+
+                    <div class="input-group">
+                        <label>SUR MESURE (TSL/HEX)</label>
+                        <input type="color" id="st-color-picker" value="${this.currentStyleTarget === 'fill' ? (obj._style?.fill || '#ffffff') : (obj._style?.stroke || '#000000')}">
+                    </div>
+
+                    <div class="input-group">
+                        <label>ÉPAISSEUR</label>
+                        <input type="range" id="st-width" min="0" max="10" step="0.5" value="${strokeWidth}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Panel Disposition (Mission 8G) -->
-        <div class="cz-panel" id="panel-disposition">
+        <div class="cz-panel collapsed" id="panel-disposition">
             <div class="panel-header">
                 <span>DISPOSITION</span>
                 <span class="chevron">▼</span>
@@ -366,11 +403,8 @@ class ComponentsZoneFeature extends StencilerFeature {
             </div>
         </div>
 
-        <!-- Panel Nuance (Mission 9C) -->
-        ${NuanceUI.render(obj)}
-
         <!-- Panel Snapping -->
-        <div class="cz-panel" id="panel-snapping">
+        <div class="cz-panel collapsed" id="panel-snapping">
             <div class="panel-header">
                 <span>MAGNÉTISME (SNAP)</span>
                 <span class="chevron">▼</span>
@@ -391,40 +425,8 @@ class ComponentsZoneFeature extends StencilerFeature {
             </div>
         </div>
 
-        <!-- Panel Style -->
-        <div class="cz-panel" id="panel-style">
-            <div class="panel-header">
-                <span>STYLE & COULEURS</span>
-                <span class="chevron">▼</span>
-            </div>
-            <div class="panel-content">
-                <div class="style-grid">
-                    <div class="fill-stroke-switch">
-                        <button class="fs-btn ${this.currentStyleTarget === 'fill' ? 'active' : ''}" data-target="fill">FOND</button>
-                        <button class="fs-btn ${this.currentStyleTarget === 'stroke' ? 'active' : ''}" data-target="stroke">CONTOUR</button>
-                    </div>
-                    
-                    <div class="color-nuancier">
-                        ${['#ffffff', '#101115', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'].map(c => `
-                            <div class="color-chip" style="background:${c}" data-color="${c}"></div>
-                        `).join('')}
-                    </div>
-
-                    <div class="input-group">
-                        <label>SUR MESURE (TSL/HEX)</label>
-                        <input type="color" id="st-color-picker" value="${this.currentStyleTarget === 'fill' ? (obj._style?.fill || '#ffffff') : (obj._style?.stroke || '#000000')}">
-                    </div>
-
-                    <div class="input-group">
-                        <label>ÉPAISSEUR</label>
-                        <input type="range" id="st-width" min="0" max="10" step="0.5" value="${strokeWidth}">
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Panel Typography -->
-        <div class="cz-panel" id="panel-typography">
+        <div class="cz-panel collapsed" id="panel-typography">
             <div class="panel-header">
                 <span>TYPOGRAPHIE</span>
                 <span class="chevron">▼</span>
@@ -435,6 +437,9 @@ class ComponentsZoneFeature extends StencilerFeature {
                 </select>
             </div>
         </div>
+
+        <!-- Panel Nuance (Mission 9C) -->
+        ${NuanceUI.render(obj)}
     `;
 
     this._setupPanelHandlers(obj);
@@ -442,6 +447,7 @@ class ComponentsZoneFeature extends StencilerFeature {
 
   _setupPanelHandlers(obj) {
     const container = this.el.querySelector('#transform-panel-container');
+    const transformTarget = this.currentCanvasSelection || obj;
 
     // Mission 9C : Nuance Handlers
     NuanceUI.setupHandlers(container, obj, () => {
@@ -464,13 +470,13 @@ class ComponentsZoneFeature extends StencilerFeature {
     };
 
     const updateLayout = () => {
-      if (!obj._layout) obj._layout = {};
-      obj._layout.x = parseInt(trInputs.x.value);
-      obj._layout.y = parseInt(trInputs.y.value);
-      obj._layout.w = parseInt(trInputs.w.value);
-      obj._layout.h = parseInt(trInputs.h.value);
-      this._persist(obj);
-      document.dispatchEvent(new CustomEvent('node:layout-changed', { detail: { id: obj.id, layout: obj._layout } }));
+      if (!transformTarget._layout) transformTarget._layout = {};
+      transformTarget._layout.x = parseInt(trInputs.x.value);
+      transformTarget._layout.y = parseInt(trInputs.y.value);
+      transformTarget._layout.w = parseInt(trInputs.w.value);
+      transformTarget._layout.h = parseInt(trInputs.h.value);
+      this._persist(transformTarget);
+      document.dispatchEvent(new CustomEvent('node:layout-changed', { detail: { id: transformTarget.id, layout: transformTarget._layout } }));
     };
     Object.values(trInputs).forEach(i => i.addEventListener('change', updateLayout));
 
@@ -559,11 +565,10 @@ class ComponentsZoneFeature extends StencilerFeature {
           if (input) {
             const newVal = Math.max(10, parseInt(input.value) + diff);
             input.value = newVal;
-            // Update transform panel logic
-            if (!obj._layout) obj._layout = {};
-            obj._layout[prop] = newVal;
-            this._persist(obj);
-            document.dispatchEvent(new CustomEvent('node:layout-changed', { detail: { id: obj.id, layout: obj._layout } }));
+            if (!transformTarget._layout) transformTarget._layout = {};
+            transformTarget._layout[prop] = newVal;
+            this._persist(transformTarget);
+            document.dispatchEvent(new CustomEvent('node:layout-changed', { detail: { id: transformTarget.id, layout: transformTarget._layout } }));
           }
         }
       });
@@ -603,12 +608,16 @@ class ComponentsZoneFeature extends StencilerFeature {
   }
 
   _updateTransformInputs(id, x, y) {
-    const current = this.currentCellule || this.currentOrgane;
+    const current = this.currentCanvasSelection || this.currentCellule || this.currentOrgane;
     if (current && current.id === id) {
       const inputX = this.el.querySelector('#tr-x');
       const inputY = this.el.querySelector('#tr-y');
       if (inputX) inputX.value = Math.round(x);
       if (inputY) inputY.value = Math.round(y);
+      // Sync _layout so re-render picks up the drag position
+      if (!current._layout) current._layout = {};
+      current._layout.x = Math.round(x);
+      current._layout.y = Math.round(y);
     }
   }
 
