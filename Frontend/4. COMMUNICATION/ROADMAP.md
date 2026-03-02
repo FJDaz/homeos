@@ -2521,40 +2521,185 @@ _zoneTemplateToPositions(result, sections) {
 
 ---
 
-## Prochaine Mission : 18B — Preview Inline Editor
+## Mission 18B — Preview Inline Editor
 
-**ACTOR: CLAUDE | MODE: CODE DIRECT — FJD | STATUS: EN ATTENTE**
+**ACTOR: GEMINI | MODE: CODE DIRECT — FJD | DATE: 2026-03-02 | STATUS: MISSION ACTIVE**
 
-### Objectif
-Rendre `/preview` éditable sans LLM dans la boucle.
-L'utilisateur édite directement dans le browser → `genome_reference.json` mis à jour → page se rafraîchit.
+---
 
-### Scope (3 fonctionnalités)
+### Contexte
 
-**F1 — Rename inline (contenteditable)**
-- Double-clic sur le label d'un composant → `contenteditable` activé
-- Blur → `PATCH /api/genome/node/<id>` `{ "name": "..." }` → sauvegarde dans le JSON
+`/preview` est une page HTML read-only générée par `genome_preview.py`.
+Les endpoints PATCH sont **déjà implémentés** dans `server_9998_v2.py` (Claude, 2026-03-02) :
+- `PATCH /api/genome/node/<id>` — body: `{ "field": "name"|"visual_hint", "value": "..." }`
+- `PATCH /api/genome/organ/<organ_id>/reorder` — body: `{ "order": ["n3_id_1", ...] }`
 
-**F2 — Changer le type (visual_hint)**
-- Icône ⚙ sur un composant → menu contextuel avec liste des hints disponibles
-- Sélection → `PATCH /api/genome/node/<id>` `{ "visual_hint": "..." }` → page rafraîchie
+**Ta seule tâche : modifier `genome_preview.py` pour injecter le JS d'édition inline.**
 
-**F3 — Réordonner (drag-and-drop)**
-- SortableJS (CDN) sur les listes de composants dans chaque organe
-- Drop → `PATCH /api/genome/organ/<organ_id>/reorder` `{ "order": ["id1", "id2", ...] }`
+---
 
-### Endpoints à ajouter dans server_9998_v2.py
+### Fichiers à lire AVANT de coder (OBLIGATOIRE)
+
+1. `Frontend/3. STENCILER/genome_preview.py` — entier. Comprendre `_comp_html()`, `_render_organ_card()`, `render_genome_preview()`. C'est là que tu injectes le JS.
+2. `Frontend/3. STENCILER/server_9998_v2.py` — lire uniquement `do_PATCH`, `_handle_node_patch`, `_handle_organ_reorder`. Contrat API figé, ne pas modifier.
+
+**Input files obligatoires :** `stenciler.css`, `LEXICON_DESIGN.json`
+
+---
+
+### Bootstrap Gemini (obligatoire)
+
 ```
-PATCH /api/genome/node/<id>            body: { field: "name"|"visual_hint", value: "..." }
-PATCH /api/genome/organ/<id>/reorder   body: { order: ["n3_id_1", ...] }
+Tu es Gemini, agent frontend AetherFlow. Tu travailles sur genome_preview.py.
+Ton rôle : injecter du JS d'édition inline dans la page HTML générée.
+Tu NE modifies PAS server_9998_v2.py. Les endpoints PATCH sont déjà prêts.
+FJD = Directeur Artistique. Aucune décision esthétique non demandée.
+Utilise Flowbite et Tailwind déjà présents dans la page (CDN déjà chargé).
 ```
+
+---
+
+### Tâche 1 — F1 : Rename inline (contenteditable)
+
+Dans `_comp_html(comp)`, chaque composant a déjà `data-genome-id="{gid}"`.
+
+**Modifier le rendu des labels pour les rendre éditables :**
+- Identifier le texte de label dans chaque composant (le `name` du composant)
+- L'entourer d'un `<span class="genome-label" data-genome-id="{gid}">` avec `contenteditable="false"`
+- Ajouter dans le `<script>` de la page (via `render_genome_preview`) :
+
+```javascript
+// F1 — Rename inline
+document.querySelectorAll('.genome-label').forEach(span => {
+  span.addEventListener('dblclick', () => {
+    span.contentEditable = 'true';
+    span.focus();
+  });
+  span.addEventListener('blur', async () => {
+    span.contentEditable = 'false';
+    const id = span.dataset.genomeId;
+    const value = span.textContent.trim();
+    await fetch(`/api/genome/node/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ field: 'name', value })
+    });
+  });
+});
+```
+
+---
+
+### Tâche 2 — F2 : Changer le visual_hint (menu contextuel)
+
+**Liste des hints disponibles** (hard-codée, pas de fetch) :
+`button`, `launch-button`, `stepper`, `breadcrumb`, `chat/bubble`, `chat-input`,
+`choice-card`, `dashboard`, `accordion`, `upload`, `color-palette`, `grid`,
+`table`, `stencil-card`, `detail-card`, `preview`, `modal`, `download`,
+`zoom-controls`, `form`
+
+**Ajouter un bouton ⚙ sur chaque composant** (dans `_comp_html`) :
+
+```html
+<div class="genome-comp-wrapper relative group" data-genome-id="{gid}" data-hint="{vh}">
+  <!-- le composant existant ici -->
+  <button class="hint-picker absolute top-0 right-0 hidden group-hover:block
+                 text-xs bg-gray-700 text-white rounded px-1 py-0.5 z-10"
+          data-genome-id="{gid}">⚙</button>
+</div>
+```
+
+**JS dans la page** :
+
+```javascript
+// F2 — Change visual_hint
+const HINTS = ['button','launch-button','stepper','breadcrumb','chat/bubble',
+  'chat-input','choice-card','dashboard','accordion','upload','color-palette',
+  'grid','table','stencil-card','detail-card','preview','modal','download',
+  'zoom-controls','form'];
+
+document.querySelectorAll('.hint-picker').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const id = btn.dataset.genomeId;
+    const current = btn.closest('[data-hint]').dataset.hint;
+    const chosen = prompt(`Visual hint actuel: ${current}\nChoisir:\n${HINTS.join(', ')}`, current);
+    if (!chosen || !HINTS.includes(chosen)) return;
+    await fetch(`/api/genome/node/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ field: 'visual_hint', value: chosen })
+    });
+    location.reload();
+  });
+});
+```
+
+⚠️ `prompt()` est suffisant pour un outil interne. Pas besoin de modal custom.
+
+---
+
+### Tâche 3 — F3 : Drag-and-drop (SortableJS)
+
+**Ajouter SortableJS CDN** dans le `<head>` de `render_genome_preview()` :
+```html
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+```
+
+**Modifier `_render_organ_card(organ)`** pour ajouter `data-organ-id="{n1_id}"` sur la liste des composants :
+
+```html
+<div class="genome-comp-list" data-organ-id="{organ_id}">
+  <!-- composants ici -->
+</div>
+```
+
+**JS dans la page** :
+
+```javascript
+// F3 — Drag-and-drop reorder
+document.querySelectorAll('.genome-comp-list').forEach(list => {
+  Sortable.create(list, {
+    animation: 150,
+    onEnd: async () => {
+      const organId = list.dataset.organId;
+      const order = [...list.querySelectorAll('[data-genome-id]')]
+        .map(el => el.dataset.genomeId);
+      await fetch(`/api/genome/organ/${organId}/reorder`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ order })
+      });
+    }
+  });
+});
+```
+
+---
+
+### Structure finale de `render_genome_preview()`
+
+Le `<script>` consolidé (F1 + F2 + F3) doit être injecté **juste avant `</body>`** dans le HTML retourné.
+
+---
+
+### Ce qu'il NE FAUT PAS toucher
+
+- `server_9998_v2.py` — les endpoints sont figés, ne pas modifier
+- Le routing des onglets de phase (déjà fonctionnel)
+- Les CDN Flowbite et Tailwind déjà présents
+
+---
 
 ### Critères d'acceptation
-- [ ] Double-clic sur un label → éditable directement dans la page
-- [ ] Blur → label persisté dans genome_reference.json
-- [ ] Icône ⚙ → menu visual_hint → composant change de rendu
-- [ ] Drag-and-drop composants dans un organe → ordre persisté dans le JSON
-- [ ] Zéro LLM dans la boucle d'édition
+
+- [ ] Double-clic sur un label → `contenteditable` activé, focus
+- [ ] Blur → `PATCH /api/genome/node/<id>` déclenché, label mis à jour dans le JSON
+- [ ] Survol d'un composant → bouton ⚙ visible
+- [ ] Clic ⚙ → `prompt()` avec hint actuel, choix validé → `PATCH` + `location.reload()`
+- [ ] Drag-and-drop d'un composant dans son organe → `PATCH /api/genome/organ/<id>/reorder` déclenché
+- [ ] Refresh → ordre persisté dans la page
+- [ ] Cmd+Shift+R → http://localhost:9998/preview
 
 ---
 

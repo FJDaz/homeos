@@ -218,6 +218,64 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
+    def do_PATCH(self):
+        """PATCH /api/genome/node/<id>  et  PATCH /api/genome/organ/<id>/reorder"""
+        if re.match(r'^/api/genome/node/[^/]+$', self.path):
+            self._handle_node_patch(self.path.split('/')[-1])
+            return
+        if re.match(r'^/api/genome/organ/[^/]+/reorder$', self.path):
+            parts = self.path.split('/')
+            self._handle_organ_reorder(parts[-2])
+            return
+        self.send_error_json(404, f"PATCH route {self.path} not found")
+
+    def _handle_node_patch(self, node_id):
+        """Met à jour un champ d'un composant N3 et sauvegarde le genome."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+        except Exception as e:
+            self.send_error_json(400, f"Invalid JSON: {e}")
+            return
+
+        field = body.get('field')
+        value = body.get('value')
+
+        if field not in ('name', 'visual_hint'):
+            self.send_error_json(400, f"Invalid field '{field}'. Allowed: name, visual_hint")
+            return
+
+        genome = load_genome()
+        node = _find_n3_by_id(genome, node_id)
+        if not node:
+            self.send_error_json(404, f"Node {node_id} not found in genome")
+            return
+
+        node[field] = value
+        save_genome(genome)
+        self.send_json({"ok": True, "id": node_id, "field": field, "value": value})
+
+    def _handle_organ_reorder(self, organ_id):
+        """Réordonne les N3 dans le premier N2 d'un organe N1."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+        except Exception as e:
+            self.send_error_json(400, f"Invalid JSON: {e}")
+            return
+
+        order = body.get('order', [])
+        genome = load_genome()
+        n2 = _find_n2_by_organ(genome, organ_id)
+        if not n2:
+            self.send_error_json(404, f"Organ {organ_id} not found in genome")
+            return
+
+        n3_map = {c['id']: c for c in n2.get('n3_components', [])}
+        n2['n3_components'] = [n3_map[cid] for cid in order if cid in n3_map]
+        save_genome(genome)
+        self.send_json({"ok": True, "organ_id": organ_id, "order": order})
+
     def do_POST(self):
         if self.path == '/api/infer_layout':
             self._handle_infer_layout()
@@ -390,6 +448,39 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store, must-revalidate')
         self.end_headers()
         self.wfile.write(html.encode('utf-8'))
+
+
+def save_genome(genome):
+    """Sauvegarde le genome sur disque (miroir de load_genome)."""
+    filepath = GENOME_FILE
+    if not os.path.exists(os.path.dirname(os.path.abspath(filepath))):
+        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), GENOME_FILE)
+    else:
+        cwd_local = os.path.dirname(os.path.abspath(__file__))
+        filepath = os.path.join(cwd_local, GENOME_FILE)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(genome, f, indent=2, ensure_ascii=False)
+
+
+def _find_n3_by_id(genome, node_id):
+    """Trouve un composant N3 par son id."""
+    for phase in genome.get('n0_phases', []):
+        for organ in phase.get('n1_sections', []):
+            for feature in organ.get('n2_features', []):
+                for comp in feature.get('n3_components', []):
+                    if comp.get('id') == node_id:
+                        return comp
+    return None
+
+
+def _find_n2_by_organ(genome, organ_id):
+    """Retourne le premier N2 d'un organe N1 donné."""
+    for phase in genome.get('n0_phases', []):
+        for organ in phase.get('n1_sections', []):
+            if organ.get('id') == organ_id:
+                features = organ.get('n2_features', [])
+                return features[0] if features else None
+    return None
 
 
 def load_custom_injection():
