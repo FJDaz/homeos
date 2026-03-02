@@ -817,3 +817,89 @@ VALIDATION: FJD — "La grille est top maintenant"
 - Tokens CSS variables garantissent cohérence jour/nuit
 
 ---
+
+---
+
+## Mission 17A — Real Wireframes at N0
+STATUS: ARCHIVÉ
+DATE: 2026-03-01
+ACTOR: CLAUDE (CODE DIRECT — FJD)
+VALIDATION: FJD (commit git, branche idx-setup)
+
+### Résumé
+Au niveau N0 du Stenciler (vue Corps → organes), les organes s'affichaient comme des compositions SVG bottom-up abstraites sans sens visuel reconnaissable.
+
+### Ce qui a été fait
+1. **SemanticMatcher.js** — Extension de `_keywordFallback()` avec mots-clés organ-level :
+   - `preview` : analys, analysis, png, image, inspect, render, viewer
+   - `stencil-card` : intent, refactor, ir, tile, item
+   - `breadcrumb` : nav, navbar, menu, header, toolbar
+   - `chat-input` : message, conversation, prompt
+   - `form` : login, signup, register, auth, password, credential
+
+2. **Canvas.renderer.js** — Bloc Mission 17A dans `renderNode()` avant `_buildComposition()` :
+   - Si `level === 0` : essaie `_matchHint(data)` sur l'organe N1
+   - Si hint trouvé : `WireframeLibrary.getSVG()` → `compGroup.innerHTML = wfSvg` → return
+   - Sinon : fall-through vers bottom-up composition (zéro régression)
+
+### Fichiers modifiés
+- `static/js/SemanticMatcher.js`
+- `static/js/Canvas.renderer.js`
+
+---
+
+## Mission 18A — Genome HTML Preview (Flowbite)
+STATUS: ARCHIVÉ
+DATE: 2026-03-02
+ACTOR: CLAUDE (CODE DIRECT — FJD)
+VALIDATION: Serveur 200 — validation visuelle FJD en attente
+
+### Contexte
+Pivot stratégique : abandon de l'inférence SVG comme vue principale. Ajout d'une route `/preview` qui rend le genome en vrais composants Flowbite HTML, garantissant une lecture fidèle et sans ambiguïté du contenu N3.
+
+### Ce qui a été fait
+1. **`genome_preview.py`** (nouveau fichier) — Mappe N3 `visual_hint` → composants Flowbite HTML.
+   - 20+ hints couverts (button, launch-button, stepper, breadcrumb, chat, table, form, upload, accordion, dashboard, grid, modal, download...)
+   - N3 `name` = label du composant
+   - `data-genome-id` + `data-hint` sur chaque élément (traçabilité genome → HTML)
+   - Onglets de navigation entre les 4 phases N0
+
+2. **`server_9998_v2.py`** — 3 patches :
+   - Import `render_genome_preview`
+   - Route `GET /preview` → phase 1 (Brainstorm) par défaut
+   - Route `GET /preview/<phase_id>` → phase ciblée
+   - Méthode `_send_html()` helper
+
+### Routes disponibles
+- `http://localhost:9998/preview` — phase Brainstorm par défaut
+- `http://localhost:9998/preview/n0_backend`
+- `http://localhost:9998/preview/n0_frontend`
+- `http://localhost:9998/preview/n0_deploy`
+
+### Prochaine étape envisagée
+Mission 18B — Inline editing : `contenteditable` + drag-and-drop + PATCH `/api/genome/node/<id>` → édition directe sans LLM dans la boucle.
+
+---
+
+## Mission V3-A — Backend Dead Code Cleanup
+STATUS: ARCHIVÉ (PARTIEL)
+DATE: 2026-03-02
+ACTOR: AETHERFLOW (auto-exécuté) + CLAUDE (audit)
+VALIDATION: 21/21 tests PASS
+
+### Ce qui a été fait
+1. **Tâche 1 ✅** — 20 fichiers `.generated.py` orphelins supprimés dans `Backend/Prod/sullivan/`
+2. **Tâche 2 🚫 BLOQUÉ** — `apply_generated_code()` dans `claude_helper.py` a des appelants actifs :
+   - `workflows/proto.py` (L180, L229)
+   - `workflows/frd.py` (L115, L228, L354)
+   - `workflows/verify_fix.py` (L12, L116, L211)
+   - `tests/test_new_file_creation.py` (multiples)
+   → Suppression reportée à V3-B (UnifiedExecutor — suppression des workflows zombie)
+3. **Tâche 3 ✅** — `astunparse>=1.6.3` déjà présent dans `requirements.txt` (L46)
+
+### Note sur le surgical_editor.py
+Une régression `\n` (évasion trop agressive) a été détectée et corrigée lors des tests finaux.
+
+### Prochaine étape V3
+V3-B : Supprimer `workflows/frd.py` et `workflows/verify_fix.py` (dead code confirmé) → débloque la suppression de `apply_generated_code()`.
+

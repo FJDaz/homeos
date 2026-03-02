@@ -17,6 +17,7 @@ sys.path.append(os.path.join(cwd, "../.."))
 sys.path.append(os.path.join(cwd, "../../Backend/Prod"))
 
 from sullivan.context_pruner import prune_genome
+from genome_preview import render_genome_preview
 
 PORT = 9998
 GENOME_FILE = "../2. GENOME/genome_reference.json"
@@ -193,6 +194,20 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"css": "/* Genome Enforced Styles */\n:root { --accent-rose: #ff0080; }"})
             return
         
+        # Route preview HTML (Mission 18A — Flowbite HTML from genome)
+        if self.path == '/preview':
+            genome = load_genome()
+            html = render_genome_preview(genome)
+            self._send_html(html)
+            return
+
+        if self.path.startswith('/preview/'):
+            phase_id = self.path[9:]
+            genome = load_genome()
+            html = render_genome_preview(genome, phase_id=phase_id)
+            self._send_html(html)
+            return
+
         self.send_error_json(404, f"Route {self.path} not found")
 
     def do_OPTIONS(self):
@@ -368,6 +383,14 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data, indent=2).encode('utf-8'))
 
+    def _send_html(self, html):
+        """Envoie une page HTML complète"""
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store, must-revalidate')
+        self.end_headers()
+        self.wfile.write(html.encode('utf-8'))
+
 
 def load_custom_injection():
     """Charge le script d'injection personnalisé s'il existe"""
@@ -389,4 +412,5 @@ if __name__ == '__main__':
     print(f"   - Stenciler:     http://localhost:{PORT}/stenciler")
     print(f"   - API Genome:    http://localhost:{PORT}/api/genome")
     print(f"   - InferLayout:   http://localhost:{PORT}/api/infer_layout  (POST)")
+    print(f"   - Preview HTML:  http://localhost:{PORT}/preview")
     server.serve_forever()

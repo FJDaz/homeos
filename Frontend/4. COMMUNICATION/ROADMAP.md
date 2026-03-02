@@ -2493,99 +2493,70 @@ _zoneTemplateToPositions(result, sections) {
 
 ---
 
-## Mission 17A — Real Wireframes at N0 : Organes en Composants Reconnaissables [MISSION ACTIVE]
-
-**ACTOR: GEMINI | MODE: CODE DIRECT — FJD | DATE: 2026-03-01 | STATUS: LIVRÉ — EN ATTENTE VALIDATION FJD**
-
----
-
-### Contexte
-
-Au niveau N0 (vue Corps → organes visibles), les organes s'affichent comme des compositions bottom-up récursives abstraites — sans aucun sens visuel reconnaissable.
-La librairie `WireframeLibrary.js` contient déjà 20+ composants UI vectoriels (navbar, chat, dashboard, form, modal, accordion…).
-Le `SemanticMatcher.js` sait déjà mapper des keywords vers ces wireframes (mais uniquement pour les atomes N3).
-
-**Objectif :** Au niveau N0, chaque organe doit afficher un wireframe reconnaissable de `WireframeLibrary` à la place de la composition récursive.
+## Mission 17A — Real Wireframes at N0 ✅ ARCHIVÉ
+> Voir [ROADMAP_ACHIEVED.md](ROADMAP_ACHIEVED.md) — SemanticMatcher + Canvas.renderer.js level===0 block.
 
 ---
 
-### Fichiers à lire AVANT de coder (OBLIGATOIRE)
-
-1. `static/js/Canvas.renderer.js` — entier. Focus sur `renderNode()` (L.187-239) et `_matchHint()` (L.38-40).
-2. `static/js/WireframeLibrary.js` — entier. Connaître tous les hints disponibles et le return format (string).
-3. `static/js/SemanticMatcher.js` — entier. Comprendre `resolveHint()` et `_keywordFallback()`.
+## Mission 18A — Genome HTML Preview (Flowbite) ✅ ARCHIVÉ
+> Voir [ROADMAP_ACHIEVED.md](ROADMAP_ACHIEVED.md) — `/preview` route + genome_preview.py.
 
 ---
 
-### Tâche 1 — `SemanticMatcher.js` : Étendre `_keywordFallback` pour les N1 organs
+## Mission V3-A — Backend Dead Code Cleanup ✅ ARCHIVÉ (PARTIEL)
+> Voir [ROADMAP_ACHIEVED.md](ROADMAP_ACHIEVED.md) — 20 fichiers .generated.py supprimés. Tâche 2 bloquée (appelants dans workflows zombie).
 
-Dans la fonction `_keywordFallback(data)`, dans l'objet `keywords`, **fusionner** les entrées suivantes avec celles déjà présentes :
+---
 
-```javascript
-// Fusionner dans l'objet keywords (ne pas supprimer les entrées existantes) :
-'preview'      : [...existants, 'analys', 'analysis', 'png', 'image', 'inspect', 'render', 'viewer'],
-'stencil-card' : [...existants, 'intent', 'refactor', 'ir', 'tile', 'item'],
-'breadcrumb'   : [...existants, 'nav', 'navbar', 'menu', 'header', 'toolbar'],
-'chat-input'   : [...existants, 'message', 'conversation', 'prompt'],
-'form'         : [...existants, 'login', 'signup', 'register', 'auth', 'password', 'credential'],
+## État Stratégique — 2026-03-02
+
+### Acquis
+- **Stenciler V3** : drill-down N0→N1→N2→N3 opérationnel. Bottom-up SVG. Mode Illustrateur. Persistence RAM.
+- **Genome Preview** : `/preview` rend le genome en vrais composants Flowbite HTML (lecture directe, sans inférence).
+- **AetherFlow V3-A** : dead code supprimé, 21/21 tests PASS. Pipeline actif intact.
+
+### Blocages connus
+- **V3-A Tâche 2** : `apply_generated_code()` non supprimable tant que `frd.py` / `verify_fix.py` existent.
+- **Preview inline editing** : `/preview` est read-only. Édition directe non encore construite.
+
+---
+
+## Prochaine Mission : 18B — Preview Inline Editor
+
+**ACTOR: CLAUDE | MODE: CODE DIRECT — FJD | STATUS: EN ATTENTE**
+
+### Objectif
+Rendre `/preview` éditable sans LLM dans la boucle.
+L'utilisateur édite directement dans le browser → `genome_reference.json` mis à jour → page se rafraîchit.
+
+### Scope (3 fonctionnalités)
+
+**F1 — Rename inline (contenteditable)**
+- Double-clic sur le label d'un composant → `contenteditable` activé
+- Blur → `PATCH /api/genome/node/<id>` `{ "name": "..." }` → sauvegarde dans le JSON
+
+**F2 — Changer le type (visual_hint)**
+- Icône ⚙ sur un composant → menu contextuel avec liste des hints disponibles
+- Sélection → `PATCH /api/genome/node/<id>` `{ "visual_hint": "..." }` → page rafraîchie
+
+**F3 — Réordonner (drag-and-drop)**
+- SortableJS (CDN) sur les listes de composants dans chaque organe
+- Drop → `PATCH /api/genome/organ/<organ_id>/reorder` `{ "order": ["id1", "id2", ...] }`
+
+### Endpoints à ajouter dans server_9998_v2.py
 ```
-
-⚠️ Ne pas supprimer les entrées existantes. Fusionner avec celles déjà présentes.
-
-**Vérification Tâche 1 :**
-- `resolveHint({ id: 'n1_analysis', name: 'Analyse PNG' })` → doit retourner `'preview'`
-- `resolveHint({ id: 'n1_ir', name: 'Intent Refactoring' })` → doit retourner `'stencil-card'`
-
----
-
-### Tâche 2 — `Canvas.renderer.js` : Wireframe au niveau N0
-
-Dans `renderNode(data, pos, color, level = 0)`, **insérer le bloc suivant AVANT** la ligne `const res = this._buildComposition(data, pos.w, color);` :
-
-```javascript
-// Mission 17A — N0 Organic Wireframe Rendering
-if (level === 0) {
-    const organHint = this._matchHint(data);
-    if (organHint) {
-        const wfSvg = WireframeLibrary.getSVG(organHint, color, pos.w, pos.h, data.name);
-        if (wfSvg) {
-            compGroup.innerHTML = wfSvg;
-            g.append(compGroup);
-            return g;
-        }
-    }
-}
+PATCH /api/genome/node/<id>            body: { field: "name"|"visual_hint", value: "..." }
+PATCH /api/genome/organ/<id>/reorder   body: { order: ["n3_id_1", ...] }
 ```
-
-Ce bloc :
-1. N'est exécuté que pour `level === 0` (organes N1 au niveau corps — pas les cells N1 ni les atomes N2)
-2. Essaie `_matchHint(data)` sur l'organe (id + name du N1 via SemanticMatcher)
-3. Si hint trouvé : `WireframeLibrary.getSVG` génère le SVG **à la bonne taille** (`pos.w × pos.h`)
-4. Retourne immédiatement avec wireframe, skip `_buildComposition()`
-5. Si pas de hint (ou wfSvg null) : tombe dans le comportement existant → **zéro régression**
-
-**Contrainte critique :** `WireframeLibrary.getSVG()` retourne une **string SVG** (pas un objet `{svg, h, w}`). L'utiliser directement comme `compGroup.innerHTML = wfSvg` — **pas** `wfSvg.svg`.
-
-**Ne pas modifier `pos.h`** dans le bloc 17A — la hauteur vient de `_zoneTemplateToPositions()` et est déjà correcte par zone.
-
----
 
 ### Critères d'acceptation
-
-- [ ] `n1_navigation` (Navigation) → wireframe `breadcrumb` visible au N0
-- [ ] `n1_dialogue` (Dialogue Utilisateur) → wireframe `chat-input` visible au N0
-- [ ] `n1_session` (Session Management) → wireframe `dashboard` visible au N0
-- [ ] `n1_upload` (Upload Design) → wireframe `upload` visible au N0
-- [ ] `n1_validation` (Validation Composants) → wireframe `accordion` visible au N0
-- [ ] `n1_export` (Export / Téléchargement) → wireframe `action-button` visible au N0
-- [ ] `n1_layout` (Layout Selection) → wireframe `grid` visible au N0
-- [ ] `n1_ir` (Intent Refactoring) → wireframe `stencil-card` visible au N0
-- [ ] `n1_analysis` (Analyse PNG) → wireframe `preview` visible au N0
-- [ ] Drill dans un organe → N1/N2/N3 non affectés (comportement inchangé)
-- [ ] Organe sans match → bottom-up composition (régression zéro)
-- [ ] Cmd+Shift+R → http://localhost:9998/stenciler
+- [ ] Double-clic sur un label → éditable directement dans la page
+- [ ] Blur → label persisté dans genome_reference.json
+- [ ] Icône ⚙ → menu visual_hint → composant change de rendu
+- [ ] Drag-and-drop composants dans un organe → ordre persisté dans le JSON
+- [ ] Zéro LLM dans la boucle d'édition
 
 ---
 
 ## Archives
-*(Voir [ROADMAP_ACHIEVED.md](file:///Users/francois-jeandazin/AETHERFLOW/Frontend/4. COMMUNICATION/ROADMAP_ACHIEVED.md) pour Phases 1 à 9D)*
+*(Voir [ROADMAP_ACHIEVED.md](ROADMAP_ACHIEVED.md) pour toutes les missions archivées)*
