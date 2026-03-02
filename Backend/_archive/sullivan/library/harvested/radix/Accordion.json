@@ -1,0 +1,23 @@
+{
+    "name": "Accordion",
+    "library": "Radix_Primitives",
+    "category": "Atome",
+    "sullivan_score": 95.0,
+    "performance_score": 98,
+    "accessibility_score": 100,
+    "ecology_score": 95,
+    "popularity_score": 90,
+    "validation_score": 95,
+    "size_kb": 2,
+    "created_at": "2026-03-01T19:19:00",
+    "user_id": "AETHERFLOW_HARVESTER",
+    "anatomy": {
+        "root": "Accordion.Root",
+        "item": "Accordion.Item",
+        "header": "Accordion.Header",
+        "trigger": "Accordion.Trigger",
+        "content": "Accordion.Content"
+    },
+    "description": "A vertical stack of interactive headings that each reveal a section of content.",
+    "source_url": "https://www.radix-ui.com/primitives/docs/components/accordion"
+}

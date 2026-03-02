@@ -1,0 +1,26 @@
+{
+    "name": "Dialog",
+    "library": "Radix_Primitives",
+    "category": "Organe",
+    "sullivan_score": 94.0,
+    "performance_score": 95,
+    "accessibility_score": 100,
+    "ecology_score": 90,
+    "popularity_score": 95,
+    "validation_score": 95,
+    "size_kb": 2,
+    "created_at": "2026-03-01T19:22:00",
+    "user_id": "AETHERFLOW_HARVESTER",
+    "anatomy": {
+        "root": "Dialog.Root",
+        "trigger": "Dialog.Trigger",
+        "portal": "Dialog.Portal",
+        "overlay": "Dialog.Overlay",
+        "content": "Dialog.Content",
+        "title": "Dialog.Title",
+        "description": "Dialog.Description",
+        "close": "Dialog.Close"
+    },
+    "description": "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.",
+    "source_url": "https://www.radix-ui.com/primitives/docs/components/dialog"
+}

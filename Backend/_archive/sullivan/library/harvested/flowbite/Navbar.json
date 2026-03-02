@@ -1,0 +1,16 @@
+{
+  "name": "Navbar",
+  "library": "Flowbite",
+  "category": "Organe",
+  "sullivan_score": 82.0,
+  "performance_score": 88,
+  "accessibility_score": 85,
+  "ecology_score": 75,
+  "popularity_score": 95,
+  "validation_score": 85,
+  "size_kb": 3,
+  "created_at": "2026-03-01T19:07:00",
+  "user_id": "AETHERFLOW_HARVESTER",
+  "html": "<nav class=\"bg-neutral-primary border-b border-default\">\n  <div class=\"max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4\">\n    <a href=\"https://flowbite.com/\" class=\"flex items-center space-x-3 rtl:space-x-reverse\">\n        <img src=\"https://flowbite.com/docs/images/logo.svg\" class=\"h-8\" alt=\"Flowbite Logo\" />\n        <span class=\"self-center text-2xl font-semibold whitespace-nowrap text-heading\">Flowbite</span>\n    </a>\n    <div class=\"hidden w-full md:block md:w-auto\" id=\"navbar-default\">\n      <ul class=\"font-medium flex flex-col p-4 md:p-0 mt-4 border border-default rounded-base bg-neutral-secondary-soft md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-neutral-primary\">\n        <li><a href=\"#\" class=\"block py-2 px-3 text-white bg-brand rounded md:bg-transparent md:text-fg-brand md:p-0\" aria-current=\"page\">Home</a></li>\n        <li><a href=\"#\" class=\"block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0\">About</a></li>\n      </ul>\n    </div>\n  </div>\n</nav>",
+  "source_url": "https://flowbite.com/docs/components/navbar/"
+}

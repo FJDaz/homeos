@@ -1,0 +1,11 @@
+<svg width="280" height="180" viewBox="80 115 375 185" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="80.5" y="117" width="375" height="184" rx="8" fill="var(--bg-tertiary)" />
+  <rect x="80.5" y="134.5" width="140" height="8" rx="2" fill="var(--accent-bleu)" />
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M427 140.801C426.841 140.96 426.625 141.05 426.399 141.05C426.174 141.05 425.958 140.96 425.798 140.801L422.999 138.002L420.2 140.801C420.04 140.956 419.825 141.041 419.602 141.04C419.38 141.038 419.166 140.948 419.009 140.791C418.851 140.633 418.762 140.42 418.76 140.197C418.758 139.974 418.844 139.759 418.998 139.599L422.398 136.199C422.558 136.04 422.774 135.95 422.999 135.95C423.225 135.95 423.441 136.04 423.6 136.199L427 139.599C427.16 139.758 427.249 139.975 427.249 140.2C427.249 140.425 427.16 140.642 427 140.801V140.801Z" fill="var(--accent-bleu)"/>
+  <rect x="80.5" y="163" width="331" height="6" rx="1" fill="var(--text-muted)" opacity="0.4"/>
+  <rect x="80.5" y="174" width="300.688" height="6" rx="1" fill="var(--text-muted)" opacity="0.4"/>
+  <rect x="80.5" y="185" width="315.297" height="6" rx="1" fill="var(--text-muted)" opacity="0.4"/>
+  <line x1="80.5" y1="214.5" x2="455.5" y2="214.5" stroke="var(--border-subtle)"/>
+  <rect x="80.5" y="232.5" width="99" height="8" rx="2" fill="var(--text-muted)" opacity="0.6"/>
+  <line x1="80.5" y1="257.5" x2="455.5" y2="257.5" stroke="var(--border-subtle)"/>
+</svg>

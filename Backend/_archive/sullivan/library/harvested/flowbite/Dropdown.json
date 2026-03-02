@@ -1,0 +1,16 @@
+{
+    "name": "Dropdown",
+    "library": "Flowbite",
+    "category": "Atome",
+    "sullivan_score": 87.0,
+    "performance_score": 90,
+    "accessibility_score": 85,
+    "ecology_score": 85,
+    "popularity_score": 95,
+    "validation_score": 85,
+    "size_kb": 2,
+    "created_at": "2026-03-01T19:17:00",
+    "user_id": "AETHERFLOW_HARVESTER",
+    "html": "<button id=\"dropdownDefaultButton\" data-dropdown-toggle=\"dropdown\" class=\"inline-flex items-center justify-center text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none\" type=\"button\">\n  Dropdown button \n  <svg class=\"w-4 h-4 ms-1.5 -me-0.5\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\">\n    <path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m19 9-7 7-7-7\"/>\n  </svg>\n</button>\n\n<div id=\"dropdown\" class=\"z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 font-medium\">\n    <ul class=\"p-2 text-sm text-body\" aria-labelledby=\"dropdownDefaultButton\">\n      <li><a href=\"#\" class=\"inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded\">Dashboard</a></li>\n      <li><a href=\"#\" class=\"inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded\">Settings</a></li>\n      <li><a href=\"#\" class=\"inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded\">Earnings</a></li>\n      <li><a href=\"#\" class=\"inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded\">Sign out</a></li>\n    </ul>\n</div>",
+    "source_url": "https://flowbite.com/docs/components/dropdowns/"
+}
