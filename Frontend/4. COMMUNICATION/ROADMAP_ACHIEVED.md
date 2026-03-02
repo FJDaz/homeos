@@ -903,3 +903,26 @@ Une régression `\n` (évasion trop agressive) a été détectée et corrigée l
 ### Prochaine étape V3
 V3-B : Supprimer `workflows/frd.py` et `workflows/verify_fix.py` (dead code confirmé) → débloque la suppression de `apply_generated_code()`.
 
+
+---
+
+## Mission 18B — Preview Inline Editor
+STATUS: ARCHIVÉ
+DATE: 2026-03-02
+ACTOR: GEMINI (JS) + CLAUDE (endpoints Python)
+VALIDATION: FJD ✅
+
+### Ce qui a été fait
+1. **genome_preview.py** — JS d'édition inline injecté :
+   - F1 : `dblclick` sur `.genome-label` → `contenteditable` → blur/Enter → `PATCH /api/genome/node/<id>` `{field:'name'}`
+   - F2 : bouton ⚙ au hover → `prompt()` hint picker → `PATCH /api/genome/node/<id>` `{field:'visual_hint'}` → `location.reload()`
+   - F3 : SortableJS CDN → drag-and-drop composants → `PATCH /api/genome/organ/<id>/reorder`
+   - Bonus : clic composant → highlight jaune (sélection visuelle)
+
+2. **server_9998_v2.py** — Endpoints PATCH :
+   - `PATCH /api/genome/node/<id>` — met à jour `name` ou `visual_hint` dans le genome JSON
+   - `PATCH /api/genome/organ/<id>/reorder` — réordonne les N3 dans un organe
+   - `save_genome()`, `_find_n3_by_id()`, `_find_n2_by_organ()` helpers
+
+### Résultat
+Édition directe dans `/preview` sans LLM dans la boucle. Persistance dans `genome_reference.json`.

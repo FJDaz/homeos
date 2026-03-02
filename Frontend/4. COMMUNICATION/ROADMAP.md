@@ -2517,13 +2517,12 @@ _zoneTemplateToPositions(result, sections) {
 
 ### Blocages connus
 - **V3-A Tâche 2** : `apply_generated_code()` non supprimable tant que `frd.py` / `verify_fix.py` existent.
-- **Preview inline editing** : `/preview` est read-only. Édition directe non encore construite.
+- **Preview inline editing** : OPÉRATIONNEL. Renommage, hint swap et reorder persistent dans le JSON.
 
 ---
 
-## Mission 18B — Preview Inline Editor
-
-**ACTOR: GEMINI | MODE: CODE DIRECT — FJD | DATE: 2026-03-02 | STATUS: MISSION ACTIVE**
+## Mission 18B — Preview Inline Editor ✅ ARCHIVÉ
+**ACTOR: GEMINI | MODE: CODE DIRECT — FJD | DATE: 2026-03-02 | STATUS: COMPLETED**
 
 ---
 
@@ -2693,15 +2692,58 @@ Le `<script>` consolidé (F1 + F2 + F3) doit être injecté **juste avant `</bod
 
 ### Critères d'acceptation
 
-- [ ] Double-clic sur un label → `contenteditable` activé, focus
-- [ ] Blur → `PATCH /api/genome/node/<id>` déclenché, label mis à jour dans le JSON
-- [ ] Survol d'un composant → bouton ⚙ visible
-- [ ] Clic ⚙ → `prompt()` avec hint actuel, choix validé → `PATCH` + `location.reload()`
-- [ ] Drag-and-drop d'un composant dans son organe → `PATCH /api/genome/organ/<id>/reorder` déclenché
-- [ ] Refresh → ordre persisté dans la page
+- [x] Double-clic sur un label → `contenteditable` activé, focus
+- [x] Blur → `PATCH /api/genome/node/<id>` déclenché, label mis à jour dans le JSON
+- [x] Survol d'un composant → bouton ⚙ visible
+- [x] Clic ⚙ → `prompt()` avec hint actuel, choix validé → `PATCH` + `location.reload()`
+- [x] Drag-and-drop d'un composant dans son organe → `PATCH /api/genome/organ/<id>/reorder` déclenché
+- [x] Refresh → ordre persisté dans la page
 - [ ] Cmd+Shift+R → http://localhost:9998/preview
 
 ---
 
 ## Archives
 *(Voir [ROADMAP_ACHIEVED.md](ROADMAP_ACHIEVED.md) pour toutes les missions archivées)*
+
+---
+
+## Mission 19A — Canvas Layout : Drag & Resize des Organes N0
+
+**ACTOR: CLAUDE | MODE: CODE DIRECT — FJD | STATUS: EN ATTENTE**
+
+### Objectif
+Déplacer et redimensionner les organes N0 sur le canvas SVG du Stenciler.
+Positions/dimensions sauvegardées dans `layout.json` séparé du genome.
+Au rechargement, le canvas restaure le layout sauvegardé.
+
+### Décision architecture — layout.json séparé
+- `genome_reference.json` = sémantique (quoi). Ne pas toucher.
+- `layout.json` (nouveau) = positions canvas (où).
+  Format : `{ "n1_ir": { "x": 120, "y": 80, "w": 320, "h": 200 }, ... }`
+- Fichier : `Frontend/2. GENOME/layout.json`
+
+### Endpoints serveur (T1 — Claude, CODE DIRECT)
+- `GET /api/layout` → retourne `layout.json` (ou `{}` si absent)
+- `POST /api/layout` → body: `{ organ_id: { x, y, w, h } }` → merge dans `layout.json`
+
+### Drag des organes N0 (T2 — Canvas.feature.js)
+- Au niveau N0 : mousedown sur organe → drag libre SVG
+- mouseup → `POST /api/layout` avec nouvelle position
+- Chargement N0 → `GET /api/layout` → applique positions via `transform`
+
+### Resize des organes N0 (T3 — Canvas.feature.js)
+- 4 poignées SVG aux coins de chaque organe N0
+- Drag poignée → redimensionne l'organe SVG en live
+- mouseup → `POST /api/layout` avec nouvelles dimensions
+
+### Fichiers à lire AVANT de coder
+1. `static/js/features/Canvas.feature.js` — entier. Focus `_renderCorps()`, drag existant.
+2. `static/js/Canvas.renderer.js` — entier. Focus `renderNode()` level===0, `_zoneTemplateToPositions()`.
+
+### Critères d'acceptation
+- [ ] Drag organe N0 → se déplace librement
+- [ ] Reload → position restaurée depuis `layout.json`
+- [ ] Drag poignée coin → organe redimensionné
+- [ ] Reload → dimensions restaurées
+- [ ] Drill dans organe → layout N1/N2/N3 non affecté
+- [ ] `layout.json` absent → fallback `_zoneTemplateToPositions()` (zéro régression)
