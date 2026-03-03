@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Genome Scaffold v2 — Mission 21B Figma Bridge avec Zones -->
+<!-- Convention: Les calques sont organisés en zones (header/sidebar/main/footer/floating) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="3600">
+  <defs><style>text { font-family: -apple-system, Helvetica, Arial, sans-serif; }</style></defs>
+<!-- Phase: Brainstorm -->
+<g id="n0_brainstorm" class="af-phase" data-genome-id="n0_brainstorm" data-name="Brainstorm">
+<rect x="0" y="0" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="28" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Brainstorm</text>
+<g id="n1_ir" class="af-organ" data-genome-id="n1_ir" data-name="Workspace / Intent Refactoring" data-ui-role="main-content" data-ux-step="4">
+<rect x="40" y="60" width="420" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="41" y1="84" x2="459" y2="84" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="108" x2="459" y2="108" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="132" x2="459" y2="132" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="156" x2="459" y2="156" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="180" x2="459" y2="180" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="204" x2="459" y2="204" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="228" x2="459" y2="228" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="252" x2="459" y2="252" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="276" x2="459" y2="276" stroke="#f0efeb" stroke-width="1"/>
+<text x="52" y="80" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="56" y="92" width="388" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="250" y="180" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="n1_arbitrage" class="af-organ" data-genome-id="n1_arbitrage" data-name="Module / Arbitrage" data-ui-role="form-panel" data-ux-step="6">
+<rect x="500" y="60" width="420" height="248" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="512" y="82" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">FORMULAIRE</text>
+<text x="516" y="110" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Tableau Expert</text>
+<rect x="516" y="114" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<line x1="524" y1="120" x2="524" y2="136" stroke="#a8c5fc" stroke-width="1.5"/>
+<text x="530" y="132" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">table</text>
+<text x="516" y="162" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Validation Arbitrage</text>
+<rect x="516" y="166" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="530" y="184" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">form</text>
+<text x="516" y="214" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Carte Stencil</text>
+<rect x="516" y="218" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="530" y="236" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">stencil-card</text>
+<rect x="516" y="268" width="388" height="28" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="710" y="288" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Submit</text>
+</g>
+</g>
+<!-- Phase: Backend -->
+<g id="n0_backend" class="af-phase" data-genome-id="n0_backend" data-name="Backend">
+<rect x="0" y="900" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="928" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Backend</text>
+<g id="n1_session" class="af-organ" data-genome-id="n1_session" data-name="Module / Session Management" data-ui-role="dashboard" data-ux-step="5">
+<rect x="40" y="960" width="420" height="236" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="52" y="982" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">DASHBOARD</text>
+<rect x="52" y="996" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="114" y="1032" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">42</text>
+<text x="114" y="1050" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Reset Sess</text>
+<rect x="184" y="996" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="246" y="1032" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">87%</text>
+<text x="246" y="1050" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Résumé Gen</text>
+<rect x="316" y="996" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="378" y="1032" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">↑12</text>
+<text x="378" y="1050" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Status Ses</text>
+<rect x="52" y="1072" width="396" height="72" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<rect x="64" y="1116" width="18" height="28" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="92" y="1100" width="18" height="44" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="120" y="1108" width="18" height="36" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="148" y="1092" width="18" height="52" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="176" y="1104" width="18" height="40" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="204" y="1088" width="18" height="56" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="430" y="1140" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">GRAPH</text>
+</g>
+</g>
+<!-- Phase: Frontend -->
+<g id="n0_frontend" class="af-phase" data-genome-id="n0_frontend" data-name="Frontend">
+<rect x="0" y="1800" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="1828" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Frontend</text>
+<g id="n1_analysis" class="af-organ" data-genome-id="n1_analysis" data-name="Module / Analyse PNG" data-ui-role="main-canvas" data-ux-step="3">
+<rect x="40" y="1860" width="420" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="41" y1="1884" x2="459" y2="1884" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="1908" x2="459" y2="1908" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="1932" x2="459" y2="1932" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="1956" x2="459" y2="1956" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="1980" x2="459" y2="1980" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="2004" x2="459" y2="2004" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="2028" x2="459" y2="2028" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="2052" x2="459" y2="2052" stroke="#f0efeb" stroke-width="1"/>
+<line x1="41" y1="2076" x2="459" y2="2076" stroke="#f0efeb" stroke-width="1"/>
+<text x="52" y="1880" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="56" y="1892" width="388" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="250" y="1980" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="n1_adaptation" class="af-organ" data-genome-id="n1_adaptation" data-name="Module / Adaptation / Zoom Atome" data-ui-role="main-canvas" data-ux-step="3">
+<rect x="500" y="1860" width="420" height="264" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="501" y1="1884" x2="919" y2="1884" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="1908" x2="919" y2="1908" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="1932" x2="919" y2="1932" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="1956" x2="919" y2="1956" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="1980" x2="919" y2="1980" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="2004" x2="919" y2="2004" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="2028" x2="919" y2="2028" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="2052" x2="919" y2="2052" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="2076" x2="919" y2="2076" stroke="#f0efeb" stroke-width="1"/>
+<line x1="501" y1="2100" x2="919" y2="2100" stroke="#f0efeb" stroke-width="1"/>
+<text x="512" y="1880" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="516" y="1892" width="388" height="216" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="710" y="1992" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="n1_layout" class="af-organ" data-genome-id="n1_layout" data-name="Workspace / Layout Selection" data-ui-role="main-content" data-ux-step="4">
+<rect x="960" y="1860" width="420" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="961" y1="1884" x2="1379" y2="1884" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="1908" x2="1379" y2="1908" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="1932" x2="1379" y2="1932" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="1956" x2="1379" y2="1956" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="1980" x2="1379" y2="1980" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="2004" x2="1379" y2="2004" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="2028" x2="1379" y2="2028" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="2052" x2="1379" y2="2052" stroke="#f0efeb" stroke-width="1"/>
+<line x1="961" y1="2076" x2="1379" y2="2076" stroke="#f0efeb" stroke-width="1"/>
+<text x="972" y="1880" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="976" y="1892" width="388" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="1170" y="1980" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="n1_validation" class="af-organ" data-genome-id="n1_validation" data-name="Module / Validation Composants" data-ui-role="dashboard" data-ux-step="5">
+<rect x="40" y="2140" width="420" height="236" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="52" y="2162" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">DASHBOARD</text>
+<rect x="52" y="2176" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="114" y="2212" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">42</text>
+<text x="114" y="2230" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Dashboard </text>
+<rect x="184" y="2176" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="246" y="2212" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">87%</text>
+<text x="246" y="2230" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Résumé Déc</text>
+<rect x="316" y="2176" width="124" height="64" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="378" y="2212" font-size="18" fill="#3d3d3c" text-anchor="middle" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif">↑12</text>
+<text x="378" y="2230" font-size="7" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Grille Ste</text>
+<rect x="52" y="2252" width="396" height="72" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<rect x="64" y="2296" width="18" height="28" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="92" y="2280" width="18" height="44" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="120" y="2288" width="18" height="36" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="148" y="2272" width="18" height="52" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="176" y="2284" width="18" height="40" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<rect x="204" y="2268" width="18" height="56" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="430" y="2320" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">GRAPH</text>
+</g>
+<g id="n1_upload" class="af-organ" data-genome-id="n1_upload" data-name="Module / Upload Design" data-ui-role="upload-zone" data-ux-step="7">
+<rect x="500" y="2140" width="420" height="160" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<rect x="520" y="2156" width="380" height="128" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="6" stroke-dasharray="6 4"/>
+<circle cx="710" cy="2208" r="22" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1.5"/>
+<text x="710" y="2198" font-size="14" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">↑</text>
+<text x="710" y="2240" font-size="11" fill="#3d3d3c" text-anchor="middle" font-weight="500" font-family="-apple-system,Helvetica,Arial,sans-serif">Drag &amp; drop</text>
+<text x="710" y="2256" font-size="8" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">or click to browse</text>
+</g>
+<g id="n1_dialogue" class="af-organ" data-genome-id="n1_dialogue" data-name="Module / Dialogue Utilisateur" data-ui-role="chat-overlay" data-ux-step="8">
+<rect x="960" y="2140" width="420" height="272" fill="#ffffff" stroke="#a8c5fc" stroke-width="2" rx="8"/>
+<rect x="960" y="2140" width="420" height="38" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="972" y="2164" font-size="8" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">ASSISTANT</text>
+<rect x="1244" y="2190" width="120" height="30" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="12"/>
+<text x="1304" y="2209" font-size="8" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Bulles Conversat</text>
+<rect x="972" y="2234" width="120" height="30" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1" rx="12"/>
+<text x="1032" y="2253" font-size="8" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Input Message</text>
+<rect x="1244" y="2278" width="120" height="30" fill="#a8c5fc" stroke="#d5d4d0" stroke-width="1" rx="12"/>
+<text x="1304" y="2297" font-size="8" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Réponse Question</text>
+<rect x="972" y="2322" width="120" height="30" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1" rx="12"/>
+<text x="1032" y="2341" font-size="8" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Passer Dialogue</text>
+<rect x="972" y="2376" width="368" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="14"/>
+<circle cx="1360" cy="2390" r="12" fill="#a8c5fc" stroke="none" stroke-width="1"/>
+</g>
+<g id="n1_navigation" class="af-organ" data-genome-id="n1_navigation" data-name="Module / Navigation" data-ui-role="onboarding-flow" data-ux-step="9">
+<rect x="40" y="2452" width="420" height="248" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="52" y="2474" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">FORMULAIRE</text>
+<text x="56" y="2502" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Stepper 9 Étapes</text>
+<rect x="56" y="2506" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<line x1="64" y1="2512" x2="64" y2="2528" stroke="#a8c5fc" stroke-width="1.5"/>
+<text x="70" y="2524" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">stepper</text>
+<text x="56" y="2554" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Bouton Suivant</text>
+<rect x="56" y="2558" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="70" y="2576" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">button</text>
+<text x="56" y="2606" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Fil d'Ariane</text>
+<rect x="56" y="2610" width="388" height="28" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="70" y="2628" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">breadcrumb</text>
+<rect x="56" y="2660" width="388" height="28" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<text x="250" y="2680" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Submit</text>
+</g>
+</g>
+<!-- Phase: Deploy -->
+<g id="n0_deploy" class="af-phase" data-genome-id="n0_deploy" data-name="Deploy">
+<rect x="0" y="2700" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="2728" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Deploy</text>
+<g id="n1_export" class="af-organ" data-genome-id="n1_export" data-name="Module / Export / Téléchargement" data-ui-role="export-action" data-ux-step="13">
+<rect x="40" y="2760" width="420" height="160" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<rect x="60" y="2776" width="380" height="128" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="6" stroke-dasharray="6 4"/>
+<circle cx="250" cy="2828" r="22" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1.5"/>
+<text x="250" y="2818" font-size="14" fill="#9d9c98" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">↑</text>
+<text x="250" y="2860" font-size="11" fill="#3d3d3c" text-anchor="middle" font-weight="500" font-family="-apple-system,Helvetica,Arial,sans-serif">Drag &amp; drop</text>
+<text x="250" y="2876" font-size="8" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">or click to browse</text>
+</g>
+</g>
+</svg>

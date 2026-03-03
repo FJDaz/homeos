@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Genome Scaffold — Mission 21A Figma Bridge -->
+<!-- Convention: Ne pas renommer les calques af-* dans Illustrator -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="3600">
+  <defs><style>text { font-family: -apple-system, Helvetica, Arial, sans-serif; }</style></defs>
+<!-- Phase: Brainstorm -->
+<g id="n0_brainstorm" class="af-phase" data-genome-id="n0_brainstorm" data-name="Brainstorm">
+<rect x="0" y="0" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="28" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Brainstorm</text>
+<g id="n1_ir" class="af-organ" data-genome-id="n1_ir" data-name="Intent Refactoring">
+<rect x="40" y="60" width="420" height="200" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="52" y="78" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_ir  /  Intent Refactoring</text>
+<g transform="translate(40,88)">
+<g>
+    <rect width="400" height="200" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="24" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">Intent Refactoring</text>
+    <rect x="24" y="48" width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="32" y="72" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">View Report IR</text>
+    <rect x="24" y="104" width="352" height="96" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="32" y="128" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">Detail Organ</text>
+</g>
+</g>
+</g>
+<g id="n1_arbitrage" class="af-organ" data-genome-id="n1_arbitrage" data-name="Arbitrage">
+<rect x="500" y="60" width="420" height="400" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="512" y="78" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_arbitrage  /  Arbitrage</text>
+<g transform="translate(500,88)">
+<g>
+    <rect width="400" height="400" fill="none" stroke="#1a1a1a" stroke-width="1"/> <!-- Background -->
+    <g transform="translate(24, 24)">
+        <!-- Arbitrage Table -->
+        <rect width="352" height="160" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="8" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">table</text>
+        <!-- Arbitrage Form -->
+        <rect x="176" y="24" width="208" height="160" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="184" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">form</text>
+        <!-- Stencil Card -->
+        <rect x="24" y="192" width="160" height="160" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="32" y="192" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">stencil-card</text>
+    </g>
+</g>
+</g>
+</g>
+</g>
+<!-- Phase: Backend -->
+<g id="n0_backend" class="af-phase" data-genome-id="n0_backend" data-name="Backend">
+<rect x="0" y="900" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="928" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Backend</text>
+<g id="n1_session" class="af-organ" data-genome-id="n1_session" data-name="Session Management">
+<rect x="40" y="960" width="420" height="300" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="52" y="978" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_session  /  Session Management</text>
+<g transform="translate(40,988)">
+<g>
+    <rect x="24" y="24" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="32" y="56" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dominant-baseline="central">RESET SESSION</text>
+    <rect x="24" y="96" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="32" y="128" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dominant-baseline="central">SUMMARY GENOME</text>
+    <rect x="24" y="168" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="32" y="200" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dominant-baseline="central">STATUS SESSION</text>
+    <rect x="24" y="240" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="32" y="272" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dominant-baseline="central">LISTE DISTILLATION</text>
+</g>
+</g>
+</g>
+</g>
+<!-- Phase: Frontend -->
+<g id="n0_frontend" class="af-phase" data-genome-id="n0_frontend" data-name="Frontend">
+<rect x="0" y="1800" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="1828" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Frontend</text>
+<g id="n1_navigation" class="af-organ" data-genome-id="n1_navigation" data-name="Navigation">
+<rect x="40" y="1860" width="420" height="240" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="52" y="1878" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_navigation  /  Navigation</text>
+<g id="n2_stepper" class="af-feature" data-genome-id="n2_stepper" data-name="Navigation UX">
+<rect x="50" y="1898" width="400" height="182" fill="#ffffff" stroke="#e8e7e3" stroke-width="1" rx="4"/>
+<text x="60" y="1911" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">NAVIGATION UX</text>
+<g id="comp_stepper" class="af-component" data-genome-id="comp_stepper" data-hint="stepper">
+<rect x="60" y="1926" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="1939" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">stepper</text>
+<text x="68" y="1953" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Stepper 9 Étapes</text>
+</g>
+<g id="comp_next_button" class="af-component" data-genome-id="comp_next_button" data-hint="button">
+<rect x="60" y="1974" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="1987" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">button</text>
+<text x="68" y="2001" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Bouton Suivant</text>
+</g>
+<g id="comp_breadcrumb" class="af-component" data-genome-id="comp_breadcrumb" data-hint="breadcrumb">
+<rect x="60" y="2022" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2035" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">breadcrumb</text>
+<text x="68" y="2049" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Fil d'Ariane</text>
+</g>
+</g>
+</g>
+<g id="n1_layout" class="af-organ" data-genome-id="n1_layout" data-name="Layout Selection">
+<rect x="500" y="1860" width="420" height="300" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="512" y="1878" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_layout  /  Layout Selection</text>
+<g transform="translate(500,1888)">
+<g>
+    <rect x="24" y="24" width="352" height="252" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+    <text x="24" y="48" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">LAYOUT SELECTION</text>
+    <rect x="24" y="72" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+    <text x="24" y="96" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">CHOIX STYLE</text>
+    <rect x="24" y="144" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+    <text x="24" y="168" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">CARTE LAYOUT</text>
+    <rect x="24" y="216" width="352" height="48" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+    <text x="24" y="240" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">GALERIE LAYOUTS</text>
+</g>
+</g>
+</g>
+<g id="n1_upload" class="af-organ" data-genome-id="n1_upload" data-name="Upload Design">
+<rect x="960" y="1860" width="420" height="200" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="972" y="1878" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_upload  /  Upload Design</text>
+<g transform="translate(960,1888)">
+<g>
+    <rect x="24" y="24" width="352" height="152" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <rect x="32" y="32" width="352" height="152" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <rect x="32" y="32" width="32" height="32" fill="#1a1a1a"/>
+    <text x="32" y="56" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="middle" dy=".3em">UPLOAD</text>
+    <rect x="72" y="32" width="32" height="32" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="96" y="56" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="middle" dy=".3em">DELETE</text>
+    <rect x="112" y="32" width="240" height="152" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="208" y="56" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="middle" dy=".3em">PREVIEW</text>
+    <rect x="112" y="32" width="32" height="32" fill="#1a1a1a"/>
+</g>
+</g>
+</g>
+<g id="n1_analysis" class="af-organ" data-genome-id="n1_analysis" data-name="Analyse PNG">
+<rect x="40" y="2188" width="420" height="140" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="52" y="2206" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_analysis  /  Analyse PNG</text>
+<g transform="translate(40,2216)">
+<g>
+  <!-- Outer container with transparent background and fixed width -->
+  <rect x="0" y="0" width="400" height="140" fill="none" stroke="none"/>
+
+  <!-- Component 1: Analysis Vision Report (preview) -->
+  <rect x="24" y="24" width="352" height="92" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="32" y="40" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">Analysis Vision Report</text>
+
+  <!-- Component 2: Launch Analysis Button -->
+  <rect x="24" y="120" width="176" height="16" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="32" y="132" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">Launch Analysis</text>
+
+  <!-- Component 3: Regenerate Analysis Button -->
+  <rect x="216" y="120" width="160" height="16" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="224" y="132" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-transform="uppercase">Regenerate Analysis</text>
+
+  <!-- Accessibility and interaction hints -->
+  <title>AetherFlow Organe n1_analysis</title>
+  <desc>
+    Analysis Vision Report preview, Launch Analysis button, and Regenerate Analysis button
+  </desc>
+</g>
+</g>
+</g>
+<g id="n1_dialogue" class="af-organ" data-genome-id="n1_dialogue" data-name="Dialogue Utilisateur">
+<rect x="500" y="2188" width="420" height="300" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="512" y="2206" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_dialogue  /  Dialogue Utilisateur</text>
+<g transform="translate(500,2216)">
+<g>
+  <rect width="400" height="300" fill="none" stroke="#1a1a1a" stroke-width="1" />
+  <text x="24" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">DIALOGUE USER</text>
+  <g transform="translate(24, 48)">
+    <rect width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="12" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">Bulles Conversation</text>
+  </g>
+  <g transform="translate(24, 104)">
+    <rect width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="12" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">Input Message</text>
+  </g>
+  <g transform="translate(24, 160)">
+    <rect width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="12" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">Réponse Question</text>
+  </g>
+  <g transform="translate(24, 216)">
+    <rect width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1" />
+    <text x="12" y="24" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em">Passer Dialogue</text>
+  </g>
+</g>
+</g>
+</g>
+<g id="n1_validation" class="af-organ" data-genome-id="n1_validation" data-name="Validation Composants">
+<rect x="960" y="2188" width="420" height="328" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="972" y="2206" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_validation  /  Validation Composants</text>
+<g transform="translate(960,2216)">
+<g>
+  <rect x="24" y="24" width="352" height="280" stroke="#1a1a1a" stroke-width="1" fill="none" />
+  <text x="24" y="48" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".35em" style="font-variant: small-caps;">n1_validation</text>
+  <g transform="translate(24, 80)">
+    <rect width="352" height="56" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="8" y="32" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".35em" style="font-variant: small-caps;">dashboard</text>
+  </g>
+  <g transform="translate(24, 152)">
+    <rect width="352" height="56" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="8" y="32" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".35em" style="font-variant: small-caps;">accordion</text>
+  </g>
+  <g transform="translate(24, 224)">
+    <rect width="352" height="56" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="8" y="32" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".35em" style="font-variant: small-caps;">grid</text>
+  </g>
+  <g transform="translate(24, 296)">
+    <rect width="352" height="56" stroke="#1a1a1a" stroke-width="1" fill="none" />
+    <text x="8" y="32" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".35em" style="font-variant: small-caps;">choice-card</text>
+  </g>
+</g>
+</g>
+</g>
+<g id="n1_adaptation" class="af-organ" data-genome-id="n1_adaptation" data-name="Adaptation / Zoom Atome">
+<rect x="40" y="2516" width="420" height="384" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="52" y="2534" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_adaptation  /  Adaptation / Zoom Atome</text>
+<g id="n2_zoom" class="af-feature" data-genome-id="n2_zoom" data-name="Navigation Zoom">
+<rect x="50" y="2554" width="400" height="326" fill="#ffffff" stroke="#e8e7e3" stroke-width="1" rx="4"/>
+<text x="60" y="2567" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">NAVIGATION ZOOM</text>
+<g id="comp_zoom_controls" class="af-component" data-genome-id="comp_zoom_controls" data-hint="zoom-controls">
+<rect x="60" y="2582" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2595" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">zoom-controls</text>
+<text x="68" y="2609" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Contrôles Zoom</text>
+</g>
+<g id="comp_zoom_out" class="af-component" data-genome-id="comp_zoom_out" data-hint="button">
+<rect x="60" y="2630" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2643" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">button</text>
+<text x="68" y="2657" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Zoom Out</text>
+</g>
+<g id="comp_detail_card" class="af-component" data-genome-id="comp_detail_card" data-hint="detail-card">
+<rect x="60" y="2678" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2691" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">detail-card</text>
+<text x="68" y="2705" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Fiche Détail Atome</text>
+</g>
+<g id="comp_code_editor" class="af-component" data-genome-id="comp_code_editor" data-hint="editor">
+<rect x="60" y="2726" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2739" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">editor</text>
+<text x="68" y="2753" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Éditeur Code</text>
+</g>
+<g id="comp_launch_button" class="af-component" data-genome-id="comp_launch_button" data-hint="launch-button">
+<rect x="60" y="2774" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2787" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">launch-button</text>
+<text x="68" y="2801" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Lancer Distillation</text>
+</g>
+<g id="comp_apply_changes" class="af-component" data-genome-id="comp_apply_changes" data-hint="apply-changes">
+<rect x="60" y="2822" width="380" height="40" fill="#f0efeb" stroke="#c5c4c0" stroke-width="1" rx="4"/>
+<text x="68" y="2835" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">apply-changes</text>
+<text x="68" y="2849" font-size="10" fill="#3d3d3c" text-anchor="start" font-weight="500" font-family="-apple-system, Helvetica, Arial, sans-serif">Appliquer Changements</text>
+</g>
+</g>
+</g>
+</g>
+<!-- Phase: Deploy -->
+<g id="n0_deploy" class="af-phase" data-genome-id="n0_deploy" data-name="Deploy">
+<rect x="0" y="2700" width="1440" height="900" fill="#fafaf8"/>
+<text x="20" y="2728" font-size="14" fill="#3d3d3c" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">Phase : Deploy</text>
+<g id="n1_export" class="af-organ" data-genome-id="n1_export" data-name="Export / Téléchargement">
+<rect x="40" y="2760" width="420" height="216" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="10"/>
+<text x="52" y="2778" font-size="11" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">n1_export  /  Export / Téléchargement</text>
+<g transform="translate(40,2788)">
+<g>
+  <rect width="400" height="216" fill="none" stroke="#1a1a1a" stroke-width="1"/> <!-- Background -->
+  <rect x="24" y="24" width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1"/> <!-- Download ZIP -->
+  <text x="32" y="56" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em" data-hint="Download ZIP">DOWNLOAD ZIP</text>
+  <rect x="24" y="96" width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1"/> <!-- Modal Confirmation -->
+  <text x="32" y="128" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em" data-hint="Modal Confirmation">MODAL CONFIRMATION</text>
+  <rect x="24" y="168" width="352" height="48" fill="none" stroke="#1a1a1a" stroke-width="1"/> <!-- New Session -->
+  <text x="32" y="200" font-family="SF Mono" font-size="11" fill="#1a1a1a" text-anchor="start" dy=".3em" data-hint="New Session">NEW SESSION</text>
+</g>
+</g>
+</g>
+</g>
+</svg>

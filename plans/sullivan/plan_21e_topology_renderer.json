@@ -1,0 +1,89 @@
+{
+  "task_id": "sullivan_21e_topology_renderer",
+  "description": "Mission 21E — Réécrire archetype_renderers.py pour câbler topology_bank.py. Chaque organe est rendu avec ses vrais composants N3 (noms réels, visual_hints réels), distribués selon la topologie appropriée à son ui_role. Fin du design hardcodé '42/87%/↑12'.",
+  "metadata": {
+    "created_at": "2026-03-03T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Sullivan pipeline : genome_enriched.json → archetype_renderers.py → genome_zones_*.svg. Le renderer actuel est STATIQUE : draw_dashboard() affiche toujours '42/87%/↑12', draw_form_panel() ignore les noms réels des champs. topology_bank.py contient 20 topologies structurelles. Il faut câbler les deux : pour chaque organe, lire ses composants N3 réels (name, visual_hint) et les dessiner via _draw_semantic_atom() selon la topologie ROLE_TO_TOPOLOGY[ui_role].",
+    "mission": "21E",
+    "phase": "Phase 21 — Genome Design Bridge",
+    "actor": "CLAUDE",
+    "roadmap_ref": "Backend/Prod/exporters/archetype_renderers.py"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire les 3 fichiers clés pour comprendre l'état actuel et les données disponibles : (1) Backend/Prod/exporters/topology_bank.py : lire TOPOLOGIES (20 entrées) et ROLE_TO_TOPOLOGY dict. (2) Backend/Prod/exporters/archetype_renderers.py : observer que draw_dashboard(), draw_form_panel(), etc. sont statiques et ignorent les composants N3 réels. (3) Lire les 20 premières lignes de Frontend/2. GENOME/genome_enriched.json pour confirmer la structure n0_phases > n1_sections > n2_features > n3_components avec champs: name, visual_hint, description_ui. Confirmer que visual_hints présents dans le génome sont : table, detail-card, choice-card, chart, button, status, list, accordion, zoom-controls, editor, preview, launch-button, color-palette, upload, chat/bubble, chat-input, stepper, breadcrumb, download, modal, form, stencil-card, dashboard.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "topology_bank.ROLE_TO_TOPOLOGY présent et lu",
+        "topology_bank.TOPOLOGIES a bien 20 entrées",
+        "genome_enriched.json confirme visual_hints réels",
+        "archetype_renderers.py identifié comme statique (42/87% hardcodé)"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/exporters/topology_bank.py",
+          "Backend/Prod/exporters/archetype_renderers.py",
+          "Frontend/2. GENOME/genome_enriched.json"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "ÉCRIRE Backend/Prod/exporters/archetype_renderers.py — Nouveau renderer topologique complet. Règles ABSOLUES : (1) Guillemets doubles uniquement dans toutes strings SVG/XML. (2) Chaque draw_* retourne (svg_string: str, h: int). (3) Ne JAMAIS utiliser de données fictives (pas de '42', '87%', 'John Doe'). Utiliser UNIQUEMENT les noms/hints fournis par le génome.\n\nSTRUCTURE DU FICHIER À PRODUIRE :\n\n```python\n#!/usr/bin/env python3\n\"\"\"\narchetype_renderers.py — Mission 21E\nRenderers topologiques : utilise topology_bank pour distribuer\nles composants N3 réels dans l'espace SVG.\n\"\"\"\nimport sys, os\nsys.path.insert(0, os.path.dirname(__file__))\nfrom topology_bank import TOPOLOGIES, ROLE_TO_TOPOLOGY\n```\n\nPalette + helpers _r/_t/_c/_line/_esc : identiques à la version actuelle.\n\nFONCTION _draw_semantic_atom(name, hint, x, y, w, h) — retourne svg_str.\nDessine un atome SVG selon son visual_hint. Tous les textes utilisent `name` (le vrai nom du composant N3). JAMAIS de valeurs fictives.\n\nAtomes à implémenter (selon les visual_hints réels du génome) :\n- 'table', 'table-row' → Tableau avec en-tête gris (h=32, C_HEADER), puis rows alternés C_SURFACE/C_BG (h=24 chacune). En-tête affiche name en bold 8px. Simuler 3 colonnes séparées par _line verticales. Badge arrondi accent à droite sur row 0.\n- 'detail-card' → Card C_SURFACE border, stripe accent verticale gauche 4px, title=name 10px bold, 2 lignes de contenu grises (w-40, h=6, rx=2 en C_BORDER).\n- 'choice-card', 'card', 'stencil-card' → Card C_SURFACE border rx=6, zone preview C_BG rx=4 (80% w, 60% h), label=name centré en bas 9px. Si 'stencil-card': border C_ACCENT.\n- 'chart', 'graph' → Fond C_SURFACE border dash='4 4', 5 barres verticales C_ACCENT de hauteurs pseudo-aléatoires (28,40,32,52,36 — FIXES, pas random), label=name en bas centre 7px C_HINT.\n- 'metric' → Card C_SURFACE border rx=6, grande valeur '—' 20px bold centre (PAS de '42'), label=name 7px C_SUB en dessous.\n- 'dashboard' → Réutiliser chart avec fond C_BG (mini-dashboard résumé).\n- 'button', 'launch-button' → Rect C_ACTIVE rx=20, texte=name[:16] blanc centre 9px bold. launch-button: h plus grand (min 36px), border-width=0.\n- 'status' → Dot coloré #4ade80 r=5 + texte=name 8px C_SUB. Avec fond C_BG rx=4.\n- 'list' → Lignes empilées rx=2 C_BG border C_BORDER, texte=name[:20] 8px, h=24 par ligne (répéter 3x si h le permet).\n- 'accordion' → En-têtes empilés C_HEADER rx=2 h=32, texte=name[:20] 9px, arrow '›' à droite.\n- 'zoom-controls' → 2 boutons carrés C_SURFACE border [+] [-] côte à côte, label=name 7px C_HINT dessous.\n- 'editor' → Fond #1e1e1e rx=4, 3 lignes de 'code' simulées (rects colorés #4ade80/#a8c5fc/#f7f6f2 de w variables), label=name 7px C_HINT dessus.\n- 'preview' → Zone C_BG border dash='6 4' rx=4, icône image simulée (rect C_BORDER + triangle, ou juste 'IMG' centré C_HINT), label=name dessous.\n- 'color-palette', 'color' → 5 cercles colorés côte à côte (couleurs: #a8c5fc, #f0efeb, #3d3d3c, #4ade80, #facc15 r=min(h//3,12)), label=name dessous.\n- 'upload' → Fond C_BG border dash='6 4' rx=6, flèche '↑' centrée C_SUB 14px, texte=name 9px dessous.\n- 'chat/bubble', 'bubble' → 2 bulles : user droite (C_ACCENT rx=12 w=70%) + ai gauche (C_HEADER rx=12 w=60%), chacune avec texte=name[:12] centré.\n- 'chat-input' → Input C_BG border rx=14, placeholder=name[:16] 8px C_HINT, circle C_ACCENT r=10 à droite.\n- 'stepper' → N cercles numérotés (N = max(3, min(6, h//20))) sur une ligne, reliés par _line C_BORDER. Cercle 0 = C_ACTIVE/blanc, autres = C_BORDER. Label=name 7px dessous.\n- 'breadcrumb' → Texte 'Phase 1 › Phase 2 › name[:10]' 8px C_SUB.\n- 'download' → Card C_SURFACE border rx=6, icône '⬇' centrée 14px C_ACCENT, texte=name[:16] 9px dessous, sous-texte '.zip · Export' 7px C_HINT.\n- 'modal' → Fond C_SURFACE border C_ACCENT sw=2 rx=8, barre titre C_HEADER h=32, texte=name[:18] 9px bold, bouton OK en bas droite C_ACTIVE.\n- 'form', 'form-input' → Label=name 8px C_SUB + input rect C_BG border rx=4 + curseur C_ACCENT.\n- défaut → Rect C_BG border rx=4 + texte=name[:20] 8px centré.\n\nFONCTION _solve_layout(x, y, w, components, topo_name) → list of (comp, cx, cy, cw, ch)\nLit TOPOLOGIES[topo_name]['layout']. Pour chaque composant, assigne coordonnées selon 'type':\n- 'grid' ou 'masonry' → flex-wrap en rangées. Pour chaque comp, chercher son visual_hint dans topo['roles'], récupérer w_pct (ex: '25%' → w * 0.25) et h_fixed. Si hint pas dans roles, utiliser 'default'. Placer en colonne, retour à la ligne si dépassement de largeur disponible.\n- 'flex-col', 'flex-col-centered' → empiler verticalement à pleine largeur, h fixe par hint.\n- 'flex-row' → côte à côte, w par hint.\n- 'overlay-centered', 'z-alternating', 'flex-row-columns' → traiter comme flex-col par défaut.\nRetourner [(comp, cx, cy, cw, ch), ...] — coordonnées absolues.\n\nFONCTION draw_dynamic_organ(organ, x, y, w, components) → (svg, h)\n1. role = organ.get('ui_role', 'main-content')\n2. topo_name = ROLE_TO_TOPOLOGY.get(role, 'bento_grid')\n3. topo = TOPOLOGIES.get(topo_name, TOPOLOGIES['bento_grid'])\n4. Calculer h_total = somme des hauteurs planifiées + padding (min 120)\n5. Fond général : _r(x, y, w, h_total, C_SURFACE, C_BORDER, rx=8)\n6. Label organe : _t(x+12, y+16, organ.get('display_label', organ.get('name',''))[:30], 7, C_HINT, weight='600')\n7. Appeler _solve_layout(x, y+24, w, components, topo_name)\n8. Pour chaque (comp, cx, cy, cw, ch) : ajouter _draw_semantic_atom(comp.get('name',''), comp.get('visual_hint','default'), cx, cy, cw, ch)\n9. Retourner svg joint + h_total\n\nFONCTIONS STRUCTURELLES inchangées (garder code identique) :\n- draw_nav_header(organ, x, y, w, components) → (svg, 56) : barre nav avec logo + pills + search\n- draw_left_sidebar(organ, x, y, w, components) → (svg, h) : menu latéral avec rows actif/inactif\n- draw_main_canvas(organ, x, y, w, components) → (svg, h) : grille + zone workspace pointillée\n\nDISPATCHER render_organ(organ, x, y, w) :\n- 'nav-header' → draw_nav_header\n- 'left-sidebar' → draw_left_sidebar\n- 'main-canvas' → draw_main_canvas\n- TOUS les autres rôles → draw_dynamic_organ\n(Supprimer draw_dashboard, draw_form_panel, draw_chat_overlay, draw_upload_zone, draw_overlay, draw_settings_panel, draw_status_bar, draw_content_module — tous remplacés par draw_dynamic_organ)\n\nIMPORTANT FINAL : Écrire le fichier COMPLET entre triple backticks avec le chemin Backend/Prod/exporters/archetype_renderers.py en commentaire ligne 1.",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Import from topology_bank présent",
+        "_draw_semantic_atom() gère tous les visual_hints du génome",
+        "_solve_layout() lit TOPOLOGIES[topo_name]['layout']",
+        "draw_dynamic_organ() utilise ROLE_TO_TOPOLOGY[role]",
+        "render_organ() dispatch : nav-header/left-sidebar/main-canvas = statiques, tout le reste = draw_dynamic_organ",
+        "Aucune valeur fictive '42', '87%', 'John Doe' dans le code",
+        "Textes toujours tirés de comp.get('name','') ou organ.get('name','')"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/exporters/archetype_renderers.py",
+          "Backend/Prod/exporters/topology_bank.py"
+        ],
+        "language": "python",
+        "framework": "svg-python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/exporters/archetype_renderers.py"
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "VALIDATION — Exécuter le pipeline Sullivan pour vérifier que le nouveau renderer fonctionne : cd /Users/francois-jeandazin/AETHERFLOW && source .venv/bin/activate && python3 -c \"import sys; sys.path.insert(0,'Backend/Prod/exporters'); from archetype_renderers import render_organ; print('OK — import réussi')\" && python3 Backend/Prod/exporters/genome_to_svg_v2.py --genome 'Frontend/2. GENOME/genome_enriched.json' --output exports/test_21e.svg 2>&1 | tail -5. Vérifier que le SVG est généré sans erreur Python. Confirmer que le SVG NE CONTIENT PAS la chaîne '42' ou '87%' ou 'workspace' pour les organes dashboard.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Import archetype_renderers réussi sans erreur",
+        "SVG généré sans exception Python",
+        "SVG ne contient pas '42' ou '87%' pour un organe dashboard",
+        "Le SVG contient les vrais noms du génome (ex: 'Vue Rapport IR', 'Bulles Conversation')"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/exporters/archetype_renderers.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    }
+  ]
+}

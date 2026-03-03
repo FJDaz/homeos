@@ -1,0 +1,340 @@
+#!/bin/bash
+# Sullivan - Interface simplifiée pour générer des SVG depuis le Genome
+# Usage: ./sullivan [command] [options]
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_PYTHON="$SCRIPT_DIR/.venv/bin/python3"
+EXPORTER="$SCRIPT_DIR/Backend/Prod/exporters/genome_to_svg.py"
+EXPORTER_ZONES="$SCRIPT_DIR/Backend/Prod/exporters/genome_to_svg_v2.py"
+GENOME_DEFAULT="$SCRIPT_DIR/Frontend/2. GENOME/genome_reference.json"
+OUTPUT_DIR="$SCRIPT_DIR/exports"
+
+# Couleurs pour les messages
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+show_help() {
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║              SULLIVAN - Genome SVG Generator               ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${GREEN}COMMANDES:${NC}"
+    echo "  ./sullivan build          Génère un SVG basique (rapide)"
+    echo "  ./sullivan enrich         Enrichit le genome avec des labels sémantiques"
+    echo "  ./sullivan zones          Génère un SVG avec layout en zones UI"
+    echo "  ./sullivan fancy          Génère un SVG avec style KIMI (lent mais beau)"
+    echo "  ./sullivan fancy-zones    Génère un SVG zones + style KIMI (meilleur rendu)"
+    echo "  ./sullivan list-styles    Liste les 20 styles disponibles"
+    echo "  ./sullivan help           Affiche cette aide"
+    echo ""
+    echo -e "${GREEN}EXEMPLES:${NC}"
+    echo "  ./sullivan build                    → SVG basique"
+    echo "  ./sullivan zones                    → SVG avec layout Header/Sidebar/Main/Footer"
+    echo "  ./sullivan fancy --style glass      → Style Glassmorphism"
+    echo "  ./sullivan fancy-zones --style swiss → Zones + Style Swiss"
+    echo ""
+    echo -e "${GREEN}STYLES POPULAIRES:${NC}"
+    echo "  minimal, glass, cyber, dark, swiss, brutal, kids"
+    echo ""
+    echo -e "${YELLOW}Note: Les modes 'zones' organisent automatiquement les composants:${NC}"
+    echo "      Header (nav, breadcrumb) | Sidebar (menu, tree)"
+    echo "      Main (editor, preview)   | Footer (status, actions)"
+    echo "      Floating (modal, chat)   → z-index supérieur"
+}
+
+list_styles() {
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║                   STYLES DISPONIBLES                       ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    
+    STYLES_LIB="$SCRIPT_DIR/docs/02_Sullivan/Composants/style_prompts_library.json"
+    
+    if [ -f "$VENV_PYTHON" ] && [ -f "$STYLES_LIB" ]; then
+        $VENV_PYTHON << PYEOF
+import json
+with open('$STYLES_LIB') as f:
+    lib = json.load(f)
+
+print(f"{'ID':<15} {'NOM':<25} DESCRIPTION")
+print("-" * 70)
+for s in lib['styles']:
+    print(f"{s['id']:<15} {s['name']:<25} {s['description'][:40]}...")
+PYEOF
+    else
+        echo "Styles: minimal, brutalist, kids, neumorphism, glassmorphism, retro,"
+        echo "        cyberpunk, swiss, material, flat, skeuomorphism, art_nouveau,"
+        echo "        art_deco, bauhaus, dark_mode, pastel, high_contrast,"
+        echo "        hand_drawn, isometric, memphis"
+    fi
+    echo ""
+    echo -e "${YELLOW}Usage: ./sullivan fancy --style <id>${NC}"
+}
+
+build_basic() {
+    echo -e "${BLUE}⚙️  Génération SVG basique...${NC}"
+    
+    OUTPUT="$OUTPUT_DIR/genome_$(date +%Y%m%d_%H%M%S).svg"
+    
+    $VENV_PYTHON "$EXPORTER" \
+        --genome "$GENOME_DEFAULT" \
+        --output "$OUTPUT"
+    
+    echo -e "${GREEN}✅ Fichier créé: $OUTPUT${NC}"
+}
+
+build_zones() {
+    echo -e "${BLUE}🎯 Génération SVG avec layout en zones...${NC}"
+    
+    GENOME_TO_USE="$GENOME_DEFAULT"
+    ENRICHED="$SCRIPT_DIR/Frontend/2. GENOME/genome_enriched.json"
+    if [ -f "$ENRICHED" ]; then
+        echo -e "${YELLOW}   Utilisation du genome enrichi : genome_enriched.json${NC}"
+        GENOME_TO_USE="$ENRICHED"
+    fi
+
+    echo -e "${YELLOW}   Organisations: Header | Sidebar | Main | Footer | Floating${NC}"
+    
+    OUTPUT="$OUTPUT_DIR/genome_zones_$(date +%Y%m%d_%H%M%S).svg"
+    
+    $VENV_PYTHON "$EXPORTER_ZONES" \
+        --genome "$GENOME_TO_USE" \
+        --output "$OUTPUT"
+    
+    echo -e "${GREEN}✅ Fichier créé: $OUTPUT${NC}"
+}
+
+build_enrich() {
+    echo -e "${BLUE}💎 Enrichissement sémantique du genome...${NC}"
+    
+    $VENV_PYTHON "$SCRIPT_DIR/Backend/Prod/enrichers/genome_enricher.py" \
+        --genome "$GENOME_DEFAULT" \
+        --output "$SCRIPT_DIR/Frontend/2. GENOME/genome_enriched.json"
+    
+    echo -e "${GREEN}✅ Genome enrichi: Frontend/2. GENOME/genome_enriched.json${NC}"
+}
+
+build_fancy() {
+    STYLE="minimal"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --style)
+                STYLE="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+    
+    echo -e "${BLUE}🎨 Génération SVG avec style '${STYLE}'...${NC}"
+    echo -e "${YELLOW}⏳ Cela peut prendre 30-60s (appels API KIMI)...${NC}"
+    
+    OUTPUT="$OUTPUT_DIR/genome_${STYLE}_$(date +%Y%m%d_%H%M%S).svg"
+    
+    $VENV_PYTHON "$EXPORTER" \
+        --genome "$GENOME_DEFAULT" \
+        --output "$OUTPUT" \
+        --kimi \
+        --style "$STYLE"
+    
+    echo -e "${GREEN}✅ Fichier créé: $OUTPUT${NC}"
+}
+
+build_fancy_zones() {
+    STYLE="minimal"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --style)
+                STYLE="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+    
+    echo -e "${BLUE}🎨 Génération SVG zones + style '${STYLE}'...${NC}"
+    echo -e "${YELLOW}   Layout zones: Header | Sidebar | Main | Footer | Floating${NC}"
+    echo -e "${YELLOW}⏳ Cela peut prendre 30-60s (appels API KIMI)...${NC}"
+    
+    OUTPUT="$OUTPUT_DIR/genome_zones_${STYLE}_$(date +%Y%m%d_%H%M%S).svg"
+    
+    $VENV_PYTHON "$EXPORTER_ZONES" \
+        --genome "$GENOME_DEFAULT" \
+        --output "$OUTPUT" \
+        --kimi \
+        --style "$STYLE"
+    
+    echo -e "${GREEN}✅ Fichier créé: $OUTPUT${NC}"
+}
+
+VALIDATOR="$SCRIPT_DIR/Backend/Prod/validators/svg_zone_validator.py"
+
+# Charger les clés API depuis .env (root puis Backend/.env)
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    export $(grep -E '^(GOOGLE_API_KEY|ANTHROPIC_API_KEY|KIMI_KEY|GOOGLE_SEC__API_KEY)=' "$SCRIPT_DIR/.env" | xargs) 2>/dev/null
+fi
+if [ -f "$SCRIPT_DIR/Backend/.env" ]; then
+    # Lire la clé Google de Backend/.env sous un nom distinct pour éviter l'écrasement
+    _BACKEND_GKEY=$(grep -m1 '^GOOGLE_API_KEY=' "$SCRIPT_DIR/Backend/.env" | cut -d= -f2)
+    [ -n "$_BACKEND_GKEY" ] && export GOOGLE_API_KEY_BACKEND="$_BACKEND_GKEY"
+fi
+
+build_validate() {
+    SVG_FILE="${1:-}"
+    PASS2="${2:-}"
+
+    if [ -z "$SVG_FILE" ]; then
+        # Dernier SVG généré
+        SVG_FILE=$(ls -t "$OUTPUT_DIR"/genome_zones_*.svg 2>/dev/null | head -1)
+        if [ -z "$SVG_FILE" ]; then
+            echo -e "${RED}❌ Aucun SVG trouvé dans $OUTPUT_DIR${NC}"
+            exit 1
+        fi
+    fi
+
+    echo -e "${BLUE}🔍 Validation : $SVG_FILE${NC}"
+
+    FLAGS=""
+    if [ "$PASS2" = "--pass2" ]; then
+        FLAGS="--pass2"
+        echo -e "${YELLOW}   Pass 2 : vérification densité activée${NC}"
+    fi
+
+    $VENV_PYTHON "$VALIDATOR" --svg "$SVG_FILE" $FLAGS
+}
+
+build_validated_zones() {
+    MAX_ATTEMPTS=4
+    PASS2=false
+    ENRICHED="$SCRIPT_DIR/Frontend/2. GENOME/genome_enriched.json"
+    FIXER="$SCRIPT_DIR/Backend/Prod/validators/organ_fixer.py"
+
+    for arg in "$@"; do
+        [ "$arg" = "--pass2" ] && PASS2=true
+    done
+
+    echo -e "${BLUE}🔄 Pipeline N1 : enrich → zones → [fix-organs] → validate (max ${MAX_ATTEMPTS})${NC}"
+
+    ATTEMPT=0
+    OUTPUT=""
+    while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        ATTEMPT=$((ATTEMPT + 1))
+        echo -e "${YELLOW}── Tentative $ATTEMPT/$MAX_ATTEMPTS ──────────────────────────${NC}"
+
+        # Tentative 1 : re-enrichir depuis genome_reference (classification fraîche)
+        # Tentatives suivantes : genome_enriched déjà patché par organ_fixer → on re-génère seulement
+        if [ $ATTEMPT -eq 1 ]; then
+            echo -e "${YELLOW}   Enrichissement depuis genome_reference...${NC}"
+            $VENV_PYTHON "$SCRIPT_DIR/Backend/Prod/enrichers/genome_enricher.py" \
+                --genome "$GENOME_DEFAULT" \
+                --output "$ENRICHED" 2>&1 | tail -4
+        else
+            echo -e "${YELLOW}   Genome enrichi patchés par organ_fixer — re-génération directe${NC}"
+        fi
+
+        # Génération SVG zones
+        OUTPUT="$OUTPUT_DIR/genome_zones_$(date +%Y%m%d_%H%M%S).svg"
+        $VENV_PYTHON "$EXPORTER_ZONES" \
+            --genome "$ENRICHED" \
+            --output "$OUTPUT" 2>&1
+
+        if [ ! -f "$OUTPUT" ]; then
+            echo -e "${RED}❌ Génération échouée (tentative $ATTEMPT)${NC}"
+            continue
+        fi
+
+        echo -e "${YELLOW}   → Validation...${NC}"
+
+        PASS2_FLAG=""
+        $PASS2 && PASS2_FLAG="--pass2"
+
+        # Capturer la sortie ET le code de retour
+        # set -e neutralisé localement : la substitution peut sortir avec code ≠ 0
+        set +e
+        VALIDATE_OUT=$($VENV_PYTHON "$VALIDATOR" --svg "$OUTPUT" $PASS2_FLAG 2>&1)
+        VALIDATE_EXIT=$?
+        set -e
+        echo "$VALIDATE_OUT"
+
+        if [ $VALIDATE_EXIT -eq 0 ]; then
+            echo -e "${GREEN}✅ PASS — SVG validé : $OUTPUT${NC}"
+            exit 0
+        fi
+
+        # ── Correction organes vides (pass2 uniquement) ──────────────────────
+        EMPTY_LINE=$(echo "$VALIDATE_OUT" | grep '^EMPTY_ORGANS:' | head -1)
+
+        if [ -n "$EMPTY_LINE" ] && $PASS2; then
+            EMPTY_IDS="${EMPTY_LINE#EMPTY_ORGANS:}"
+            echo -e "${YELLOW}   Organes vides détectés : ${EMPTY_IDS}${NC}"
+            echo -e "${YELLOW}   → Correction sémantique via Gemini (organ_fixer)...${NC}"
+
+            # Convertir "id1,id2" en args séparés pour Python
+            ORGAN_ARGS=$(echo "$EMPTY_IDS" | tr ',' ' ')
+
+            $VENV_PYTHON "$FIXER" \
+                --organs $ORGAN_ARGS \
+                --genome "$ENRICHED" \
+                || echo -e "${YELLOW}   ⚠ organ_fixer sans résultat — prochaine tentative sans patch${NC}"
+
+            echo -e "${YELLOW}   → Re-génération avec genome corrigé...${NC}"
+        else
+            echo -e "${RED}   FAIL (pas d'organes vides identifiés ou --pass2 non actif) — réessai...${NC}"
+        fi
+    done
+
+    echo -e "${RED}❌ Échec après $MAX_ATTEMPTS tentatives. Dernier SVG : ${OUTPUT:-aucun}${NC}"
+    exit 1
+}
+
+# Main
+case "${1:-help}" in
+    build|basic|fast)
+        build_basic
+        ;;
+    zones|layout|structured)
+        build_zones
+        ;;
+    enrich|label|classify)
+        build_enrich
+        ;;
+    fancy|styled|kim)
+        shift
+        build_fancy "$@"
+        ;;
+    fancy-zones|styled-layout|both)
+        shift
+        build_fancy_zones "$@"
+        ;;
+    validate|check)
+        build_validate "${@:2}"
+        ;;
+    validated|zones-validated|vz)
+        build_validated_zones "${@:2}"
+        ;;
+    list-styles|styles|ls)
+        list_styles
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo -e "${RED}❌ Commande inconnue: $1${NC}"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac
