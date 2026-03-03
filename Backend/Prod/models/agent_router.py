@@ -271,7 +271,8 @@ class AgentRouter:
         step: Step,
         context: Optional[str] = None,
         surgical_mode: bool = False,
-        loaded_files: Optional[Dict[str, Optional[str]]] = None
+        loaded_files: Optional[Dict[str, Optional[str]]] = None,
+        system_context: Optional[str] = None
     ) -> StepResult:
         """
         Execute a step using the appropriate provider with full smart routing.
@@ -315,7 +316,7 @@ class AgentRouter:
 
         # Standard execution with fallback cascade
         return await self._execute_with_fallback(
-            step, context, routing_decision, surgical_mode, start_time
+            step, context, routing_decision, surgical_mode, start_time, system_context
         )
     
     async def _execute_with_fallback(
@@ -324,7 +325,8 @@ class AgentRouter:
         context: Optional[str],
         routing_decision: RoutingDecision,
         surgical_mode: bool,
-        start_time: datetime
+        start_time: datetime,
+        system_context: Optional[str] = None
     ) -> StepResult:
         """Execute step with fallback cascade."""
         
@@ -384,7 +386,8 @@ class AgentRouter:
                     prompt=prompt,
                     context=context,
                     max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000,
-                    output_constraint="json_surgical" if surgical_mode else None
+                    output_constraint="json_surgical" if surgical_mode else None,
+                    system_prompt=system_context
                 ),
                 context_size=routing_decision.estimated_tokens
             )
@@ -455,7 +458,7 @@ class AgentRouter:
                 )
         else:
             # Fallback to simple execution without cascade
-            return await self._execute_simple(step, context, surgical_mode, start_time)
+            return await self._execute_simple(step, context, surgical_mode, start_time, system_context)
     
     async def _execute_chunked_step(
         self,
@@ -600,7 +603,8 @@ class AgentRouter:
         step: Step,
         context: Optional[str],
         surgical_mode: bool,
-        start_time: datetime
+        start_time: datetime,
+        system_context: Optional[str] = None
     ) -> StepResult:
         """Simple execution without fallback cascade (legacy)."""
         
@@ -619,7 +623,8 @@ class AgentRouter:
             result = await provider.generate(
                 prompt=prompt,
                 context=context,
-                max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000
+                max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000,
+                system_prompt=system_context
             )
             
             execution_time = (datetime.now() - start_time).total_seconds() * 1000

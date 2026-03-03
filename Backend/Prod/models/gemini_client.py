@@ -138,7 +138,8 @@ class GeminiClient(BaseLLMClient):
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         cache_params: Optional[Dict[str, Any]] = None,
-        output_constraint: Optional[str] = None
+        output_constraint: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> GenerationResult:
         """
         Generate code/text from a prompt with automatic fallback cascade.
@@ -181,6 +182,11 @@ class GeminiClient(BaseLLMClient):
             from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
             request_data["systemInstruction"] = {
                 "parts": [{"text": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")}]
+            }
+        elif system_prompt:
+            # 2B: static context as systemInstruction (cached, separate from dynamic contents)
+            request_data["systemInstruction"] = {
+                "parts": [{"text": system_prompt}]
             }
 
         # response_mime_type not supported by current Gemini REST API; rely on prompt for JSON

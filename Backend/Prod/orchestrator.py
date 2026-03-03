@@ -25,6 +25,7 @@ from .rag import PageIndexRetriever
 from .core.surgical_editor import SurgicalEditor
 from .core.plan_status import update_plan_status
 from .claude_helper import split_structure_and_code
+from .core.apply_engine import ApplyEngine
 from .ui.hybrid_loader import HybridLoader, Phase, StepStatus
 
 
@@ -142,9 +143,10 @@ class Orchestrator:
             except Exception as e:
                 logger.warning(f"Failed to initialize RAG system: {e}")
                 self.rag_enabled = False
-                self.rag = None
         else:
             self.rag = None
+        
+        self.apply_engine = ApplyEngine(project_root=Path(__file__).parent.parent.parent)
     
     async def execute_plan(
         self,
@@ -877,6 +879,7 @@ Your reasoning will be used to guide the actual code generation step.
         """
         # Build context from previous results if needed
         step_context = context or ""
+        _system_context: Optional[str] = None  # 2B: static instructions (sent as system message, not mixed in user prompt)
         
         if step.dependencies:
             # Add outputs from dependent steps to context
@@ -974,53 +977,36 @@ Your reasoning will be used to guide the actual code generation step.
                     # Surgical mode enabled but no AST parsed - warn but continue
                     logger.warning("Surgical mode enabled but no AST contexts available. LLM will use file content only.")
                 
-                # Add instructions based on step type and mode
+                # 2B: Extract static instructions as system_context (sent as system message, not mixed in user content)
+                # This enables prefix caching on DeepSeek and systemInstruction caching on Gemini.
                 if surgical_mode:
-                    files_section += """
-
-SURGICAL MODE INSTRUCTIONS:
-Generate ONLY these operation types (no others will work):
-- add_import: Add an import statement
-- add_function: Add a standalone function (NOT a route decorator, just the function)
-- add_class: Add a new class definition
-- add_method: Add a method to an existing class
-- modify_method: Modify an existing method
-- replace_import: Replace one import with another
-
-CRITICAL - FORBIDDEN OPERATIONS (will cause errors):
-❌ add_route (not supported)
-❌ add_to_router (not supported)
-❌ add_endpoint (not supported)
-❌ add_decorator (not supported)
-
-For FastAPI routes, use add_function with the full decorated function:
-{
-  "type": "add_function",
-  "code": "@router.get('/endpoint')\\nasync def my_endpoint():\\n    return {'status': 'ok'}"
-}
-
-JSON structure:
-{
-  "operations": [
-    {
-      "type": "add_method|modify_method|add_import|replace_import|add_class|add_function",
-      "target": "ClassName or ClassName.method_name",
-      "position": "after|before|end",
-      "after_method": "method_name",
-      "code": "def new_method(self): ..."
-    }
-  ]
-}
-
-Focus on precise, minimal changes that integrate seamlessly with existing code.
-"""
+                    _system_context = (
+                        "SURGICAL MODE INSTRUCTIONS:\n"
+                        "Generate ONLY these operation types (no others will work):\n"
+                        "- add_import: Add an import statement\n"
+                        "- add_function: Add a standalone function (NOT a route decorator)\n"
+                        "- add_class: Add a new class definition\n"
+                        "- add_method: Add a method to an existing class\n"
+                        "- modify_method: Modify an existing method\n"
+                        "- replace_import: Replace one import with another\n"
+                        "\nCRITICAL - FORBIDDEN OPERATIONS (will cause errors):\n"
+                        "❌ add_route (not supported)\n"
+                        "❌ add_to_router (not supported)\n"
+                        "❌ add_endpoint (not supported)\n"
+                        "❌ add_decorator (not supported)\n"
+                        "\nFor FastAPI routes, use add_function with the full decorated function.\n"
+                        '\nJSON structure: {"operations": [{"type": "add_method|modify_method|add_import|replace_import|add_class|add_function", '
+                        '"target": "ClassName or ClassName.method_name", "position": "after|before|end", '
+                        '"after_method": "method_name", "code": "def new_method(self): ..."}]}\n'
+                        "Focus on precise, minimal changes that integrate seamlessly with existing code."
+                    )
                 else:
                     if step.type == "refactoring":
-                        files_section += "\nModify the existing code above according to the requirements. Preserve existing structure, imports, and patterns.\n"
+                        _system_context = "Modify the existing code according to the requirements. Preserve existing structure, imports, and patterns."
                     elif step.type == "code_generation":
-                        files_section += "\nAdd new code to the existing files above. Ensure compatibility with existing imports and structure.\n"
+                        _system_context = "Add new code to the existing files. Ensure compatibility with existing imports and structure."
                     elif step.type == "patch":
-                        files_section += "\nGenerate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file.\n"
+                        _system_context = "Generate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file."
                 
                 step_context = "\n\n".join([step_context, files_section]) if step_context else files_section
         
@@ -1039,112 +1025,34 @@ Focus on precise, minimal changes that integrate seamlessly with existing code.
         # Pass surgical_mode flag to agent_router
         # Pass loaded_files for smart context estimation
         result = await self.agent_router.execute_step(
-            step, step_context, surgical_mode=surgical_mode, loaded_files=existing_files
+            step, step_context, surgical_mode=surgical_mode, loaded_files=existing_files, system_context=_system_context
         )
 
-        # Apply surgical instructions if in surgical mode and execution succeeded
-        if surgical_mode and result.success and result.output:
-            from .core.surgical_editor import SurgicalInstructionParser
-
-            # Check if the output contains surgical instructions
-            if SurgicalInstructionParser.is_surgical_output(result.output):
-                logger.info(f"Applying surgical instructions for step {step.id}")
-
-                # Apply to each Python file that was parsed
-                applied_files = []
-                application_errors = []
-
-                for file_path_str in existing_files.keys():
-                    file_path = Path(file_path_str)
-                    if not file_path.is_absolute():
-                        file_path = project_root / file_path
-
-                    if file_path.suffix != '.py':
-                        continue
-
-                    if existing_files[file_path_str] is None:
-                        # NEW FILE: Create it directly using SurgicalEditor helper
-                        try:
-                            success, message = SurgicalEditor.create_new_file(file_path, result.output)
-                            if success:
-                                applied_files.append(f"{file_path} (created)")
-                                logger.info(message)
-                            else:
-                                # FALLBACK: Extract code from surgical JSON and write directly
-                                logger.warning(f"Surgical creation failed for {file_path}: {message}")
-                                logger.info(f"Attempting fallback: extract code from operations")
-
-                                from .core.surgical_editor import SurgicalInstructionParser
-                                operations, parse_error = SurgicalInstructionParser.parse_instructions(result.output)
-
-                                if operations:
-                                    # Extract all code from operations
-                                    code_parts = []
-                                    for op in operations:
-                                        if hasattr(op, 'code') and op.code:
-                                            code_parts.append(op.code)
-
-                                    if code_parts:
-                                        fallback_code = "\n\n".join(code_parts)
-                                        file_path.parent.mkdir(parents=True, exist_ok=True)
-                                        file_path.write_text(fallback_code, encoding='utf-8')
-                                        applied_files.append(f"{file_path} (created via fallback)")
-                                        logger.info(f"✅ Fallback successful: wrote {len(fallback_code)} chars to {file_path}")
-                                    else:
-                                        application_errors.append(f"{file_path}: {message}")
-                                        logger.warning(f"Failed to create {file_path}: {message}")
-                                else:
-                                    application_errors.append(f"{file_path}: {message}")
-                                    logger.warning(f"Failed to create {file_path}: {message}")
-                        except Exception as e:
-                            application_errors.append(f"{file_path}: Failed to create new file: {e}")
-                            logger.warning(f"Error creating new file {file_path}: {e}")
-                    else:
-                        # EXISTING FILE: Apply surgical edits
-                        if file_path.exists():
-                            try:
-                                editor = SurgicalEditor(file_path)
-                                if editor.prepare():
-                                    success, modified_code, original_code = editor.apply_instructions(result.output)
-
-                                    if success and modified_code:
-                                        # Write the modified code back to the file
-                                        file_path.write_text(modified_code, encoding='utf-8')
-                                        applied_files.append(f"{file_path} (modified)")
-                                        logger.info(f"Applied surgical edits to {file_path}")
-                                    elif not success:
-                                        # VETO: Stop the append fallback and alert the user
-                                        error_msg = f"Surgical modification failed for {file_path}: {modified_code}"
-                                        logger.error(f"❌ {error_msg}")
-                                        
-                                        # Strong visual alert in logs and results
-                                        alert_banner = "\n" + "!" * 80 + "\n"
-                                        alert_banner += "⚠️  ALERT: MODIFICATION REJECTED\n"
-                                        alert_banner += f"The surgical edit for {file_path} failed or produced invalid code.\n"
-                                        alert_banner += "THE FILE HAS BEEN PRESERVED IN ITS ORIGINAL STATE TO PREVENT CORRUPTION.\n"
-                                        alert_banner += "!" * 80 + "\n"
-                                        
-                                        logger.critical(alert_banner)
-                                        application_errors.append(f"{file_path}: {modified_code}")
-                                        
-                                        # Optional: Save faulty JSON for debugging
-                                        try:
-                                            debug_path = project_root / ".gemini" / "debug" / f"failed_surgery_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-                                            debug_path.parent.mkdir(parents=True, exist_ok=True)
-                                            debug_path.write_text(result.output, encoding='utf-8')
-                                            logger.info(f"Faulty instructions saved to {debug_path}")
-                                        except:
-                                            pass
-
-                            except Exception as e:
-                                application_errors.append(f"{file_path}: {e}")
-                                logger.warning(f"Error applying surgical edits to {file_path}: {e}")
-
-                # Update result output with application summary
-                if applied_files:
-                    result.output = f"Surgical edits applied to: {', '.join(applied_files)}\n\nOriginal instructions:\n{result.output}"
-                if application_errors:
-                    result.output += f"\n\nApplication errors:\n" + "\n".join(application_errors)
+        # Apply changes via ApplyEngine if step produced output
+        if result.success and result.output and (step.type in ["refactoring", "code_generation"]):
+            logger.info(f"Applying changes for step {step.id} via ApplyEngine")
+            
+            apply_results = await asyncio.to_thread(
+                self.apply_engine.apply,
+                step_id=step.id,
+                output=result.output,
+                target_files=list(existing_files.keys()),
+                step_type=step.type,
+                surgical_mode=surgical_mode,
+                context=step.context
+            )
+            
+            # Update result output with application summary
+            summary = []
+            if apply_results["applied_files"]:
+                summary.append(f"✅ Applied to: {', '.join(apply_results['applied_files'])}")
+            if apply_results["failed_files"]:
+                summary.append(f"❌ FAILED to apply to: {', '.join(apply_results['failed_files'])}")
+            if apply_results["review_needed"]:
+                summary.append(f"📝 Saved for review (.generated): {', '.join(apply_results['review_needed'])}")
+            
+            if summary:
+                result.output = "[APPLY RESULTS]\n" + "\n".join(summary) + "\n" + "="*40 + "\n\n" + result.output
 
         return result
     

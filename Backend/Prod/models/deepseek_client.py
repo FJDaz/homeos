@@ -130,7 +130,8 @@ class DeepSeekClient(BaseLLMClient):
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         cache_params: Optional[Dict[str, Any]] = None,
-        output_constraint: Optional[str] = None
+        output_constraint: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> GenerationResult:
         """
         Generate code from a prompt (BaseLLMClient interface).
@@ -178,6 +179,9 @@ class DeepSeekClient(BaseLLMClient):
                 "role": "system",
                 "content": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")
             })
+        elif system_prompt:
+            # 2B: static context as system message (enables DeepSeek prefix caching)
+            messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": full_prompt})
 
         # Prepare request
