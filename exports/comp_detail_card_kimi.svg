@@ -1,0 +1,39 @@
+<svg viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-8" y="-8" width="496" height="316">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Card -->
+  <rect x="16" y="16" width="448" height="268" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Header -->
+  <text x="32" y="50" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Fiche Détail Atome</text>
+
+  <!-- Endpoint -->
+  <text x="32" y="84" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280" letter-spacing="0.05em">ENDPOINT</text>
+  <rect x="32" y="92" width="416" height="40" rx="8" fill="#f8f7f4"/>
+  <text x="44" y="116" font-family="Roboto Mono, monospace" font-size="14" fill="#151515">/api/v1/atoms/:id</text>
+
+  <!-- Method -->
+  <text x="32" y="164" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280" letter-spacing="0.05em">MÉTHODE</text>
+  <rect x="32" y="172" width="80" height="32" rx="6" fill="#97ea90"/>
+  <text x="72" y="193" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#151515" text-anchor="middle">GET</text>
+
+  <!-- URL -->
+  <text x="128" y="164" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280" letter-spacing="0.05em">URL</text>
+  <rect x="128" y="172" width="320" height="32" rx="6" fill="#f8f7f4"/>
+  <text x="140" y="191" font-family="Roboto Mono, monospace" font-size="13" fill="#151515">https://api.example.com/atoms/42</text>
+
+  <!-- Buttons -->
+  <g>
+    <rect x="32" y="228" width="120" height="40" rx="9999" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="92" y="252" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515" text-anchor="middle">Copier</text>
+  </g>
+
+  <g>
+    <rect x="168" y="228" width="120" height="40" rx="9999" fill="#1258ca"/>
+    <text x="228" y="252" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Tester</text>
+  </g>
+</svg>

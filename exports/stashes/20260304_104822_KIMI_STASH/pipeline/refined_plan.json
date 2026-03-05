@@ -1,0 +1,184 @@
+{
+  "reference_theme": "Most (Creative Agency)",
+  "art_direction": "Bold creative agency aesthetic with high-contrast dark/light sections, energetic orange accents, masonry-style asymmetric grids, and premium card shadows. Transforms SaaS utility into editorial design portfolio feel.",
+  "typography_overrides": {
+    "display_font": "Plus Jakarta Sans",
+    "body_font": "Inter",
+    "accent_color": "#ff6b35",
+    "bg_color": "#ffffff"
+  },
+  "phases": {
+    "n0_brainstorm": {
+      "layout_style": "masonry_hero_asymmetric",
+      "total_height": 780,
+      "organs": [
+        {
+          "id": "n1_ir",
+          "x": 260,
+          "y": 80,
+          "w": 760,
+          "h": 620,
+          "atom_style_hint": "Hero-scale IR table with dark card (#1a1a2e bg), orange accent chips (rx=10), high data density. viewBox='0 0 760 620'",
+          "regenerate_atoms": [
+            "comp_ir_table",
+            "comp_ir_detail"
+          ]
+        },
+        {
+          "id": "n1_arbitrage",
+          "x": 1052,
+          "y": 180,
+          "w": 348,
+          "h": 420,
+          "atom_style_hint": "Elevated sidebar card with heavy shadow, pill buttons, compact arbiter metrics. viewBox='0 0 348 420'",
+          "regenerate_atoms": [
+            "comp_arbiter_table",
+            "comp_arbiter_validate"
+          ]
+        }
+      ]
+    },
+    "n0_backend": {
+      "layout_style": "full_bleed_dark_band",
+      "total_height": 560,
+      "organs": [
+        {
+          "id": "n1_session",
+          "x": 260,
+          "y": 80,
+          "w": 1140,
+          "h": 400,
+          "atom_style_hint": "Dark band treatment (#1a1a2e bg), session controls as premium dashboard, orange status indicators, rx=12 cards. viewBox='0 0 1140 400'",
+          "regenerate_atoms": [
+            "comp_session_reset",
+            "comp_session_status",
+            "comp_genome_summary",
+            "comp_distillation_list"
+          ]
+        }
+      ]
+    },
+    "n0_frontend": {
+      "layout_style": "masonry_editorial_grid",
+      "total_height": 2680,
+      "organs": [
+        {
+          "id": "n1_navigation",
+          "x": 260,
+          "y": 0,
+          "w": 1140,
+          "h": 72,
+          "atom_style_hint": "Minimal nav bar, pill-shaped active state with orange accent, generous whitespace. viewBox='0 0 1140 72'",
+          "regenerate_atoms": [
+            "comp_breadcrumb",
+            "comp_stepper"
+          ]
+        },
+        {
+          "id": "n1_analysis",
+          "x": 260,
+          "y": 120,
+          "w": 740,
+          "h": 680,
+          "atom_style_hint": "Large feature card with image-grade visual density, analysis controls as editorial hero, orange CTA. viewBox='0 0 740 680'",
+          "regenerate_atoms": [
+            "comp_vision_analyze_btn",
+            "comp_vision_report",
+            "comp_vision_regenerate"
+          ]
+        },
+        {
+          "id": "n1_upload",
+          "x": 1040,
+          "y": 120,
+          "w": 360,
+          "h": 520,
+          "atom_style_hint": "Tall portrait card, dropzone with dashed orange border, compact palette picker below. viewBox='0 0 360 520'",
+          "regenerate_atoms": [
+            "comp_upload_dropzone",
+            "comp_upload_delete",
+            "comp_color_palette",
+            "comp_preview_zones"
+          ]
+        },
+        {
+          "id": "n1_layout",
+          "x": 260,
+          "y": 860,
+          "w": 360,
+          "h": 380,
+          "atom_style_hint": "Square-ish layout card with grid preview, choice chips with rx=10, shadow elevation. viewBox='0 0 360 380'",
+          "regenerate_atoms": [
+            "comp_layout_card",
+            "comp_choice_style",
+            "comp_layout_grid"
+          ]
+        },
+        {
+          "id": "n1_validation",
+          "x": 660,
+          "y": 860,
+          "w": 740,
+          "h": 380,
+          "atom_style_hint": "Wide validation dashboard, accordion with orange active states, dense metric rows. viewBox='0 0 740 380'",
+          "regenerate_atoms": [
+            "comp_validation_dashboard",
+            "comp_validation_accordion",
+            "comp_stenciler_grid",
+            "comp_stenciler_select"
+          ]
+        },
+        {
+          "id": "n1_adaptation",
+          "x": 260,
+          "y": 1320,
+          "w": 1140,
+          "h": 480,
+          "atom_style_hint": "Full-width dark card (#1a1a2e), zoom controls as cinematic timeline, code editor with syntax glow. viewBox='0 0 1140 480'",
+          "regenerate_atoms": [
+            "comp_zoom_out",
+            "comp_zoom_controls",
+            "comp_detail_card",
+            "comp_code_editor"
+          ]
+        },
+        {
+          "id": "n1_dialogue",
+          "x": 1040,
+          "y": 1900,
+          "w": 360,
+          "h": 560,
+          "atom_style_hint": "Tall chat sidebar, bubble messages with orange avatar accents, minimal input field. viewBox='0 0 360 560'",
+          "regenerate_atoms": [
+            "comp_chat_bubbles",
+            "comp_chat_answer",
+            "comp_chat_input",
+            "comp_chat_skip"
+          ]
+        }
+      ]
+    },
+    "n0_deploy": {
+      "layout_style": "centered_hero_cta",
+      "total_height": 480,
+      "organs": [
+        {
+          "id": "n1_export",
+          "x": 420,
+          "y": 100,
+          "w": 820,
+          "h": 280,
+          "atom_style_hint": "Centered premium CTA card, large pill launch button (orange), modal-style container with heavy shadow, download zip with progress. viewBox='0 0 820 280'",
+          "regenerate_atoms": [
+            "comp_launch_button",
+            "comp_apply_changes",
+            "comp_download_zip",
+            "comp_confirm_modal",
+            "comp_new_session",
+            "comp_next_button"
+          ]
+        }
+      ]
+    }
+  }
+}

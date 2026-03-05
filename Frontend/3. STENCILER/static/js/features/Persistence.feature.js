@@ -21,6 +21,11 @@ class PersistenceFeature extends StencilerFeature {
         console.log('💾 Persistence Manager Initialized');
     }
 
+    render() {
+        // Feature silencieuse, pas d'UI à rendre
+        return '';
+    }
+
     /**
      * Tente de charger une version locale si elle existe et est plus récente.
      */

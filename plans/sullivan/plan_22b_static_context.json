@@ -1,0 +1,133 @@
+{
+  "task_id": "aetherflow_22b_static_context",
+  "description": "Mission 22B — Séparation Contexte Statique/Dynamique (Proposition 2B). Extraire les instructions statiques (SURGICAL_MODE_INSTRUCTIONS, instructions de type refactoring/code_generation) hors du step_context dynamique. Les passer comme system_context séparé → systemInstruction pour Gemini, system message pour DeepSeek. Objectif : réduire le prompt dynamique, activer le prefix caching, cache hit rate > 90% sur les instructions statiques.",
+  "metadata": {
+    "created_at": "2026-03-03T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "AetherFlow V3 Pipeline. Actuellement : les instructions statiques (SURGICAL_MODE_INSTRUCTIONS ~36 lignes, instructions refactoring/code_gen) sont injectées dans step_context (contenu dynamique qui change à chaque step). Cela bust le prefix cache DeepSeek et empêche Gemini de les mettre en systemInstruction. Fix : déplacer le statique hors du dynamique via un param system_context. Les providers Gemini et DeepSeek ont DÉJÀ le pattern system_prompt via output_constraint=json_surgical (SURGICAL_SYSTEM_PROMPT en system/systemInstruction). On généralise ce pattern à tous les types de steps.",
+    "mission": "22B",
+    "phase": "Phase 22 — Latence",
+    "actor": "CLAUDE",
+    "roadmap_ref": "docs/05_Operations/05-operations/PROPOSITIONS_LATENCE_MAX.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire les sections exactes à modifier. (1) orchestrator.py L.965-1030 : localiser le bloc SURGICAL_MODE_INSTRUCTIONS et les instructions statiques de type (refactoring/code_generation/patch). (2) agent_router.py L.269-460 : méthodes execute_step(), _execute_with_fallback(), _execute_simple() — signature et appels client.generate(). (3) gemini_client.py L.134-190 : méthode generate() et pattern systemInstruction. (4) deepseek_client.py L.126-200 : méthode generate() et pattern system message. Confirmer que le pattern output_constraint=json_surgical injecte déjà SURGICAL_SYSTEM_PROMPT comme system message (ligne 175-181 deepseek, ligne 180-184 gemini). Confirmer les lignes exactes du bloc SURGICAL_MODE_INSTRUCTIONS dans orchestrator.py (la grande chaîne multiligne avec FORBIDDEN OPERATIONS etc.).",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "SURGICAL_MODE_INSTRUCTIONS bloc localisé dans orchestrator.py",
+        "Signatures generate() confirmées pour gemini et deepseek (system_prompt absent = à ajouter)",
+        "execute_step() signature confirmée dans agent_router.py (system_context absent = à ajouter)"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/orchestrator.py",
+          "Backend/Prod/models/agent_router.py",
+          "Backend/Prod/models/gemini_client.py",
+          "Backend/Prod/models/deepseek_client.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "MODIFIER orchestrator.py — Extraire les instructions statiques hors de step_context. CHANGEMENTS PRÉCIS :\n\n1. Au début de _execute_step(), définir une variable locale `_system_context = None`.\n\n2. Dans le bloc `if surgical_mode:` (après `files_section += \"\\n\\nExisting code files:\\n\"` et le remplissage des fichiers), REMPLACER le bloc qui ajoute les instructions au files_section :\n```python\n                if surgical_mode:\n                    files_section += \"\"\"\n\nSURGICAL MODE INSTRUCTIONS:\n...(tout le bloc)...\"\"\"\n```\nPAR :\n```python\n                if surgical_mode:\n                    _system_context = (\n                        \"SURGICAL MODE INSTRUCTIONS:\\n\"\n                        \"Generate ONLY these operation types (no others will work):\\n\"\n                        \"- add_import: Add an import statement\\n\"\n                        \"- add_function: Add a standalone function (NOT a route decorator, just the function)\\n\"\n                        \"- add_class: Add a new class definition\\n\"\n                        \"- add_method: Add a method to an existing class\\n\"\n                        \"- modify_method: Modify an existing method\\n\"\n                        \"- replace_import: Replace one import with another\\n\"\n                        \"\\nCRITICAL - FORBIDDEN OPERATIONS (will cause errors):\\n\"\n                        \"❌ add_route (not supported)\\n\"\n                        \"❌ add_to_router (not supported)\\n\"\n                        \"❌ add_endpoint (not supported)\\n\"\n                        \"❌ add_decorator (not supported)\\n\"\n                        \"\\nFor FastAPI routes, use add_function with the full decorated function.\\n\"\n                        \"\\nJSON structure:\\n\"\n                        '{\\n  \"operations\": [\\n    {\\n      \"type\": \"add_method|modify_method|add_import|replace_import|add_class|add_function\",\\n      \"target\": \"ClassName or ClassName.method_name\",\\n      \"position\": \"after|before|end\",\\n      \"after_method\": \"method_name\",\\n      \"code\": \"def new_method(self): ...\"\\n    }\\n  ]\\n}\\n\\nFocus on precise, minimal changes that integrate seamlessly with existing code.'\n                    )\n```\n\n3. Dans le bloc `else:` (non-surgical), REMPLACER les ajouts statiques au files_section :\n```python\n                else:\n                    if step.type == \"refactoring\":\n                        files_section += \"\\nModify the existing code above...\"\n                    elif step.type == \"code_generation\":\n                        files_section += \"\\nAdd new code to...\"\n                    elif step.type == \"patch\":\n                        files_section += \"\\nGenerate ONLY the fragment...\"\n```\nPAR :\n```python\n                else:\n                    if step.type == \"refactoring\":\n                        _system_context = \"Modify the existing code according to the requirements. Preserve existing structure, imports, and patterns.\"\n                    elif step.type == \"code_generation\":\n                        _system_context = \"Add new code to the existing files. Ensure compatibility with existing imports and structure.\"\n                    elif step.type == \"patch\":\n                        _system_context = \"Generate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file.\"\n```\n\n4. Dans l'appel à `agent_router.execute_step()`, ajouter le paramètre `system_context=_system_context` :\n```python\n        result = await self.agent_router.execute_step(\n            step, step_context, surgical_mode=surgical_mode, loaded_files=existing_files, system_context=_system_context\n        )\n```\n\nRÈGLE ABSOLUE : Ne pas modifier quoi que ce soit d'autre dans le fichier. Ne pas toucher aux imports, aux autres méthodes, à la structure de la classe.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "SURGICAL_MODE_INSTRUCTIONS n'est plus ajouté dans files_section (step_2)",
+        "_system_context est défini et passé à agent_router.execute_step(system_context=_system_context)",
+        "Les instructions statiques refactoring/code_generation/patch sont dans _system_context pas dans files_section"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/orchestrator.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/orchestrator.py"
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "MODIFIER agent_router.py — Ajouter system_context param et le thread jusqu'aux clients. CHANGEMENTS PRÉCIS :\n\n1. Signature de execute_step() — ajouter `system_context: Optional[str] = None` :\n```python\n    async def execute_step(\n        self,\n        step: Step,\n        context: Optional[str] = None,\n        surgical_mode: bool = False,\n        loaded_files: Optional[Dict[str, Optional[str]]] = None,\n        system_context: Optional[str] = None\n    ) -> StepResult:\n```\n\n2. Dans execute_step(), passer system_context aux appels internes — dans `_execute_chunked_step`, `_execute_section_generation`, `_execute_with_fallback`, et `_execute_simple`. Pour chaque appel, ajouter `system_context=system_context`.\n\n3. Signature de _execute_with_fallback() — ajouter `system_context: Optional[str] = None` :\n```python\n    async def _execute_with_fallback(\n        self,\n        step: Step,\n        context: Optional[str],\n        routing_decision: RoutingDecision,\n        surgical_mode: bool,\n        start_time: datetime,\n        system_context: Optional[str] = None\n    ) -> StepResult:\n```\n\n4. Dans _execute_with_fallback(), dans le lambda `execute_fn`, passer `system_prompt=system_context` à client.generate() :\n```python\n                execute_fn=lambda client: client.generate(\n                    prompt=prompt,\n                    context=context,\n                    max_tokens=step.estimated_tokens * 2 if step.estimated_tokens else 4000,\n                    output_constraint=\"json_surgical\" if surgical_mode else None,\n                    system_prompt=system_context\n                ),\n```\n\n5. Signature de _execute_simple() — ajouter `system_context: Optional[str] = None` et passer à provider.generate() :\n```python\n    async def _execute_simple(\n        self,\n        step: Step,\n        context: Optional[str],\n        surgical_mode: bool,\n        start_time: datetime,\n        system_context: Optional[str] = None\n    ) -> StepResult:\n```\nEt dans l'appel provider.generate() : ajouter `system_prompt=system_context`.\n\nRÈGLE ABSOLUE : Modifier UNIQUEMENT les signatures et les appels client.generate() indiqués. Ne pas toucher à la logique de routing, au prompt_cache, au semantic_cache, aux autres méthodes.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 700,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "execute_step() accepte system_context: Optional[str] = None",
+        "_execute_with_fallback() accepte system_context et le passe à client.generate(system_prompt=system_context)",
+        "_execute_simple() accepte system_context et le passe à provider.generate(system_prompt=system_context)"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/agent_router.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/models/agent_router.py"
+        }
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "MODIFIER gemini_client.py et deepseek_client.py — Ajouter system_prompt param à generate(). CHANGEMENTS PRÉCIS :\n\nGEMINI (gemini_client.py) :\n1. Ajouter `system_prompt: Optional[str] = None` à la signature generate().\n2. Juste avant `if output_constraint == \"json_surgical\":` (actuellement L.180), ajouter :\n```python\n        # Static system context (2B: séparé du contenu dynamique pour prefix caching)\n        if system_prompt and output_constraint != \"json_surgical\":\n            request_data[\"systemInstruction\"] = {\n                \"parts\": [{\"text\": system_prompt}]\n            }\n```\n(Ne pas toucher au bloc output_constraint=json_surgical existant — il gère son propre systemInstruction)\n\nDEEPSEEK (deepseek_client.py) :\n1. Ajouter `system_prompt: Optional[str] = None` à la signature generate().\n2. Dans la construction des messages, REMPLACER :\n```python\n        messages = []\n        if output_constraint == \"json_surgical\":\n            from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT\n            messages.append({\n                \"role\": \"system\",\n                \"content\": SURGICAL_SYSTEM_PROMPT.format(ast_summary=\"[AST context provided in task prompt]\")\n            })\n        messages.append({\"role\": \"user\", \"content\": full_prompt})\n```\nPAR :\n```python\n        messages = []\n        if output_constraint == \"json_surgical\":\n            from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT\n            messages.append({\n                \"role\": \"system\",\n                \"content\": SURGICAL_SYSTEM_PROMPT.format(ast_summary=\"[AST context provided in task prompt]\")\n            })\n        elif system_prompt:\n            # 2B: static context as system message (enables DeepSeek prefix caching)\n            messages.append({\"role\": \"system\", \"content\": system_prompt})\n        messages.append({\"role\": \"user\", \"content\": full_prompt})\n```\n\nRÈGLE ABSOLUE : Modifier UNIQUEMENT ce qui est indiqué. Ne pas toucher aux fallback cascades, aux modèles, aux retry loops, aux autres méthodes. Produire les deux fichiers modifiés.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "gemini_client.generate() accepte system_prompt: Optional[str] = None",
+        "Gemini: quand system_prompt fourni et pas json_surgical, systemInstruction est set",
+        "deepseek_client.generate() accepte system_prompt: Optional[str] = None",
+        "DeepSeek: quand system_prompt fourni et pas json_surgical, system message ajouté"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/gemini_client.py",
+          "Backend/Prod/models/deepseek_client.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/models/gemini_client.py"
+        }
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "VALIDATION — Vérifier que les imports et les signatures sont corrects. Exécuter : cd /Users/francois-jeandazin/AETHERFLOW && source .venv/bin/activate && python3 -c \"import sys; sys.path.insert(0, 'Backend/Prod'); from orchestrator import Orchestrator; from models.agent_router import AgentRouter; from models.gemini_client import GeminiClient; import inspect; sig = inspect.signature(AgentRouter.execute_step); print('execute_step params:', list(sig.parameters.keys())); print('OK — 2B validé')\" 2>&1 | tail -10. Vérifier que system_context apparaît dans les paramètres de execute_step. Vérifier absence d'ImportError.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": ["step_2", "step_3", "step_4"],
+      "validation_criteria": [
+        "Aucun ImportError",
+        "'system_context' dans les params de execute_step",
+        "Orchestrator s'instancie sans erreur"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/orchestrator.py",
+          "Backend/Prod/models/agent_router.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    }
+  ]
+}

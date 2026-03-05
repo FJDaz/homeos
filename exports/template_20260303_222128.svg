@@ -1,0 +1,1525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Scaffold — KIMI-directed layout — 2026-03-03 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2860">
+  <defs><style>text { font-family: Inter, system-ui, sans-serif; }</style></defs>
+<g id="n0_brainstorm" class="af-phase" data-genome-id="n0_brainstorm">
+<rect x="0" y="0" width="1440" height="560" fill="#f7f6f2"/>
+<rect x="0" y="0" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="10" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="29" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="13" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="109" y="28" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="14" x2="324" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="24" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="28" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="48" width="188" height="512" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="68" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRAINSTORM</text>
+<rect x="46" y="78" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="87" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="99" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Intent Refactoring</text>
+<rect x="52" y="123" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="135" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Arbitrage</text>
+<g id="n1_ir" class="af-organ" data-genome-id="n1_ir" data-name="Intent Refactoring" data-ui-role="dashboard" data-index="1">
+<rect x="260" y="0" width="720" height="620" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_ir_table" class="kimi-comp" transform="translate(100,200) scale(1.0000)">
+  <title>Vue Rapport IR</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="576" height="356">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#97ea90"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="520" height="300" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Title -->
+  <text x="40" y="52" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#151515">Vue Rapport IR</text>
+
+  <!-- Table header -->
+  <rect x="40" y="70" width="480" height="36" fill="#f8f7f4" rx="6"/>
+  <text x="56" y="92" font-size="12" fill="#151515" letter-spacing="1.5" font-weight="600">ORGANE</text>
+  <text x="200" y="92" font-size="12" fill="#151515" letter-spacing="1.5" font-weight="600">VERDICT</text>
+  <text x="320" y="92" font-size="12" fill="#151515" letter-spacing="1.5" font-weight="600">SCORE</text>
+  <text x="440" y="92" font-size="12" fill="#151515" letter-spacing="1.5" font-weight="600">ACTION</text>
+
+  <!-- Row 1 -->
+  <rect x="40" y="116" width="480" height="44" fill="#ffffff" stroke="#e5e5e5" stroke-width="1" rx="6"/>
+  <text x="56" y="142" font-size="14" fill="#151515">Foie</text>
+  <rect x="200" y="126" width="60" height="24" rx="12" fill="#97ea90"/>
+  <text x="230" y="142" font-size="12" fill="#ffffff" text-anchor="middle">Accept</text>
+  <text x="320" y="142" font-size="14" fill="#151515">92 %</text>
+  <rect x="440" y="126" width="60" height="24" rx="6" fill="url(#btnGrad)"/>
+  <text x="470" y="142" font-size="12" fill="#ffffff" text-anchor="middle">Détails</text>
+
+  <!-- Row 2 -->
+  <rect x="40" y="168" width="480" height="44" fill="#ffffff" stroke="#e5e5e5" stroke-width="1" rx="6"/>
+  <text x="56" y="194" font-size="14" fill="#151515">Rein gauche</text>
+  <rect x="200" y="178" width="60" height="24" rx="12" fill="#ffd548"/>
+  <text x="230" y="194" font-size="12" fill="#ffffff" text-anchor="middle">Revise</text>
+  <text x="320" y="194" font-size="14" fill="#151515">68 %</text>
+  <rect x="440" y="178" width="60" height="24" rx="6" fill="url(#btnGrad)"/>
+  <text x="470" y="194" font-size="12" fill="#ffffff" text-anchor="middle">Détails</text>
+
+  <!-- Row 3 -->
+  <rect x="40" y="220" width="480" height="44" fill="#ffffff" stroke="#e5e5e5" stroke-width="1" rx="6"/>
+  <text x="56" y="246" font-size="14" fill="#151515">Poumon droit</text>
+  <rect x="200" y="230" width="60" height="24" rx="12" fill="#f05e23"/>
+  <text x="230" y="246" font-size="12" fill="#ffffff" text-anchor="middle">Reject</text>
+  <text x="320" y="246" font-size="14" fill="#151515">41 %</text>
+  <rect x="440" y="230" width="60" height="24" rx="6" fill="url(#btnGrad)"/>
+  <text x="470" y="246" font-size="12" fill="#ffffff" text-anchor="middle">Détails</text>
+</g>
+<g id="comp_ir_detail" class="kimi-comp" transform="translate(276,368) scale(1.0000)">
+  <title>Détail Organe</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="496" height="316">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7a3c"/>
+    </linearGradient>
+    <linearGradient id="copyGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#3a7bff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card -->
+  <rect x="16" y="16" width="448" height="268" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Header -->
+  <text x="32" y="48" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#151515">Détail Organe</text>
+
+  <!-- Divider -->
+  <line x1="32" y1="64" x2="448" y2="64" stroke="#f0f0f0" stroke-width="1"/>
+
+  <!-- Section: Endpoints -->
+  <text x="32" y="92" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#151515">Endpoints</text>
+
+  <!-- Endpoint chips -->
+  <rect x="32" y="104" width="88" height="28" rx="6" fill="#f8f7f4"/>
+  <text x="48" y="122" font-family="Inter, sans-serif" font-size="12" fill="#151515">GET /coeur</text>
+
+  <rect x="128" y="104" width="96" height="28" rx="6" fill="#f8f7f4"/>
+  <text x="144" y="122" font-family="Inter, sans-serif" font-size="12" fill="#151515">POST /poumon</text>
+
+  <rect x="232" y="104" width="104" height="28" rx="6" fill="#f8f7f4"/>
+  <text x="248" y="122" font-family="Inter, sans-serif" font-size="12" fill="#151515">PATCH /rein/:id</text>
+
+  <!-- Section: Modèles -->
+  <text x="32" y="164" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#151515">Modèles</text>
+
+  <!-- Model card -->
+  <rect x="32" y="176" width="200" height="60" rx="8" fill="#f8f7f4"/>
+  <text x="44" y="196" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#151515">OrganeCardiaque</text>
+  <text x="44" y="212" font-family="Roboto Mono, monospace" font-size="11" fill="#666">{"rythme": "int", "pression": "float"}</text>
+  <text x="44" y="228" font-family="Inter, sans-serif" font-size="10" letter-spacing="1.5" fill="#999">MODÈLE PRINCIPAL</text>
+
+  <!-- Actions -->
+  <rect x="360" y="80" width="88" height="36" rx="9999" fill="url(#btnGrad)"/>
+  <text x="404" y="102" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Tester</text>
+
+  <rect x="360" y="128" width="88" height="36" rx="9999" fill="url(#copyGrad)"/>
+  <text x="404" y="150" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Copier</text>
+
+  <!-- Status badge -->
+  <rect x="360" y="188" width="88" height="28" rx="6" fill="#e6f7e5"/>
+  <text x="404" y="206" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#2a7d45" text-anchor="middle">Actif</text>
+</g>
+</g>
+<g id="n1_arbitrage" class="af-organ" data-genome-id="n1_arbitrage" data-name="Arbitrage" data-ui-role="dashboard" data-index="2">
+<rect x="1012" y="120" width="388" height="480" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_arbiter_table" class="kimi-comp" transform="translate(1028,136) scale(0.6357)">
+  <title>Tableau Expert</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="576" height="356">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ffd548"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans",Inter,sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .label { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:#151515; }
+      .meta { font-family:Inter,system-ui,sans-serif; font-size:10px; fill:#666666; letter-spacing:1.5px; text-transform:uppercase; }
+      .mono { font-family:"Roboto Mono",monospace; font-size:11px; fill:#151515; }
+      .cell { fill:#ffffff; stroke:#e5e5e5; stroke-width:1; }
+      .head { fill:#f8f7f4; stroke:#e5e5e5; stroke-width:1; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="24" y="24" width="512" height="292" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="48" y="56" class="title">Tableau Expert – Validations</text>
+
+  <!-- Table -->
+  <g>
+    <!-- Headers -->
+    <rect x="48" y="80" width="88" height="32" rx="4" class="head"/>
+    <text x="56" y="100" class="meta">ID</text>
+
+    <rect x="136" y="80" width="120" height="32" rx="4" class="head"/>
+    <text x="144" y="100" class="meta">Module</text>
+
+    <rect x="256" y="80" width="96" height="32" rx="4" class="head"/>
+    <text x="264" y="100" class="meta">Statut</text>
+
+    <rect x="352" y="80" width="96" height="32" rx="4" class="head"/>
+    <text x="360" y="100" class="meta">Durée</text>
+
+    <rect x="448" y="80" width="88" height="32" rx="4" class="head"/>
+    <text x="456" y="100" class="meta">Actions</text>
+
+    <!-- Row 1 -->
+    <rect x="48" y="112" width="88" height="32" rx="4" class="cell"/>
+    <text x="56" y="130" class="mono">#4821</text>
+
+    <rect x="136" y="112" width="120" height="32" rx="4" class="cell"/>
+    <text x="144" y="130" class="label">Auth JWT</text>
+
+    <rect x="256" y="112" width="96" height="32" rx="4" class="cell"/>
+    <text x="264" y="130" class="label" fill="#1258ca">Validé</text>
+
+    <rect x="352" y="112" width="96" height="32" rx="4" class="cell"/>
+    <text x="360" y="130" class="mono">142 ms</text>
+
+    <rect x="448" y="112" width="88" height="32" rx="4" class="cell"/>
+    <rect x="456" y="120" width="72" height="16" rx="9999" fill="url(#btnGrad)"/>
+    <text x="492" y="131" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Détails</text>
+
+    <!-- Row 2 -->
+    <rect x="48" y="144" width="88" height="32" rx="4" class="cell"/>
+    <text x="56" y="162" class="mono">#4822</text>
+
+    <rect x="136" y="144" width="120" height="32" rx="4" class="cell"/>
+    <text x="144" y="162" class="label">Pay Stripe</text>
+
+    <rect x="256" y="144" width="96" height="32" rx="4" class="cell"/>
+    <text x="264" y="162" class="label" fill="#97ea90">Succès</text>
+
+    <rect x="352" y="144" width="96" height="32" rx="4" class="cell"/>
+    <text x="360" y="162" class="mono">98 ms</text>
+
+    <rect x="448" y="144" width="88" height="32" rx="4" class="cell"/>
+    <rect x="456" y="152" width="72" height="16" rx="9999" fill="url(#btnGrad)"/>
+    <text x="492" y="163" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Détails</text>
+
+    <!-- Row 3 -->
+    <rect x="48" y="176" width="88" height="32" rx="4" class="cell"/>
+    <text x="56" y="194" class="mono">#4823</text>
+
+    <rect x="136" y="176" width="120" height="32" rx="4" class="cell"/>
+    <text x="144" y="194" class="label">Cache Redis</text>
+
+    <rect x="256" y="176" width="96" height="32" rx="4" class="cell"/>
+    <text x="264" y="194" class="label" fill="#ffd548">Averti</text>
+
+    <rect x="352" y="176" width="96" height="32" rx="4" class="cell"/>
+    <text x="360" y="194" class="mono">201 ms</text>
+
+    <rect x="448" y="176" width="88" height="32" rx="4" class="cell"/>
+    <rect x="456" y="184" width="72" height="16" rx="9999" fill="url(#btnGrad)"/>
+    <text x="492" y="195" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Détails</text>
+
+    <!-- Row 4 -->
+    <rect x="48" y="208" width="88" height="32" rx="4" class="cell"/>
+    <text x="56" y="226" class="mono">#4824</text>
+
+    <rect x="136" y="208" width="120" height="32" rx="4" class="cell"/>
+    <text x="144" y="226" class="label">Export CSV</text>
+
+    <rect x="256" y="208" width="96" height="32" rx="4" class="cell"/>
+    <text x="264" y="226" class="label" fill="#97ea90">Succès</text>
+
+    <rect x="352" y="208" width="96" height="32" rx="4" class="cell"/>
+    <text x="360" y="226" class="mono">76 ms</text>
+
+    <rect x="448" y="208" width="88" height="32" rx="4" class="cell"/>
+    <rect x="456" y="216" width="72" height="16" rx="9999" fill="url(#btnGrad)"/>
+    <text x="492" y="227" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Détails</text>
+
+    <!-- Row 5 -->
+    <rect x="48" y="240" width="88" height="32" rx="4" class="cell"/>
+    <text x="56" y="258" class="mono">#4825</text>
+
+    <rect x="136" y="240" width="120" height="32" rx="4" class="cell"/>
+    <text x="144" y="258" class="label">Webhook</text>
+
+    <rect x="256" y="240" width="96" height="32" rx="4" class="cell"/>
+    <text x="264" y="258" class="label" fill="#1258ca">Validé</text>
+
+    <rect x="352" y="240" width="96" height="32" rx="4" class="cell"/>
+    <text x="360" y="258" class="mono">119 ms</text>
+
+    <rect x="448" y="240" width="88" height="32" rx="4" class="cell"/>
+    <rect x="456" y="248" width="72" height="16" rx="9999" fill="url(#btnGrad)"/>
+    <text x="492" y="259" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Détails</text>
+  </g>
+</g>
+<g id="comp_arbiter_validate" class="kimi-comp" transform="translate(1028,364) scale(0.8900)">
+  <title>Validation Arbitrage</title>
+<defs>
+    <filter id="cardShadow" x="-20" y="-20" width="440" height="340">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0f4ab4"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans", sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .label { font-family:"Inter", sans-serif; font-size:13px; fill:#151515; }
+      .meta { font-family:"Inter", sans-serif; font-size:10px; fill:#666; letter-spacing:1.5px; text-transform:uppercase; }
+      .code { font-family:"Roboto Mono", monospace; font-size:12px; fill:#1258ca; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="360" height="260" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="52" class="title">Validation Arbitrage</text>
+
+  <!-- Decision list -->
+  <g>
+    <text x="40" y="88" class="label">Décision #1</text>
+    <rect x="40" y="96" width="16" height="16" rx="3" fill="#ffffff" stroke="#d0d0d0" stroke-width="1.5"/>
+    <text x="64" y="108" class="label">Approuver le transfert</text>
+    <text x="320" y="108" class="code">+2.34%</text>
+  </g>
+
+  <g>
+    <text x="40" y="128" class="label">Décision #2</text>
+    <rect x="40" y="136" width="16" height="16" rx="3" fill="#ffffff" stroke="#d0d0d0" stroke-width="1.5"/>
+    <text x="64" y="148" class="label">Rejuster les frais</text>
+    <text x="320" y="148" class="code">—0.87%</text>
+  </g>
+
+  <g>
+    <text x="40" y="168" class="label">Décision #3</text>
+    <rect x="40" y="176" width="16" height="16" rx="3" fill="#ffffff" stroke="#d0d0d0" stroke-width="1.5"/>
+    <text x="64" y="188" class="label">Verrouiller le cours</text>
+    <text x="320" y="188" class="code">+1.12%</text>
+  </g>
+
+  <!-- Metadata -->
+  <text x="40" y="220" class="meta">Gain estimé total</text>
+  <text x="40" y="236" class="code" font-size="16px" font-weight="600">+2.59%</text>
+
+  <!-- Submit button -->
+  <rect x="244" y="208" width="116" height="36" rx="6" fill="url(#btnGrad)"/>
+  <text x="302" y="230" font-family="Inter, sans-serif" font-size="14px" font-weight="600" fill="#ffffff" text-anchor="middle">Valider</text>
+</g>
+</g>
+</g>
+<g id="n0_backend" class="af-phase" data-genome-id="n0_backend">
+<rect x="0" y="560" width="1440" height="440" fill="#f7f6f2"/>
+<rect x="0" y="560" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="570" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="589" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="573" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="588" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="573" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="168" y="588" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="573" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="588" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="573" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="588" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="574" x2="324" y2="594" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="584" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="588" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="608" width="188" height="392" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="628" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BACKEND</text>
+<rect x="46" y="638" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="647" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="659" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Session Management</text>
+<g id="n1_session" class="af-organ" data-genome-id="n1_session" data-name="Session Management" data-ui-role="dashboard" data-index="3">
+<rect x="260" y="0" width="1140" height="320" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_session_reset" class="kimi-comp" transform="translate(276,16) scale(1.0000)">
+  <title>Reset Session</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#ffb800"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans", Inter, sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .body { font-family:Inter, system-ui, sans-serif; font-size:14px; fill:#555555; }
+      .btn-label { font-family:Inter, system-ui, sans-serif; font-weight:700; font-size:14px; fill:#ffffff; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="8" width="328" height="64" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="30" class="title">Réinitialiser la session</text>
+
+  <!-- Body text -->
+  <text x="32" y="50" class="body">Redémarrez à zéro en un clic</text>
+
+  <!-- Reset button -->
+  <rect x="232" y="24" width="96" height="32" rx="6" fill="url(#btnGradient)"/>
+  <text x="280" y="44" class="btn-label" text-anchor="middle">Reset</text>
+</g>
+<g id="comp_genome_summary" class="kimi-comp" transform="translate(276,108) scale(1.0000)">
+  <title>Résumé Genome</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7a3c"/>
+    </linearGradient>
+    <style>
+      .title { font:700 19px "Plus Jakarta Sans",Inter,sans-serif; }
+      .label { font:10px "Inter",system-ui,sans-serif; letter-spacing:1.5px; text-transform:uppercase; }
+      .body { font:13px "Inter",system-ui,sans-serif; }
+      .mono { font:12px "Roboto Mono",monospace; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="520" height="260" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="54" class="title" fill="#151515">Résumé Genome</text>
+
+  <!-- Topology block -->
+  <rect x="40" y="74" width="240" height="90" rx="6" fill="#f8f7f4"/>
+  <text x="52" y="96" class="label" fill="#666">Topologie</text>
+  <circle cx="80" cy="130" r="18" fill="#ffffff" stroke="#f05e23" stroke-width="2"/>
+  <text x="80" y="135" class="body" text-anchor="middle" fill="#151515">3</text>
+  <text x="108" y="135" class="body" fill="#151515">Clusters actifs</text>
+  <line x1="80" y1="148" x2="80" y2="170" stroke="#e5e5e5" stroke-width="1"/>
+  <circle cx="80" cy="182" r="6" fill="#97ea90"/>
+  <text x="96" y="186" class="body" fill="#151515">État sain</text>
+
+  <!-- Endpoints block -->
+  <rect x="300" y="74" width="240" height="90" rx="6" fill="#f8f7f4"/>
+  <text x="312" y="96" class="label" fill="#666">Endpoints</text>
+  <text x="312" y="118" class="body" fill="#151515">API REST</text>
+  <text x="312" y="134" class="mono" fill="#666">/genome/v2/…</text>
+  <rect x="312" y="144" width="60" height="20" rx="9999" fill="#1258ca"/>
+  <text x="342" y="158" class="body" text-anchor="middle" fill="#ffffff">200 OK</text>
+
+  <!-- Metrics row -->
+  <rect x="40" y="180" width="160" height="50" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+  <text x="52" y="200" class="label" fill="#666">Requêtes/min</text>
+  <text x="52" y="220" class="title" fill="#151515">1 247</text>
+
+  <rect x="220" y="180" width="160" height="50" rx="6" fill="#ffffff" stroke="#e5e5e1" stroke-width="1"/>
+  <text x="232" y="200" class="label" fill="#666">Latence moy</text>
+  <text x="232" y="220" class="title" fill="#151515">42 ms</text>
+
+  <rect x="400" y="180" width="140" height="50" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+  <text x="412" y="200" class="label" fill="#666">Disponibilité</text>
+  <text x="412" y="220" class="title" fill="#151515">99.9 %</text>
+
+  <!-- Action button -->
+  <rect x="40" y="250" width="120" height="32" rx="6" fill="url(#btnGrad)"/>
+  <text x="100" y="271" class="body" text-anchor="middle" fill="#ffffff">Voir détails</text>
+</g>
+</g>
+</g>
+<g id="n0_frontend" class="af-phase" data-genome-id="n0_frontend">
+<rect x="0" y="1000" width="1440" height="1460" fill="#f7f6f2"/>
+<rect x="0" y="1000" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="1010" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="1029" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="1013" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="1028" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="1013" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="1028" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="1013" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="227" y="1028" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="1013" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="1028" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="1014" x2="324" y2="1034" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="1024" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="1028" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="1048" width="188" height="1412" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="1068" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRONTEND</text>
+<rect x="46" y="1078" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="1087" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="1099" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Analyse PNG</text>
+<rect x="52" y="1123" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1135" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Layout Selection</text>
+<rect x="52" y="1159" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1171" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Validation Composa</text>
+<rect x="52" y="1195" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1207" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Adaptation / Zoom </text>
+<rect x="52" y="1231" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1243" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Upload Design</text>
+<rect x="52" y="1267" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1279" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Dialogue Utilisate</text>
+<rect x="52" y="1303" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1315" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Navigation</text>
+<g id="n1_analysis" class="af-organ" data-genome-id="n1_analysis" data-name="Analyse PNG" data-ui-role="main-canvas" data-index="4">
+<rect x="260" y="0" width="820" height="700" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_vision_report" class="kimi-comp" transform="translate(276,16) scale(1.0000)">
+  <title>Rapport Analyse Vision</title>
+<defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="confidenceHigh" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="confidenceMedium" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="confidenceLow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#f87171"/>
+    </linearGradient>
+    <linearGradient id="scanLine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1258ca" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#1258ca" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1258ca" stop-opacity="0"/>
+    </linearGradient>
+    
+    <!-- Filters -->
+    <filter id="shadowSoft" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="shadowMedium" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glowBlue" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="scanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Patterns -->
+    <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#334155" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+    
+    <!-- Clip paths -->
+    <clipPath id="imageClip">
+      <rect x="16" y="16" width="340" height="268" rx="12"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="560" height="300" fill="url(#bgGradient)"/>
+  <rect width="560" height="300" fill="url(#gridPattern)"/>
+  
+  <!-- Main Analysis Card -->
+  <rect x="12" y="12" width="348" height="276" rx="16" fill="url(#cardGradient)" filter="url(#shadowMedium)"/>
+  
+  <!-- Image Preview Area -->
+  <g clip-path="url(#imageClip)">
+    <!-- Simulated document/image content -->
+    <rect x="16" y="16" width="340" height="268" fill="#0f172a"/>
+    
+    <!-- Document lines simulation -->
+    <g opacity="0.4">
+      <rect x="40" y="50" width="200" height="8" rx="4" fill="#475569"/>
+      <rect x="40" y="70" width="280" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="85" width="260" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="100" width="290" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="130" width="180" height="8" rx="4" fill="#475569"/>
+      <rect x="40" y="150" width="270" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="165" width="250" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="180" width="280" height="6" rx="3" fill="#334155"/>
+      <rect x="40" y="210" width="220" height="8" rx="4" fill="#475569"/>
+      <rect x="40" y="230" width="240" height="6" rx="3" fill="#334155"/>
+    </g>
+    
+    <!-- Analysis Overlay Zones -->
+    <!-- Zone 1: Header - High Confidence -->
+    <g opacity="0.85">
+      <rect x="32" y="40" width="296" height="28" rx="6" fill="url(#confidenceHigh)" opacity="0.15" stroke="#1258ca" stroke-width="1.5"/>
+      <rect x="32" y="40" width="296" height="28" rx="6" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+      <!-- Corner markers -->
+      <path d="M 32 48 L 32 40 L 40 40" fill="none" stroke="#3b82f6" stroke-width="2"/>
+      <path d="M 320 40 L 328 40 L 328 48" fill="none" stroke="#3b82f6" stroke-width="2"/>
+      <path d="M 328 60 L 328 68 L 320 68" fill="none" stroke="#3b82f6" stroke-width="2"/>
+      <path d="M 40 68 L 32 68 L 32 60" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    </g>
+    
+    <!-- Zone 2: Section - Medium Confidence -->
+    <g opacity="0.85">
+      <rect x="32" y="120" width="296" height="70" rx="6" fill="url(#confidenceMedium)" opacity="0.12" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="32" y="120" width="296" height="70" rx="6" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+      <!-- Corner markers -->
+      <path d="M 32 128 L 32 120 L 40 120" fill="none" stroke="#fbbf24" stroke-width="2"/>
+      <path d="M 320 120 L 328 120 L 328 128" fill="none" stroke="#fbbf24" stroke-width="2"/>
+      <path d="M 328 182 L 328 190 L 320 190" fill="none" stroke="#fbbf24" stroke-width="2"/>
+      <path d="M 40 190 L 32 190 L 32 182" fill="none" stroke="#fbbf24" stroke-width="2"/>
+    </g>
+    
+    <!-- Zone 3: Footer - Low Confidence -->
+    <g opacity="0.85">
+      <rect x="32" y="200" width="200" height="50" rx="6" fill="url(#confidenceLow)" opacity="0.12" stroke="#ef4444" stroke-width="1.5"/>
+      <rect x="32" y="200" width="200" height="50" rx="6" fill="none" stroke="#f87171" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+      <!-- Corner markers -->
+      <path d="M 32 208 L 32 200 L 40 200" fill="none" stroke="#f87171" stroke-width="2"/>
+      <path d="M 224 200 L 232 200 L 232 208" fill="none" stroke="#f87171" stroke-width="2"/>
+      <path d="M 232 242 L 232 250 L 224 250" fill="none" stroke="#f87171" stroke-width="2"/>
+      <path d="M 40 250 L 32 250 L 32 242" fill="none" stroke="#f87171" stroke-width="2"/>
+    </g>
+    
+    <!-- Scan Line Animation Effect -->
+    <rect x="16" y="100" width="340" height="3" fill="url(#scanLine)" filter="url(#scanGlow)"/>
+    
+    <!-- Crosshair at center -->
+    <g transform="translate(180, 150)" opacity="0.6">
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#1258ca" stroke-width="1"/>
+      <circle cx="0" cy="0" r="8" fill="none" stroke="#1258ca" stroke-width="1"/>
+      <line x1="-24" y1="0" x2="24" y2="0" stroke="#1258ca" stroke-width="1"/>
+      <line x1="0" y1="-24" x2="0" y2="24" stroke="#1258ca" stroke-width="1"/>
+    </g>
+  </g>
+  
+  <!-- Zone Labels -->
+  <!-- Label 1 -->
+  <g transform="translate(340, 54)">
+    <rect x="0" y="-14" width="80" height="28" rx="6" fill="#1258ca" filter="url(#shadowSoft)"/>
+    <text x="40" y="4" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Titre 98%</text>
+  </g>
+  
+  <!-- Label 2 -->
+  <g transform="translate(340, 155)">
+    <rect x="0" y="-14" width="80" height="28" rx="6" fill="#f59e0b" filter="url(#shadowSoft)"/>
+    <text x="40" y="4" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Section 72%</text>
+  </g>
+  
+  <!-- Label 3 -->
+  <g transform="translate(244, 225)">
+    <rect x="0" y="-14" width="80" height="28" rx="6" fill="#ef4444" filter="url(#shadowSoft)"/>
+    <text x="40" y="4" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Bas 45%</text>
+  </g>
+  
+  <!-- Right Panel: Analysis Controls -->
+  <rect x="372" y="12" width="176" height="276" rx="16" fill="url(#cardGradient)" filter="url(#shadowMedium)"/>
+  
+  <!-- Panel Header -->
+  <text x="460" y="44" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="14" font-weight="600" fill="#f8fafc" text-anchor="middle">Analyse Vision</text>
+  
+  <!-- Confidence Legend -->
+  <g transform="translate(388, 64)">
+    <text x="0" y="0" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="500" fill="#94a3b8">Confiance</text>
+    
+    <!-- High -->
+    <g transform="translate(0, 16)">
+      <rect x="0" y="0" width="12" height="12" rx="3" fill="url(#confidenceHigh)"/>
+      <text x="20" y="10" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Élevée &gt;90%</text>
+    </g>
+    
+    <!-- Medium -->
+    <g transform="translate(0, 36)">
+      <rect x="0" y="0" width="12" height="12" rx="3" fill="url(#confidenceMedium)"/>
+      <text x="20" y="10" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Moyenne 50-90%</text>
+    </g>
+    
+    <!-- Low -->
+    <g transform="translate(0, 56)">
+      <rect x="0" y="0" width="12" height="12" rx="3" fill="url(#confidenceLow)"/>
+      <text x="20" y="10" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="500" fill="#e2e8f0">Faible &lt;50%</text>
+    </g>
+  </g>
+  
+  <!-- Detected Elements List -->
+  <g transform="translate(388, 152)">
+    <text x="0" y="0" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="500" fill="#94a3b8">Éléments détectés</text>
+    
+    <!-- Item 1 -->
+    <g transform="translate(0, 16)">
+      <rect x="0" y="0" width="144" height="32" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="16" cy="16" r="6" fill="url(#confidenceHigh)"/>
+      <text x="30" y="12" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="9" font-weight="600" fill="#f8fafc">En-tête document</text>
+      <text x="30" y="24" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="400" fill="#94a3b8">Zone 1 • Confiance 98%</text>
+      <circle cx="128" cy="16" r="8" fill="#1258ca" opacity="0.2"/>
+      <text x="128" y="20" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="600" fill="#3b82f6" text-anchor="middle">✓</text>
+    </g>
+    
+    <!-- Item 2 -->
+    <g transform="translate(0, 52)">
+      <rect x="0" y="0" width="144" height="32" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="16" cy="16" r="6" fill="url(#confidenceMedium)"/>
+      <text x="30" y="12" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="9" font-weight="600" fill="#f8fafc">Corps de texte</text>
+      <text x="30" y="24" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="400" fill="#94a3b8">Zone 2 • Confiance 72%</text>
+      <circle cx="128" cy="16" r="8" fill="#f59e0b" opacity="0.2"/>
+      <text x="128" y="20" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="600" fill="#fbbf24" text-anchor="middle">!</text>
+    </g>
+    
+    <!-- Item 3 -->
+    <g transform="translate(0, 88)">
+      <rect x="0" y="0" width="144" height="32" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="16" cy="16" r="6" fill="url(#confidenceLow)"/>
+      <text x="30" y="12" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="9" font-weight="600" fill="#f8fafc">Pied de page</text>
+      <text x="30" y="24" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="400" fill="#94a3b8">Zone 3 • Confiance 45%</text>
+      <circle cx="128" cy="16" r="8" fill="#ef4444" opacity="0.2"/>
+      <text x="128" y="20" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="8" font-weight="600" fill="#f87171" text-anchor="middle">?</text>
+    </g>
+  </g>
+  
+  <!-- Action Buttons -->
+  <g transform="translate(388, 236)">
+    <rect x="0" y="0" width="144" height="36" rx="8" fill="url(#confidenceHigh)" filter="url(#shadowSoft)"/>
+    <text x="72" y="23" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Valider l'analyse</text>
+  </g>
+  
+  <!-- Secondary Button -->
+  <g transform="translate(388, 276)">
+    <rect x="0" y="-32" width="144" height="32" rx="8" fill="none" stroke="#334155" stroke-width="1"/>
+    <text x="72" y="-12" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="11" font-weight="500" fill="#94a3b8" text-anchor="middle">Rejeter &amp; réanalyser</text>
+  </g>
+  
+  <!-- Status Badge -->
+  <g transform="translate(16, 16)">
+    <rect x="0" y="0" width="80" height="24" rx="12" fill="#1258ca" opacity="0.9" filter="url(#glowBlue)"/>
+    <circle cx="16" cy="12" r="4" fill="#22d3ee">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="48" y="16" font-family="Inter, Plus Jakarta Sans, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Analyse...</text>
+  </g>
+</g>
+<g id="comp_vision_analyze_btn" class="kimi-comp" transform="translate(276,328) scale(1.0000)">
+  <title>Bouton Analyser</title>
+<defs>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="360" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7e42"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <filter id="btnGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#f05e23" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="10" width="320" height="60" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="32" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="700" fill="#151515">Analyse IA</text>
+
+  <!-- Launch button -->
+  <g filter="url(#btnGlow)">
+    <rect x="200" y="20" width="130" height="40" rx="9999" fill="url(#btnGrad)"/>
+  </g>
+
+  <!-- Rocket icon -->
+  <g transform="translate(216 32) scale(1.2)">
+    <path d="M7 2c0-1.1-.9-2-2-2s-2 .9-2 2v2h4V2z" fill="#ffffff"/>
+    <path d="M12 6H4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" fill="#ffffff"/>
+    <path d="M10 12H6v2h4v-2z" fill="#ffffff"/>
+  </g>
+
+  <!-- Button label -->
+  <text x="248" y="43" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" letter-spacing="0.2">Lancer l'analyse</text>
+
+  <!-- Metadata -->
+  <text x="40" y="55" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">GEMINI POWERED</text>
+</g>
+<g id="comp_vision_regenerate" class="kimi-comp" transform="translate(276,420) scale(1.0000)">
+  <title>Régénérer Analyse</title>
+<defs>
+    <filter id="cardShadow" x="-20" y="-20" width="400" height="120">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#5a86ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="12" width="320" height="56" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="34" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="700" fill="#151515">Analyse</text>
+
+  <!-- Subtext -->
+  <text x="40" y="54" font-family="Inter, sans-serif" font-size="13" fill="#6b7280">Relancer si le résultat ne convient pas</text>
+
+  <!-- Button -->
+  <rect x="244" y="24" width="84" height="32" rx="6" fill="url(#btnGrad)"/>
+  <text x="272" y="43" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">🔄 Régénérer</text>
+</g>
+</g>
+<g id="n1_layout" class="af-organ" data-genome-id="n1_layout" data-name="Layout Selection" data-ui-role="dashboard" data-index="5">
+<rect x="260" y="740" width="480" height="360" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_choice_style" class="kimi-comp" transform="translate(276,756) scale(1.0000)">
+  <title>Choix Style</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="376" height="196">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="gradAccent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1258ca"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans", Inter, sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .label { font-family:Inter, system-ui, sans-serif; font-weight:600; font-size:13px; fill:#151515; }
+      .meta { font-family:Inter, system-ui, sans-serif; font-weight:500; font-size:10px; fill:#666; letter-spacing:1.5; text-transform:uppercase; }
+      .check { font-family:Inter, system-ui, sans-serif; font-weight:600; font-size:11px; fill:#ffffff; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="16" width="328" height="148" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="40" class="title">Choix Style</text>
+
+  <!-- Radio cards 2×2 -->
+  <!-- Minimal -->
+  <g>
+    <rect x="32" y="56" width="144" height="48" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <circle cx="44" cy="80" r="10" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="60" y="74" class="label">Minimal</text>
+    <text x="60" y="90" class="meta">Épuré &amp; clair</text>
+  </g>
+
+  <!-- Brutaliste -->
+  <g>
+    <rect x="192" y="56" width="144" height="48" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <circle cx="204" cy="80" r="10" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="220" y="74" class="label">Brutaliste</text>
+    <text x="220" y="90" class="meta">Raw &amp; audacieux</text>
+  </g>
+
+  <!-- Moderne -->
+  <g>
+    <rect x="32" y="112" width="144" height="48" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <circle cx="44" cy="136" r="10" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="60" y="130" class="label">Moderne</text>
+    <text x="60" y="146" class="meta">Fluides &amp; animations</text>
+  </g>
+
+  <!-- Corporate -->
+  <g>
+    <rect x="192" y="112" width="144" height="48" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <circle cx="204" cy="136" r="10" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="220" y="130" class="label">Corporate</text>
+    <text x="220" y="146" class="meta">Professionnel &amp; stable</text>
+  </g>
+</g>
+<g id="comp_layout_card" class="kimi-comp" transform="translate(276,948) scale(1.0000)">
+  <title>Carte Layout</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#ffb703"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card -->
+  <rect x="16" y="16" width="328" height="148" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Preview image -->
+  <rect x="32" y="32" width="104" height="80" rx="6" fill="#f8f7f4"/>
+  <rect x="40" y="40" width="88" height="8" rx="2" fill="#e5e4e1"/>
+  <rect x="40" y="52" width="64" height="8" rx="2" fill="#e5e4e1"/>
+  <rect x="40" y="64" width="72" height="8" rx="2" fill="#e5e4e1"/>
+  <rect x="40" y="76" width="56" height="8" rx="2" fill="#e5e4e1"/>
+
+  <!-- Selection indicator -->
+  <circle cx="136" cy="40" r="8" fill="#ffffff" stroke="#ffd548" stroke-width="2"/>
+  <circle cx="136" cy="40" r="4" fill="#ffd548"/>
+
+  <!-- Title -->
+  <text x="152" y="52" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Carte Layout</text>
+
+  <!-- Subtitle -->
+  <text x="152" y="72" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Cliquable avec preview</text>
+
+  <!-- Action -->
+  <rect x="152" y="88" width="80" height="28" rx="9999" fill="url(#accentGrad)"/>
+  <text x="192" y="106" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Sélectionner</text>
+</g>
+</g>
+<g id="n1_validation" class="af-organ" data-genome-id="n1_validation" data-name="Validation Composants" data-ui-role="dashboard" data-index="6">
+<rect x="772" y="740" width="628" height="360" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_validation_dashboard" class="kimi-comp" transform="translate(788,756) scale(1.0000)">
+  <title>Dashboard Validation</title>
+<defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#7dd87a"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans",Inter,sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .body { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:#151515; }
+      .label { font-family:Inter,system-ui,sans-serif; font-size:10px; fill:#151515; letter-spacing:1.5px; text-transform:uppercase; }
+      .metric { font-family:Inter,system-ui,sans-serif; font-size:24px; font-weight:600; fill:#151515; }
+      .unit { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:#666; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="520" height="260" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Header -->
+  <text x="40" y="50" class="title">Validation Dashboard</text>
+  <text x="40" y="70" class="body">Explore quality metrics across zones, layout, style &amp; trust.</text>
+
+  <!-- Metric cards -->
+  <g>
+    <!-- Zones -->
+    <rect x="40" y="90" width="110" height="80" rx="6" fill="#f8f7f4"/>
+    <text x="50" y="110" class="label">Zones</text>
+    <text x="50" y="135" class="metric">42</text>
+    <circle cx="130" cy="125" r="12" fill="#97ea90"/>
+    <text x="130" y="130" text-anchor="middle" font-family="Inter" font-size="12" fill="#ffffff">✓</text>
+
+    <!-- Layout -->
+    <rect x="170" y="90" width="110" height="80" rx="6" fill="#f8f7f4"/>
+    <text x="180" y="110" class="label">Layout</text>
+    <text x="180" y="135" class="metric">98%</text>
+    <text x="180" y="150" class="unit">alignment score</text>
+
+    <!-- Style -->
+    <rect x="300" y="90" width="110" height="80" rx="6" fill="#f8f7f4"/>
+    <text x="310" y="110" class="label">Style</text>
+    <text x="310" y="135" class="metric">A+</text>
+    <text x="310" y="150" class="unit">consistency</text>
+
+    <!-- Trust -->
+    <rect x="430" y="90" width="110" height="80" rx="6" fill="#f8f7f4"/>
+    <text x="440" y="110" class="label">Trust</text>
+    <text x="440" y="135" class="metric">5.0</text>
+    <text x="440" y="150" class="unit">user rating</text>
+  </g>
+
+  <!-- Action bar -->
+  <rect x="40" y="190" width="500" height="1" fill="#e5e5e5"/>
+  <rect x="40" y="210" width="120" height="36" rx="6" fill="url(#btnGrad)"/>
+  <text x="100" y="232" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#ffffff">Explore</text>
+
+  <!-- Mini legend -->
+  <text x="180" y="230" class="body">Last validated: 2 min ago</text>
+  <circle cx="340" cy="225" r="4" fill="#97ea90"/>
+  <text x="350" y="230" class="body">All systems operational</text>
+</g>
+<g id="comp_validation_accordion" class="kimi-comp" transform="translate(788,1068) scale(1.0000)">
+  <title>Résumé Décisions</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="456" height="256">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#5b8bf7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="16" width="408" height="208" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Résumé Décisions</text>
+
+  <!-- Accordion item 1 -->
+  <g id="zone1">
+    <rect x="32" y="64" width="376" height="44" rx="6" fill="#f8f7f4"/>
+    <text x="48" y="88" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Zones validées</text>
+    <circle cx="384" cy="86" r="12" fill="#2458f3"/>
+    <path d="M380 82 l8 8-8 8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Accordion item 2 -->
+  <g id="zone2">
+    <rect x="32" y="116" width="376" height="44" rx="6" fill="#f8f7f4"/>
+    <text x="48" y="140" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Style</text>
+    <circle cx="384" cy="138" r="12" fill="#2458f3"/>
+    <path d="M380 134 l8 8-8 8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Accordion item 3 -->
+  <g id="zone3">
+    <rect x="32" y="168" width="376" height="44" rx="6" fill="#f8f7f4"/>
+    <text x="48" y="192" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Ajustements</text>
+    <circle cx="384" cy="190" r="12" fill="#2458f3"/>
+    <path d="M380 186 l8 8-8 8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</g>
+</g>
+<g id="n1_adaptation" class="af-organ" data-genome-id="n1_adaptation" data-name="Adaptation / Zoom Atome" data-ui-role="dashboard" data-index="7">
+<rect x="260" y="1140" width="680" height="340" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_zoom_controls" class="kimi-comp" transform="translate(276,1156) scale(1.0000)">
+  <title>Contrôles Zoom</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0d3d8c"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans", Inter, sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .label { font-family:Inter, system-ui, sans-serif; font-weight:600; font-size:14px; fill:#ffffff; }
+      .meta { font-family:Inter, system-ui, sans-serif; font-weight:500; font-size:10px; fill:#666666; letter-spacing:1.5px; text-transform:uppercase; }
+      .crumb { font-family:Inter, system-ui, sans-serif; font-weight:500; font-size:12px; fill:#1258ca; }
+      .crumbSep { font-family:Inter, system-ui, sans-serif; font-weight:500; font-size:12px; fill:#999999; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="400" height="200" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="54" class="title">Contrôles Zoom</text>
+
+  <!-- Breadcrumb -->
+  <text x="40" y="80" class="crumb">Accueil</text>
+  <text x="88" y="80" class="crumbSep">/</text>
+  <text x="100" y="80" class="crumb">Carte</text>
+  <text x="132" y="80" class="crumbSep">/</text>
+  <text x="144" y="80" class="crumb">Vue détaillée</text>
+
+  <!-- Zoom controls bar -->
+  <rect x="40" y="110" width="360" height="48" rx="8" fill="#f8f7f4"/>
+
+  <!-- Out button -->
+  <rect x="56" y="118" width="72" height="32" rx="6" fill="url(#grad)"/>
+  <text x="92" y="138" class="label" text-anchor="middle">Out</text>
+  <path d="M68 130h16" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Corps dropdown -->
+  <rect x="144" y="118" width="96" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+  <text x="192" y="138" class="meta" text-anchor="middle" fill="#151515">Corps</text>
+  <path d="M220 128l4 4 4-4" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- In button -->
+  <rect x="256" y="118" width="72" height="32" rx="6" fill="url(#grad)"/>
+  <text x="292" y="138" class="label" text-anchor="middle">In</text>
+  <path d="M268 130h16M276 122v16" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Metadata -->
+  <text x="40" y="190" class="meta">Zoom actuel : 100 %</text>
+</g>
+<g id="comp_zoom_out" class="kimi-comp" transform="translate(276,1408) scale(1.0000)">
+  <title>Zoom Out</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#6ad462"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="10" width="320" height="60" fill="#ffffff" rx="12" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="40" y="32" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="700" fill="#151515">Navigation</text>
+
+  <!-- Button -->
+  <rect x="220" y="20" width="110" height="40" fill="url(#btnGrad)" rx="9999"/>
+  <g transform="translate(240 40)">
+    <path d="M0,-6 L-6,6 L6,6 Z" fill="#ffffff" transform="rotate(180)"/>
+  </g>
+  <text x="260" y="35" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" letter-spacing="0.5">Remonter</text>
+</g>
+</g>
+<g id="n1_upload" class="af-organ" data-genome-id="n1_upload" data-name="Upload Design" data-ui-role="upload-zone" data-index="8">
+<rect x="1112" y="60" width="288" height="420" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_color_palette" class="kimi-comp" transform="translate(1128,76) scale(0.5818)">
+  <title>Palette Extraite</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="456" height="256">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="gradAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7a47"/>
+    </linearGradient>
+    <style>
+      .title{font-family:"Plus Jakarta Sans",Inter,sans-serif;font-weight:700;font-size:18px;fill:#151515}
+      .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:#151515}
+      .chip{font-family:Inter,system-ui,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;fill:#ffffff}
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="24" y="24" width="392" height="192" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Title -->
+  <text x="48" y="56" class="title">Palette Extraite</text>
+
+  <!-- Swatches -->
+  <rect x="48" y="80" width="72" height="72" rx="8" fill="#1258ca"/>
+  <rect x="128" y="80" width="72" height="72" rx="8" fill="#f05e23"/>
+  <rect x="208" y="80" width="72" height="72" rx="8" fill="#ffd548"/>
+  <rect x="288" y="80" width="72" height="72" rx="8" fill="#97ea90"/>
+
+  <!-- Hex labels -->
+  <text x="84" y="168" class="label" text-anchor="middle">#1258ca</text>
+  <text x="164" y="168" class="label" text-anchor="middle">#f05e23</text>
+  <text x="244" y="168" class="label" text-anchor="middle">#ffd548</text>
+  <text x="324" y="168" class="label" text-anchor="middle">#97ea90</text>
+
+  <!-- Chips -->
+  <rect x="48" y="184" width="64" height="24" rx="12" fill="url(#gradAccent)"/>
+  <text x="80" y="199" class="chip" text-anchor="middle">Primary</text>
+
+  <rect x="120" y="184" width="64" height="24" rx="12" fill="#151515"/>
+  <text x="152" y="199" class="chip" text-anchor="middle">Accent</text>
+
+  <rect x="192" y="184" width="64" height="24" rx="12" fill="#ffd548"/>
+  <text x="224" y="199" class="chip" text-anchor="middle">Gold</text>
+
+  <rect x="264" y="184" width="64" height="24" rx="12" fill="#97ea90"/>
+  <text x="296" y="199" class="chip" text-anchor="middle">Success</text>
+</g>
+<g id="comp_upload_dropzone" class="kimi-comp" transform="translate(1128,227) scale(0.6400)">
+  <title>Zone Upload</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="416" height="236">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0d47b1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="16" width="368" height="188" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="48" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#151515">
+    Zone Upload
+  </text>
+
+  <!-- Drop zone -->
+  <rect x="32" y="64" width="336" height="108" rx="6" fill="#f8f7f4" stroke="#e5e4e1" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <!-- Folder icon -->
+  <g transform="translate(188 92)">
+    <path d="M0 8h24v16H0z" fill="#ffd548" rx="2"/>
+    <path d="M0 8h8l4-4h12v16H0z" fill="#ffd548"/>
+  </g>
+
+  <!-- Drop prompt -->
+  <text x="200" y="130" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515" text-anchor="middle">
+    Déposez un fichier ici
+  </text>
+
+  <!-- Or divider -->
+  <text x="200" y="150" font-family="Inter, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">
+    ou
+  </text>
+
+  <!-- Browse button -->
+  <rect x="156" y="158" width="88" height="32" rx="9999" fill="url(#btnGrad)"/>
+  <text x="200" y="178" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">
+    Parcourir
+  </text>
+</g>
+<g id="comp_upload_delete" class="kimi-comp" transform="translate(1128,379) scale(0.7111)">
+  <title>Suppression Upload</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="100%" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0d48a3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="12" y="12" width="336" height="56" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="28" y="36" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Suppression Upload</text>
+
+  <!-- Delete button -->
+  <rect x="264" y="24" width="72" height="32" rx="6" fill="url(#btnGrad)"/>
+  <text x="300" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Delete</text>
+
+  <!-- Trash icon -->
+  <g transform="translate(276,32)">
+    <path d="M2 4h12M4 4V2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-2 0v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4h8z" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</g>
+<g id="comp_preview_zones" class="kimi-comp" transform="translate(1128,447) scale(0.5818)">
+  <title>Aperçu Zones</title>
+<defs>
+    <filter id="cardShadow" x="-8" y="-8" width="456" height="256">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1a40c0"/>
+    </linearGradient>
+    <style>
+      .title { font-family:"Plus Jakarta Sans", Inter, sans-serif; font-weight:700; font-size:18px; fill:#151515; }
+      .body { font-family:Inter, system-ui, sans-serif; font-size:13px; fill:#444; }
+      .meta { font-family:Inter, system-ui, sans-serif; font-size:10px; fill:#888; letter-spacing:1.5px; text-transform:uppercase; }
+      .zone { mix-blend-mode:multiply; opacity:0.6; }
+    </style>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="16" width="408" height="208" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="44" class="title">Aperçu Zones</text>
+
+  <!-- Image preview -->
+  <rect x="32" y="56" width="160" height="120" rx="6" fill="#f8f7f4"/>
+  <image x="32" y="56" width="160" height="120" preserveAspectRatio="xMidYMid slice"
+         href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTYwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2Y4ZjdmNCIvPjx0ZXh0IHg9IjgwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UHJldmlldyBJbWFnZTwvdGV4dD48L3N2Zz4="/>
+
+  <!-- Highlight zones -->
+  <rect class="zone" x="48" y="80" width="40" height="32" rx="4" fill="#2458f3"/>
+  <rect class="zone" x="100" y="120" width="56" height="24" rx="4" fill="#97ea90"/>
+  <rect class="zone" x="140" y="90" width="36" height="44" rx="4" fill="#ffd548"/>
+
+  <!-- Info panel -->
+  <rect x="208" y="56" width="184" height="120" rx="6" fill="#f8f7f4"/>
+  <text x="220" y="78" class="meta">Zones détectées</text>
+  <text x="220" y="98" class="body">Zone A · 40×32 px</text>
+  <text x="220" y="116" class="body">Zone B · 56×24 px</text>
+  <text x="220" y="134" class="body">Zone C · 36×44 px</text>
+
+  <!-- Action button -->
+  <rect x="220" y="142" width="120" height="28" rx="9999" fill="url(#btnGrad)"/>
+  <text x="280" y="161" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Explorer</text>
+</g>
+</g>
+<g id="n1_dialogue" class="af-organ" data-genome-id="n1_dialogue" data-name="Dialogue Utilisateur" data-ui-role="chat-overlay" data-index="9">
+<rect x="980" y="420" width="420" height="580" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_chat_bubbles" class="kimi-comp" transform="translate(996,436) scale(0.8818)">
+  <title>Bulles Conversation</title>
+<defs>
+    <filter id="cardShadow" x="-20" y="-20" width="480" height="280">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7b3d"/>
+    </linearGradient>
+    <linearGradient id="sGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#3a7bff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- backdrop -->
+  <rect width="440" height="240" fill="#151515" fill-opacity="0.48"/>
+
+  <!-- card -->
+  <rect x="40" y="20" width="360" height="200" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- header -->
+  <text x="60" y="50" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Conversation</text>
+  <g>
+    <rect x="320" y="34" width="60" height="28" rx="6" fill="url(#btnGrad)"/>
+    <text x="350" y="52" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Fermer</text>
+  </g>
+
+  <!-- chat bubbles -->
+  <!-- S indigo -->
+  <g>
+    <rect x="60" y="70" width="180" height="36" rx="18" fill="url(#sGrad)"/>
+    <text x="74" y="93" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#ffffff">Bonjour, comment puis-je vous aider ?</text>
+  </g>
+
+  <!-- user -->
+  <g>
+    <rect x="220" y="120" width="160" height="36" rx="18" fill="#f8f7f4"/>
+    <text x="234" y="143" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#151515">J’ai une question sur mon compte</text>
+  </g>
+
+  <!-- S indigo -->
+  <g>
+    <rect x="60" y="170" width="200" height="36" rx="18" fill="url(#sGrad)"/>
+    <text x="74" y="193" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#ffffff">Bien sûr, je vous écoute. De quoi s’agit-il ?</text>
+  </g>
+</g>
+<g id="comp_chat_input" class="kimi-comp" transform="translate(996,659) scale(0.8818)">
+  <title>Input Message</title>
+<defs>
+    <filter id="cardShadow" x="-12" y="-12" width="464" height="264">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="sendGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#3b6ff3"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="24" width="400" height="192" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  <text x="40" y="56" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#151515">Input Message</text>
+  <rect x="40" y="80" width="360" height="72" rx="8" fill="#f8f7f4"/>
+  <text x="56" y="116" font-family="Inter, system-ui, sans-serif" font-size="16" fill="#666666">Type your message here…</text>
+  <g transform="translate(56, 144)">
+    <rect x="0" y="0" width="32" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="8" y="21" font-family="Inter, system-ui, sans-serif" font-size="16" fill="#2458f3">📎</text>
+  </g>
+  <g transform="translate(104, 144)">
+    <rect x="0" y="0" width="32" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="8" y="21" font-family="Inter, system-ui, sans-serif" font-size="16" fill="#2458f3">😊</text>
+  </g>
+  <rect x="336" y="144" width="64" height="32" rx="9999" fill="url(#sendGradient)"/>
+  <text x="368" y="164" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">➤</text>
+</g>
+<g id="comp_chat_answer" class="kimi-comp" transform="translate(996,882) scale(1.0000)">
+  <title>Réponse Question</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#7bd974"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="16" y="16" width="328" height="148" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Section title -->
+  <text x="32" y="44" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#151515">
+    Réponse Question
+  </text>
+
+  <!-- Question label -->
+  <text x="32" y="68" font-family="Inter, sans-serif" font-size="14" fill="#555555">
+    Choisissez une option :
+  </text>
+
+  <!-- Option 1 -->
+  <rect x="32" y="80" width="296" height="36" rx="6" fill="#f8f7f4"/>
+  <text x="44" y="102" font-family="Inter, sans-serif" font-size="14" fill="#151515">
+    Oui, absolument
+  </text>
+  <circle cx="308" cy="98" r="10" fill="none" stroke="#cccccc" stroke-width="2"/>
+
+  <!-- Option 2 -->
+  <rect x="32" y="124" width="296" height="36" rx="6" fill="#f8f7f4"/>
+  <text x="44" y="146" font-family="Inter, sans-serif" font-size="14" fill="#151515">
+    Non, pas du tout
+  </text>
+  <circle cx="308" cy="142" r="10" fill="none" stroke="#cccccc" stroke-width="2"/>
+
+  <!-- Submit button -->
+  <rect x="232" y="124" width="96" height="36" rx="9999" fill="url(#btnGrad)"/>
+  <text x="280" y="146" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">
+    Valider
+  </text>
+</g>
+</g>
+<g id="n1_navigation" class="af-organ" data-genome-id="n1_navigation" data-name="Navigation" data-ui-role="onboarding-flow" data-index="10">
+<rect x="972" y="1140" width="428" height="200" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_stepper" class="kimi-comp" transform="translate(988,1156) scale(0.9000)">
+  <title>Stepper 9 Étapes</title>
+<defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="gradActive" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7b3d"/>
+    </linearGradient>
+    <linearGradient id="gradCompleted" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#3a7bff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Header bar -->
+  <rect x="0" y="0" width="440" height="72" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Logo / Title -->
+  <text x="24" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#0D0E13">Stepper 9 Étapes</text>
+
+  <!-- Actions -->
+  <g>
+    <rect x="360" y="20" width="60" height="32" rx="6" fill="#f05e23"/>
+    <text x="390" y="40" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Aide</text>
+  </g>
+
+  <!-- Stepper container -->
+  <g transform="translate(24, 88)">
+    <!-- Line -->
+    <line x1="24" y1="24" x2="392" y2="24" stroke="#e5e7eb" stroke-width="2"/>
+
+    <!-- Step 1 completed -->
+    <g>
+      <circle cx="24" cy="24" r="12" fill="url(#gradCompleted)"/>
+      <path d="M19 24l3 3 6-6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="24" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#0D0E13" text-anchor="middle">1. Accueil</text>
+    </g>
+
+    <!-- Step 2 completed -->
+    <g>
+      <circle cx="70" cy="24" r="12" fill="url(#gradCompleted)"/>
+      <path d="M65 24l3 3 6-6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="70" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#0D0E13" text-anchor="middle">2. Profil</text>
+    </g>
+
+    <!-- Step 3 completed -->
+    <g>
+      <circle cx="116" cy="24" r="12" fill="url(#gradCompleted)"/>
+      <path d="M111 24l3 3 6-6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="116" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#0D0E13" text-anchor="middle">3. Projet</text>
+    </g>
+
+    <!-- Step 4 active -->
+    <g>
+      <circle cx="162" cy="24" r="12" fill="url(#gradActive)"/>
+      <text x="162" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+      <text x="162" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f05e23" text-anchor="middle">4. Budget</text>
+    </g>
+
+    <!-- Step 5 future -->
+    <g>
+      <circle cx="208" cy="24" r="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+      <text x="208" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#9ca3af" text-anchor="middle">5</text>
+      <text x="208" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">5. Équipe</text>
+    </g>
+
+    <!-- Step 6 future -->
+    <g>
+      <circle cx="254" cy="24" r="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+      <text x="254" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#9ca3af" text-anchor="middle">6</text>
+      <text x="254" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">6. Planning</text>
+    </g>
+
+    <!-- Step 7 future -->
+    <g>
+      <circle cx="300" cy="24" r="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+      <text x="300" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#9ca3af" text-anchor="middle">7</text>
+      <text x="300" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">7. Validation</text>
+    </g>
+
+    <!-- Step 8 future -->
+    <g>
+      <circle cx="346" cy="24" r="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+      <text x="346" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#9ca3af" text-anchor="middle">8</text>
+      <text x="346" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">8. Paiement</text>
+    </g>
+
+    <!-- Step 9 future -->
+    <g>
+      <circle cx="392" cy="24" r="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+      <text x="392" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#9ca3af" text-anchor="middle">9</text>
+      <text x="392" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">9. Confirmation</text>
+    </g>
+  </g>
+</g>
+</g>
+</g>
+<g id="n0_deploy" class="af-phase" data-genome-id="n0_deploy">
+<rect x="0" y="2460" width="1440" height="400" fill="#f7f6f2"/>
+<rect x="0" y="2460" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="2470" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="2489" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="2473" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="2488" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="2473" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="2488" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="2473" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="2488" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="2473" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="286" y="2488" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="2474" x2="324" y2="2494" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="2484" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="2488" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="2508" width="188" height="352" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="2528" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DEPLOY</text>
+<rect x="46" y="2538" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="2547" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="2559" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Export / Télécharg</text>
+<g id="n1_export" class="af-organ" data-genome-id="n1_export" data-name="Export / Téléchargement" data-ui-role="export-action" data-index="11">
+<rect x="380" y="60" width="680" height="280" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+<g id="comp_download_zip" class="kimi-comp" transform="translate(396,76) scale(1.0000)">
+  <title>Téléchargement ZIP</title>
+<defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff7a00"/>
+      <stop offset="100%" stop-color="#f05e23"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="20" y="20" width="400" height="200" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Icon -->
+  <g transform="translate(40 60)">
+    <rect x="0" y="0" width="48" height="56" rx="4" fill="#ffece4"/>
+    <rect x="4" y="4" width="40" height="48" rx="2" fill="#ffd548"/>
+    <text x="24" y="32" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#ffffff" text-anchor="middle">ZIP</text>
+  </g>
+
+  <!-- Title -->
+  <text x="108" y="70" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Archive complète</text>
+
+  <!-- Meta -->
+  <text x="108" y="90" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">2.3 MB • 42 fichiers • MAJ 12 juin 2024</text>
+
+  <!-- Progress bar (static) -->
+  <rect x="108" y="110" width="240" height="6" rx="3" fill="#e5e7eb"/>
+  <rect x="108" y="110" width="240" height="6" rx="3" fill="#f05e23"/>
+
+  <!-- Download button -->
+  <g transform="translate(108 140)">
+    <rect x="0" y="0" width="240" height="44" rx="6" fill="url(#btnGrad)"/>
+    <text x="120" y="28" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">📥 Télécharger le ZIP</text>
+  </g>
+
+  <!-- Secondary info -->
+  <text x="108" y="210" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">Aucune inscription requise • Scan antivirus OK</text>
+</g>
+</g>
+</g>
+</svg>

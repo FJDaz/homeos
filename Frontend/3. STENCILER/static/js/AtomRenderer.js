@@ -109,9 +109,9 @@ export function renderAtom(nodeData, availableWidth, color) {
         height = metrics.inputHeight * 2 + 10;
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="${metrics.inputHeight}" rx="${metrics.radius}" fill="var(--bg-tertiary)" stroke="var(--border-subtle)"/>
-            <text x="12" y="${metrics.inputHeight / 2 + 3}" font-size="${metrics.fontSize}" fill="var(--text-muted)">📝 Champ 1...</text>
+            <rect x="8" y="${metrics.inputHeight / 2 - 1}" width="40" height="2" rx="1" fill="var(--text-muted)" opacity="0.3"/>
             <rect x="0" y="${metrics.inputHeight + 6}" width="${availableWidth}" height="${metrics.inputHeight}" rx="${metrics.radius}" fill="var(--bg-tertiary)" stroke="var(--border-subtle)"/>
-            <text x="12" y="${metrics.inputHeight * 1.5 + 9}" font-size="${metrics.fontSize}" fill="var(--text-muted)">📝 Champ 2...</text>
+            <rect x="8" y="${metrics.inputHeight * 1.5 + 5}" width="30" height="2" rx="1" fill="var(--text-muted)" opacity="0.3"/>
         `;
     }
     // 3. Listes simples
@@ -132,19 +132,19 @@ export function renderAtom(nodeData, availableWidth, color) {
         const colW = availableWidth / 3;
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="20" fill="var(--bg-tertiary)" rx="4"/>
-            <text x="8" y="14" font-size="9" fill="var(--text-muted)" font-family="monospace">ID</text>
-            <text x="${colW}" y="14" font-size="9" fill="var(--text-muted)" font-family="monospace">STATUS</text>
-            <text x="${colW * 2}" y="14" font-size="9" fill="var(--text-muted)" font-family="monospace">ACTION</text>
+            <rect x="8" y="7" width="20" height="6" rx="1" fill="var(--text-muted)" opacity="0.3"/>
+            <rect x="${colW}" y="7" width="40" height="6" rx="1" fill="var(--text-muted)" opacity="0.3"/>
+            <rect x="${colW * 2}" y="7" width="40" height="6" rx="1" fill="var(--text-muted)" opacity="0.3"/>
             
             <rect x="0" y="24" width="${availableWidth}" height="1" fill="var(--border-subtle)"/>
-            <text x="8" y="40" font-size="10" fill="var(--text-primary)">OBJ-01</text>
-            <rect x="${colW}" y="32" width="40" height="12" rx="6" fill="var(--accent-terra, #C4A589)" opacity="0.3"/><text x="${colW + 20}" y="40" font-size="8" fill="var(--accent-terra, #C4A589)" text-anchor="middle" font-weight="700">actif</text>
-            <text x="${colW * 2}" y="40" font-size="10" fill="${color}">Détails →</text>
+            <rect x="8" y="34" width="30" height="8" rx="1" fill="var(--text-primary)" opacity="0.6"/>
+            <rect x="${colW}" y="32" width="40" height="12" rx="6" fill="var(--accent-terra, #C4A589)" opacity="0.3"/>
+            <rect x="${colW * 2}" y="34" width="30" height="8" rx="1" fill="${color}" opacity="0.6"/>
 
             <rect x="0" y="50" width="${availableWidth}" height="1" fill="var(--border-subtle)"/>
-            <text x="8" y="66" font-size="10" fill="var(--text-primary)">OBJ-02</text>
-            <rect x="${colW}" y="58" width="40" height="12" rx="6" fill="var(--accent-ocre, #B87B5C)" opacity="0.3"/><text x="${colW + 20}" y="66" font-size="8" fill="var(--accent-ocre, #B87B5C)" text-anchor="middle" font-weight="700">wait</text>
-            <text x="${colW * 2}" y="66" font-size="10" fill="${color}">Détails →</text>
+            <rect x="8" y="60" width="30" height="8" rx="1" fill="var(--text-primary)" opacity="0.6"/>
+            <rect x="${colW}" y="58" width="40" height="12" rx="6" fill="var(--accent-ocre, #B87B5C)" opacity="0.3"/>
+            <rect x="${colW * 2}" y="60" width="30" height="8" rx="1" fill="${color}" opacity="0.6"/>
         `;
     }
     // 5. Upload Zone
@@ -152,18 +152,16 @@ export function renderAtom(nodeData, availableWidth, color) {
         height = 80;
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="${height}" rx="8" fill="var(--bg-tertiary)" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4 4" class="subtle-shadow"/>
-            <text x="${availableWidth / 2}" y="36" font-size="24" fill="var(--text-muted)" text-anchor="middle">☁️</text>
-            <text x="${availableWidth / 2}" y="56" font-size="10" fill="var(--text-secondary)" text-anchor="middle" font-family="Geist">Glisser-déposer le fichier ici</text>
+            <path d="M ${availableWidth / 2 - 10} 45 L ${availableWidth / 2} 35 L ${availableWidth / 2 + 10} 45 M ${availableWidth / 2} 35 L ${availableWidth / 2} 55" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
         `;
     }
     // 6. Navigation / Breadcrumb
     else if (hint === 'breadcrumb') {
         height = 24;
         svgContent = `
-            <rect x="0" y="2" width="50" height="20" rx="4" fill="${color}20"/>
-            <text x="25" y="15" font-size="9" fill="${color}" text-anchor="middle" font-weight="600">Accueil</text>
-            <text x="62" y="15" font-size="12" fill="var(--text-muted)">›</text>
-            <text x="75" y="15" font-size="10" fill="var(--text-secondary)">${safeName.substring(0, 15)}</text>
+            <rect x="0" y="2" width="40" height="20" rx="4" fill="${color}20"/>
+            <rect x="55" y="11" width="10" height="2" rx="1" fill="var(--text-muted)"/>
+            <rect x="75" y="11" width="30" height="2" rx="1" fill="var(--text-secondary)"/>
         `;
     }
     // 7. Accordeon
@@ -199,7 +197,7 @@ export function renderAtom(nodeData, availableWidth, color) {
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="24" rx="12" fill="var(--bg-tertiary)"/>
             <circle cx="12" cy="12" r="4" fill="var(--accent-terra, #C4A589)"/>
-            <text x="24" y="16" font-size="10" fill="var(--text-secondary)" font-weight="700">${safeName} (actif)</text>
+            <rect x="24" y="9" width="40" height="6" rx="1" fill="var(--text-secondary)" opacity="0.5"/>
         `;
     }
     // 10. Dashboard Cards
@@ -208,9 +206,9 @@ export function renderAtom(nodeData, availableWidth, color) {
         svgContent = `
             <rect x="0" y="0" width="${availableWidth}" height="${height}" rx="8" fill="var(--bg-primary)" stroke="var(--border-subtle)" class="subtle-shadow"/>
             <rect x="12" y="12" width="24" height="24" rx="6" fill="${color}20"/>
-            <text x="24" y="28" font-size="14" text-anchor="middle">📊</text>
+            <rect x="18" y="20" width="12" height="8" rx="1" fill="${color}" opacity="0.4"/>
             <text x="44" y="22" font-size="12" fill="var(--text-primary)" font-weight="700">${safeName}</text>
-            <text x="44" y="50" font-size="20" fill="${color}" font-weight="800" letter-spacing="-1">1,234</text>
+            <rect x="44" y="35" width="40" height="12" rx="2" fill="${color}" opacity="0.2"/>
             <rect x="12" y="68" width="${availableWidth - 24}" height="4" rx="2" fill="var(--bg-tertiary)"/>
             <rect x="12" y="68" width="${(availableWidth - 24) * 0.6}" height="4" rx="2" fill="${color}"/>
         `;
@@ -233,9 +231,9 @@ export function renderAtom(nodeData, availableWidth, color) {
         height = 60;
         svgContent = `
             <rect x="0" y="0" width="${availableWidth * 0.7}" height="24" rx="12" fill="var(--bg-tertiary)"/>
-            <text x="12" y="15" font-size="10" fill="var(--text-secondary)">Message reçu...</text>
+            <rect x="12" y="11" width="30" height="2" rx="1" fill="var(--text-secondary)" opacity="0.4"/>
             <rect x="${availableWidth * 0.3}" y="32" width="${availableWidth * 0.7}" height="24" rx="12" fill="${color}"/>
-            <text x="${availableWidth - 12}" y="47" font-size="10" fill="white" text-anchor="end">Notre réponse ici</text>
+            <rect x="${availableWidth - 42}" y="43" width="30" height="2" rx="1" fill="white" opacity="0.6"/>
         `;
     }
     // 13. Grille (Layout Gallery)
@@ -244,7 +242,7 @@ export function renderAtom(nodeData, availableWidth, color) {
         const w2 = (availableWidth - 12) / 2;
         svgContent = `
             <rect x="0" y="0" width="${w2}" height="44" rx="6" fill="var(--bg-primary)" stroke="${color}" stroke-width="2" class="subtle-shadow"/>
-            <circle cx="${w2 / 2}" cy="22" r="10" fill="${color}20"/><text x="${w2 / 2}" y="26" font-size="12" fill="${color}" text-anchor="middle">✓</text>
+            <rect x="${w2 / 2 - 6}" y="16" width="12" height="12" rx="6" fill="${color}" opacity="0.2"/>
             
             <rect x="${w2 + 12}" y="0" width="${w2}" height="44" rx="6" fill="var(--bg-tertiary)" stroke="var(--border-subtle)"/>
             

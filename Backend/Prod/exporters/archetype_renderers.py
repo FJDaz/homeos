@@ -266,9 +266,16 @@ def draw_dynamic_organ(organ, x, y, w, components):
     """
     Renderer universel piloté par topology_bank.
     Pas de valeurs fictives — uniquement les données du génome.
+    Utilise la stratégie WP-inspired (layout_strategy) prioritairement.
     """
     role = organ.get('ui_role', 'main-content')
-    topo_name = ROLE_TO_TOPOLOGY.get(role, 'bento_grid')
+    gemini_strategy = organ.get('layout_strategy')
+    
+    # Priorité: 1. Gemini WP Strategy, 2. Static Mapping, 3. bento_grid
+    if gemini_strategy and gemini_strategy in TOPOLOGIES:
+        topo_name = gemini_strategy
+    else:
+        topo_name = ROLE_TO_TOPOLOGY.get(role, 'bento_grid')
 
     # Calculer la hauteur totale : somme des hauteurs planifiées + padding top
     PAD_TOP = 28

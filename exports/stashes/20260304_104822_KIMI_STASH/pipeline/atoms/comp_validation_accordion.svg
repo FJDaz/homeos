@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    
+    <!-- Gradient for active indicator -->
+    <linearGradient id="activeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ffd548"/>
+    </linearGradient>
+    
+    <!-- Subtle divider gradient -->
+    <linearGradient id="dividerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0f0f0" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#f0f0f0" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Card -->
+  <rect x="0" y="0" width="600" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="24" y="32" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Résumé Décisions</text>
+  <text x="24" y="52" font-size="11" fill="#6b7280">3 sections validées • Dernière mise à jour il y a 2h</text>
+  
+  <!-- Accordion Item 1: Active/Expanded -->
+  <!-- Left accent bar -->
+  <rect x="0" y="72" width="4" height="88" rx="0" fill="url(#activeGradient)"/>
+  
+  <!-- Item header background (subtle) -->
+  <rect x="4" y="72" width="592" height="48" fill="#fafafa"/>
+  
+  <!-- Icon: Check circle -->
+  <circle cx="40" cy="96" r="12" fill="#97ea90" fill-opacity="0.15"/>
+  <path d="M35 96l3 3 7-7" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Title -->
+  <text x="64" y="92" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="13" font-weight="600" fill="#151515">Zones validées</text>
+  <text x="64" y="108" font-size="10" fill="#6b7280">4 zones • 12 critères</text>
+  
+  <!-- Chevron up (expanded) -->
+  <path d="M556 100l-6-6-6 6" stroke="#f05e23" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Expanded Content -->
+  <text x="64" y="132" font-size="11" fill="#374151">• Zone commerciale : <tspan fill="#22c55e" font-weight="500">Validée</tspan></text>
+  <text x="64" y="148" font-size="11" fill="#374151">• Zone logistique : <tspan fill="#22c55e" font-weight="500">Validée</tspan></text>
+  
+  <!-- Divider -->
+  <rect x="24" y="159" width="552" height="1" fill="url(#dividerGradient)"/>
+  
+  <!-- Accordion Item 2: Collapsed -->
+  <circle cx="40" cy="184" r="12" fill="#ffd548" fill-opacity="0.15"/>
+  <path d="M36 184h8M40 180v8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  
+  <text x="64" y="180" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="13" font-weight="600" fill="#151515">Style &amp; charte graphique</text>
+  <text x="64" y="196" font-size="10" fill="#6b7280">En attente de validation</text>
+  
+  <!-- Status badge -->
+  <rect x="480" y="174" width="72" height="20" rx="4" fill="#ffd548" fill-opacity="0.15"/>
+  <text x="516" y="187" font-size="9" font-weight="600" fill="#b45309" text-anchor="middle">EN COURS</text>
+  
+  <!-- Chevron down -->
+  <path d="M544 184l6 6 6-6" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Divider -->
+  <rect x="24" y="215" width="552" height="1" fill="url(#dividerGradient)"/>
+  
+  <!-- Accordion Item 3: Collapsed -->
+  <circle cx="40" cy="240" r="12" fill="#e5e7eb"/>
+  <circle cx="40" cy="240" r="4" fill="#9ca3af"/>
+  
+  <text x="64" y="236" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="13" font-weight="600" fill="#151515">Ajustements finaux</text>
+  <text x="64" y="252" font-size="10" fill="#9ca3af">Bloqué — étapes précédentes requises</text>
+  
+  <!-- Status badge -->
+  <rect x="478" y="230" width="74" height="20" rx="4" fill="#f3f4f6"/>
+  <text x="515" y="243" font-size="9" font-weight="600" fill="#6b7280" text-anchor="middle">BLOQUÉ</text>
+  
+  <!-- Chevron down -->
+  <path d="M544 240l6 6 6-6" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Bottom action bar -->
+  <rect x="0" y="280" width="600" height="40" rx="0 0 12 12" fill="#fafafa"/>
+  <text x="24" y="304" font-size="10" fill="#6b7280" letter-spacing="0.5">2/3 sections complétées</text>
+  
+  <!-- Progress indicator -->
+  <rect x="400" y="294" width="120" height="6" rx="3" fill="#e5e7eb"/>
+  <rect x="400" y="294" width="80" height="6" rx="3" fill="url(#activeGradient)"/>
+  
+  <!-- Action button -->
+  <rect x="536" y="288" width="40" height="24" rx="6" fill="#f05e23"/>
+  <text x="556" y="303" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Suite</text>
+</svg>

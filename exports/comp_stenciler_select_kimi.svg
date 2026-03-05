@@ -1,0 +1,50 @@
+<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#6ad96f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sidebar -->
+  <rect width="440" height="240" fill="#1a1a2e" rx="0"/>
+
+  <!-- Choice Card 1 -->
+  <g id="card1">
+    <rect x="16" y="16" width="408" height="56" fill="#ffffff" rx="8" filter="url(#cardShadow)"/>
+    <circle cx="44" cy="44" r="16" fill="#e5e7eb"/>
+    <text x="68" y="38" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#151515">Composant A</text>
+    <text x="68" y="54" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Réf. 23A-LQ</text>
+    <rect x="304" y="28" width="56" height="32" rx="9999" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="332" y="47" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515" text-anchor="middle">Réserve</text>
+    <rect x="368" y="28" width="40" height="32" rx="9999" fill="url(#btnGrad)"/>
+    <text x="388" y="47" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">Garder</text>
+  </g>
+
+  <!-- Choice Card 2 (active) -->
+  <g id="card2">
+    <rect x="16" y="84" width="408" height="56" fill="#ffffff" rx="8" filter="url(#cardShadow)"/>
+    <circle cx="44" cy="112" r="16" fill="#97ea90"/>
+    <text x="68" y="106" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#151515">Composant B</text>
+    <text x="68" y="122" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Réf. 41B-X9</text>
+    <rect x="304" y="96" width="56" height="32" rx="9999" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="332" y="115" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515" text-anchor="middle">Réserve</text>
+    <rect x="368" y="96" width="40" height="32" rx="9999" fill="#151515"/>
+    <text x="388" y="115" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">Garder</text>
+  </g>
+
+  <!-- Choice Card 3 -->
+  <g id="card3">
+    <rect x="16" y="152" width="408" height="56" fill="#ffffff" rx="8" filter="url(#cardShadow)"/>
+    <circle cx="44" cy="180" r="16" fill="#e5e7eb"/>
+    <text x="68" y="174" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#151515">Composant C</text>
+    <text x="68" y="190" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Réf. 12C-MK</text>
+    <rect x="304" y="164" width="56" height="32" rx="9999" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="332" y="183" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515" text-anchor="middle">Réserve</text>
+    <rect x="368" y="164" width="40" height="32" rx="9999" fill="url(#btnGrad)"/>
+    <text x="388" y="183" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">Garder</text>
+  </g>
+</svg>

@@ -1,0 +1,134 @@
+{
+  "task_id": "figma_bridge_21a_genome_svg",
+  "description": "Mission 21A — Créer genome_to_svg.py (génère SVG scaffold balisé depuis le genome JSON) et ajouter GET /api/export/svg dans server_9998_v2.py. Le SVG généré = calques nommés par IDs genome, ouvrable dans Illustrator.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "AetherFlow Genome Design Bridge. Genome structure: n0_phases → n1_sections → n2_features → n3_components. Chaque niveau a un id (ex: n1_ir, n2_auth, n3_btn_login). Les n3 ont un visual_hint. SVG cible: 1440x900px par phase N0, organes N1 en grille, features N2 en colonnes, composants N3 en rectangles étiquetés. Illustrator préserve les IDs SVG comme noms de calques.",
+    "mission": "21A",
+    "phase": "Figma Bridge — Phase 1",
+    "actor": "AETHERFLOW",
+    "mode": "-f",
+    "roadmap_ref": "docs/02_Sullivan/FIGMA-Like/ROADMAP_FIGMA_BRIDGE.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire server_9998_v2.py pour confirmer le pattern de routing do_GET, les imports existants, et le point d'insertion de la nouvelle route GET /api/export/svg (avant le fallback 404 final).",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Pattern routing do_GET confirmé (if self.path == '...')",
+        "load_genome() confirmée (retourne dict avec n0_phases)",
+        "Point d'insertion identifié avant self.send_error_json(404, ...)"
+      ],
+      "context": {
+        "files": ["Frontend/3. STENCILER/server_9998_v2.py"],
+        "language": "python"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "CREATE — Créer Backend/Prod/exporters/__init__.py (vide) et Backend/Prod/exporters/genome_to_svg.py avec la fonction generate_svg(genome) → str SVG. Structure SVG: une page 1440x900 par phase N0, organes N1 en grille (3 col, 420px wide, spacing 40px), features N2 en colonnes dans l'organe, composants N3 = rectangles étiquetés avec visual_hint. Chaque <g> porte id= et data-genome-id= du nœud genome.",
+      "type": "code_generation",
+      "complexity": 0.65,
+      "estimated_tokens": 1400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Backend/Prod/exporters/__init__.py créé (vide)",
+        "Backend/Prod/exporters/genome_to_svg.py créé",
+        "Fonction generate_svg(genome) exportée — retourne une string SVG valide",
+        "SVG racine : <svg xmlns='http://www.w3.org/2000/svg' width='1440' height='900'>",
+        "Chaque phase N0 → <g id='n0_xxx' class='af-phase' data-genome-id='n0_xxx'>",
+        "Chaque organe N1 → <g id='n1_xxx' class='af-organ' data-genome-id='n1_xxx' data-name='...'>",
+        "Chaque feature N2 → <g id='n2_xxx' class='af-feature' data-genome-id='n2_xxx'>",
+        "Chaque composant N3 → <g id='n3_xxx' class='af-component' data-hint='visual_hint'>",
+        "N3 = rect étiqueté + text (visual_hint + name)",
+        "Organes N1 positionnés en grille : 3 colonnes, col_w=420, gap=40, start_x=40, start_y=40",
+        "Python stdlib uniquement (pas de lxml, pas de svgwrite)",
+        "Fonction main() avec argparse --output pour usage CLI"
+      ],
+      "context": {
+        "files": [],
+        "language": "python",
+        "framework": "stdlib-only"
+      },
+      "file_to_create": "Backend/Prod/exporters/genome_to_svg.py",
+      "content": "#!/usr/bin/env python3\n\"\"\"\ngenome_to_svg.py — Mission 21A Genome Design Bridge\nGénère un SVG scaffold balisé depuis le genome AetherFlow.\nChaque <g> porte l'ID genome → calques nommés dans Illustrator.\n\nUsage CLI:\n  python genome_to_svg.py --output exports/genome_scaffold.svg\n\nImport:\n  from exporters.genome_to_svg import generate_svg\n\"\"\"\n\nimport json\nimport os\nimport argparse\nfrom pathlib import Path\n\n# Layout constants (px)\nARTBOARD_W = 1440\nARTBOARD_H = 900\nCOL_W = 420       # largeur d'un organe N1\nCOL_GAP = 40      # espacement entre organes\nN_COLS = 3        # organes par ligne\nSTART_X = 40\nSTART_Y = 40\nFEAT_PAD = 10     # padding intérieur feature N2\nCOMP_H = 40       # hauteur d'un composant N3\nCOMP_GAP = 8      # espacement entre composants N3\nHEADER_H = 24    # hauteur du titre N1\nFEAT_HEADER_H = 18  # hauteur du titre N2\n\n# Couleurs\nCOL_ORGAN_BG = '#f7f6f2'\nCOL_ORGAN_STROKE = '#d5d4d0'\nCOL_FEAT_BG = '#ffffff'\nCOL_FEAT_STROKE = '#e8e7e3'\nCOL_COMP_BG = '#f0efeb'\nCOL_COMP_STROKE = '#c5c4c0'\nCOL_TEXT_MAIN = '#3d3d3c'\nCOL_TEXT_SUB = '#9d9c98'\nCOL_TEXT_HINT = '#b5b4b0'\n\n\ndef _esc(s):\n    \"\"\"Échappe les caractères XML dans les attributs.\"\"\"\n    return str(s).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\"', '&quot;')\n\n\ndef _rect(x, y, w, h, fill, stroke, rx=6):\n    return f'<rect x=\"{x}\" y=\"{y}\" width=\"{w}\" height=\"{h}\" fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"1\" rx=\"{rx}\"/>'\n\n\ndef _text(x, y, content, size=10, fill=COL_TEXT_MAIN, anchor='start', weight='normal'):\n    return f'<text x=\"{x}\" y=\"{y}\" font-size=\"{size}\" fill=\"{fill}\" text-anchor=\"{anchor}\" font-weight=\"{weight}\" font-family=\"-apple-system, Helvetica, sans-serif\">{_esc(content)}</text>'\n\n\ndef _render_n3(comp, x, y, w):\n    \"\"\"Génère le SVG d'un composant N3.\"\"\"\n    gid = _esc(comp.get('id', ''))\n    name = comp.get('name', gid)\n    hint = comp.get('visual_hint', 'component')\n    h = COMP_H\n\n    lines = [\n        f'<g id=\"{gid}\" class=\"af-component\" data-genome-id=\"{gid}\" data-hint=\"{_esc(hint)}\">',\n        _rect(x, y, w - FEAT_PAD * 2, h, COL_COMP_BG, COL_COMP_STROKE, rx=4),\n        _text(x + 8, y + 13, hint, size=8, fill=COL_TEXT_HINT),\n        _text(x + 8, y + 27, name, size=10, fill=COL_TEXT_MAIN, weight='500'),\n        '</g>'\n    ]\n    return '\\n'.join(lines), h\n\n\ndef _render_n2(feat, x, y, w):\n    \"\"\"Génère le SVG d'une feature N2 avec ses composants N3.\"\"\"\n    gid = _esc(feat.get('id', ''))\n    name = feat.get('name', gid)\n    comps = feat.get('n3_components', [])\n\n    # Calculer la hauteur totale\n    inner_h = FEAT_HEADER_H + FEAT_PAD\n    for _ in comps:\n        inner_h += COMP_H + COMP_GAP\n    inner_h += FEAT_PAD\n    total_h = inner_h\n\n    lines = [\n        f'<g id=\"{gid}\" class=\"af-feature\" data-genome-id=\"{gid}\" data-name=\"{_esc(name)}\">',\n        _rect(x, y, w - FEAT_PAD, total_h, COL_FEAT_BG, COL_FEAT_STROKE, rx=4),\n        _text(x + FEAT_PAD, y + 13, name.upper(), size=8, fill=COL_TEXT_SUB, weight='600'),\n    ]\n\n    cy = y + FEAT_HEADER_H + FEAT_PAD\n    for comp in comps:\n        svg_comp, h = _render_n3(comp, x + FEAT_PAD, cy, w - FEAT_PAD)\n        lines.append(svg_comp)\n        cy += h + COMP_GAP\n\n    lines.append('</g>')\n    return '\\n'.join(lines), total_h\n\n\ndef _render_n1(organ, x, y):\n    \"\"\"Génère le SVG d'un organe N1 avec ses features N2.\"\"\"\n    gid = _esc(organ.get('id', ''))\n    name = organ.get('name', gid)\n    feats = organ.get('n2_features', [])\n    w = COL_W\n\n    # Passe 1 : calculer hauteur totale\n    inner_y = y + HEADER_H + FEAT_PAD\n    for feat in feats:\n        comps = feat.get('n3_components', [])\n        fh = FEAT_HEADER_H + FEAT_PAD + (COMP_H + COMP_GAP) * len(comps) + FEAT_PAD\n        inner_y += fh + FEAT_PAD\n    total_h = inner_y - y + FEAT_PAD\n\n    lines = [\n        f'<g id=\"{gid}\" class=\"af-organ\" data-genome-id=\"{gid}\" data-name=\"{_esc(name)}\">',\n        _rect(x, y, w, total_h, COL_ORGAN_BG, COL_ORGAN_STROKE, rx=8),\n        _text(x + 12, y + 16, f'{gid}  /  {name}', size=11, fill=COL_TEXT_MAIN, weight='600'),\n    ]\n\n    cy = y + HEADER_H + FEAT_PAD\n    for feat in feats:\n        svg_feat, fh = _render_n2(feat, x + FEAT_PAD, cy, w - FEAT_PAD)\n        lines.append(svg_feat)\n        cy += fh + FEAT_PAD\n\n    lines.append('</g>')\n    return '\\n'.join(lines), total_h\n\n\ndef _render_n0(phase):\n    \"\"\"Génère le SVG d'une phase N0 (artboard 1440x900).\"\"\"\n    gid = _esc(phase.get('id', ''))\n    name = phase.get('name', gid)\n    organs = phase.get('n1_sections', [])\n\n    lines = [\n        f'<!-- Phase: {_esc(name)} -->',\n        f'<g id=\"{gid}\" class=\"af-phase\" data-genome-id=\"{gid}\" data-name=\"{_esc(name)}\">',\n        f'<rect x=\"0\" y=\"0\" width=\"{ARTBOARD_W}\" height=\"{ARTBOARD_H}\" fill=\"#fafaf8\" rx=\"0\"/>',\n        _text(20, 26, f'Phase: {name}', size=14, fill=COL_TEXT_MAIN, weight='700'),\n    ]\n\n    for i, organ in enumerate(organs):\n        col = i % N_COLS\n        row = i // N_COLS\n        x = START_X + col * (COL_W + COL_GAP)\n        y = START_Y + 30 + row * 500  # 500px par rangée (estimation)\n        svg_organ, _ = _render_n1(organ, x, y)\n        lines.append(svg_organ)\n\n    lines.append('</g>')\n    return '\\n'.join(lines)\n\n\ndef generate_svg(genome):\n    \"\"\"Génère un SVG scaffold balisé depuis le genome AetherFlow.\"\"\"\n    phases = genome.get('n0_phases', [])\n\n    pages = []\n    for phase in phases:\n        pages.append(_render_n0(phase))\n\n    # Un seul SVG, pages empilées verticalement (hauteur totale = N_phases * ARTBOARD_H)\n    total_h = ARTBOARD_H * max(len(phases), 1)\n    svg_parts = [\n        f'<?xml version=\"1.0\" encoding=\"UTF-8\"?>',\n        f'<!-- AetherFlow Genome Scaffold — Mission 21A -->',\n        f'<!-- Convention: Ne pas renommer les calques af-* dans Illustrator -->',\n        f'<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{ARTBOARD_W}\" height=\"{total_h}\">',\n        f'  <defs><style>text {{ font-family: -apple-system, Helvetica, Arial, sans-serif; }}</style></defs>',\n    ]\n\n    offset_y = 0\n    for i, phase in enumerate(phases):\n        phase_svg = _render_n0(phase)\n        svg_parts.append(f'<g transform=\"translate(0, {offset_y})\">')\n        svg_parts.append(phase_svg)\n        svg_parts.append('</g>')\n        offset_y += ARTBOARD_H\n\n    svg_parts.append('</svg>')\n    return '\\n'.join(svg_parts)\n\n\ndef main():\n    parser = argparse.ArgumentParser(description='AetherFlow Genome → SVG scaffold')\n    parser.add_argument('--genome', default=None, help='Chemin vers genome_reference.json')\n    parser.add_argument('--output', default='exports/genome_scaffold.svg', help='Chemin de sortie SVG')\n    args = parser.parse_args()\n\n    # Chemin genome par défaut\n    if args.genome:\n        genome_path = args.genome\n    else:\n        base = Path(__file__).parent.parent.parent.parent\n        genome_path = base / 'Frontend' / '2. GENOME' / 'genome_reference.json'\n\n    with open(genome_path, 'r', encoding='utf-8') as f:\n        genome = json.load(f)\n\n    svg = generate_svg(genome)\n\n    out = Path(args.output)\n    out.parent.mkdir(parents=True, exist_ok=True)\n    out.write_text(svg, encoding='utf-8')\n    print(f'SVG généré : {out} ({len(svg)} chars, {len(genome.get(\"n0_phases\", []))} phases)')\n\n\nif __name__ == '__main__':\n    main()\n"
+    },
+    {
+      "id": "step_3",
+      "description": "PATCH server_9998_v2.py — Importer generate_svg depuis Backend/Prod/exporters/genome_to_svg.py et ajouter la route GET /api/export/svg dans do_GET. La route appelle generate_svg(genome) et sert le fichier SVG en téléchargement (Content-Disposition: attachment).",
+      "type": "patch",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Import sys.path.append pour Backend/Prod ajouté si pas déjà présent",
+        "from exporters.genome_to_svg import generate_svg ajouté dans les imports",
+        "Route if self.path == '/api/export/svg': présente dans do_GET",
+        "La route appelle generate_svg(load_genome()) → svg_str",
+        "Content-Type: image/svg+xml",
+        "Content-Disposition: attachment; filename=genome_scaffold.svg",
+        "La route est positionnée avant le fallback 404 final"
+      ],
+      "context": {
+        "files": ["Frontend/3. STENCILER/server_9998_v2.py"],
+        "language": "python",
+        "patches": [
+          {
+            "description": "Ajouter l'import generate_svg après les imports existants",
+            "position": "after",
+            "marker": "from genome_preview import render_genome_preview",
+            "replacement": "from genome_preview import render_genome_preview\nfrom exporters.genome_to_svg import generate_svg"
+          },
+          {
+            "description": "Ajouter route GET /api/export/svg avant le fallback 404",
+            "position": "before",
+            "marker": "        self.send_error_json(404, f\"Route {self.path} not found\")",
+            "replacement": "        # Route export SVG scaffold (Mission 21A — Genome Design Bridge)\n        if self.path == '/api/export/svg':\n            genome = load_genome()\n            svg_str = generate_svg(genome)\n            svg_bytes = svg_str.encode('utf-8')\n            self.send_response(200)\n            self.send_header('Content-Type', 'image/svg+xml')\n            self.send_header('Content-Disposition', 'attachment; filename=\"genome_scaffold.svg\"')\n            self.send_header('Content-Length', str(len(svg_bytes)))\n            self.send_header('Access-Control-Allow-Origin', '*')\n            self.end_headers()\n            self.wfile.write(svg_bytes)\n            return\n\n        self.send_error_json(404, f\"Route {self.path} not found\")"
+          }
+        ]
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "VALIDATION — Vérifier syntaxe Python des deux fichiers et cohérence des imports.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 150,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "python3 -m py_compile Backend/Prod/exporters/genome_to_svg.py → aucune erreur",
+        "python3 -m py_compile Frontend/3. STENCILER/server_9998_v2.py → aucune erreur",
+        "server_9998_v2.py contient 'from exporters.genome_to_svg import generate_svg'",
+        "server_9998_v2.py contient 'if self.path == \"/api/export/svg\"'",
+        "Backend/Prod/exporters/__init__.py existe"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/exporters/genome_to_svg.py",
+          "Backend/Prod/exporters/__init__.py",
+          "Frontend/3. STENCILER/server_9998_v2.py"
+        ],
+        "language": "python"
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "GET http://localhost:9998/api/export/svg → télécharge genome_scaffold.svg",
+      "SVG ouvert dans Illustrator : calques nommés n0_xxx / n1_xxx / n2_xxx / n3_xxx",
+      "python genome_to_svg.py --output exports/genome_scaffold.svg → fichier créé",
+      "N3 composants visibles comme rectangles étiquetés avec visual_hint + name"
+    ],
+    "constraints": [
+      "Python stdlib uniquement dans genome_to_svg.py",
+      "3 fichiers touchés : genome_to_svg.py (create) + __init__.py (create) + server_9998_v2.py (patch)",
+      "Aucune modification des fichiers JS/CSS du Stenciler"
+    ],
+    "rapport_dans_roadmap": "Écrire le rapport d'exécution dans docs/02_Sullivan/FIGMA-Like/ROADMAP_FIGMA_BRIDGE.md sous Mission 21A"
+  }
+}

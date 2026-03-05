@@ -1,0 +1,35 @@
+<svg viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-8" y="-8" width="496" height="316">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  
+  <rect x="16" y="16" width="448" height="268" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <text x="32" y="48" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Détail Organe</text>
+  
+  <rect x="32" y="64" width="416" height="1" fill="#e5e7eb"/>
+  
+  <text x="32" y="92" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#6b7280">NOM</text>
+  <text x="32" y="108" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#151515">Foie</text>
+  
+  <text x="32" y="132" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#6b7280">ENDPOINT</text>
+  <rect x="32" y="140" width="320" height="32" rx="6" fill="#f8f7f4" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="44" y="158" font-family="Roboto Mono, monospace" font-size="12" fill="#151515">POST /api/v1/organes/foie</text>
+  
+  <g>
+    <rect x="368" y="140" width="80" height="32" rx="9999" fill="#f05e23"/>
+    <text x="408" y="158" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">COPIER</text>
+  </g>
+  
+  <text x="32" y="200" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#6b7280">MODÈLE</text>
+  <rect x="32" y="208" width="416" height="60" rx="6" fill="#f8f7f4" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="44" y="226" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">{"id": "foie", "nom": "Foie", "fonction": "Métabolisme"}</text>
+  <text x="44" y="242" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">"status": "actif", "volume_ml": 1500}</text>
+  
+  <g>
+    <rect x="32" y="236" width="80" height="28" rx="9999" fill="none" stroke="#f05e23" stroke-width="1"/>
+    <text x="72" y="252" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#f05e23" text-anchor="middle">TESTER</text>
+  </g>
+</svg>

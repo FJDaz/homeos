@@ -301,10 +301,11 @@ def _kimi_organ_svg(organ, style_id='auto'):
     try:
         client = OpenAI(api_key=key, base_url='https://api.moonshot.ai/v1')
         resp = client.chat.completions.create(
-            model='moonshot-v1-8k',
+            model='kimi-k2.5',
             messages=[{'role': 'user', 'content': prompt}],
-            temperature=0.4,
-            max_tokens=1500,
+            temperature=1,
+            max_tokens=8000,
+            extra_body={"thinking": {"type": "disabled"}},
         )
         raw = resp.choices[0].message.content.strip()
         raw = re.sub(r'^```json\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
@@ -554,7 +555,7 @@ def _draw_app_shell(offset_y, total_h, active_id, all_phases, phase_name, organs
         tw = len(code) * 9 + 24
         tf = C if active else 'none'
         tc = '#ffffff' if active else C_SUB
-        lines.append(f'<rect x="{tx}" y="{offset_y+13}" width="{tw}" height="22" fill="{tf}" rx="11"/>')
+        lines.append(f'<rect x="{tx}" y="{offset_y+13}" width="{tw}" height="22" fill="{tf}" rx="10"/>')
         lines.append(_text(tx + tw // 2, offset_y + 28, code, 9, tc, 'middle', '600'))
         tx += tw + 8
 

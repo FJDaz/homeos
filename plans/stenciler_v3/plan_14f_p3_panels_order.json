@@ -1,0 +1,125 @@
+{
+  "task_id": "stenciler_v3_14f_p3_panels_order",
+  "description": "Mission 14F-P3 (TEST CLAUDE) — Dans ComponentsZone.feature.js, inverser l'ordre de #transform-panel-container et .components-grid dans _renderOrganeView (N2) et _renderCelluleView (N3) afin que les outils d'édition apparaissent EN PREMIER, avant le contenu pédagogique (liste des cellules / cartes d'atomes).",
+  "metadata": {
+    "created_at": "2026-03-01T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Stenciler V3 — ComponentsZone.feature.js. Problème : dans _renderOrganeView et _renderCelluleView, le HTML template place .components-grid AVANT #transform-panel-container. L'utilisateur veut les outils d'édition (panels TRANSFORMATION etc.) en premier visuellement, et le contenu pédagogique (cellules/atomes) en dessous. Fix = déplacer <div id='transform-panel-container'></div> AVANT la div .components-grid dans les deux méthodes.",
+    "mission": "14F-P3",
+    "phase": "Phase 14 — Canvas Illustrateur",
+    "actor": "CLAUDE",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire _renderOrganeView (L145-186) et _renderCelluleView (L188-219) dans ComponentsZone.feature.js. Confirmer que dans les deux méthodes, le template innerHTML place : (1) div.components-grid AVANT (2) div#transform-panel-container. Identifier les marqueurs exacts de chaque bloc pour le patch.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Dans _renderOrganeView : .components-grid.clickable apparaît avant #transform-panel-container",
+        "Dans _renderCelluleView : .components-grid.n3-view apparaît avant #transform-panel-container",
+        "Les deux méthodes ont un seul #transform-panel-container chacune"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "PATCH _renderOrganeView — Dans le template innerHTML de _renderOrganeView, déplacer <div id='transform-panel-container'></div> AVANT la div class='components-grid clickable'. Le résultat attendu : header > #transform-panel-container > .components-grid. Les contenus internes de .components-grid (cells-list, cell-items) restent identiques.",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Dans le template de _renderOrganeView : #transform-panel-container apparaît AVANT .components-grid.clickable",
+        "La div .components-grid avec cells-list et cell-items est préservée identiquement",
+        "L'appel this._renderSidebarPanels(this.currentOrgane) après innerHTML reste en place"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false,
+        "patch": {
+          "position": "replace",
+          "marker_start": "    this.el.innerHTML = `\n        <div class=\"components-zone-header\">\n            <div class=\"cz-breadcrumb\">\n                <span class=\"cz-back\" id=\"cz-back-to-corps\">",
+          "marker_end": "    this._renderSidebarPanels(this.currentOrgane);",
+          "idempotent": true
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "PATCH _renderCelluleView — Dans le template innerHTML de _renderCelluleView, déplacer <div id='transform-panel-container'></div> AVANT la div class='components-grid n3-view'. Le résultat attendu : header > #transform-panel-container > .components-grid.n3-view. Les contenus internes (atom-cards avec atom-name-input et atom-desc-input) restent identiques.",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 400,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Dans le template de _renderCelluleView : #transform-panel-container apparaît AVANT .components-grid.n3-view",
+        "Les atom-cards avec atom-name-input et atom-desc-input sont préservées identiquement",
+        "L'appel this._renderSidebarPanels(this.currentCellule) après innerHTML reste en place"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false,
+        "patch": {
+          "position": "replace",
+          "marker_start": "    this.el.innerHTML = `\n        <div class=\"components-zone-header\">\n            <div class=\"cz-breadcrumb\">\n                <span class=\"cz-back\" id=\"cz-back-to-organe\">",
+          "marker_end": "    this._renderSidebarPanels(this.currentCellule);",
+          "idempotent": true
+        }
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "VALIDATION — Vérifier que dans le fichier patché : (1) _renderOrganeView a #transform-panel-container AVANT .components-grid.clickable, (2) _renderCelluleView a #transform-panel-container AVANT .components-grid.n3-view, (3) _setupCelluleListeners() reste appelé après _renderSidebarPanels(), (4) tous les event listeners et data-id sont préservés.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 150,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "Dans _renderOrganeView : transform-panel-container avant components-grid clickable",
+        "Dans _renderCelluleView : transform-panel-container avant components-grid n3-view",
+        "_setupCelluleListeners() toujours appelé après _renderSidebarPanels dans _renderCelluleView",
+        "data-id sur cell-item et atom-card préservés"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "En vue N2 (organe sélectionné) : panels TRANSFORMATION etc. visibles en premier, liste des cellules en dessous",
+      "En vue N3 (cellule sélectionnée) : panels TRANSFORMATION etc. visibles en premier, atom-cards en dessous",
+      "Aucune régression : click cell-item → onCelluleSelected fonctionne, inputs atom-card persistent"
+    ],
+    "constraints": [
+      "ComponentsZone.feature.js : fichier unique modifié",
+      "Seules _renderOrganeView et _renderCelluleView modifiées — aucune autre méthode touchée",
+      "Aucune nouvelle dépendance externe"
+    ],
+    "rapport_dans_roadmap": "Remplacer la section 'Mission 14F-P3-CLAUDE-TEST' dans ROADMAP.md par le rapport d'exécution."
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "reference_theme": "Most (Creative Agency)",
+  "art_direction": "Bold creative agency aesthetic with high-contrast orange energy (#ff6b35), masonry-style asymmetric grids, generous whitespace (120px sections), and pill-shaped CTAs. Components are dense, high-fidelity interfaces with 12px card radius and soft shadows. The layout emphasizes visual hierarchy through scale contrast and strategic use of the accent color.",
+  "typography_overrides": {
+    "display_font": "Plus Jakarta Sans",
+    "body_font": "Inter",
+    "accent_color": "#ff6b35",
+    "bg_color": "#ffffff"
+  },
+  "phases": {
+    "n0_brainstorm": {
+      "layout_style": "masonry_hero",
+      "total_height": 820,
+      "organs": [
+        {
+          "id": "n1_ir",
+          "x": 260,
+          "y": 80,
+          "w": 760,
+          "h": 640,
+          "atom_style_hint": "Hero-scale IR workspace with dense data table, viewBox='0 0 760 640'. Large typography, orange accent on active states, 12px radius cards, high-fidelity grid interface with Plus Jakarta Sans headers.",
+          "regenerate_atoms": [
+            "comp_ir_table",
+            "comp_ir_detail"
+          ]
+        },
+        {
+          "id": "n1_arbitrage",
+          "x": 1040,
+          "y": 160,
+          "w": 360,
+          "h": 480,
+          "atom_style_hint": "Floating sidebar card with power-user controls, viewBox='0 0 360 480'. Pill buttons, orange accent CTAs, compact arbiter validation interface with high density.",
+          "regenerate_atoms": [
+            "comp_arbiter_table",
+            "comp_arbiter_validate"
+          ]
+        }
+      ]
+    },
+    "n0_backend": {
+      "layout_style": "agency_grid",
+      "total_height": 560,
+      "organs": [
+        {
+          "id": "n1_session",
+          "x": 260,
+          "y": 80,
+          "w": 1140,
+          "h": 400,
+          "atom_style_hint": "Full-width session control bar, viewBox='0 0 1140 400'. Horizontal layout with status indicators, pill-shaped action buttons, orange accent on primary actions, high-contrast dark elements on white ground.",
+          "regenerate_atoms": [
+            "comp_session_reset",
+            "comp_session_status",
+            "comp_genome_summary",
+            "comp_distillation_list"
+          ]
+        }
+      ]
+    },
+    "n0_frontend": {
+      "layout_style": "masonry_asymmetric",
+      "total_height": 2640,
+      "organs": [
+        {
+          "id": "n1_navigation",
+          "x": 260,
+          "y": 0,
+          "w": 1140,
+          "h": 72,
+          "atom_style_hint": "Minimal nav bar, viewBox='0 0 1140 72'. Clean horizontal layout with pill-shaped logo mark, sparse navigation links, orange accent on active state.",
+          "regenerate_atoms": [
+            "comp_breadcrumb",
+            "comp_stepper"
+          ]
+        },
+        {
+          "id": "n1_upload",
+          "x": 1020,
+          "y": 120,
+          "w": 380,
+          "h": 520,
+          "atom_style_hint": "Vertical upload panel, viewBox='0 0 380 520'. Stacked dropzone with orange dashed border, color palette picker below, high-contrast white cards with 12px radius.",
+          "regenerate_atoms": [
+            "comp_upload_dropzone",
+            "comp_color_palette",
+            "comp_upload_delete"
+          ]
+        },
+        {
+          "id": "n1_analysis",
+          "x": 260,
+          "y": 120,
+          "w": 720,
+          "h": 680,
+          "atom_style_hint": "Large analysis workspace, viewBox='0 0 720 680'. Dense vision interface with large analyze button, report panels, regeneration controls. High-fidelity data visualization with orange accent highlights.",
+          "regenerate_atoms": [
+            "comp_vision_analyze_btn",
+            "comp_vision_report",
+            "comp_vision_regenerate"
+          ]
+        },
+        {
+          "id": "n1_layout",
+          "x": 260,
+          "y": 880,
+          "w": 360,
+          "h": 420,
+          "atom_style_hint": "Compact layout card, viewBox='0 0 360 420'. Grid preview with style selector, dense component thumbnails, orange accent on selected state.",
+          "regenerate_atoms": [
+            "comp_layout_card",
+            "comp_choice_style",
+            "comp_layout_grid"
+          ]
+        },
+        {
+          "id": "n1_validation",
+          "x": 660,
+          "y": 880,
+          "w": 740,
+          "h": 420,
+          "atom_style_hint": "Wide validation dashboard, viewBox='0 0 740 420'. Horizontal accordion interface, status indicators with orange for warnings/errors, high-density validation list.",
+          "regenerate_atoms": [
+            "comp_validation_dashboard",
+            "comp_validation_accordion"
+          ]
+        },
+        {
+          "id": "n1_adaptation",
+          "x": 260,
+          "y": 1380,
+          "w": 1140,
+          "h": 460,
+          "atom_style_hint": "Full-width adaptation stage, viewBox='0 0 1140 460'. Zoom controls with large preview zones, stenciler grid, detail cards. Cinematic horizontal layout with orange accent on primary actions.",
+          "regenerate_atoms": [
+            "comp_zoom_out",
+            "comp_zoom_controls",
+            "comp_stenciler_grid",
+            "comp_stenciler_select",
+            "comp_detail_card",
+            "comp_preview_zones"
+          ]
+        },
+        {
+          "id": "n1_dialogue",
+          "x": 1020,
+          "y": 1920,
+          "w": 380,
+          "h": 640,
+          "atom_style_hint": "Tall chat sidebar, viewBox='0 0 380 640'. Stacked chat bubbles with orange user accents, input field at bottom, skip action. High-fidelity messaging interface with generous padding.",
+          "regenerate_atoms": [
+            "comp_chat_bubbles",
+            "comp_chat_answer",
+            "comp_chat_input",
+            "comp_chat_skip"
+          ]
+        }
+      ]
+    },
+    "n0_deploy": {
+      "layout_style": "centered_hero",
+      "total_height": 480,
+      "organs": [
+        {
+          "id": "n1_export",
+          "x": 420,
+          "y": 100,
+          "w": 820,
+          "h": 280,
+          "atom_style_hint": "Centered export stage, viewBox='0 0 820 280'. Large launch button with pill shape, code editor preview, apply changes toggle. High-contrast finale with dominant orange CTA, download and confirm actions.",
+          "regenerate_atoms": [
+            "comp_launch_button",
+            "comp_apply_changes",
+            "comp_code_editor",
+            "comp_download_zip",
+            "comp_confirm_modal",
+            "comp_new_session",
+            "comp_next_button"
+          ]
+        }
+      ]
+    }
+  }
+}

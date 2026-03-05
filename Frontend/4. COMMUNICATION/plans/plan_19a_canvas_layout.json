@@ -1,0 +1,78 @@
+{
+  "task_id": "mission_19a_canvas_layout_persistence",
+  "description": "Persister positions/dimensions des organes N0 sur disque via layout.json. Drag et resize EXISTENT DEJA dans Canvas.feature.js (Mission 8C/8E). Seule la persistance disque manque. 2 fichiers à patcher.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Stenciler V3 — Mission 19A canvas layout persistence"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter GET /api/layout et POST /api/layout dans server_9998_v2.py",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Constante LAYOUT_FILE = '../2. GENOME/layout.json' ajoutée après GENOME_FILE",
+        "Fonction load_layout() qui retourne {} si fichier absent",
+        "Fonction save_layout(data) qui merge et sauvegarde",
+        "Route GET /api/layout dans do_GET() avant le 404 fallback",
+        "Route POST /api/layout dans do_POST() via _handle_layout_post()",
+        "python3 -m py_compile passe sans erreur"
+      ],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": true,
+        "input_files": [
+          "Frontend/3. STENCILER/server_9998_v2.py"
+        ],
+        "instructions": "Patche Frontend/3. STENCILER/server_9998_v2.py pour ajouter la persistance du layout canvas.\n\n1. Ajouter après la ligne 'GENOME_FILE = ...' :\nLAYOUT_FILE = '../2. GENOME/layout.json'\n\n2. Ajouter après save_genome() ces deux fonctions :\n\ndef load_layout():\n    cwd_local = os.path.dirname(os.path.abspath(__file__))\n    filepath = os.path.join(cwd_local, LAYOUT_FILE)\n    if os.path.exists(filepath):\n        with open(filepath, 'r') as f:\n            return json.load(f)\n    return {}\n\ndef save_layout(data):\n    cwd_local = os.path.dirname(os.path.abspath(__file__))\n    filepath = os.path.join(cwd_local, LAYOUT_FILE)\n    existing = load_layout()\n    existing.update(data)\n    with open(filepath, 'w', encoding='utf-8') as f:\n        json.dump(existing, f, indent=2, ensure_ascii=False)\n\n3. Dans do_GET(), ajouter avant 'self.send_error_json(404...)' :\nif self.path == '/api/layout':\n    self.send_json(load_layout())\n    return\n\n4. Dans do_POST(), ajouter avant 'self.send_error_json(404...)' :\nif self.path == '/api/layout':\n    self._handle_layout_post()\n    return\n\n5. Ajouter la méthode dans la classe Handler, après _handle_infer_layout :\ndef _handle_layout_post(self):\n    try:\n        length = int(self.headers.get('Content-Length', 0))\n        body = json.loads(self.rfile.read(length)) if length else {}\n    except Exception as e:\n        self.send_error_json(400, f'Invalid JSON: {e}')\n        return\n    save_layout(body)\n    self.send_json({'ok': True})\n\nN'ajouter rien d'autre. Ne pas modifier la logique existante."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Dans _renderCorps(), charger layout.json au démarrage et appliquer les positions sauvegardées",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 200,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "fetch('/api/layout') appelé au début de _renderCorps()",
+        "this.savedLayout initialisé avec le résultat",
+        "Dans la boucle des organes : if (this.savedLayout[organe.id]) pos = { ...pos, ...this.savedLayout[organe.id] }",
+        "Placé APRES 'if (organe._layout)' existant"
+      ],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": true,
+        "input_files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js"
+        ],
+        "instructions": "Patche Canvas.feature.js — fonction _renderCorps() (ligne ~145).\n\n1. Au debut de _renderCorps(), apres la recuperation de phaseData, ajouter :\nconst layoutRes = await fetch('/api/layout');\nthis.savedLayout = layoutRes.ok ? await layoutRes.json() : {};\n\n2. Dans la boucle sur les organes (n1_sections), apres le bloc 'if (organe._layout) { pos = { ...pos, ...organe._layout }; }' (ligne ~182), ajouter :\nif (this.savedLayout && this.savedLayout[organe.id]) {\n    pos = { ...pos, ...this.savedLayout[organe.id] };\n}\n\nNe modifier aucune autre ligne. Ne pas toucher au reste de la fonction."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Dans _updateLayoutInGenome(), appeler POST /api/layout pour persister sur disque",
+      "type": "patch",
+      "complexity": 0.2,
+      "estimated_tokens": 150,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "fetch POST /api/layout appelé après la mise à jour _layout en mémoire",
+        "Fire-and-forget avec .catch(() => {})",
+        "body contient { [id]: { x, y } } ou { [id]: { x, y, w, h } } selon les params"
+      ],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": true,
+        "input_files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js"
+        ],
+        "instructions": "Patche Canvas.feature.js — fonction _updateLayoutInGenome() (ligne ~686).\n\nApres le console.log (ligne ~705), ajouter :\nfetch('/api/layout', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ [id]: { x, y, ...(w !== undefined && { w }), ...(h !== undefined && { h }) } })\n}).catch(() => {});\n\nNe modifier aucune autre ligne de la fonction."
+      }
+    }
+  ]
+}

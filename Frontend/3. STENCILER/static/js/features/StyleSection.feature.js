@@ -17,13 +17,16 @@ class StyleSectionFeature extends StencilerFeature {
     render() {
         const { components } = Lexicon.classes;
         return `
-            <h3>Styles</h3>
-            <div class="styles-list">
+            <div class="sidebar-section-header" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="margin: 0;">styles</h3>
+                <span class="section-chevron">▸</span>
+            </div>
+            <div class="section-content styles-list" style="display: none;">
                 ${this.styles.map(style => `
                     <div class="${components.style_card} ${style.id === this.selectedStyle ? components.active_tab : ''}" 
                             data-style="${style.id}"
                             style="border-color: ${style.color}">
-                        <span class="style-name">${style.name}</span>
+                        <span class="style-name">${style.name.toLowerCase()}</span>
                     </div>
                 `).join('')}
             </div>
@@ -34,6 +37,16 @@ class StyleSectionFeature extends StencilerFeature {
         this.el = document.querySelector(parentSelector);
         if (!this.el) return;
         this.el.innerHTML = this.render();
+
+        const header = this.el.querySelector('.sidebar-section-header');
+        const content = this.el.querySelector('.section-content');
+        const chevron = this.el.querySelector('.section-chevron');
+
+        header.addEventListener('click', () => {
+            const isHidden = content.style.display === 'none';
+            content.style.display = isHidden ? 'block' : 'none';
+            chevron.textContent = isHidden ? '▾' : '▸';
+        });
 
         this.el.querySelectorAll(`[${Lexicon.data.style}]`).forEach(item => {
             item.addEventListener('click', () => {

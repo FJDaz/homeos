@@ -1,0 +1,131 @@
+{
+  "task_id": "aetherflow_23_kimi_batch",
+  "description": "Phase 23 — KIMI SVG Generator. (A) Corriger kimi_client.py pour utiliser OpenAI SDK avec base_url=https://api.moonshot.ai/v1 et modèle kimi-k2-turbo-preview. (B) Créer kimi_batch_designer.py qui génère des SVGs pour tous les organes N1 du génome enrichi. (C) Mettre à jour settings.py (kimi_model default).",
+  "metadata": {
+    "created_at": "2026-03-03T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "AetherFlow V3. KIMI (Moonshot AI) génère de meilleurs SVGs que les renderers Python statiques (test validé : test_kimi_analysis.svg). Le prototype test_kimi_designer.py cible un seul organe. On généralise à tous les N1 du génome et on corrige kimi_client.py pour utiliser le SDK OpenAI (openai==2.16.0 installé) avec base_url=https://api.moonshot.ai/v1. Clé env : KIMI_KEY.",
+    "mission": "23",
+    "phase": "Phase 23 — KIMI SVG Generator",
+    "actor": "CLAUDE"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire les 3 fichiers sources pour comprendre l'état actuel avant modifications. (1) Backend/Prod/models/kimi_client.py — noter la structure actuelle (httpx, self.api_url, self.model). (2) Backend/Prod/exporters/test_kimi_designer.py — noter le prompt exact, le pattern d'appel API, la structure JSON payload, la logique d'extraction SVG (<svg ... </svg>). (3) Backend/Prod/config/settings.py L.36-52 — noter les champs kimi_api_key, kimi_api_url, kimi_model actuels. Résumer les lignes clés.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "Structure kimi_client.py notée (httpx vs openai SDK)",
+        "Prompt KIMI de test_kimi_designer.py noté",
+        "Champs settings.py kimi_* notés"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/kimi_client.py",
+          "Backend/Prod/exporters/test_kimi_designer.py",
+          "Backend/Prod/config/settings.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "MODIFIER Backend/Prod/config/settings.py — Mettre à jour les 3 champs KIMI. CHANGEMENTS PRÉCIS :\\n\\n1. Champ kimi_api_url (L.40-44) : changer default et description :\\n```python\\n    kimi_api_url: str = Field(\\n        default=\\\"https://api.moonshot.ai/v1\\\",\\n        alias=\\\"KIMI_API_URL\\\",\\n        description=\\\"KIMI (Moonshot) base URL for OpenAI-compatible SDK\\\",\\n    )\\n```\\n\\n2. Champ kimi_model (L.46-50) : changer default et description :\\n```python\\n    kimi_model: str = Field(\\n        default=\\\"kimi-k2-turbo-preview\\\",\\n        alias=\\\"KIMI_MODEL\\\",\\n        description=\\\"KIMI model (kimi-k2-turbo-preview recommended)\\\",\\n    )\\n```\\n\\nNe modifier QUE ces deux champs. Ne pas toucher à kimi_api_key ni aux autres fields.",
+      "type": "refactoring",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "kimi_api_url default = 'https://api.moonshot.ai/v1'",
+        "kimi_model default = 'kimi-k2-turbo-preview'"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/config/settings.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/config/settings.py"
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "RÉÉCRIRE Backend/Prod/models/kimi_client.py — Remplacer httpx par OpenAI SDK. Produire le fichier COMPLET entre triple backticks python.\\n\\nSPÉCIFICATION COMPLÈTE :\\n```python\\n# Backend/Prod/models/kimi_client.py\\n\\\"\\\"\\\"KIMI (Moonshot) client — OpenAI-compatible SDK.\\\"\\\"\\\"\\nfrom typing import Optional\\nfrom loguru import logger\\n\\nfrom ..config.settings import settings\\n\\n\\nclass KimiClient:\\n    \\\"\\\"\\\"Client KIMI via OpenAI SDK. base_url = https://api.moonshot.ai/v1\\\"\\\"\\\"\\n\\n    def __init__(self):\\n        self.api_key = settings.kimi_api_key\\n        self.base_url = settings.kimi_api_url  # https://api.moonshot.ai/v1\\n        self.model = settings.kimi_model       # kimi-k2-turbo-preview\\n        if not self.api_key:\\n            logger.warning(\\\"KIMI API key not configured\\\")\\n\\n    @property\\n    def available(self) -> bool:\\n        return bool(self.api_key)\\n\\n    def _get_client(self):\\n        \\\"\\\"\\\"Return an OpenAI client pointed at Moonshot API.\\\"\\\"\\\"\\n        from openai import OpenAI\\n        return OpenAI(base_url=self.base_url, api_key=self.api_key)\\n\\n    async def generate_svg(self, prompt: str, system_prompt: str = \\\"You are a professional SVG UI designer specializing in high-fidelity wireframes.\\\") -> Optional[str]:\\n        \\\"\\\"\\\"Generate an SVG string from a prompt. Returns raw SVG string or None.\\\"\\\"\\\"\\n        if not self.available:\\n            return None\\n        import asyncio\\n        try:\\n            client = self._get_client()\\n            response = await asyncio.to_thread(\\n                client.chat.completions.create,\\n                model=self.model,\\n                messages=[\\n                    {\\\"role\\\": \\\"system\\\", \\\"content\\\": system_prompt},\\n                    {\\\"role\\\": \\\"user\\\", \\\"content\\\": prompt}\\n                ],\\n                temperature=0.4,\\n                max_tokens=4000\\n            )\\n            content = response.choices[0].message.content or \\\"\\\"\\n            if \\\"<svg\\\" in content:\\n                return content[content.find(\\\"<svg\\\"):content.rfind(\\\"</svg>\\\")+6]\\n            return None\\n        except Exception as e:\\n            logger.error(f\\\"KIMI generate_svg error: {e}\\\")\\n            return None\\n\\n    async def validate_output(self, output: str, expected_language: str = \\\"python\\\", step_type: str = \\\"code_generation\\\") -> dict:\\n        \\\"\\\"\\\"Gate-keeper validation. Returns {valid, reason, detected_issue}.\\\"\\\"\\\"\\n        if not self.available:\\n            return {\\\"valid\\\": True, \\\"reason\\\": \\\"KIMI not available\\\", \\\"detected_issue\\\": None}\\n        quick = self._quick_heuristic_check(output, expected_language)\\n        if not quick[\\\"valid\\\"]:\\n            return quick\\n        try:\\n            import asyncio\\n            client = self._get_client()\\n            prompt = self._build_validation_prompt(output, expected_language, step_type)\\n            response = await asyncio.to_thread(\\n                client.chat.completions.create,\\n                model=self.model,\\n                messages=[\\n                    {\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"You are a code validation assistant. Respond with JSON only.\\\"},\\n                    {\\\"role\\\": \\\"user\\\", \\\"content\\\": prompt}\\n                ],\\n                temperature=0.1,\\n                max_tokens=200\\n            )\\n            content = response.choices[0].message.content or \\\"\\\"\\n            return self._parse_validation_response(content)\\n        except Exception as e:\\n            logger.warning(f\\\"KIMI validation error: {e}\\\")\\n            return {\\\"valid\\\": True, \\\"reason\\\": f\\\"KIMI error: {e}\\\", \\\"detected_issue\\\": None}\\n\\n    def _quick_heuristic_check(self, output: str, expected_language: str) -> dict:\\n        stripped = output.strip()\\n        toxic = ['{{\\\"operations\\\":', '{\\\"files\\\":', '{\\\"changes\\\":', '\\\"operation\\\":', '\\\"file_path\\\":']\\n        for p in toxic:\\n            if p in stripped[:500]:\\n                return {\\\"valid\\\": False, \\\"reason\\\": f\\\"JSON wrapper instead of {expected_language}\\\", \\\"detected_issue\\\": \\\"json_wrapper\\\"}\\n        if not stripped:\\n            return {\\\"valid\\\": False, \\\"reason\\\": \\\"Empty output\\\", \\\"detected_issue\\\": \\\"empty_output\\\"}\\n        return {\\\"valid\\\": True, \\\"reason\\\": \\\"Heuristic passed\\\", \\\"detected_issue\\\": None}\\n\\n    def _build_validation_prompt(self, output: str, expected_language: str, step_type: str) -> str:\\n        truncated = output[:2000]\\n        return f\\\"\\\"\\\"Validate this LLM output before applying to a file.\\nExpected: {expected_language} code for step type \\\\\\\"{step_type}\\\\\\\"\\nOutput:\\n```\\n{truncated}\\n```\\nCheck: is this actual code or a JSON wrapper? Any harmful patterns?\\nRespond JSON only: {{\\\"valid\\\": true/false, \\\"reason\\\": \\\"...\\\", \\\"detected_issue\\\": null}}\\\"\\\"\\\"\\n\\n    def _parse_validation_response(self, content: str) -> dict:\\n        import json\\n        try:\\n            if \\\"```json\\\" in content:\\n                content = content.split(\\\"```json\\\")[1].split(\\\"```\\\")[0]\\n            elif \\\"```\\\" in content:\\n                content = content.split(\\\"```\\\")[1].split(\\\"```\\\")[0]\\n            result = json.loads(content.strip())\\n            return {\\\"valid\\\": result.get(\\\"valid\\\", True), \\\"reason\\\": result.get(\\\"reason\\\", \\\"\\\"), \\\"detected_issue\\\": result.get(\\\"detected_issue\\\")}\\n        except Exception:\\n            return {\\\"valid\\\": True, \\\"reason\\\": \\\"Parse error, allowing through\\\", \\\"detected_issue\\\": None}\\n\\n    async def execute_step(self, step, context: Optional[str] = None, system_context: Optional[str] = None):\\n        \\\"\\\"\\\"Execute an AetherFlow step using KIMI.\\\"\\\"\\\"\\n        from .deepseek_client import StepResult\\n        import time, asyncio\\n        if not self.available:\\n            return StepResult(step_id=step.id, success=False, output=\\\"\\\", tokens_used=0, input_tokens=0, output_tokens=0, execution_time_ms=0, error=\\\"KIMI API key not configured\\\", cost_usd=0.0)\\n        start = time.time()\\n        try:\\n            client = self._get_client()\\n            messages = []\\n            if system_context:\\n                messages.append({\\\"role\\\": \\\"system\\\", \\\"content\\\": system_context})\\n            else:\\n                messages.append({\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"You are an expert software engineer. Generate clean, well-structured code.\\\"})\\n            user_content = (context + \\\"\\\\n\\\\n\\\" if context else \\\"\\\") + f\\\"Task: {step.description}\\\\nType: {step.type}\\\"\\n            messages.append({\\\"role\\\": \\\"user\\\", \\\"content\\\": user_content})\\n            response = await asyncio.to_thread(\\n                client.chat.completions.create,\\n                model=self.model,\\n                messages=messages,\\n                temperature=0.3,\\n                max_tokens=8000\\n            )\\n            elapsed = (time.time() - start) * 1000\\n            output = response.choices[0].message.content or \\\"\\\"\\n            usage = response.usage\\n            in_tok = usage.prompt_tokens if usage else 0\\n            out_tok = usage.completion_tokens if usage else 0\\n            total = usage.total_tokens if usage else 0\\n            cost = (total / 1_000_000) * 0.015\\n            return StepResult(step_id=step.id, success=True, output=output, tokens_used=total, input_tokens=in_tok, output_tokens=out_tok, execution_time_ms=elapsed, error=None, cost_usd=cost)\\n        except Exception as e:\\n            elapsed = (time.time() - start) * 1000\\n            return StepResult(step_id=step.id, success=False, output=\\\"\\\", tokens_used=0, input_tokens=0, output_tokens=0, execution_time_ms=elapsed, error=str(e), cost_usd=0.0)\\n```\\n\\nProduire le fichier complet EXACTEMENT comme ci-dessus, entre triple backticks python.",
+      "type": "code_generation",
+      "complexity": 0.4,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "from openai import OpenAI présent",
+        "generate_svg() méthode présente",
+        "asyncio.to_thread utilisé pour les appels OpenAI SDK (synchrone)",
+        "execute_step() accepte system_context"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/kimi_client.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/models/kimi_client.py"
+        }
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "CRÉER Backend/Prod/exporters/kimi_batch_designer.py — Script batch qui génère un SVG KIMI pour chaque organe N1 du génome. Produire le fichier COMPLET entre triple backticks python.\\n\\nSPÉCIFICATION :\\n- Charger `Frontend/2. GENOME/genome_enriched.json` (relatif à project_root = 4 niveaux au-dessus de __file__)\\n- Utiliser directement l'API KIMI via openai SDK (pas kimi_client.py — script standalone)\\n- Clé : `os.getenv('KIMI_KEY')`\\n- base_url : `https://api.moonshot.ai/v1`\\n- model : `kimi-k2-turbo-preview`\\n\\nPROMPT KIMI (identique à test_kimi_designer.py) :\\n```\\nYou are a Lead Theme Architect for premium WordPress themes (like Astra, Divi, ThemeForest top sellers).\\nYour task is to generate ONLY valid, clean SVG code to represent a single UI section (an \\\"organ\\\").\\n\\nREQUIREMENTS:\\n1. Output ONLY the <svg>...</svg> code block. No markdown around it, no explanations.\\n2. Dimensions: viewBox=\\\"0 0 1000 600\\\".\\n3. Aesthetics: Draw ACTUAL premium components. Beautiful buttons with rounded corners, gradients, clear labels. Cards with subtle shadows and image placeholders.\\n4. Density: Do NOT leave big empty spaces. Use ThemeForest standard of high information density.\\n5. Layout Strategy: {layout_strategy}\\n\\nOrgan Name: {organ_name}\\nComponents:\\n{components_json}\\n```\\n\\nLOGIQUE BATCH :\\n```python\\nimport sys, os, json, time, requests\\nfrom pathlib import Path\\nfrom dotenv import load_dotenv\\nfrom openai import OpenAI\\n\\nproject_root = Path(__file__).parent.parent.parent.parent\\nload_dotenv(project_root / \\\"Backend/.env\\\")\\n\\ndef collect_components(organ):\\n    components = []\\n    for feature in organ.get(\\\"n2_features\\\", []):\\n        components.extend(feature.get(\\\"n3_components\\\", []))\\n    return components\\n\\ndef generate_svg_for_organ(client, organ, model):\\n    components = collect_components(organ)\\n    prompt = PROMPT.format(\\n        layout_strategy=organ.get(\\\"layout_strategy\\\", \\\"responsive_grid\\\"),\\n        organ_name=organ.get(\\\"name\\\", organ[\\\"id\\\"]),\\n        components_json=json.dumps(components, indent=2)\\n    )\\n    response = client.chat.completions.create(\\n        model=model,\\n        messages=[\\n            {\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"You are a professional SVG UI designer specializing in high-fidelity WordPress wireframes.\\\"},\\n            {\\\"role\\\": \\\"user\\\", \\\"content\\\": prompt}\\n        ],\\n        temperature=0.4,\\n        max_tokens=4000\\n    )\\n    content = response.choices[0].message.content or \\\"\\\"\\n    if \\\"<svg\\\" in content:\\n        return content[content.find(\\\"<svg\\\"):content.rfind(\\\"</svg>\\\")+6]\\n    return None\\n\\ndef main():\\n    api_key = os.getenv(\\\"KIMI_KEY\\\")\\n    if not api_key:\\n        print(\\\"❌ KIMI_KEY not set\\\")\\n        return\\n    model = \\\"kimi-k2-turbo-preview\\\"\\n    client = OpenAI(base_url=\\\"https://api.moonshot.ai/v1\\\", api_key=api_key)\\n\\n    genome_path = project_root / \\\"Frontend/2. GENOME/genome_enriched.json\\\"\\n    with open(genome_path) as f:\\n        genome = json.load(f)\\n\\n    exports_dir = project_root / \\\"exports\\\"\\n    exports_dir.mkdir(exist_ok=True)\\n\\n    results = []\\n    for n0 in genome.get(\\\"n0_phases\\\", []):\\n        for organ in n0.get(\\\"n1_sections\\\", []):\\n            organ_id = organ[\\\"id\\\"]\\n            print(f\\\"Generating SVG for {organ_id}...\\\")\\n            try:\\n                svg = generate_svg_for_organ(client, organ, model)\\n                if svg:\\n                    out_path = exports_dir / f\\\"{organ_id}_kimi.svg\\\"\\n                    out_path.write_text(svg, encoding=\\\"utf-8\\\")\\n                    organ[\\\"svg_payload\\\"] = svg\\n                    results.append({\\\"id\\\": organ_id, \\\"status\\\": \\\"ok\\\", \\\"file\\\": str(out_path)})\\n                    print(f\\\"  ✅ {organ_id} → {out_path.name}\\\")\\n                else:\\n                    results.append({\\\"id\\\": organ_id, \\\"status\\\": \\\"no_svg\\\"})\\n                    print(f\\\"  ❌ {organ_id} → no SVG in response\\\")\\n                time.sleep(1)  # rate limit\\n            except Exception as e:\\n                results.append({\\\"id\\\": organ_id, \\\"status\\\": \\\"error\\\", \\\"error\\\": str(e)})\\n                print(f\\\"  ❌ {organ_id} → {e}\\\")\\n\\n    out_genome = project_root / \\\"Frontend/2. GENOME/genome_enriched_kimi.json\\\"\\n    with open(out_genome, \\\"w\\\") as f:\\n        json.dump(genome, f, indent=2, ensure_ascii=False)\\n    print(f\\\"\\\\n✅ genome_enriched_kimi.json saved\\\")\\n\\n    ok = sum(1 for r in results if r[\\\"status\\\"] == \\\"ok\\\")\\n    print(f\\\"\\\\n📊 {ok}/{len(results)} organs generated successfully\\\")\\n    for r in results:\\n        status = \\\"✅\\\" if r[\\\"status\\\"] == \\\"ok\\\" else \\\"❌\\\"\\n        print(f\\\"  {status} {r['id']}\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n```\\n\\nProduire le fichier complet entre triple backticks python, en incluant PROMPT comme constante en haut du fichier.",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "from openai import OpenAI présent",
+        "Boucle sur n0_phases → n1_sections",
+        "generate_svg_for_organ() présente",
+        "genome_enriched_kimi.json sauvegardé avec svg_payload",
+        "exports/<organ_id>_kimi.svg sauvegardés"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/exporters/test_kimi_designer.py"
+        ],
+        "language": "python",
+        "auto_apply": true,
+        "patch": {
+          "position": "replace",
+          "target_file": "Backend/Prod/exporters/kimi_batch_designer.py"
+        }
+      }
+    },
+    {
+      "id": "step_5",
+      "description": "VALIDATION — Vérifier les imports Python. Exécuter : cd /Users/francois-jeandazin/AETHERFLOW && source .venv/bin/activate && python3 -c \"import sys; sys.path.insert(0, 'Backend/Prod'); from models.kimi_client import KimiClient; from openai import OpenAI; print('KimiClient OK'); k = KimiClient(); print('available:', k.available); print('model:', k.model); print('base_url:', k.base_url)\" 2>&1 | tail -10. Vérifier que KimiClient charge sans erreur, que model=kimi-k2-turbo-preview, que base_url=https://api.moonshot.ai/v1.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 150,
+      "dependencies": ["step_2", "step_3", "step_4"],
+      "validation_criteria": [
+        "Aucun ImportError",
+        "KimiClient.model = kimi-k2-turbo-preview",
+        "KimiClient.base_url = https://api.moonshot.ai/v1",
+        "kimi_batch_designer.py existe dans Backend/Prod/exporters/"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/kimi_client.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    }
+  ]
+}

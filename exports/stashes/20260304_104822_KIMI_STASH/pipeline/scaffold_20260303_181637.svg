@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Scaffold — KIMI-directed layout — 2026-03-03 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="3680">
+  <defs><style>text { font-family: Inter, system-ui, sans-serif; }</style></defs>
+<g id="n0_brainstorm" class="af-phase" data-genome-id="n0_brainstorm">
+<rect x="0" y="0" width="1440" height="800" fill="#f7f6f2"/>
+<rect x="0" y="0" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="10" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="29" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="13" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="109" y="28" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="13" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="14" x2="324" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="24" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="28" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="48" width="188" height="752" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="68" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRAINSTORM</text>
+<rect x="46" y="78" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="87" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="99" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Intent Refactoring</text>
+<rect x="52" y="123" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="135" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Arbitrage</text>
+<g id="n1_ir" class="af-organ" data-genome-id="n1_ir" data-name="Intent Refactoring" data-ui-role="dashboard" data-index="1">
+  <rect x="260" y="0" width="700" height="360" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="610" y="170" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">1</text>
+  <text x="610" y="190" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Intent Refactoring</text>
+  <text x="610" y="206" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+<g id="n1_arbitrage" class="af-organ" data-genome-id="n1_arbitrage" data-name="Arbitrage" data-ui-role="dashboard" data-index="2">
+  <rect x="980" y="0" width="400" height="720" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="1180" y="350" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">2</text>
+  <text x="1180" y="370" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Arbitrage</text>
+  <text x="1180" y="386" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+</g>
+<g id="n0_backend" class="af-phase" data-genome-id="n0_backend">
+<rect x="0" y="800" width="1440" height="560" fill="#f7f6f2"/>
+<rect x="0" y="800" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="810" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="829" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="813" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="813" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="168" y="828" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="813" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="813" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="814" x2="324" y2="834" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="824" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="828" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="848" width="188" height="512" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="868" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BACKEND</text>
+<rect x="46" y="878" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="887" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="899" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Session Management</text>
+<g id="n1_session" class="af-organ" data-genome-id="n1_session" data-name="Session Management" data-ui-role="dashboard" data-index="3">
+  <rect x="260" y="800" width="1120" height="480" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="820" y="1030" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">3</text>
+  <text x="820" y="1050" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Session Management</text>
+  <text x="820" y="1066" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+</g>
+<g id="n0_frontend" class="af-phase" data-genome-id="n0_frontend">
+<rect x="0" y="1360" width="1440" height="1840" fill="#f7f6f2"/>
+<rect x="0" y="1360" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="1370" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="1389" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="1373" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="1388" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="1373" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="1388" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="1373" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="227" y="1388" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="1373" width="51" height="22" fill="none" rx="11"/>
+<text x="286" y="1388" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="1374" x2="324" y2="1394" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="1384" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="1388" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="1408" width="188" height="1792" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="1428" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRONTEND</text>
+<rect x="46" y="1438" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="1447" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="1459" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Analyse PNG</text>
+<rect x="52" y="1483" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1495" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Layout Selection</text>
+<rect x="52" y="1519" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1531" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Validation Composa</text>
+<rect x="52" y="1555" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1567" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Adaptation / Zoom </text>
+<rect x="52" y="1591" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1603" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Upload Design</text>
+<rect x="52" y="1627" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1639" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Dialogue Utilisate</text>
+<rect x="52" y="1663" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1675" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Navigation</text>
+<g id="n1_analysis" class="af-organ" data-genome-id="n1_analysis" data-name="Analyse PNG" data-ui-role="main-canvas" data-index="4">
+  <rect x="260" y="1360" width="820" height="600" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="670" y="1650" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">4</text>
+  <text x="670" y="1670" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Analyse PNG</text>
+  <text x="670" y="1686" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">main-canvas</text>
+</g>
+<g id="n1_layout" class="af-organ" data-genome-id="n1_layout" data-name="Layout Selection" data-ui-role="dashboard" data-index="5">
+  <rect x="260" y="2000" width="560" height="360" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="540" y="2170" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">5</text>
+  <text x="540" y="2190" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Layout Selection</text>
+  <text x="540" y="2206" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+<g id="n1_validation" class="af-organ" data-genome-id="n1_validation" data-name="Validation Composants" data-ui-role="dashboard" data-index="6">
+  <rect x="860" y="2000" width="620" height="360" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="1170" y="2170" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">6</text>
+  <text x="1170" y="2190" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Validation Composants</text>
+  <text x="1170" y="2206" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+<g id="n1_adaptation" class="af-organ" data-genome-id="n1_adaptation" data-name="Adaptation / Zoom Atome" data-ui-role="dashboard" data-index="7">
+  <rect x="260" y="2400" width="1120" height="480" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="820" y="2630" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">7</text>
+  <text x="820" y="2650" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Adaptation / Zoom Atome</text>
+  <text x="820" y="2666" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">dashboard</text>
+</g>
+<g id="n1_upload" class="af-organ" data-genome-id="n1_upload" data-name="Upload Design" data-ui-role="upload-zone" data-index="8">
+  <rect x="1100" y="1360" width="380" height="600" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="1290" y="1650" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">8</text>
+  <text x="1290" y="1670" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Upload Design</text>
+  <text x="1290" y="1686" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">upload-zone</text>
+</g>
+<g id="n1_dialogue" class="af-organ" data-genome-id="n1_dialogue" data-name="Dialogue Utilisateur" data-ui-role="chat-overlay" data-index="9">
+  <rect x="1040" y="2560" width="340" height="360" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="1210" y="2730" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">9</text>
+  <text x="1210" y="2750" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Dialogue Utilisateur</text>
+  <text x="1210" y="2766" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">chat-overlay</text>
+</g>
+<g id="n1_navigation" class="af-organ" data-genome-id="n1_navigation" data-name="Navigation" data-ui-role="onboarding-flow" data-index="10">
+  <rect x="260" y="2920" width="1120" height="200" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="820" y="3010" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">10</text>
+  <text x="820" y="3030" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Navigation</text>
+  <text x="820" y="3046" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">onboarding-flow</text>
+</g>
+</g>
+<g id="n0_deploy" class="af-phase" data-genome-id="n0_deploy">
+<rect x="0" y="3200" width="1440" height="480" fill="#f7f6f2"/>
+<rect x="0" y="3200" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="3210" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="3229" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="3213" width="51" height="22" fill="none" rx="11"/>
+<text x="109" y="3228" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BRS</text>
+<rect x="143" y="3213" width="51" height="22" fill="none" rx="11"/>
+<text x="168" y="3228" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">BKS</text>
+<rect x="202" y="3213" width="51" height="22" fill="none" rx="11"/>
+<text x="227" y="3228" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">FRD</text>
+<rect x="261" y="3213" width="51" height="22" fill="#3d3d3c" rx="11"/>
+<text x="286" y="3228" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DPL</text>
+<line x1="324" y1="3214" x2="324" y2="3234" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="3224" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="3228" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="3248" width="188" height="432" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="3268" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">DEPLOY</text>
+<rect x="46" y="3278" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="3287" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="3299" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Export / Télécharg</text>
+<g id="n1_export" class="af-organ" data-genome-id="n1_export" data-name="Export / Téléchargement" data-ui-role="export-action" data-index="11">
+  <rect x="260" y="3200" width="780" height="400" fill="none" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="6 3" rx="8"/>
+  <text x="650" y="3390" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#b5b4b0" text-anchor="middle" font-weight="600">11</text>
+  <text x="650" y="3410" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#c8c7c3" text-anchor="middle">Export / Téléchargement</text>
+  <text x="650" y="3426" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#d5d4d0" text-anchor="middle">export-action</text>
+</g>
+</g>
+</svg>

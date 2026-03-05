@@ -21,28 +21,28 @@ class PrimitiveEditorFeature extends StencilerFeature {
         this.panel.className = 'prim-editor-panel hidden';
         this.panel.innerHTML = `
             <div class="prim-editor-header">
-                <span class="prim-editor-tag" id="prim-tag">RECT</span>
-                <span class="prim-editor-title">PRIMITIVE</span>
+                <span class="prim-editor-tag" id="prim-tag">rect</span>
+                <span class="prim-editor-title">primitive</span>
                 <button class="prim-editor-close" id="prim-close">✕</button>
             </div>
             <div class="prim-editor-body">
                 <div class="prim-row">
-                    <label>FOND</label>
+                    <label>fond</label>
                     <input type="color" id="prim-fill" value="#e8e7e3">
                     <button class="prim-none-btn" data-prop="fill">none</button>
                 </div>
                 <div class="prim-row">
-                    <label>CONTOUR</label>
+                    <label>contour</label>
                     <input type="color" id="prim-stroke" value="#3d3d3c">
                     <button class="prim-none-btn" data-prop="stroke">none</button>
                 </div>
                 <div class="prim-row">
-                    <label>ÉPAIS.</label>
+                    <label>épais.</label>
                     <input type="range" id="prim-sw" min="0" max="8" step="0.5" value="1.5">
                     <span id="prim-sw-val">1.5</span>
                 </div>
                 <div class="prim-row prim-opacity-row">
-                    <label>OPAC.</label>
+                    <label>opac.</label>
                     <input type="range" id="prim-opacity" min="0" max="1" step="0.05" value="1">
                     <span id="prim-opacity-val">1</span>
                 </div>
@@ -118,7 +118,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
         const opVal = this.panel.querySelector('#prim-opacity-val');
         const tagEl = this.panel.querySelector('#prim-tag');
 
-        if (tagEl) tagEl.textContent = (detail.tag || 'EL').toUpperCase();
+        if (tagEl) tagEl.textContent = (detail.tag || 'el').toLowerCase();
 
         // Color picker uniquement pour les couleurs hex valides
         if (detail.fill && detail.fill !== 'none' && /^#[0-9a-f]{3,6}$/i.test(detail.fill)) {

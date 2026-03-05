@@ -1,0 +1,87 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    
+    <!-- Button Gradient -->
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#6dd865"/>
+    </linearGradient>
+    
+    <!-- Method Badge Gradient -->
+    <linearGradient id="getGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0d3f8f"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f8f7f4"/>
+  
+  <!-- Main Card -->
+  <rect x="24" y="24" width="652" height="352" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="48" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Fiche Détail Atome</text>
+  
+  <!-- Status Badge -->
+  <rect x="48" y="78" width="68" height="20" rx="4" fill="#97ea90" opacity="0.15"/>
+  <text x="82" y="92" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#2d7a28" text-anchor="middle" letter-spacing="0.5">ACTIF</text>
+  
+  <!-- Divider -->
+  <line x1="48" y1="112" x2="652" y2="112" stroke="#e8e8e6" stroke-width="1"/>
+  
+  <!-- Endpoint Section -->
+  <text x="48" y="144" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">ENDPOINT</text>
+  
+  <!-- Method Badge -->
+  <rect x="48" y="156" width="56" height="28" rx="6" fill="url(#getGradient)"/>
+  <text x="76" y="175" font-family="Roboto Mono, monospace" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">GET</text>
+  
+  <!-- URL Field -->
+  <rect x="112" y="156" width="516" height="28" rx="6" fill="#f8f7f4" stroke="#e8e8e6" stroke-width="1"/>
+  <text x="124" y="175" font-family="Roboto Mono, monospace" font-size="12" fill="#151515">https://api.atome.io/v1/elements/42</text>
+  
+  <!-- Copy Button -->
+  <rect x="564" y="160" width="56" height="20" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+  <text x="592" y="174" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#374151" text-anchor="middle">Copier</text>
+  
+  <!-- Metadata Grid -->
+  <text x="48" y="220" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">MÉTADONNÉES</text>
+  
+  <!-- Grid Items -->
+  <g transform="translate(48, 236)">
+    <!-- Item 1 -->
+    <rect width="196" height="56" rx="8" fill="#f8f7f4"/>
+    <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">ID</text>
+    <text x="16" y="44" font-family="Roboto Mono, monospace" font-size="14" fill="#151515">atm_8f3k9m2p</text>
+    
+    <!-- Item 2 -->
+    <g transform="translate(212, 0)">
+      <rect width="196" height="56" rx="8" fill="#f8f7f4"/>
+      <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">Version</text>
+      <text x="16" y="44" font-family="Roboto Mono, monospace" font-size="14" fill="#151515">v2.4.1</text>
+    </g>
+    
+    <!-- Item 3 -->
+    <g transform="translate(424, 0)">
+      <rect width="180" height="56" rx="8" fill="#f8f7f4"/>
+      <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">Dernière mise à jour</text>
+      <text x="16" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#151515">14 jan. 2024</text>
+    </g>
+  </g>
+  
+  <!-- Response Preview -->
+  <text x="48" y="320" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">APERÇU RÉPONSE</text>
+  
+  <!-- Code Block -->
+  <rect x="48" y="332" width="400" height="32" rx="6" fill="#151515"/>
+  <text x="64" y="352" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">{"status": "success", "data": {"id": "atm_8f3k9m2p", ...}}</text>
+  
+  <!-- Primary Action Button -->
+  <rect x="476" y="332" width="152" height="32" rx="6" fill="url(#btnGradient)"/>
+  <text x="552" y="352" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Tester l'endpoint</text>
+</svg>

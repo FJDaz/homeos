@@ -1,0 +1,63 @@
+<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#2d8cff"/>
+    </linearGradient>
+    <filter id="cardShade" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity=".08"/>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Hero headline -->
+  <text x="40" y="80" font-family="Bebas Neue" font-size="48" fill="#151515">Analyse PNG</text>
+
+  <!-- Masonry grid -->
+  <g filter="url(#cardShade)">
+    <!-- Card 1: Vision Report -->
+    <rect x="40" y="120" width="280" height="200" rx="12" fill="#ffffff"/>
+    <rect x="56" y="136" width="248" height="120" rx="8" fill="#f5f7fa"/>
+    <rect x="56" y="136" width="248" height="120" rx="8" fill="url(#btnGrad)" opacity=".08"/>
+    <circle cx="180" cy="196" r="24" fill="#ffffff"/>
+    <path d="M180 188l16 16-32 0z" fill="#1258ca"/>
+    <text x="68" y="280" font-family="Inter" font-size="16" font-weight="600" fill="#151515">Rapport Analyse Vision</text>
+    <rect x="68" y="292" width="80" height="20" rx="10" fill="#e8f0ff"/>
+    <text x="76" y="305" font-family="Inter" font-size="12" fill="#1258ca">preview</text>
+
+    <!-- Card 2: Analyze button -->
+    <rect x="340" y="120" width="280" height="140" rx="12" fill="#ffffff"/>
+    <rect x="356" y="136" width="248" height="72" rx="8" fill="#f5f7fa"/>
+    <g transform="translate(460,160)">
+      <circle r="24" fill="url(#btnGrad)" filter="url(#glow)"/>
+      <path d="M-8 0l6-6v12z" fill="#ffffff"/>
+      <path d="M2 0h12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <text x="368" y="240" font-family="Inter" font-size="16" font-weight="600" fill="#151515">Bouton Analyser</text>
+    <rect x="368" y="252" width="90" height="20" rx="10" fill="#fff4e6"/>
+    <text x="376" y="265" font-family="Inter" font-size="12" fill="#ff8c00">launch-button</text>
+
+    <!-- Card 3: Regenerate -->
+    <rect x="640" y="120" width="280" height="140" rx="12" fill="#ffffff"/>
+    <rect x="656" y="136" width="248" height="72" rx="8" fill="#f5f7fa"/>
+    <g transform="translate(760,160)">
+      <circle r="24" fill="#ffffff" stroke="#1258ca" stroke-width="2"/>
+      <path d="M760 160a16 16 0 1 1-4 11l-4-4 8 0-4 4a12 12 0 1 0 4-11z" fill="#1258ca"/>
+    </g>
+    <text x="668" y="240" font-family="Inter" font-size="16" font-weight="600" fill="#151515">Régénérer Analyse</text>
+    <rect x="668" y="252" width="60" height="20" rx="10" fill="#e8f0ff"/>
+    <text x="676" y="265" font-family="Inter" font-size="12" fill="#1258ca">button</text>
+  </g>
+
+  <!-- Primary action -->
+  <g transform="translate(40,360)">
+    <rect x="0" y="0" width="200" height="48" rx="24" fill="url(#btnGrad)" filter="url(#glow)"/>
+    <text x="100" y="30" text-anchor="middle" font-family="Inter" font-size="15" font-weight="600" fill="#ffffff">Lancer l'analyse Gemini</text>
+  </g>
+</svg>

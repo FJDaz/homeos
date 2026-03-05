@@ -1,0 +1,70 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="statusGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ffd548"/>
+    </linearGradient>
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#d94e1a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Card Background -->
+  <rect x="16" y="16" width="368" height="368" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="40" y="56" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#151515">Validations Expert</text>
+  <text x="40" y="78" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">12 éléments validés • Dernière mise à jour: 14:32</text>
+  
+  <!-- Status Bar -->
+  <rect x="40" y="94" width="320" height="8" rx="4" fill="#f3f4f6"/>
+  <rect x="40" y="94" width="256" height="8" rx="4" fill="url(#statusGradient)"/>
+  <text x="368" y="100" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#f05e23" text-anchor="end">80%</text>
+  
+  <!-- Table Header -->
+  <rect x="40" y="118" width="320" height="36" rx="6" fill="#f8f7f4"/>
+  <text x="56" y="140" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5">ID</text>
+  <text x="120" y="140" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5">MODULE</text>
+  <text x="220" y="140" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5">STATUT</text>
+  <text x="320" y="140" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-anchor="end">SCORE</text>
+  
+  <!-- Row 1 -->
+  <rect x="40" y="162" width="320" height="44" rx="6" fill="#ffffff" stroke="#f3f4f6" stroke-width="1"/>
+  <text x="56" y="188" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">#VAL-001</text>
+  <text x="120" y="188" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Authentication</text>
+  <circle cx="232" cy="184" r="6" fill="#97ea90"/>
+  <text x="246" y="188" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151">Validé</text>
+  <text x="360" y="188" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#151515" text-anchor="end">98%</text>
+  
+  <!-- Row 2 -->
+  <rect x="40" y="214" width="320" height="44" rx="6" fill="#ffffff" stroke="#f3f4f6" stroke-width="1"/>
+  <text x="56" y="240" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">#VAL-002</text>
+  <text x="120" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Encryption</text>
+  <circle cx="232" cy="236" r="6" fill="#97ea90"/>
+  <text x="246" y="240" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151">Validé</text>
+  <text x="360" y="240" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#151515" text-anchor="end">95%</text>
+  
+  <!-- Row 3 -->
+  <rect x="40" y="266" width="320" height="44" rx="6" fill="#fff7ed"/>
+  <text x="56" y="292" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">#VAL-003</text>
+  <text x="120" y="292" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">API Gateway</text>
+  <circle cx="232" cy="288" r="6" fill="#ffd548"/>
+  <text x="246" y="292" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#92400e">En cours</text>
+  <text x="360" y="292" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#f05e23" text-anchor="end">72%</text>
+  
+  <!-- Row 4 -->
+  <rect x="40" y="318" width="320" height="44" rx="6" fill="#ffffff" stroke="#f3f4f6" stroke-width="1"/>
+  <text x="56" y="344" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">#VAL-004</text>
+  <text x="120" y="344" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Audit Logs</text>
+  <circle cx="232" cy="340" r="6" fill="#e5e7eb"/>
+  <text x="246" y="344" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">En attente</text>
+  <text x="360" y="344" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#9ca3af" text-anchor="end">—</text>
+  
+  <!-- Action Button -->
+  <rect x="264" y="370" width="96" height="28" rx="6" fill="url(#btnGradient)"/>
+  <text x="312" y="388" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">Exporter CSV</text>
+</svg>

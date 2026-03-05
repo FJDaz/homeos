@@ -174,6 +174,85 @@ def enrich_pass3_density(genome):
             print(f"  [PASS3] {organ.get('id')} → {organ['layout_type']} (N3={n3_count})")
     return genome
 
+import asyncio
+from typing import Optional
+
+def _get_api_key_for_gemini() -> Optional[str]:
+    import os
+    return (os.environ.get('GOOGLE_API_KEY_BACKEND') or 
+            os.environ.get('GOOGLE_API_KEY'))
+
+def enrich_pass4_architecture(genome):
+    """
+    Pass 4: Utilise Gemini Architect pour générer un layout premium WP-inspired.
+    Si Gemini n'est pas dispo, garde la stratégie standard.
+    """
+    api_key = _get_api_key_for_gemini()
+    if not api_key:
+        print("  [PASS4] Skipped (No Google API Key)")
+        return genome
+        
+    try:
+        import sys
+        import os
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+            
+        from Backend.Prod.planners.gemini_planner import GeminiPlanner
+        from Backend.Prod.models.gemini_client import GeminiClient
+        from Backend.Prod.exporters.topology_bank import TOPOLOGIES
+        
+        # Format topology bank context
+        topo_context = []
+        for name, spec in TOPOLOGIES.items():
+            topo_context.append(f"- {name}: {spec['description']}")
+        topo_str = "\n".join(topo_context)
+        
+        client = GeminiClient(api_key=api_key)
+        planner = GeminiPlanner(gemini_client=client)
+        
+        # Create an event loop explicitly for sync context
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+        for phase in genome.get('n0_phases', []):
+            for organ in phase.get('n1_sections', []):
+                # Request layout from Gemini
+                print(f"  [PASS4] Consulting Theme Architect for {organ.get('id')}...")
+                result = loop.run_until_complete(
+                    planner.generate_ui_architecture(organ, topo_str)
+                )
+                
+                # Apply the layout strategy
+                organ['layout_strategy'] = result.get('layout_strategy', 'standard')
+                organ['layout_justification'] = result.get('justification', '')
+                
+                # Optional: Handle explicit zone assignments if returned
+                assignments = result.get('zone_assignment', {})
+                if assignments:
+                    # Enrich N2 features with zone info where possible
+                    for uizone, item_list in assignments.items():
+                        for item in item_list:
+                            # Simplistic match to append zone info to description or a new field
+                            for feat in organ.get('n2_features', []):
+                                for comp in feat.get('n3_components', []):
+                                    if comp.get('name', '').lower() in item.lower():
+                                        comp['zone_assignment'] = uizone
+                                        break
+                                        
+                print(f"  [PASS4] ↳ Selected: {organ['layout_strategy']}")
+                
+    except ImportError as e:
+        print(f"  [PASS4] Skipped (Missing dependencies: {e})")
+    except Exception as e:
+        print(f"  [PASS4] Failed: {e}")
+        
+    return genome
+
 def main():
     parser = argparse.ArgumentParser(description='AetherFlow Genome Enricher')
     parser.add_argument('--genome', required=True, help='Path to genome_reference.json')
@@ -187,6 +266,7 @@ def main():
     enriched = enrich_genome(genome)
     enriched = enrich_pass2_ux(enriched)
     enriched = enrich_pass3_density(enriched)
+    enriched = enrich_pass4_architecture(enriched)
     
     if not args.dry_run:
         with open(args.output, 'w', encoding='utf-8') as f:
@@ -197,3 +277,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

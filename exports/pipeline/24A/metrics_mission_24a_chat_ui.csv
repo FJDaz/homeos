@@ -1,0 +1,17 @@
+Metric,Value
+Task ID,mission_24a_chat_ui
+Task Description,"Ajouter une interface de chat HCI dans le template-viewer de server_9998_v2.py pour itérer avec KIMI. Layout 2 panneaux : gauche=SVG canvas, droite=chat feedback. Backend : POST /api/feedback (lance run_pipeline.py --from 6 en thread daemon), GET /api/pipeline-status, POST /api/accept."
+Total Steps,0
+Successful Steps,0
+Failed Steps,0
+Total Execution Time (ms),489969.37200000003
+Average Step Time (ms),0
+Total Tokens Used,0
+Total Input Tokens,0
+Total Output Tokens,0
+Total Cost (USD),0
+Success Rate,0
+Started At,2026-03-03T21:21:44.312314
+Completed At,2026-03-03T21:29:54.281686
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error

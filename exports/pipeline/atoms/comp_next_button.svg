@@ -1,0 +1,55 @@
+<svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ff7a3d"/>
+    </linearGradient>
+    <linearGradient id="btnGradientHover" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e5551f"/>
+      <stop offset="100%" stop-color="#f05e23"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Card -->
+  <rect x="20" y="20" width="380" height="240" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Section Title -->
+  <text x="50" y="62" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Configuration du projet</text>
+  
+  <!-- Progress Indicator -->
+  <rect x="50" y="78" width="320" height="4" rx="2" fill="#e8e6e3"/>
+  <rect x="50" y="78" width="192" height="4" rx="2" fill="#f05e23"/>
+  <text x="50" y="102" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b6b6b">Étape 3 sur 5</text>
+  
+  <!-- Prerequisite Validation List -->
+  <!-- Item 1: Validated -->
+  <circle cx="62" cy="132" r="8" fill="#97ea90"/>
+  <path d="M58 132 L61 135 L66 129" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="82" y="136" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="500" fill="#151515">Nom du projet renseigné</text>
+  
+  <!-- Item 2: Validated -->
+  <circle cx="62" cy="162" r="8" fill="#97ea90"/>
+  <path d="M58 162 L61 165 L66 159" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="82" y="166" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="500" fill="#151515">Type de licence sélectionné</text>
+  
+  <!-- Item 3: Validated -->
+  <circle cx="62" cy="192" r="8" fill="#97ea90"/>
+  <path d="M58 192 L61 195 L66 189" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="82" y="196" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="500" fill="#151515">Équipe assignée (3 membres)</text>
+  
+  <!-- Status Badge -->
+  <rect x="260" y="122" width="110" height="28" rx="6" fill="#f8f7f4"/>
+  <circle cx="278" cy="136" r="4" fill="#97ea90"/>
+  <text x="290" y="140" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515" letter-spacing="0.5">PRÊT À CONTINUER</text>
+  
+  <!-- Primary Button: Bouton Suivant -->
+  <rect x="230" y="190" width="140" height="44" rx="6" fill="url(#btnGradient)"/>
+  <text x="260" y="217" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff">Suivant</text>
+  <path d="M352 210 L358 215 L352 220" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Helper Text -->
+  <text x="50" y="245" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9b9b9b" letter-spacing="0.3">Tous les prérequis sont validés. Vous pouvez passer à l'étape suivante.</text>
+</svg>

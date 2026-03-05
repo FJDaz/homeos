@@ -1,0 +1,162 @@
+{
+  "n1_export": {
+    "x": -280,
+    "y": 120
+  },
+  "n1_navigation": {
+    "x": -17,
+    "y": 49
+  },
+  "n1_analysis": {
+    "x": -19,
+    "y": 20
+  },
+  "n1_upload": {
+    "x": -169,
+    "y": -240
+  },
+  "n1_ir": {
+    "x": -5,
+    "y": -9
+  },
+  "n1_layout": {
+    "x": -798,
+    "y": 16
+  },
+  "n1_arbitrage": {
+    "x": -160,
+    "y": -4
+  },
+  "n1_session": {
+    "x": 92,
+    "y": -20
+  },
+  "n1_validation": {
+    "x": 107,
+    "y": -688
+  },
+  "n1_adaptation": {
+    "x": -210,
+    "y": -690
+  },
+  "comp_ir_table": {
+    "x": 227,
+    "y": 114,
+    "s": 0.6460666666666667
+  },
+  "comp_arbiter_table": {
+    "x": 855,
+    "y": 92,
+    "s": 0.7533333333333333
+  },
+  "comp_session_reset": {
+    "x": 133,
+    "y": 1138,
+    "s": 0.4649
+  },
+  "comp_genome_summary": {
+    "x": 666,
+    "y": 1000,
+    "s": 0.4649
+  },
+  "comp_session_status": {
+    "x": 141,
+    "y": 986,
+    "s": 0.4649
+  },
+  "comp_ir_detail": {
+    "x": 245,
+    "y": 425,
+    "s": 0.5927
+  },
+  "comp_arbiter_validate": {
+    "x": 844,
+    "y": 398,
+    "s": 0.7533333333333333
+  },
+  "comp_stencil_card": {
+    "x": 1144,
+    "y": 103,
+    "s": 0.7567
+  },
+  "comp_distillation_list": {
+    "x": 163,
+    "y": 1300,
+    "s": 0.43820000000000003
+  },
+  "comp_validation_dashboard": {
+    "x": 267,
+    "y": 2611,
+    "s": 0.3466
+  },
+  "comp_vision_report": {
+    "x": 260,
+    "y": 1912,
+    "s": 0.2395
+  },
+  "comp_vision_analyze_btn": {
+    "x": 256,
+    "y": 2062,
+    "s": 0.2633
+  },
+  "comp_vision_regenerate": {
+    "x": 267,
+    "y": 2212,
+    "s": 0.2195
+  },
+  "comp_validation_accordion": {
+    "x": 271,
+    "y": 2736,
+    "s": 0.3566
+  },
+  "comp_stenciler_grid": {
+    "x": 264,
+    "y": 2871,
+    "s": 0.41330000000000006
+  },
+  "comp_stenciler_select": {
+    "x": 239,
+    "y": 3025,
+    "s": 0.4599666666666667
+  },
+  "comp_zoom_controls": {
+    "x": 849,
+    "y": 2596,
+    "s": 0.3171
+  },
+  "comp_zoom_out": {
+    "x": 851,
+    "y": 2747,
+    "s": 0.31376666666666664
+  },
+  "comp_detail_card": {
+    "x": 1089,
+    "y": 2604,
+    "s": 0.3138
+  },
+  "comp_code_editor": {
+    "x": 1086,
+    "y": 2749,
+    "s": 0.3204
+  },
+  "comp_choice_style": {
+    "x": 854,
+    "y": 1912,
+    "s": 0.55
+  },
+  "comp_layout_card": {
+    "x": 869,
+    "y": 2100,
+    "s": 0.4867
+  },
+  "comp_layout_grid": {
+    "x": 864,
+    "y": 2282,
+    "s": 0.5033666666666666
+  },
+  "comp_launch_button": {
+    "x": 849,
+    "y": 2873,
+    "s": 0.3271
+  }
+}

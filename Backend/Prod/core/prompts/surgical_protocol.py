@@ -54,9 +54,9 @@ Check that:
 
 ## OUTPUT FORMAT
 
-{
+{{
   "operations": [
-    {
+    {{
       "type": "operation_type",
       "target": "qualified_target_name",  // For add_method, modify_method
       "code": "python code here",         // For add_method, modify_method, add_class, add_function
@@ -65,9 +65,9 @@ Check that:
       "new": "new import",                // For replace_import
       "position": "end",                  // Optional: "end", "after"
       "after": "existing_element"         // Optional: insert after this element
-    }
+    }}
   ]
-}
+}}
 
 ## VALIDATION RULES
 

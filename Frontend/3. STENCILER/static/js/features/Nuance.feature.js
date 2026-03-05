@@ -23,7 +23,7 @@ export const NuanceUI = {
         const substyle = resolveSubstyle(node);
 
         return `
-            <div class="cz-panel" id="panel-nuance">
+            <div class="cz-panel collapsed" id="panel-nuance">
                 <div class="panel-header">
                     <span>NUANCE (SOUS-STYLES)</span>
                     <span class="chevron">▼</span>

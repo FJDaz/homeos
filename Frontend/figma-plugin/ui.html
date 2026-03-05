@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        h2 {
+            font-size: 14px;
+            color: #333;
+            margin-top: 0;
+        }
+
+        .status {
+            font-size: 12px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .btn {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #e05d2d;
+        }
+
+        .debug {
+            font-size: 10px;
+            color: #999;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>AetherFlow Bridge</h2>
+    <div class="status" id="status">Connecting to localhost:9998...</div>
+    <button class="btn" id="import-btn">Import Manifest</button>
+    <div class="debug" id="debug"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const debugEl = document.getElementById('debug');
+        const importBtn = document.getElementById('import-btn');
+
+        importBtn.onclick = async () => {
+            statusEl.innerText = "Fetching manifest...";
+            try {
+                const response = await fetch('http://localhost:9998/api/manifest');
+                const manifest = await response.json();
+
+                statusEl.innerText = "Manifest loaded! Sending to Figma...";
+                parent.postMessage({ pluginMessage: { type: 'import-manifest', manifest } }, '*');
+            } catch (err) {
+                statusEl.innerText = "Error: Failed to fetch manifest.";
+                debugEl.innerText = err.toString();
+            }
+        };
+
+        onmessage = (event) => {
+            const msg = event.data.pluginMessage;
+            if (msg.type === 'import-done') {
+                statusEl.innerText = "Import successful! " + msg.count + " elements created.";
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+{
+  "name": "Most (Creative Agency)",
+  "url": "https://madsparkstudio.com/themes/most/?storefront=envato-elements",
+  "colors": {
+    "primary": "#ff6b35",
+    "bg": "#ffffff",
+    "dark": "#111111",
+    "text": "#333333",
+    "muted": "#888888",
+    "accent2": "#1a1a2e"
+  },
+  "typography": {
+    "display": {
+      "family": "Plus Jakarta Sans",
+      "weight": 700,
+      "size_hero": 64
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400,
+      "size": 16
+    },
+    "label": {
+      "family": "Inter",
+      "weight": 600,
+      "size": 11,
+      "uppercase": true
+    }
+  },
+  "layout": {
+    "style": "masonry_hero",
+    "hero_height": 700,
+    "card_radius": 12,
+    "card_shadow": "0 8px 32px rgba(0,0,0,0.10)",
+    "button_style": "pill",
+    "button_radius": 9999,
+    "section_padding_v": 120,
+    "col_gap": 32
+  },
+  "vibe": "bold creative agency — high contrast, orange energy, masonry grids"
+}

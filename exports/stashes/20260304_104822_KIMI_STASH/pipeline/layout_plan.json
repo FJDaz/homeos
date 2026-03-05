@@ -1,0 +1,127 @@
+{
+  "phases": {
+    "n0_brainstorm": {
+      "layout_style": "grid_12_cols",
+      "total_height": 800,
+      "organs": [
+        {
+          "id": "n1_ir",
+          "x": 260,
+          "y": 60,
+          "w": 760,
+          "h": 600,
+          "layout_strategy": "bento_grid",
+          "note": "Col 0 to 8 (span 8)"
+        },
+        {
+          "id": "n1_arbitrage",
+          "x": 1020,
+          "y": 140,
+          "w": 380,
+          "h": 500,
+          "layout_strategy": "flex-col",
+          "note": "Col 8 to 12 (span 4)"
+        }
+      ]
+    },
+    "n0_backend": {
+      "layout_style": "grid_12_cols",
+      "total_height": 600,
+      "organs": [
+        {
+          "id": "n1_session",
+          "x": 260,
+          "y": 60,
+          "w": 1140,
+          "h": 440,
+          "layout_strategy": "agency_grid",
+          "note": "Col 0 to 12 (span 12)"
+        }
+      ]
+    },
+    "n0_frontend": {
+      "layout_style": "grid_12_cols",
+      "total_height": 2800,
+      "organs": [
+        {
+          "id": "n1_analysis",
+          "x": 260,
+          "y": 120,
+          "w": 760,
+          "h": 700,
+          "layout_strategy": "agency_grid",
+          "note": "Col 0 to 8 (span 8)"
+        },
+        {
+          "id": "n1_upload",
+          "x": 1020,
+          "y": 60,
+          "w": 380,
+          "h": 540,
+          "layout_strategy": "flex-col",
+          "note": "Col 8 to 12 (span 4)"
+        },
+        {
+          "id": "n1_layout",
+          "x": 260,
+          "y": 920,
+          "w": 380,
+          "h": 400,
+          "layout_strategy": "bento_grid",
+          "note": "Col 0 to 4 (span 4)"
+        },
+        {
+          "id": "n1_validation",
+          "x": 640,
+          "y": 920,
+          "w": 760,
+          "h": 400,
+          "layout_strategy": "agency_grid",
+          "note": "Col 4 to 12 (span 8)"
+        },
+        {
+          "id": "n1_adaptation",
+          "x": 260,
+          "y": 1440,
+          "w": 1140,
+          "h": 500,
+          "layout_strategy": "agency_grid",
+          "note": "Col 0 to 12 (span 12)"
+        },
+        {
+          "id": "n1_dialogue",
+          "x": 1020,
+          "y": 2040,
+          "w": 380,
+          "h": 600,
+          "layout_strategy": "flex-col",
+          "note": "Col 8 to 12 (span 4) - Staggered down"
+        },
+        {
+          "id": "n1_navigation",
+          "x": 260,
+          "y": 0,
+          "w": 1140,
+          "h": 80,
+          "layout_strategy": "flex-col",
+          "note": "Col 0 to 12"
+        }
+      ]
+    },
+    "n0_deploy": {
+      "layout_style": "grid_12_cols",
+      "total_height": 500,
+      "organs": [
+        {
+          "id": "n1_export",
+          "x": 450,
+          "y": 100,
+          "w": 760,
+          "h": 320,
+          "layout_strategy": "bento_grid",
+          "note": "Centered Span 8 (Col 2 to 10 approx)"
+        }
+      ]
+    }
+  }
+}

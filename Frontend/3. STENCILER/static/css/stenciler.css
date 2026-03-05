@@ -305,6 +305,57 @@ body {
   text-align: center;
 }
 
+/* Sidebar Right Polish (Mission 14C-UX) */
+.sidebar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  border-color: var(--border-warm);
+}
+
+.color-swatch.active {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 3px var(--text-primary);
+}
+
+.prim-row label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+
+.border-range {
+  width: 100%;
+  accent-color: var(--accent-ardoise, #5A6B7C);
+}
+
+.section-chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
 /* Mission 8D : Transform Panel */
 .transform-panel {
   margin-top: 20px;

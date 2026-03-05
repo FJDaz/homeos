@@ -1,0 +1,42 @@
+<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-8" y="-8" width="456" height="256">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .card { fill:#fff; filter:url(#cardShadow); }
+      .h { font-family:"Plus Jakarta Sans",Inter,sans-serif; font-weight:700; }
+      .b { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:#1f2937; }
+      .t { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:#6b7280; letter-spacing:0.05em; }
+      .ic { fill:#f05e23; }
+    </style>
+  </defs>
+
+  <!-- Card -->
+  <rect class="card" x="16" y="16" width="408" height="208" rx="12"/>
+
+  <!-- Header -->
+  <text class="h" x="32" y="48" font-size="20" fill="#111">Résumé Décisions</text>
+
+  <!-- Accordion rows -->
+  <!-- Row 1: Zones validées (open) -->
+  <rect x="32" y="68" width="376" height="40" rx="8" fill="#fef3ec"/>
+  <text class="b" x="52" y="88">Zones validées</text>
+  <text class="t" x="52" y="104">3 sections approuvées</text>
+  <path class="ic" d="M340 82l6 6-6 6" stroke="#f05e23" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="88" r="4" fill="#f05e23"/>
+
+  <!-- Row 2: Style (closed) -->
+  <rect x="32" y="120" width="376" height="40" rx="8" fill="#f9fafb"/>
+  <text class="b" x="52" y="140">Style</text>
+  <text class="t" x="52" y="156">2 options en attente</text>
+  <path class="ic" d="M340 134l6-6 6 6" stroke="#f05e23" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="140" r="4" fill="#d1d5db"/>
+
+  <!-- Row 3: Ajustements (closed) -->
+  <rect x="32" y="172" width="376" height="40" rx="8" fill="#f9fafb"/>
+  <text class="b" x="52" y="192">Ajustements</text>
+  <text class="t" x="52" y="208">5 paramètres disponibles</text>
+  <path class="ic" d="M340 186l6-6 6 6" stroke="#f05e23" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="192" r="4" fill="#d1d5db"/>
+</svg>

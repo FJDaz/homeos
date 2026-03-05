@@ -241,3 +241,75 @@ Detected Issues:
         except json.JSONDecodeError as e:
             logger.warning(f"Failed to parse reviewed plan: {e}, returning original")
             return plan
+
+    async def generate_ui_architecture(
+        self,
+        organ_data: Dict[str, Any],
+        topology_bank_context: str
+    ) -> Dict[str, Any]:
+        """
+        Generate a dynamic WP-inspired UI layout for a given organ using the Architect Prompt.
+        
+        Args:
+            organ_data: The organ section containing n2_features and n3_components.
+            topology_bank_context: Context string containing available layout patterns.
+            
+        Returns:
+            Dictionary with the layout_strategy and zone_assignment.
+        """
+        logger.info(f"Gemini Planner: Generating WP Architecture for '{organ_data.get('name', 'Unknown')}'")
+        
+        from ..core.prompts.system_prompt_architect import ARCHITECT_SYSTEM_PROMPT
+        
+        system_prompt = ARCHITECT_SYSTEM_PROMPT
+        
+        user_prompt = f"""Design a premium layout for the following UI module.
+
+MODULE INFO:
+Name: {organ_data.get('name')}
+Role: {organ_data.get('ui_role', 'unknown')}
+Description: {organ_data.get('description', '')}
+
+AVAILABLE COMPONENTS:
+"""
+        
+        # List components
+        for feat in organ_data.get('n2_features', []):
+            for comp in feat.get('n3_components', []):
+                user_prompt += f"- {comp.get('name')} (Hint: {comp.get('visual_hint', '')})\n"
+                
+        user_prompt += f"\nTOPOLOGY REFERENCES:\n{topology_bank_context}\n"
+        user_prompt += "\nOutput ONLY valid JSON."
+        
+        full_prompt = f"{system_prompt}\n\n{user_prompt}"
+        
+        result = await self.client.generate(
+            prompt=full_prompt,
+            context=None,
+            max_tokens=2048,
+            temperature=0.8,  # Higher temperature for creative layouts
+            output_constraint="JSON only"
+        )
+        
+        if not result.success:
+            logger.warning(f"Architecture generation failed: {result.error}")
+            return {"layout_strategy": "standard", "zone_assignment": {}}
+        
+        try:
+            content = result.code.strip()
+            if content.startswith("```json"):
+                content = content[7:]
+            if content.startswith("```"):
+                content = content[3:]
+            if content.endswith("```"):
+                content = content[:-3]
+            content = content.strip()
+            
+            layout_data = json.loads(content)
+            logger.info(f"Architecture generated successfully: {layout_data.get('layout_strategy')}")
+            return layout_data
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse architecture JSON: {e}")
+            return {"layout_strategy": "standard", "zone_assignment": {}}
+

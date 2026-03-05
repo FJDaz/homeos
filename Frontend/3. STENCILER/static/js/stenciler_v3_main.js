@@ -30,6 +30,7 @@ const FEATURE_CONFIG = [
   { id: 'canvas', class: CanvasFeature, slot: Lexicon.slots.canvas },
   { id: 'preview', class: PreviewBandFeature, slot: Lexicon.slots.preview },
   { id: 'components', class: ComponentsZoneFeature, slot: Lexicon.slots.sidebar_right },
+  // { id: 'tsl-picker', class: TSLPickerFeature, slot: Lexicon.slots.sidebar_right }, 
   { id: 'status', class: APIStatusFeature, slot: Lexicon.slots.footer },
   // { id: 'persistence', class: PersistenceFeature, slot: 'body' }, // HOTFIX 14D: Desactive suite crash Not Implemented
   { id: 'primitive-editor', class: PrimitiveEditorFeature, slot: 'body' },

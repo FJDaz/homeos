@@ -1,0 +1,34 @@
+<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-8" y="-8" width="456" height="256">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .card{fill:#fff;stroke:#e5e7eb;stroke-width:1;rx:12;filter:url(#cardShadow)}
+      .label{font:700 11px/1 Plus Jakarta Sans,Inter,sans-serif;letter-spacing:.05em;text-transform:uppercase;fill:#6b7280}
+      .option{fill:#f8f7f4;stroke:#e5e7eb;stroke-width:1;rx:8;cursor:pointer}
+      .option:hover{fill:#97ea90;stroke:#97ea90}
+      .txt{font:500 14px/1 Inter,system-ui,sans-serif;fill:#111}
+      .check{fill:none;stroke:#111;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .option:hover .check{stroke:#fff}
+      .option:hover .txt{fill:#fff}
+    </style>
+  </defs>
+
+  <rect class="card" x="20" y="20" width="400" height="200"/>
+
+  <text class="label" x="40" y="48">Choisissez votre réponse</text>
+  <text font-size="16" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="700" fill="#111" x="40" y="72">Quel est le principal avantage de Sullivan ?</text>
+
+  <g class="option">
+    <rect x="40" y="92" width="360" height="40"/>
+    <text class="txt" x="64" y="116">Réduction des coûts opérationnels</text>
+    <path class="check" d="M48 108l4 4 8-8"/>
+  </g>
+
+  <g class="option">
+    <rect x="40" y="140" width="360" height="40"/>
+    <text class="txt" x="64" y="164">Amélioration de la satisfaction client</text>
+    <circle cx="52" cy="160" r="8" fill="none" stroke="#111" stroke-width="2"/>
+  </g>
+</svg>

@@ -1,0 +1,43 @@
+{
+  "task_id": "mission_20b_focus_mode",
+  "description": "Ajouter le focus mode au genome_canvas.html : clic carte → overlay semi-transparent, carte reste en place, autres cartes s'estompent, contenu détaillé N2/N3 révélé dans la carte. Clic dehors → reset.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Stenciler V3 — Mission 20B focus mode genome canvas"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter focus mode à genome_canvas.html sans casser drag, resize, tabs",
+      "type": "code_generation",
+      "complexity": 0.5,
+      "estimated_tokens": 1400,
+      "dependencies": [],
+      "validation_criteria": [
+        "Drag fonctionne toujours (ne pas toucher initDragAndDrop)",
+        "Resize fonctionne toujours (ne pas toucher logique resize)",
+        "Tabs N0 fonctionnent toujours",
+        "Clic simple sur carte (sans mouvement) → focus mode activé",
+        "Focus mode : overlay div semi-transparent couvre tout le canvas",
+        "Focus mode : carte cliquée reste à sa position, z-index 200, width min 400px",
+        "Focus mode : autres cartes opacity 0.15, pointer-events none",
+        "Focus mode : carte en focus affiche N2 features + N3 composants en détail avec scroll",
+        "Focus mode : bouton ✕ en haut à droite de la carte en focus",
+        "Clic overlay OU bouton ✕ → exit focus, tout restauré",
+        "Distinction click vs drag : focus UNIQUEMENT si mousedown→mouseup sans mouvement (< 5px)"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "input_files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "instructions": "Lis ENTIEREMENT Frontend/3. STENCILER/static/genome_canvas.html avant de coder.\nRéécris-le en ajoutant UNIQUEMENT le focus mode. Ne pas modifier initDragAndDrop(), renderTabs(), renderPhase(), loadGenomeAndRender(), _comp_html().\n\n## Ce qui ne doit PAS changer\n- `initDragAndDrop()` : drag + resize déjà fonctionnels — NE PAS TOUCHER\n- `renderTabs()` / `renderPhase()` — NE PAS TOUCHER\n- `loadGenomeAndRender()` — NE PAS TOUCHER\n- `_comp_html()` — NE PAS TOUCHER\n- CSS existant (organ-container, resize-handle, organ-title, etc.) — NE PAS TOUCHER\n\n## Focus mode — spec exacte\n\n### Détecter click vs drag\nDans `initDragAndDrop()`, sur mousedown : stocker `_mouseDownX = e.clientX`, `_mouseDownY = e.clientY`.\nSur mouseup du drag : si draggedOrgan ET distance < 5px depuis mousedown → appeler `enterFocus(card)`.\nDistance = Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY).\nNE PAS appeler enterFocus si resize en cours.\n\n### enterFocus(card)\n1. Créer div#focus-overlay (position:absolute, inset:0, background:rgba(240,239,235,0.7), z-index:100) → appendChild dans #genome-canvas\n2. Toutes les .organ-container sauf `card` → style.opacity='0.12', style.pointerEvents='none'\n3. `card` → style.zIndex='200', style.minWidth='420px', style.boxShadow='0 8px 32px rgba(0,0,0,0.18)'\n4. Remplacer le contenu de `card` par la vue détaillée (voir ci-dessous)\n5. Stocker l'organe courant dans `_focusedOrgan` et son contenu compact dans `_focusedContent`\n\n### Vue détaillée dans la carte\nHeader : `<div class='organ-title' style='display:flex;justify-content:space-between;align-items:center;'>` + nom organe + `<button id='focus-close' style='background:none;border:none;font-size:18px;cursor:pointer;color:#999;'>✕</button>`\nBody scroll : `<div style='max-height:500px;overflow-y:auto;padding:8px 0;'>`\nPour chaque n2_feature de l'organe dans `_genome` :\n  - Titre feature : `<p style='font-size:10px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 6px;'>${feature.name}</p>`\n  - Pour chaque n3_component : `<div style='margin-bottom:8px;'>` + `_comp_html(comp)` + `<p style='font-size:9px;color:#aaa;margin:2px 0 0 2px;'>${comp.name}</p></div>`\n\nComment retrouver l'organe dans `_genome` : `_genome.n0_phases[_activePhaseIdx].n1_sections.find(o => o.id === card.dataset.organId)`\n\n### exitFocus()\n1. Supprimer #focus-overlay s'il existe\n2. Toutes les .organ-container → style.opacity='', style.pointerEvents=''\n3. `_focusedOrgan` → style.zIndex='', style.minWidth='', style.boxShadow=''\n4. Restaurer le contenu compact : `_focusedOrgan.innerHTML = _focusedContent` + réappend resize-handle\n5. `_focusedOrgan = null`\n\n### Event listeners pour exitFocus\n- Clic sur #focus-overlay → exitFocus()\n- Clic sur #focus-close → exitFocus()\n- Ces listeners dans enterFocus() lui-même (addEventListener one-time)\n\n### Variables globales à ajouter\n```javascript\nlet _focusedOrgan = null;\nlet _focusedContent = null;\nlet _mouseDownX = 0, _mouseDownY = 0;\n```\n\n## CSS à ajouter (dans <style>)\n```css\n#focus-overlay {\n  position: absolute; inset: 0;\n  background: rgba(240,239,235,0.75);\n  z-index: 100;\n  cursor: default;\n}\n.organ-container.focused {\n  z-index: 200;\n  min-width: 420px;\n  box-shadow: 0 8px 32px rgba(0,0,0,0.18);\n}\n```\n\n## IMPORTANT\n- Output : UNIQUEMENT le fichier HTML complet\n- Tester mentalement : drag ne déclenche pas focus (distance > 5px)\n- Tester mentalement : resize ne déclenche pas focus\n- Le contenu de la carte en focus doit avoir overflow-y:auto pour les organes avec beaucoup de composants"
+      }
+    }
+  ]
+}

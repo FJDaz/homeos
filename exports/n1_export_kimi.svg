@@ -1,0 +1,51 @@
+<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#4a37d0"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f7f9ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity=".12"/>
+    </filter>
+  </defs>
+
+  <!-- Main card -->
+  <rect x="120" y="120" width="760" height="360" rx="16" fill="url(#cardGrad)" filter="url(#shadow)"/>
+  <rect x="140" y="140" width="720" height="160" rx="12" fill="#f1f3ff" stroke="#e0e4ff" stroke-width="1"/>
+
+  <!-- Placeholder thumbnail -->
+  <rect x="160" y="160" width="120" height="120" rx="8" fill="#dfe3ff"/>
+  <path d="M200 210 L220 190 L250 220 L270 200 L300 230 L300 250 L200 250 Z" fill="#a8b0ff" opacity=".6"/>
+  <circle cx="240" cy="220" r="18" fill="#6c5ce7" opacity=".8"/>
+
+  <!-- File info -->
+  <text x="300" y="190" font-size="18" fill="#2d3436" font-family="Arial, sans-serif" font-weight="600">theme-package.zip</text>
+  <text x="300" y="210" font-size="14" fill="#636e72">2.3 MB • 42 fichiers • 12/07/2024 14:32</text>
+
+  <!-- Download button -->
+  <rect x="300" y="230" width="180" height="44" rx="22" fill="url(#btnGrad)" filter="url(#shadow)"/>
+  <path d="M350 250 L370 270 L390 250 M370 240 L370 270" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <text x="410" y="256" font-size="16" fill="#fff" font-family="Arial, sans-serif" font-weight="600">Télécharger ZIP</text>
+
+  <!-- New session button -->
+  <rect x="520" y="230" width="180" height="44" rx="22" fill="#dfe6e9" stroke="#b2bec3" stroke-width="1"/>
+  <path d="M590 240 L590 250 L600 250 M600 240 L590 250 L600 260" stroke="#2d3436" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <text x="620" y="256" font-size="16" fill="#2d3436" font-family="Arial, sans-serif" font-weight="600">Nouvelle session</text>
+
+  <!-- Modal -->
+  <rect x="250" y="80" width="500" height="240" rx="16" fill="#ffffff" filter="url(#shadow)" stroke="#e0e0e0" stroke-width="1"/>
+  <rect x="250" y="80" width="500" height="60" rx="16" fill="#f7f9ff"/>
+  <text x="280" y="118" font-size="20" fill="#2d3436" font-family="Arial, sans-serif" font-weight="700">Confirmer le téléchargement</text>
+  <text x="280" y="180" font-size="15" fill="#636e72">Êtes-vous sûr de vouloir télécharger l’archive ZIP ?</text>
+
+  <!-- Modal buttons -->
+  <rect x="420" y="270" width="80" height="36" rx="18" fill="#dfe6e9" stroke="#b2bec3" stroke-width="1"/>
+  <text x="460" y="293" font-size="14" fill="#2d3436" font-family="Arial, sans-serif" text-anchor="middle">Annuler</text>
+
+  <rect x="520" y="270" width="80" height="36" rx="18" fill="url(#btnGrad)" filter="url(#shadow)"/>
+  <text x="560" y="293" font-size="14" fill="#fff" font-family="Arial, sans-serif" text-anchor="middle">Confirmer</text>
+</svg>

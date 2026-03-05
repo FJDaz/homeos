@@ -1,0 +1,38 @@
+{
+  "task_id": "mission_20c_resize_height",
+  "description": "Ajouter poignée de resize hauteur (bord bas) sur les cartes du genome_canvas.html. Même pattern que le resize largeur existant (bas-droit). Persister h dans /api/layout.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Stenciler V3 — Mission 20C resize hauteur genome canvas"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Ajouter poignée resize hauteur + persistance h dans genome_canvas.html",
+      "type": "code_generation",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "NE PAS toucher le drag, le focus mode, les tabs, les fonctions existantes",
+        "Poignée .resize-handle-s visible en bas au centre de chaque carte (curseur s-resize)",
+        "Drag poignée bas → augmente/diminue height de la carte (min 100px)",
+        "mouseup → POST /api/layout avec { [id]: { x, y, w, h } }",
+        "GET /api/layout au load → restaure h (card.style.height = layout[id].h + 'px')",
+        "La poignée bas-droit existante (.resize-handle) continue de fonctionner pour la largeur"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "input_files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "instructions": "Lis ENTIEREMENT Frontend/3. STENCILER/static/genome_canvas.html avant de coder.\nAjoute UNIQUEMENT le resize hauteur. Ne touche à rien d'autre.\n\n## Ce que tu dois ajouter\n\n### 1. CSS (dans <style>, après .resize-handle existant)\n```css\n.resize-handle-s {\n  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);\n  width: 40px; height: 6px; cursor: s-resize;\n  background: #d5d4d0; border-radius: 3px; opacity: 0.6;\n}\n.resize-handle-s:hover { opacity: 1; }\n```\n\n### 2. Dans renderOrgan() — après le rh (resize-handle bas-droit existant)\n```javascript\nconst rhs = document.createElement('div');\nrhs.className = 'resize-handle-s';\norganContainer.appendChild(rhs);\n```\n\n### 3. Dans initDragAndDrop() — variables en haut de la fonction\nAjouter : `let resizedHeightOrgan = null, resizeHeightStartY, resizeHeightStartH;`\n\n### 4. Dans le mousedown listener — après le bloc resize-handle existant\n```javascript\nif (e.target.classList.contains('resize-handle-s')) {\n  resizedHeightOrgan = e.target.closest('.organ-container');\n  resizeHeightStartY = e.clientY;\n  resizeHeightStartH = resizedHeightOrgan.offsetHeight;\n  document.body.style.userSelect = 'none';\n  return;\n}\n```\n\n### 5. Dans le mouseup listener — après le bloc resizedOrgan existant\n```javascript\nif (resizedHeightOrgan) {\n  const id = resizedHeightOrgan.dataset.organId;\n  const x = parseInt(resizedHeightOrgan.style.left);\n  const y = parseInt(resizedHeightOrgan.style.top);\n  const w = resizedHeightOrgan.offsetWidth;\n  const h = resizedHeightOrgan.offsetHeight;\n  fetch('/api/layout', { method: 'POST', headers: {'Content-Type':'application/json'},\n    body: JSON.stringify({ [id]: { x, y, w, h } }) }).catch(() => {});\n  resizedHeightOrgan = null;\n  document.body.style.userSelect = '';\n  return;\n}\n```\n\n### 6. Dans le mousemove listener — après le bloc resizedOrgan existant\n```javascript\nif (resizedHeightOrgan) {\n  const newH = Math.max(100, resizeHeightStartH + (e.clientY - resizeHeightStartY));\n  resizedHeightOrgan.style.height = newH + 'px';\n  resizedHeightOrgan.style.overflow = 'hidden';\n} else\n```\n(remplacer le `else if (draggedOrgan)` par `else if (draggedOrgan)` — juste ajouter le bloc avant)\n\n### 7. Dans renderPhase() — restaurer h au load\nAprès `organ.w = saved ? saved.w : null;` ajouter :\n`organ.h = saved ? saved.h : null;`\n\n### 8. Dans renderOrgan() — après `if (organ.w) organContainer.style.width = organ.w + 'px';`\n`if (organ.h) organContainer.style.height = organ.h + 'px';`\n\n## IMPORTANT\n- Output : UNIQUEMENT le fichier HTML complet\n- Ne pas modifier enterFocus(), exitFocus(), renderTabs(), loadGenomeAndRender(), _comp_html()\n- Les autres POST /api/layout existants (drag + resize largeur) doivent aussi inclure h si défini : ajouter `h: parseInt(card.style.height) || undefined` dans leurs payloads"
+      }
+    }
+  ]
+}

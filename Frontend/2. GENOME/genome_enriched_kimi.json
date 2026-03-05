@@ -1,0 +1,741 @@
+{
+  "genome_version": "3.1-kimi-innocent-inferred",
+  "inference_method": "4-source-confrontation",
+  "project": "HomeOS/Sullivan",
+  "date": "2026-02-10",
+  "metadata": {
+    "confidence_global": 0.85,
+    "sources_used": [
+      "WORKFLOW_UTILISATEUR.md",
+      "PRD_HOMEOS_ETAT_ACTUEL.md",
+      "api.py",
+      "studio_routes.py"
+    ],
+    "composants_count": 32,
+    "n0_count": 4,
+    "n1_count": 10,
+    "n2_count": 14,
+    "n3_count": 32,
+    "methodology": "Kimi Innocent - 4 bundles confrontation",
+    "rule_applied": "Logs > Code > Doc"
+  },
+  "n0_phases": [
+    {
+      "id": "n0_brainstorm",
+      "name": "Brainstorm",
+      "description": "Phase 1 - Analyse intention utilisateur et structuration besoins fonctionnels",
+      "order": 1,
+      "confidence": 0.88,
+      "n1_sections": [
+        {
+          "id": "n1_ir",
+          "name": "Intent Refactoring",
+          "description": "Étape 1 - Inventaire fonctionnel et détection organes",
+          "n2_features": [
+            {
+              "id": "n2_ir_report",
+              "name": "Rapport IR",
+              "description": "Visualisation inventaire organes détectés",
+              "n3_components": [
+                {
+                  "id": "comp_ir_table",
+                  "name": "Vue Rapport IR",
+                  "endpoint": "/studio/reports/ir",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un tableau des organes détectés avec verdict coloré (Accept/Revise/Reject) et peut cliquer pour voir les détails",
+                  "zone_assignment": "sidebar"
+                },
+                {
+                  "id": "comp_ir_detail",
+                  "name": "Détail Organe",
+                  "endpoint": "/studio/drilldown",
+                  "method": "GET",
+                  "visual_hint": "detail-card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une fiche technique détaillant un organe avec ses endpoints et modèles, et peut copier ou tester",
+                  "zone_assignment": "main"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Intent Refactoring",
+          "ux_step": 5,
+          "layout_type": "compact",
+          "col_span": 1,
+          "layout_strategy": "master_detail",
+          "layout_justification": "The master-detail layout allows for a focused view of the 'Détail Organe' while providing a contextual navigation and filtering within the 'Vue Rapport IR' sidebar. This asymmetric split enhances information density and user experience.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#4f46e5\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"3\" flood-color=\"#000\" flood-opacity=\".15\"/>\n    </filter>\n    <pattern id=\"imgPlace\" patternUnits=\"userSpaceOnUse\" width=\"40\" height=\"40\">\n      <rect width=\"40\" height=\"40\" fill=\"#e5e7eb\"/>\n      <circle cx=\"20\" cy=\"20\" r=\"8\" fill=\"#9ca3af\"/>\n    </pattern>\n  </defs>\n\n  <!-- Sidebar -->\n  <rect x=\"0\" y=\"0\" width=\"320\" height=\"600\" fill=\"#f9fafb\"/>\n  <rect x=\"0\" y=\"0\" width=\"320\" height=\"56\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <text x=\"24\" y=\"34\" font-size=\"16\" fill=\"#111827\" font-family=\"Arial\" font-weight=\"600\">Vue Rapport IR</text>\n\n  <!-- Table rows -->\n  <g font-family=\"Arial\" font-size=\"14\">\n    <rect x=\"16\" y=\"72\" width=\"288\" height=\"72\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"28\" y=\"84\" width=\"40\" height=\"40\" rx=\"4\" fill=\"url(#imgPlace)\"/>\n    <text x=\"80\" y=\"100\" fill=\"#1f2937\" font-weight=\"500\">Header Hero</text>\n    <rect x=\"80\" y=\"106\" width=\"60\" height=\"20\" rx=\"10\" fill=\"#10b981\"/>\n    <text x=\"90\" y=\"119\" fill=\"#fff\" font-size=\"12\">Accept</text>\n\n    <rect x=\"16\" y=\"160\" width=\"288\" height=\"72\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"28\" y=\"172\" width=\"40\" height=\"40\" rx=\"4\" fill=\"url(#imgPlace)\"/>\n    <text x=\"80\" y=\"188\" fill=\"#1f2937\" font-weight=\"500\">CTA Strip</text>\n    <rect x=\"80\" y=\"194\" width=\"60\" height=\"20\" rx=\"10\" fill=\"#f59e0b\"/>\n    <text x=\"90\" y=\"207\" fill=\"#fff\" font-size=\"12\">Revise</text>\n\n    <rect x=\"16\" y=\"248\" width=\"288\" height=\"72\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"28\" y=\"260\" width=\"40\" height=\"40\" rx=\"4\" fill=\"url(#imgPlace)\"/>\n    <text x=\"80\" y=\"276\" fill=\"#1f2937\" font-weight=\"500\">Footer Bar</text>\n    <rect x=\"80\" y=\"282\" width=\"60\" height=\"20\" rx=\"10\" fill=\"#ef4444\"/>\n    <text x=\"90\" y=\"295\" fill=\"#fff\" font-size=\"12\">Reject</text>\n  </g>\n\n  <!-- Main detail -->\n  <rect x=\"336\" y=\"0\" width=\"664\" height=\"600\" fill=\"#fff\"/>\n  <rect x=\"336\" y=\"0\" width=\"664\" height=\"56\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <text x=\"352\" y=\"34\" font-size=\"16\" fill=\"#111827\" font-family=\"Arial\" font-weight=\"600\">Détail Organe : Header Hero</text>\n\n  <rect x=\"352\" y=\"80\" width=\"296\" height=\"200\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <rect x=\"368\" y=\"96\" width=\"264\" height=\"120\" rx=\"4\" fill=\"url(#imgPlace)\"/>\n  <text x=\"368\" y=\"240\" font-size=\"14\" fill=\"#374151\" font-family=\"Arial\">Endpoints : GET /hero, POST /hero</text>\n  <text x=\"368\" y=\"260\" font-size=\"14\" fill=\"#374151\" font-family=\"Arial\">Modèle : Hero-v2.json</text>\n\n  <rect x=\"672\" y=\"80\" width=\"296\" height=\"200\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <text x=\"688\" y=\"108\" font-size=\"14\" fill=\"#1f2937\" font-family=\"Arial\" font-weight=\"600\">Actions</text>\n  <rect x=\"688\" y=\"120\" width=\"120\" height=\"36\" rx=\"6\" fill=\"url(#btnGrad)\"/>\n  <text x=\"712\" y=\"142\" fill=\"#fff\" font-size=\"14\" font-family=\"Arial\">Tester</text>\n  <rect x=\"824\" y=\"120\" width=\"120\" height=\"36\" rx=\"6\" fill=\"#fff\" stroke=\"#d1d5db\" stroke-width=\"1\"/>\n  <text x=\"848\" y=\"142\" fill=\"#374151\" font-size=\"14\" font-family=\"Arial\">Copier</text>\n\n  <rect x=\"352\" y=\"304\" width=\"616\" height=\"240\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <text x=\"368\" y=\"332\" font-size=\"14\" fill=\"#1f2937\" font-family=\"Arial\" font-weight=\"600\">Logs récents</text>\n  <line x1=\"368\" y1=\"344\" x2=\"952\" y2=\"344\" stroke=\"#e5e7eb\" stroke-width=\"1\"/>\n  <text x=\"368\" y=\"364\" font-size=\"13\" fill=\"#6b7280\" font-family=\"Arial\">2025-06-10 14:23 — Accepté par Jean D.</text>\n  <text x=\"368\" y=\"384\" font-size=\"13\" fill=\"#6b7280\" font-family=\"Arial\">2025-06-10 11:05 — Révision demandée par Marie K.</text>\n  <text x=\"368\" y=\"404\" font-size=\"13\" fill=\"#6b7280\" font-family=\"Arial\">2025-06-09 18:41 — Soumis par Luc M.</text>\n</svg>"
+        },
+        {
+          "id": "n1_arbitrage",
+          "name": "Arbitrage",
+          "description": "Étape 2 - Décision garder/réserve par capacité",
+          "n2_features": [
+            {
+              "id": "n2_stencils",
+              "name": "Stencils HCI",
+              "description": "Cartes de pouvoirs avec validation",
+              "n3_components": [
+                {
+                  "id": "comp_arbiter_table",
+                  "name": "Tableau Expert",
+                  "endpoint": "/studio/reports/arbitrage",
+                  "method": "GET",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un tableau technique récapitulatif des validations en mode expert",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_arbiter_validate",
+                  "name": "Validation Arbitrage",
+                  "endpoint": "/studio/validate",
+                  "method": "POST",
+                  "visual_hint": "form",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un formulaire de validation et peut soumettre ses décisions finales",
+                  "zone_assignment": "sidebar"
+                },
+                {
+                  "id": "comp_stencil_card",
+                  "name": "Carte Stencil",
+                  "endpoint": "/studio/arbitrage/forms",
+                  "method": "GET",
+                  "visual_hint": "stencil-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une carte pouvoir avec titre, description et boutons Garder/Réserve, et peut sélectionner son choix",
+                  "zone_assignment": "sidebar"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Arbitrage",
+          "ux_step": 5,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "split_pane_form",
+          "layout_justification": "The split-pane layout provides a clear separation between the data-rich table and the decision-making form, enhanced by contextual information from the stencil card. This structure ensures users can easily analyze the expert data and make informed decisions with a premium feel.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#4f46e5\"/>\n    </linearGradient>\n    <linearGradient id=\"cardGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#fff\"/>\n      <stop offset=\"100%\" stop-color=\"#f9fafb\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-2\" y=\"-2\" width=\"200%\" height=\"200%\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"3\" flood-color=\"#000\" flood-opacity=\".15\"/>\n    </filter>\n  </defs>\n\n  <!-- MAIN: Tableau Expert -->\n  <g id=\"comp_arbiter_table\">\n    <rect x=\"20\" y=\"20\" width=\"640\" height=\"560\" fill=\"url(#cardGrad)\" stroke=\"#e5e7eb\" stroke-width=\"1\" rx=\"8\" filter=\"url(#shadow)\"/>\n    <text x=\"40\" y=\"55\" font-size=\"18\" font-weight=\"600\" fill=\"#111827\">Tableau Expert</text>\n\n    <!-- Table header -->\n    <rect x=\"40\" y=\"80\" width=\"600\" height=\"40\" fill=\"#f3f4f6\"/>\n    <text x=\"60\" y=\"103\" font-size=\"14\" font-weight=\"500\" fill=\"#374151\">ID</text>\n    <text x=\"140\" y=\"103\" font-size=\"14\" font-weight=\"500\" fill=\"#374151\">Titre</text>\n    <text x=\"320\" y=\"103\" font-size=\"14\" font-weight=\"500\" fill=\"#374151\">Statut</text>\n    <text x=\"480\" y=\"103\" font-size=\"14\" font-weight=\"500\" fill=\"#374151\">Action</text>\n\n    <!-- Rows -->\n    <g>\n      <rect x=\"40\" y=\"130\" width=\"600\" height=\"50\" fill=\"#fff\"/>\n      <text x=\"60\" y=\"157\" font-size=\"14\" fill=\"#111827\">#4821</text>\n      <text x=\"140\" y=\"157\" font-size=\"14\" fill=\"#111827\">Maquette Accueil</text>\n      <rect x=\"310\" y=\"137\" width=\"80\" height=\"26\" fill=\"#dbeafe\" rx=\"4\"/>\n      <text x=\"350\" y=\"154\" font-size=\"13\" fill=\"#1d4ed8\" text-anchor=\"middle\">En attente</text>\n      <rect x=\"470\" y=\"137\" width=\"70\" height=\"26\" fill=\"url(#btnGrad)\" rx=\"6\"/>\n      <text x=\"505\" y=\"154\" font-size=\"13\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"500\">Voir</text>\n    </g>\n\n    <g>\n      <rect x=\"40\" y=\"190\" width=\"600\" height=\"50\" fill=\"#f9fafb\"/>\n      <text x=\"60\" y=\"217\" font-size=\"14\" fill=\"#111827\">#4822</text>\n      <text x=\"140\" y=\"217\" font-size=\"14\" fill=\"#111827\">Bannière Promo</text>\n      <rect x=\"310\" y=\"197\" width=\"80\" height=\"26\" fill=\"#d1fae5\" rx=\"4\"/>\n      <text x=\"350\" y=\"214\" font-size=\"13\" fill=\"#047857\" text-anchor=\"middle\">Validé</text>\n      <rect x=\"470\" y=\"197\" width=\"70\" height=\"26\" fill=\"url(#btnGrad)\" rx=\"6\"/>\n      <text x=\"505\" y=\"214\" font-size=\"13\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"500\">Voir</text>\n    </g>\n\n    <g>\n      <rect x=\"40\" y=\"250\" width=\"600\" height=\"50\" fill=\"#fff\"/>\n      <text x=\"60\" y=\"277\" font-size=\"14\" fill=\"#111827\">#4823</text>\n      <text x=\"140\" y=\"277\" font-size=\"14\" fill=\"#111827\">Icônes Services</text>\n      <rect x=\"310\" y=\"257\" width=\"80\" height=\"26\" fill=\"#fee2e2\" rx=\"4\"/>\n      <text x=\"350\" y=\"274\" font-size=\"13\" fill=\"#b91c1c\" text-anchor=\"middle\">Rejeté</text>\n      <rect x=\"470\" y=\"257\" width=\"70\" height=\"26\" fill=\"url(#btnGrad)\" rx=\"6\"/>\n      <text x=\"505\" y=\"274\" font-size=\"13\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"500\">Voir</text>\n    </g>\n  </g>\n\n  <!-- SIDEBAR: Validation Arbitrage -->\n  <g id=\"comp_arbiter_validate\">\n    <rect x=\"680\" y=\"20\" width=\"300\" height=\"180\" fill=\"url(#cardGrad)\" stroke=\"#e5e7eb\" stroke-width=\"1\" rx=\"8\" filter=\"url(#shadow)\"/>\n    <text x=\"700\" y=\"55\" font-size=\"18\" font-weight=\"600\" fill=\"#111827\">Validation Arbitrage</text>\n\n    <rect x=\"700\" y=\"80\" width=\"260\" height=\"36\" fill=\"#fff\" stroke=\"#d1d5db\" stroke-width=\"1\" rx=\"6\"/>\n    <text x=\"715\" y=\"103\" font-size=\"14\" fill=\"#6b7280\">Commentaire…</text>\n\n    <rect x=\"700\" y=\"130\" width=\"120\" height=\"36\" fill=\"#10b981\" rx=\"6\"/>\n    <text x=\"760\" y=\"153\" font-size=\"14\" fill=\"#fff\" font-weight=\"500\" text-anchor=\"middle\">Approuver</text>\n\n    <rect x=\"840\" y=\"130\" width=\"120\" height=\"36\" fill=\"#ef4444\" rx=\"6\"/>\n    <text x=\"900\" y=\"153\" font-size=\"14\" fill=\"#fff\" font-weight=\"500\" text-anchor=\"middle\">Rejeter</text>\n  </g>\n\n  <!-- SIDEBAR: Carte Stencil -->\n  <g id=\"comp_stencil_card\">\n    <rect x=\"680\" y=\"220\" width=\"300\" height=\"360\" fill=\"url(#cardGrad)\" stroke=\"#e5e7eb\" stroke-width=\"1\" rx=\"8\" filter=\"url(#shadow)\"/>\n    <text x=\"700\" y=\"255\" font-size=\"18\" font-weight=\"600\" fill=\"#111827\">Carte Stencil</text>\n\n    <rect x=\"700\" y=\"280\" width=\"260\" height=\"120\" fill=\"#e5e7eb\" rx=\"6\"/>\n    <rect x=\"710\" y=\"290\" width=\"240\" height=\"100\" fill=\"#d1d5db\" rx=\"4\"/>\n\n    <text x=\"700\" y=\"425\" font-size=\"16\" font-weight=\"500\" fill=\"#111827\">Stencil Header</text>\n    <text x=\"700\" y=\"450\" font-size=\"14\" fill=\"#6b7280\">Description succincte de l’élément à arbitrer.</text>\n\n    <rect x=\"700\" y=\"480\" width=\"120\" height=\"36\" fill=\"#22c55e\" rx=\"6\"/>\n    <text x=\"760\" y=\"503\" font-size=\"14\" fill=\"#fff\" font-weight=\"500\" text-anchor=\"middle\">Garder</text>\n\n    <rect x=\"840\" y=\"480\" width=\"120\" height=\"36\" fill=\"#f59e0b\" rx=\"6\"/>\n    <text x=\"900\" y=\"503\" font-size=\"14\" fill=\"#fff\" font-weight=\"500\" text-anchor=\"middle\">Réserve</text>\n  </g>\n</svg>"
+        }
+      ]
+    },
+    {
+      "id": "n0_backend",
+      "name": "Backend",
+      "description": "Phase 2 - Architecture serveur et gestion données",
+      "order": 2,
+      "confidence": 0.92,
+      "n1_sections": [
+        {
+          "id": "n1_session",
+          "name": "Session Management",
+          "description": "Étape 3 - Gestion état et persistence",
+          "n2_features": [
+            {
+              "id": "n2_session_mgmt",
+              "name": "Gestion Session",
+              "description": "Contrôle état machine à états",
+              "n3_components": [
+                {
+                  "id": "comp_session_reset",
+                  "name": "Reset Session",
+                  "endpoint": "/studio/session/reset",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un bouton de réinitialisation avec confirmation et peut redémarrer à zéro",
+                  "zone_assignment": "header"
+                },
+                {
+                  "id": "comp_genome_summary",
+                  "name": "Résumé Genome",
+                  "endpoint": "/studio/genome/summary",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un dashboard récapitulatif avec topologie et endpoints et peut cliquer pour détails",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_session_status",
+                  "name": "Status Session",
+                  "endpoint": "/studio/session",
+                  "method": "GET",
+                  "visual_hint": "status",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit 4 LEDs (vertes/grises) indiquant l'état current_step, genome, entries et peut rafraîchir",
+                  "zone_assignment": "sidebar"
+                },
+                {
+                  "id": "comp_distillation_list",
+                  "name": "Liste Distillation",
+                  "endpoint": "/studio/distillation/entries",
+                  "method": "GET",
+                  "visual_hint": "list",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une liste des entrées de distillation avec timestamp et verdicts",
+                  "zone_assignment": "main"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Session Management",
+          "ux_step": 5,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "dashboard_grid",
+          "layout_justification": "The dashboard_grid layout provides a dense information architecture, placing key performance indicators (Résumé Genome) in the main view and session status in a contextual sidebar, while allowing for session resets via a prominent header action. The Liste Distillation fills the rest of the main view for a comprehensive dashboard.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#ff4444\"/>\n      <stop offset=\"100%\" stop-color=\"#cc0000\"/>\n    </linearGradient>\n    <linearGradient id=\"cardGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#ffffff\"/>\n      <stop offset=\"100%\" stop-color=\"#f5f7fa\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"3\" flood-color=\"#000\" flood-opacity=\".15\"/>\n    </filter>\n  </defs>\n\n  <!-- Header zone -->\n  <rect x=\"20\" y=\"20\" width=\"960\" height=\"70\" fill=\"#fff\" stroke=\"#e0e6ed\" stroke-width=\"1\" rx=\"6\"/>\n  <text x=\"40\" y=\"55\" font-size=\"18\" font-weight=\"600\" fill=\"#2d3748\">Session Management</text>\n  <g id=\"comp_session_reset\">\n    <rect x=\"800\" y=\"32\" width=\"160\" height=\"36\" fill=\"url(#btnGrad)\" filter=\"url(#shadow)\" rx=\"18\"/>\n    <text x=\"880\" y=\"54\" font-size=\"14\" font-weight=\"500\" fill=\"#fff\" text-anchor=\"middle\">Reset Session</text>\n  </g>\n\n  <!-- Sidebar zone -->\n  <rect x=\"20\" y=\"110\" width=\"220\" height=\"470\" fill=\"#f7fafc\" stroke=\"#e0e6ed\" stroke-width=\"1\" rx=\"6\"/>\n  <text x=\"40\" y=\"140\" font-size=\"14\" font-weight=\"600\" fill=\"#2d3748\">Status Session</text>\n  <g id=\"comp_session_status\">\n    <g>\n      <circle cx=\"60\" cy=\"170\" r=\"10\" fill=\"#38a169\"/>\n      <text x=\"80\" y=\"175\" font-size=\"12\" fill=\"#4a5568\">current_step</text>\n    </g>\n    <g>\n      <circle cx=\"60\" cy=\"200\" r=\"10\" fill=\"#38a169\"/>\n      <text x=\"80\" y=\"205\" font-size=\"12\" fill=\"#4a5568\">genome</text>\n    </g>\n    <g>\n      <circle cx=\"60\" cy=\"230\" r=\"10\" fill=\"#cbd5e0\"/>\n      <text x=\"80\" y=\"235\" font-size=\"12\" fill=\"#4a5568\">entries</text>\n    </g>\n    <g>\n      <circle cx=\"60\" cy=\"260\" r=\"10\" fill=\"#38a169\"/>\n      <text x=\"80\" y=\"265\" font-size=\"12\" fill=\"#4a5568\">ready</text>\n    </g>\n  </g>\n\n  <!-- Main zone -->\n  <g id=\"comp_genome_summary\">\n    <rect x=\"260\" y=\"110\" width=\"700\" height=\"220\" fill=\"url(#cardGrad)\" filter=\"url(#shadow)\" rx=\"8\"/>\n    <text x=\"280\" y=\"140\" font-size=\"16\" font-weight=\"600\" fill=\"#2d3748\">Résumé Genome</text>\n    <rect x=\"280\" y=\"160\" width=\"140\" height=\"80\" fill=\"#e2e8f0\" rx=\"4\"/>\n    <text x=\"290\" y=\"180\" font-size=\"12\" fill=\"#4a5568\">Topology</text>\n    <rect x=\"440\" y=\"160\" width=\"140\" height=\"80\" fill=\"#e2e8f0\" rx=\"4\"/>\n    <text x=\"450\" y=\"180\" font-size=\"12\" fill=\"#4a5568\">Endpoints</text>\n    <rect x=\"600\" y=\"160\" width=\"140\" height=\"80\" fill=\"#e2e8f0\" rx=\"4\"/>\n    <text x=\"610\" y=\"180\" font-size=\"12\" fill=\"#4a5568\">Metrics</text>\n    <rect x=\"760\" y=\"160\" width=\"180\" height=\"80\" fill=\"#e2e8f0\" rx=\"4\"/>\n    <text x=\"770\" y=\"180\" font-size=\"12\" fill=\"#4a5568\">Health</text>\n  </g>\n\n  <g id=\"comp_distillation_list\">\n    <rect x=\"260\" y=\"350\" width=\"700\" height=\"230\" fill=\"url(#cardGrad)\" filter=\"url(#shadow)\" rx=\"8\"/>\n    <text x=\"280\" y=\"380\" font-size=\"16\" font-weight=\"600\" fill=\"#2d3748\">Liste Distillation</text>\n    <rect x=\"280\" y=\"400\" width=\"660\" height=\"40\" fill=\"#f7fafc\" stroke=\"#e2e8f0\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"290\" y=\"422\" font-size=\"13\" fill=\"#4a5568\">2025-06-24 14:32 — Verdict: success</text>\n    <rect x=\"280\" y=\"450\" width=\"660\" height=\"40\" fill=\"#f7fafc\" stroke=\"#e2e8f0\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"290\" y=\"472\" font-size=\"13\" fill=\"#4a5568\">2025-06-24 14:28 — Verdict: warning</text>\n    <rect x=\"280\" y=\"500\" width=\"660\" height=\"40\" fill=\"#f7fafc\" stroke=\"#e2e8f0\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"290\" y=\"522\" font-size=\"13\" fill=\"#4a5568\">2025-06-24 14:25 — Verdict: success</text>\n  </g>\n</svg>"
+        }
+      ]
+    },
+    {
+      "id": "n0_frontend",
+      "name": "Frontend",
+      "description": "Phase 3 - Génération interface utilisateur",
+      "order": 3,
+      "confidence": 0.9,
+      "n1_sections": [
+        {
+          "id": "n1_analysis",
+          "name": "Analyse PNG",
+          "description": "Étape 6 - Analyse visuelle avec Gemini Vision",
+          "n2_features": [
+            {
+              "id": "n2_vision_analysis",
+              "name": "Rapport Visuel",
+              "description": "Extraction structure depuis image",
+              "n3_components": [
+                {
+                  "id": "comp_vision_report",
+                  "name": "Rapport Analyse Vision",
+                  "endpoint": "/studio/step/6/analysis",
+                  "method": "GET",
+                  "visual_hint": "preview",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit l'image avec calque d'analyse superposé (zones, confiance) et peut interagir",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_vision_analyze_btn",
+                  "name": "Bouton Analyser",
+                  "endpoint": "/studio/step/6/analyze",
+                  "method": "POST",
+                  "visual_hint": "launch-button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un bouton fusée 🚀 'Lancer l'analyse Gemini' et peut déclencher",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_vision_regenerate",
+                  "name": "Régénérer Analyse",
+                  "endpoint": "/studio/step/6/regenerate",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un bouton 🔄 et peut relancer l'analyse si insatisfait",
+                  "zone_assignment": "main"
+                }
+              ]
+            }
+          ],
+          "ui_role": "main-canvas",
+          "dominant_zone": "main",
+          "display_label": "Module / Analyse PNG",
+          "ux_step": 3,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "split_editorial",
+          "layout_justification": "The split_editorial layout provides a dynamic and premium feel by dedicating the left side to the visual analysis report and the right side to the interactive 'Analyser' and 'Regenerate Analysis' buttons, creating a balanced and engaging user experience.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#a855f7\"/>\n    </linearGradient>\n    <linearGradient id=\"rocketGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#22d3ee\"/>\n      <stop offset=\"100%\" stop-color=\"#0ea5e9\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"6\" flood-color=\"#000\" flood-opacity=\".12\"/>\n    </filter>\n  </defs>\n\n  <!-- Card -->\n  <rect x=\"40\" y=\"40\" width=\"920\" height=\"520\" rx=\"16\" fill=\"#ffffff\" filter=\"url(#shadow)\"/>\n\n  <!-- Header -->\n  <text x=\"80\" y=\"90\" font-size=\"24\" font-weight=\"600\" fill=\"#111827\">Rapport Analyse Vision</text>\n\n  <!-- Image placeholder with overlay -->\n  <rect x=\"80\" y=\"120\" width=\"400\" height=\"300\" rx=\"12\" fill=\"#e5e7eb\"/>\n  <rect x=\"80\" y=\"120\" width=\"400\" height=\"300\" rx=\"12\" fill=\"#3b82f6\" fill-opacity=\".25\"/>\n  <rect x=\"100\" y=\"140\" width=\"120\" height=\"40\" rx=\"8\" fill=\"#ffffff\" fill-opacity=\".9\"/>\n  <text x=\"110\" y=\"165\" font-size=\"14\" font-weight=\"500\" fill=\"#1e40af\">Zone A – 92%</text>\n  <rect x=\"320\" y=\"320\" width=\"140\" height=\"40\" rx=\"8\" fill=\"#ffffff\" fill-opacity=\".9\"/>\n  <text x=\"330\" y=\"345\" font-size=\"14\" font-weight=\"500\" fill=\"#1e40af\">Zone B – 87%</text>\n\n  <!-- Stats panel -->\n  <rect x=\"520\" y=\"120\" width=\"400\" height=\"140\" rx=\"12\" fill=\"#f3f4f6\"/>\n  <text x=\"540\" y=\"150\" font-size=\"14\" font-weight=\"600\" fill=\"#374151\">Détection</text>\n  <text x=\"540\" y=\"180\" font-size=\"28\" font-weight=\"700\" fill=\"#111827\">2 zones</text>\n  <text x=\"540\" y=\"210\" font-size=\"14\" font-weight=\"600\" fill=\"#374151\">Confiance moyenne</text>\n  <text x=\"540\" y=\"240\" font-size=\"28\" font-weight=\"700\" fill=\"#111827\">89.5%</text>\n\n  <!-- Buttons -->\n  <g id=\"btn-analyze\">\n    <rect x=\"520\" y=\"300\" width=\"400\" height=\"56\" rx=\"28\" fill=\"url(#rocketGrad)\" filter=\"url(#shadow)\"/>\n    <text x=\"660\" y=\"335\" font-size=\"18\" font-weight=\"600\" fill=\"#ffffff\">🚀 Lancer l'analyse Gemini</text>\n  </g>\n\n  <g id=\"btn-regen\">\n    <rect x=\"520\" y=\"380\" width=\"400\" height=\"48\" rx=\"24\" fill=\"url(#btnGrad)\"/>\n    <text x=\"700\" y=\"410\" font-size=\"16\" font-weight=\"600\" fill=\"#ffffff\">🔄 Régénérer</text>\n  </g>\n</svg>"
+        },
+        {
+          "id": "n1_layout",
+          "name": "Layout Selection",
+          "description": "Étape 5A - Sélection style UI",
+          "n2_features": [
+            {
+              "id": "n2_layouts",
+              "name": "Galerie Layouts",
+              "description": "Choix parmi 8 styles de mise en page",
+              "n3_components": [
+                {
+                  "id": "comp_choice_style",
+                  "name": "Choix Style",
+                  "endpoint": "/studio/step/5/layouts/select",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit des radio cards 2×2 (Minimal/Brutaliste/Moderne/Corporate) et peut choisir",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_layout_card",
+                  "name": "Carte Layout",
+                  "endpoint": "/studio/step/5/select-layout/{layout_id}",
+                  "method": "POST",
+                  "visual_hint": "card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une carte layout cliquable avec preview et peut la sélectionner",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_layout_grid",
+                  "name": "Galerie Layouts",
+                  "endpoint": "/studio/step/5/layouts",
+                  "method": "GET",
+                  "visual_hint": "grid",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une galerie 3×2 des layouts avec aperçu visuel et peut sélectionner",
+                  "zone_assignment": "main"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Layout Selection",
+          "ux_step": 5,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "bento_grid",
+          "layout_justification": "The bento grid allows for a visually appealing and modular presentation of layout options, offering a premium feel compared to a simple list or gallery. The 'Choix Style' component can be a larger hero element, while 'Carte Layout' and 'Galerie Layouts' can be secondary features, creating a dynamic and engaging user experience.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#4f46e5\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"6\" flood-color=\"#000\" flood-opacity=\".12\"/>\n    </filter>\n    <pattern id=\"img1\" patternUnits=\"userSpaceOnUse\" width=\"100\" height=\"80\">\n      <rect width=\"100\" height=\"80\" fill=\"#e5e7eb\"/>\n      <path d=\"M20 30h60v20H20z M30 50h40\" stroke=\"#9ca3af\" stroke-width=\"2\" fill=\"none\"/>\n    </pattern>\n    <pattern id=\"img2\" patternUnits=\"userSpaceOnUse\" width=\"100\" height=\"80\">\n      <rect width=\"100\" height=\"80\" fill=\"#e5e7eb\"/>\n      <circle cx=\"50\" cy=\"40\" r=\"20\" stroke=\"#9ca3af\" stroke-width=\"2\" fill=\"none\"/>\n    </pattern>\n    <pattern id=\"img3\" patternUnits=\"userSpaceOnUse\" width=\"100\" height=\"80\">\n      <rect width=\"100\" height=\"80\" fill=\"#e5e7eb\"/>\n      <path d=\"M10 20h80M10 40h60M10 60h70\" stroke=\"#9ca3af\" stroke-width=\"2\" fill=\"none\"/>\n    </pattern>\n  </defs>\n\n  <!-- Header -->\n  <rect x=\"0\" y=\"0\" width=\"1000\" height=\"60\" fill=\"#f9fafb\"/>\n  <text x=\"30\" y=\"38\" font-size=\"22\" font-weight=\"700\" fill=\"#111827\">Choisissez un style & layout</text>\n\n  <!-- 2x2 Style Choice Grid -->\n  <g id=\"styleChoice\">\n    <rect x=\"30\" y=\"90\" width=\"210\" height=\"140\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"40\" y=\"100\" width=\"190\" height=\"80\" rx=\"6\" fill=\"url(#img1)\"/>\n    <text x=\"135\" y=\"205\" font-size=\"16\" font-weight=\"600\" fill=\"#111827\" text-anchor=\"middle\">Minimal</text>\n    <circle cx=\"195\" cy=\"160\" r=\"14\" fill=\"#fff\" stroke=\"#6366f1\" stroke-width=\"2\"/>\n    <circle cx=\"195\" cy=\"160\" r=\"6\" fill=\"#6366f1\"/>\n\n    <rect x=\"260\" y=\"90\" width=\"210\" height=\"140\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"270\" y=\"100\" width=\"190\" height=\"80\" rx=\"6\" fill=\"url(#img2)\"/>\n    <text x=\"365\" y=\"205\" font-size=\"16\" font-weight=\"600\" fill=\"#111827\" text-anchor=\"middle\">Brutaliste</text>\n\n    <rect x=\"30\" y=\"250\" width=\"210\" height=\"140\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"40\" y=\"260\" width=\"190\" height=\"80\" rx=\"6\" fill=\"url(#img3)\"/>\n    <text x=\"135\" y=\"365\" font-size=\"16\" font-weight=\"600\" fill=\"#111827\" text-anchor=\"middle\">Moderne</text>\n\n    <rect x=\"260\" y=\"250\" width=\"210\" height=\"140\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"270\" y=\"260\" width=\"190\" height=\"80\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <path d=\"M290 290h40v20h-40z M350 290l20 20-20 20\" stroke=\"#9ca3af\" stroke-width=\"2\" fill=\"none\"/>\n    <text x=\"365\" y=\"365\" font-size=\"16\" font-weight=\"600\" fill=\"#111827\" text-anchor=\"middle\">Corporate</text>\n  </g>\n\n  <!-- Layout Card -->\n  <g id=\"layoutCard\">\n    <rect x=\"500\" y=\"90\" width=\"220\" height=\"300\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"510\" y=\"100\" width=\"200\" height=\"130\" rx=\"8\" fill=\"#e5e7eb\"/>\n    <rect x=\"520\" y=\"110\" width=\"180\" height=\"20\" rx=\"4\" fill=\"#c7d2fe\"/>\n    <rect x=\"520\" y=\"140\" width=\"130\" height=\"12\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <rect x=\"520\" y=\"160\" width=\"150\" height=\"12\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <rect x=\"520\" y=\"180\" width=\"100\" height=\"12\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <text x=\"610\" y=\"260\" font-size=\"18\" font-weight=\"700\" fill=\"#111827\" text-anchor=\"middle\">Landing Pro</text>\n    <text x=\"610\" y=\"280\" font-size=\"14\" fill=\"#6b7280\" text-anchor=\"middle\">Parfait pour SaaS</text>\n    <rect x=\"530\" y=\"300\" width=\"160\" height=\"40\" rx=\"20\" fill=\"url(#btnGrad)\"/>\n    <text x=\"610\" y=\"325\" font-size=\"15\" font-weight=\"600\" fill=\"#fff\" text-anchor=\"middle\">Sélectionner</text>\n  </g>\n\n  <!-- 3x2 Layout Gallery -->\n  <g id=\"layoutGallery\">\n    <rect x=\"740\" y=\"90\" width=\"220\" height=\"90\" rx=\"10\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"750\" y=\"100\" width=\"80\" height=\"70\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <rect x=\"840\" y=\"100\" width=\"110\" height=\"16\" rx=\"4\" fill=\"#c7d2fe\"/>\n    <rect x=\"840\" y=\"122\" width=\"90\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <rect x=\"840\" y=\"138\" width=\"100\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n\n    <rect x=\"740\" y=\"195\" width=\"220\" height=\"90\" rx=\"10\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"750\" y=\"205\" width=\"80\" height=\"70\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <rect x=\"840\" y=\"205\" width=\"110\" height=\"16\" rx=\"4\" fill=\"#c7d2fe\"/>\n    <rect x=\"840\" y=\"227\" width=\"90\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <rect x=\"840\" y=\"243\" width=\"100\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n\n    <rect x=\"740\" y=\"300\" width=\"220\" height=\"90\" rx=\"10\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"750\" y=\"310\" width=\"80\" height=\"70\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <rect x=\"840\" y=\"310\" width=\"110\" height=\"16\" rx=\"4\" fill=\"#c7d2fe\"/>\n    <rect x=\"840\" y=\"332\" width=\"90\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n    <rect x=\"840\" y=\"348\" width=\"100\" height=\"10\" rx=\"4\" fill=\"#a5b4fc\"/>\n  </g>\n\n  <!-- Bottom actions -->\n  <rect x=\"30\" y=\"420\" width=\"930\" height=\"60\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n  <rect x=\"820\" y=\"435\" width=\"130\" height=\"30\" rx=\"15\" fill=\"#e5e7eb\"/>\n  <text x=\"885\" y=\"454\" font-size=\"14\" font-weight=\"600\" fill=\"#374151\" text-anchor=\"middle\">Continuer</text>\n</svg>"
+        },
+        {
+          "id": "n1_validation",
+          "name": "Validation Composants",
+          "description": "Étape 8 - Validation finale et accord",
+          "n2_features": [
+            {
+              "id": "n2_validation",
+              "name": "Récap Global",
+              "description": "Dashboard validation finale",
+              "n3_components": [
+                {
+                  "id": "comp_validation_dashboard",
+                  "name": "Dashboard Validation",
+                  "endpoint": "/studio/step/8",
+                  "method": "GET",
+                  "visual_hint": "dashboard",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un dashboard métriques (zones, layout, style, confiance) et peut explorer",
+                  "zone_assignment": "header"
+                },
+                {
+                  "id": "comp_validation_accordion",
+                  "name": "Résumé Décisions",
+                  "endpoint": "/studio/step/8",
+                  "method": "GET",
+                  "visual_hint": "accordion",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un accordéon des sections (zones validées, style, ajustements) et peut déplier",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_stenciler_grid",
+                  "name": "Grille Stencils",
+                  "endpoint": "/studio/stencils",
+                  "method": "GET",
+                  "visual_hint": "grid",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une grille des 9 Corps avec leurs composants et peut sélectionner keep/reserve",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_stenciler_select",
+                  "name": "Sélection Composant",
+                  "endpoint": "/studio/stencils/select",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit des boutons Garder/Réserve sur chaque composant et peut décider",
+                  "zone_assignment": "sidebar"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Validation Composants",
+          "ux_step": 5,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "dashboard_grid",
+          "layout_justification": "The 'dashboard_grid' strategy provides a dense and informative overview, utilizing a grid layout for the stencils, an accordion for decision summaries, and a contextual sidebar for component selection. This arrangement feels premium due to its high information density and contextual navigation.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"gradA\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#8b5cf6\"/>\n    </linearGradient>\n    <linearGradient id=\"gradB\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#f9fafb\"/>\n      <stop offset=\"100%\" stop-color=\"#e5e7eb\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"4\" flood-color=\"#000\" flood-opacity=\".12\"/>\n    </filter>\n  </defs>\n\n  <!-- Header Dashboard -->\n  <g id=\"comp_validation_dashboard\">\n    <rect x=\"20\" y=\"20\" width=\"960\" height=\"100\" rx=\"12\" fill=\"url(#gradB)\" filter=\"url(#shadow)\"/>\n    <text x=\"50\" y=\"60\" font-size=\"22\" font-weight=\"600\" fill=\"#1f2937\">Dashboard Validation</text>\n    <rect x=\"50\" y=\"75\" width=\"200\" height=\"30\" rx=\"8\" fill=\"#e0e7ff\"/>\n    <text x=\"60\" y=\"95\" font-size=\"14\" fill=\"#4f46e5\">Zones · Layout · Style · Confiance</text>\n    <rect x=\"280\" y=\"75\" width=\"90\" height=\"30\" rx=\"8\" fill=\"#d1fae5\"/>\n    <text x=\"290\" y=\"95\" font-size=\"14\" fill=\"#065f46\">Validé 4/4</text>\n    <rect x=\"390\" y=\"75\" width=\"90\" height=\"30\" rx=\"8\" fill=\"#fef3c7\"/>\n    <text x=\"400\" y=\"95\" font-size=\"14\" fill=\"#92400e\">En attente 2</text>\n  </g>\n\n  <!-- Main Accordion -->\n  <g id=\"comp_validation_accordion\">\n    <rect x=\"20\" y=\"140\" width=\"680\" height=\"160\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <text x=\"40\" y=\"170\" font-size=\"18\" font-weight=\"600\" fill=\"#1f2937\">Résumé Décisions</text>\n    <rect x=\"40\" y=\"185\" width=\"640\" height=\"40\" rx=\"8\" fill=\"#f3f4f6\"/>\n    <text x=\"55\" y=\"208\" font-size=\"15\" fill=\"#374151\">Zones validées · Header, Hero, Footer</text>\n    <rect x=\"40\" y=\"235\" width=\"640\" height=\"40\" rx=\"8\" fill=\"#f3f4f6\"/>\n    <text x=\"55\" y=\"258\" font-size=\"15\" fill=\"#374151\">Style · Palette, Typo, Espacements</text>\n  </g>\n\n  <!-- Stencil Grid -->\n  <g id=\"comp_stenciler_grid\">\n    <rect x=\"20\" y=\"320\" width=\"680\" height=\"260\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <text x=\"40\" y=\"350\" font-size=\"18\" font-weight=\"600\" fill=\"#1f2937\">Grille Stencils</text>\n    <g fill=\"#e5e7eb\">\n      <rect x=\"40\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"140\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"240\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"340\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"440\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"540\" y=\"370\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"40\" y=\"470\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"140\" y=\"470\" width=\"90\" height=\"90\" rx=\"8\"/>\n      <rect x=\"240\" y=\"470\" width=\"90\" height=\"90\" rx=\"8\"/>\n    </g>\n  </g>\n\n  <!-- Sidebar Choice -->\n  <g id=\"comp_stenciler_select\">\n    <rect x=\"720\" y=\"140\" width=\"260\" height=\"440\" rx=\"12\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <text x=\"740\" y=\"170\" font-size=\"18\" font-weight=\"600\" fill=\"#1f2937\">Sélection Composant</text>\n    <rect x=\"740\" y=\"190\" width=\"220\" height=\"80\" rx=\"8\" fill=\"#f3f4f6\"/>\n    <rect x=\"750\" y=\"200\" width=\"80\" height=\"28\" rx=\"6\" fill=\"url(#gradA)\"/>\n    <text x=\"760\" y=\"218\" font-size=\"13\" fill=\"#fff\">Garder</text>\n    <rect x=\"840\" y=\"200\" width=\"80\" height=\"28\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <text x=\"850\" y=\"218\" font-size=\"13\" fill=\"#374151\">Réserve</text>\n    <rect x=\"740\" y=\"290\" width=\"220\" height=\"80\" rx=\"8\" fill=\"#f3f4f6\"/>\n    <rect x=\"750\" y=\"300\" width=\"80\" height=\"28\" rx=\"6\" fill=\"url(#gradA)\"/>\n    <text x=\"760\" y=\"318\" font-size=\"13\" fill=\"#fff\">Garder</text>\n    <rect x=\"840\" y=\"300\" width=\"80\" height=\"28\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <text x=\"850\" y=\"318\" font-size=\"13\" fill=\"#374151\">Réserve</text>\n    <rect x=\"740\" y=\"390\" width=\"220\" height=\"80\" rx=\"8\" fill=\"#f3f4f6\"/>\n    <rect x=\"750\" y=\"400\" width=\"80\" height=\"28\" rx=\"6\" fill=\"url(#gradA)\"/>\n    <text x=\"760\" y=\"418\" font-size=\"13\" fill=\"#fff\">Garder</text>\n    <rect x=\"840\" y=\"400\" width=\"80\" height=\"28\" rx=\"6\" fill=\"#e5e7eb\"/>\n    <text x=\"850\" y=\"418\" font-size=\"13\" fill=\"#374151\">Réserve</text>\n  </g>\n</svg>"
+        },
+        {
+          "id": "n1_adaptation",
+          "name": "Adaptation / Zoom Atome",
+          "description": "Étape 9 - Zoom drill-down et finalisation",
+          "n2_features": [
+            {
+              "id": "n2_zoom",
+              "name": "Navigation Zoom",
+              "description": "Exploration granulaire Corps→Organe→Atome",
+              "n3_components": [
+                {
+                  "id": "comp_zoom_controls",
+                  "name": "Contrôles Zoom",
+                  "endpoint": "/studio/zoom/{level}/{target_id}",
+                  "method": "GET",
+                  "visual_hint": "zoom-controls",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une navigation ← Out | 🔍 Corps ▼ | In → + breadcrumb et peut zoomer/dézoomer",
+                  "zone_assignment": "header"
+                },
+                {
+                  "id": "comp_zoom_out",
+                  "name": "Zoom Out",
+                  "endpoint": "/studio/zoom/out",
+                  "method": "GET",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un bouton 'Remonter' et peut remonter d'un niveau hiérarchique",
+                  "zone_assignment": "header"
+                },
+                {
+                  "id": "comp_detail_card",
+                  "name": "Fiche Détail Atome",
+                  "endpoint": "/studio/zoom/atome/{atome_id}",
+                  "method": "GET",
+                  "visual_hint": "detail-card",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une fiche technique d'un atome avec endpoint, méthode, URL, boutons Copier/Tester",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_code_editor",
+                  "name": "Éditeur Code",
+                  "endpoint": "/studio/ir-genome-view",
+                  "method": "GET",
+                  "visual_hint": "editor",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un éditeur syntax highlighting avec toolbar et peut modifier le code",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_launch_button",
+                  "name": "Lancer Distillation",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "launch-button",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un bouton fusée 🚀 'Lancer la distillation' et peut finaliser",
+                  "zone_assignment": "floating"
+                },
+                {
+                  "id": "comp_apply_changes",
+                  "name": "Appliquer Changements",
+                  "endpoint": "/studio/step/7/confirm",
+                  "method": "POST",
+                  "visual_hint": "apply-changes",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit 💾 Appliquer / ↩️ Annuler côte à côte et peut sauvegarder ou annuler",
+                  "zone_assignment": "sidebar"
+                }
+              ]
+            }
+          ],
+          "ui_role": "dashboard",
+          "dominant_zone": "main",
+          "display_label": "Module / Adaptation / Zoom Atome",
+          "ux_step": 5,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "dashboard_grid",
+          "layout_justification": "A dashboard grid provides a focused, data-rich environment. The code editor and atom detail are the focal points, contextual changes are docked in the sidebar, and the distillation launch is prominently placed as a floating action.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#4f46e5\"/>\n    </linearGradient>\n    <linearGradient id=\"launchGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#f59e0b\"/>\n      <stop offset=\"100%\" stop-color=\"#d97706\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"3\" flood-color=\"#000\" flood-opacity=\".15\"/>\n    </filter>\n  </defs>\n\n  <!-- Header -->\n  <rect x=\"0\" y=\"0\" width=\"1000\" height=\"60\" fill=\"#f3f4f6\"/>\n  <g id=\"comp_zoom_controls\" transform=\"translate(20,15)\">\n    <rect x=\"0\" y=\"0\" width=\"30\" height=\"30\" rx=\"6\" fill=\"url(#btnGrad)\" filter=\"url(#shadow)\"/>\n    <text x=\"15\" y=\"20\" text-anchor=\"middle\" fill=\"#fff\" font-size=\"14\" font-family=\"Arial\">−</text>\n    <rect x=\"40\" y=\"0\" width=\"110\" height=\"30\" rx=\"6\" fill=\"#fff\" stroke=\"#d1d5db\"/>\n    <text x=\"95\" y=\"20\" text-anchor=\"middle\" fill=\"#111\" font-size=\"13\" font-family=\"Arial\">🔍 Corps ▼</text>\n    <rect x=\"160\" y=\"0\" width=\"30\" height=\"30\" rx=\"6\" fill=\"url(#btnGrad)\" filter=\"url(#shadow)\"/>\n    <text x=\"175\" y=\"20\" text-anchor=\"middle\" fill=\"#fff\" font-size=\"14\" font-family=\"Arial\">+</text>\n  </g>\n  <g id=\"comp_zoom_out\" transform=\"translate(600,15)\">\n    <rect x=\"0\" y=\"0\" width=\"90\" height=\"30\" rx=\"6\" fill=\"#fff\" stroke=\"#d1d5db\"/>\n    <text x=\"45\" y=\"20\" text-anchor=\"middle\" fill=\"#111\" font-size=\"13\" font-family=\"Arial\">Remonter</text>\n  </g>\n\n  <!-- Main -->\n  <g id=\"comp_detail_card\" transform=\"translate(20,80)\">\n    <rect x=\"0\" y=\"0\" width=\"460\" height=\"220\" rx=\"8\" fill=\"#fff\" filter=\"url(#shadow)\"/>\n    <rect x=\"15\" y=\"15\" width=\"430\" height=\"100\" rx=\"4\" fill=\"#f9fafb\" stroke=\"#e5e7eb\"/>\n    <text x=\"30\" y=\"40\" fill=\"#4b5563\" font-size=\"13\" font-family=\"Arial\">Endpoint</text>\n    <text x=\"30\" y=\"60\" fill=\"#111\" font-size=\"14\" font-family=\"Arial\">/studio/zoom/atome/42</text>\n    <text x=\"30\" y=\"85\" fill=\"#4b5563\" font-size=\"13\" font-family=\"Arial\">Méthode</text>\n    <text x=\"30\" y=\"105\" fill=\"#10b981\" font-size=\"14\" font-family=\"Arial\">GET</text>\n    <rect x=\"30\" y=\"130\" width=\"70\" height=\"28\" rx=\"6\" fill=\"#e0e7ff\"/>\n    <text x=\"65\" y=\"148\" text-anchor=\"middle\" fill=\"#4338ca\" font-size=\"12\" font-family=\"Arial\">Copier</text>\n    <rect x=\"110\" y=\"130\" width=\"70\" height=\"28\" rx=\"6\" fill=\"#e0e7ff\"/>\n    <text x=\"145\" y=\"148\" text-anchor=\"middle\" fill=\"#4338ca\" font-size=\"12\" font-family=\"Arial\">Tester</text>\n  </g>\n\n  <g id=\"comp_code_editor\" transform=\"translate(500,80)\">\n    <rect x=\"0\" y=\"0\" width=\"480\" height=\"220\" rx=\"8\" fill=\"#1e293b\" filter=\"url(#shadow)\"/>\n    <rect x=\"0\" y=\"0\" width=\"480\" height=\"36\" rx=\"8\" fill=\"#111827\"/>\n    <circle cx=\"14\" cy=\"18\" r=\"5\" fill=\"#ef4444\"/>\n    <circle cx=\"30\" cy=\"18\" r=\"5\" fill=\"#f59e0b\"/>\n    <circle cx=\"46\" cy=\"18\" r=\"5\" fill=\"#10b981\"/>\n    <text x=\"60\" y=\"22\" fill=\"#9ca3af\" font-size=\"12\" font-family=\"monospace\">ir-genome-view.js</text>\n    <text x=\"15\" y=\"65\" fill=\"#34d399\" font-size=\"13\" font-family=\"monospace\">function distill(atom) {</text>\n    <text x=\"25\" y=\"85\" fill=\"#e5e7eb\" font-size=\"13\" font-family=\"monospace\">return atom.refine();</text>\n    <text x=\"15\" y=\"105\" fill=\"#34d399\" font-size=\"13\" font-family=\"monospace\">}</text>\n  </g>\n\n  <!-- Sidebar -->\n  <g id=\"comp_apply_changes\" transform=\"translate(20,320)\">\n    <rect x=\"0\" y=\"0\" width=\"220\" height=\"40\" rx=\"6\" fill=\"#fff\" stroke=\"#d1d5db\"/>\n    <text x=\"40\" y=\"25\" fill=\"#111\" font-size=\"13\" font-family=\"Arial\">💾 Appliquer</text>\n    <rect x=\"230\" y=\"0\" width=\"90\" height=\"40\" rx=\"6\" fill=\"#fff\" stroke=\"#d1d5db\"/>\n    <text x=\"275\" y=\"25\" fill=\"#111\" font-size=\"13\" font-family=\"Arial\">↩️ Annuler</text>\n  </g>\n\n  <!-- Floating -->\n  <g id=\"comp_launch_button\" transform=\"translate(850,480)\">\n    <circle cx=\"40\" cy=\"40\" r=\"40\" fill=\"url(#launchGrad)\" filter=\"url(#shadow)\"/>\n    <path d=\"M30 35l10 10-10 10 5 5 15-15-15-15z\" fill=\"#fff\"/>\n    <text x=\"40\" y=\"95\" text-anchor=\"middle\" fill=\"#92400e\" font-size=\"12\" font-family=\"Arial\">Lancer</text>\n  </g>\n</svg>"
+        },
+        {
+          "id": "n1_upload",
+          "name": "Upload Design",
+          "description": "Étape 5B - Import et analyse maquettes",
+          "n2_features": [
+            {
+              "id": "n2_upload",
+              "name": "Upload et Extraction",
+              "description": "Analyse fichier design uploadé",
+              "n3_components": [
+                {
+                  "id": "comp_color_palette",
+                  "name": "Palette Extraite",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "color-palette",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit 4 swatches de couleurs + chips style (rounded, font) extraites du design",
+                  "zone_assignment": "sidebar"
+                },
+                {
+                  "id": "comp_upload_dropzone",
+                  "name": "Zone Upload",
+                  "endpoint": "/studio/step/5/upload",
+                  "method": "POST",
+                  "visual_hint": "upload",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "drag",
+                  "description_ui": "L'utilisateur voit une zone drag & drop avec icône 📁 et feedback visuel et peut déposer un fichier",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_upload_delete",
+                  "name": "Suppression Upload",
+                  "endpoint": "/studio/step/5/upload",
+                  "method": "DELETE",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un bouton de suppression et peut retirer le fichier uploadé",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_preview_zones",
+                  "name": "Aperçu Zones",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "preview",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit l'image uploadée avec zones surlignées (bleu/vert/rose) et peut explorer",
+                  "zone_assignment": "sidebar"
+                }
+              ]
+            }
+          ],
+          "ui_role": "upload-zone",
+          "dominant_zone": "main",
+          "display_label": "Module / Upload Design",
+          "ux_step": 7,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "split_pane_form",
+          "layout_justification": "Split pane with upload and delete actions in the main area (right pane - form) and preview and palette in the sidebar for visual context (left pane).",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6366f1\"/>\n      <stop offset=\"100%\" stop-color=\"#4f46e5\"/>\n    </linearGradient>\n    <linearGradient id=\"dropGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#f9fafb\"/>\n      <stop offset=\"100%\" stop-color=\"#e5e7eb\"/>\n    </linearGradient>\n    <filter id=\"sh\" x=\"-4\" y=\"-4\" width=\"108\" height=\"108\" color-interpolation-filters=\"sRGB\">\n      <feDropShadow dx=\"0\" dy=\"2\" stdDeviation=\"3\" flood-opacity=\".15\"/>\n    </filter>\n  </defs>\n\n  <!-- Sidebar -->\n  <rect x=\"0\" y=\"0\" width=\"340\" height=\"600\" fill=\"#f3f4f6\"/>\n  <rect x=\"0\" y=\"0\" width=\"340\" height=\"52\" fill=\"#fff\"/>\n  <text x=\"24\" y=\"32\" font-size=\"18\" font-weight=\"600\" fill=\"#111\">Palette Extraite</text>\n\n  <!-- Palette Grid -->\n  <g id=\"comp_color_palette\">\n    <rect x=\"24\" y=\"72\" width=\"64\" height=\"64\" rx=\"12\" fill=\"#6366f1\"/>\n    <rect x=\"100\" y=\"72\" width=\"64\" height=\"64\" rx=\"12\" fill=\"#10b981\"/>\n    <rect x=\"176\" y=\"72\" width=\"64\" height=\"64\" rx=\"12\" fill=\"#ec4899\"/>\n    <rect x=\"252\" y=\"72\" width=\"64\" height=\"64\" rx=\"12\" fill=\"#f59e0b\"/>\n    <text x=\"24\" y=\"164\" font-size=\"13\" fill=\"#4b5563\">Primary</text>\n    <text x=\"100\" y=\"164\" font-size=\"13\" fill=\"#4b5563\">Success</text>\n    <text x=\"176\" y=\"164\" font-size=\"13\" fill=\"#4b5563\">Accent</text>\n    <text x=\"252\" y=\"164\" font-size=\"13\" fill=\"#4b5563\">Warning</text>\n  </g>\n\n  <!-- Style Chips -->\n  <g id=\"style_chips\">\n    <rect x=\"24\" y=\"190\" width=\"292\" height=\"40\" rx=\"20\" fill=\"#fff\" filter=\"url(#sh)\"/>\n    <rect x=\"36\" y=\"202\" width=\"16\" height=\"16\" rx=\"8\" fill=\"#6366f1\"/>\n    <text x=\"60\" y=\"214\" font-size=\"14\" fill=\"#111\" font-weight=\"500\">Rounded 12px</text>\n    <rect x=\"24\" y=\"246\" width=\"292\" height=\"40\" rx=\"20\" fill=\"#fff\" filter=\"url(#sh)\"/>\n    <rect x=\"36\" y=\"258\" width=\"16\" height=\"16\" rx=\"8\" fill=\"#10b981\"/>\n    <text x=\"60\" y=\"270\" font-size=\"14\" fill=\"#111\" font-weight=\"500\">Inter 14/1.5</text>\n  </g>\n\n  <!-- Preview Zones -->\n  <rect x=\"0\" y=\"310\" width=\"340\" height=\"52\" fill=\"#fff\"/>\n  <text x=\"24\" y=\"342\" font-size=\"18\" font-weight=\"600\" fill=\"#111\">Aperçu Zones</text>\n  <g id=\"comp_preview_zones\">\n    <rect x=\"24\" y=\"378\" width=\"292\" height=\"180\" rx=\"12\" fill=\"#e0e7ff\"/>\n    <rect x=\"36\" y=\"390\" width=\"268\" height=\"156\" rx=\"8\" fill=\"#fff\"/>\n    <rect x=\"48\" y=\"402\" width=\"80\" height=\"40\" rx=\"6\" fill=\"#dbeafe\"/>\n    <rect x=\"136\" y=\"402\" width=\"80\" height=\"40\" rx=\"6\" fill=\"#d1fae5\"/>\n    <rect x=\"224\" y=\"402\" width=\"68\" height=\"40\" rx=\"6\" fill=\"#fce7f3\"/>\n    <text x=\"48\" y=\"424\" font-size=\"12\" fill=\"#1e40af\">Header</text>\n    <text x=\"136\" y=\"424\" font-size=\"12\" fill=\"#065f46\">Hero</text>\n    <text x=\"224\" y=\"424\" font-size=\"12\" fill=\"#be185d\">CTA</text>\n    <rect x=\"48\" y=\"454\" width=\"244\" height=\"76\" rx=\"6\" fill=\"#f3f4f6\"/>\n    <text x=\"60\" y=\"474\" font-size=\"12\" fill=\"#6b7280\">Image placeholder</text>\n  </g>\n\n  <!-- Main Pane -->\n  <rect x=\"352\" y=\"0\" width=\"648\" height=\"600\" fill=\"#fff\"/>\n  <text x=\"376\" y=\"40\" font-size=\"24\" font-weight=\"700\" fill=\"#111\">Upload Design</text>\n\n  <!-- Dropzone -->\n  <g id=\"comp_upload_dropzone\">\n    <rect x=\"376\" y=\"80\" width=\"600\" height=\"240\" rx=\"16\" fill=\"url(#dropGrad)\" stroke=\"#d1d5db\" stroke-width=\"2\" stroke-dasharray=\"8 8\"/>\n    <path d=\"M576 160l24 24 48-48\" stroke=\"#6366f1\" stroke-width=\"2\" fill=\"none\"/>\n    <path d=\"M600 136v56\" stroke=\"#6366f1\" stroke-width=\"2\"/>\n    <text x=\"676\" y=\"176\" font-size=\"16\" fill=\"#4b5563\">Drop file here or <tspan fill=\"#6366f1\" font-weight=\"600\">browse</tspan></text>\n    <text x=\"676\" y=\"200\" font-size=\"13\" fill=\"#9ca3af\">PNG, JPG, SVG up to 10MB</text>\n  </g>\n\n  <!-- Delete Button -->\n  <g id=\"comp_upload_delete\">\n    <rect x=\"376\" y=\"344\" width=\"128\" height=\"40\" rx=\"8\" fill=\"#fee2e2\"/>\n    <text x=\"420\" y=\"368\" font-size=\"14\" font-weight=\"600\" fill=\"#b91c1c\">Delete Upload</text>\n    <path d=\"M404 356l-4 4 4 4m16 0l4-4-4-4\" stroke=\"#b91c1c\" stroke-width=\"2\" fill=\"none\"/>\n  </g>\n\n  <!-- Next Button -->\n  <rect x=\"848\" y=\"528\" width=\"128\" height=\"48\" rx=\"10\" fill=\"url(#btnGrad)\" filter=\"url(#sh)\"/>\n  <text x=\"912\" y=\"558\" font-size=\"15\" font-weight=\"600\" fill=\"#fff\" text-anchor=\"middle\">Next Step</text>\n</svg>"
+        },
+        {
+          "id": "n1_dialogue",
+          "name": "Dialogue Utilisateur",
+          "description": "Étape 7 - Chat Majordome pour affiner",
+          "n2_features": [
+            {
+              "id": "n2_chat",
+              "name": "Interface Chat",
+              "description": "Conversation avec Sullivan",
+              "n3_components": [
+                {
+                  "id": "comp_chat_bubbles",
+                  "name": "Bulles Conversation",
+                  "endpoint": "/studio/step/7/dialogue",
+                  "method": "GET",
+                  "visual_hint": "chat/bubble",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit des bulles de conversation style Messenger (S indigo + user) et peut lire",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_chat_input",
+                  "name": "Input Message",
+                  "endpoint": "/studio/step/7/message",
+                  "method": "POST",
+                  "visual_hint": "chat-input",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un champ saisie + 📎 😊 + bouton envoi ➤ et peut écrire et envoyer",
+                  "zone_assignment": "floating"
+                },
+                {
+                  "id": "comp_chat_answer",
+                  "name": "Réponse Question",
+                  "endpoint": "/studio/step/7/answer",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit des options de réponse à une question de Sullivan et peut choisir",
+                  "zone_assignment": "floating"
+                },
+                {
+                  "id": "comp_chat_skip",
+                  "name": "Passer Dialogue",
+                  "endpoint": "/studio/step/7/skip",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un bouton 'Passer' et peut sauter le dialogue vers validation",
+                  "zone_assignment": "floating"
+                }
+              ]
+            }
+          ],
+          "ui_role": "chat-overlay",
+          "dominant_zone": "main",
+          "display_label": "Module / Dialogue Utilisateur",
+          "ux_step": 8,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "chat_thread",
+          "layout_justification": "A premium chat experience focuses on the conversation flow. The 'chat_thread' layout ensures clear message display. Floating elements provide contextual actions without disrupting the core dialogue.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"gradS\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#4f46e5\"/>\n      <stop offset=\"100%\" stop-color=\"#7c3aed\"/>\n    </linearGradient>\n    <linearGradient id=\"gradUser\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#e5e7eb\"/>\n      <stop offset=\"100%\" stop-color=\"#d1d5db\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">\n      <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"6\" flood-color=\"#000\" flood-opacity=\".12\"/>\n    </filter>\n  </defs>\n\n  <!-- Bulles Conversation -->\n  <g id=\"comp_chat_bubbles\">\n    <!-- Sullivan -->\n    <rect x=\"80\" y=\"60\" width=\"420\" height=\"90\" rx=\"24\" fill=\"url(#gradS)\" filter=\"url(#shadow)\"/>\n    <text x=\"110\" y=\"100\" fill=\"#fff\" font-size=\"18\" font-family=\"Arial\">Bonjour ! Je suis Sullivan, votre assistant.</text>\n    <text x=\"110\" y=\"125\" fill=\"#fff\" font-size=\"18\" font-family=\"Arial\">Quel est votre objectif principal aujourd’hui ?</text>\n\n    <!-- User -->\n    <rect x=\"500\" y=\"170\" width=\"420\" height=\"60\" rx=\"24\" fill=\"url(#gradUser)\" filter=\"url(#shadow)\"/>\n    <text x=\"530\" y=\"205\" fill=\"#111\" font-size=\"18\" font-family=\"Arial\">Je souhaite créer un site vitrine pour mon entreprise.</text>\n\n    <!-- Sullivan -->\n    <rect x=\"80\" y=\"250\" width=\"420\" height=\"60\" rx=\"24\" fill=\"url(#gradS)\" filter=\"url(#shadow)\"/>\n    <text x=\"110\" y=\"285\" fill=\"#fff\" font-size=\"18\" font-family=\"Arial\">Parfait ! Quel secteur d’activité ?</text>\n  </g>\n\n  <!-- Réponse Question -->\n  <g id=\"comp_chat_answer\">\n    <rect x=\"80\" y=\"340\" width=\"280\" height=\"90\" rx=\"16\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\" filter=\"url(#shadow)\"/>\n    <text x=\"100\" y=\"375\" fill=\"#111\" font-size=\"18\" font-family=\"Arial\">🛍️ Commerce / Retail</text>\n\n    <rect x=\"380\" y=\"340\" width=\"280\" height=\"90\" rx=\"16\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\" filter=\"url(#shadow)\"/>\n    <text x=\"400\" y=\"375\" fill=\"#111\" font-size=\"18\" font-family=\"Arial\">💼 Services B2B</text>\n\n    <rect x=\"680\" y=\"340\" width=\"280\" height=\"90\" rx=\"16\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\" filter=\"url(#shadow)\"/>\n    <text x=\"700\" y=\"375\" fill=\"#111\" font-size=\"18\" font-family=\"Arial\">🏢 Immobilier</text>\n  </g>\n\n  <!-- Input Message -->\n  <g id=\"comp_chat_input\">\n    <rect x=\"80\" y=\"460\" width=\"720\" height=\"70\" rx=\"35\" fill=\"#fff\" stroke=\"#d1d5db\" stroke-width=\"2\" filter=\"url(#shadow)\"/>\n    <text x=\"110\" y=\"500\" fill=\"#9ca3af\" font-size=\"18\" font-family=\"Arial\">Tapez votre message…</text>\n    <circle cx=\"750\" cy=\"495\" r=\"25\" fill=\"#4f46e5\"/>\n    <path d=\"M740 485 l20 10 -20 10 5 -10 z\" fill=\"#fff\"/>\n    <text x=\"800\" y=\"500\" fill=\"#9ca3af\" font-size=\"24\" font-family=\"Arial\">😊</text>\n  </g>\n\n  <!-- Passer Dialogue -->\n  <g id=\"comp_chat_skip\">\n    <rect x=\"830\" y=\"460\" width=\"130\" height=\"70\" rx=\"35\" fill=\"none\" stroke=\"#9ca3af\" stroke-width=\"2\"/>\n    <text x=\"880\" y=\"500\" fill=\"#4b5563\" font-size=\"18\" font-family=\"Arial\" text-anchor=\"middle\">Passer</text>\n  </g>\n</svg>"
+        },
+        {
+          "id": "n1_navigation",
+          "name": "Navigation",
+          "description": "Étape 4/9 - Stepper et flux entre étapes",
+          "n2_features": [
+            {
+              "id": "n2_stepper",
+              "name": "Navigation UX",
+              "description": "Indicateurs progression parcours",
+              "n3_components": [
+                {
+                  "id": "comp_stepper",
+                  "name": "Stepper 9 Étapes",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "stepper",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un stepper horizontal des 9 phases avec états active/completed/future et peut naviguer",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_next_button",
+                  "name": "Bouton Suivant",
+                  "endpoint": "/studio/next/{current_step}",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "submit",
+                  "description_ui": "L'utilisateur voit un bouton étape suivante avec validation des prérequis et peut avancer"
+                },
+                {
+                  "id": "comp_breadcrumb",
+                  "name": "Fil d'Ariane",
+                  "endpoint": "/studio/step/{step}",
+                  "method": "GET",
+                  "visual_hint": "breadcrumb",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un breadcrumb Phase > Étape > Section et peut remonter dans la hiérarchie",
+                  "zone_assignment": "header"
+                }
+              ]
+            }
+          ],
+          "ui_role": "onboarding-flow",
+          "dominant_zone": "header",
+          "display_label": "Module / Navigation",
+          "ux_step": 9,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "stepper_wizard",
+          "layout_justification": "The stepper_wizard layout provides a clear, linear progression through the onboarding flow. The breadcrumb provides context, and the main area focuses on the current step in the process. The button is implied by the wizard step. This is a premium and engaging user experience.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <!-- Background -->\n  <rect width=\"1000\" height=\"600\" fill=\"#f6f7f9\"/>\n\n  <!-- Header breadcrumb -->\n  <g id=\"breadcrumb\">\n    <rect x=\"40\" y=\"30\" width=\"920\" height=\"44\" rx=\"8\" fill=\"#ffffff\" stroke=\"#e1e4e8\" stroke-width=\"1\"/>\n    <text x=\"60\" y=\"55\" font-size=\"14\" fill=\"#586069\">Phase 3</text>\n    <path d=\"M130 45h10m-5-4l5 4-5 4\" stroke=\"#586069\" stroke-width=\"2\" fill=\"none\"/>\n    <text x=\"160\" y=\"55\" font-size=\"14\" fill=\"#586069\">Étape 5</text>\n    <path d=\"M230 45h10m-5-4l5 4-5 4\" stroke=\"#586069\" stroke-width=\"2\" fill=\"none\"/>\n    <text x=\"260\" y=\"55\" font-size=\"14\" fill=\"#24292e\" font-weight=\"600\">Section</text>\n  </g>\n\n  <!-- 9-step horizontal stepper -->\n  <g id=\"stepper\">\n    <!-- Stepper background card -->\n    <rect x=\"40\" y=\"110\" width=\"920\" height=\"100\" rx=\"12\" fill=\"#ffffff\" stroke=\"#e1e4e8\" stroke-width=\"1\"/>\n    \n    <!-- Connector lines -->\n    <line x1=\"130\" y1=\"160\" x2=\"210\" y2=\"160\" stroke=\"#28a745\" stroke-width=\"2\"/>\n    <line x1=\"230\" y1=\"160\" x2=\"310\" y2=\"160\" stroke=\"#28a745\" stroke-width=\"2\"/>\n    <line x1=\"330\" y1=\"160\" x2=\"410\" y2=\"160\" stroke=\"#28a745\" stroke-width=\"2\"/>\n    <line x1=\"430\" y1=\"160\" x2=\"510\" y2=\"160\" stroke=\"#28a745\" stroke-width=\"2\"/>\n    <line x1=\"530\" y1=\"160\" x2=\"610\" y2=\"160\" stroke=\"#28a745\" stroke-width=\"2\"/>\n    <line x1=\"630\" y1=\"160\" x2=\"710\" y2=\"160\" stroke=\"#cbd5e0\" stroke-width=\"2\"/>\n    <line x1=\"730\" y1=\"160\" x2=\"810\" y2=\"160\" stroke=\"#cbd5e0\" stroke-width=\"2\"/>\n    <line x1=\"830\" y1=\"160\" x2=\"910\" y2=\"160\" stroke=\"#cbd5e0\" stroke-width=\"2\"/>\n\n    <!-- Step 1 completed -->\n    <circle cx=\"100\" cy=\"160\" r=\"18\" fill=\"#28a745\"/>\n    <text x=\"100\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ffffff\" font-weight=\"600\">1</text>\n    <text x=\"100\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Brief</text>\n\n    <!-- Step 2 completed -->\n    <circle cx=\"220\" cy=\"160\" r=\"18\" fill=\"#28a745\"/>\n    <text x=\"220\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ffffff\" font-weight=\"600\">2</text>\n    <text x=\"220\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Sitemap</text>\n\n    <!-- Step 3 completed -->\n    <circle cx=\"340\" cy=\"160\" r=\"18\" fill=\"#28a745\"/>\n    <text x=\"340\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ffffff\" font-weight=\"600\">3</text>\n    <text x=\"340\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Wireframe</text>\n\n    <!-- Step 4 completed -->\n    <circle cx=\"460\" cy=\"160\" r=\"18\" fill=\"#28a745\"/>\n    <text x=\"460\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ffffff\" font-weight=\"600\">4</text>\n    <text x=\"460\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Design</text>\n\n    <!-- Step 5 active -->\n    <circle cx=\"580\" cy=\"160\" r=\"18\" fill=\"#0366d6\" stroke=\"#ffffff\" stroke-width=\"3\"/>\n    <text x=\"580\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ffffff\" font-weight=\"600\">5</text>\n    <text x=\"580\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#0366d6\" font-weight=\"600\">Content</text>\n\n    <!-- Step 6 future -->\n    <circle cx=\"700\" cy=\"160\" r=\"18\" fill=\"#e1e4e8\" stroke=\"#ffffff\" stroke-width=\"3\"/>\n    <text x=\"700\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">6</text>\n    <text x=\"700\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Build</text>\n\n    <!-- Step 7 future -->\n    <circle cx=\"820\" cy=\"160\" r=\"18\" fill=\"#e1e4e8\" stroke=\"#ffffff\" stroke-width=\"3\"/>\n    <text x=\"820\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">7</text>\n    <text x=\"820\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">QA</text>\n\n    <!-- Step 8 future -->\n    <circle cx=\"940\" cy=\"160\" r=\"18\" fill=\"#e1e4e8\" stroke=\"#ffffff\" stroke-width=\"3\"/>\n    <text x=\"940\" y=\"165\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">8</text>\n    <text x=\"940\" y=\"195\" text-anchor=\"middle\" font-size=\"12\" fill=\"#586069\">Launch</text>\n  </g>\n\n  <!-- Next button -->\n  <g id=\"next_button\">\n    <defs>\n      <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0%\" stop-color=\"#28a745\"/>\n        <stop offset=\"100%\" stop-color=\"#218838\"/>\n      </linearGradient>\n    </defs>\n    <rect x=\"800\" y=\"250\" width=\"160\" height=\"48\" rx=\"24\" fill=\"url(#btnGrad)\"/>\n    <text x=\"880\" y=\"278\" text-anchor=\"middle\" font-size=\"15\" fill=\"#ffffff\" font-weight=\"600\">Étape suivante</text>\n    <path d=\"M910 265l6 6-6 6m-3-6h12\" stroke=\"#ffffff\" stroke-width=\"2\" fill=\"none\"/>\n  </g>\n\n  <!-- Helper text -->\n  <text x=\"60\" y=\"280\" font-size=\"13\" fill=\"#586069\">Prérequis validés • Vous pouvez avancer</text>\n</svg>"
+        }
+      ]
+    },
+    {
+      "id": "n0_deploy",
+      "name": "Deploy",
+      "description": "Phase 4 - Préparation et export projet final",
+      "order": 4,
+      "confidence": 0.82,
+      "n1_sections": [
+        {
+          "id": "n1_export",
+          "name": "Export / Téléchargement",
+          "description": "Étape 10 - Génération et export code final",
+          "n2_features": [
+            {
+              "id": "n2_export",
+              "name": "Export Projet",
+              "description": "Génération archive ZIP téléchargeable",
+              "n3_components": [
+                {
+                  "id": "comp_download_zip",
+                  "name": "Téléchargement ZIP",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "download",
+                  "layout_hint": "flex-column",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une carte fichier avec bouton 📥 et peut télécharger l'archive ZIP",
+                  "zone_assignment": "main"
+                },
+                {
+                  "id": "comp_confirm_modal",
+                  "name": "Modal Confirmation",
+                  "endpoint": "/studio/finalize",
+                  "method": "POST",
+                  "visual_hint": "modal",
+                  "layout_hint": "centered",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit une fenêtre modale avec titre, message, boutons Annuler/Confirmer",
+                  "zone_assignment": "floating"
+                },
+                {
+                  "id": "comp_new_session",
+                  "name": "Nouvelle Session",
+                  "endpoint": "/studio/session/reset",
+                  "method": "POST",
+                  "visual_hint": "button",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit un bouton ↻ Nouvelle session et peut recommencer",
+                  "zone_assignment": "main"
+                }
+              ]
+            }
+          ],
+          "ui_role": "export-action",
+          "dominant_zone": "main",
+          "display_label": "Module / Export / Téléchargement",
+          "ux_step": 13,
+          "layout_type": "standard",
+          "col_span": 1,
+          "layout_strategy": "export_download",
+          "layout_justification": "The 'export_download' strategy directly addresses the module's purpose. The main area focuses on the primary action (download) and a secondary action (new session), while the modal confirmation appears as a floating element for critical user feedback.",
+          "svg_payload": "<svg viewBox=\"0 0 1000 600\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"btnGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#6c5ce7\"/>\n      <stop offset=\"100%\" stop-color=\"#4a37d0\"/>\n    </linearGradient>\n    <linearGradient id=\"cardGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0%\" stop-color=\"#ffffff\"/>\n      <stop offset=\"100%\" stop-color=\"#f7f9ff\"/>\n    </linearGradient>\n    <filter id=\"shadow\" x=\"-10%\" y=\"-10%\" width=\"120%\" height=\"120%\">\n      <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"6\" flood-color=\"#000\" flood-opacity=\".12\"/>\n    </filter>\n  </defs>\n\n  <!-- Main card -->\n  <rect x=\"120\" y=\"120\" width=\"760\" height=\"360\" rx=\"16\" fill=\"url(#cardGrad)\" filter=\"url(#shadow)\"/>\n  <rect x=\"140\" y=\"140\" width=\"720\" height=\"160\" rx=\"12\" fill=\"#f1f3ff\" stroke=\"#e0e4ff\" stroke-width=\"1\"/>\n\n  <!-- Placeholder thumbnail -->\n  <rect x=\"160\" y=\"160\" width=\"120\" height=\"120\" rx=\"8\" fill=\"#dfe3ff\"/>\n  <path d=\"M200 210 L220 190 L250 220 L270 200 L300 230 L300 250 L200 250 Z\" fill=\"#a8b0ff\" opacity=\".6\"/>\n  <circle cx=\"240\" cy=\"220\" r=\"18\" fill=\"#6c5ce7\" opacity=\".8\"/>\n\n  <!-- File info -->\n  <text x=\"300\" y=\"190\" font-size=\"18\" fill=\"#2d3436\" font-family=\"Arial, sans-serif\" font-weight=\"600\">theme-package.zip</text>\n  <text x=\"300\" y=\"210\" font-size=\"14\" fill=\"#636e72\">2.3 MB • 42 fichiers • 12/07/2024 14:32</text>\n\n  <!-- Download button -->\n  <rect x=\"300\" y=\"230\" width=\"180\" height=\"44\" rx=\"22\" fill=\"url(#btnGrad)\" filter=\"url(#shadow)\"/>\n  <path d=\"M350 250 L370 270 L390 250 M370 240 L370 270\" stroke=\"#fff\" stroke-width=\"3\" stroke-linecap=\"round\" fill=\"none\"/>\n  <text x=\"410\" y=\"256\" font-size=\"16\" fill=\"#fff\" font-family=\"Arial, sans-serif\" font-weight=\"600\">Télécharger ZIP</text>\n\n  <!-- New session button -->\n  <rect x=\"520\" y=\"230\" width=\"180\" height=\"44\" rx=\"22\" fill=\"#dfe6e9\" stroke=\"#b2bec3\" stroke-width=\"1\"/>\n  <path d=\"M590 240 L590 250 L600 250 M600 240 L590 250 L600 260\" stroke=\"#2d3436\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"/>\n  <text x=\"620\" y=\"256\" font-size=\"16\" fill=\"#2d3436\" font-family=\"Arial, sans-serif\" font-weight=\"600\">Nouvelle session</text>\n\n  <!-- Modal -->\n  <rect x=\"250\" y=\"80\" width=\"500\" height=\"240\" rx=\"16\" fill=\"#ffffff\" filter=\"url(#shadow)\" stroke=\"#e0e0e0\" stroke-width=\"1\"/>\n  <rect x=\"250\" y=\"80\" width=\"500\" height=\"60\" rx=\"16\" fill=\"#f7f9ff\"/>\n  <text x=\"280\" y=\"118\" font-size=\"20\" fill=\"#2d3436\" font-family=\"Arial, sans-serif\" font-weight=\"700\">Confirmer le téléchargement</text>\n  <text x=\"280\" y=\"180\" font-size=\"15\" fill=\"#636e72\">Êtes-vous sûr de vouloir télécharger l’archive ZIP ?</text>\n\n  <!-- Modal buttons -->\n  <rect x=\"420\" y=\"270\" width=\"80\" height=\"36\" rx=\"18\" fill=\"#dfe6e9\" stroke=\"#b2bec3\" stroke-width=\"1\"/>\n  <text x=\"460\" y=\"293\" font-size=\"14\" fill=\"#2d3436\" font-family=\"Arial, sans-serif\" text-anchor=\"middle\">Annuler</text>\n\n  <rect x=\"520\" y=\"270\" width=\"80\" height=\"36\" rx=\"18\" fill=\"url(#btnGrad)\" filter=\"url(#shadow)\"/>\n  <text x=\"560\" y=\"293\" font-size=\"14\" fill=\"#fff\" font-family=\"Arial, sans-serif\" text-anchor=\"middle\">Confirmer</text>\n</svg>"
+        }
+      ]
+    }
+  ]
+}

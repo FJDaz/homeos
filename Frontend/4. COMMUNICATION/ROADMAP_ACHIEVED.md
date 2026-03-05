@@ -6,6 +6,36 @@
 
 ---
 
+## Mission 24G — Design Cleanup (rx <= 10) ✅ 2026-03-04
+- [x] Contrainte stricte `rx <= 10` imposée dans `04_kimi_atom_factory.py` (prompt).
+- [x] Sécurité RegEx ajoutée dans `07_composer.py` pour raboter tout `rx/ry > 10` à l'injection.
+- [x] Cleanup des restes `rx="11"` dans le builder statique `genome_to_svg_v2.py`.
+
+## Mission 24E — Recalibration échelle KIMI ✅ 2026-03-04
+- [x] Calcul du scale factor forcé : `target_w / atom_viewbox_w`.
+- [x] Injection des dimensions pixel cibles (`zone_w`, `zone_h`) dans le prompt de Step 6.
+- [x] Lecture de `layout_plan.json` dès la génération des atomes.
+
+## Mission 24D — Drag au niveau Organe ✅ 2026-03-03
+- [x] Drag sur `.af-organ` déplace fond + tous ses composants enfants ensemble.
+- [x] `POST /api/organ-move` persiste dans `template_overrides.json`.
+
+## Mission 24C — Template Viewer Interactif (Drag + Resize) ✅ 2026-03-03
+- [x] Drag d'un composant SVG sans libs tierces.
+- [x] Resize d'un composant SVG.
+- [x] Overrides persistés et restaurés.
+
+## Mission 24B — KIMI : IDs sémantiques dans le SVG rendu ✅ 2026-03-03
+- [x] Chaque zone/composant rendu dans `<g id="{comp_id}" class="kimi-comp">`.
+- [x] `<title>{label}</title>` ajouté en premier enfant.
+
+## Mission 24A — Template Viewer Chat UI ✅ 2026-03-03
+- [x] Chat UI intégré (panneau droit 340px).
+- [x] Route `POST /api/feedback` pour itération continue.
+- [x] Zéro fetch(), tout en XHR.
+
+---
+
 ## PHASE 1 — Wireframes Sullivan Renderer
 STATUS: ARCHIVÉ
 DATE: 2026-02-15
@@ -4039,6 +4069,62 @@ Guillemets doubles uniquement dans les strings Python destinées à XML/SVG.
 Réponds avec le code complet de chaque fichier entre triple backticks avec le chemin en commentaire L1.
 ```
 - [x] Le `server_9998_v2.py` accepte et consolide correctement ces modifications dans son fichier physique.
+
+---
+
+## PHASE 21E — Mission Topology Bank + Renderer Topologique
+STATUS: ARCHIVÉ
+DATE: 2026-03-03
+COMMIT: fc3dec8
+BRANCH: experience_front_gemini
+
+### Ce qui a été fait
+- Créé `Backend/Prod/exporters/topology_bank.py` — 20 topologies nommées (bento_grid, split_editorial, masonry, etc.) avec col_span, row_span, densité
+- Créé `Backend/Prod/exporters/archetype_renderers.py` — renderers SVG par archétype (nav_header, dashboard, form_panel, chat_overlay, etc.)
+- Passes 2+3 dans `genome_enricher.py` : ux_step (tri par séquence UX) + col_span/layout_type (densité N3)
+- Renderer `genome_to_svg_v2.py` branché sur `render_organ()` / `_render_n1()`
+
+### Résultat visuel
+FJD : résultat "gris, des boîtes nulles alignées" — visuellement médiocre. Archétypes Python trop basiques. Le renderer statique ne peut pas concurrencer un LLM pour le design.
+
+### Décision
+→ Abandon du renderer Python statique comme solution principale. Passer à KIMI comme générateur SVG IA.
+
+---
+
+## PHASE 22 — Prop 3A + 2B : Latence AetherFlow
+STATUS: ARCHIVÉ
+DATE: 2026-03-03
+COMMIT: 0a97804
+BRANCH: experience_front_gemini
+
+### Ce qui a été fait
+
+**Prop 3A — ApplyEngine off-thread (`asyncio.to_thread`)**
+- `orchestrator.py` : `self.apply_engine.apply(...)` → `await asyncio.to_thread(self.apply_engine.apply, ...)`
+- 1 ligne modifiée. Débloque l'event loop pendant les opérations AST/fichiers (sync).
+
+**Prop 2B — Séparation contexte statique/dynamique**
+- Extrait `SURGICAL_MODE_INSTRUCTIONS` (~36L) + instructions refactoring/code_gen/patch hors de `step_context` (prompt user)
+- Ajouté param `system_context: Optional[str] = None` dans la chaîne : `_execute_step()` → `execute_step()` → `_execute_with_fallback()` / `_execute_simple()`
+- `gemini_client.generate()` : `system_prompt` → `request_data["systemInstruction"]` (séparé des `contents`, caching Gemini)
+- `deepseek_client.generate()` : `system_prompt` → `{"role": "system", "content": ...}` (prefix caching DeepSeek)
+- Les instructions statiques ne boustent plus le prompt dynamique → cache hit > 90% attendu sur instructions fixes
+
+**Fichiers modifiés :**
+- `Backend/Prod/orchestrator.py`
+- `Backend/Prod/models/agent_router.py`
+- `Backend/Prod/models/gemini_client.py`
+- `Backend/Prod/models/deepseek_client.py`
+
+### Validation
+- AST check ✅ sur les 4 fichiers
+- Test AetherFlow : 1/1 steps ✅, pipeline sans erreur (129s, $0.01)
+- Prop 2B active uniquement sur steps surgical/refactoring/code_gen/patch (pas analysis → system_context=None normal)
+
+### Méthode
+- Plan AetherFlow lancé (780s, 648K tokens) → .generated non auto-appliqués (Codestral fragmented output)
+- Apply final : CODE DIRECT sur les 4 fichiers
 
 ---
 

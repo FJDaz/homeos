@@ -1,0 +1,59 @@
+{
+  "task_id": "v3_b1_kill_zombies",
+  "description": "V3-B1: Remplacer apply_generated_code() dans proto.py par ApplyEngine, puis supprimer la fonction devenue dead code dans claude_helper.py. Migrer ou supprimer test_new_file_creation.py.",
+  "metadata": {
+    "phase": "V3-B1",
+    "workflow": "BUILD",
+    "author": "Claude + FJD",
+    "date": "2026-03-02",
+    "context": "apply_generated_code() est du dead code depuis la création d'ApplyEngine. Elle est encore appelée uniquement par proto.py (L180, L229 dans la méthode _apply_generated_code). frd.py et verify_fix.py sont déjà archivés. L'objectif est de brancher proto.py sur ApplyEngine et de supprimer la fonction legacy."
+  },
+  "steps": [
+    {
+      "id": "step_01",
+      "description": "Refactoriser la méthode _apply_generated_code() dans proto.py pour utiliser ApplyEngine au lieu de apply_generated_code(). La méthode actuelle (L163-252) boucle sur plan.steps, récupère le step output via get_step_output(), puis appelle apply_generated_code() pour chaque fichier cible. La remplacer par : import ApplyEngine depuis core.apply_engine, créer une instance ApplyEngine(project_root), appeler engine.apply(step_id, step_output, target_files, step_type) pour chaque step. Conserver la même signature de retour dict avec les clés success, files_applied, files_failed, applied_files, failed_files. Supprimer l'import 'from ..claude_helper import get_step_output, apply_generated_code' (L180) et le remplacer par 'from ..core.apply_engine import ApplyEngine' et conserver uniquement 'from ..claude_helper import get_step_output'.",
+      "type": "refactoring",
+      "complexity": 0.6,
+      "estimated_tokens": 2500,
+      "context": {
+        "files": [
+          "Backend/Prod/workflows/proto.py",
+          "Backend/Prod/core/apply_engine.py"
+        ],
+        "surgical_mode": true
+      }
+    },
+    {
+      "id": "step_02",
+      "description": "Supprimer la fonction apply_generated_code() dans claude_helper.py. La fonction se trouve approximativement aux lignes 315-393. Avant de supprimer, vérifier que grep -rn 'apply_generated_code' Backend/ ne retourne plus que la définition dans claude_helper.py (après step_01, proto.py ne doit plus l'appeler). Supprimer le bloc entier : la docstring, la signature def apply_generated_code(...), et toutes ses lignes jusqu'au dernier 'return False'. Ne toucher à aucune autre fonction du fichier.",
+      "type": "refactoring",
+      "complexity": 0.4,
+      "estimated_tokens": 1500,
+      "context": {
+        "files": [
+          "Backend/Prod/claude_helper.py"
+        ],
+        "surgical_mode": true
+      }
+    },
+    {
+      "id": "step_03",
+      "description": "Analyser Backend/Prod/tests/test_new_file_creation.py et déterminer si ses cas de test sont couverts par test_apply_engine_e2e.py. Si oui : supprimer test_new_file_creation.py entièrement. Si les tests couvrent des cas non couverts par e2e : réécrire le fichier pour utiliser ApplyEngine au lieu de apply_generated_code. Objectif final : tous les tests dans Backend/Prod/tests/ passent avec PYTHONPATH=. pytest Backend/Prod/tests/ -v.",
+      "type": "refactoring",
+      "complexity": 0.5,
+      "estimated_tokens": 2000,
+      "context": {
+        "files": [
+          "Backend/Prod/tests/test_new_file_creation.py",
+          "Backend/Prod/tests/test_apply_engine_e2e.py"
+        ],
+        "surgical_mode": false
+      }
+    }
+  ],
+  "validation": {
+    "command": "PYTHONPATH=. pytest Backend/Prod/tests/ -v",
+    "expected": "tous PASS",
+    "post_check": "grep -rn 'apply_generated_code' Backend/Prod/ doit retourner zéro résultat"
+  }
+}

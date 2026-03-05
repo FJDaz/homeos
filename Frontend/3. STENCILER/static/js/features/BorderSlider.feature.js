@@ -9,6 +9,24 @@ class BorderSliderFeature extends StencilerFeature {
     this.el = null;
   }
 
+  init() {
+    document.addEventListener('primitive:selected', (e) => {
+      this._activePrim = e.detail.el;
+      if (this.el) {
+        this.el.style.opacity = '1';
+        this.el.style.pointerEvents = 'all';
+      }
+    });
+
+    document.addEventListener('primitive:deselected', () => {
+      this._activePrim = null;
+      if (this.el) {
+        this.el.style.opacity = '0.4';
+        this.el.style.pointerEvents = 'none';
+      }
+    });
+  }
+
   render() {
     return `
         <label>Bordure: <span id="border-value">0px</span></label>
@@ -25,6 +43,8 @@ class BorderSliderFeature extends StencilerFeature {
 
     this.el.innerHTML = this.render();
 
+    this.init();
+
     const slider = this.el.querySelector('.border-range');
     const valueDisplay = this.el.querySelector('#border-value');
 
@@ -38,6 +58,10 @@ class BorderSliderFeature extends StencilerFeature {
   }
 
   applyBorder() {
+    if (this._activePrim) {
+      this._activePrim.setAttribute('stroke-width', this.value);
+      return;
+    }
     if (!this.canvas?.getActiveObject()) return;
     const obj = this.canvas.getActiveObject();
     obj.set('strokeWidth', this.value);

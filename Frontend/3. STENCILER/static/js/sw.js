@@ -1,67 +1,12 @@
-const CACHE_NAME = 'sullivan-dev-v3';
-const STATIC_ASSETS = [
-    '/',
-    '/stenciler',
-    '/static/js/sullivan_engine.js',
-    '/static/js/semantic_bridge.js',
-    '/static/js/viewer.js',
-    '/static/js/stenciler_app.js',
-    '/static/css/viewer.css',
-    '/static/css/stenciler.css'
-];
-
-// Installation : Mise en cache des assets statiques
-self.addEventListener('install', event => {
-    self.skipWaiting(); // Activation immédiate du nouveau SW
+// sw.js — DÉSACTIVÉ 2026-02-23
+// Ce SW se désinstalle et nettoie tous les caches pour éviter les interférences en dev.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            console.log('🧬 SW: Caching static assets');
-            return cache.addAll(STATIC_ASSETS);
-        })
+        caches.keys()
+            .then(keys => Promise.all(keys.map(key => caches.delete(key))))
+            .then(() => self.registration.unregister())
+            .then(() => self.clients.claim())
     );
 });
-
-// Activation : Nettoyage des anciens caches
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(
-                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-            );
-        })
-    );
-});
-
-// Stratégie de Fetch
-self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-
-    // Stratégie Stale-While-Revalidate pour l'API Genome
-    if (url.pathname.startsWith('/api/')) {
-        event.respondWith(
-            caches.open(CACHE_NAME).then(cache => {
-                return cache.match(event.request).then(cachedResponse => {
-                    const fetchPromise = fetch(event.request).then(networkResponse => {
-                        // On ne peut mettre en cache que les requêtes GET réussies
-                        if (event.request.method === 'GET' && networkResponse.ok) {
-                            cache.put(event.request, networkResponse.clone());
-                        }
-                        return networkResponse;
-                    }).catch(() => {
-                        // Offline : retourner le cache si disponible
-                        return cachedResponse || new Response(JSON.stringify({ error: "Offline mode active" }), {
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                    });
-                    return cachedResponse || fetchPromise;
-                });
-            })
-        );
-    }
-    // Stratégie Network-First pour les assets statiques (dev mode)
-    else {
-        event.respondWith(
-            fetch(event.request).catch(() => caches.match(event.request))
-        );
-    }
-});
+// Pas de listener fetch pour permettre un bypass immédiat au réseau

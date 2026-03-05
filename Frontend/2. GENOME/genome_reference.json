@@ -5,7 +5,12 @@
   "date": "2026-02-10",
   "metadata": {
     "confidence_global": 0.85,
-    "sources_used": ["WORKFLOW_UTILISATEUR.md", "PRD_HOMEOS_ETAT_ACTUEL.md", "api.py", "studio_routes.py"],
+    "sources_used": [
+      "WORKFLOW_UTILISATEUR.md",
+      "PRD_HOMEOS_ETAT_ACTUEL.md",
+      "api.py",
+      "studio_routes.py"
+    ],
     "composants_count": 32,
     "n0_count": 4,
     "n1_count": 10,
@@ -67,14 +72,14 @@
               "description": "Cartes de pouvoirs avec validation",
               "n3_components": [
                 {
-                  "id": "comp_stencil_card",
-                  "name": "Carte Stencil",
-                  "endpoint": "/studio/arbitrage/forms",
+                  "id": "comp_arbiter_table",
+                  "name": "Tableau Expert",
+                  "endpoint": "/studio/reports/arbitrage",
                   "method": "GET",
-                  "visual_hint": "stencil-card",
-                  "layout_hint": "grid",
+                  "visual_hint": "table",
+                  "layout_hint": "flex-column",
                   "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit une carte pouvoir avec titre, description et boutons Garder/Réserve, et peut sélectionner son choix"
+                  "description_ui": "L'utilisateur voit un tableau technique récapitulatif des validations en mode expert"
                 },
                 {
                   "id": "comp_arbiter_validate",
@@ -87,14 +92,14 @@
                   "description_ui": "L'utilisateur voit un formulaire de validation et peut soumettre ses décisions finales"
                 },
                 {
-                  "id": "comp_arbiter_table",
-                  "name": "Tableau Expert",
-                  "endpoint": "/studio/reports/arbitrage",
+                  "id": "comp_stencil_card",
+                  "name": "Carte Stencil",
+                  "endpoint": "/studio/arbitrage/forms",
                   "method": "GET",
-                  "visual_hint": "table",
-                  "layout_hint": "flex-column",
+                  "visual_hint": "stencil-card",
+                  "layout_hint": "grid",
                   "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit un tableau technique récapitulatif des validations en mode expert"
+                  "description_ui": "L'utilisateur voit une carte pouvoir avec titre, description et boutons Garder/Réserve, et peut sélectionner son choix"
                 }
               ]
             }
@@ -120,16 +125,6 @@
               "description": "Contrôle état machine à états",
               "n3_components": [
                 {
-                  "id": "comp_session_status",
-                  "name": "Status Session",
-                  "endpoint": "/studio/session",
-                  "method": "GET",
-                  "visual_hint": "status",
-                  "layout_hint": "flex-row",
-                  "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit 4 LEDs (vertes/grises) indiquant l'état current_step, genome, entries et peut rafraîchir"
-                },
-                {
                   "id": "comp_session_reset",
                   "name": "Reset Session",
                   "endpoint": "/studio/session/reset",
@@ -148,6 +143,16 @@
                   "layout_hint": "flex-column",
                   "interaction_type": "click",
                   "description_ui": "L'utilisateur voit un dashboard récapitulatif avec topologie et endpoints et peut cliquer pour détails"
+                },
+                {
+                  "id": "comp_session_status",
+                  "name": "Status Session",
+                  "endpoint": "/studio/session",
+                  "method": "GET",
+                  "visual_hint": "status",
+                  "layout_hint": "flex-row",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit 4 LEDs (vertes/grises) indiquant l'état current_step, genome, entries et peut rafraîchir"
                 },
                 {
                   "id": "comp_distillation_list",
@@ -170,7 +175,7 @@
       "name": "Frontend",
       "description": "Phase 3 - Génération interface utilisateur",
       "order": 3,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "n1_sections": [
         {
           "id": "n1_navigation",
@@ -227,14 +232,14 @@
               "description": "Choix parmi 8 styles de mise en page",
               "n3_components": [
                 {
-                  "id": "comp_layout_grid",
-                  "name": "Galerie Layouts",
-                  "endpoint": "/studio/step/5/layouts",
-                  "method": "GET",
-                  "visual_hint": "grid",
+                  "id": "comp_choice_style",
+                  "name": "Choix Style",
+                  "endpoint": "/studio/step/5/layouts/select",
+                  "method": "POST",
+                  "visual_hint": "choice-card",
                   "layout_hint": "grid",
                   "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit une galerie 3×2 des layouts avec aperçu visuel et peut sélectionner"
+                  "description_ui": "L'utilisateur voit des radio cards 2×2 (Minimal/Brutaliste/Moderne/Corporate) et peut choisir"
                 },
                 {
                   "id": "comp_layout_card",
@@ -247,14 +252,14 @@
                   "description_ui": "L'utilisateur voit une carte layout cliquable avec preview et peut la sélectionner"
                 },
                 {
-                  "id": "comp_choice_style",
-                  "name": "Choix Style",
-                  "endpoint": "/studio/step/5/layouts/select",
-                  "method": "POST",
-                  "visual_hint": "choice-card",
+                  "id": "comp_layout_grid",
+                  "name": "Galerie Layouts",
+                  "endpoint": "/studio/step/5/layouts",
+                  "method": "GET",
+                  "visual_hint": "grid",
                   "layout_hint": "grid",
                   "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit des radio cards 2×2 (Minimal/Brutaliste/Moderne/Corporate) et peut choisir"
+                  "description_ui": "L'utilisateur voit une galerie 3×2 des layouts avec aperçu visuel et peut sélectionner"
                 }
               ]
             }
@@ -270,6 +275,16 @@
               "name": "Upload et Extraction",
               "description": "Analyse fichier design uploadé",
               "n3_components": [
+                {
+                  "id": "comp_color_palette",
+                  "name": "Palette Extraite",
+                  "endpoint": "/studio/designer/upload",
+                  "method": "POST",
+                  "visual_hint": "color-palette",
+                  "layout_hint": "grid",
+                  "interaction_type": "click",
+                  "description_ui": "L'utilisateur voit 4 swatches de couleurs + chips style (rounded, font) extraites du design"
+                },
                 {
                   "id": "comp_upload_dropzone",
                   "name": "Zone Upload",
@@ -289,16 +304,6 @@
                   "layout_hint": "flex-row",
                   "interaction_type": "click",
                   "description_ui": "L'utilisateur voit un bouton de suppression et peut retirer le fichier uploadé"
-                },
-                {
-                  "id": "comp_color_palette",
-                  "name": "Palette Extraite",
-                  "endpoint": "/studio/designer/upload",
-                  "method": "POST",
-                  "visual_hint": "color-palette",
-                  "layout_hint": "grid",
-                  "interaction_type": "click",
-                  "description_ui": "L'utilisateur voit 4 swatches de couleurs + chips style (rounded, font) extraites du design"
                 },
                 {
                   "id": "comp_preview_zones",

@@ -1,0 +1,596 @@
+Dans :
+<g id="n1_adaptation" class="af-organ selected" data-genome-id="n1_adaptation" data-name="Module / Adaptation / Zoom Atome" data-ui-role="dashboard" data-ux-step="5" transform="translate(-604,-446) scale(1)">
+<rect x="838" y="2584" width="562" height="1368" fill="transparent" stroke="transparent" stroke-width="1" rx="8"></rect>
+<text x="850" y="2602" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Module / Adaptation / Zoom Ato</text>
+<text x="878" y="2716" font-size="12" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">+</text>
+<g id="comp_zoom_controls" class="kimi-comp selected" transform="translate(854,2624) scale(0.6671)">
+  <title>Contrôles Zoom</title>
+<defs>
+    <!-- Shadow filter -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"></feDropShadow>
+    </filter>
+    
+    <!-- Gradient for primary button -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"></stop>
+      <stop offset="100%" stop-color="#6dd963"></stop>
+    </linearGradient>
+    
+    <!-- Gradient for zoom level indicator -->
+    <linearGradient id="zoomGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"></stop>
+      <stop offset="100%" stop-color="#97ea90"></stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f8f7f4"></rect>
+  
+  <!-- Main Card -->
+  <rect x="40" y="40" width="620" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+  
+  <!-- Section Title -->
+  <text x="70" y="82" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Contrôles Zoom</text>
+  
+  <!-- Subtitle/Description -->
+  <text x="70" y="108" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#666666">Navigation et ajustement du niveau de zoom</text>
+  
+  <!-- Breadcrumb -->
+  <g transform="translate(70, 145)">
+    <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#1258ca" font-weight="500">Anatomie</text>
+    <text x="70" y="0" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#999999">/</text>
+    <text x="85" y="0" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#1258ca" font-weight="500">Système nerveux</text>
+    <text x="215" y="0" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#999999">/</text>
+    <text x="230" y="0" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#151515" font-weight="500">Corps</text>
+  </g>
+  
+  <!-- Zoom Controls Container -->
+  <g transform="translate(70, 185)">
+    <!-- Zoom Out Button -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="56" height="44" rx="6" fill="#f8f7f4" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="28" y="28" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#151515" text-anchor="middle">−</text>
+    </g>
+    
+    <!-- Zoom Level Indicator -->
+    <g transform="translate(64, 0)">
+      <rect x="0" y="0" width="160" height="44" rx="6" fill="#151515"></rect>
+      <!-- Magnifying glass icon -->
+      <g transform="translate(16, 12)">
+        <circle cx="10" cy="10" r="8" fill="none" stroke="#97ea90" stroke-width="2"></circle>
+        <line x1="16" y1="16" x2="22" y2="22" stroke="#97ea90" stroke-width="2" stroke-linecap="round"></line>
+      </g>
+      <!-- Zoom level text -->
+      <text x="48" y="28" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Corps</text>
+      <!-- Dropdown arrow -->
+      <path d="M 135 18 L 142 26 L 149 18" fill="none" stroke="#97ea90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <!-- Progress bar -->
+      <rect x="48" y="34" width="104" height="3" rx="1.5" fill="#333333"></rect>
+      <rect x="48" y="34" width="72" height="3" rx="1.5" fill="url(#zoomGradient)"></rect>
+    </g>
+    
+    <!-- Zoom In Button -->
+    <g transform="translate(232, 0)">
+      <rect x="0" y="0" width="56" height="44" rx="6" fill="#f8f7f4" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="28" y="29" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#151515" text-anchor="middle">+</text>
+    </g>
+    
+    <!-- Reset Button -->
+    <g transform="translate(304, 0)">
+      <rect x="0" y="0" width="80" height="44" rx="6" fill="url(#primaryGradient)"></rect>
+      <text x="40" y="28" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Reset</text>
+    </g>
+  </g>
+  
+  <!-- Zoom Presets -->
+  <g transform="translate(70, 255)">
+    <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#999999" letter-spacing="1.5" text-transform="uppercase">NIVEAUX PRÉDÉFINIS</text>
+    
+    <!-- Preset buttons -->
+    <g transform="translate(0, 16)">
+      <!-- 25% -->
+      <rect x="0" y="0" width="56" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="28" y="21" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#666666" text-anchor="middle">25%</text>
+      
+      <!-- 50% -->
+      <rect x="64" y="0" width="56" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="92" y="21" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#666666" text-anchor="middle">50%</text>
+      
+      <!-- 100% (active) -->
+      <rect x="128" y="0" width="64" height="32" rx="6" fill="#151515"></rect>
+      <text x="160" y="21" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#97ea90" text-anchor="middle" font-weight="500">100%</text>
+      
+      <!-- 150% -->
+      <rect x="200" y="0" width="56" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="228" y="21" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#666666" text-anchor="middle">150%</text>
+      
+      <!-- 200% -->
+      <rect x="264" y="0" width="56" height="32" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+      <text x="292" y="21" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#666666" text-anchor="middle">200%</text>
+    </g>
+  </g>
+  
+  <!-- Keyboard shortcut hint -->
+  <g transform="translate(70, 325)">
+    <rect x="0" y="0" width="280" height="28" rx="6" fill="#f8f7f4"></rect>
+    <text x="12" y="19" font-family="Roboto Mono, monospace" font-size="11" fill="#666666">Ctrl + Scroll</text>
+    <text x="100" y="19" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#999999">ou</text>
+    <text x="128" y="19" font-family="Roboto Mono, monospace" font-size="11" fill="#666666">Cmd + +/-</text>
+    <text x="210" y="19" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#999999">pour zoomer</text>
+  </g>
+  
+  <!-- Info badge -->
+  <g transform="translate(520, 325)">
+    <rect x="0" y="0" width="110" height="28" rx="6" fill="#97ea90" fill-opacity="0.15"></rect>
+    <circle cx="16" cy="14" r="4" fill="#97ea90"></circle>
+    <text x="28" y="19" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#2d7a27" font-weight="500">Niveau optimal</text>
+  </g>
+<rect class="resize-handle" x="688" y="388" width="24" height="24" fill="transparent" stroke="#f05e23" stroke-width="2" style="cursor:se-resize; pointer-events:all; opacity:0;"></rect>
+</g>
+<g id="comp_zoom_out" class="kimi-comp" transform="translate(854,2938) scale(0.7571)">
+  <title>Zoom Out</title>
+<defs>
+    <!-- Shadow filter for card -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"></feDropShadow>
+    </filter>
+    
+    <!-- Gradient for primary button -->
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2458f3"></stop>
+      <stop offset="100%" stop-color="#1a46d1"></stop>
+    </linearGradient>
+    
+    <!-- Subtle surface gradient -->
+    <linearGradient id="surfaceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fafbfc"></stop>
+      <stop offset="100%" stop-color="#f5f7fa"></stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f8f7f4"></rect>
+  
+  <!-- Main Card -->
+  <rect x="50" y="50" width="600" height="300" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+  
+  <!-- Card Header Section -->
+  <rect x="50" y="50" width="600" height="72" rx="12" fill="url(#surfaceGradient)"></rect>
+  <rect x="50" y="110" width="600" height="12" fill="#ffffff"></rect>
+  
+  <!-- Section Title -->
+  <text x="82" y="95" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Structure hiérarchique</text>
+  
+  <!-- Breadcrumb / Path indicator -->
+  <text x="82" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280">Racine</text>
+  <text x="126" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#9ca3af">/</text>
+  <text x="138" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280">Départements</text>
+  <text x="226" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#9ca3af">/</text>
+  <text x="238" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#2458f3">Équipe Design</text>
+  
+  <!-- Hierarchy visualization - current level indicator -->
+  <rect x="82" y="168" width="536" height="64" rx="8" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"></rect>
+  
+  <!-- Level indicator dots -->
+  <circle cx="106" cy="188" r="4" fill="#2458f3"></circle>
+  <circle cx="106" cy="200" r="4" fill="#d1d5db"></circle>
+  <circle cx="106" cy="212" r="4" fill="#d1d5db"></circle>
+  
+  <!-- Current node label -->
+  <text x="126" y="193" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Équipe Design</text>
+  <text x="126" y="213" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#6b7280">Niveau 3 • 12 membres • 4 sous-équipes</text>
+  
+  <!-- Decorative hierarchy lines -->
+  <line x1="82" y1="256" x2="618" y2="256" stroke="#e5e7eb" stroke-width="1"></line>
+  
+  <!-- Zoom Out / Remonter Button -->
+  <g transform="translate(82, 276)">
+    <!-- Button background -->
+    <rect width="156" height="44" rx="6" fill="url(#btnGradient)"></rect>
+    
+    <!-- Arrow up icon -->
+    <path d="M20 26 L26 20 L32 26 M26 20 L26 32" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+    
+    <!-- Button label -->
+    <text x="46" y="27" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Remonter</text>
+  </g>
+  
+  <!-- Secondary info -->
+  <text x="258" y="303" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#9ca3af">Retour au niveau Départements</text>
+  
+  <!-- Visual hint - parent level preview -->
+  <g opacity="0.5">
+    <rect x="450" y="276" width="168" height="44" rx="6" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4"></rect>
+    <text x="534" y="303" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#9ca3af" text-anchor="middle">Niveau parent</text>
+  </g>
+<rect class="resize-handle" x="688" y="388" width="24" height="24" fill="transparent" stroke="#f05e23" stroke-width="2" style="cursor:se-resize; pointer-events:all; opacity:0;"></rect>
+</g>
+<g id="comp_detail_card" class="kimi-comp" transform="translate(854,3252) scale(0.7571)">
+  <title>Fiche Détail Atome</title>
+<defs>
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"></feDropShadow>
+    </filter>
+    
+    <!-- Button Gradient -->
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"></stop>
+      <stop offset="100%" stop-color="#6dd865"></stop>
+    </linearGradient>
+    
+    <!-- Method Badge Gradient -->
+    <linearGradient id="getGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"></stop>
+      <stop offset="100%" stop-color="#0d3f8f"></stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f8f7f4"></rect>
+  
+  <!-- Main Card -->
+  <rect x="24" y="24" width="652" height="352" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+  
+  <!-- Header Section -->
+  <text x="48" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Fiche Détail Atome</text>
+  
+  <!-- Status Badge -->
+  <rect x="48" y="78" width="68" height="20" rx="4" fill="#97ea90" opacity="0.15"></rect>
+  <text x="82" y="92" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#2d7a28" text-anchor="middle" letter-spacing="0.5">ACTIF</text>
+  
+  <!-- Divider -->
+  <line x1="48" y1="112" x2="652" y2="112" stroke="#e8e8e6" stroke-width="1"></line>
+  
+  <!-- Endpoint Section -->
+  <text x="48" y="144" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">ENDPOINT</text>
+  
+  <!-- Method Badge -->
+  <rect x="48" y="156" width="56" height="28" rx="6" fill="url(#getGradient)"></rect>
+  <text x="76" y="175" font-family="Roboto Mono, monospace" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">GET</text>
+  
+  <!-- URL Field -->
+  <rect x="112" y="156" width="516" height="28" rx="6" fill="#f8f7f4" stroke="#e8e8e6" stroke-width="1"></rect>
+  <text x="124" y="175" font-family="Roboto Mono, monospace" font-size="12" fill="#151515">https://api.atome.io/v1/elements/42</text>
+  
+  <!-- Copy Button -->
+  <rect x="564" y="160" width="56" height="20" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1"></rect>
+  <text x="592" y="174" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#374151" text-anchor="middle">Copier</text>
+  
+  <!-- Metadata Grid -->
+  <text x="48" y="220" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">MÉTADONNÉES</text>
+  
+  <!-- Grid Items -->
+  <g transform="translate(48, 236)">
+    <!-- Item 1 -->
+    <rect width="196" height="56" rx="8" fill="#f8f7f4"></rect>
+    <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">ID</text>
+    <text x="16" y="44" font-family="Roboto Mono, monospace" font-size="14" fill="#151515">atm_8f3k9m2p</text>
+    
+    <!-- Item 2 -->
+    <g transform="translate(212, 0)">
+      <rect width="196" height="56" rx="8" fill="#f8f7f4"></rect>
+      <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">Version</text>
+      <text x="16" y="44" font-family="Roboto Mono, monospace" font-size="14" fill="#151515">v2.4.1</text>
+    </g>
+    
+    <!-- Item 3 -->
+    <g transform="translate(424, 0)">
+      <rect width="180" height="56" rx="8" fill="#f8f7f4"></rect>
+      <text x="16" y="24" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">Dernière mise à jour</text>
+      <text x="16" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#151515">14 jan. 2024</text>
+    </g>
+  </g>
+  
+  <!-- Response Preview -->
+  <text x="48" y="320" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="1.5" text-transform="uppercase">APERÇU RÉPONSE</text>
+  
+  <!-- Code Block -->
+  <rect x="48" y="332" width="400" height="32" rx="6" fill="#151515"></rect>
+  <text x="64" y="352" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">{"status": "success", "data": {"id": "atm_8f3k9m2p", ...}}</text>
+  
+  <!-- Primary Action Button -->
+  <rect x="476" y="332" width="152" height="32" rx="6" fill="url(#btnGradient)"></rect>
+  <text x="552" y="352" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Tester l'endpoint</text>
+<rect class="resize-handle" x="688" y="388" width="24" height="24" fill="transparent" stroke="#f05e23" stroke-width="2" style="cursor:se-resize; pointer-events:all; opacity:0;"></rect>
+</g>
+<g id="comp_code_editor" class="kimi-comp" transform="translate(854,3566) scale(0.7571)">
+  <title>Éditeur Code</title>
+<defs>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"></feDropShadow>
+    </filter>
+    <linearGradient id="toolbarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fafafa"></stop>
+      <stop offset="100%" stop-color="#f0f0f0"></stop>
+    </linearGradient>
+    <linearGradient id="primaryBtn" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2458f3"></stop>
+      <stop offset="100%" stop-color="#1a46c4"></stop>
+    </linearGradient>
+    <linearGradient id="runBtn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"></stop>
+      <stop offset="100%" stop-color="#059669"></stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Card Background -->
+  <rect x="0" y="0" width="700" height="400" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+  
+  <!-- Header Section -->
+  <rect x="0" y="0" width="700" height="56" rx="12" fill="transparent"></rect>
+  <rect x="0" y="0" width="700" height="48" rx="12" fill="transparent"></rect>
+  <rect x="0" y="12" width="700" height="44" fill="transparent"></rect>
+  
+  <!-- Title -->
+  <text x="24" y="36" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Éditeur Code</text>
+  
+  <!-- File Tab -->
+  <rect x="160" y="12" width="120" height="32" rx="6" fill="#f8f7f4"></rect>
+  <text x="176" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#4a4a4a">main.js</text>
+  <circle cx="264" cy="28" r="4" fill="#10b981"></circle>
+  
+  <!-- Header Actions -->
+  <rect x="540" y="12" width="64" height="32" rx="6" fill="url(#primaryBtn)"></rect>
+  <text x="558" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Save</text>
+  
+  <rect x="612" y="12" width="64" height="32" rx="6" fill="url(#runBtn)"></rect>
+  <polygon points="628,22 628,34 640,28" fill="#ffffff"></polygon>
+  <text x="646" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Run</text>
+  
+  <!-- Divider -->
+  <rect x="24" y="56" width="652" height="1" fill="#e5e5e5"></rect>
+  
+  <!-- Toolbar -->
+  <rect x="24" y="68" width="652" height="40" rx="6" fill="url(#toolbarGrad)"></rect>
+  
+  <!-- Toolbar Buttons -->
+  <rect x="36" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <rect x="42" y="84" width="16" height="2" rx="1" fill="#6b7280"></rect>
+  <rect x="42" y="88" width="12" height="2" rx="1" fill="#6b7280"></rect>
+  <rect x="42" y="92" width="14" height="2" rx="1" fill="#6b7280"></rect>
+  
+  <rect x="72" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <rect x="80" y="82" width="12" height="12" rx="2" fill="none" stroke="#6b7280" stroke-width="1.5"></rect>
+  
+  <rect x="108" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <path d="M118 88 L124 82 L124 94 Z" fill="#6b7280"></path>
+  <path d="M126 88 L132 82 L132 94 Z" fill="#6b7280"></path>
+  
+  <rect x="144" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <path d="M154 88 L160 94 L166 88" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  
+  <rect x="180" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <path d="M190 94 L196 88 L202 94" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  
+  <!-- Toolbar Divider -->
+  <rect x="220" y="80" width="1" height="16" fill="#d1d5db"></rect>
+  
+  <!-- Language Selector -->
+  <rect x="232" y="76" width="80" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <text x="242" y="92" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#4a4a4a">JavaScript</text>
+  <path d="M302 88 L308 94 L314 88" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 308 91)"></path>
+  
+  <!-- Search -->
+  <rect x="580" y="76" width="84" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"></rect>
+  <circle cx="592" cy="88" r="4" fill="none" stroke="#9ca3af" stroke-width="1.5"></circle>
+  <line x1="595" y1="91" x2="598" y2="94" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"></line>
+  <text x="604" y="92" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">Search...</text>
+  
+  <!-- Code Editor Area -->
+  <rect x="24" y="116" width="652" height="268" rx="6" fill="#fafafa"></rect>
+  
+  <!-- Line Numbers -->
+  <rect x="24" y="116" width="48" height="268" rx="6" fill="#f0f0f0"></rect>
+  <text x="52" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">1</text>
+  <text x="52" y="164" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">2</text>
+  <text x="52" y="184" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">3</text>
+  <text x="52" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">4</text>
+  <text x="52" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">5</text>
+  <text x="52" y="244" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">6</text>
+  <text x="52" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">7</text>
+  <text x="52" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">8</text>
+  <text x="52" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">9</text>
+  <text x="52" y="324" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">10</text>
+  <text x="52" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">11</text>
+  <text x="52" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">12</text>
+  
+  <!-- Active Line Highlight -->
+  <rect x="72" y="152" width="604" height="20" fill="#e0e7ff"></rect>
+  
+  <!-- Code Content -->
+  <!-- Line 1: Import -->
+  <text x="84" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">import</text>
+  <text x="132" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
+  <text x="140" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">useState</text>
+  <text x="188" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">,</text>
+  <text x="196" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">useEffect</text>
+  <text x="252" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">}</text>
+  <text x="264" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">from</text>
+  <text x="296" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">'react'</text>
+  <text x="340" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">;</text>
+  
+  <!-- Line 2: Empty -->
+  
+  <!-- Line 3: Comment -->
+  <text x="84" y="184" font-family="Roboto Mono, monospace" font-size="12" fill="#6b7280">// Configuration du composant éditeur</text>
+  
+  <!-- Line 4: Const -->
+  <text x="84" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">const</text>
+  <text x="116" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">Editor</text>
+  <text x="156" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">=</text>
+  <text x="168" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">({</text>
+  <text x="180" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">initialCode</text>
+  <text x="252" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">})</text>
+  <text x="268" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=&gt;</text>
+  <text x="288" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
+  
+  <!-- Line 5: useState -->
+  <text x="100" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">const</text>
+  <text x="140" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">[</text>
+  <text x="148" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">code</text>
+  <text x="176" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">,</text>
+  <text x="188" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">setCode</text>
+  <text x="236" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">]</text>
+  <text x="248" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=</text>
+  <text x="268" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">useState</text>
+  <text x="316" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
+  <text x="324" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">initialCode</text>
+  <text x="396" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">);</text>
+  
+  <!-- Line 6: Empty -->
+  
+  <!-- Line 7: useEffect -->
+  <text x="100" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">useEffect</text>
+  <text x="156" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(()</text>
+  <text x="180" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=&gt;</text>
+  <text x="200" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
+  
+  <!-- Line 8: console.log -->
+  <text x="116" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">console</text>
+  <text x="164" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">.</text>
+  <text x="172" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">log</text>
+  <text x="196" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
+  <text x="204" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">'Éditeur initialisé'</text>
+  <text x="340" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">);</text>
+  
+  <!-- Line 9: closing brace -->
+  <text x="100" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">},</text>
+  <text x="116" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">[]);</text>
+  
+  <!-- Line 10: Empty -->
+  
+  <!-- Line 11: return -->
+  <text x="100" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">return</text>
+  <text x="144" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
+  
+  <!-- Line 12: div -->
+  <text x="116" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#dc2626">&lt;div</text>
+  <text x="156" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">className</text>
+  <text x="220" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">=</text>
+  <text x="232" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">"editor-container"</text>
+  <text x="356" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#dc2626">&gt;</text>
+  
+  <!-- Cursor -->
+  <rect x="368" y="352" width="2" height="16" fill="#2458f3">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"></animate>
+  </rect>
+  
+  <!-- Status Bar -->
+  <rect x="24" y="376" width="652" height="24" rx="0 0 6 6" fill="#f8f7f4"></rect>
+  <text x="36" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">UTF-8</text>
+  <text x="84" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">JavaScript</text>
+  <text x="156" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">Ln 12, Col 28</text>
+  <text x="580" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#10b981">● Saved</text>
+<rect class="resize-handle" x="688" y="388" width="24" height="24" fill="transparent" stroke="#f05e23" stroke-width="2" style="cursor:se-resize; pointer-events:all; opacity:0;"></rect>
+</g>
+<g id="comp_launch_button" class="kimi-comp" transform="translate(854,3880) scale(0.7571)">
+  <title>Lancer Distillation</title>
+<defs>
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"></feDropShadow>
+    </filter>
+    
+    <!-- Button Shadow -->
+    <filter id="btnShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#97ea90" flood-opacity="0.4"></feDropShadow>
+    </filter>
+    
+    <!-- Primary Gradient -->
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"></stop>
+      <stop offset="100%" stop-color="#6dd965"></stop>
+    </linearGradient>
+    
+    <!-- Success Glow -->
+    <radialGradient id="successGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#97ea90" stop-opacity="0.15"></stop>
+      <stop offset="100%" stop-color="#97ea90" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <!-- Subtle Border -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8e8e6"></stop>
+      <stop offset="100%" stop-color="#f0efec"></stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f8f7f4"></rect>
+  
+  <!-- Main Card -->
+  <rect x="60" y="50" width="580" height="300" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+  <rect x="60" y="50" width="580" height="300" rx="12" fill="none" stroke="url(#borderGrad)" stroke-width="1"></rect>
+  
+  <!-- Status Indicator -->
+  <circle cx="100" cy="85" r="6" fill="#97ea90"></circle>
+  <text x="118" y="89" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#5a5a58" letter-spacing="0.5">PRÊT À LANCER</text>
+  
+  <!-- Section Title -->
+  <text x="100" y="135" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Distillation des données</text>
+  
+  <!-- Body Text -->
+  <text x="100" y="165" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b6b69">Tous les paramètres sont configurés. Le processus extraira les</text>
+  <text x="100" y="185" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b6b69">entités clés et générera les embeddings vectoriels.</text>
+  
+  <!-- Stats Row -->
+  <g transform="translate(100, 220)">
+    <!-- Stat 1 -->
+    <rect x="0" y="0" width="140" height="56" rx="8" fill="#fafaf9"></rect>
+    <text x="16" y="22" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#9a9a98" letter-spacing="1.5">DOCUMENTS</text>
+    <text x="16" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">2,847</text>
+    
+    <!-- Stat 2 -->
+    <rect x="156" y="0" width="140" height="56" rx="8" fill="#fafaf9"></rect>
+    <text x="172" y="22" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#9a9a98" letter-spacing="1.5">CHUNKS</text>
+    <text x="172" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">14,203</text>
+    
+    <!-- Stat 3 -->
+    <rect x="312" y="0" width="140" height="56" rx="8" fill="#fafaf9"></rect>
+    <text x="328" y="22" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#9a9a98" letter-spacing="1.5">TEMPS EST.</text>
+    <text x="328" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">~4 min</text>
+  </g>
+  
+  <!-- Launch Button -->
+  <g transform="translate(100, 298)">
+    <!-- Glow Effect -->
+    <ellipse cx="180" cy="28" rx="160" ry="24" fill="url(#successGlow)"></ellipse>
+    
+    <!-- Button Background -->
+    <rect x="0" y="0" width="360" height="56" rx="9999" fill="url(#primaryGrad)" filter="url(#btnShadow)"></rect>
+    
+    <!-- Rocket Icon -->
+    <g transform="translate(118, 16)">
+      <path d="M12 2c0 0-7 4-7 11v3l-3 3h20l-3-3v-3c0-7-7-11-7-11zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-5 12h10v2H7v-2z" fill="#ffffff"></path>
+      <path d="M10 14h4v4h-4z" fill="#ffffff" opacity="0.3"></path>
+    </g>
+    
+    <!-- Button Label -->
+    <text x="202" y="34" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Lancer la distillation</text>
+  </g>
+  
+  <!-- Info Note -->
+  <text x="100" y="380" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9a9a98">Vous pourrez suivre la progression en temps réel</text>
+  
+  <!-- Decorative Element -->
+  <circle cx="580" cy="120" r="40" fill="none" stroke="#97ea90" stroke-width="1" stroke-dasharray="4 4" opacity="0.4"></circle>
+  <circle cx="580" cy="120" r="24" fill="#97ea90" opacity="0.08"></circle>
+<rect class="resize-handle" x="688" y="388" width="24" height="24" fill="transparent" stroke="#f05e23" stroke-width="2" style="cursor:se-resize; pointer-events:all; opacity:0;"></rect>
+</g>
+</g>
+
+Pourquoi est-ce <g id="n1_adaptation" class="af-organ selected" data-genome-id="n1_adaptation" data-name="Module / Adaptation / Zoom Atome" data-ui-role="dashboard" data-ux-step="5" transform="translate(-604,-446) scale(1)">
+Qui est dragable alors qu'il subsume à la fois <rect x="40" y="40" width="620" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect> 
+et 
+<rect x="50" y="50" width="600" height="300" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect>
+Et
+<rect x="0" y="0" width="700" height="400" rx="12" fill="#ffffff" filter="url(#cardShadow)"></rect> et <rect width="700" height="400" fill="#f8f7f4"></rect>
+Et non les rect sus notés. 
+`C'est valable pour toute la proposition. En fait il faut que les sonne dragages soit égale aux actuelles zone scalaires
+
+
+Dans ce type d'objets :
+<rect x="0" y="0" width="360" height="56" rx="9999" fill="url(#primaryGrad)" filter="url(#btnShadow)"></rect>
+Il faut proscrire les RX de plus de 10, dans le doc entier, il ne faut pas de rect supérieurs à 50

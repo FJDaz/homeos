@@ -1,0 +1,82 @@
+<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f9fafb"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <filter id="sh" x="-4" y="-4" width="108" height="108" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".15"/>
+    </filter>
+  </defs>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="340" height="600" fill="#f3f4f6"/>
+  <rect x="0" y="0" width="340" height="52" fill="#fff"/>
+  <text x="24" y="32" font-size="18" font-weight="600" fill="#111">Palette Extraite</text>
+
+  <!-- Palette Grid -->
+  <g id="comp_color_palette">
+    <rect x="24" y="72" width="64" height="64" rx="12" fill="#6366f1"/>
+    <rect x="100" y="72" width="64" height="64" rx="12" fill="#10b981"/>
+    <rect x="176" y="72" width="64" height="64" rx="12" fill="#ec4899"/>
+    <rect x="252" y="72" width="64" height="64" rx="12" fill="#f59e0b"/>
+    <text x="24" y="164" font-size="13" fill="#4b5563">Primary</text>
+    <text x="100" y="164" font-size="13" fill="#4b5563">Success</text>
+    <text x="176" y="164" font-size="13" fill="#4b5563">Accent</text>
+    <text x="252" y="164" font-size="13" fill="#4b5563">Warning</text>
+  </g>
+
+  <!-- Style Chips -->
+  <g id="style_chips">
+    <rect x="24" y="190" width="292" height="40" rx="20" fill="#fff" filter="url(#sh)"/>
+    <rect x="36" y="202" width="16" height="16" rx="8" fill="#6366f1"/>
+    <text x="60" y="214" font-size="14" fill="#111" font-weight="500">Rounded 12px</text>
+    <rect x="24" y="246" width="292" height="40" rx="20" fill="#fff" filter="url(#sh)"/>
+    <rect x="36" y="258" width="16" height="16" rx="8" fill="#10b981"/>
+    <text x="60" y="270" font-size="14" fill="#111" font-weight="500">Inter 14/1.5</text>
+  </g>
+
+  <!-- Preview Zones -->
+  <rect x="0" y="310" width="340" height="52" fill="#fff"/>
+  <text x="24" y="342" font-size="18" font-weight="600" fill="#111">Aperçu Zones</text>
+  <g id="comp_preview_zones">
+    <rect x="24" y="378" width="292" height="180" rx="12" fill="#e0e7ff"/>
+    <rect x="36" y="390" width="268" height="156" rx="8" fill="#fff"/>
+    <rect x="48" y="402" width="80" height="40" rx="6" fill="#dbeafe"/>
+    <rect x="136" y="402" width="80" height="40" rx="6" fill="#d1fae5"/>
+    <rect x="224" y="402" width="68" height="40" rx="6" fill="#fce7f3"/>
+    <text x="48" y="424" font-size="12" fill="#1e40af">Header</text>
+    <text x="136" y="424" font-size="12" fill="#065f46">Hero</text>
+    <text x="224" y="424" font-size="12" fill="#be185d">CTA</text>
+    <rect x="48" y="454" width="244" height="76" rx="6" fill="#f3f4f6"/>
+    <text x="60" y="474" font-size="12" fill="#6b7280">Image placeholder</text>
+  </g>
+
+  <!-- Main Pane -->
+  <rect x="352" y="0" width="648" height="600" fill="#fff"/>
+  <text x="376" y="40" font-size="24" font-weight="700" fill="#111">Upload Design</text>
+
+  <!-- Dropzone -->
+  <g id="comp_upload_dropzone">
+    <rect x="376" y="80" width="600" height="240" rx="16" fill="url(#dropGrad)" stroke="#d1d5db" stroke-width="2" stroke-dasharray="8 8"/>
+    <path d="M576 160l24 24 48-48" stroke="#6366f1" stroke-width="2" fill="none"/>
+    <path d="M600 136v56" stroke="#6366f1" stroke-width="2"/>
+    <text x="676" y="176" font-size="16" fill="#4b5563">Drop file here or <tspan fill="#6366f1" font-weight="600">browse</tspan></text>
+    <text x="676" y="200" font-size="13" fill="#9ca3af">PNG, JPG, SVG up to 10MB</text>
+  </g>
+
+  <!-- Delete Button -->
+  <g id="comp_upload_delete">
+    <rect x="376" y="344" width="128" height="40" rx="8" fill="#fee2e2"/>
+    <text x="420" y="368" font-size="14" font-weight="600" fill="#b91c1c">Delete Upload</text>
+    <path d="M404 356l-4 4 4 4m16 0l4-4-4-4" stroke="#b91c1c" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Next Button -->
+  <rect x="848" y="528" width="128" height="48" rx="10" fill="url(#btnGrad)" filter="url(#sh)"/>
+  <text x="912" y="558" font-size="15" font-weight="600" fill="#fff" text-anchor="middle">Next Step</text>
+</svg>

@@ -1,0 +1,35 @@
+{
+  "task_id": "aetherflow_test_22b",
+  "description": "Test 22B — Vérifier que le pipeline fonctionne après les modifs 3A+2B. Step unique d'analyse : lire la signature de execute_step() dans agent_router.py et confirmer la présence du paramètre system_context.",
+  "metadata": {
+    "created_at": "2026-03-03T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Test post-modifs 22B. Le pipeline doit passer system_context à execute_step() depuis orchestrator. Ce step vérifie uniquement la signature sans modifier quoi que ce soit.",
+    "mission": "TEST-22B",
+    "phase": "Phase 22 — Validation",
+    "actor": "CLAUDE"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire agent_router.py et confirmer : (1) execute_step() a bien le paramètre system_context: Optional[str] = None dans sa signature. (2) _execute_with_fallback() passe system_prompt=system_context à client.generate(). (3) Lire orchestrator.py et confirmer que _system_context est défini et passé à agent_router.execute_step(). Résumer les lignes exactes trouvées.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "system_context trouvé dans signature execute_step()",
+        "system_prompt=system_context trouvé dans appel client.generate()",
+        "_system_context trouvé dans orchestrator._execute_step()"
+      ],
+      "context": {
+        "files": [
+          "Backend/Prod/models/agent_router.py",
+          "Backend/Prod/orchestrator.py"
+        ],
+        "language": "python",
+        "auto_apply": false
+      }
+    }
+  ]
+}

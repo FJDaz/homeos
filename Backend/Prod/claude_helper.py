@@ -137,10 +137,56 @@ def get_step_output(step_id: str, output_dir: str = "output") -> Optional[str]:
     Returns:
         Step output content or None
     """
-    output_file = Path(output_dir) / "step_outputs" / f"{step_id}.txt"
+    outputs_dir = Path(output_dir) / "step_outputs"
+    
+    # Priority 1: Clean code output (no headers)
+    code_file = outputs_dir / f"{step_id}_code.txt"
+    if code_file.exists():
+        return code_file.read_text(encoding="utf-8")
+        
+    # Priority 2: Full output (with headers)
+    output_file = outputs_dir / f"{step_id}.txt"
     if output_file.exists():
         return output_file.read_text(encoding="utf-8")
+        
     return None
+
+
+def merge_step_outputs_to_file(
+    step_ids: List[str],
+    output_dir: str,
+    target_path: Path
+) -> bool:
+    """
+    Merge multiple step outputs into a single file.
+    
+    Args:
+        step_ids: List of step IDs to merge
+        output_dir: Directory where step outputs are stored
+        target_path: Path to the target file to create/overwrite
+        
+    Returns:
+        True if merge successful, False otherwise
+    """
+    parts = []
+    for step_id in step_ids:
+        content = get_step_output(step_id, output_dir)
+        if content:
+            parts.append(content)
+        else:
+            logger.warning(f"Could not find output for step {step_id} during merge")
+            
+    if parts:
+        try:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            target_path.write_text("\n\n".join(parts), encoding="utf-8")
+            logger.info(f"Merged {len(parts)} step outputs into {target_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to write merged output to {target_path}: {e}")
+            return False
+            
+    return False
 
 
 def _extract_code_blocks(step_output: str) -> List[Tuple[str, str]]:
@@ -218,26 +264,51 @@ def _determine_file_extension(language: str) -> str:
 
 def split_structure_and_code(output: str) -> Tuple[str, str]:
     """
-    Split output into structure (explanations) and code parts.
-
-    Args:
-        output: Raw output containing both structure and code
-
+    Split output into structure (explanations, file trees) and code parts.
+    
     Returns:
         Tuple of (structure_part, code_part)
     """
-    code_blocks = _extract_code_blocks(output)
+    if not output or output.isspace():
+        return ("", output)
 
-    if not code_blocks:
-        # No code found, all is structure
-        return (output, "")
-
-    # Combine all code blocks
-    code_part = "\n\n".join(code for _, code in code_blocks)
-
-    # Structure is everything except code blocks
-    structure_part = re.sub(r'```(\w+)?\n.*?```', '', output, flags=re.DOTALL).strip()
-
+    # Extract explicit structure blocks
+    struct_parts = []
+    remaining_output = output
+    
+    # Find ```file_tree ... ``` and ```structure ... ```
+    pattern = r'```(?:file_tree|structure)\n(.*?)```'
+    matches = list(re.finditer(pattern, remaining_output, re.DOTALL))
+    for match in reversed(matches): # Work backwards to avoid offset issues
+        content = match.group(1).strip()
+        struct_parts.insert(0, content)
+        remaining_output = remaining_output[:match.start()] + remaining_output[match.end():]
+        
+    # Find implicit tree lines (├──, │, └──)
+    lines = remaining_output.splitlines()
+    tree_regex = re.compile(r'[├──│└──]')
+    tree_lines_indices = [i for i, line in enumerate(lines) if tree_regex.search(line)]
+    
+    if len(tree_lines_indices) >= 2:
+        # Extract tree lines
+        final_lines = []
+        extracted_tree = []
+        for i, line in enumerate(lines):
+            if i in tree_lines_indices:
+                extracted_tree.append(line)
+            else:
+                final_lines.append(line)
+        struct_parts.extend(extracted_tree)
+        # Use a temporary string join to avoid joining empty lines if they were structure
+        remaining_output = "\n".join(final_lines)
+        
+    structure_part = "\n".join(struct_parts).strip()
+    code_part = remaining_output.strip() if structure_part else output
+    
+    # If no structure found, structure_part is empty and code_part is full output
+    if not structure_part:
+        return ("", output)
+        
     return (structure_part, code_part)
 
 

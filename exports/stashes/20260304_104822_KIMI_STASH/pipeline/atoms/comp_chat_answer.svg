@@ -1,0 +1,67 @@
+<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="sullivanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#6dd485"/>
+    </linearGradient>
+    <linearGradient id="selectedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#7dd87a"/>
+    </linearGradient>
+    <linearGradient id="buttonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#0d3d8c"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="520" fill="#f8f7f4"/>
+  
+  <!-- Main Card -->
+  <rect x="20" y="20" width="360" height="480" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <rect x="20" y="20" width="360" height="4" rx="12" fill="url(#sullivanGradient)"/>
+  
+  <!-- Avatar & Name -->
+  <circle cx="56" cy="56" r="20" fill="url(#sullivanGradient)"/>
+  <text x="56" y="62" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">S</text>
+  
+  <text x="88" y="52" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#151515">Sullivan</text>
+  <text x="88" y="68" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Pose une question</text>
+  
+  <!-- Question Bubble -->
+  <rect x="44" y="88" width="312" height="72" rx="12" fill="#f8f7f4"/>
+  <text x="60" y="114" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#151515">« Comment préfères-tu recevoir tes</text>
+  <text x="60" y="134" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#151515">notifications de nouveaux messages ? »</text>
+  
+  <!-- Section Title -->
+  <text x="44" y="192" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Votre réponse</text>
+  <text x="44" y="212" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Sélectionnez une option ci-dessous</text>
+  
+  <!-- Option 1: Selected -->
+  <rect x="44" y="232" width="312" height="64" rx="8" fill="url(#selectedGradient)" fill-opacity="0.15" stroke="#97ea90" stroke-width="2"/>
+  <circle cx="76" cy="264" r="16" fill="#97ea90"/>
+  <path d="M70 264 L74 268 L82 260" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="104" y="260" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Notification push</text>
+  <text x="104" y="278" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#4b5563">Alerte instantanée sur mobile</text>
+  
+  <!-- Option 2 -->
+  <rect x="44" y="308" width="312" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <circle cx="76" cy="340" r="16" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="104" y="336" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Email récapitulatif</text>
+  <text x="104" y="354" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Résumé quotidien à 9h</text>
+  
+  <!-- Option 3 -->
+  <rect x="44" y="384" width="312" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <circle cx="76" cy="416" r="16" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="104" y="412" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Pas de notification</text>
+  <text x="104" y="430" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Consulter à ma convenance</text>
+  
+  <!-- Submit Button -->
+  <rect x="44" y="468" width="312" height="44" rx="6" fill="url(#buttonGradient)"/>
+  <text x="200" y="496" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">Confirmer ma réponse</text>
+</svg>

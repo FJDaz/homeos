@@ -1,0 +1,24 @@
+<svg viewBox="0 0 360 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="sd" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#4d7fff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Header bar -->
+  <rect width="360" height="80" fill="#0D0E13"/>
+  <line x1="0" y1="79" x2="360" y2="79" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Logo / title -->
+  <text x="24" y="48" font-family="Plus Jakarta Sans, sans-serif" font-size="22" fill="#ffffff" font-weight="700">Zoom Out</text>
+
+  <!-- Remonter button -->
+  <g filter="url(#sd)">
+    <rect x="224" y="20" width="112" height="40" rx="9999" fill="url(#btnGrad)"/>
+  </g>
+  <text x="280" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#ffffff" font-weight="600" text-anchor="middle">Remonter</text>
+</svg>

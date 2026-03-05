@@ -1,8 +1,8 @@
-# PRD AETHERFLOW — À jour (v2.2)
+# PRD AETHERFLOW — À jour (v2.3)
 
 **Product Requirements Document** : AETHERFLOW — Orchestrateur d’agents IA pour le développement logiciel.  
-**Version** : 2.2.0  
-**Dernière mise à jour** : Janvier 2026  
+**Version** : 2.3.0  
+**Dernière mise à jour** : Mars 2026  
 
 ---
 
@@ -11,12 +11,15 @@
 ### 1.1 Nom et positionnement
 
 - **Nom produit** : AETHERFLOW (nom interne) / Homeos (nom commercial).
-- **Rôle** : Orchestrateur d’exécution de plans de développement : exécute des plans JSON (génération de code, refactoring) via des LLM multi-providers, applique le code généré, et propose des workflows de validation et de correction.
+- **Rôle** : Orchestrateur d’exécution de plans de développement. Évolue vers un moteur **Standalone BKD** (Backend Development) pour la construction de code robuste et "Pristine".
 
-### 1.2 Principe d’orchestration
+### 1.2 Principe d’orchestration (Deep Flow)
 
-- **Claude Code (dans Cursor)** = architecte : produit les plans (`plan.json`), appelle AETHERFLOW, applique les sorties aux fichiers sources.
-- **AETHERFLOW** = exécuteur : lit le plan, appelle les providers (DeepSeek, Gemini, Groq, Codestral) par step, gère cache, RAG, métriques, et workflows (PROTO, PROD, VerifyFix, Run-and-Fix).
+- **Deep Flow Architecture** :
+    - **Raisonnement (DeepSeek-R1)** : Analyse stratégique et architecturale initiale.
+    - **Écriture (Fast Models)** : Génération itérative du code via Codestral, Groq ou DeepSeek-V3.
+- **Claude Code (dans Cursor)** = architecte : produit les plans (`plan.json`).
+- **AETHERFLOW** = exécuteur : lit le plan, gère le cycle de vie, le "Self-Healing" et la persistance.
 - **Aucune Claude API** dans le cœur : la validation et le contrôle sont faits par Claude Code ou par des modes DOUBLE-CHECK (ex. Gemini) dans AETHERFLOW.
 
 ### 1.3 Objectifs clés
@@ -67,7 +70,12 @@
 
 - **Répertoire de sortie** : `step_outputs/` (fichiers `step_X.txt`, `step_X_code.txt`, `step_X_structure.md` selon split structure/code).
 - **Métriques** : temps, tokens, coût par step et global, succès/échec.
-- **Application** : faite par le workflow (PROTO/PROD) ou par Claude Code via `apply_generated_code()` (claude_helper).
+- **Application** : fait par le `ApplyEngine` (fusionnant surgical, overwrite et fallback) piloté par l'Orchestrateur.
+
+### 2.7 Asymétrie FAST/BUILD (Apply Logic)
+
+- **FAST Mode** : Le code généré est considéré comme un brouillon (draft). Il est sauvegardé dans `step_outputs/` mais n'est **jamais** appliqué chirurgicalement aux fichiers source originaux pour éviter toute corruption accidentelle lors de la phase d'exploration. L'application se fait par écrasement si explicitement demandé ou via Claude Code.
+- **BUILD Mode** : Le code est optimisé pour la production. Le mode **Surgical Edit** est activé par défaut pour les fichiers Python, permettant des modifications précises via AST. En cas d'échec surgical, un fallback vers l'extraction de blocs de code (Smart Overwrite) est tenté avant de recourir à la création de fichiers `.generated` pour revue manuelle.
 
 ---
 
@@ -99,10 +107,14 @@
 - **Helper** : `Backend.Prod.claude_helper` — `execute_plan_cli()`, `get_step_output()`, `apply_generated_code()`, `generate_plan_with_planner()`.
 - **Règle** : AETHERFLOW utilisé pour l’**implémentation** (génération de code) ; vérification / review / refactoring manuel par Claude Code directement.
 
-### 4.4 Sullivan & Genome
+### 4.4 Sullivan & Genome (Stenciler V3)
 
-- **Genome** : représentation du produit (metadata, topology, endpoints) ; génération via API ou CLI `genome`.
-- **Sullivan** : kernel de génération frontend (designer à partir d’image, build à partir du genome, dev mode analyse backend, plan-screens). Utilise Gemini (design, principes) et le builder pour produire du HTML/Studio.
+- **Genome** : Source de vérité unique (metadata, topology, endpoints). Représentation "Pristine" du produit.
+- **Stenciler V3** : Module Illustrator-like pour la manipulation directe de l'UI.
+    - **Illustrator Mode** : Édition interactive des primitives SVG au clic.
+    - **Bottom-Up Rendering** : Priorité aux wireframes métiers (`WireframeLibrary`) sur le rendu générique.
+    - **Persistance** : Synchronisation temps réel entre modifications graphiques (SVG) et données Genome.
+- **Sullivan** : Build à partir du genome, dev mode analyse backend. Intégré au Stenciler pour la prévisualisation contextualisée.
 
 ---
 
@@ -127,10 +139,13 @@
 
 ## 7. Roadmap (résumé)
 
-- **Actuel (v2.2)** : PROTO, PROD, VerifyFix, Run-and-Fix, Surgical Edit, multi-provider, RAG, Sullivan/Genome/Studio.
-- **Court terme** : stabilisation des tests (imports Backend.Prod.*), documentation des workflows, option `pytest pythonpath` pour les tests.
-- **Moyen terme** : mode **agentique** (boucle LLM + outils pendant un step) — voir `docs/05-operations/AGENTIFICATION_AETHERFLOW.md`.
-- **Long terme** : tool calling natif (read_file, search_replace, run_terminal restreint), intégration CI/CD, multi-projets.
+- **Actuel (v2.3)** : Phase 14 (Stenciler V3), Write-back génome, Illustrator Mode, Palette Stenciler, Deep Flow (R1).
+- **Court terme** : 
+    - Mission 14C (Copie/Duplication).
+    - Mission 14D (Sullivan Embedded - La Valise).
+    - Nettoyage des interfaces (suppression mentions HTTP/Dev).
+- **Moyen terme** : Mode **agentique** via LangGraph (Self-Healing autonome).
+- **Long terme** : Tool calling natif, intégration CI/CD, multi-projets.
 
 ---
 
@@ -146,4 +161,4 @@
 
 ---
 
-*Statut : PRD à jour reflétant l’état de AETHERFLOW v2.2 (janvier 2026).*
+*Statut : PRD à jour reflétant l’état de AETHERFLOW v2.3 (mars 2026).*

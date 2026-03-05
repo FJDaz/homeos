@@ -1,0 +1,99 @@
+<svg viewBox="0 0 340 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Drop shadow filter -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    
+    <!-- Gradient for accent button -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#f05e23"/>
+    </linearGradient>
+    
+    <!-- Subtle gradient for drop zone -->
+    <linearGradient id="zoneGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8f7f4"/>
+    </linearGradient>
+    
+    <!-- Dashed border pattern -->
+    <pattern id="dashedPattern" patternUnits="userSpaceOnUse" width="8" height="8">
+      <rect width="8" height="8" fill="none"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="340" height="500" fill="#f8f7f4"/>
+  
+  <!-- Main Card -->
+  <rect x="20" y="20" width="300" height="460" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Section Title -->
+  <text x="40" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#151515">Upload Files</text>
+  
+  <!-- Subtitle -->
+  <text x="40" y="82" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Drag and drop or browse to upload</text>
+  
+  <!-- Drag & Drop Zone -->
+  <rect x="40" y="105" width="260" height="200" rx="8" fill="url(#zoneGradient)" stroke="#ffd548" stroke-width="2" stroke-dasharray="8,6"/>
+  
+  <!-- Folder Icon -->
+  <g transform="translate(145, 155)">
+    <!-- Folder back -->
+    <path d="M5 8 L15 8 L18 5 L45 5 L45 15 L5 15 Z" fill="#ffd548" opacity="0.3"/>
+    <!-- Folder body -->
+    <rect x="0" y="10" width="50" height="35" rx="4" fill="#ffd548"/>
+    <!-- Folder tab -->
+    <path d="M0 14 L50 14 L50 42 C50 44.2 48.2 46 46 46 L4 46 C1.8 46 0 44.2 0 42 Z" fill="#f05e23" opacity="0.9"/>
+    <!-- Inner folder -->
+    <rect x="4" y="18" width="42" height="24" rx="2" fill="#ffd548" opacity="0.4"/>
+    <!-- Upload arrow -->
+    <path d="M25 24 L25 36 M25 24 L20 29 M25 24 L30 29" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  
+  <!-- Zone Label -->
+  <text x="170" y="215" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515" text-anchor="middle">Drop files here</text>
+  
+  <!-- Zone Sublabel -->
+  <text x="170" y="235" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">or click to browse</text>
+  
+  <!-- File Types -->
+  <text x="170" y="265" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af" text-anchor="middle">Supports: JPG, PNG, PDF, SVG</text>
+  
+  <!-- Browse Button -->
+  <rect x="110" y="285" width="120" height="36" rx="6" fill="url(#accentGradient)"/>
+  <text x="170" y="308" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Browse Files</text>
+  
+  <!-- Divider -->
+  <line x1="40" y1="330" x2="300" y2="330" stroke="#e5e7eb" stroke-width="1"/>
+  
+  <!-- Recent Uploads Label -->
+  <text x="40" y="360" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="12" fill="#151515" letter-spacing="0.5">RECENT</text>
+  
+  <!-- File Item 1 -->
+  <rect x="40" y="375" width="260" height="48" rx="6" fill="#f8f7f4"/>
+  <g transform="translate(52, 387)">
+    <!-- File icon -->
+    <rect x="0" y="0" width="24" height="24" rx="4" fill="#ffd548" opacity="0.2"/>
+    <text x="12" y="17" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#f05e23" text-anchor="middle">PDF</text>
+  </g>
+  <text x="84" y="402" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#151515">contract_v2.pdf</text>
+  <text x="84" y="416" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">2.4 MB • Just now</text>
+  <!-- Success indicator -->
+  <circle cx="280" cy="399" r="8" fill="#97ea90"/>
+  <path d="M276 399 L279 402 L284 396" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- File Item 2 -->
+  <rect x="40" y="431" width="260" height="48" rx="6" fill="#f8f7f4"/>
+  <g transform="translate(52, 443)">
+    <!-- Image icon -->
+    <rect x="0" y="0" width="24" height="24" rx="4" fill="#1258ca" opacity="0.15"/>
+    <text x="12" y="17" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#1258ca" text-anchor="middle">IMG</text>
+  </g>
+  <text x="84" y="458" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#151515">dashboard_mock.png</text>
+  <text x="84" y="472" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">1.8 MB • 2 min ago</text>
+  <!-- Success indicator -->
+  <circle cx="280" cy="455" r="8" fill="#97ea90"/>
+  <path d="M276 455 L279 458 L284 452" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

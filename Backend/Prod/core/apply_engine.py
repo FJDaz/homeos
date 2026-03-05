@@ -7,6 +7,7 @@ from loguru import logger
 from datetime import datetime
 
 from .surgical_editor import SurgicalEditor, SurgicalInstructionParser
+from .surgical_editor_js import SurgicalApplierJS, ASTParserJS
 from .post_apply_validator import validate_after_apply
 from ..claude_helper import _extract_code_blocks
 
@@ -70,7 +71,7 @@ class ApplyEngine:
             method_used = "none"
 
             # Strategy Selection
-            if surgical_mode and file_path.suffix == ".py" and step_type == "refactoring" and file_path.exists():
+            if surgical_mode and file_path.suffix in (".py", ".js") and step_type == "refactoring" and file_path.exists():
                 # TRY SURGICAL
                 success, method_used = self._apply_surgical(file_path, output)
             
@@ -113,19 +114,42 @@ class ApplyEngine:
             return False, "no_surgical_json"
 
         try:
-            editor = SurgicalEditor(file_path)
-            if not editor.prepare():
-                return False, "ast_parse_failed"
-
-            success, modified_code, error_msg = editor.apply_instructions(output)
-            if success and modified_code:
-                # Backup before write
-                self._create_backup(file_path)
-                file_path.write_text(modified_code, encoding='utf-8')
-                return True, "surgical"
+            if file_path.suffix == ".js":
+                # Use JS Editor
+                parser = ASTParserJS(file_path)
+                if not parser.parse():
+                    return False, "ast_parse_failed_js"
+                applier = SurgicalApplierJS(file_path, parser)
+                try:
+                    operations, parse_err = SurgicalInstructionParser.parse_instructions(output)
+                    if not operations:
+                         return False, f"instruction_parse_failed: {parse_err}"
+                    success, result_content = applier.apply_operations(operations)
+                    if success:
+                        self._create_backup(file_path)
+                        file_path.write_text(result_content, encoding='utf-8')
+                        return True, "surgical_js"
+                    else:
+                        logger.debug(f"Surgical JS apply failed for {file_path}: {result_content}")
+                        return False, f"surgical_js_failed: {result_content}"
+                except Exception as e:
+                    logger.error(f"Error during surgical JS apply for {file_path}: {e}")
+                    return False, "surgical_js_exception"
             else:
-                logger.debug(f"Surgical apply failed for {file_path}: {error_msg}")
-                return False, f"surgical_failed: {error_msg}"
+                # Use Python Editor
+                editor = SurgicalEditor(file_path)
+                if not editor.prepare():
+                    return False, "ast_parse_failed"
+
+                success, modified_code, error_msg = editor.apply_instructions(output)
+                if success and modified_code:
+                    # Backup before write
+                    self._create_backup(file_path)
+                    file_path.write_text(modified_code, encoding='utf-8')
+                    return True, "surgical"
+                else:
+                    logger.debug(f"Surgical apply failed for {file_path}: {error_msg}")
+                    return False, f"surgical_failed: {error_msg}"
         except Exception as e:
             logger.error(f"Error during surgical apply for {file_path}: {e}")
             return False, "surgical_exception"

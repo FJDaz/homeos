@@ -1,0 +1,101 @@
+{
+  "task_id": "stenciler_v3_14f_p4_primoverlay",
+  "description": "Mission 14F-P4 (TEST CLAUDE) — Dans Canvas.feature.js, méthode _exitGroupEdit(), écrire le SVG modifié dans le génome (genomeNode.svg_payload) pour la persistence cross-session des primitives éditées en Mode Illustrateur. Actuellement PrimOverlay sauve en RAM uniquement — perdu au reload.",
+  "metadata": {
+    "created_at": "2026-03-01T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Stenciler V3 — Mode Illustrateur (11A). _exitGroupEdit() dans Canvas.feature.js : après PrimOverlay.set(nodeId, svg, h, w), ajouter l'écriture dans le génome via this._findInGenome(nodeId) → genomeNode.svg_payload = content.innerHTML + genomeNode.svg_h = bb.height. Le protocole svg_payload est déjà supporté par renderAtom dans AtomRenderer.js (détecte nodeData.svg_payload → retourne {svg, h, w} directement).",
+    "mission": "14F-P4",
+    "phase": "Phase 14 — Canvas Illustrateur",
+    "actor": "CLAUDE",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire _exitGroupEdit() dans Canvas.feature.js (autour de L.995-1016). Confirmer : (1) PrimOverlay.set(nodeId, content.innerHTML, bb.height, bb.width) est appelé, (2) this._findInGenome existe et cherche dans this.genome.n0_phases, (3) AtomRenderer.js supporte déjà nodeData.svg_payload. Identifier la ligne exacte où insérer l'écriture génome après PrimOverlay.set.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 200,
+      "dependencies": [],
+      "validation_criteria": [
+        "PrimOverlay.set(nodeId, ...) appelé dans _exitGroupEdit",
+        "this._findInGenome(id) existe dans Canvas.feature.js",
+        "AtomRenderer.js : nodeData.svg_payload déclenche retour direct {svg, h, w}"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js",
+          "Frontend/3. STENCILER/static/js/AtomRenderer.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "PATCH _exitGroupEdit — Après la ligne PrimOverlay.set(nodeId, content.innerHTML, bb.height, bb.width), ajouter : (1) const genomeNode = this._findInGenome(nodeId); (2) if (genomeNode) { genomeNode.svg_payload = content.innerHTML; genomeNode.svg_h = Math.round(bb.height) || 80; }. Ne pas ajouter de genome:updated supplémentaire car _renderCorps(corpsId) dispatche déjà genome:updated. Préserver le reste de _exitGroupEdit identique.",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 300,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "_findInGenome(nodeId) appelé après PrimOverlay.set",
+        "genomeNode.svg_payload = content.innerHTML si genomeNode trouvé",
+        "genomeNode.svg_h = Math.round(bb.height) || 80",
+        "if (genomeNode) garde — pas de crash si nœud non trouvé",
+        "Reste de _exitGroupEdit identique (drillStack reset, _renderCorps, groupEditMode = false)"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false,
+        "patch": {
+          "position": "replace",
+          "marker_start": "        // Capture SVG modifié + dimensions → PrimOverlay (14B)",
+          "marker_end": "        // Re-render N0 complet",
+          "idempotent": true
+        }
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "VALIDATION — Vérifier que le patch est correct : (1) PrimOverlay.set toujours appelé en premier, (2) _findInGenome(nodeId) appelé juste après, (3) if (genomeNode) guard présent, (4) genomeNode.svg_payload et svg_h assignés, (5) _renderCorps(corpsId) toujours appelé après (cascade re-render), (6) groupEditMode = false toujours à la fin.",
+      "type": "analysis",
+      "complexity": 0.1,
+      "estimated_tokens": 150,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "PrimOverlay.set avant _findInGenome",
+        "guard if (genomeNode) présent",
+        "svg_payload et svg_h assignés sur genomeNode",
+        "_renderCorps et groupEditMode = false préservés"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/Canvas.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "Mode Illustrateur → éditer primitive → exit → Cmd+Shift+R → primitive conservée (svg_payload dans génome)",
+      "PrimOverlay.get() continue de fonctionner dans la session courante (pas cassé)",
+      "Aucune régression sur _renderCorps cascade après _exitGroupEdit"
+    ],
+    "constraints": [
+      "Canvas.feature.js : fichier unique modifié",
+      "Seule _exitGroupEdit modifiée — aucune autre méthode touchée",
+      "Aucune modification à AtomRenderer.js (svg_payload déjà supporté)"
+    ],
+    "rapport_dans_roadmap": "Remplacer la section Mission 14F-P4-CLAUDE-TEST dans ROADMAP.md par le rapport d'exécution."
+  }
+}

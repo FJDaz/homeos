@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 100">
+  <!-- Frontend Card - Style Hype Minimaliste -->
+  <defs>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#5A6B7C" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  
+  <!-- Card background avec ombre douce -->
+  <rect x="0" y="0" width="280" height="100" rx="8" 
+        fill="#fafafa" stroke="#e2e8f0" stroke-width="1"
+        filter="url(#soft-shadow)"/>
+  
+  <!-- Bandeau latéral couleur Frontend (a8dcc9) -->
+  <rect x="0" y="0" width="4" height="100" rx="8" fill="#a8dcc9"/>
+  <rect x="0" y="8" width="4" height="84" fill="#a8dcc9"/>
+  
+  <!-- Badge "frontend" -->
+  <rect x="16" y="12" width="58" height="16" rx="8" fill="#a8dcc9" opacity="0.15"/>
+  <text x="45" y="23" text-anchor="middle" font-size="8" font-weight="700" fill="#5A6B7C" font-family="system-ui">frontend</text>
+  
+  <!-- Titre de l'organe -->
+  <text x="16" y="52" font-size="16" font-weight="700" fill="#1a1a1a" font-family="system-ui">présentation</text>
+  
+  <!-- Sous-titre/description -->
+  <text x="16" y="72" font-size="11" font-weight="400" fill="#5A6B7C" font-family="system-ui">architecture &amp; wireframes</text>
+  
+  <!-- Nombre d'atomes (pill) -->
+  <rect x="16" y="82" width="28" height="14" rx="7" fill="#f1f5f9"/>
+  <text x="30" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#9B8B9E" font-family="system-ui">12</text>
+  
+  <!-- Icône flèche (subtile) -->
+  <path d="M 250 50 L 258 55 L 250 60" fill="none" stroke="#C4A589" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+</svg>

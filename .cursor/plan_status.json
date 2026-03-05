@@ -1,21 +1,20 @@
 {
-  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/plans/repair/plan_phase2_range.json",
-  "plan_id": "repair_phase2_range_replacement",
+  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/plans/sullivan/plan_21e_topology_renderer.json",
+  "plan_id": "sullivan_21e_topology_renderer",
   "workflow_type": "PROD",
-  "phase": "BUILD",
+  "phase": "validation",
   "batch_index": 1,
   "total_batches": 1,
   "completed_steps": [],
   "current_step_ids": [
-    "step_2",
     "step_1"
   ],
-  "total_steps": 2,
+  "total_steps": 1,
   "status": "running",
   "started_at": "2025-01-30T14:00:00+00:00",
-  "updated_at": "2026-02-21T13:46:19.792825+00:00",
-  "total_time_ms": 99.12700000000001,
-  "total_cost_usd": 0.0,
+  "updated_at": "2026-03-03T20:21:44.332472+00:00",
+  "total_time_ms": 145246.93899999998,
+  "total_cost_usd": 0.029283959999999998,
   "error_message": "cannot import name 'apply_plan_outputs' from 'Prod.claude_helper' (/Users/francois-jeandazin/AETHERFLOW/Backend/Prod/claude_helper.py)",
   "error": "'NoneType' object has no attribute 'success'"
 }

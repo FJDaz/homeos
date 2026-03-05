@@ -1,0 +1,56 @@
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Card shadow -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    
+    <!-- Button gradient -->
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#d94d1a"/>
+    </linearGradient>
+    
+    <!-- Button hover state gradient -->
+    <linearGradient id="btnGradientHover" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b2e"/>
+      <stop offset="100%" stop-color="#e8551f"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main card background -->
+  <rect x="20" y="20" width="560" height="240" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Section label -->
+  <text x="50" y="55" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">ACTIONS</text>
+  
+  <!-- Section title -->
+  <text x="50" y="90" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#111827">Gérer votre session</text>
+  
+  <!-- Body text -->
+  <text x="50" y="120" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b7280">Recommencez une nouvelle session pour réinitialiser vos données</text>
+  <text x="50" y="140" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b7280">et repartir de zéro avec un environnement propre.</text>
+  
+  <!-- Button container with subtle hover area -->
+  <rect x="50" y="170" width="164" height="56" rx="8" fill="transparent"/>
+  
+  <!-- Main button -->
+  <rect x="50" y="170" width="164" height="48" rx="6" fill="url(#btnGradient)"/>
+  
+  <!-- Refresh icon -->
+  <g transform="translate(70, 186)">
+    <path d="M4 8a6 6 0 0 1 6-6 6 6 0 0 1 6 6c0 1.5-.5 2.8-1.4 3.8" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M20 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6c0-1.5.5-2.8 1.4-3.8" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M14.5 4.5L16 2l2.5 2.5" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M9.5 19.5L8 22l-2.5-2.5" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Button label -->
+  <text x="102" y="200" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff">Nouvelle session</text>
+  
+  <!-- Status indicator dot -->
+  <circle cx="540" cy="55" r="6" fill="#97ea90"/>
+  
+  <!-- Status text -->
+  <text x="526" y="80" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280" text-anchor="end">Session active</text>
+</svg>

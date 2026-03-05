@@ -1,5 +1,6 @@
-"""KIMI (Moonshot) client for gate-keeper validation."""
-import httpx
+"""KIMI (Moonshot) client — OpenAI-compatible SDK."""
+import asyncio
+import json
 from typing import Optional
 from loguru import logger
 
@@ -7,27 +8,51 @@ from ..config.settings import settings
 
 
 class KimiClient:
-    """
-    Client for KIMI (Moonshot) API.
-
-    Used as gate-keeper to validate LLM output before apply.
-    Fast and cheap validation layer.
-    """
+    """Client KIMI via OpenAI SDK. base_url = https://api.moonshot.ai/v1"""
 
     def __init__(self):
-        """Initialize KIMI client."""
         self.api_key = settings.kimi_api_key
-        self.api_url = settings.kimi_api_url
-        self.model = settings.kimi_model
-        self.timeout = 30  # Short timeout for validation
-
+        self.base_url = settings.kimi_api_url  # https://api.moonshot.ai/v1
+        self.model = settings.kimi_model       # kimi-k2-turbo-preview
         if not self.api_key:
             logger.warning("KIMI API key not configured")
 
     @property
     def available(self) -> bool:
-        """Check if KIMI client is available."""
         return bool(self.api_key)
+
+    def _get_client(self):
+        """Return an OpenAI client pointed at Moonshot API."""
+        from openai import OpenAI
+        return OpenAI(base_url=self.base_url, api_key=self.api_key)
+
+    async def generate_svg(
+        self,
+        prompt: str,
+        system_prompt: str = "You are a professional SVG UI designer specializing in high-fidelity wireframes."
+    ) -> Optional[str]:
+        """Generate an SVG string from a prompt. Returns raw SVG string or None."""
+        if not self.available:
+            return None
+        try:
+            client = self._get_client()
+            response = await asyncio.to_thread(
+                client.chat.completions.create,
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=16000,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            content = response.choices[0].message.content or ""
+            if "<svg" in content:
+                return content[content.find("<svg"):content.rfind("</svg>") + 6]
+            return None
+        except Exception as e:
+            logger.error(f"KIMI generate_svg error: {e}")
+            return None
 
     async def validate_output(
         self,
@@ -35,292 +60,128 @@ class KimiClient:
         expected_language: str = "python",
         step_type: str = "code_generation"
     ) -> dict:
-        """
-        Validate LLM output before apply.
-
-        Args:
-            output: The LLM output to validate
-            expected_language: Expected code language (python, html, javascript, etc.)
-            step_type: Type of step (code_generation, patch, refactoring, analysis)
-
-        Returns:
-            dict with:
-                - valid: bool - True if output looks safe to apply
-                - reason: str - Explanation if invalid
-                - detected_issue: str|None - Type of issue detected
-        """
+        """Gate-keeper validation. Returns {valid, reason, detected_issue}."""
         if not self.available:
-            return {"valid": True, "reason": "KIMI not available, skipping validation", "detected_issue": None}
+            return {"valid": True, "reason": "KIMI not available", "detected_issue": None}
 
-        # Quick heuristic check first (no API call needed for obvious issues)
-        quick_check = self._quick_heuristic_check(output, expected_language)
-        if not quick_check["valid"]:
-            return quick_check
+        quick = self._quick_heuristic_check(output, expected_language)
+        if not quick["valid"]:
+            return quick
 
-        # If heuristic passed, use KIMI for deeper validation
         try:
+            client = self._get_client()
             prompt = self._build_validation_prompt(output, expected_language, step_type)
-
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    self.api_url,
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": [
-                            {"role": "system", "content": "You are a code validation assistant. Respond with JSON only."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.1,
-                        "max_tokens": 200
-                    }
-                )
-
-                if response.status_code != 200:
-                    logger.warning(f"KIMI validation failed: {response.status_code}")
-                    return {"valid": True, "reason": "KIMI API error, allowing through", "detected_issue": None}
-
-                result = response.json()
-                content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-                return self._parse_validation_response(content)
-
+            response = await asyncio.to_thread(
+                client.chat.completions.create,
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a code validation assistant. Respond with JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=2000,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            content = response.choices[0].message.content or ""
+            return self._parse_validation_response(content)
         except Exception as e:
             logger.warning(f"KIMI validation error: {e}")
-            return {"valid": True, "reason": f"KIMI error: {e}, allowing through", "detected_issue": None}
+            return {"valid": True, "reason": f"KIMI error: {e}", "detected_issue": None}
 
     def _quick_heuristic_check(self, output: str, expected_language: str) -> dict:
-        """
-        Quick heuristic check without API call.
-        Catches obvious issues like JSON wrapper instead of code.
-        """
         stripped = output.strip()
-
-        # Check for JSON "operations" wrapper (common LLM mistake)
-        toxic_patterns = [
-            '{"operations":',
-            '{"files":',
-            '{"changes":',
-            '"operation":',
-            '"file_path":',
-            '{"type": "',
-        ]
-
-        for pattern in toxic_patterns:
-            if pattern in stripped[:500]:  # Check first 500 chars
+        toxic = ['{"operations":', '{"files":', '{"changes":', '"operation":', '"file_path":']
+        for p in toxic:
+            if p in stripped[:500]:
                 return {
                     "valid": False,
-                    "reason": f"Output looks like JSON wrapper instead of {expected_language} code",
+                    "reason": f"JSON wrapper instead of {expected_language}",
                     "detected_issue": "json_wrapper"
                 }
-
-        # Check if output starts with JSON when expecting code
-        if expected_language in ["python", "html", "javascript", "typescript"]:
-            if stripped.startswith("{") and '"' in stripped[:50]:
-                # Could be JSON instead of code
-                return {
-                    "valid": False,
-                    "reason": f"Output starts with JSON but expected {expected_language}",
-                    "detected_issue": "json_instead_of_code"
-                }
-
-        # Check for empty or whitespace-only output
         if not stripped:
-            return {
-                "valid": False,
-                "reason": "Output is empty",
-                "detected_issue": "empty_output"
-            }
-
-        return {"valid": True, "reason": "Heuristic check passed", "detected_issue": None}
+            return {"valid": False, "reason": "Empty output", "detected_issue": "empty_output"}
+        return {"valid": True, "reason": "Heuristic passed", "detected_issue": None}
 
     def _build_validation_prompt(self, output: str, expected_language: str, step_type: str) -> str:
-        """Build the validation prompt for KIMI."""
-        # Truncate output if too long (KIMI is for quick validation)
-        truncated = output[:2000] if len(output) > 2000 else output
-
-        return f"""Validate this LLM output before applying it to a file.
-
-Expected: {expected_language} code for step type "{step_type}"
-
-Output to validate:
-```
-{truncated}
-```
-
-Check for these issues:
-1. Is this actual {expected_language} code, or a JSON wrapper/metadata?
-2. Does it contain harmful patterns (infinite loops, rm -rf, etc.)?
-3. Is it syntactically reasonable for {expected_language}?
-
-Respond with JSON only:
-{{"valid": true/false, "reason": "brief explanation", "detected_issue": null or "issue_type"}}"""
+        truncated = output[:2000]
+        return (
+            f"Validate this LLM output before applying to a file.\n"
+            f"Expected: {expected_language} code for step type \"{step_type}\"\n"
+            f"Output:\n```\n{truncated}\n```\n"
+            f"Check: is this actual code or a JSON wrapper? Any harmful patterns?\n"
+            f'Respond JSON only: {{"valid": true/false, "reason": "...", "detected_issue": null}}'
+        )
 
     def _parse_validation_response(self, content: str) -> dict:
-        """Parse KIMI's validation response."""
-        import json
-
         try:
-            # Try to parse as JSON
-            # Handle markdown code blocks
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0]
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0]
-
             result = json.loads(content.strip())
             return {
                 "valid": result.get("valid", True),
-                "reason": result.get("reason", "Unknown"),
+                "reason": result.get("reason", ""),
                 "detected_issue": result.get("detected_issue")
             }
-        except json.JSONDecodeError:
-            # If KIMI didn't return valid JSON, be permissive
-            logger.debug(f"KIMI returned non-JSON: {content[:100]}")
-            return {"valid": True, "reason": "Could not parse KIMI response, allowing through", "detected_issue": None}
+        except Exception:
+            return {"valid": True, "reason": "Parse error, allowing through", "detected_issue": None}
 
-    async def execute_step(self, step, context: Optional[str] = None):
-        """
-        Execute a step using KIMI API.
-
-        Args:
-            step: Step to execute (must have .description and .type attributes)
-            context: Additional context for the step
-
-        Returns:
-            StepResult with execution results
-        """
+    async def execute_step(
+        self,
+        step,
+        context: Optional[str] = None,
+        system_context: Optional[str] = None
+    ):
+        """Execute an AetherFlow step using KIMI."""
         from .deepseek_client import StepResult
         import time
 
         if not self.available:
             return StepResult(
-                step_id=step.id,
-                success=False,
-                output="",
-                tokens_used=0,
-                input_tokens=0,
-                output_tokens=0,
-                execution_time_ms=0,
-                error="KIMI API key not configured",
-                cost_usd=0.0
+                step_id=step.id, success=False, output="",
+                tokens_used=0, input_tokens=0, output_tokens=0,
+                execution_time_ms=0, error="KIMI API key not configured", cost_usd=0.0
             )
 
-        start_time = time.time()
-
+        start = time.time()
         try:
-            # Build prompt from step description and context
-            prompt_parts = []
+            client = self._get_client()
+            messages = []
+            if system_context:
+                messages.append({"role": "system", "content": system_context})
+            else:
+                messages.append({
+                    "role": "system",
+                    "content": "You are an expert software engineer. Generate clean, well-structured code."
+                })
+            user_content = (context + "\n\n" if context else "") + f"Task: {step.description}\nType: {step.type}"
+            messages.append({"role": "user", "content": user_content})
 
-            if context:
-                prompt_parts.append(context)
-                prompt_parts.append("\n\n")
+            response = await asyncio.to_thread(
+                client.chat.completions.create,
+                model=self.model,
+                messages=messages,
+                max_tokens=8000,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            elapsed = (time.time() - start) * 1000
+            output = response.choices[0].message.content or ""
+            usage = response.usage
+            in_tok = usage.prompt_tokens if usage else 0
+            out_tok = usage.completion_tokens if usage else 0
+            total = usage.total_tokens if usage else 0
+            cost = (total / 1_000_000) * 0.015
 
-            prompt_parts.append(f"Task: {step.description}\n")
-            prompt_parts.append(f"Type: {step.type}\n\n")
-
-            # Add step-specific instructions
-            if step.type == "code_generation":
-                prompt_parts.append("Generate complete, production-ready code.\n")
-            elif step.type == "refactoring":
-                prompt_parts.append("Refactor the code while preserving functionality.\n")
-            elif step.type == "analysis":
-                prompt_parts.append("Analyze the code and provide detailed insights.\n")
-
-            prompt = "".join(prompt_parts)
-
-            # Call KIMI API
-            async with httpx.AsyncClient(timeout=120) as client:  # Longer timeout for code generation
-                response = await client.post(
-                    self.api_url,
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": [
-                            {"role": "system", "content": "You are an expert software engineer. Generate clean, well-structured code."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.3,
-                        "max_tokens": 8000  # KIMI supports large outputs
-                    }
-                )
-
-                execution_time_ms = (time.time() - start_time) * 1000
-
-                if response.status_code != 200:
-                    error_msg = f"KIMI API error: {response.status_code}"
-                    logger.error(error_msg)
-                    return StepResult(
-                        step_id=step.id,
-                        success=False,
-                        output="",
-                        tokens_used=0,
-                        input_tokens=0,
-                        output_tokens=0,
-                        execution_time_ms=execution_time_ms,
-                        error=error_msg,
-                        cost_usd=0.0
-                    )
-
-                result = response.json()
-                output = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-                # Extract token usage
-                usage = result.get("usage", {})
-                input_tokens = usage.get("prompt_tokens", 0)
-                output_tokens = usage.get("completion_tokens", 0)
-                total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
-
-                # Calculate cost (KIMI pricing: ~$0.012 per 1M tokens)
-                cost_usd = (total_tokens / 1_000_000) * 0.012
-
-                logger.info(f"KIMI step {step.id} completed: {total_tokens} tokens, ${cost_usd:.4f}")
-
-                return StepResult(
-                    step_id=step.id,
-                    success=True,
-                    output=output,
-                    tokens_used=total_tokens,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    execution_time_ms=execution_time_ms,
-                    error=None,
-                    cost_usd=cost_usd
-                )
-
-        except httpx.TimeoutException:
-            execution_time_ms = (time.time() - start_time) * 1000
-            error_msg = f"KIMI request timeout after {execution_time_ms/1000:.1f}s"
-            logger.error(error_msg)
+            logger.info(f"KIMI step {step.id} completed: {total} tokens, ${cost:.4f}")
             return StepResult(
-                step_id=step.id,
-                success=False,
-                output="",
-                tokens_used=0,
-                input_tokens=0,
-                output_tokens=0,
-                execution_time_ms=execution_time_ms,
-                error=error_msg,
-                cost_usd=0.0
+                step_id=step.id, success=True, output=output,
+                tokens_used=total, input_tokens=in_tok, output_tokens=out_tok,
+                execution_time_ms=elapsed, error=None, cost_usd=cost
             )
         except Exception as e:
-            execution_time_ms = (time.time() - start_time) * 1000
-            error_msg = f"KIMI execution error: {e}"
-            logger.error(error_msg)
+            elapsed = (time.time() - start) * 1000
             return StepResult(
-                step_id=step.id,
-                success=False,
-                output="",
-                tokens_used=0,
-                input_tokens=0,
-                output_tokens=0,
-                execution_time_ms=execution_time_ms,
-                error=error_msg,
-                cost_usd=0.0
+                step_id=step.id, success=False, output="",
+                tokens_used=0, input_tokens=0, output_tokens=0,
+                execution_time_ms=elapsed, error=str(e), cost_usd=0.0
             )

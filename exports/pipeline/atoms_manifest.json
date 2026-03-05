@@ -1,0 +1,236 @@
+{
+  "comp_arbiter_table": {
+    "id": "comp_arbiter_table",
+    "status": "ok",
+    "vw": 400,
+    "vh": 400
+  },
+  "comp_arbiter_validate": {
+    "id": "comp_arbiter_validate",
+    "status": "ok",
+    "vw": 400,
+    "vh": 400
+  },
+  "comp_ir_table": {
+    "id": "comp_ir_table",
+    "status": "ok",
+    "vw": 680,
+    "vh": 480
+  },
+  "comp_stencil_card": {
+    "id": "comp_stencil_card",
+    "status": "ok",
+    "vw": 400,
+    "vh": 400
+  },
+  "comp_ir_detail": {
+    "id": "comp_ir_detail",
+    "status": "ok",
+    "vw": 680,
+    "vh": 480
+  },
+  "comp_session_reset": {
+    "id": "comp_session_reset",
+    "status": "ok",
+    "vw": 1140,
+    "vh": 360
+  },
+  "comp_session_status": {
+    "id": "comp_session_status",
+    "status": "ok",
+    "vw": 1140,
+    "vh": 360
+  },
+  "comp_genome_summary": {
+    "id": "comp_genome_summary",
+    "status": "ok",
+    "vw": 1140,
+    "vh": 360
+  },
+  "comp_distillation_list": {
+    "id": "comp_distillation_list",
+    "status": "ok",
+    "vw": 1140,
+    "vh": 360
+  },
+  "comp_vision_analyze_btn": {
+    "id": "comp_vision_analyze_btn",
+    "status": "ok",
+    "vw": 780,
+    "vh": 580
+  },
+  "comp_vision_report": {
+    "id": "comp_vision_report",
+    "status": "ok",
+    "vw": 780,
+    "vh": 580
+  },
+  "comp_vision_regenerate": {
+    "id": "comp_vision_regenerate",
+    "status": "ok",
+    "vw": 780,
+    "vh": 580
+  },
+  "comp_choice_style": {
+    "id": "comp_choice_style",
+    "status": "ok",
+    "vw": 520,
+    "vh": 320
+  },
+  "comp_layout_card": {
+    "id": "comp_layout_card",
+    "status": "ok",
+    "vw": 520,
+    "vh": 320
+  },
+  "comp_validation_dashboard": {
+    "id": "comp_validation_dashboard",
+    "status": "ok",
+    "vw": 600,
+    "vh": 320
+  },
+  "comp_validation_accordion": {
+    "id": "comp_validation_accordion",
+    "status": "ok",
+    "vw": 600,
+    "vh": 320
+  },
+  "comp_layout_grid": {
+    "id": "comp_layout_grid",
+    "status": "ok",
+    "vw": 520,
+    "vh": 320
+  },
+  "comp_zoom_out": {
+    "id": "comp_zoom_out",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_stenciler_grid": {
+    "id": "comp_stenciler_grid",
+    "status": "ok",
+    "vw": 600,
+    "vh": 320
+  },
+  "comp_zoom_controls": {
+    "id": "comp_zoom_controls",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_stenciler_select": {
+    "id": "comp_stenciler_select",
+    "status": "ok",
+    "vw": 600,
+    "vh": 320
+  },
+  "comp_detail_card": {
+    "id": "comp_detail_card",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_launch_button": {
+    "id": "comp_launch_button",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_apply_changes": {
+    "id": "comp_apply_changes",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_color_palette": {
+    "id": "comp_color_palette",
+    "status": "ok",
+    "vw": 340,
+    "vh": 500
+  },
+  "comp_upload_delete": {
+    "id": "comp_upload_delete",
+    "status": "ok",
+    "vw": 340,
+    "vh": 500
+  },
+  "comp_upload_dropzone": {
+    "id": "comp_upload_dropzone",
+    "status": "ok",
+    "vw": 340,
+    "vh": 500
+  },
+  "comp_code_editor": {
+    "id": "comp_code_editor",
+    "status": "ok",
+    "vw": 700,
+    "vh": 400
+  },
+  "comp_chat_answer": {
+    "id": "comp_chat_answer",
+    "status": "ok",
+    "vw": 400,
+    "vh": 520
+  },
+  "comp_chat_bubbles": {
+    "id": "comp_chat_bubbles",
+    "status": "ok",
+    "vw": 400,
+    "vh": 520
+  },
+  "comp_chat_input": {
+    "id": "comp_chat_input",
+    "status": "ok",
+    "vw": 400,
+    "vh": 520
+  },
+  "comp_preview_zones": {
+    "id": "comp_preview_zones",
+    "status": "ok",
+    "vw": 340,
+    "vh": 500
+  },
+  "comp_chat_skip": {
+    "id": "comp_chat_skip",
+    "status": "ok",
+    "vw": 400,
+    "vh": 520
+  },
+  "comp_next_button": {
+    "id": "comp_next_button",
+    "status": "ok",
+    "vw": 420,
+    "vh": 280
+  },
+  "comp_confirm_modal": {
+    "id": "comp_confirm_modal",
+    "status": "ok",
+    "vw": 600,
+    "vh": 280
+  },
+  "comp_download_zip": {
+    "id": "comp_download_zip",
+    "status": "ok",
+    "vw": 600,
+    "vh": 280
+  },
+  "comp_breadcrumb": {
+    "id": "comp_breadcrumb",
+    "status": "ok",
+    "vw": 420,
+    "vh": 280
+  },
+  "comp_stepper": {
+    "id": "comp_stepper",
+    "status": "ok",
+    "vw": 420,
+    "vh": 280
+  },
+  "comp_new_session": {
+    "id": "comp_new_session",
+    "status": "ok",
+    "vw": 600,
+    "vh": 280
+  }
+}

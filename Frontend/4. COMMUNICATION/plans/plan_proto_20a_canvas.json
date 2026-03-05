@@ -1,0 +1,42 @@
+{
+  "task_id": "proto_20a_genome_canvas",
+  "description": "Prototype canvas HTML pur : organes N1 rendus en vrais composants Flowbite, draggables librement. Remplace le canvas SVG cassé. Nouveau fichier genome_canvas.html autonome.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Stenciler V3 — Proto 20A genome canvas HTML pur"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Générer genome_canvas.html — canvas HTML div-based avec organes N1 draggables et composants Flowbite réels",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1200,
+      "dependencies": [],
+      "validation_criteria": [
+        "fetch('/api/genome') chargé au démarrage",
+        "fetch('/api/layout') chargé au démarrage, positions restaurées",
+        "Tabs de navigation entre les phases N0",
+        "Chaque organe N1 = carte div.organ-card position:absolute draggable",
+        "Drag via mousedown/mousemove/mouseup sur le header de la carte",
+        "mouseup → POST /api/layout avec { [organ.id]: { x, y } }",
+        "N3 components rendus en HTML Flowbite selon visual_hint",
+        "Tailwind CDN + Flowbite CDN présents",
+        "Zéro lib de drag externe (mousedown/move/up natifs suffisent)"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "input_files": [
+          "Frontend/3. STENCILER/genome_preview.py",
+          "Frontend/3. STENCILER/server_9998_v2.py"
+        ],
+        "instructions": "Génère un fichier HTML autonome : Frontend/3. STENCILER/static/genome_canvas.html\n\nC'est un canvas éditeur type Figma minimaliste pour visualiser et repositionner les organes du genome AetherFlow.\n\n## Structure du génome (lire genome_preview.py pour comprendre)\nLe genome vient de GET /api/genome sous forme { genome: { n0_phases: [ { id, name, n1_sections: [ { id, name, n2_features: [ { n3_components: [ { id, name, visual_hint } ] } ] } ] } ] } }\n\n## Ce que le fichier doit faire\n\n1. Au load : fetch('/api/genome') + fetch('/api/layout') en parallèle (Promise.all)\n2. Afficher des tabs en haut pour chaque phase N0 (clic → change de phase)\n3. Pour la phase active, afficher un canvas (div#genome-canvas, position:relative, bg:#f0efeb, min-height:700px, overflow:hidden)\n4. Pour chaque organe N1 de la phase : créer div.organ-card (position:absolute, bg:white, border:1px solid #d5d4d0, border-radius:8px, min-width:280px, max-width:320px, box-shadow:0 2px 8px rgba(0,0,0,0.08))\n5. Position initiale des cartes : grille automatique (col 0: x=40, col 1: x=360, col 2: x=680, row gap 320px) si pas de layout sauvegardé\n6. Si /api/layout retourne des positions pour l'organe → appliquer style.left et style.top depuis le JSON\n\n## Drag & Drop\nMousedown sur .organ-card-header → drag libre\nMousemove document → déplacer la carte (style.left/top)\nMouseup document → fin drag → POST /api/layout avec body: { [organe.id]: { x: parseInt(card.style.left), y: parseInt(card.style.top) } }\nLe body doit avoir cursor:default et user-select:none pendant le drag.\n\n## Rendu des composants\nChaque organe affiche ses N3 components dans le body de la carte.\nUtiliser la même logique de mapping visual_hint → HTML que dans genome_preview.py (lire ce fichier pour comprendre les mappings).\nSimplifier : juste les 8 visual_hints les plus courants suffisent pour le prototype :\n- button : <button class='text-white bg-blue-600 rounded-lg text-sm px-3 py-1.5 w-full'>{name}</button>\n- form : <div class='p-2 bg-gray-50 border rounded-lg text-xs text-gray-500'>Formulaire : {name}</div>\n- table : <div class='p-2 bg-gray-50 border rounded-lg text-xs text-gray-500'>Tableau : {name}</div>\n- chat/bubble : <div class='p-2 bg-gray-100 rounded-lg text-xs text-gray-700'>{name}</div>\n- dashboard : <div class='p-2 bg-white border rounded text-xs'><span class='font-bold text-lg text-gray-700'>—</span><p class='text-gray-400'>{name}</p></div>\n- card / stencil-card / detail-card : <div class='p-2 bg-white border rounded text-xs font-medium text-gray-700'>{name}</div>\n- upload : <div class='p-2 border-2 border-dashed border-gray-300 rounded text-xs text-gray-400 text-center'>{name}</div>\n- fallback : <span class='inline-flex items-center bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full'>{name}</span>\n\n## Structure HTML complète\n```html\n<!DOCTYPE html>\n<html lang='fr'>\n<head>\n  <meta charset='UTF-8'>\n  <title>Genome Canvas</title>\n  <script src='https://cdn.tailwindcss.com'></script>\n  <link href='https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css' rel='stylesheet'>\n  <style>\n    body { font-family: -apple-system, sans-serif; margin: 0; background: #f7f6f2; }\n    #genome-canvas { position: relative; min-height: 700px; background: #f0efeb;\n      background-image: radial-gradient(circle, #d5d4d0 1px, transparent 1px);\n      background-size: 24px 24px; }\n    .organ-card { position: absolute; background: white; border: 1px solid #d5d4d0;\n      border-radius: 8px; min-width: 280px; max-width: 320px;\n      box-shadow: 0 2px 8px rgba(0,0,0,0.08); }\n    .organ-card-header { padding: 10px 12px; border-bottom: 1px solid #f0efeb;\n      cursor: grab; user-select: none; display: flex; align-items: center; gap: 8px;\n      font-size: 12px; font-weight: 600; color: #3d3d3c; }\n    .organ-card-header:active { cursor: grabbing; }\n    .organ-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;\n      max-height: 280px; overflow-y: auto; }\n    .comp-item { font-size: 11px; }\n    .phase-tab { padding: 8px 16px; font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; color: #6a6a69; }\n    .phase-tab.active { border-bottom-color: #3d3d3c; color: #3d3d3c; font-weight: 600; }\n  </style>\n</head>\n<body>\n  <header style='background:white; border-bottom:1px solid #d5d4d0; display:flex; align-items:center; padding:0 20px; height:44px; gap:0;'>\n    <span style='font-size:13px; font-weight:600; color:#3d3d3c; margin-right:24px;'>Genome Canvas</span>\n    <div id='phase-tabs' style='display:flex;'></div>\n    <a href='/stenciler' style='margin-left:auto; font-size:11px; color:#999; text-decoration:none;'>Stenciler →</a>\n  </header>\n  <div id='genome-canvas'></div>\n  <script src='https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js'></script>\n  <script>\n    // ... code JS ici ...\n  </script>\n</body>\n</html>\n```\n\n## JS à écrire (dans le script)\n- `loadData()` : Promise.all([fetch('/api/genome'), fetch('/api/layout')]) → parse → appeler renderPhase(phases[0])\n- `renderTabs(phases)` : crée les tabs, clic → renderPhase(phase)\n- `renderPhase(phase)` : vide #genome-canvas, crée les organ-cards\n- `createOrganCard(organ, x, y)` : crée div.organ-card positionné, header draggable, body avec composants\n- `renderComponents(components)` : retourne HTML string des N3 composants\n- `setupDrag(card, organId)` : mousedown → track → mousemove → mouseup → savePosition()\n- `savePosition(organId, x, y)` : fetch POST /api/layout avec {[organId]: {x, y}}\n\n## IMPORTANT\n- Output : UNIQUEMENT le code HTML complet du fichier genome_canvas.html\n- Rien d'autre que le fichier HTML\n- Le fichier doit être autonome et fonctionner immédiatement à http://localhost:9998/genome_canvas\n- Ne pas ajouter de commentaires sur ce que tu as fait — juste le code"
+      }
+    }
+  ]
+}

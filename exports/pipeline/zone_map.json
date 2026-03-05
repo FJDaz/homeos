@@ -1,0 +1,494 @@
+{
+  "canvas": {
+    "w": 1440,
+    "header_h": 48,
+    "sidebar_w": 220,
+    "margin": 40,
+    "safe_x": 260,
+    "safe_w": 1140
+  },
+  "tabs": [
+    {
+      "id": "n0_brainstorm",
+      "label": "Brainstorm",
+      "index": 0
+    },
+    {
+      "id": "n0_backend",
+      "label": "Backend",
+      "index": 1
+    },
+    {
+      "id": "n0_frontend",
+      "label": "Frontend",
+      "index": 2
+    },
+    {
+      "id": "n0_deploy",
+      "label": "Deploy",
+      "index": 3
+    }
+  ],
+  "organs": [
+    {
+      "id": "n1_ir",
+      "name": "Intent Refactoring",
+      "n0": "n0_brainstorm",
+      "ui_role": "dashboard",
+      "layout_strategy": "master_detail",
+      "n3_count": 2,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 2,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_ir_table",
+          "name": "Vue Rapport IR",
+          "visual_hint": "table",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un tableau des organes détectés avec verdict coloré (Accept/Revise/Reject) et peut cliquer pour voir les détails"
+        },
+        {
+          "id": "comp_ir_detail",
+          "name": "Détail Organe",
+          "visual_hint": "detail-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une fiche technique détaillant un organe avec ses endpoints et modèles, et peut copier ou tester"
+        }
+      ]
+    },
+    {
+      "id": "n1_arbitrage",
+      "name": "Arbitrage",
+      "n0": "n0_brainstorm",
+      "ui_role": "dashboard",
+      "layout_strategy": "split_pane_form",
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 3,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_arbiter_table",
+          "name": "Tableau Expert",
+          "visual_hint": "table",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un tableau technique récapitulatif des validations en mode expert"
+        },
+        {
+          "id": "comp_arbiter_validate",
+          "name": "Validation Arbitrage",
+          "visual_hint": "form",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un formulaire de validation et peut soumettre ses décisions finales"
+        },
+        {
+          "id": "comp_stencil_card",
+          "name": "Carte Stencil",
+          "visual_hint": "stencil-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une carte pouvoir avec titre, description et boutons Garder/Réserve, et peut sélectionner son choix"
+        }
+      ]
+    },
+    {
+      "id": "n1_session",
+      "name": "Session Management",
+      "n0": "n0_backend",
+      "ui_role": "dashboard",
+      "layout_strategy": "dashboard_grid",
+      "n3_count": 4,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 4,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_session_reset",
+          "name": "Reset Session",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton de réinitialisation avec confirmation et peut redémarrer à zéro"
+        },
+        {
+          "id": "comp_genome_summary",
+          "name": "Résumé Genome",
+          "visual_hint": "dashboard",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un dashboard récapitulatif avec topologie et endpoints et peut cliquer pour détails"
+        },
+        {
+          "id": "comp_session_status",
+          "name": "Status Session",
+          "visual_hint": "status",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit 4 LEDs (vertes/grises) indiquant l'état current_step, genome, entries et peut rafraîchir"
+        },
+        {
+          "id": "comp_distillation_list",
+          "name": "Liste Distillation",
+          "visual_hint": "list",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une liste des entrées de distillation avec timestamp et verdicts"
+        }
+      ]
+    },
+    {
+      "id": "n1_analysis",
+      "name": "Analyse PNG",
+      "n0": "n0_frontend",
+      "ui_role": "main-canvas",
+      "layout_strategy": "split_editorial",
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 3,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_vision_report",
+          "name": "Rapport Analyse Vision",
+          "visual_hint": "preview",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit l'image avec calque d'analyse superposé (zones, confiance) et peut interagir"
+        },
+        {
+          "id": "comp_vision_analyze_btn",
+          "name": "Bouton Analyser",
+          "visual_hint": "launch-button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton fusée 🚀 'Lancer l'analyse Gemini' et peut déclencher"
+        },
+        {
+          "id": "comp_vision_regenerate",
+          "name": "Régénérer Analyse",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton 🔄 et peut relancer l'analyse si insatisfait"
+        }
+      ]
+    },
+    {
+      "id": "n1_layout",
+      "name": "Layout Selection",
+      "n0": "n0_frontend",
+      "ui_role": "dashboard",
+      "layout_strategy": "bento_grid",
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 3,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_choice_style",
+          "name": "Choix Style",
+          "visual_hint": "choice-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit des radio cards 2×2 (Minimal/Brutaliste/Moderne/Corporate) et peut choisir"
+        },
+        {
+          "id": "comp_layout_card",
+          "name": "Carte Layout",
+          "visual_hint": "card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une carte layout cliquable avec preview et peut la sélectionner"
+        },
+        {
+          "id": "comp_layout_grid",
+          "name": "Galerie Layouts",
+          "visual_hint": "grid",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une galerie 3×2 des layouts avec aperçu visuel et peut sélectionner"
+        }
+      ]
+    },
+    {
+      "id": "n1_validation",
+      "name": "Validation Composants",
+      "n0": "n0_frontend",
+      "ui_role": "dashboard",
+      "layout_strategy": "dashboard_grid",
+      "n3_count": 4,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 4,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_validation_dashboard",
+          "name": "Dashboard Validation",
+          "visual_hint": "dashboard",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un dashboard métriques (zones, layout, style, confiance) et peut explorer"
+        },
+        {
+          "id": "comp_validation_accordion",
+          "name": "Résumé Décisions",
+          "visual_hint": "accordion",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un accordéon des sections (zones validées, style, ajustements) et peut déplier"
+        },
+        {
+          "id": "comp_stenciler_grid",
+          "name": "Grille Stencils",
+          "visual_hint": "grid",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une grille des 9 Corps avec leurs composants et peut sélectionner keep/reserve"
+        },
+        {
+          "id": "comp_stenciler_select",
+          "name": "Sélection Composant",
+          "visual_hint": "choice-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit des boutons Garder/Réserve sur chaque composant et peut décider"
+        }
+      ]
+    },
+    {
+      "id": "n1_adaptation",
+      "name": "Adaptation / Zoom Atome",
+      "n0": "n0_frontend",
+      "ui_role": "dashboard",
+      "layout_strategy": "dashboard_grid",
+      "n3_count": 6,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 6,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_zoom_controls",
+          "name": "Contrôles Zoom",
+          "visual_hint": "zoom-controls",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une navigation ← Out | 🔍 Corps ▼ | In → + breadcrumb et peut zoomer/dézoomer"
+        },
+        {
+          "id": "comp_zoom_out",
+          "name": "Zoom Out",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton 'Remonter' et peut remonter d'un niveau hiérarchique"
+        },
+        {
+          "id": "comp_detail_card",
+          "name": "Fiche Détail Atome",
+          "visual_hint": "detail-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une fiche technique d'un atome avec endpoint, méthode, URL, boutons Copier/Tester"
+        },
+        {
+          "id": "comp_code_editor",
+          "name": "Éditeur Code",
+          "visual_hint": "editor",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un éditeur syntax highlighting avec toolbar et peut modifier le code"
+        },
+        {
+          "id": "comp_launch_button",
+          "name": "Lancer Distillation",
+          "visual_hint": "launch-button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton fusée 🚀 'Lancer la distillation' et peut finaliser"
+        },
+        {
+          "id": "comp_apply_changes",
+          "name": "Appliquer Changements",
+          "visual_hint": "apply-changes",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit 💾 Appliquer / ↩️ Annuler côte à côte et peut sauvegarder ou annuler"
+        }
+      ]
+    },
+    {
+      "id": "n1_upload",
+      "name": "Upload Design",
+      "n0": "n0_frontend",
+      "ui_role": "upload-zone",
+      "layout_strategy": "split_pane_form",
+      "n3_count": 4,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 4,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_color_palette",
+          "name": "Palette Extraite",
+          "visual_hint": "color-palette",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit 4 swatches de couleurs + chips style (rounded, font) extraites du design"
+        },
+        {
+          "id": "comp_upload_dropzone",
+          "name": "Zone Upload",
+          "visual_hint": "upload",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une zone drag & drop avec icône 📁 et feedback visuel et peut déposer un fichier"
+        },
+        {
+          "id": "comp_upload_delete",
+          "name": "Suppression Upload",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton de suppression et peut retirer le fichier uploadé"
+        },
+        {
+          "id": "comp_preview_zones",
+          "name": "Aperçu Zones",
+          "visual_hint": "preview",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit l'image uploadée avec zones surlignées (bleu/vert/rose) et peut explorer"
+        }
+      ]
+    },
+    {
+      "id": "n1_dialogue",
+      "name": "Dialogue Utilisateur",
+      "n0": "n0_frontend",
+      "ui_role": "chat-overlay",
+      "layout_strategy": "chat_thread",
+      "n3_count": 4,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 2,
+        "footer": 0,
+        "floating": 2
+      },
+      "components": [
+        {
+          "id": "comp_chat_bubbles",
+          "name": "Bulles Conversation",
+          "visual_hint": "chat/bubble",
+          "zone": "floating",
+          "description_ui": "L'utilisateur voit des bulles de conversation style Messenger (S indigo + user) et peut lire"
+        },
+        {
+          "id": "comp_chat_input",
+          "name": "Input Message",
+          "visual_hint": "chat-input",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un champ saisie + 📎 😊 + bouton envoi ➤ et peut écrire et envoyer"
+        },
+        {
+          "id": "comp_chat_answer",
+          "name": "Réponse Question",
+          "visual_hint": "choice-card",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit des options de réponse à une question de Sullivan et peut choisir"
+        },
+        {
+          "id": "comp_chat_skip",
+          "name": "Passer Dialogue",
+          "visual_hint": "button",
+          "zone": "floating",
+          "description_ui": "L'utilisateur voit un bouton 'Passer' et peut sauter le dialogue vers validation"
+        }
+      ]
+    },
+    {
+      "id": "n1_navigation",
+      "name": "Navigation",
+      "n0": "n0_frontend",
+      "ui_role": "onboarding-flow",
+      "layout_strategy": "stepper_wizard",
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 2,
+        "sidebar": 0,
+        "main": 1,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_stepper",
+          "name": "Stepper 9 Étapes",
+          "visual_hint": "stepper",
+          "zone": "header",
+          "description_ui": "L'utilisateur voit un stepper horizontal des 9 phases avec états active/completed/future et peut naviguer"
+        },
+        {
+          "id": "comp_next_button",
+          "name": "Bouton Suivant",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton étape suivante avec validation des prérequis et peut avancer"
+        },
+        {
+          "id": "comp_breadcrumb",
+          "name": "Fil d'Ariane",
+          "visual_hint": "breadcrumb",
+          "zone": "header",
+          "description_ui": "L'utilisateur voit un breadcrumb Phase > Étape > Section et peut remonter dans la hiérarchie"
+        }
+      ]
+    },
+    {
+      "id": "n1_export",
+      "name": "Export / Téléchargement",
+      "n0": "n0_deploy",
+      "ui_role": "export-action",
+      "layout_strategy": "export_download",
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 0,
+        "sidebar": 0,
+        "main": 2,
+        "footer": 0,
+        "floating": 1
+      },
+      "components": [
+        {
+          "id": "comp_download_zip",
+          "name": "Téléchargement ZIP",
+          "visual_hint": "download",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit une carte fichier avec bouton 📥 et peut télécharger l'archive ZIP"
+        },
+        {
+          "id": "comp_confirm_modal",
+          "name": "Modal Confirmation",
+          "visual_hint": "modal",
+          "zone": "floating",
+          "description_ui": "L'utilisateur voit une fenêtre modale avec titre, message, boutons Annuler/Confirmer"
+        },
+        {
+          "id": "comp_new_session",
+          "name": "Nouvelle Session",
+          "visual_hint": "button",
+          "zone": "main",
+          "description_ui": "L'utilisateur voit un bouton ↻ Nouvelle session et peut recommencer"
+        }
+      ]
+    }
+  ]
+}

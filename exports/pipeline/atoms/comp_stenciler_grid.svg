@@ -1,0 +1,164 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1a46c4"/>
+    </linearGradient>
+    <linearGradient id="keepGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1a46c4"/>
+    </linearGradient>
+    <linearGradient id="reserveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#e5bc3a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Card -->
+  <rect x="0" y="0" width="600" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="24" y="32" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Grille Stencils</text>
+  <text x="24" y="52" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Sélectionnez les composants à conserver ou réserver</text>
+  
+  <!-- Grid Container -->
+  <g transform="translate(24, 68)">
+    <!-- Row 1 -->
+    <!-- Corps 1 -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 1</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Moteur • Châssis • Électronique</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="url(#keepGradient)"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#ffffff" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 2 -->
+    <g transform="translate(188, 0)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 2</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Transmission • Freins • Suspension</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="url(#reserveGradient)"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#151515" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 3 -->
+    <g transform="translate(376, 0)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 3</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Carrosserie • Peinture • Joint</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Row 2 -->
+    <!-- Corps 4 -->
+    <g transform="translate(0, 74)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 4</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Éclairage • Signalisation • Optique</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="url(#keepGradient)"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#ffffff" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 5 -->
+    <g transform="translate(188, 74)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 5</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Intérieur • Sièges • Tableau bord</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 6 -->
+    <g transform="translate(376, 74)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 6</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Climatisation • Ventilation • Filtre</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="url(#reserveGradient)"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#151515" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Row 3 -->
+    <!-- Corps 7 -->
+    <g transform="translate(0, 148)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 7</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Sécurité • Airbag • Ceintures</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 8 -->
+    <g transform="translate(188, 148)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 8</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Multimédia • Navigation • Audio</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="url(#keepGradient)"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#ffffff" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+    
+    <!-- Corps 9 -->
+    <g transform="translate(376, 148)">
+      <rect x="0" y="0" width="176" height="62" rx="8" fill="#f8f7f4"/>
+      <text x="12" y="20" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#151515">Corps 9</text>
+      <text x="12" y="36" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Roues • Pneus • Jantes • Freins</text>
+      <g transform="translate(12, 44)">
+        <rect x="0" y="0" width="44" height="14" rx="6" fill="#e5e7eb"/>
+        <text x="22" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" fill="#6b7280" text-anchor="middle">Keep</text>
+        <rect x="50" y="0" width="52" height="14" rx="6" fill="url(#reserveGradient)"/>
+        <text x="76" y="10" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#151515" text-anchor="middle">Reserve</text>
+      </g>
+    </g>
+  </g>
+  
+  <!-- Footer Stats -->
+  <g transform="translate(24, 296)">
+    <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">
+      <tspan font-weight="600" fill="#2458f3">3</tspan> Keep
+      <tspan dx="16" font-weight="600" fill="#e5bc3a">3</tspan> Reserve
+      <tspan dx="16" font-weight="600" fill="#9ca3af">3</tspan> Pending
+    </text>
+    
+    <!-- Action Button -->
+    <g transform="translate(476, -10)">
+      <rect x="0" y="0" width="76" height="28" rx="6" fill="url(#accentGradient)"/>
+      <text x="38" y="18" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">Valider</text>
+    </g>
+  </g>
+</svg>

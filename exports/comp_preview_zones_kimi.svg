@@ -1,0 +1,54 @@
+<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <filter id="cardShade" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#97ea90"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="120" height="240" fill="#1a1a2e" rx="0"/>
+  <text x="14" y="24" fill="#ffffff" font-size="13" font-weight="600">Zones</text>
+
+  <!-- Zone rows -->
+  <g fill="#ffffff" font-size="12">
+    <rect x="8" y="36" width="104" height="28" fill="#97ea90" rx="9999"/>
+    <circle cx="20" cy="50" r="5" fill="#1a1a2e"/>
+    <text x="30" y="53" fill="#1a1a2e" font-weight="600">Zone 1</text>
+
+    <rect x="8" y="70" width="104" height="28" fill="#ffffff" fill-opacity="0.08" rx="8"/>
+    <circle cx="20" cy="84" r="5" fill="#ffffff"/>
+    <text x="30" y="87" fill="#ffffff">Zone 2</text>
+
+    <rect x="8" y="104" width="104" height="28" fill="#ffffff" fill-opacity="0.08" rx="8"/>
+    <circle cx="20" cy="118" r="5" fill="#ffffff"/>
+    <text x="30" y="121" fill="#ffffff">Zone 3</text>
+
+    <rect x="8" y="138" width="104" height="28" fill="#ffffff" fill-opacity="0.08" rx="8"/>
+    <circle cx="20" cy="152" r="5" fill="#ffffff"/>
+    <text x="30" y="155" fill="#ffffff">Zone 4</text>
+  </g>
+
+  <!-- Preview card -->
+  <rect x="132" y="12" width="296" height="216" fill="#ffffff" rx="12" filter="url(#cardShade)"/>
+  <rect x="144" y="24" width="272" height="152" fill="#f8f7f4" rx="8"/>
+  <!-- Image mock -->
+  <rect x="152" y="32" width="120" height="80" fill="#e5e7eb" rx="4"/>
+  <rect x="280" y="32" width="120" height="80" fill="#e5e7eb" rx="4"/>
+  <!-- Highlight overlays -->
+  <rect x="152" y="32" width="120" height="80" fill="#1258ca" fill-opacity="0.18" rx="4"/>
+  <rect x="280" y="32" width="120" height="80" fill="#97ea90" fill-opacity="0.18" rx="4"/>
+  <!-- Labels -->
+  <text x="160" y="50" fill="#ffffff" font-size="10" font-weight="600" letter-spacing="0.05em">ZONE 1</text>
+  <text x="288" y="50" fill="#ffffff" font-size="10" font-weight="600" letter-spacing="0.05em">ZONE 2</text>
+
+  <!-- Actions -->
+  <rect x="144" y="188" width="88" height="32" fill="url(#btnGrad)" rx="9999"/>
+  <text x="188" y="208" fill="#ffffff" font-size="13" font-weight="600" text-anchor="middle">Explorer</text>
+
+  <rect x="240" y="188" width="88" height="32" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="9999"/>
+  <text x="284" y="208" fill="#1a1a2e" font-size="13" font-weight="600" text-anchor="middle">Reset</text>
+</svg>

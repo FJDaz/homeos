@@ -1,0 +1,85 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="cardShadow" x="-8" y="-8" width="616" height="336">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#ffd548"/>
+    </linearGradient>
+    <linearGradient id="barGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#4a90e2"/>
+    </linearGradient>
+    <linearGradient id="greenBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2d8a3e"/>
+      <stop offset="100%" stop-color="#97ea90"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Card Background -->
+  <rect x="0" y="0" width="600" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="24" y="36" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Validation Dashboard</text>
+  <text x="24" y="56" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Real-time quality metrics across all zones</text>
+  
+  <!-- Main Score Circle -->
+  <circle cx="120" cy="180" r="64" fill="none" stroke="#f3f4f6" stroke-width="12"/>
+  <circle cx="120" cy="180" r="64" fill="none" stroke="url(#scoreGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="321" stroke-dashoffset="48" transform="rotate(-90 120 180)"/>
+  <text x="120" y="175" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="32" font-weight="700" fill="#151515">85</text>
+  <text x="120" y="195" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280" letter-spacing="1.5">OVERALL SCORE</text>
+  
+  <!-- Metric Cards Row -->
+  <!-- Zones Metric -->
+  <rect x="208" y="88" width="172" height="84" rx="8" fill="#f8f7f4"/>
+  <text x="224" y="112" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280" letter-spacing="1.5">ZONES COVERED</text>
+  <text x="224" y="144" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#151515">12/14</text>
+  <rect x="224" y="156" width="140" height="6" rx="3" fill="#e5e7eb"/>
+  <rect x="224" y="156" width="120" height="6" rx="3" fill="url(#barGradient)"/>
+  
+  <!-- Layout Metric -->
+  <rect x="396" y="88" width="180" height="84" rx="8" fill="#f8f7f4"/>
+  <text x="412" y="112" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280" letter-spacing="1.5">LAYOUT CONSISTENCY</text>
+  <text x="412" y="144" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#151515">94%</text>
+  <rect x="412" y="156" width="148" height="6" rx="3" fill="#e5e7eb"/>
+  <rect x="412" y="156" width="139" height="6" rx="3" fill="url(#greenBar)"/>
+  
+  <!-- Style Validation Section -->
+  <rect x="208" y="184" width="368" height="120" rx="8" fill="#f8f7f4"/>
+  <text x="224" y="208" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280" letter-spacing="1.5">STYLE COMPLIANCE</text>
+  
+  <!-- Style Check Items -->
+  <g transform="translate(224, 228)">
+    <circle cx="8" cy="8" r="8" fill="#97ea90"/>
+    <path d="M5 8L7 10L11 6" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="24" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Typography standards</text>
+    <text x="312" y="12" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#2d8a3e" font-weight="600">PASS</text>
+  </g>
+  
+  <g transform="translate(224, 252)">
+    <circle cx="8" cy="8" r="8" fill="#97ea90"/>
+    <path d="M5 8L7 10L11 6" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="24" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Color palette alignment</text>
+    <text x="312" y="12" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#2d8a3e" font-weight="600">PASS</text>
+  </g>
+  
+  <g transform="translate(224, 276)">
+    <circle cx="8" cy="8" r="8" fill="#ffd548"/>
+    <text x="8" y="12" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="10" font-weight="700" fill="#92400e">!</text>
+    <text x="24" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#151515">Spacing density check</text>
+    <text x="312" y="12" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#92400e" font-weight="600">REVIEW</text>
+  </g>
+  
+  <!-- Explore Button -->
+  <rect x="464" y="36" width="112" height="36" rx="6" fill="url(#scoreGradient)"/>
+  <text x="520" y="58" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Explore Data</text>
+  
+  <!-- Mini Trend Indicator -->
+  <g transform="translate(24, 260)">
+    <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280" letter-spacing="1.5">TREND</text>
+    <path d="M0 20L20 8L40 16L60 4L80 12L96 6" stroke="#f05e23" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="96" cy="6" r="4" fill="#f05e23"/>
+    <text x="0" y="44" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#2d8a3e" font-weight="600">↑ 12% vs last week</text>
+  </g>
+</svg>

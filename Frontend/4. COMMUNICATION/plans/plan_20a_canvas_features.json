@@ -1,0 +1,40 @@
+{
+  "task_id": "mission_20a_canvas_features",
+  "description": "Ajouter F1 (focus mode drill-down), F2 (resize), F3 (layout w/h) à genome_canvas.html. Le canvas HTML pur remplace le canvas SVG cassé. Ne pas casser le drag ni les tabs existants.",
+  "metadata": {
+    "created_at": "2026-03-02T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Stenciler V3 — Mission 20A genome canvas features"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "F1 Focus mode + F2 Resize + F3 layout w/h — réécriture complète de genome_canvas.html avec les 3 features",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 1500,
+      "dependencies": [],
+      "validation_criteria": [
+        "Drag fonctionne toujours (listeners sur document, e.target.closest)",
+        "Tabs N0 fonctionnent toujours (renderTabs + renderPhase)",
+        "F1 : clic carte → overlay semi-transparent sur canvas, carte active au z-index 100, autres cartes opacity 0.2",
+        "F1 : clic outside (overlay ou fond canvas) → reset focus",
+        "F1 : en mode focus, la carte révèle N2 features + N3 composants détaillés dans un scroll interne",
+        "F2 : poignée resize coin bas-droit sur chaque carte, drag → update width",
+        "F3 : mouseup resize → POST /api/layout avec { [id]: { x, y, w } }",
+        "F3 : GET /api/layout au load → restaure x, y, w (width) en plus des positions"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "input_files": [
+          "Frontend/3. STENCILER/static/genome_canvas.html"
+        ],
+        "instructions": "Réécris complètement Frontend/3. STENCILER/static/genome_canvas.html en ajoutant 3 features.\nLis le fichier actuel AVANT de coder — il contient le drag fonctionnel et les tabs qu'il ne faut PAS casser.\n\n## Ce qui doit rester intact\n- Drag : mousedown via `e.target.closest('.organ-container')`, listeners sur `document` (mousemove + mouseup)\n- Tabs : `renderTabs(phases)`, `renderPhase(phase)`, `_activePhaseIdx`\n- `_comp_html(comp)` : mapping visual_hint → Flowbite HTML\n- `loadGenomeAndRender()` : Promise.all([fetch('/api/genome'), fetch('/api/layout')])\n- POST /api/layout au mouseup du drag avec { [id]: { x, y } }\n\n## F1 — Focus mode (drill-down sans navigation)\n\nClic sur .organ-container (pas pendant drag) → mode focus :\n1. Ajouter div#focus-overlay (position:absolute, inset:0, background:rgba(240,239,235,0.85), z-index:50) dans #genome-canvas\n2. La carte cliquée : z-index:100, pointer-events:all, largeur étendue à 480px si < 480px\n3. Les autres cartes : opacity:0.15, pointer-events:none\n4. Dans la carte en focus : remplacer le contenu par la vue détaillée :\n   - Header : nom organe + bouton ✕ (ferme le focus)\n   - Pour chaque n2_feature : titre de la feature (texte gris uppercase 10px)\n   - Pour chaque n3_component dans la feature : composant Flowbite (via _comp_html) + nom en dessous (9px gris)\n   - max-height: 500px, overflow-y: auto sur le body\n5. Clic sur #focus-overlay OU bouton ✕ → sortir du focus :\n   - Supprimer #focus-overlay\n   - Restaurer toutes les cartes (opacity:1, pointer-events:all, z-index:1)\n   - Restaurer le contenu de la carte au rendu compact (liste N3 summary)\n\nDISTINGUER clic drag de clic focus : ne déclencher le focus QUE si la carte n'a pas bougé (distance < 5px entre mousedown et mouseup).\n\n## F2 — Resize\n\nAjouter sur chaque carte un div.resize-handle (position:absolute, bottom:0, right:0, width:12px, height:12px, cursor:se-resize, background:linear-gradient(135deg, transparent 50%, #d5d4d0 50%)).\n\nmousedown sur .resize-handle :\n- Stocker startX, startW (offsetWidth de la carte)\n- mousemove sur document → card.style.width = (startW + dx) + 'px' avec min 200px\n- mouseup sur document → POST /api/layout avec { [id]: { x, y, w: parseInt(card.style.width) } }\n- Empêcher le drag normal pendant le resize (flag isResizing)\n\n## F3 — Persistance w/h\n\nAu load (après GET /api/layout) :\n- Si layout[organ.id].w → appliquer card.style.width = layout[organ.id].w + 'px'\n\nAu mouseup drag (existant) : inclure w dans le POST si la carte a une largeur définie :\n```javascript\nfetch('/api/layout', { method: 'POST', headers: {'Content-Type':'application/json'},\n  body: JSON.stringify({ [id]: { x, y, w: parseInt(draggedOrgan.style.width) || undefined } })\n}).catch(() => {});\n```\n\n## Contraintes CSS importantes\n- #genome-canvas : position:relative, min-height:700px, overflow:visible (pour que les cartes puissent dépasser)\n- .organ-container : position:absolute, min-width:200px, background:white\n- Ne pas utiliser display:none pour cacher — utiliser opacity + pointer-events\n\n## Output\nUNIQUEMENT le fichier HTML complet. Rien d'autre."
+      }
+    }
+  ]
+}

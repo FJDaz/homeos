@@ -5,9 +5,14 @@ class ColorPaletteFeature extends StencilerFeature {
   constructor(id = 'color-palette', options = {}) {
     super(id, options);
     this.swatches = [
-      '#ef4444', '#f97316', '#f59e0b', '#84cc16',
-      '#22c55e', '#10b981', '#06b6d4', '#0ea5e9',
-      '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef'
+      '#a8c5fc', // --accent-bleu
+      '#c4a589', // --accent-terra
+      '#a3c4a8', // --accent-vert
+      '#f0b8b8', // --accent-rose
+      '#c5b8f0', // --accent-violet
+      '#f0d0a8', // --accent-ambre
+      '#3d3d3c', // --text-primary (noir chaud)
+      '#f7f6f2'  // --bg-primary (crème)
     ];
     this.selectedColor = this.swatches[0];
     this.canvas = options.canvas;
@@ -24,6 +29,24 @@ class ColorPaletteFeature extends StencilerFeature {
     `;
   }
 
+  init() {
+    document.addEventListener('primitive:selected', (e) => {
+      this._activePrim = e.detail.el;
+      if (this.el) {
+        this.el.style.opacity = '1';
+        this.el.style.pointerEvents = 'all';
+      }
+    });
+
+    document.addEventListener('primitive:deselected', () => {
+      this._activePrim = null;
+      if (this.el) {
+        this.el.style.opacity = '0.4';
+        this.el.style.pointerEvents = 'none';
+      }
+    });
+  }
+
   mount(parentSelector) {
     this.el = document.querySelector(parentSelector);
     if (!this.el) return;
@@ -33,6 +56,8 @@ class ColorPaletteFeature extends StencilerFeature {
     this.el.classList.add('color-palette');
 
     this.el.innerHTML = this.render();
+
+    this.init();
 
     this.el.querySelectorAll('.color-swatch').forEach(swatch => {
       swatch.addEventListener('click', () => {
@@ -45,6 +70,10 @@ class ColorPaletteFeature extends StencilerFeature {
   }
 
   applyColor() {
+    if (this._activePrim) {
+      this._activePrim.setAttribute('fill', this.selectedColor);
+      return;
+    }
     if (!this.canvas?.getActiveObject()) return;
     const obj = this.canvas.getActiveObject();
     if (window.colorMode === 'stroke') {

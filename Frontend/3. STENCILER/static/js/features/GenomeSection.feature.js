@@ -32,8 +32,11 @@ class GenomeSectionFeature extends StencilerFeature {
 
     // On vide avant de render pour éviter les duplications
     this.el.innerHTML = `
-        <h3>Genome (${phases.length} phases)</h3>
-        <div class="phases-list">
+        <div class="sidebar-section-header" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+          <h3 style="margin: 0;">genome (${phases.length})</h3>
+          <span class="section-chevron">▾</span>
+        </div>
+        <div class="section-content phases-list" style="display: block;">
           ${phases.map(phase => `
             <div class="phase-item ${this.selectedCorps.has(phase.id) ? 'selected' : ''}" data-id="${phase.id}">
               <span class="phase-name">${phase.name}</span>
@@ -42,6 +45,16 @@ class GenomeSectionFeature extends StencilerFeature {
           `).join('')}
         </div>
     `;
+
+    const header = this.el.querySelector('.sidebar-section-header');
+    const content = this.el.querySelector('.section-content');
+    const chevron = this.el.querySelector('.section-chevron');
+
+    header.addEventListener('click', () => {
+      const isHidden = content.style.display === 'none';
+      content.style.display = isHidden ? 'block' : 'none';
+      chevron.textContent = isHidden ? '▾' : '▸';
+    });
 
     this.el.querySelectorAll('.phase-item').forEach(item => {
       item.addEventListener('click', () => {

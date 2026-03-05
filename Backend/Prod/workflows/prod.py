@@ -137,15 +137,8 @@ class ProdWorkflow:
             # Phase 2.5: Apply refactored code to source files
             logger.info("Phase 2.5: Applying refactored code to source files")
             update_plan_status(phase="apply")
-            # #region agent log
-            t25 = time.time(); _dbg("B", "prod.py:Phase2.5", "Phase 2.5 apply start", {})
-            # #endregion
-            apply_result = await self._apply_refactored_code(
-                plan=plan,
-                build_result=build_result,
-                output_dir=output_dir / "build_refactored" if output_dir else None
-            )
-            logger.info(f"Applied code to {apply_result['files_applied']} file(s)")
+            # Phase 2.5: DELETED (Handled by Orchestrator + ApplyEngine during BUILD)
+            apply_result = {"success": True, "files_applied": 0, "details": []}
             # Merge chunked step outputs into one file if plan declares output_merge
             output_merge = plan.metadata.get("output_merge") if isinstance(getattr(plan, "metadata", None), dict) else None
             if output_merge and output_dir:
@@ -172,7 +165,7 @@ class ProdWorkflow:
                 except Exception as survey_err:
                     logger.debug(f"Error survey log failed: {survey_err}")
             # #region agent log
-            _dbg("B", "prod.py:Phase2.5", "Phase 2.5 apply end", {"duration_s": round(time.time() - t25, 2), "files_applied": apply_result["files_applied"]})
+            _dbg("B", "prod.py:Phase2.5", "Phase 2.5 apply end (skipped, unified apply active)", {"duration_s": 0, "files_applied": 0})
             # #endregion
             # Phase 3: DOUBLE-CHECK validation
             logger.info("Phase 3: Final validation with DOUBLE-CHECK mode (Gemini)")
@@ -287,97 +280,6 @@ class ProdWorkflow:
         )
         
         return "\n".join(context_parts)
-    
-    async def _apply_refactored_code(
-        self,
-        plan: Plan,
-        build_result: Dict[str, Any],
-        output_dir: Optional[Path]
-    ) -> Dict[str, Any]:
-        """
-        Apply refactored code from BUILD phase to source files.
-        
-        Args:
-            plan: Plan object with step definitions
-            build_result: Results from BUILD execution
-            output_dir: Output directory where step outputs are stored
-            
-        Returns:
-            Dictionary with application results
-        """
-        from ..claude_helper import get_step_output, apply_generated_code
-        
-        files_applied = []
-        files_failed = []
-        
-        if not output_dir:
-            logger.warning("No output directory provided, cannot apply refactored code")
-            return {
-                "success": False,
-                "files_applied": 0,
-                "files_failed": 0,
-                "error": "No output directory"
-            }
-        
-        # For each step in the plan
-        for step in plan.steps:
-            # Get step output from BUILD phase
-            step_output = get_step_output(step.id, str(output_dir))
-            
-            if not step_output:
-                logger.debug(f"No output found for step {step.id}, skipping")
-                continue
-            
-            # Get target files from step context
-            target_files = step.context.get("files", []) if step.context else []
-            
-            if not target_files:
-                logger.debug(f"No target files specified for step {step.id}, skipping")
-                continue
-            
-            # Apply code to each target file
-            for file_path_str in target_files:
-                try:
-                    # Resolve file path (relative to project root)
-                    file_path = Path(file_path_str)
-                    if not file_path.is_absolute():
-                        # Try to resolve relative to project root
-                        # Assuming we're in Backend/Prod, go up to project root
-                        project_root = Path(__file__).parent.parent.parent.parent
-                        file_path = project_root / file_path
-                    
-                    # Convert step to dict for apply_generated_code
-                    step_dict = {
-                        "id": step.id,
-                        "type": step.type,
-                        "context": step.context or {}
-                    }
-                    
-                    # Apply the code
-                    success = apply_generated_code(
-                        step_output=step_output,
-                        target_file=file_path,
-                        plan_step=step_dict
-                    )
-                    
-                    if success:
-                        files_applied.append(str(file_path))
-                        logger.info(f"✓ Applied code from {step.id} to {file_path}")
-                    else:
-                        files_failed.append(str(file_path))
-                        logger.warning(f"✗ Failed to apply code from {step.id} to {file_path}")
-                        
-                except Exception as e:
-                    logger.error(f"Error applying code from {step.id} to {file_path_str}: {e}")
-                    files_failed.append(file_path_str)
-        
-        return {
-            "success": len(files_failed) == 0,
-            "files_applied": len(files_applied),
-            "files_failed": len(files_failed),
-            "applied_files": files_applied,
-            "failed_files": files_failed
-        }
     
     async def _validate_results(
         self,

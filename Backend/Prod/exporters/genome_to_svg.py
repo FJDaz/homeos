@@ -175,7 +175,7 @@ def _kimi_organ_svg(organ, style_id='auto'):
     try:
         client = OpenAI(api_key=key, base_url='https://api.moonshot.ai/v1')
         resp = client.chat.completions.create(
-            model='moonshot-v1-8k',
+            model='kimi-k2.5',
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0.4,
             max_tokens=1200,

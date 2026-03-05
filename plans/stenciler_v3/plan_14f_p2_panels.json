@@ -1,0 +1,108 @@
+{
+  "task_id": "stenciler_v3_14f_p2_panels",
+  "description": "Mission 14F-P2 (TEST CLAUDE) — Réorganiser les panels de la sidebar-right dans ComponentsZone.feature.js : (1) reorder outils d'édition en premier, (2) ajouter classe 'collapsed' par défaut sur tous les panels sauf panel-transform. Fichier unique : ComponentsZone.feature.js, méthode _renderSidebarPanels.",
+  "metadata": {
+    "created_at": "2026-03-01T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Stenciler V3 — Sidebar-right = ComponentsZone._renderSidebarPanels(). Actuellement 6 panels dans l'ordre : TRANSFORMATION, DISPOSITION, NUANCE, MAGNÉTISME, STYLE & COULEURS, TYPOGRAPHIE. Tous ouverts par défaut. Objectif : reorder (édition d'abord) + collapse tous sauf TRANSFORMATION.",
+    "mission": "14F-P2",
+    "phase": "Phase 14 — Canvas Illustrateur",
+    "actor": "CLAUDE",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire ComponentsZone.feature.js, méthode _renderSidebarPanels (L269-440). Confirmer l'ordre actuel des 6 panels HTML dans container.innerHTML : panel-transform, panel-disposition, panel-nuance (NuanceUI.render), panel-snapping, panel-style, panel-typography. Confirmer qu'aucun panel n'a la classe 'collapsed' par défaut.",
+      "type": "analysis",
+      "complexity": 0.15,
+      "estimated_tokens": 250,
+      "dependencies": [],
+      "validation_criteria": [
+        "6 panels identifiés : panel-transform, panel-disposition, panel-nuance, panel-snapping, panel-style, panel-typography",
+        "Aucun panel n'a 'collapsed' dans sa classe div.cz-panel par défaut",
+        "panel-transform est le premier"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "PATCH _renderSidebarPanels — Réécrire container.innerHTML pour : (1) nouveau ordre des panels : panel-transform (sans collapsed), panel-style (collapsed), panel-disposition (collapsed), panel-snapping (collapsed), panel-typography (collapsed), panel-nuance (collapsed). (2) Ajouter la classe 'collapsed' sur tous les panels SAUF panel-transform. La classe doit être sur la div.cz-panel elle-même : <div class='cz-panel collapsed' id='panel-style'>. Les contenus internes de chaque panel restent identiques.",
+      "type": "patch",
+      "complexity": 0.5,
+      "estimated_tokens": 800,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "panel-transform : div class='cz-panel' (pas collapsed)",
+        "panel-style : div class='cz-panel collapsed' (2e position)",
+        "panel-disposition : div class='cz-panel collapsed' (3e position)",
+        "panel-snapping : div class='cz-panel collapsed' (4e position)",
+        "panel-typography : div class='cz-panel collapsed' (5e position)",
+        "NuanceUI.render(obj) / panel-nuance : 6e position, collapsed",
+        "Tous les contenus internes (labels, inputs, selects, buttons) préservés identiquement"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "input_files": [
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json",
+          "Frontend/3. STENCILER/static/css/stenciler.css"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false,
+        "patch": {
+          "position": "replace",
+          "marker_start": "    container.innerHTML = `",
+          "marker_end": "    this._setupPanelHandlers(obj);",
+          "idempotent": true
+        },
+        "replacement": "    container.innerHTML = `\n        <!-- Panel Transformation (ouvert par défaut) -->\n        <div class=\"cz-panel\" id=\"panel-transform\">\n            ... (panel-transform content identique) ...\n        </div>\n        <!-- Panel Style & Couleurs -->\n        <div class=\"cz-panel collapsed\" id=\"panel-style\">\n            ... (panel-style content identique) ...\n        </div>\n        <!-- Panel Disposition -->\n        <div class=\"cz-panel collapsed\" id=\"panel-disposition\">\n            ... (panel-disposition content identique) ...\n        </div>\n        <!-- Panel Magnétisme -->\n        <div class=\"cz-panel collapsed\" id=\"panel-snapping\">\n            ... (panel-snapping content identique) ...\n        </div>\n        <!-- Panel Typographie -->\n        <div class=\"cz-panel collapsed\" id=\"panel-typography\">\n            ... (panel-typography content identique) ...\n        </div>\n        <!-- Panel Nuance -->\n        <div class=\"cz-panel collapsed\" id=\"panel-nuance\">\n            ${NuanceUI.render(obj)}\n        </div>\n    `;\n\n    this._setupPanelHandlers(obj);"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "VALIDATION — Vérifier que le fichier patché est correct : (1) panel-transform sans collapsed, (2) les 5 autres avec collapsed, (3) ordre panel-transform > panel-style > panel-disposition > panel-snapping > panel-typography > nuance, (4) tous les handlers de _setupPanelHandlers restent compatibles (ids panel-transform, panel-style, panel-disposition, panel-snapping, panel-typography inchangés).",
+      "type": "analysis",
+      "complexity": 0.15,
+      "estimated_tokens": 200,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "grep 'cz-panel collapsed' → 5 occurrences (pas 6)",
+        "grep 'id=\"panel-transform\"' → classe sans 'collapsed'",
+        "Ordre correct dans le HTML généré",
+        "NuanceUI.render(obj) toujours présent dans le template"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "auto_apply": false
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "TRANSFORMATION ouvert au chargement, 5 autres panels fermés",
+      "Ordre visuel : Transform > Style > Disposition > Snap > Typo > Nuance",
+      "Click sur panel-header toggle encore correctement (CSS .collapsed + .panel-header handler existant)",
+      "Aucune régression sur les handlers colors, sliders, transform inputs"
+    ],
+    "constraints": [
+      "ComponentsZone.feature.js : fichier unique modifié",
+      "Seule _renderSidebarPanels modifiée — aucune autre méthode touchée",
+      "Aucune nouvelle dépendance externe"
+    ],
+    "rapport_dans_roadmap": "Remplacer la section 'Mission 14F-P2-CLAUDE-TEST' dans ROADMAP.md par le rapport d'exécution."
+  }
+}

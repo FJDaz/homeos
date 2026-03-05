@@ -1,0 +1,149 @@
+{
+  "_meta": {
+    "description": "Bibliothèque de 20 styles de rendu SVG pour les cartes organe AetherFlow",
+    "usage": "Injecter le 'prompt_template' dans le contexte du designer UI pour générer un SVG stylisé",
+    "version": "1.0.0"
+  },
+  "styles": [
+    {
+      "id": "minimal",
+      "name": "Minimaliste",
+      "name_en": "Minimal",
+      "description": "Épure totale, lignes fines, espaces généreux",
+      "prompt_template": "Tu es un designer UI minimaliste. Génère une carte organe AetherFlow avec une esthétique épurée et essentielle. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Contraintes: Largeur 400px, hauteur auto. Palette: fond transparent, éléments en #1a1a1a uniquement, stroke 1px. PAS de couleurs, PAS d'ombres, PAS de gradients. Formes géométriques pures (carrés, cercles parfaits). Espacement généreux (24px). Typography: SF Mono, 11px, uppercase pour labels. UNIQUEMENT des guillemets doubles. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "brutalist",
+      "name": "Brutaliste",
+      "name_en": "Brutalist",
+      "description": "Bordures épaisses, contraste fort, formes brutes",
+      "prompt_template": "Tu es un designer UI brutaliste. Génère une carte organe AetherFlow avec un style brutaliste radical. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Style: bordures épaisses 4px noires (#000000), ombres dures décalées (4px 4px 0 #000), formes géométriques brutes, pas d'arrondis (rx=0). Palette: fond #ff6b6b ou #ffe66d (couleurs primaires vives), texte noir épais 900. Contraste maximum. Typography: Arial Black, systématiquement en gras. PAS de gradients. PAS d'anti-aliasing visuel. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "kids",
+      "name": "Enfant / Jeunesse",
+      "name_en": "Kids & Youth",
+      "description": "Couleurs vives, formes arrondies, style ludique",
+      "prompt_template": "Tu es un designer UI pour enfants. Génère une carte organe AetherFlow joyeuse et ludique. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: jaune #ffd93d, rouge #ff6b6b, bleu #6bcf7f, orange #ffa502. Formes très arrondies (rx=20). Petites décorations: étoiles, coeurs, petits cercles. Ombres douces colorées. Typography: Comic Sans MS ou rounded sans-serif, 13px friendly. Emojis simplifiés en SVG pour chaque composant. Style Play-Doh/plastique. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "neumorphism",
+      "name": "Neumorphisme Soft UI",
+      "name_en": "Neumorphism",
+      "description": "Effets de relief doux, ombres internes/externes",
+      "prompt_template": "Tu es un designer UI spécialisé en Neumorphism. Génère une carte organe AetherFlow avec effet Soft UI. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: fond unique #e0e5ec. Tous les éléments en relief avec doubles ombres: shadow-highlight #ffffff en haut-gauche, shadow-dark #a3b1c6 en bas-droite. PAS de bordures visibles. Formes arrondies rx=12. Effet 'pressed' pour éléments actifs (ombres inversées). Monochrome strict. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "glassmorphism",
+      "name": "Glassmorphism",
+      "name_en": "Glassmorphism",
+      "description": "Transparence, flou, effet verre dépoli",
+      "prompt_template": "Tu es un designer UI spécialisé en Glassmorphism. Génère une carte organe AetherFlow avec effet verre. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Fond: gradient coloré flou (#ff00cc → #3333ff) en arrière-plan. Carte: fill rgba(255,255,255,0.15), stroke rgba(255,255,255,0.3) 1px, backdrop-filter blur. Éléments: transparence variable, reflets blancs subtils. Border-radius généreux rx=16. Typography: SF Pro Display light, 12px. Style iOS 17. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "retro",
+      "name": "Rétro / Vintage",
+      "name_en": "Retro Vintage",
+      "description": "Esthétique années 70-80, teintes sépia",
+      "prompt_template": "Tu es un designer UI vintage. Génère une carte organe AetherFlow style années 70. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: orange brûlé #cc5500, moutarde #d4a574, olive #6b8e23, brun #8b4513, crème #f5f5dc. Texture subtile: grain de papier. Typography: Cooper Black ou serif vintage. Bordures doubles (2px + 4px décalé). Ombres longues dégradées (sunset effect). Style affiche de concert psychédélique. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "cyberpunk",
+      "name": "Cyberpunk",
+      "name_en": "Cyberpunk",
+      "description": "Néon, noir profond, glitch effects",
+      "prompt_template": "Tu es un designer UI cyberpunk. Génère une carte organe AetherFlow néon futuriste. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Fond: noir profond #0a0a0f. Accents néon: cyan #00ffff, magenta #ff00ff, jaune #ffff00. Glow effects sur tous les éléments actifs (filter glow). Lignes de grille en arrière-plan (matrix style). Typography: monospace sci-fi, 11px, lettres espacées. Éléments avec bordures néon pulsantes. Style Blade Runner. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "swiss",
+      "name": "Swiss Design / International Style",
+      "name_en": "Swiss Design",
+      "description": "Grille rigide, Helvetica, asymétrie constructive",
+      "prompt_template": "Tu es un designer UI suisse (Swiss Style). Génère une carte organe AetherFlow style Josef Müller-Brockmann. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Grille modulaire stricte 8px. Asymétrie délibérée. Palette: noir #000000, rouge #e30613, blanc #ffffff UNIQUEMENT. Typography: Helvetica Neue, Bold pour titres, Regular pour corps. Lignes de construction visibles (1px gris). Alignements à gauche stricts. Cercles rouges comme accents. Géométrie pure. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "material",
+      "name": "Material Design",
+      "name_en": "Material Design",
+      "description": "Ombres portées, surfaces, profondeur z-axis",
+      "prompt_template": "Tu es un designer UI Google Material Design. Génère une carte organe AetherFlow Material 3. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: fond #fffbfe, primary #6750a4, secondary #625b71, surface #fffbfe. Élévation via ombres: z1 à z4. Formes arrondies harmonisées (rx=12). Ripple effects suggérés. Icônes outlined 24px. Typography: Roboto, 12-14px. État 'hover' = tonalité de couleur. Contained buttons avec fond coloré. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "flat",
+      "name": "Flat Design",
+      "name_en": "Flat Design",
+      "description": "Pas de relief, couleurs plates, icônes simplifiées",
+      "prompt_template": "Tu es un designer UI Flat Design. Génère une carte organe AetherFlow style Windows 8 / iOS 7. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: couleurs primaires saturées plates (#3498db, #e74c3c, #2ecc71). ZERO ombre. ZERO gradient. ZERO bordure. Formes géométriques pures. Typography: Segoe UI, 13px, couleurs inversées sur fonds colorés. Long shadows optionnelles (45deg) si accent demandé. Simplicité radicale. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "skeuomorphism",
+      "name": "Skeuomorphisme",
+      "name_en": "Skeuomorphism",
+      "description": "Réalisme, textures, métal, cuir, bois",
+      "prompt_template": "Tu es un designer UI skeuomorphique. Génère une carte organe AetherFlow style iOS 6. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Textures réalistes: métal brossé (linearGradient silver), cuir (pattern), plastique glossy. Boutons 3D avec dégradé linéaire (haut clair, bas foncé). Ombres internes pour creux. Highlights blancs pour effet brillant. Biseaux subtils. Style réaliste tactile. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "art_nouveau",
+      "name": "Art Nouveau",
+      "name_en": "Art Nouveau",
+      "description": "Lignes organiques, végétal, Mucha, courbes",
+      "prompt_template": "Tu es un designer UI Art Nouveau. Génère une carte organe AetherFlow style Mucha / Horta. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Lignes fluides et organiques (courbes de Bézier). Motifs végétaux: tiges, feuilles, fleurs stylisées. Palette: vert sauge #9caf88, or vieilli #c9a961, ivoire #fffff0, mauve #b8a9c9. Typography: serif élégant avec empattements décoratifs. Bordures ornementales. Style naturel sinueux. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "art_deco",
+      "name": "Art Déco",
+      "name_en": "Art Deco",
+      "description": "Géométrie chic, dorures, années folles",
+      "prompt_template": "Tu es un designer UI Art Déco. Génère une carte organe AetherFlow style Gatsby / Chrysler Building. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Géométrie: zigzags, chevrons, arcs ensoleillés. Palette: or #d4af37, noir #0a0a0a, crème #f5f5dc, émeraude #50c878. Lignes dorées fines et épaisses alternées. Symétrie parfaite. Typography: Broadway ou serif géométrique, majuscules élégantes. Sunburst patterns. Luxe et glamour. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "bauhaus",
+      "name": "Bauhaus",
+      "name_en": "Bauhaus",
+      "description": "Forme suit fonction, primaires, géométrie",
+      "prompt_template": "Tu es un designer UI Bauhaus. Génère une carte organe AetherFlow style École de Dessau. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette primaire pur: rouge #ff0000, jaune #ffcc00, bleu #0066cc, NOIR #000000. Formes géométriques de base: cercles, triangles, rectangles UNIQUEMENT. Superposition d'éléments primaires. Diagonales à 45°. Typography: Bauhaus / Futura, géométrique sans-serif. Fonction avant forme. Équilibre asymétrique. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "dark_mode",
+      "name": "Dark Mode / Midnight",
+      "name_en": "Dark Mode",
+      "description": "Fond sombre, accents colorés, contrastes maîtrisés",
+      "prompt_template": "Tu es un designer UI Dark Mode. Génère une carte organe AetherFlow thème nuit. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Fond: gris très foncé #1c1c1e ou noir #000000. Surfaces: gris #2c2c2e. Texte: blanc #ffffff ou gris clair #98989d. Accents: bleu #0a84ff, vert #30d158, indigo #5e5ce6. Élévation via gris plus clairs (pas d'ombres). Contrastes WCAG AAA. Typography: SF Pro Text, 12px. Style iOS Dark Mode natif. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "pastel",
+      "name": "Pastel / Soft",
+      "name_en": "Pastel Soft",
+      "description": "Couleurs pastel douces, ambiance douceur",
+      "prompt_template": "Tu es un designer UI Pastel. Génère une carte organe AetherFlow douce et apaisante. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette pastel: rose #ffd1dc, bleu ciel #b5eadd, lavande #e6e6fa, pêche #ffdab9, menthe #f5fffa. Aucun noir: gris très doux #6b7280 pour le texte. Bordures subtiles 0.5px. Formes très arrondies rx=16. Ombres ultra-douces. Typography: Quicksand ou rounded, 13px doux. Style Kawaii soft. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "high_contrast",
+      "name": "High Contrast / Accessibilité",
+      "name_en": "High Contrast",
+      "description": "Contraste maximum, lisibilité prioritaire",
+      "prompt_template": "Tu es un designer UI accessibilité. Génère une carte organe AetherFlow haute lisibilité. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Palette: fond noir #000000, texte blanc #ffffff UNIQUEMENT. Bordures épaisses 3px blanches. ZéRO gris. Formes larges, espacement 20px minimum. Typography: system-ui bold, 14px minimum. Focus indicators visibles 4px jaune. Respect WCAG AAA. Pas de transparence. Clair et net. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "hand_drawn",
+      "name": "Hand Drawn / Sketch",
+      "name_en": "Hand Drawn",
+      "description": "Style croquis, traits irréguliers, papier",
+      "prompt_template": "Tu es un designer UI sketch à main levée. Génère une carte organe AetherFlow style carnet de croquis. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Lignes: stroke-linecap=round, stroke irrégulier (simuler wobble), couleur #2d3436. Fond papier: #fdfbf7 avec texture subtile. Éléments comme dessinés au feutre. Ratures volontaires. Annotations manuscrites. Typography: Patrick Hand ou cursive, 14px. Style wireframe dessiné. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "isometric",
+      "name": "3D Isométrique",
+      "name_en": "Isometric 3D",
+      "description": "Perspective isométrique, profondeur 3D",
+      "prompt_template": "Tu es un designer UI 3D isométrique. Génère une carte organe AetherFlow en perspective isométrique. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Perspective: 30° isométrique. Éléments avec 3 faces visibles (haut, gauche, droite). Couleurs: teinte principale + 20% plus foncé (droite) + 40% plus foncé (gauche). Ombres portées 3D. Cubes, blocs empilables. Grid isométrique en arrière-plan. Style City Builder. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    },
+    {
+      "id": "memphis",
+      "name": "Memphis Design",
+      "name_en": "Memphis Milano",
+      "description": "Ettore Sottsass, motifs géométriques flashy",
+      "prompt_template": "Tu es un designer UI Memphis Milano. Génère une carte organe AetherFlow style Sottsass années 80. Organe: {organ.id} - '{organ.name}'. Composants ({N}): [liste]. Motifs: squiggles (lignes ondulées), pois, triangles, rayures bicolores. Palette néon: rose shocking #ff006e, turquoise #00f5d4, jaune #fee440, noir motifs. Asymétrie joyeuse. Éléments décalés volontairement. Patterns géométriques en arrière-plan. Typography: futura bold, playful. Anti-minimaliste. Répondre JSON: {\"h\": int, \"svg\": \"<g>...</g>\"}"
+    }
+  ]
+}

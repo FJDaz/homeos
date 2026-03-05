@@ -1,0 +1,138 @@
+{
+  "task_id": "stenciler_v3_14f_p1_claude_test",
+  "description": "Mission 14F-P1 (TEST CLAUDE) — Supprimer les contrôles HTTP (select méthode GET/POST/PUT/DELETE/PATCH + input endpoint URL) et la classe edit-mode des cartes atome dans ComponentsZone.feature.js. Fix 1 de la mission 14F-BUGS. Fichier unique : ComponentsZone.feature.js.",
+  "metadata": {
+    "created_at": "2026-03-01T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "project_context": "Stenciler V3 — Modular Feature Architecture. SVG natif (pas Fabric.js). Genome N0→N1→N2→N3. Event bus CustomEvent pour communication inter-features. Sidebar N3 = ComponentsZone._renderCelluleView(). Les cartes atome contiennent des résidus d'interface développeur (HTTP method select + URL endpoint input) à supprimer : le canvas est un outil DA, pas un éditeur d'API.",
+    "mission": "14F-P1",
+    "phase": "Phase 14 — Canvas Illustrateur",
+    "actor": "CLAUDE",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "ANALYSE — Lire ComponentsZone.feature.js. Confirmer : (1) classe edit-mode sur div.component-card atom-card (~L206), (2) bloc select.atom-method-select avec options GET/POST/PUT/DELETE/PATCH (~L208-212), (3) div.atom-endpoint-row avec span endpoint-label + input.atom-endpoint-input (~L215-218), (4) objet inputs avec method + endpoint dans _setupCelluleListeners (~L243-248), (5) références atom.method, atom.endpoint, inputs.method.className dans updateFn (~L251-257).",
+      "type": "analysis",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": [],
+      "validation_criteria": [
+        "Classe edit-mode confirmée sur div.component-card atom-card",
+        "select.atom-method-select avec 5 options HTTP confirmé",
+        "div.atom-endpoint-row avec input.atom-endpoint-input confirmé",
+        "inputs object contient method et endpoint dans _setupCelluleListeners",
+        "updateFn écrit atom.method, atom.endpoint, et réassigne inputs.method.className"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm"
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "PATCH _renderCelluleView — Modifier le template de carte atome. Remplacer le bloc depuis '<div class=\"component-card atom-card edit-mode\"' jusqu'à '</div>' (fin du bloc carte) pour : (1) supprimer la classe edit-mode, (2) supprimer entièrement le select.atom-method-select avec ses 5 options, (3) supprimer entièrement div.atom-endpoint-row (span + input endpoint). Garder uniquement l'input.atom-name-input dans atom-header et textarea.atom-desc-input.",
+      "type": "patch",
+      "complexity": 0.5,
+      "estimated_tokens": 600,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "div.component-card n'a plus la classe edit-mode",
+        "Aucun select avec options GET/POST/PUT/DELETE/PATCH dans le template",
+        "Aucun div.atom-endpoint-row ni input.atom-endpoint-input dans le template",
+        "atom-name-input préservé dans atom-header",
+        "atom-desc-input (textarea) préservé"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "input_files": [
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json",
+          "Frontend/3. STENCILER/static/css/stenciler.css"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "patch": {
+          "position": "replace",
+          "marker_start": "                <div class=\"component-card atom-card edit-mode\" data-id=\"${atom.id}\">",
+          "marker_end": "                    <textarea class=\"atom-desc-input\" placeholder=\"Description UI...\">${atom.description_ui || ''}</textarea>\n                </div>",
+          "idempotent": true
+        },
+        "replacement": "                <div class=\"component-card atom-card\" data-id=\"${atom.id}\">\n                    <div class=\"atom-header\">\n                        <input type=\"text\" class=\"atom-name-input\" value=\"${atom.name}\" spellcheck=\"false\" placeholder=\"Nom de l'atome\">\n                    </div>\n                    <textarea class=\"atom-desc-input\" placeholder=\"Description UI...\">${atom.description_ui || ''}</textarea>\n                </div>"
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "PATCH _setupCelluleListeners — Nettoyer l'objet inputs et updateFn. (1) Dans const inputs : supprimer les entrées method (atom-method-select) et endpoint (atom-endpoint-input). (2) Dans updateFn : supprimer les lignes atom.method = inputs.method.value, atom.endpoint = inputs.endpoint.value, et la ligne inputs.method.className = ... Le visual feedback LED (saving/idle) et le dispatch genome:updated doivent être préservés.",
+      "type": "patch",
+      "complexity": 0.4,
+      "estimated_tokens": 500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "inputs ne contient plus les clés method ni endpoint",
+        "updateFn ne lit plus inputs.method ni inputs.endpoint",
+        "atom.method et atom.endpoint ne sont plus écrits dans updateFn",
+        "atom.name = inputs.name.value préservé",
+        "atom.description_ui = inputs.desc.value préservé",
+        "visual feedback LED saving/idle préservé",
+        "dispatch genome:updated préservé"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm",
+        "patch": {
+          "position": "replace",
+          "marker_start": "      const inputs = {",
+          "marker_end": "      Object.values(inputs).forEach(input => {",
+          "idempotent": true
+        },
+        "replacement": "      const inputs = {\n        name: card.querySelector('.atom-name-input'),\n        desc: card.querySelector('.atom-desc-input')\n      };\n\n      const updateFn = () => {\n        atom.name = inputs.name.value;\n        atom.description_ui = inputs.desc.value;\n\n        // Visual feedback\n        if (led) {\n          led.className = 'cz-led saving';\n          setTimeout(() => { if (led) led.className = 'cz-led idle'; }, 2000);\n        }\n\n        console.log(`[Persistence] Updated atom ${atomId}`);\n        document.dispatchEvent(new CustomEvent('genome:updated', {\n          detail: { type: 'n3', id: atomId, genome: this.genome }\n        }));\n      };\n\n      Object.values(inputs).forEach(input => {"
+      }
+    },
+    {
+      "id": "step_4",
+      "description": "VALIDATION — Vérifier que ComponentsZone.feature.js patché est cohérent : (1) aucun select HTTP, aucun endpoint input dans le template, (2) inputs = {name, desc} uniquement, (3) updateFn ne référence plus method ni endpoint, (4) persistence LED et genome:updated intacts.",
+      "type": "analysis",
+      "complexity": 0.2,
+      "estimated_tokens": 300,
+      "dependencies": ["step_2", "step_3"],
+      "validation_criteria": [
+        "grep 'atom-method-select' → 0 résultat",
+        "grep 'atom-endpoint-input' → 0 résultat",
+        "grep 'edit-mode' → 0 résultat dans les templates",
+        "grep 'genome:updated' → au moins 1 résultat (dispatch préservé)",
+        "grep 'atom-name-input' → au moins 1 résultat dans le template et dans inputs"
+      ],
+      "context": {
+        "files": [
+          "Frontend/3. STENCILER/static/js/features/ComponentsZone.feature.js"
+        ],
+        "language": "javascript",
+        "framework": "vanilla-js-esm"
+      }
+    }
+  ],
+  "success_criteria": {
+    "functional": [
+      "N3 sidebar : zéro select HTTP method, zéro input endpoint URL, zéro classe edit-mode",
+      "atom-name-input fonctionnel : changement déclenche persistence via genome:updated",
+      "atom-desc-input fonctionnel : changement déclenche persistence via genome:updated",
+      "LED saving/idle visible lors de la modification d'un atom"
+    ],
+    "constraints": [
+      "ComponentsZone.feature.js : fichier unique modifié",
+      "Aucune nouvelle dépendance externe",
+      "Vanilla JS uniquement",
+      "Aucune modification des autres fichiers"
+    ],
+    "rapport_dans_roadmap": "Remplacer la section 'Mission 14F-P1-CLAUDE-TEST' dans ROADMAP.md par le rapport d'exécution."
+  }
+}

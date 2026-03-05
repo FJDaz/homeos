@@ -11,21 +11,26 @@ Mission 18A — 2026-03-02
 def _comp_html(comp):
     """N3 visual_hint → snippet Flowbite HTML."""
     vh   = comp.get('visual_hint', 'button')
-    name = comp.get('name', comp.get('id', 'Component'))
     gid  = comp.get('id', '')
+    name = comp.get('name', gid or 'Component')
+    
+    # F1 — Rename label (contenteditable wrapper)
+    label = f'<span class="genome-label" data-genome-id="{gid}">{name}</span>'
+    
     w    = f'data-genome-id="{gid}" data-hint="{vh}"'
+    content = ""
 
     if vh in ('button', 'apply-changes'):
-        return f'<button type="button" {w} class="genome-comp text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">{name}</button>'
+        content = f'<button type="button" {w} class="genome-comp text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">{label}</button>'
 
     elif vh == 'launch-button':
-        return f'<button type="button" {w} class="genome-comp w-full text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 font-semibold rounded-xl text-base px-6 py-3">{name}</button>'
+        content = f'<button type="button" {w} class="genome-comp w-full text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 font-semibold rounded-xl text-base px-6 py-3">{label}</button>'
 
     elif vh == 'stepper':
-        return f'''<div {w} class="genome-comp">
+        content = f'''<div {w} class="genome-comp">
   <ol class="flex items-center w-full text-xs text-gray-500">
     <li class="flex items-center text-blue-600 after:content-[\\'\\'] after:w-full after:h-0.5 after:bg-blue-200 after:mx-2">
-      <span class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full shrink-0 mr-1">1</span>{name}
+      <span class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full shrink-0 mr-1">1</span>{label}
     </li>
     <li class="flex items-center after:content-[\\'\\'] after:w-full after:h-0.5 after:bg-gray-200 after:mx-2">
       <span class="flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full shrink-0 mr-1">2</span>Étape 2
@@ -37,22 +42,22 @@ def _comp_html(comp):
 </div>'''
 
     elif vh == 'breadcrumb':
-        return f'''<nav {w} aria-label="Breadcrumb" class="genome-comp">
+        content = f'''<nav {w} aria-label="Breadcrumb" class="genome-comp">
   <ol class="inline-flex items-center space-x-1 text-sm">
     <li><a href="#" class="text-gray-500 hover:text-blue-600">Accueil</a></li>
-    <li><span class="mx-1 text-gray-400">/</span><span class="text-gray-700 font-medium">{name}</span></li>
+    <li><span class="mx-1 text-gray-400">/</span><span class="text-gray-700 font-medium">{label}</span></li>
   </ol>
 </nav>'''
 
     elif vh in ('chat/bubble', 'chat'):
-        return f'''<div {w} class="genome-comp flex items-start gap-2">
+        content = f'''<div {w} class="genome-comp flex items-start gap-2">
   <div class="flex flex-col max-w-xs leading-1.5 p-3 bg-gray-100 rounded-e-xl rounded-es-xl">
-    <p class="text-sm text-gray-900">{name}</p>
+    <p class="text-sm text-gray-900">{label}</p>
   </div>
 </div>'''
 
     elif vh == 'chat-input':
-        return f'''<div {w} class="genome-comp flex items-center gap-2 p-2 bg-gray-50 border border-gray-300 rounded-lg">
+        content = f'''<div {w} class="genome-comp flex items-center gap-2 p-2 bg-gray-50 border border-gray-300 rounded-lg">
   <input type="text" class="flex-1 text-sm bg-white border border-gray-200 rounded-lg p-2 focus:ring-blue-500" placeholder="{name}...">
   <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full">
     <svg class="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 18 20"><path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/></svg>
@@ -60,15 +65,15 @@ def _comp_html(comp):
 </div>'''
 
     elif vh == 'choice-card':
-        return f'''<div {w} class="genome-comp p-3 bg-white border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-50">
-  <h5 class="text-sm font-semibold text-gray-900">{name}</h5>
+        content = f'''<div {w} class="genome-comp p-3 bg-white border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-50">
+  <h5 class="text-sm font-semibold text-gray-900">{label}</h5>
   <p class="text-xs text-gray-500 mt-0.5">Sélectionner</p>
 </div>'''
 
     elif vh in ('dashboard', 'status'):
-        return f'''<div {w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+        content = f'''<div {w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
   <p class="text-2xl font-bold text-gray-700">—</p>
-  <p class="text-xs text-gray-500 mt-1">{name}</p>
+  <p class="text-xs text-gray-500 mt-1">{label}</p>
   <span class="inline-flex items-center mt-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
     <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>Actif
   </span>
@@ -76,31 +81,31 @@ def _comp_html(comp):
 
     elif vh == 'accordion':
         uid = gid.replace('_', '-')
-        return f'''<div {w} class="genome-comp" id="acc-{uid}" data-accordion="collapse">
+        content = f'''<div {w} class="genome-comp" id="acc-{uid}" data-accordion="collapse">
   <h2 id="h-{uid}">
     <button type="button" class="flex items-center justify-between w-full p-3 font-medium text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50"
       data-accordion-target="#b-{uid}" aria-expanded="false" aria-controls="b-{uid}">
-      <span>{name}</span>
+      <span>{label}</span>
       <svg class="w-3 h-3 rotate-180 shrink-0" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/></svg>
     </button>
   </h2>
   <div id="b-{uid}" class="hidden" aria-labelledby="h-{uid}">
-    <div class="p-3 border border-t-0 border-gray-200 rounded-b-lg text-xs text-gray-500">Contenu : {name}</div>
+    <div class="p-3 border border-t-0 border-gray-200 rounded-b-lg text-xs text-gray-500">Contenu : {label}</div>
   </div>
 </div>'''
 
     elif vh == 'upload':
-        return f'''<div {w} class="genome-comp flex items-center justify-center w-full">
+        content = f'''<div {w} class="genome-comp flex items-center justify-center w-full">
   <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
     <svg class="w-7 h-7 mb-2 text-gray-400" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
-    <p class="text-xs text-gray-500">{name}</p>
+    <p class="text-xs text-gray-500">{label}</p>
     <input type="file" class="hidden">
   </label>
 </div>'''
 
     elif vh == 'color-palette':
-        return f'''<div {w} class="genome-comp">
-  <p class="text-xs text-gray-400 mb-2">{name}</p>
+        content = f'''<div {w} class="genome-comp">
+  <p class="text-xs text-gray-400 mb-2">{label}</p>
   <div class="flex gap-2">
     <div class="w-7 h-7 rounded-full bg-blue-400 border border-white shadow" title="#60a5fa"></div>
     <div class="w-7 h-7 rounded-full bg-rose-400 border border-white shadow" title="#fb7185"></div>
@@ -111,20 +116,20 @@ def _comp_html(comp):
 </div>'''
 
     elif vh in ('grid', 'layout'):
-        return f'''<div {w} class="genome-comp">
+        content = f'''<div {w} class="genome-comp">
   <div class="grid grid-cols-3 gap-1.5">
     <div class="h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">A</div>
     <div class="h-10 bg-blue-50 border border-blue-200 rounded flex items-center justify-center text-xs text-blue-500 font-medium">B</div>
     <div class="h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">C</div>
   </div>
-  <p class="text-xs text-gray-400 mt-1">{name}</p>
+  <p class="text-xs text-gray-400 mt-1">{label}</p>
 </div>'''
 
     elif vh == 'table':
-        return f'''<div {w} class="genome-comp overflow-x-auto rounded-lg border border-gray-200">
+        content = f'''<div {w} class="genome-comp overflow-x-auto rounded-lg border border-gray-200">
   <table class="w-full text-xs text-left text-gray-500">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-      <tr><th class="px-3 py-2">ID</th><th class="px-3 py-2">{name}</th><th class="px-3 py-2">Status</th></tr>
+      <tr><th class="px-3 py-2">ID</th><th class="px-3 py-2">{label}</th><th class="px-3 py-2">Status</th></tr>
     </thead>
     <tbody>
       <tr class="bg-white border-b"><td class="px-3 py-2">001</td><td class="px-3 py-2">Item A</td><td class="px-3 py-2"><span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded">OK</span></td></tr>
@@ -134,47 +139,57 @@ def _comp_html(comp):
 </div>'''
 
     elif vh in ('stencil-card', 'detail-card', 'card'):
-        return f'''<div {w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-  <h5 class="text-sm font-semibold text-gray-900 mb-1">{name}</h5>
+        content = f'''<div {w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+  <h5 class="text-sm font-semibold text-gray-900 mb-1">{label}</h5>
   <p class="text-xs text-gray-500">Détails et recommandations</p>
   <a href="#" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Voir →</a>
 </div>'''
 
     elif vh == 'preview':
-        return f'''<div {w} class="genome-comp p-2 bg-gray-50 border border-gray-200 rounded-lg">
+        content = f'''<div {w} class="genome-comp p-2 bg-gray-50 border border-gray-200 rounded-lg">
   <div class="h-20 bg-gray-200 rounded flex items-center justify-center text-gray-400">
     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
   </div>
-  <p class="text-xs text-gray-500 mt-1">{name}</p>
+  <p class="text-xs text-gray-500 mt-1">{label}</p>
 </div>'''
 
     elif vh in ('modal', 'confirm'):
-        return f'<button {w} type="button" class="genome-comp text-blue-700 bg-white border border-blue-300 hover:bg-blue-50 font-medium rounded-lg text-sm px-4 py-2">{name}</button>'
+        content = f'<button {w} type="button" class="genome-comp text-blue-700 bg-white border border-blue-300 hover:bg-blue-50 font-medium rounded-lg text-sm px-4 py-2">{label}</button>'
 
     elif vh == 'download':
-        return f'''<a href="#" {w} class="genome-comp inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2">
+        content = f'''<a href="#" {w} class="genome-comp inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2">
   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-  {name}
+  {label}
 </a>'''
 
     elif vh == 'zoom-controls':
-        return f'''<div {w} class="genome-comp inline-flex rounded-md shadow-sm" role="group">
+        content = f'''<div {w} class="genome-comp inline-flex rounded-md shadow-sm" role="group">
   <button type="button" class="px-3 py-1.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100">−</button>
-  <button type="button" class="px-3 py-1.5 text-sm text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100">{name}</button>
+  <button type="button" class="px-3 py-1.5 text-sm text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100">{label}</button>
   <button type="button" class="px-3 py-1.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100">+</button>
 </div>'''
 
     elif vh == 'form':
-        return f'''<form {w} class="genome-comp space-y-2">
+        content = f'''<form {w} class="genome-comp space-y-2">
   <div>
-    <label class="block text-xs font-medium text-gray-700 mb-1">{name}</label>
+    <label class="block text-xs font-medium text-gray-700 mb-1">{label}</label>
     <input type="text" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2 focus:ring-blue-500">
   </div>
   <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">Valider</button>
 </form>'''
 
     else:
-        return f'<span {w} class="genome-comp inline-flex items-center bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full">{name} <span class="text-xs text-gray-400 ml-1.5">({vh})</span></span>'
+        content = f'<span {w} class="genome-comp inline-flex items-center bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full">{label} <span class="text-xs text-gray-400 ml-1.5">({vh})</span></span>'
+
+    # F2 — Hint Picker wrapper + button
+    hint_picker = f'''<button class="hint-picker absolute top-0 right-0 hidden group-hover:block
+                 text-xs bg-gray-700 text-white rounded px-1 py-0.5 z-10"
+          data-genome-id="{gid}">⚙</button>'''
+    
+    return f'''<div class="genome-comp-wrapper relative group" data-genome-id="{gid}" data-hint="{vh}">
+  {content}
+  {hint_picker}
+</div>'''
 
 
 def _render_organ_card(organ):
@@ -187,8 +202,12 @@ def _render_organ_card(organ):
         feat_name = feat.get('name', '')
         if feat_name:
             body += f'<p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2 mt-3 first:mt-0">{feat_name}</p>'
+        
+        # F3 — Drag-and-drop organ list
+        body += f'<div class="genome-comp-list space-y-2" data-organ-id="{gid}">'
         for comp in feat.get('n3_components', []):
-            body += f'<div class="mb-2">{_comp_html(comp)}</div>'
+            body += f'<div>{_comp_html(comp)}</div>'
+        body += '</div>'
 
     return f'''
 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-genome-id="{gid}">
@@ -238,11 +257,14 @@ def render_genome_preview(genome, phase_id=None):
   <title>Preview — {phase_title}</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <style>
     body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }}
     .genome-comp {{ transition: outline 0.1s; cursor: default; display: block; }}
     .genome-comp:hover {{ outline: 2px solid #3b82f6; outline-offset: 3px; border-radius: 4px; }}
     .genome-selected {{ outline: 3px solid #f59e0b !important; outline-offset: 3px; border-radius: 4px; }}
+    .genome-label {{ cursor: pointer; }}
+    .genome-label[contenteditable="true"] {{ background: white; color: black; outline: 1px solid blue; padding: 0 4px; }}
   </style>
 </head>
 <body class="bg-stone-50">
@@ -268,12 +290,77 @@ def render_genome_preview(genome, phase_id=None):
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   <script>
-    document.querySelectorAll('[data-genome-id]').forEach(el => {{
+    // F1 — Rename inline
+    document.querySelectorAll('.genome-label').forEach(span => {{
+      span.addEventListener('dblclick', (e) => {{
+        e.stopPropagation();
+        span.contentEditable = 'true';
+        span.focus();
+      }});
+      span.addEventListener('blur', async () => {{
+        span.contentEditable = 'false';
+        const id = span.dataset.genomeId;
+        const value = span.textContent.trim();
+        await fetch(`/api/genome/node/${{id}}`, {{
+          method: 'PATCH',
+          headers: {{'Content-Type': 'application/json'}},
+          body: JSON.stringify({{ field: 'name', value }})
+        }});
+      }});
+      span.addEventListener('keydown', (e) => {{
+        if (e.key === 'Enter') {{
+            e.preventDefault();
+            span.blur();
+        }}
+      }});
+    }});
+
+    // F2 — Change visual_hint
+    const HINTS = ['button','launch-button','stepper','breadcrumb','chat/bubble',
+      'chat-input', 'chat', 'choice-card','dashboard','accordion','upload','color-palette',
+      'grid', 'layout', 'table','stencil-card','detail-card','preview','modal','download',
+      'zoom-controls','form'];
+
+    document.querySelectorAll('.hint-picker').forEach(btn => {{
+      btn.addEventListener('click', async (e) => {{
+        e.stopPropagation();
+        const id = btn.dataset.genomeId;
+        const current = btn.closest('[data-hint]').dataset.hint;
+        const chosen = prompt(`Visual hint actuel: ${{current}}\\nChoisir:\\n${{HINTS.join(', ')}}`, current);
+        if (!chosen || !HINTS.includes(chosen)) return;
+        await fetch(`/api/genome/node/${{id}}`, {{
+          method: 'PATCH',
+          headers: {{'Content-Type': 'application/json'}},
+          body: JSON.stringify({{ field: 'visual_hint', value: chosen }})
+        }});
+        location.reload();
+      }});
+    }});
+
+    // F3 — Drag-and-drop reorder
+    document.querySelectorAll('.genome-comp-list').forEach(list => {{
+      Sortable.create(list, {{
+        animation: 150,
+        handle: '.genome-comp-wrapper', // Can drag anywhere on the component
+        onEnd: async () => {{
+          const organId = list.dataset.organId;
+          const order = [...list.querySelectorAll('.genome-comp-wrapper')]
+            .map(el => el.dataset.genomeId);
+          await fetch(`/api/genome/organ/${{organId}}/reorder`, {{
+            method: 'PATCH',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{ order }})
+          }});
+        }}
+      }});
+    }});
+
+    // Visual feedback for selection
+    document.querySelectorAll('.genome-comp-wrapper').forEach(el => {{
       el.addEventListener('click', function(e) {{
         if (['INPUT','BUTTON','A','LABEL'].includes(e.target.tagName)) return;
         document.querySelectorAll('.genome-selected').forEach(x => x.classList.remove('genome-selected'));
         this.classList.add('genome-selected');
-        console.log('genome:', this.dataset.genomeId);
       }});
     }});
   </script>

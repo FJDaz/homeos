@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 320">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#f05e23"/>
+    </linearGradient>
+    <linearGradient id="hoverGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#97ea90"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Card Background -->
+  <rect x="0" y="0" width="520" height="320" rx="12" fill="#ffffff" filter="url(#shadow)"/>
+  
+  <!-- Header Section -->
+  <rect x="24" y="24" width="472" height="48" rx="8" fill="#f8f7f4"/>
+  <text x="44" y="54" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Layout Preview</text>
+  
+  <!-- Status Badge -->
+  <rect x="380" y="32" width="100" height="32" rx="9999" fill="#97ea90" fill-opacity="0.2"/>
+  <circle cx="400" cy="48" r="4" fill="#97ea90"/>
+  <text x="412" y="52" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515" letter-spacing="1.5">ACTIVE</text>
+  
+  <!-- Preview Grid - Layout Visualization -->
+  <g transform="translate(24, 88)">
+    <!-- Sidebar -->
+    <rect x="0" y="0" width="72" height="160" rx="6" fill="#f8f7f4"/>
+    <rect x="12" y="16" width="48" height="8" rx="4" fill="#151515" fill-opacity="0.1"/>
+    <rect x="12" y="32" width="36" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <rect x="12" y="44" width="40" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <rect x="12" y="56" width="32" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <rect x="12" y="80" width="48" height="8" rx="4" fill="#151515" fill-opacity="0.1"/>
+    <rect x="12" y="96" width="36" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <rect x="12" y="108" width="40" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    
+    <!-- Main Content Area -->
+    <rect x="88" y="0" width="208" height="160" rx="6" fill="#f8f7f4"/>
+    <!-- Header -->
+    <rect x="104" y="16" width="120" height="12" rx="6" fill="#151515" fill-opacity="0.1"/>
+    <rect x="104" y="36" width="176" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <rect x="104" y="48" width="144" height="6" rx="3" fill="#151515" fill-opacity="0.06"/>
+    <!-- Content Cards -->
+    <rect x="104" y="72" width="80" height="64" rx="6" fill="#ffffff"/>
+    <rect x="112" y="84" width="48" height="6" rx="3" fill="#151515" fill-opacity="0.1"/>
+    <rect x="112" y="96" width="56" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="112" y="104" width="44" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="112" y="116" width="32" height="12" rx="6" fill="#ffd548" fill-opacity="0.3"/>
+    
+    <rect x="200" y="72" width="80" height="64" rx="6" fill="#ffffff"/>
+    <rect x="208" y="84" width="48" height="6" rx="3" fill="#151515" fill-opacity="0.1"/>
+    <rect x="208" y="96" width="56" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="208" y="104" width="44" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="208" y="116" width="32" height="12" rx="6" fill="#1258ca" fill-opacity="0.2"/>
+    
+    <!-- Right Panel -->
+    <rect x="312" y="0" width="160" height="160" rx="6" fill="#f8f7f4"/>
+    <rect x="328" y="16" width="80" height="8" rx="4" fill="#151515" fill-opacity="0.1"/>
+    <rect x="328" y="36" width="128" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="328" y="44" width="112" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <rect x="328" y="52" width="96" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    <!-- Stats -->
+    <rect x="328" y="76" width="56" height="32" rx="6" fill="#ffffff"/>
+    <rect x="336" y="84" width="24" height="6" rx="3" fill="#97ea90"/>
+    <rect x="336" y="96" width="32" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    
+    <rect x="400" y="76" width="56" height="32" rx="6" fill="#ffffff"/>
+    <rect x="408" y="84" width="24" height="6" rx="3" fill="#f05e23"/>
+    <rect x="408" y="96" width="32" height="4" rx="2" fill="#151515" fill-opacity="0.06"/>
+    
+    <!-- Action Button in Preview -->
+    <rect x="328" y="124" width="128" height="28" rx="6" fill="url(#accentGradient)"/>
+    <text x="392" y="143" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">Preview</text>
+  </g>
+  
+  <!-- Selection Indicator -->
+  <rect x="24" y="264" width="472" height="32" rx="6" fill="#ffd548" fill-opacity="0.1"/>
+  <circle cx="44" cy="280" r="8" fill="#ffd548"/>
+  <path d="M40 280 L43 283 L48 277" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="284" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#151515">Selected: Dashboard Grid Layout</text>
+  
+  <!-- Meta Info -->
+  <text x="380" y="284" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#151515" fill-opacity="0.5" letter-spacing="1.5">ID: LYT-2847</text>
+</svg>

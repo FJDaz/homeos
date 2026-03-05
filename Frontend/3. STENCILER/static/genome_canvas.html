@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genome Canvas</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    #genome-canvas {
+      position: relative;
+      min-height: 700px;
+      background: #f0efeb;
+      background-image: radial-gradient(circle, #d5d4d0 1px, transparent 1px);
+      background-size: 24px 24px;
+      overflow: visible;
+    }
+
+    .organ-container {
+      position: absolute;
+      border: 1px solid #d5d4d0;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: move;
+      min-width: 200px;
+    }
+
+    .organ-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #3d3d3c;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+
+    .component-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .genome-comp {
+      transition: outline 0.1s;
+      cursor: default;
+      display: block;
+    }
+
+    .genome-comp:hover {
+      outline: 2px solid #a8c5fc;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .resize-handle {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 14px; height: 14px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 50%, #c5c4c0 50%);
+      border-bottom-right-radius: 8px;
+    }
+
+    .resize-handle-s {
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 40px; height: 6px;
+      cursor: s-resize;
+      background: #d5d4d0;
+      border-radius: 3px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .organ-container:hover .resize-handle-s { opacity: 1; }
+
+    /* Drill-down overlay */
+    #drill-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(240,239,235,0.96);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    #drill-inner {
+      width: 95%;
+      max-width: 1200px;
+      height: 90%;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #d5d4d0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #drill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0efeb;
+      flex-shrink: 0;
+    }
+
+    #drill-cols {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      overflow-x: auto;
+      flex: 1;
+      background: #f7f6f2;
+    }
+
+    .drill-col {
+      min-width: 260px;
+      background: white;
+      border: 1px solid #d5d4d0;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drill-col-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    /* Focus mode */
+    #focus-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(240,239,235,0.75);
+      z-index: 100;
+    }
+
+    .organ-container.focused {
+      z-index: 200;
+      min-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      cursor: default;
+    }
+
+    .phase-tab {
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: #6a6a69;
+      text-decoration: none;
+    }
+    .phase-tab.active {
+      border-bottom-color: #3d3d3c;
+      color: #3d3d3c;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+
+  <header style="background:white; border-bottom:1px solid #d5d4d0; display:flex; align-items:center; padding:0 20px; height:44px;">
+    <span style="font-size:13px; font-weight:600; color:#3d3d3c; margin-right:24px;">Genome Canvas</span>
+    <div id="phase-tabs" style="display:flex;"></div>
+    <a href="/stenciler" style="margin-left:auto; font-size:11px; color:#999; text-decoration:none;">Stenciler →</a>
+  </header>
+
+  <div id="genome-canvas"></div>
+
+  <!-- Drill-down -->
+  <div id="drill-overlay" style="display:none;">
+    <div id="drill-inner">
+      <div id="drill-header">
+        <span id="drill-title" style="font-size:14px;font-weight:600;color:#3d3d3c;"></span>
+        <button onclick="exitDrillDown()" style="background:none;border:1px solid #d5d4d0;padding:4px 12px;border-radius:6px;font-size:12px;color:#6a6a69;cursor:pointer;">Fermer ✕</button>
+      </div>
+      <div id="drill-cols"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script>
+    let _genome = null;
+    let _layout = {};
+    let _activePhaseIdx = 0;
+    let _focusedOrgan = null;
+    let _focusedContent = null;
+    let _mdX = 0, _mdY = 0;
+
+    // ─── Component renderer ─────────────────────────────────────────────────────
+    function _comp_html(comp) {
+      const vh = comp.visual_hint || 'button';
+      const gid = comp.id || '';
+      const name = comp.name || gid || 'Component';
+      const w = `data-genome-id="${gid}" data-hint="${vh}"`;
+
+      if (vh === 'button' || vh === 'apply-changes') {
+        return `<button type="button" ${w} class="genome-comp text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">${name}</button>`;
+      } else if (vh === 'launch-button') {
+        return `<button type="button" ${w} class="genome-comp w-full text-white bg-gradient-to-r from-blue-500 to-blue-700 font-semibold rounded-xl text-base px-6 py-3">${name}</button>`;
+      } else if (vh === 'stepper') {
+        return `<div ${w} class="genome-comp"><ol class="flex items-center w-full text-xs text-gray-500">
+          <li class="flex items-center after:content-[''] after:w-full after:h-0.5 after:bg-gray-200 after:mx-2 text-blue-600">
+            <span class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full shrink-0 mr-1">1</span>${name}
+          </li>
+          <li class="flex items-center"><span class="flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full shrink-0 mr-1">2</span>Étape</li>
+        </ol></div>`;
+      } else if (vh === 'breadcrumb') {
+        return `<nav ${w} class="genome-comp"><ol class="inline-flex items-center space-x-1 text-sm">
+          <li><a href="#" class="text-gray-500 hover:text-blue-600">Accueil</a></li>
+          <li><span class="mx-1 text-gray-400">/</span><span class="text-gray-700 font-medium">${name}</span></li>
+        </ol></nav>`;
+      } else if (vh === 'chat/bubble' || vh === 'chat') {
+        return `<div ${w} class="genome-comp flex items-start gap-2">
+          <div class="flex flex-col max-w-xs p-3 bg-gray-100 rounded-e-xl rounded-es-xl">
+            <p class="text-sm text-gray-900">${name}</p>
+          </div></div>`;
+      } else if (vh === 'chat-input') {
+        return `<div ${w} class="genome-comp flex items-center gap-2 p-2 bg-gray-50 border border-gray-300 rounded-lg">
+          <input type="text" class="flex-1 text-sm bg-white border border-gray-200 rounded-lg p-2" placeholder="${name}...">
+          <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full">
+            <svg class="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 18 20"><path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/></svg>
+          </button></div>`;
+      } else if (vh === 'choice-card') {
+        return `<div ${w} class="genome-comp p-3 bg-white border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-50">
+          <h5 class="text-sm font-semibold text-gray-900">${name}</h5>
+          <p class="text-xs text-gray-500 mt-0.5">Sélectionner</p></div>`;
+      } else if (vh === 'dashboard' || vh === 'status') {
+        return `<div ${w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <p class="text-2xl font-bold text-gray-700">—</p>
+          <p class="text-xs text-gray-500 mt-1">${name}</p>
+          <span class="inline-flex items-center mt-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>Actif
+          </span></div>`;
+      } else if (vh === 'accordion') {
+        const uid = gid.replace('_', '-');
+        return `<div ${w} class="genome-comp" id="acc-${uid}" data-accordion="collapse">
+          <h2 id="h-${uid}"><button type="button" class="flex items-center justify-between w-full p-3 font-medium text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50"
+            data-accordion-target="#b-${uid}" aria-expanded="false">
+            <span>${name}</span>
+            <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/></svg>
+          </button></h2>
+          <div id="b-${uid}" class="hidden"><div class="p-3 border border-t-0 border-gray-200 rounded-b-lg text-xs text-gray-500">${name}</div></div>
+        </div>`;
+      } else if (vh === 'upload') {
+        return `<div ${w} class="genome-comp flex items-center justify-center w-full">
+          <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+            <svg class="w-7 h-7 mb-2 text-gray-400" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
+            <p class="text-xs text-gray-500">${name}</p>
+            <input type="file" class="hidden">
+          </label></div>`;
+      } else if (vh === 'table') {
+        return `<div ${w} class="genome-comp overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full text-xs text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr><th class="px-3 py-2">ID</th><th class="px-3 py-2">${name}</th><th class="px-3 py-2">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white border-b"><td class="px-3 py-2">001</td><td class="px-3 py-2">Item A</td><td class="px-3 py-2"><span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded">OK</span></td></tr>
+              <tr class="bg-gray-50"><td class="px-3 py-2">002</td><td class="px-3 py-2">Item B</td><td class="px-3 py-2"><span class="bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">En cours</span></td></tr>
+            </tbody>
+          </table></div>`;
+      } else if (vh === 'stencil-card' || vh === 'detail-card' || vh === 'card') {
+        return `<div ${w} class="genome-comp p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <h5 class="text-sm font-semibold text-gray-900 mb-1">${name}</h5>
+          <p class="text-xs text-gray-500">Détails et recommandations</p>
+          <a href="#" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Voir →</a></div>`;
+      } else if (vh === 'form') {
+        return `<form ${w} class="genome-comp space-y-2">
+          <div><label class="block text-xs font-medium text-gray-700 mb-1">${name}</label>
+          <input type="text" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2"></div>
+          <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">Valider</button>
+        </form>`;
+      } else if (vh === 'modal' || vh === 'confirm') {
+        return `<button ${w} type="button" class="genome-comp text-blue-700 bg-white border border-blue-300 hover:bg-blue-50 font-medium rounded-lg text-sm px-4 py-2">${name}</button>`;
+      } else if (vh === 'download') {
+        return `<a href="#" ${w} class="genome-comp inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          ${name}</a>`;
+      } else if (vh === 'grid' || vh === 'layout') {
+        return `<div ${w} class="genome-comp"><div class="grid grid-cols-3 gap-1.5">
+          <div class="h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">A</div>
+          <div class="h-10 bg-blue-50 border border-blue-200 rounded flex items-center justify-center text-xs text-blue-500 font-medium">B</div>
+          <div class="h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">C</div>
+        </div><p class="text-xs text-gray-400 mt-1">${name}</p></div>`;
+      } else {
+        return `<span ${w} class="genome-comp inline-flex items-center bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full">${name}</span>`;
+      }
+    }
+
+    // ─── Drill-down ──────────────────────────────────────────────────────────────
+    function enterDrillDown(organId) {
+      let organ = null;
+      for (const phase of (_genome?.n0_phases || [])) {
+        organ = (phase.n1_sections || []).find(o => o.id === organId);
+        if (organ) break;
+      }
+      if (!organ) return;
+
+      document.getElementById('drill-title').textContent = organ.name;
+      const cols = document.getElementById('drill-cols');
+      cols.innerHTML = '';
+
+      for (const feat of (organ.n2_features || [])) {
+        const col = document.createElement('div');
+        col.className = 'drill-col';
+        const t = document.createElement('div');
+        t.className = 'drill-col-title';
+        t.textContent = feat.name;
+        col.appendChild(t);
+        for (const comp of (feat.n3_components || [])) {
+          const cw = document.createElement('div');
+          cw.innerHTML = _comp_html(comp);
+          const cn = document.createElement('p');
+          cn.style.cssText = 'font-size:9px;color:#aaa;margin:2px 0 6px 2px;';
+          cn.textContent = comp.name;
+          cw.appendChild(cn);
+          col.appendChild(cw);
+        }
+        cols.appendChild(col);
+      }
+
+      document.getElementById('drill-overlay').style.display = 'flex';
+    }
+
+    function exitDrillDown() {
+      document.getElementById('drill-overlay').style.display = 'none';
+    }
+
+    // ─── Focus mode ─────────────────────────────────────────────────────────────
+    function enterFocus(card) {
+      if (_focusedOrgan) return;
+      _focusedContent = card.innerHTML;
+      _focusedOrgan = card;
+
+      const canvas = document.getElementById('genome-canvas');
+      const overlay = document.createElement('div');
+      overlay.id = 'focus-overlay';
+      canvas.appendChild(overlay);
+
+      document.querySelectorAll('.organ-container').forEach(c => {
+        if (c !== card) { c.style.opacity = '0.28'; c.style.pointerEvents = 'none'; }
+      });
+      card.classList.add('focused');
+
+      // Find organ in genome
+      const organId = card.dataset.organId;
+      let organ = null;
+      for (const phase of (_genome?.n0_phases || [])) {
+        organ = (phase.n1_sections || []).find(o => o.id === organId);
+        if (organ) break;
+      }
+      if (!organ) return;
+
+      // Build detailed content
+      card.innerHTML = '';
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 10px 6px;border-bottom:1px solid #f0efeb;margin-bottom:6px;';
+      header.innerHTML = `<span style="font-size:13px;font-weight:600;color:#3d3d3c;">${organ.name}</span><button id="focus-close" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;line-height:1;">✕</button>`;
+      card.appendChild(header);
+
+      const body = document.createElement('div');
+      body.style.cssText = 'max-height:500px;overflow-y:auto;padding:6px 10px;';
+      for (const feat of (organ.n2_features || [])) {
+        const ft = document.createElement('p');
+        ft.style.cssText = 'font-size:10px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.05em;margin:10px 0 5px;';
+        ft.textContent = feat.name;
+        body.appendChild(ft);
+        for (const comp of (feat.n3_components || [])) {
+          const cw = document.createElement('div');
+          cw.style.marginBottom = '6px';
+          cw.innerHTML = _comp_html(comp);
+          const cn = document.createElement('p');
+          cn.style.cssText = 'font-size:9px;color:#aaa;margin:2px 0 0 2px;';
+          cn.textContent = comp.name;
+          cw.appendChild(cn);
+          body.appendChild(cw);
+        }
+      }
+      card.appendChild(body);
+
+      overlay.addEventListener('click', exitFocus, { once: true });
+      document.getElementById('focus-close').addEventListener('click', exitFocus, { once: true });
+    }
+
+    function exitFocus() {
+      const overlay = document.getElementById('focus-overlay');
+      if (overlay) overlay.remove();
+      document.querySelectorAll('.organ-container').forEach(c => {
+        c.style.opacity = '';
+        c.style.pointerEvents = '';
+      });
+      if (_focusedOrgan) {
+        _focusedOrgan.classList.remove('focused');
+        _focusedOrgan.innerHTML = _focusedContent;
+        const rh = document.createElement('div');
+        rh.className = 'resize-handle';
+        _focusedOrgan.appendChild(rh);
+        const rhs = document.createElement('div');
+        rhs.className = 'resize-handle-s';
+        _focusedOrgan.appendChild(rhs);
+        _focusedOrgan = null;
+        _focusedContent = null;
+      }
+    }
+
+    // ─── Render ──────────────────────────────────────────────────────────────────
+    function renderOrgan(organ) {
+      const card = document.createElement('div');
+      card.className = 'organ-container';
+      card.dataset.organId = organ.id;
+      card.style.left = organ.x + 'px';
+      card.style.top = organ.y + 'px';
+      if (organ.w) card.style.width = organ.w + 'px';
+      if (organ.h) card.style.height = organ.h + 'px';
+
+      // Title with dblclick rename
+      const title = document.createElement('div');
+      title.className = 'organ-title';
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = organ.name;
+      nameSpan.style.cssText = 'cursor:text; padding:2px 4px; border-radius:3px;';
+      nameSpan.addEventListener('mousedown', e => e.stopPropagation());
+      nameSpan.addEventListener('dblclick', e => { e.stopPropagation(); });
+      nameSpan.addEventListener('click', e => { e.stopPropagation(); });
+      nameSpan.addEventListener('dblclick', () => {
+        nameSpan.contentEditable = 'true';
+        nameSpan.focus();
+        nameSpan.style.background = '#f0f9ff';
+        nameSpan.style.outline = '1px solid #93c5fd';
+        card.setAttribute('data-editing', '1');
+      });
+      nameSpan.addEventListener('blur', async () => {
+        nameSpan.contentEditable = 'false';
+        nameSpan.style.background = '';
+        nameSpan.style.outline = '';
+        card.removeAttribute('data-editing');
+        const newName = nameSpan.textContent.trim();
+        if (newName && newName !== organ.name) {
+          organ.name = newName;
+          await fetch(`/api/genome/node/${organ.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ field: 'name', value: newName })
+          }).catch(() => {});
+        } else {
+          nameSpan.textContent = organ.name;
+        }
+      });
+      nameSpan.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameSpan.blur(); } });
+      title.appendChild(nameSpan);
+      card.appendChild(title);
+
+      // Components
+      const list = document.createElement('div');
+      list.className = 'component-list';
+      for (const feat of (organ.n2_features || [])) {
+        for (const comp of (feat.n3_components || [])) {
+          const cw = document.createElement('div');
+          cw.innerHTML = _comp_html(comp);
+          list.appendChild(cw);
+        }
+      }
+      card.appendChild(list);
+
+      // Resize handles
+      const rh = document.createElement('div');
+      rh.className = 'resize-handle';
+      card.appendChild(rh);
+      const rhs = document.createElement('div');
+      rhs.className = 'resize-handle-s';
+      card.appendChild(rhs);
+
+      // dblclick → drill-down (stops the pending focus timer)
+      card.addEventListener('dblclick', e => {
+        if (e.target.classList.contains('resize-handle') || e.target.classList.contains('resize-handle-s')) return;
+        if (card._focusTimer) { clearTimeout(card._focusTimer); card._focusTimer = null; }
+        enterDrillDown(organ.id);
+      });
+
+      return card;
+    }
+
+    // ─── Drag & Resize ───────────────────────────────────────────────────────────
+    function initDragAndDrop() {
+      let draggedOrgan = null;
+      let resizedOrgan = null, resizeStartX, resizeStartW;
+      let resizedHeightOrgan = null, resizeHStartY, resizeHStartH;
+
+      document.addEventListener('mousedown', e => {
+        if (_focusedOrgan) return;
+        if (e.target.closest('.organ-container')?.hasAttribute('data-editing')) return;
+
+        _mdX = e.clientX;
+        _mdY = e.clientY;
+
+        if (e.target.classList.contains('resize-handle-s')) {
+          resizedHeightOrgan = e.target.closest('.organ-container');
+          resizeHStartY = e.clientY;
+          resizeHStartH = resizedHeightOrgan.offsetHeight;
+          document.body.style.userSelect = 'none';
+          return;
+        }
+        if (e.target.classList.contains('resize-handle')) {
+          resizedOrgan = e.target.closest('.organ-container');
+          resizeStartX = e.clientX;
+          resizeStartW = resizedOrgan.offsetWidth;
+          document.body.style.userSelect = 'none';
+          return;
+        }
+        const card = e.target.closest('.organ-container');
+        if (card) {
+          draggedOrgan = card;
+          draggedOrgan._startX = e.clientX - draggedOrgan.offsetLeft;
+          draggedOrgan._startY = e.clientY - draggedOrgan.offsetTop;
+          document.body.style.userSelect = 'none';
+        }
+      });
+
+      document.addEventListener('mouseup', e => {
+        if (resizedHeightOrgan) {
+          const id = resizedHeightOrgan.dataset.organId;
+          const x = parseInt(resizedHeightOrgan.style.left) || 0;
+          const y = parseInt(resizedHeightOrgan.style.top) || 0;
+          const w = parseInt(resizedHeightOrgan.style.width) || resizedHeightOrgan.offsetWidth;
+          const h = resizedHeightOrgan.offsetHeight;
+          fetch('/api/layout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ [id]: { x, y, w, h } }) }).catch(() => {});
+          resizedHeightOrgan = null;
+          document.body.style.userSelect = '';
+          return;
+        }
+        if (resizedOrgan) {
+          const id = resizedOrgan.dataset.organId;
+          const x = parseInt(resizedOrgan.style.left) || 0;
+          const y = parseInt(resizedOrgan.style.top) || 0;
+          const w = resizedOrgan.offsetWidth;
+          const h = parseInt(resizedOrgan.style.height) || resizedOrgan.offsetHeight;
+          fetch('/api/layout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ [id]: { x, y, w, h } }) }).catch(() => {});
+          resizedOrgan = null;
+          document.body.style.userSelect = '';
+          return;
+        }
+        if (draggedOrgan) {
+          const dist = Math.hypot(e.clientX - _mdX, e.clientY - _mdY);
+          if (dist < 5) {
+            // Click = focus mode (delayed to let dblclick cancel it)
+            const card = draggedOrgan;
+            draggedOrgan = null;
+            document.body.style.userSelect = '';
+            card._focusTimer = setTimeout(() => {
+              card._focusTimer = null;
+              enterFocus(card);
+            }, 220);
+            return;
+          }
+          const id = draggedOrgan.dataset.organId;
+          const x = parseInt(draggedOrgan.style.left) || 0;
+          const y = parseInt(draggedOrgan.style.top) || 0;
+          const w = parseInt(draggedOrgan.style.width) || draggedOrgan.offsetWidth;
+          const h = parseInt(draggedOrgan.style.height) || draggedOrgan.offsetHeight;
+          fetch('/api/layout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ [id]: { x, y, w, h } }) }).catch(() => {});
+          draggedOrgan = null;
+          document.body.style.userSelect = '';
+        }
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (resizedHeightOrgan) {
+          const newH = Math.max(100, resizeHStartH + (e.clientY - resizeHStartY));
+          resizedHeightOrgan.style.height = newH + 'px';
+          resizedHeightOrgan.style.overflow = 'hidden';
+        } else if (resizedOrgan) {
+          const newW = Math.max(200, resizeStartW + (e.clientX - resizeStartX));
+          resizedOrgan.style.width = newW + 'px';
+        } else if (draggedOrgan) {
+          draggedOrgan.style.left = (e.clientX - draggedOrgan._startX) + 'px';
+          draggedOrgan.style.top = (e.clientY - draggedOrgan._startY) + 'px';
+        }
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (document.getElementById('drill-overlay').style.display !== 'none') exitDrillDown();
+          else if (_focusedOrgan) exitFocus();
+        }
+      });
+    }
+
+    // ─── Tabs & Phase ────────────────────────────────────────────────────────────
+    function renderTabs(phases) {
+      const tabs = document.getElementById('phase-tabs');
+      tabs.innerHTML = '';
+      phases.forEach((phase, i) => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = phase.name || phase.id;
+        a.className = 'phase-tab' + (i === _activePhaseIdx ? ' active' : '');
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          _activePhaseIdx = i;
+          renderTabs(phases);
+          renderPhase(phases[i]);
+        });
+        tabs.appendChild(a);
+      });
+    }
+
+    function renderPhase(phase) {
+      const canvas = document.getElementById('genome-canvas');
+      canvas.innerHTML = '';
+      let x = 20, y = 20;
+      (phase.n1_sections || []).forEach(organ => {
+        const saved = _layout[organ.id];
+        organ.x = saved ? saved.x : x;
+        organ.y = saved ? saved.y : y;
+        organ.w = saved ? saved.w : null;
+        organ.h = saved ? saved.h : null;
+        x += 320; if (x > 900) { x = 20; y += 280; }
+        canvas.appendChild(renderOrgan(organ));
+      });
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────────
+    async function loadGenomeAndRender() {
+      const [gRes, lRes] = await Promise.all([fetch('/api/genome'), fetch('/api/layout')]);
+      _genome = await gRes.json();
+      _layout = lRes.ok ? await lRes.json() : {};
+      const phases = _genome.n0_phases || [];
+      renderTabs(phases);
+      if (phases.length) renderPhase(phases[_activePhaseIdx]);
+      initDragAndDrop();
+    }
+
+    loadGenomeAndRender();
+  </script>
+</body>
+</html>

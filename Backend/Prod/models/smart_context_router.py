@@ -380,18 +380,28 @@ class SmartContextRouter:
             execution_mode=execution_mode
         )
         
+        # Surgical mode override: Codestral cannot generate valid surgical JSON
+        # Always escalate surgical tasks to DeepSeek (or Gemini as fallback)
+        if step.context and step.context.get('surgical_mode') and decision.primary_provider == "codestral":
+            for override in ["deepseek", "gemini", "groq"]:
+                if override in self.available_providers:
+                    decision.primary_provider = override
+                    decision.fallback_chain = self._get_fallback_chain(override, execution_mode)
+                    decision.reason += f"; surgical_mode → {override}"
+                    break
+
         # Check if should chunk
         should_chunk, chunk_reason = self.should_chunk_step(step, estimated_tokens, loaded_files)
         if should_chunk:
             decision.should_chunk = True
             decision.chunk_size = self._calculate_chunk_size(estimated_tokens)
             decision.reason += f"; Chunking: {chunk_reason}"
-        
+
         logger.info(
             f"Smart routing for {step.id}: {decision.primary_provider} "
             f"({decision.estimated_tokens} tokens, {decision.reason})"
         )
-        
+
         return decision
     
     def _get_fallback_chain(

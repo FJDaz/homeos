@@ -1,0 +1,148 @@
+<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Shadow filter -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    
+    <!-- Layout preview gradients -->
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8f0fe"/>
+      <stop offset="100%" stop-color="#c2d8ff"/>
+    </linearGradient>
+    <linearGradient id="splitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fef3e8"/>
+      <stop offset="100%" stop-color="#fde0c7"/>
+    </linearGradient>
+    <linearGradient id="gridGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="magazineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ff"/>
+      <stop offset="100%" stop-color="#e9d5ff"/>
+    </linearGradient>
+    <linearGradient id="dashboardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="landingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </linearGradient>
+    
+    <!-- Selected state gradient -->
+    <linearGradient id="selectedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f05e23" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#f05e23" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main card -->
+  <rect x="0" y="0" width="520" height="320" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header -->
+  <text x="24" y="36" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Galerie Layouts</text>
+  <text x="24" y="56" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Sélectionnez un modèle pour démarrer</text>
+  
+  <!-- Grid container -->
+  <g transform="translate(24, 74)">
+    
+    <!-- Layout 1: Hero (Selected) -->
+    <g transform="translate(0, 0)">
+      <rect width="148" height="102" rx="8" fill="url(#selectedGrad)" stroke="#f05e23" stroke-width="2"/>
+      <rect x="8" y="8" width="132" height="62" rx="4" fill="url(#heroGrad)"/>
+      <!-- Hero content preview -->
+      <rect x="20" y="20" width="60" height="8" rx="2" fill="#4a7c59" opacity="0.3"/>
+      <rect x="20" y="32" width="40" height="6" rx="2" fill="#6b7280" opacity="0.4"/>
+      <rect x="20" y="42" width="28" height="20" rx="3" fill="#f05e23" opacity="0.6"/>
+      <!-- Bottom nav preview -->
+      <rect x="8" y="74" width="132" height="20" rx="4" fill="#ffffff"/>
+      <circle cx="24" cy="84" r="4" fill="#f05e23"/>
+      <rect x="36" y="82" width="16" height="4" rx="2" fill="#d1d5db"/>
+      <rect x="56" y="82" width="16" height="4" rx="2" fill="#d1d5db"/>
+      <!-- Selection indicator -->
+      <circle cx="134" cy="16" r="10" fill="#f05e23"/>
+      <path d="M130 16 L133 19 L138 13" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#151515" text-anchor="middle">Hero</text>
+    </g>
+    
+    <!-- Layout 2: Split -->
+    <g transform="translate(164, 0)">
+      <rect width="148" height="102" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="8" y="8" width="132" height="86" rx="4" fill="url(#splitGrad)"/>
+      <!-- Split layout preview -->
+      <rect x="16" y="16" width="56" height="70" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="80" y="20" width="52" height="6" rx="2" fill="#92400e" opacity="0.3"/>
+      <rect x="80" y="30" width="36" height="4" rx="2" fill="#92400e" opacity="0.2"/>
+      <rect x="80" y="38" width="44" height="4" rx="2" fill="#92400e" opacity="0.2"/>
+      <rect x="80" y="50" width="28" height="16" rx="3" fill="#f05e23" opacity="0.5"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280" text-anchor="middle">Split</text>
+    </g>
+    
+    <!-- Layout 3: Grid -->
+    <g transform="translate(328, 0)">
+      <rect width="148" height="102" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="8" y="8" width="132" height="86" rx="4" fill="url(#gridGrad)"/>
+      <!-- Grid preview -->
+      <rect x="16" y="16" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="54" y="16" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="92" y="16" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="16" y="54" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="54" y="54" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="92" y="54" width="34" height="34" rx="3" fill="#ffffff" opacity="0.9"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280" text-anchor="middle">Grid</text>
+    </g>
+    
+    <!-- Layout 4: Magazine -->
+    <g transform="translate(0, 136)">
+      <rect width="148" height="102" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="8" y="8" width="132" height="86" rx="4" fill="url(#magazineGrad)"/>
+      <!-- Magazine layout preview -->
+      <rect x="16" y="16" width="80" height="50" rx="3" fill="#ffffff" opacity="0.95"/>
+      <rect x="100" y="16" width="26" height="23" rx="3" fill="#ffffff" opacity="0.8"/>
+      <rect x="100" y="43" width="26" height="23" rx="3" fill="#ffffff" opacity="0.8"/>
+      <rect x="16" y="70" width="110" height="16" rx="3" fill="#ffffff" opacity="0.7"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280" text-anchor="middle">Magazine</text>
+    </g>
+    
+    <!-- Layout 5: Dashboard -->
+    <g transform="translate(164, 136)">
+      <rect width="148" height="102" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="8" y="8" width="132" height="86" rx="4" fill="url(#dashboardGrad)"/>
+      <!-- Dashboard preview -->
+      <rect x="12" y="12" width="20" height="76" rx="3" fill="#0ea5e9" opacity="0.2"/>
+      <rect x="36" y="16" width="48" height="28" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="88" y="16" width="48" height="28" rx="3" fill="#ffffff" opacity="0.9"/>
+      <rect x="36" y="48" width="100" height="40" rx="3" fill="#ffffff" opacity="0.9"/>
+      <!-- Chart bars -->
+      <rect x="44" y="72" width="8" height="12" rx="1" fill="#0ea5e9" opacity="0.4"/>
+      <rect x="56" y="66" width="8" height="18" rx="1" fill="#0ea5e9" opacity="0.6"/>
+      <rect x="68" y="60" width="8" height="24" rx="1" fill="#0ea5e9" opacity="0.8"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280" text-anchor="middle">Dashboard</text>
+    </g>
+    
+    <!-- Layout 6: Landing -->
+    <g transform="translate(328, 136)">
+      <rect width="148" height="102" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="8" y="8" width="132" height="86" rx="4" fill="url(#landingGrad)"/>
+      <!-- Landing preview -->
+      <rect x="24" y="20" width="100" height="12" rx="3" fill="#ffffff" opacity="0.95"/>
+      <rect x="40" y="38" width="68" height="6" rx="2" fill="#c2410c" opacity="0.3"/>
+      <rect x="52" y="48" width="44" height="6" rx="2" fill="#c2410c" opacity="0.2"/>
+      <rect x="44" y="62" width="60" height="20" rx="10" fill="#f05e23" opacity="0.7"/>
+      <!-- Features row -->
+      <rect x="20" y="88" width="28" height="4" rx="2" fill="#ffffff" opacity="0.6"/>
+      <rect x="60" y="88" width="28" height="4" rx="2" fill="#ffffff" opacity="0.6"/>
+      <rect x="100" y="88" width="28" height="4" rx="2" fill="#ffffff" opacity="0.6"/>
+      <!-- Label -->
+      <text x="74" y="118" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280" text-anchor="middle">Landing</text>
+    </g>
+    
+  </g>
+</svg>

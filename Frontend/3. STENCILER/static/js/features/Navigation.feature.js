@@ -11,10 +11,23 @@ class NavigationFeature extends StencilerFeature {
   render() {
     const { components } = Lexicon.classes;
     return `
-        ${this.sections.map(id => {
-      const name = id.replace('section-', '').charAt(0).toUpperCase() + id.replace('section-', '').slice(1);
-      return `<a href="#${id}" class="${components.tab}">${name}</a>`;
+        <div class="sidebar-section-header" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+          <h3 style="margin: 0;">navigation</h3>
+          <span class="section-chevron">▾</span>
+        </div>
+        <div class="section-content" style="display: block;">
+          <ul class="breadcrumbs-list" style="list-style: none; padding: 4px 0; margin: 0;">
+            ${this.sections.map((id, index) => {
+      const name = id.replace('section-', '').toLowerCase();
+      return `
+                <li style="padding: 2px 0; display: flex; align-items: center; gap: 6px;">
+                  ${index > 0 ? '<span style="color: var(--text-muted);">›</span>' : ''}
+                  <a href="#${id}" class="${components.tab}" style="text-decoration: none; color: inherit; font-size: 11px;">${name}</a>
+                </li>
+              `;
     }).join('')}
+          </ul>
+        </div>
     `;
   }
 
@@ -28,6 +41,17 @@ class NavigationFeature extends StencilerFeature {
 
     parent.innerHTML = this.render();
     this.el = parent;
+
+    const header = this.el.querySelector('.sidebar-section-header');
+    const content = this.el.querySelector('.section-content');
+    const chevron = this.el.querySelector('.section-chevron');
+
+    header.addEventListener('click', () => {
+      const isHidden = content.style.display === 'none';
+      content.style.display = isHidden ? 'block' : 'none';
+      chevron.textContent = isHidden ? '▾' : '▸';
+    });
+
     this.setupListeners();
   }
 

@@ -276,80 +276,91 @@ class SurgicalInstructionParser:
         Returns:
             Tuple of (list of operations, error message if any)
         """
-        # Try to extract JSON from output - look for JSON code blocks first
-        json_match = None
+        if not output or not output.strip():
+            return None, "Empty output"
+
+        # Strategy 1: Find all JSON-like blocks and pick the best one
+        json_blocks = []
         
-        # Try markdown code block with json (capture the JSON content)
-        # Match ```json ... ``` or ``` ... ``` with JSON inside
-        code_block_match = re.search(r'```(?:json)?\s*(\{.*?"operations".*?\})\s*```', output, re.DOTALL)
-        if code_block_match:
-            # Use the captured group (the JSON content)
-            json_str = code_block_match.group(1)
+        # Pattern 1: Markdown code blocks
+        for match in re.finditer(r'```(?:json)?\s*(\{.*?\})\s*```', output, re.DOTALL):
+            json_blocks.append(match.group(1))
+            
+        # Pattern 2: Raw objects starting with { and containing "operations"
+        # We search for the outermost braces
+        potential_objects = []
+        stack = []
+        start_index = -1
+        
+        for i, char in enumerate(output):
+            if char == '{':
+                if not stack:
+                    start_index = i
+                stack.append('{')
+            elif char == '}':
+                if stack:
+                    stack.pop()
+                    if not stack:
+                        obj_str = output[start_index:i+1]
+                        if '"operations"' in obj_str:
+                            potential_objects.append(obj_str)
+        
+        json_blocks.extend(potential_objects)
+        
+        # Try to parse each block, starting from the longest (most likely to be the full instruction)
+        json_blocks.sort(key=len, reverse=True)
+        
+        latest_error = "No JSON instructions found"
+        for json_str in json_blocks:
             try:
-                # Validate it's valid JSON
-                json.loads(json_str)
-                # Create a match object-like structure
-                class MatchObj:
-                    def __init__(self, json_str):
-                        self._json_str = json_str
-                    def group(self, n):
-                        return self._json_str if n == 0 or n == 1 else None
-                json_match = MatchObj(json_str)
-            except json.JSONDecodeError:
-                pass
-        
-        if not json_match:
-            # Try to find JSON object with operations key (more flexible)
-            json_match = re.search(r'\{[^{}]*"operations"\s*:\s*\[.*?\]\s*\}', output, re.DOTALL)
-        
-        if not json_match:
-            # Try to find any JSON block containing operations (nested braces)
-            # Use a more sophisticated approach to handle nested JSON
-            json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*"operations"[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', output, re.DOTALL)
-        
-        if not json_match:
-            return None, "No JSON instructions found in output"
-        
-        try:
-            # Handle both regex match objects and our MatchObj
-            if hasattr(json_match, '_json_str'):
-                json_str = json_match._json_str
-            else:
-                json_str = json_match.group(0)
-            data = json.loads(json_str)
-            
-            if 'operations' not in data:
-                return None, "Missing 'operations' key in JSON"
-            
-            operations = []
-            for op_data in data['operations']:
+                # Basic cleanup: remove common LLM-injected artifacts
+                # 1. Remove trailing commas in arrays/objects
+                clean_json = re.sub(r',\s*([\]}])', r'\1', json_str)
+                # 2. Try to parse
+                data = json.loads(clean_json)
+                
+                if isinstance(data, dict) and 'operations' in data:
+                    operations = []
+                    for op_data in data['operations']:
+                        if not isinstance(op_data, dict):
+                            continue
+                        
+                        op = SurgicalOperation(
+                            op_type=op_data.get('type'),
+                            target=op_data.get('target'),
+                            position=op_data.get('position'),
+                            code=op_data.get('code'),
+                            modifications=op_data.get('modifications'),
+                            after_method=op_data.get('after_method'),
+                            after_class=op_data.get('after_class'),
+                            after_function=op_data.get('after_function'),
+                            old_import=op_data.get('old'),
+                            new_import=op_data.get('new') or op_data.get('import')
+                        )
+                        operations.append(op)
+                    
+                    if operations:
+                        return operations, None
+                    else:
+                        latest_error = "No valid operations found in JSON"
+                else:
+                    latest_error = "JSON does not contain 'operations' key"
+            except json.JSONDecodeError as e:
+                latest_error = f"Invalid JSON ({e})"
+                # One last attempt: try to fix missing commas between operations if it's a list issue
                 try:
-                    op = SurgicalOperation(
-                        op_type=op_data.get('type'),
-                        target=op_data.get('target'),
-                        position=op_data.get('position'),
-                        code=op_data.get('code'),
-                        modifications=op_data.get('modifications'),
-                        after_method=op_data.get('after_method'),
-                        after_class=op_data.get('after_class'),
-                        after_function=op_data.get('after_function'),
-                        old_import=op_data.get('old'),
-                        new_import=op_data.get('new') or op_data.get('import')  # Support both 'new' and 'import' keys
-                    )
-                    operations.append(op)
-                except Exception as e:
-                    logger.warning(f"Error parsing operation: {e}")
-                    continue
-            
-            if not operations:
-                return None, "No valid operations found"
-            
-            return operations, None
-            
-        except json.JSONDecodeError as e:
-            return None, f"Invalid JSON: {e}"
-        except Exception as e:
-            return None, f"Error parsing instructions: {e}"
+                    # Look for { ... } { ... } and insert comma
+                    fixed_json = re.sub(r'\}\s*\{', '},{', json_str)
+                    data = json.loads(fixed_json)
+                    # (recursion or reuse logic here)
+                    if 'operations' in data:
+                        # Success on fixed JSON!
+                        return SurgicalInstructionParser.parse_instructions(fixed_json)
+                except:
+                    pass
+                continue
+                
+        return None, latest_error
     
     @staticmethod
     def is_surgical_output(output: str) -> bool:

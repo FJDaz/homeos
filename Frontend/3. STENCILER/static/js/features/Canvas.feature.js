@@ -45,6 +45,9 @@ class CanvasFeature extends StencilerFeature {
 
         // --- Toggle Grid ---
         this.gridVisible = true;
+
+        // --- Mission 19A : Persistence Layout N0 ---
+        this.layout_store = {};
     }
 
     mount(parentSelector) {
@@ -75,6 +78,7 @@ class CanvasFeature extends StencilerFeature {
                 <button id="btn-zoom-in">+</button>
                 <button id="btn-zoom-reset">Reset</button>
                 <button id="btn-export-svg" title="Export SVG">📥</button>
+                <button id="btn-infer-llm" title="Re-inférer layout via LLM">✨</button>
             </div>
             <button id="btn-delete" class="delete-btn">🗑️</button>
         `;
@@ -96,10 +100,16 @@ class CanvasFeature extends StencilerFeature {
         this._setupPanningHandlers(); // Mission 8D
         this._updateGridPattern(); // Mission 8D-BIS
 
-        document.addEventListener('corps:open', (e) => {
+        // --- Mission 19A : Load N0 Layout ---
+        fetch('/api/layout')
+            .then(res => res.json())
+            .then(data => { this.layout_store = data; })
+            .catch(e => console.warn('[19A] Layout load failed:', e));
+
+        document.addEventListener('corps:open', async (e) => {
             const { corpsId } = e.detail;
             this.drillStack = [];
-            this._renderCorps(corpsId);
+            await this._renderCorps(corpsId);
         });
 
         // --- Mission 8D : Sync back from Transform Panel ---
@@ -141,7 +151,7 @@ class CanvasFeature extends StencilerFeature {
         });
     }
 
-    _renderCorps(corpsId) {
+    async _renderCorps(corpsId) {
         if (!this.viewport) return;
         this.currentCorpsId = corpsId;
         this.viewport.innerHTML = '';
@@ -151,13 +161,38 @@ class CanvasFeature extends StencilerFeature {
         const CORPS_COLORS = { n0_brainstorm: '#d4b2bc', n0_backend: '#a8c5fc', n0_frontend: '#a8dcc9', n0_deploy: '#edd0b0' };
         const accentColor = CORPS_COLORS[corpsId] || '#cbd5e1';
 
-        const layout = LayoutEngine.proposeLayout(phaseData);
-        this._applyLayout(layout);
+        let positions;
+        try {
+            const organs = phaseData.n1_sections.map(o => ({
+                id: o.id,
+                name: o.name || '',
+                n2_count: (o.n2_features || []).length
+            }));
+            const res = await fetch('/api/infer_layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ organs, mode: 'heuristic' })
+            });
+            const { result } = await res.json();
+            positions = this._zoneTemplateToPositions(result, phaseData.n1_sections);
+            // On s'assure que le viewBox suit le layout
+            this.viewBox = { x: 0, y: 0, w: 1200, h: 900 };
+            this.svg.setAttribute('viewBox', '0 0 1200 900');
+        } catch (e) {
+            console.warn('[16A] infer_layout fallback:', e);
+            const layout = LayoutEngine.proposeLayout(phaseData);
+            positions = layout.positions;
+            this._applyLayout(layout);
+        }
 
         phaseData.n1_sections.forEach((organe) => {
-            let pos = layout.positions.find(p => p.id === organe.id);
-            // --- Surcharge Mission 8C/D : Persistence du Layout & Dimensions ---
-            if (organe._layout) {
+            let pos = positions.find(p => p.id === organe.id);
+            // --- Surcharge Mission 19A : persistence du Layout N0 ---
+            const saved = this.layout_store[organe.id];
+            if (saved) {
+                pos = { ...pos, ...saved };
+            } else if (organe._layout) {
+                // Fallback legacy (si le genome contient encore des positions)
                 pos = { ...pos, ...organe._layout };
             }
             if (pos) this._renderNode(organe, pos, accentColor, 0);
@@ -165,6 +200,98 @@ class CanvasFeature extends StencilerFeature {
 
         this._updateIndicator(phaseData.name.toUpperCase());
         this._hidePlaceholder();
+    }
+
+    _zoneTemplateToPositions(result, sections) {
+        const GAP = 8;
+
+        // Grouper par zone
+        const byZone = {};
+        sections.forEach(s => {
+            const zone = result[s.id]?.zone || 'main';
+            (byZone[zone] = byZone[zone] || []).push({ s, inf: result[s.id] || {} });
+        });
+
+        // Hauteur adaptative d'un organe
+        // Base généreuse : _buildComposition() est tall par nature (bottom-up SVG)
+        const organH = (s, inf) => {
+            if (inf.h === 'full') return 640;
+            if (typeof inf.h === 'number' && inf.h > 0) return inf.h;
+            return Math.max(160, 80 + (s.n2_features?.length || 0) * 40);
+        };
+
+        // Zones élastiques
+        const hasLeft = !!(byZone.sidebar_left?.length);
+        const hasRight = !!(byZone.sidebar_right?.length);
+        const mainX = hasLeft ? 248 : 8;
+        const mainW = 1200 - mainX - (hasRight ? 248 : 8);
+
+        const positions = [];
+
+        // --- HEADER (flex horizontal) ---
+        (byZone.header || []).forEach((item, i, arr) => {
+            const colW = Math.floor(1200 / arr.length);
+            positions.push({ id: item.s.id, x: i * colW, y: 0, w: colW, h: 56, zone: 'header' });
+        });
+
+        // --- FOOTER (flex horizontal) ---
+        (byZone.footer || []).forEach((item, i, arr) => {
+            const colW = Math.floor(1200 / arr.length);
+            positions.push({ id: item.s.id, x: i * colW, y: 840, w: colW, h: 48, zone: 'footer' });
+        });
+
+        // --- PREVIEW BAND (flex horizontal) ---
+        (byZone.preview_band || []).forEach((item, i, arr) => {
+            const colW = Math.floor(1200 / arr.length);
+            positions.push({ id: item.s.id, x: i * colW, y: 720, w: colW, h: 120, zone: 'preview_band' });
+        });
+
+        // --- SIDEBAR LEFT (stack vertical) ---
+        let sy = 56;
+        (byZone.sidebar_left || []).forEach(item => {
+            const h = organH(item.s, item.inf);
+            positions.push({ id: item.s.id, x: 0, y: sy, w: 240, h, zone: 'sidebar_left' });
+            sy += h + GAP;
+        });
+
+        // --- SIDEBAR RIGHT (stack vertical) ---
+        sy = 56;
+        (byZone.sidebar_right || []).forEach(item => {
+            const h = organH(item.s, item.inf);
+            positions.push({ id: item.s.id, x: 960, y: sy, w: 240, h, zone: 'sidebar_right' });
+            sy += h + GAP;
+        });
+
+        // --- CANVAS (prend tout l'espace élastique) ---
+        (byZone.canvas || []).forEach(item => {
+            positions.push({ id: item.s.id, x: mainX, y: 56, w: mainW, h: 640, zone: 'canvas' });
+        });
+
+        // --- MAIN (stack vertical ou 2-col si > 3) ---
+        const mainItems = [...(byZone.main || []), ...(byZone.unknown || [])];
+        if (mainItems.length <= 3) {
+            let my = 56;
+            mainItems.forEach(item => {
+                const h = organH(item.s, item.inf);
+                const w = typeof item.inf.w === 'number' ? Math.min(item.inf.w, mainW) : mainW;
+                positions.push({ id: item.s.id, x: mainX, y: my, w, h, zone: 'main' });
+                my += h + 16;
+            });
+        } else {
+            const colW = Math.floor(mainW / 2) - GAP;
+            let col0y = 56, col1y = 56;
+            mainItems.forEach((item, i) => {
+                const col = i % 2;
+                const h = organH(item.s, item.inf);
+                const x = col === 0 ? mainX : mainX + colW + GAP * 2;
+                const y = col === 0 ? col0y : col1y;
+                positions.push({ id: item.s.id, x, y, w: colW, h, zone: 'main' });
+                if (col === 0) col0y += h + 16;
+                else col1y += h + 16;
+            });
+        }
+
+        return positions;
     }
 
     _renderOrgane(organeId) {
@@ -590,6 +717,17 @@ class CanvasFeature extends StencilerFeature {
         if (findAndApply(this.genome.n0_phases)) {
             console.log(`📍 Layout persistent pour ${id} :`, { x, y });
             document.dispatchEvent(new CustomEvent('genome:updated'));
+
+            // --- Mission 19A : Sync layout.json pour N0 ---
+            const currentLevel = this.drillStack.length; // 0 = Corps (Organes visible)
+            if (currentLevel === 0) {
+                this.layout_store[id] = { x, y, w, h };
+                fetch('/api/layout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [id]: { x, y, w, h } })
+                }).catch(e => console.error('[19A] POST layout failed:', e));
+            }
         }
     }
 
@@ -957,7 +1095,7 @@ class CanvasFeature extends StencilerFeature {
         updateHandlePositions();
     }
 
-    _exitGroupEdit() {
+    async _exitGroupEdit() {
         const node = this.groupEditTarget;
         if (!node) return;
 
@@ -1010,6 +1148,7 @@ class CanvasFeature extends StencilerFeature {
         if (nodeId && content) {
             const bb = content.getBBox();
             PrimOverlay.set(nodeId, content.innerHTML, bb.height, bb.width);
+            console.log('💾 [PrimOverlay] Saved:', nodeId, PrimOverlay.get(nodeId));
             const genomeNode = this._findInGenome(nodeId);
             if (genomeNode) {
                 genomeNode.svg_payload = content.innerHTML;
@@ -1021,7 +1160,7 @@ class CanvasFeature extends StencilerFeature {
         const corpsId = this.currentCorpsId;
         if (corpsId) {
             this.drillStack = [];
-            this._renderCorps(corpsId);
+            await this._renderCorps(corpsId);
         }
 
         this.groupEditMode = false;
@@ -1136,6 +1275,54 @@ class CanvasFeature extends StencilerFeature {
             }
             if (btn) {
                 btn.style.opacity = this.gridVisible ? '1' : '0.4';
+            }
+        });
+
+        // Handler LLM Layout (Mission 16A)
+        this.el.querySelector('#btn-infer-llm')?.addEventListener('click', async () => {
+            if (!this.currentCorpsId) return;
+            const phaseData = this.genome?.n0_phases?.find(p => p.id === this.currentCorpsId);
+            if (!phaseData) return;
+            const organs = phaseData.n1_sections.map(o => ({
+                id: o.id, name: o.name || '', n2_count: (o.n2_features || []).length
+            }));
+
+            // Show loading state
+            const btn = this.el.querySelector('#btn-infer-llm');
+            if (btn) btn.textContent = '⏳';
+
+            try {
+                const res = await fetch('/api/infer_layout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        organs,
+                        mode: 'llm',
+                        model: 'gemini-3-flash-preview'
+                    })
+                });
+                const { result, tier } = await res.json();
+                console.log(`[16A] LLM layout tier: ${tier}`, result);
+
+                this.viewport.innerHTML = '';
+                const positions = this._zoneTemplateToPositions(result, phaseData.n1_sections);
+
+                // update viewBox
+                this.viewBox = { x: 0, y: 0, w: 1200, h: 900 };
+                this.svg.setAttribute('viewBox', '0 0 1200 900');
+
+                const CORPS_COLORS = { n0_brainstorm: '#d4b2bc', n0_backend: '#a8c5fc', n0_frontend: '#a8dcc9', n0_deploy: '#edd0b0' };
+                const accentColor = CORPS_COLORS[this.currentCorpsId] || '#cbd5e1';
+
+                phaseData.n1_sections.forEach((organe) => {
+                    let pos = positions.find(p => p.id === organe.id);
+                    if (organe._layout) pos = { ...pos, ...organe._layout };
+                    if (pos) this._renderNode(organe, pos, accentColor, 0);
+                });
+            } catch (e) {
+                console.error('[16A] LLM infer failed:', e);
+            } finally {
+                if (btn) btn.textContent = '✨';
             }
         });
     }

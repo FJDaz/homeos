@@ -1,0 +1,143 @@
+<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="acceptGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#6dd565"/>
+    </linearGradient>
+    <linearGradient id="reviseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#ffb800"/>
+    </linearGradient>
+    <linearGradient id="rejectGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f05e23"/>
+      <stop offset="100%" stop-color="#d94a15"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#ffb800"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Card -->
+  <rect x="16" y="16" width="648" height="448" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Header Section -->
+  <text x="48" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Vue Rapport IR</text>
+  
+  <!-- Subtitle -->
+  <text x="48" y="92" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Analyse des organes détectés et verdicts de conformité</text>
+  
+  <!-- Search/Filter Bar -->
+  <rect x="48" y="112" width="280" height="40" rx="6" fill="#f8f7f4"/>
+  <text x="68" y="137" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#9ca3af">Rechercher un organe...</text>
+  
+  <!-- Filter Pills -->
+  <rect x="340" y="112" width="80" height="32" rx="9999" fill="#ffd548"/>
+  <text x="380" y="132" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Tous</text>
+  
+  <rect x="428" y="112" width="80" height="32" rx="9999" fill="#f8f7f4"/>
+  <text x="468" y="132" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#6b7280" text-anchor="middle">Acceptés</text>
+  
+  <rect x="516" y="112" width="80" height="32" rx="9999" fill="#f8f7f4"/>
+  <text x="556" y="132" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#6b7280" text-anchor="middle">Révisés</text>
+  
+  <!-- Table Header -->
+  <rect x="48" y="168" width="584" height="44" rx="6" fill="#f8f7f4"/>
+  
+  <text x="72" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" letter-spacing="1.5">ORGANE</text>
+  <text x="220" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" letter-spacing="1.5">CONFIDENCE</text>
+  <text x="340" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" letter-spacing="1.5">VERDICT</text>
+  <text x="460" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" letter-spacing="1.5">DATE</text>
+  <text x="560" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" letter-spacing="1.5">ACTION</text>
+  
+  <!-- Row 1 - Accept -->
+  <rect x="48" y="220" width="584" height="56" rx="6" fill="#ffffff"/>
+  <rect x="48" y="220" width="4" height="56" rx="2" fill="#97ea90"/>
+  
+  <!-- Organ Icon -->
+  <circle cx="72" cy="248" r="16" fill="#f8f7f4"/>
+  <path d="M68 244 L72 240 L76 244 M68 252 L72 256 L76 252" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <text x="96" y="245" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Foie</text>
+  <text x="96" y="262" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9ca3af">Segment IV</text>
+  
+  <!-- Confidence Bar -->
+  <rect x="220" y="240" width="80" height="8" rx="4" fill="#e5e7eb"/>
+  <rect x="220" y="240" width="72" height="8" rx="4" fill="#1258ca"/>
+  <text x="308" y="248" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#151515">92%</text>
+  
+  <!-- Verdict Badge -->
+  <rect x="340" y="236" width="76" height="24" rx="6" fill="url(#acceptGradient)"/>
+  <text x="378" y="252" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Accept</text>
+  
+  <text x="460" y="252" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">14 Jan 2024</text>
+  
+  <!-- Action Button -->
+  <rect x="552" y="232" width="64" height="32" rx="6" fill="#f8f7f4"/>
+  <text x="584" y="252" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Détails</text>
+  
+  <!-- Row 2 - Revise -->
+  <rect x="48" y="284" width="584" height="56" rx="6" fill="#ffffff"/>
+  <rect x="48" y="284" width="4" height="56" rx="2" fill="#ffd548"/>
+  
+  <circle cx="72" cy="312" r="16" fill="#f8f7f4"/>
+  <circle cx="72" cy="312" r="6" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+  <line x1="72" y1="306" x2="72" y2="300" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <text x="96" y="309" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Rein droit</text>
+  <text x="96" y="326" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9ca3af">Pôle supérieur</text>
+  
+  <rect x="220" y="304" width="80" height="8" rx="4" fill="#e5e7eb"/>
+  <rect x="220" y="304" width="56" height="8" rx="4" fill="#f05e23"/>
+  <text x="308" y="312" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#151515">68%</text>
+  
+  <rect x="340" y="300" width="76" height="24" rx="6" fill="url(#reviseGradient)"/>
+  <text x="378" y="316" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Revise</text>
+  
+  <text x="460" y="316" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">14 Jan 2024</text>
+  
+  <rect x="552" y="296" width="64" height="32" rx="6" fill="#ffd548"/>
+  <text x="584" y="316" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Détails</text>
+  
+  <!-- Row 3 - Reject -->
+  <rect x="48" y="348" width="584" height="56" rx="6" fill="#ffffff"/>
+  <rect x="48" y="348" width="4" height="56" rx="2" fill="#f05e23"/>
+  
+  <circle cx="72" cy="376" r="16" fill="#f8f7f4"/>
+  <rect x="66" y="372" width="12" height="8" rx="2" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+  <line x1="69" y1="376" x2="75" y2="376" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <text x="96" y="373" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">Rate</text>
+  <text x="96" y="390" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9ca3af">Hile splénique</text>
+  
+  <rect x="220" y="368" width="80" height="8" rx="4" fill="#e5e7eb"/>
+  <rect x="220" y="368" width="24" height="8" rx="4" fill="#f05e23"/>
+  <text x="308" y="376" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#151515">32%</text>
+  
+  <rect x="340" y="364" width="76" height="24" rx="6" fill="url(#rejectGradient)"/>
+  <text x="378" y="380" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Reject</text>
+  
+  <text x="460" y="380" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">13 Jan 2024</text>
+  
+  <rect x="552" y="360" width="64" height="32" rx="6" fill="#f8f7f4"/>
+  <text x="584" y="380" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515" text-anchor="middle">Détails</text>
+  
+  <!-- Row 4 - Accept -->
+  <rect x="48" y="412" width="584" height="36" rx="6" fill="#f8f7f4" opacity="0.5"/>
+  <rect x="48" y="412" width="4" height="36" rx="2" fill="#97ea90" opacity="0.5"/>
+  
+  <!-- Pagination -->
+  <text x="48" y="456" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Affichage 1-3 sur 12 organes</text>
+  
+  <rect x="520" y="440" width="32" height="32" rx="6" fill="#f8f7f4"/>
+  <path d="M532 452 L528 456 L532 460" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <rect x="560" y="440" width="32" height="32" rx="6" fill="#ffd548"/>
+  <path d="M572 452 L576 456 L572 460" stroke="#151515" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Hover indicator line -->
+  <rect x="640" y="220" width="4" height="56" rx="2" fill="#ffd548" opacity="0"/>
+</svg>

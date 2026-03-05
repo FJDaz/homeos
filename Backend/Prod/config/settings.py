@@ -38,15 +38,15 @@ class Settings(BaseSettings):
     )
 
     kimi_api_url: str = Field(
-        default="https://api.moonshot.ai/v1/chat/completions",
+        default="https://api.moonshot.ai/v1",
         alias="KIMI_API_URL",
-        description="KIMI (Moonshot) API endpoint URL",
+        description="KIMI (Moonshot) base URL for OpenAI-compatible SDK",
     )
 
     kimi_model: str = Field(
-        default="moonshot-v1-8k",
+        default="kimi-k2.5",
         alias="KIMI_MODEL",
-        description="KIMI model to use (moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k)",
+        description="KIMI model (kimi-k2.5 recommended)",
     )
 
     use_kimi_hf: bool = Field(default=True, alias="USE_KIMI_HF", description="Use KIMI via HF (free)")

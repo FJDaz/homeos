@@ -88,11 +88,16 @@ const Renderer = {
     _buildComposition(data, availableWidth, color) {
         // Est-ce un Atome (N3) ?
         if ((data.id && data.id.startsWith('comp_')) || data.interaction_type) {
-            // PrimOverlay : SVG modifié par l'utilisateur en Mode Illustrateur (14B)
+            // 1. PrimOverlay : SVG modifié par l'utilisateur en Mode Illustrateur (14B)
             const cached = PrimOverlay.get(data.id);
             if (cached) return cached;
 
-            // 14F-BUGS : Tenter WireframeLibrary avant renderAtom (Bottom-Up)
+            // 2. SVG-First : Payload direct depuis le génome (Mission 14F-P4)
+            if (data.svg_payload) {
+                return { svg: data.svg_payload, h: data.svg_h || 80, w: availableWidth };
+            }
+
+            // 3. 14F-BUGS : Tenter WireframeLibrary (Bottom-Up Fallback)
             const hint = this._matchHint(data);
             if (hint) {
                 const wfResult = WireframeLibrary.getSVG(hint, color, availableWidth, 180, data.name);
@@ -101,6 +106,7 @@ const Renderer = {
                 }
             }
 
+            // 4. Fallback sémantique
             return renderAtom(data, availableWidth, color);
         }
 
@@ -145,12 +151,11 @@ const Renderer = {
             // Génération de l'enfant N3
             const res = this._buildComposition(child, childAvailWidth, color);
 
-            // Mémoire bottom-up : cellules (N2) uniquement — pas les atomes (N3).
-            // Les coords N3 canvas ne sont pas compatibles avec les coords locales.
-            const isAtomChild = child.id?.startsWith('comp_') || !!child.interaction_type;
+            // Mémoire bottom-up : persistance des positions manuelles (_layout.x/y)
             let tx = currentX;
             let ty = currentY;
-            if (!isAtomChild && child._layout?.x !== undefined && child._layout?.y !== undefined) {
+            if (child._layout?.x !== undefined && child._layout?.y !== undefined) {
+                // Scaling proportional si on est dans un conteneur (Bottom-Up N1/N2)
                 tx = Math.round((child._layout.x / CANVAS_REF_W) * availableWidth);
                 ty = child._layout.y;
                 maxPositionedY = Math.max(maxPositionedY, ty + res.h);
@@ -222,26 +227,13 @@ const Renderer = {
             'pointer-events': 'none'
         });
 
-        // Mission 17A — N0 Organic Wireframe Rendering
-        if (level === 0) {
-            const organHint = this._matchHint(data);
-            if (organHint) {
-                const wfSvg = WireframeLibrary.getSVG(organHint, color, pos.w, pos.h, data.name);
-                if (wfSvg) {
-                    compGroup.innerHTML = wfSvg;
-                    g.append(compGroup);
-                    return g;
-                }
-            }
-        }
-
         const res = this._buildComposition(data, pos.w, color);
 
-        // Shrink-wrap : W = availableWidth (preservé depuis _layout.w si défini)
-        // H suit le contenu SAUF si l'utilisateur a défini une H explicite via _layout
+        // H suit le contenu SAUF si l'utilisateur a défini une H explicite via _layout (legacy)
+        // OU si pos.h est déjà défini (Mission 19A : layout_store)
         const userH = data._layout?.h;
-        pos.h = userH || res.h;
-        pos.w = res.w;
+        pos.h = userH || pos.h || res.h;
+        pos.w = pos.w || res.w;
         rect.setAttribute('height', pos.h);
         rect.setAttribute('width', pos.w);
 
@@ -267,6 +259,20 @@ const Renderer = {
         if (wfContent) {
             const nodeData = this._findDataById(g.dataset.id);
             if (nodeData) {
+                // Mission 19A : Special handling for N0 (Organic Wireframes)
+                const isN0 = g.classList.contains('corps-node');
+                if (isN0) {
+                    const hint = this._matchHint(nodeData);
+                    if (hint) {
+                        const wfSvg = WireframeLibrary.getSVG(hint, 'var(--accent-bleu)', w, h, nodeData.name);
+                        if (wfSvg) {
+                            wfContent.innerHTML = wfSvg;
+                            wfContent.removeAttribute('transform');
+                            return;
+                        }
+                    }
+                }
+
                 const res = this._buildComposition(nodeData, w, 'var(--accent-bleu)');
                 wfContent.innerHTML = res.svg;
                 if (res.h > 0 && h > 0 && Math.abs(h - res.h) > 1) {
