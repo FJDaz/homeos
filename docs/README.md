@@ -28,6 +28,7 @@ Documentation du projet, organisée **par thème**.
 ## Entrées rapides
 
 - **Démarrer** : [01-getting-started/INSTALLATION.md](01-getting-started/INSTALLATION.md) · [01-getting-started/GUIDE_RAPIDE_AETHERFLOW.md](01-getting-started/GUIDE_RAPIDE_AETHERFLOW.md)
+- **Pipeline de Production** : [03-aetherflow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md](03_AetherFlow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md)
 - **Sullivan / Genome** : [02-sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md](02-sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md) · [02-sullivan/PRD_SULLIVAN.md](02-sullivan/PRD_SULLIVAN.md)
 - **HomeOS** : [04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md](04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md)
 - **Opérations** : [05-operations/CLEAR_CACHE.md](05-operations/CLEAR_CACHE.md) · [05-operations/TROUBLESHOOTING_CURSOR_SHELL.md](05-operations/TROUBLESHOOTING_CURSOR_SHELL.md)
