@@ -1,68 +1,94 @@
-<svg viewBox="0 0 220 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 240 520" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="btn-gradient" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f05e23"/>
-      <stop offset="100%" stop-color="#d94d1a"/>
+    <linearGradient id="activeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1258ca;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#1258ca;stop-opacity:0.04"/>
     </linearGradient>
   </defs>
   
   <g id="component_root">
-    <rect x="10" y="10" width="200" height="500" rx="8" fill="#ffffff" filter="url(#card-shadow)" stroke="#d5d4d0" stroke-width="1"/>
+    <rect x="12" y="12" width="216" height="496" rx="10" fill="#ffffff" filter="url(#shadow)"/>
     
-    <text x="25" y="40" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#1a1a1a">Explorateur</text>
+    <text x="32" y="48" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="18" fill="#111827">Workspace</text>
     
-    <rect x="20" y="55" width="180" height="32" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
-    <text x="52" y="76" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b6b6b">Rechercher...</text>
-    <path d="M32 68 C32 65.79 33.79 64 36 64 C38.21 64 40 65.79 40 68 C40 70.21 38.21 72 36 72 C33.79 72 32 70.21 32 68 Z M38.5 73.5 L41.5 76.5" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <g transform="translate(196, 36)">
+      <rect x="0" y="0" width="24" height="24" rx="6" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
+      <path d="M12 7 L12 17 M7 12 L17 12" stroke="#6b7280" stroke-width="2" stroke-linecap="round"/>
+    </g>
     
-    <rect x="20" y="97" width="88" height="28" rx="6" fill="#f05e23"/>
-    <text x="64" y="115" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11" fill="#ffffff" text-anchor="middle">Cloud</text>
-    <rect x="112" y="97" width="88" height="28" rx="6" fill="transparent" stroke="#e5e5e5" stroke-width="1"/>
-    <text x="156" y="115" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="11" fill="#6b6b6b" text-anchor="middle">Local</text>
+    <rect x="32" y="66" width="176" height="36" rx="6" fill="#fafafa" stroke="#d5d4d0" stroke-width="1"/>
+    <g transform="translate(40, 74)">
+      <circle cx="8" cy="10" r="6" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+      <line x1="12.5" y1="14.5" x2="17" y2="19" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    <text x="68" y="88" font-family="Inter, sans-serif" font-size="12" fill="#9ca3af">Search files...</text>
     
-    <rect x="20" y="135" width="180" height="40" rx="6" fill="#fff5f2"/>
-    <path d="M35 148 L35 158 C35 159.1 35.9 160 37 160 L53 160 C54.1 160 55 159.1 55 158 L55 152 C55 150.9 54.1 150 53 150 L47 150 L45 148 L37 148 C35.9 148 35 148.9 35 148 Z" fill="#f05e23"/>
-    <text x="62" y="158" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#1a1a1a">Documents</text>
-    <text x="170" y="158" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">12</text>
+    <text x="32" y="130" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="0.05em">LOCAL</text>
     
-    <rect x="20" y="180" width="180" height="40" rx="6" fill="transparent"/>
-    <path d="M35 193 L35 203 C35 204.1 35.9 205 37 205 L53 205 C54.1 205 55 204.1 55 203 L55 197 C55 195.9 54.1 195 53 195 L47 195 L45 193 L37 193 C35.9 193 35 193.9 35 193 Z" fill="#1258ca"/>
-    <text x="62" y="203" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#1a1a1a">Images</text>
-    <text x="170" y="203" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">48</text>
+    <g transform="translate(32, 146)">
+      <rect x="-8" y="-6" width="192" height="32" rx="6" fill="transparent"/>
+      <path d="M2 8 L2 4 C2 2.5 3 1.5 4.5 1.5 L8 1.5 L10 4 L20 4 C21.5 4 22.5 5 22.5 6.5 L22.5 8 Z" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+      <rect x="2" y="8" width="20.5" height="14" rx="1.5" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+      <text x="34" y="16" font-family="Inter, sans-serif" font-size="13" fill="#374151">src</text>
+    </g>
     
-    <rect x="20" y="225" width="180" height="40" rx="6" fill="transparent"/>
-    <path d="M38 232 L38 242 C38 243.1 38.9 244 40 244 L50 244 C51.1 244 52 243.1 52 242 L52 237 L47 232 L40 232 C38.9 232 38 232.9 38 232 Z" fill="#e5e5e5"/>
-    <path d="M47 232 L47 237 L52 237" stroke="#c5c4c0" stroke-width="1" fill="none"/>
-    <text x="62" y="243" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#1a1a1a">Projet-final.psd</text>
-    <text x="170" y="243" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">24MB</text>
+    <g transform="translate(32, 182)">
+      <rect x="-8" y="-6" width="192" height="32" rx="6" fill="url(#activeGradient)"/>
+      <path d="M2 8 L2 4 C2 2.5 3 1.5 4.5 1.5 L8 1.5 L10 4 L20 4 C21.5 4 22.5 5 22.5 6.5 L22.5 8 Z" fill="#3b82f6" stroke="#2563eb" stroke-width="1"/>
+      <rect x="2" y="8" width="20.5" height="14" rx="1.5" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
+      <text x="34" y="16" font-family="Inter, sans-serif" font-size="13" fill="#1258ca" font-weight="600">components</text>
+      <circle cx="168" cy="10" r="3" fill="#1258ca"/>
+    </g>
     
-    <rect x="20" y="270" width="180" height="40" rx="6" fill="transparent"/>
-    <rect x="38" y="278" width="14" height="18" rx="2" fill="#97ea90" opacity="0.3"/>
-    <path d="M40 283 L50 283 M40 287 L50 287 M40 291 L46 291" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
-    <text x="62" y="293" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#1a1a1a">Budget-2024.xlsx</text>
-    <text x="170" y="293" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">2.4MB</text>
+    <g transform="translate(48, 218)">
+      <rect x="-24" y="-6" width="176" height="28" rx="4" fill="transparent"/>
+      <rect x="0" y="2" width="16" height="20" rx="2" fill="#eff6ff" stroke="#1258ca" stroke-width="1"/>
+      <text x="3" y="16" font-family="Roboto Mono, monospace" font-size="9" fill="#1258ca" font-weight="600">TS</text>
+      <text x="24" y="17" font-family="Inter, sans-serif" font-size="12" fill="#4b5563">main.tsx</text>
+    </g>
     
-    <rect x="20" y="315" width="180" height="40" rx="6" fill="transparent"/>
-    <rect x="38" y="323" width="14" height="18" rx="1" fill="#fee2e2"/>
-    <text x="40" y="335" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="7" fill="#dc2626">PDF</text>
-    <text x="62" y="338" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#1a1a1a">Contrat.pdf</text>
-    <text x="170" y="338" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">1.2MB</text>
+    <g transform="translate(48, 250)">
+      <rect x="-24" y="-6" width="176" height="28" rx="4" fill="transparent"/>
+      <rect x="0" y="2" width="16" height="20" rx="2" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+      <text x="4" y="16" font-family="Roboto Mono, monospace" font-size="9" fill="#6b7280">{ }</text>
+      <text x="24" y="17" font-family="Inter, sans-serif" font-size="12" fill="#4b5563">config.json</text>
+    </g>
     
-    <text x="25" y="380" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="12" fill="#1a1a1a">Stockage Cloud</text>
-    <rect x="25" y="390" width="170" height="6" rx="3" fill="#f3f4f6"/>
-    <rect x="25" y="390" width="102" height="6" rx="3" fill="#f05e23"/>
-    <text x="25" y="410" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b">102 GB</text>
-    <text x="195" y="410" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af" text-anchor="end">sur 200 GB</text>
+    <g transform="translate(48, 282)">
+      <rect x="-24" y="-6" width="176" height="28" rx="4" fill="transparent"/>
+      <rect x="0" y="2" width="16" height="20" rx="2" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+      <text x="3" y="16" font-family="Roboto Mono, monospace" font-size="9" fill="#d97706">CSS</text>
+      <text x="24" y="17" font-family="Inter, sans-serif" font-size="12" fill="#4b5563">styles.css</text>
+    </g>
     
-    <rect x="20" y="430" width="180" height="36" rx="6" fill="url(#btn-gradient)"/>
-    <path d="M95 442 L95 450 M95 442 L92 447 M95 442 L98 447" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="115" y="452" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#ffffff">Téléverser</text>
+    <text x="32" y="344" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#6b7280" letter-spacing="0.05em">CLOUD</text>
     
-    <rect x="20" y="472" width="180" height="36" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
-    <path d="M38 482 L38 494 L52 494 L52 486 L47 482 L38 482 Z M47 482 L47 486 L52 486" stroke="#6b6b6b" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-    <text x="110" y="494" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1a1a1a" text-anchor="middle">Nouveau dossier</text>
+    <g transform="translate(32, 360)">
+      <rect x="0" y="0" width="176" height="44" rx="8" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+      <path d="M16 32 L24 16 L32 16 L24 32 Z" fill="#f59e0b"/>
+      <path d="M24 32 L32 16 L40 16 L32 32 Z" fill="#10b981"/>
+      <path d="M20 32 L28 32 L24 24 Z" fill="#3b82f6"/>
+      <text x="52" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#374151">Google Drive</text>
+      <text x="52" y="38" font-family="Inter, sans-serif" font-size="10" fill="#10b981">Connected</text>
+    </g>
+    
+    <g transform="translate(32, 412)">
+      <rect x="0" y="0" width="176" height="44" rx="8" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+      <path d="M20 14 L28 20 L36 14 L28 8 Z" fill="#3b82f6"/>
+      <path d="M20 26 L28 32 L36 26 L28 20 Z" fill="#3b82f6"/>
+      <text x="52" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#374151">Dropbox</text>
+      <text x="52" y="38" font-family="Inter, sans-serif" font-size="10" fill="#10b981">Connected</text>
+    </g>
+    
+    <g transform="translate(32, 480)">
+      <text x="0" y="0" font-family="Inter, sans-serif" font-size="11" fill="#6b7280">Storage</text>
+      <text x="176" y="0" font-family="Inter, sans-serif" font-size="11" fill="#374151" text-anchor="end" font-weight="600">74%</text>
+      <rect x="0" y="8" width="176" height="4" rx="2" fill="#e5e7eb"/>
+      <rect x="0" y="8" width="130" height="4" rx="2" fill="#1258ca"/>
+      <text x="0" y="28" font-family="Inter, sans-serif" font-size="10" fill="#9ca3af">14.8 GB of 20 GB used</text>
+    </g>
   </g>
 </svg>

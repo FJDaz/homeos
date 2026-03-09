@@ -2,35 +2,29 @@
   "comp_brs_arbitrage": {
     "id": "comp_brs_arbitrage",
     "status": "ok",
-    "vw": 240,
-    "vh": 480
+    "vw": 260,
+    "vh": 520
   },
-  "comp_brs_iframes": {
-    "id": "comp_brs_iframes",
+  "comp_brs_search": {
+    "id": "comp_brs_search",
     "status": "ok",
-    "vw": 700,
-    "vh": 480
+    "vw": 220,
+    "vh": 520
   },
   "comp_brs_trace": {
     "id": "comp_brs_trace",
     "status": "ok",
     "vw": 1140,
-    "vh": 140
+    "vh": 180
   },
-  "comp_brs_search": {
-    "id": "comp_brs_search",
+  "comp_brs_iframes": {
+    "id": "comp_brs_iframes",
     "status": "ok",
-    "vw": 200,
-    "vh": 480
+    "vw": 620,
+    "vh": 520
   },
   "comp_bkd_files": {
     "id": "comp_bkd_files",
-    "status": "ok",
-    "vw": 220,
-    "vh": 520
-  },
-  "comp_bkd_agent": {
-    "id": "comp_bkd_agent",
     "status": "ok",
     "vw": 240,
     "vh": 520
@@ -38,73 +32,79 @@
   "comp_bkd_editor": {
     "id": "comp_bkd_editor",
     "status": "ok",
-    "vw": 680,
+    "vw": 660,
     "vh": 520
   },
   "comp_bkd_roadmap": {
     "id": "comp_bkd_roadmap",
     "status": "ok",
-    "vw": 680,
+    "vw": 660,
+    "vh": 520
+  },
+  "comp_bkd_agent": {
+    "id": "comp_bkd_agent",
+    "status": "ok",
+    "vw": 200,
     "vh": 520
   },
   "comp_bkd_term": {
     "id": "comp_bkd_term",
     "status": "ok",
     "vw": 1140,
-    "vh": 140
-  },
-  "comp_frd_pedagogie": {
-    "id": "comp_frd_pedagogie",
-    "status": "ok",
-    "vw": 240,
-    "vh": 560
+    "vh": 200
   },
   "comp_frd_history": {
     "id": "comp_frd_history",
     "status": "ok",
-    "vw": 180,
-    "vh": 480
+    "vw": 200,
+    "vh": 560
   },
   "comp_frd_viewer": {
     "id": "comp_frd_viewer",
     "status": "ok",
-    "vw": 720,
+    "vw": 700,
     "vh": 560
   },
-  "comp_frd_style": {
-    "id": "comp_frd_style",
+  "comp_frd_pedagogie": {
+    "id": "comp_frd_pedagogie",
     "status": "ok",
-    "vw": 240,
+    "vw": 200,
     "vh": 560
   },
   "comp_frd_context": {
     "id": "comp_frd_context",
     "status": "ok",
-    "vw": 600,
-    "vh": 100
+    "vw": 1140,
+    "vh": 160
+  },
+  "comp_frd_style": {
+    "id": "comp_frd_style",
+    "status": "ok",
+    "vw": 200,
+    "vh": 560
   },
   "comp_dpl_secrets": {
     "id": "comp_dpl_secrets",
     "status": "ok",
-    "vw": 200,
-    "vh": 540
+    "vw": 260,
+    "vh": 600
   },
   "comp_dpl_chat": {
     "id": "comp_dpl_chat",
     "status": "ok",
-    "vw": 680,
-    "vh": 540
-  },
-  "comp_dpl_iframe": {
-    "id": "comp_dpl_iframe",
-    "status": "ok",
-    "vw": 680,
-    "vh": 540
+    "vw": 600,
+    "vh": 600
   },
   "comp_dpl_capture": {
     "id": "comp_dpl_capture",
     "status": "ok",
-    "vw": 260,
-    "vh": 540
+    "vw": 240,
+    "vh": 600
+  },
+  "comp_dpl_iframe": {
+    "id": "comp_dpl_iframe",
+    "status": "ok",
+    "vw": 600,
+    "vh": 600
   }
 }

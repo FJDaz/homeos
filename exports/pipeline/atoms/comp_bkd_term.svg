@@ -1,48 +1,56 @@
-<svg viewBox="0 0 1140 140" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="terminalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#18181b;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1"/>
+    <linearGradient id="status-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97ea90" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#97ea90" stop-opacity="0.1"/>
     </linearGradient>
-    <clipPath id="terminalHeaderClip">
-      <rect x="44" y="60" width="1064" height="60" rx="6"/>
-    </clipPath>
   </defs>
   
-  <g id="component_root">
-    <rect x="20" y="20" width="1100" height="100" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+  <!-- Main Card Surface -->
+  <rect x="0" y="0" width="1140" height="200" fill="#ffffff" rx="8" filter="url(#card-shadow)"/>
+  
+  <!-- Section Title -->
+  <text x="32" y="44" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#1a1a1a">Terminal Output</text>
+  
+  <!-- Live Status Badge -->
+  <rect x="1004" y="24" width="104" height="32" rx="6" fill="url(#status-gradient)" stroke="#97ea90" stroke-width="1.5"/>
+  <circle cx="1026" cy="40" r="4" fill="#22c55e">
+    <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="1056" y="45" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#166534">Active</text>
+  
+  <!-- Terminal Window Container -->
+  <rect x="32" y="64" width="1076" height="112" rx="6" fill="#0f1419"/>
+  
+  <!-- Terminal Header Bar -->
+  <path d="M 32 64 L 1108 64 L 1108 92 L 32 92 Z" fill="#161b22"/>
+  <circle cx="52" cy="78" r="5" fill="#ff5f57"/>
+  <circle cx="72" cy="78" r="5" fill="#febc2e"/>
+  <circle cx="92" cy="78" r="5" fill="#28c840"/>
+  <text x="570" y="82" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#8b949e" text-anchor="middle">homeos-audit — zsh — 80×24</text>
+  
+  <!-- Terminal Content -->
+  <g font-family="Roboto Mono, monospace" font-size="11">
+    <!-- Command Input -->
+    <text x="48" y="112" fill="#7ee787">➜</text>
+    <text x="64" y="112" fill="#e6edf3">homeos-cli mission --id=BKD-442 --verify</text>
     
-    <text x="44" y="48" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#1e293b">Audit Terminal</text>
+    <!-- Execution Log 1 -->
+    <text x="48" y="132" fill="#484f58">[14:32:08]</text>
+    <text x="108" y="132" fill="#97ea90">✓</text>
+    <text x="120" y="132" fill="#c9d1d9">Sullivan execution: 14 files processed via surgical edit</text>
     
-    <rect x="1016" y="32" width="92" height="24" rx="4" fill="#1258ca" fill-opacity="0.1"/>
-    <circle cx="1032" cy="44" r="3" fill="#1258ca"/>
-    <text x="1042" y="48" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11" fill="#1258ca">TRACKING</text>
+    <!-- Execution Log 2 -->
+    <text x="48" y="152" fill="#484f58">[14:32:09]</text>
+    <text x="108" y="152" fill="#97ea90">✓</text>
+    <text x="120" y="152" fill="#c9d1d9">AST validation passed: src/modules/Header.tsx</text>
     
-    <rect x="44" y="60" width="1064" height="60" rx="6" fill="url(#terminalGradient)"/>
-    <rect x="44" y="60" width="1064" height="20" fill="#27272a" clip-path="url(#terminalHeaderClip)"/>
-    
-    <circle cx="58" cy="70" r="3" fill="#ef4444"/>
-    <circle cx="68" cy="70" r="3" fill="#f59e0b"/>
-    <circle cx="78" cy="70" r="3" fill="#22c55e"/>
-    
-    <text x="102" y="74" font-family="Roboto Mono, monospace" font-size="10" fill="#71717a">audit-log-8921 — bash</text>
-    
-    <text x="56" y="96" font-family="Roboto Mono, monospace" font-size="11" fill="#e2e8f0" font-weight="500">$</text>
-    <text x="68" y="96" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca" font-weight="600">audit</text>
-    <text x="112" y="96" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">--live</text>
-    <text x="160" y="96" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">--session=prod-01</text>
-    
-    <text x="56" y="112" font-family="Roboto Mono, monospace" font-size="10" fill="#64748b">[14:32:05]</text>
-    <text x="120" y="112" font-family="Roboto Mono, monospace" font-size="10" fill="#a5b4fc">AUTH</text>
-    <text x="154" y="112" font-family="Roboto Mono, monospace" font-size="10" fill="#475569">::</text>
-    <text x="170" y="112" font-family="Roboto Mono, monospace" font-size="10" fill="#cbd5e1">Validating credentials...</text>
-    <text x="340" y="112" font-family="Roboto Mono, monospace" font-size="10" fill="#97ea90">[OK]</text>
-    
-    <rect x="56" y="116" width="6" height="10" fill="#1258ca">
-      <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
-    </rect>
+    <!-- Audit Trail -->
+    <text x="48" y="172" fill="#484f58">[14:32:10]</text>
+    <text x="108" y="172" fill="#1258ca">❯</text>
+    <text x="120" y="172" fill="#c9d1d9">Audit committed: CR-2024-8842 → ROADMAP_ACHIEVED.md</text>
   </g>
 </svg>

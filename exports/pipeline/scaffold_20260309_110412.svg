@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Genome Scaffold v3 — App Wireframe (header+sidebar+main) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="3600">
+  <defs><style>text { font-family: -apple-system, Helvetica, Arial, sans-serif; }</style></defs>
+<!-- Phase: Phase 1 - BRS (Brain-Reasoning-Service) -->
+<g id="phase_1_brs" class="af-phase" data-genome-id="phase_1_brs" data-name="Phase 1 - BRS (Brain-Reasoning-Service)">
+<rect x="0" y="0" width="1440" height="900" fill="#f7f6f2"/>
+<rect x="0" y="0" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="10" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="29" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="13" width="51" height="22" fill="#3d3d3c" rx="10"/>
+<text x="109" y="28" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="143" y="13" width="51" height="22" fill="none" rx="10"/>
+<text x="168" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="202" y="13" width="51" height="22" fill="none" rx="10"/>
+<text x="227" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="261" y="13" width="51" height="22" fill="none" rx="10"/>
+<text x="286" y="28" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<line x1="324" y1="14" x2="324" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="24" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="28" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="48" width="188" height="852" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="68" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHASE 1 - BRS (BRAIN-REASONING-SERVICE)</text>
+<rect x="46" y="78" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="87" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="99" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Main Area (Multive</text>
+<rect x="52" y="123" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="135" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Left (Mote</text>
+<rect x="52" y="159" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="171" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Right (Arb</text>
+<rect x="52" y="195" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="207" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Footer Collapsible</text>
+<g id="brs_main" class="af-organ" data-genome-id="brs_main" data-name="Main Area (Multiverse)" data-ui-role="main-canvas" data-ux-step="">
+<rect x="244" y="72" width="562" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="245" y1="96" x2="805" y2="96" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="120" x2="805" y2="120" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="144" x2="805" y2="144" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="168" x2="805" y2="168" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="192" x2="805" y2="192" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="216" x2="805" y2="216" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="240" x2="805" y2="240" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="264" x2="805" y2="264" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="288" x2="805" y2="288" stroke="#f0efeb" stroke-width="1"/>
+<text x="256" y="92" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="260" y="104" width="530" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="525" y="192" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="brs_sidebar_left" class="af-organ" data-genome-id="brs_sidebar_left" data-name="Sidebar Left (Moteur Sullivan)" data-ui-role="left-sidebar" data-ux-step="">
+<rect x="838" y="72" width="88" height="104" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="848" y="94" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">MENU</text>
+<rect x="842" y="110" width="80" height="32" fill="#a8c5fc" stroke="#a8c5fc" stroke-width="1" rx="4"/>
+<rect x="848" y="116" width="16" height="16" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="3"/>
+<text x="872" y="128" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Centre de Rech</text>
+</g>
+<g id="brs_sidebar_right" class="af-organ" data-genome-id="brs_sidebar_right" data-name="Sidebar Right (Arbitrage Sullivan)" data-ui-role="settings-panel" data-ux-step="">
+<rect x="244" y="344" width="562" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="256" y="362" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Sidebar Right (Arbitrage Sulli</text>
+<rect x="244" y="372" width="421" height="52" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6" stroke-dasharray="4 4"/>
+<rect x="256" y="386" width="79" height="28" fill="#a8c5fc" stroke="none" stroke-width="1" rx="2"/>
+<rect x="339" y="382" width="79" height="32" fill="#a8c5fc" stroke="none" stroke-width="1" rx="2"/>
+<rect x="422" y="382" width="79" height="32" fill="#a8c5fc" stroke="none" stroke-width="1" rx="2"/>
+<rect x="505" y="382" width="79" height="32" fill="#a8c5fc" stroke="none" stroke-width="1" rx="2"/>
+<rect x="588" y="382" width="79" height="32" fill="#a8c5fc" stroke="none" stroke-width="1" rx="2"/>
+<text x="454" y="421" font-size="7" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Arbitrage Dashbo</text>
+</g>
+<g id="brs_footer" class="af-organ" data-genome-id="brs_footer" data-name="Footer Collapsible (La Trace)" data-ui-role="status-bar" data-ux-step="">
+<rect x="838" y="344" width="562" height="136" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="850" y="362" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Footer Collapsible (La Trace)</text>
+<rect x="854" y="372" width="96" height="28" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="862" y="390" font-size="8" fill="#3d3d3c" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Trace Logs</text>
+<rect x="854" y="400" width="96" height="21" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="0"/>
+<line x1="892" y1="400" x2="892" y2="421" stroke="#d5d4d0" stroke-width="1"/>
+<line x1="930" y1="400" x2="930" y2="421" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="934" y="404" width="11" height="14" fill="#a8c5fc" stroke="none" stroke-width="1" rx="8"/>
+<rect x="854" y="422" width="96" height="21" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="0"/>
+<line x1="892" y1="422" x2="892" y2="443" stroke="#d5d4d0" stroke-width="1"/>
+<line x1="930" y1="422" x2="930" y2="443" stroke="#d5d4d0" stroke-width="1"/>
+</g>
+</g>
+<!-- Phase: Phase 2 - BKD (La Forge) -->
+<g id="phase_2_bkd" class="af-phase" data-genome-id="phase_2_bkd" data-name="Phase 2 - BKD (La Forge)">
+<rect x="0" y="900" width="1440" height="900" fill="#f7f6f2"/>
+<rect x="0" y="900" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="910" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="929" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="913" width="51" height="22" fill="none" rx="10"/>
+<text x="109" y="928" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="143" y="913" width="51" height="22" fill="#3d3d3c" rx="10"/>
+<text x="168" y="928" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="202" y="913" width="51" height="22" fill="none" rx="10"/>
+<text x="227" y="928" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="261" y="913" width="51" height="22" fill="none" rx="10"/>
+<text x="286" y="928" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<line x1="324" y1="914" x2="324" y2="934" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="924" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="928" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="948" width="188" height="852" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="968" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHASE 2 - BKD (LA FORGE)</text>
+<rect x="46" y="978" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="987" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="999" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Left (Work</text>
+<rect x="52" y="1023" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1035" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Main Area (Edition</text>
+<rect x="52" y="1059" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1071" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Right (Maj</text>
+<rect x="52" y="1095" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1107" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Footer (Terminal &amp;</text>
+<g id="bkd_sidebar_left" class="af-organ" data-genome-id="bkd_sidebar_left" data-name="Sidebar Left (Workspace)" data-ui-role="left-sidebar" data-ux-step="">
+<rect x="244" y="972" width="88" height="104" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="254" y="994" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">MENU</text>
+<rect x="248" y="1010" width="80" height="32" fill="#a8c5fc" stroke="#a8c5fc" stroke-width="1" rx="4"/>
+<rect x="254" y="1016" width="16" height="16" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="3"/>
+<text x="278" y="1028" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">File Explorer</text>
+</g>
+<g id="bkd_main" class="af-organ" data-genome-id="bkd_main" data-name="Main Area (Edition &amp; Roadmap)" data-ui-role="main-canvas" data-ux-step="">
+<rect x="838" y="972" width="562" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="839" y1="996" x2="1399" y2="996" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1020" x2="1399" y2="1020" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1044" x2="1399" y2="1044" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1068" x2="1399" y2="1068" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1092" x2="1399" y2="1092" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1116" x2="1399" y2="1116" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1140" x2="1399" y2="1140" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1164" x2="1399" y2="1164" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="1188" x2="1399" y2="1188" stroke="#f0efeb" stroke-width="1"/>
+<text x="850" y="992" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="854" y="1004" width="530" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="1119" y="1092" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="bkd_sidebar_right" class="af-organ" data-genome-id="bkd_sidebar_right" data-name="Sidebar Right (Majordome Sullivan)" data-ui-role="settings-panel" data-ux-step="">
+<rect x="244" y="1244" width="562" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="256" y="1262" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Sidebar Right (Majordome Sulli</text>
+<rect x="244" y="1272" width="393" height="52" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="26"/>
+<text x="256" y="1302" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Chat Majordome</text>
+<circle cx="651" cy="1298" r="11" fill="#a8c5fc" stroke="none" stroke-width="1"/>
+</g>
+<g id="bkd_footer" class="af-organ" data-genome-id="bkd_footer" data-name="Footer (Terminal &amp; Audit)" data-ui-role="status-bar" data-ux-step="">
+<rect x="838" y="1244" width="562" height="136" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="850" y="1262" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Footer (Terminal &amp;amp; Audit)</text>
+<rect x="854" y="1272" width="96" height="88" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<circle cx="868" cy="1316" r="5" fill="#4ade80" stroke="none" stroke-width="1"/>
+<text x="878" y="1320" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Terminal Output</text>
+</g>
+</g>
+<!-- Phase: Phase 3 - FRD (Le Tisseur) -->
+<g id="phase_3_frd" class="af-phase" data-genome-id="phase_3_frd" data-name="Phase 3 - FRD (Le Tisseur)">
+<rect x="0" y="1800" width="1440" height="900" fill="#f7f6f2"/>
+<rect x="0" y="1800" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="1810" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="1829" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="1813" width="51" height="22" fill="none" rx="10"/>
+<text x="109" y="1828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="143" y="1813" width="51" height="22" fill="none" rx="10"/>
+<text x="168" y="1828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="202" y="1813" width="51" height="22" fill="#3d3d3c" rx="10"/>
+<text x="227" y="1828" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="261" y="1813" width="51" height="22" fill="none" rx="10"/>
+<text x="286" y="1828" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<line x1="324" y1="1814" x2="324" y2="1834" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="1824" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="1828" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="1848" width="188" height="852" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="1868" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHASE 3 - FRD (LE TISSEUR)</text>
+<rect x="46" y="1878" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="1887" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="1899" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Main Area (Genome </text>
+<rect x="52" y="1923" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1935" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Left (Le P</text>
+<rect x="52" y="1959" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="1971" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Right (Péd</text>
+<rect x="52" y="1995" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="2007" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Footer Contextuel</text>
+<g id="frd_main" class="af-organ" data-genome-id="frd_main" data-name="Main Area (Genome Viewer)" data-ui-role="main-canvas" data-ux-step="">
+<rect x="244" y="1872" width="562" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="245" y1="1896" x2="805" y2="1896" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="1920" x2="805" y2="1920" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="1944" x2="805" y2="1944" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="1968" x2="805" y2="1968" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="1992" x2="805" y2="1992" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="2016" x2="805" y2="2016" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="2040" x2="805" y2="2040" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="2064" x2="805" y2="2064" stroke="#f0efeb" stroke-width="1"/>
+<line x1="245" y1="2088" x2="805" y2="2088" stroke="#f0efeb" stroke-width="1"/>
+<text x="256" y="1892" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="260" y="1904" width="530" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="525" y="1992" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="frd_sidebar_left" class="af-organ" data-genome-id="frd_sidebar_left" data-name="Sidebar Left (Le Pourquoi)" data-ui-role="left-sidebar" data-ux-step="">
+<rect x="838" y="1872" width="88" height="104" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="848" y="1894" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">MENU</text>
+<rect x="842" y="1910" width="80" height="32" fill="#a8c5fc" stroke="#a8c5fc" stroke-width="1" rx="4"/>
+<rect x="848" y="1916" width="16" height="16" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="3"/>
+<text x="872" y="1928" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Intent Feed</text>
+</g>
+<g id="frd_sidebar_right" class="af-organ" data-genome-id="frd_sidebar_right" data-name="Sidebar Right (Pédagogie)" data-ui-role="settings-panel" data-ux-step="">
+<rect x="244" y="2144" width="562" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="256" y="2162" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Sidebar Right (Pédagogie)</text>
+<rect x="244" y="2172" width="393" height="52" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="26"/>
+<text x="256" y="2202" font-size="8" fill="#b5b4b0" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Pedagogy Chat</text>
+<circle cx="651" cy="2198" r="11" fill="#a8c5fc" stroke="none" stroke-width="1"/>
+<rect x="665" y="2172" width="421" height="52" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="6"/>
+<rect x="671" y="2178" width="409" height="31" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<text x="875" y="2223" font-size="9" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Style Choice</text>
+</g>
+<g id="frd_footer" class="af-organ" data-genome-id="frd_footer" data-name="Footer Contextuel" data-ui-role="status-bar" data-ux-step="">
+<rect x="838" y="2144" width="562" height="136" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="850" y="2162" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Footer Contextuel</text>
+<rect x="854" y="2172" width="96" height="88" fill="#f7f6f2" stroke="#d5d4d0" stroke-width="1" rx="4"/>
+<circle cx="868" cy="2216" r="5" fill="#4ade80" stroke="none" stroke-width="1"/>
+<text x="878" y="2220" font-size="8" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Tooltip Info</text>
+</g>
+</g>
+<!-- Phase: Phase 4 - DPL (Le Propulseur) -->
+<g id="phase_4_dpl" class="af-phase" data-genome-id="phase_4_dpl" data-name="Phase 4 - DPL (Le Propulseur)">
+<rect x="0" y="2700" width="1440" height="900" fill="#f7f6f2"/>
+<rect x="0" y="2700" width="1440" height="48" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>
+<rect x="40" y="2710" width="28" height="28" fill="#3d3d3c" rx="4"/>
+<text x="48" y="2729" font-size="11" fill="#ffffff" text-anchor="start" font-weight="700" font-family="-apple-system, Helvetica, Arial, sans-serif">AF</text>
+<rect x="84" y="2713" width="51" height="22" fill="none" rx="10"/>
+<text x="109" y="2728" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="143" y="2713" width="51" height="22" fill="none" rx="10"/>
+<text x="168" y="2728" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="202" y="2713" width="51" height="22" fill="none" rx="10"/>
+<text x="227" y="2728" font-size="9" fill="#9d9c98" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<rect x="261" y="2713" width="51" height="22" fill="#3d3d3c" rx="10"/>
+<text x="286" y="2728" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHA</text>
+<line x1="324" y1="2714" x2="324" y2="2734" stroke="#d5d4d0" stroke-width="1"/>
+<circle cx="1384" cy="2724" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>
+<text x="1384" y="2728" font-size="7" fill="#3d3d3c" text-anchor="middle" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">FJD</text>
+<rect x="40" y="2748" width="188" height="852" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>
+<text x="52" y="2768" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system, Helvetica, Arial, sans-serif">PHASE 4 - DPL (LE PROPULSEUR)</text>
+<rect x="46" y="2778" width="176" height="30" fill="#a8c5fc" rx="4"/>
+<rect x="52" y="2787" width="14" height="14" fill="#3d3d3c" rx="3"/>
+<text x="72" y="2799" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Left (Conf</text>
+<rect x="52" y="2823" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="2835" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Main Area (Dual Co</text>
+<rect x="52" y="2859" width="14" height="14" fill="#d5d4d0" rx="3"/>
+<text x="72" y="2871" font-size="9" fill="#9d9c98" text-anchor="start" font-weight="normal" font-family="-apple-system, Helvetica, Arial, sans-serif">Sidebar Right (Gui</text>
+<g id="dpl_sidebar_left" class="af-organ" data-genome-id="dpl_sidebar_left" data-name="Sidebar Left (Configurations)" data-ui-role="left-sidebar" data-ux-step="">
+<rect x="244" y="2772" width="88" height="104" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="254" y="2794" font-size="7" fill="#9d9c98" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">MENU</text>
+<rect x="248" y="2810" width="80" height="32" fill="#a8c5fc" stroke="#a8c5fc" stroke-width="1" rx="4"/>
+<rect x="254" y="2816" width="16" height="16" fill="#3d3d3c" stroke="#d5d4d0" stroke-width="1" rx="3"/>
+<text x="278" y="2828" font-size="9" fill="#3d3d3c" text-anchor="start" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">Secrets Manage</text>
+</g>
+<g id="dpl_main" class="af-organ" data-genome-id="dpl_main" data-name="Main Area (Dual Col)" data-ui-role="main-canvas" data-ux-step="">
+<rect x="838" y="2772" width="562" height="240" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<line x1="839" y1="2796" x2="1399" y2="2796" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2820" x2="1399" y2="2820" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2844" x2="1399" y2="2844" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2868" x2="1399" y2="2868" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2892" x2="1399" y2="2892" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2916" x2="1399" y2="2916" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2940" x2="1399" y2="2940" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2964" x2="1399" y2="2964" stroke="#f0efeb" stroke-width="1"/>
+<line x1="839" y1="2988" x2="1399" y2="2988" stroke="#f0efeb" stroke-width="1"/>
+<text x="850" y="2792" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">CANVAS / EDITOR</text>
+<rect x="854" y="2804" width="530" height="192" fill="#f7f6f2" stroke="#9d9c98" stroke-width="1" rx="4" stroke-dasharray="4 4"/>
+<text x="1119" y="2892" font-size="9" fill="#b5b4b0" text-anchor="middle" font-weight="normal" font-family="-apple-system,Helvetica,Arial,sans-serif">[ workspace ]</text>
+</g>
+<g id="dpl_sidebar_right" class="af-organ" data-genome-id="dpl_sidebar_right" data-name="Sidebar Right (Guide Sullivan)" data-ui-role="settings-panel" data-ux-step="">
+<rect x="244" y="3044" width="562" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+<text x="256" y="3062" font-size="7" fill="#b5b4b0" text-anchor="start" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Sidebar Right (Guide Sullivan)</text>
+<rect x="244" y="3072" width="421" height="52" fill="#3d3d3c" stroke="none" stroke-width="1" rx="16"/>
+<text x="454" y="3102" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="-apple-system,Helvetica,Arial,sans-serif">Capture Action</text>
+</g>
+</g>
+</svg>

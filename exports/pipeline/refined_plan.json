@@ -1,46 +1,46 @@
 {
   "reference_theme": "Most (Creative Agency)",
-  "art_direction": "Refined for bold creative agency aesthetic—high-contrast orange (#ff6b35) energy against clean white, masonry grid layouts with 12px rounded cards and elevated shadows (0 8px 32px rgba(0,0,0,0.10)), pill-shaped interactive elements (radius 9999px), and reinterpreted 'Genome' as atomic design system visualization (component library grid rather than biological tissue). Dense, high-fidelity UI with precise 1:1 pixel density compensation.",
+  "art_direction": "Bold creative agency aesthetic with high-contrast orange energy (#ff6b35), masonry-inspired asymmetric layouts, and premium card-based UI. Dense, high-fidelity components with 12px radius cards, soft shadows, and pill-shaped interactive elements. Clean white canvas with strategic dark (#111111) and muted (#888888) accents.",
   "typography_overrides": {
-    "display_font": "Plus Jakarta Sans, 700",
-    "body_font": "Inter, 400",
+    "display_font": "Plus Jakarta Sans, 700 weight, tight letter-spacing (-0.02em)",
+    "body_font": "Inter, 400 weight, 16px size",
     "accent_color": "#ff6b35",
     "bg_color": "#ffffff"
   },
   "phases": {
     "phase_1_brs": {
-      "layout_style": "masonry_dashboard",
-      "total_height": 640,
+      "layout_style": "masonry_research_dashboard",
+      "total_height": 700,
       "organs": [
         {
           "id": "brs_sidebar_left",
           "x": 260,
           "y": 0,
-          "w": 200,
-          "h": 480,
-          "atom_style_hint": "viewBox='0 0 200 480', slim control dock with dark (#111) background, pill-shaped search input (9999px radius), orange (#ff6b35) active states, Plus Jakarta Sans for headers, high-fidelity iconography at 1:1 density",
+          "w": 220,
+          "h": 520,
+          "atom_style_hint": "viewBox='0 0 220 520'. Dense search interface with orange (#ff6b35) active states, Plus Jakarta Sans headers at 18px, Inter body at 13px. Card radius 12px, shadow 0 8px 32px rgba(0,0,0,0.08). Compact form inputs with 9999px pill-shaped search button. High pixel density: 1px strokes, 8px grid system.",
           "regenerate_atoms": [
             "comp_brs_search"
           ]
         },
         {
           "id": "brs_main",
-          "x": 460,
+          "x": 512,
           "y": 0,
-          "w": 700,
-          "h": 480,
-          "atom_style_hint": "viewBox='0 0 700 480', masonry hero canvas with white cards (12px radius), soft shadow (0 8px 32px rgba(0,0,0,0.10)), multiverse visualization as asymmetric bento grid, orange primary actions, Inter body text",
+          "w": 620,
+          "h": 520,
+          "atom_style_hint": "viewBox='0 0 620 520'. Hero masonry grid for iframe previews. White cards with 12px radius, #111111 headers (Plus Jakarta Sans 24px), muted #888888 meta text (Inter 11px uppercase). 32px internal padding. High-fidelity browser chrome mockups at 1:1 scale. Orange (#ff6b35) accent badges.",
           "regenerate_atoms": [
             "comp_brs_iframes"
           ]
         },
         {
           "id": "brs_sidebar_right",
-          "x": 1160,
+          "x": 1164,
           "y": 0,
-          "w": 240,
-          "h": 480,
-          "atom_style_hint": "viewBox='0 0 240 480', settings panel with high-contrast borders, pill toggles, orange accent (#ff6b35) for arbitrage parameters, dark (#1a1a2e) secondary background sections",
+          "w": 260,
+          "h": 520,
+          "atom_style_hint": "viewBox='0 0 260 520'. Arbitrage panel with dark (#1a1a2e) header bar contrast. High-density text hierarchy: 20px Plus Jakarta Sans bold titles, 12px Inter secondary. Pill badges with orange background (#ff6b35) on white cards. Compact list items at 44px height. Shadow depth on hover states.",
           "regenerate_atoms": [
             "comp_brs_arbitrage"
           ]
@@ -48,10 +48,10 @@
         {
           "id": "brs_footer",
           "x": 260,
-          "y": 500,
+          "y": 520,
           "w": 1140,
-          "h": 140,
-          "atom_style_hint": "viewBox='0 0 1140 140', full-width status bar with near-black (#111111) background, monospace Inter for logs, orange progress indicators, 12px rounded top corners",
+          "h": 180,
+          "atom_style_hint": "viewBox='0 0 1140 180'. Full-width trace log with monospace Inter (13px) for code, Plus Jakarta Sans (14px bold) for section labels. Dark (#111111) left border accent (4px). White background with subtle top shadow. High-density data tables with 8px row padding. Orange (#ff6b35) status indicators.",
           "regenerate_atoms": [
             "comp_brs_trace"
           ]
@@ -59,27 +59,27 @@
       ]
     },
     "phase_2_bkd": {
-      "layout_style": "masonry_workspace",
-      "total_height": 680,
+      "layout_style": "masonry_workshop_terminal",
+      "total_height": 720,
       "organs": [
         {
           "id": "bkd_sidebar_left",
           "x": 260,
           "y": 0,
-          "w": 220,
+          "w": 240,
           "h": 520,
-          "atom_style_hint": "viewBox='0 0 220 520', tool palette with file browser as masonry list items, 12px rounded cards, muted (#888) inactive states transitioning to orange (#ff6b35) on hover, clean white backgrounds",
+          "atom_style_hint": "viewBox='0 0 240 520'. File explorer with tree navigation. Plus Jakarta Sans 12px uppercase folder labels (weight 600), Inter 13px file names. Orange (#ff6b35) active file indicator. 12px card radius, white background with subtle shadow. High-density: 32px row height, 8px icon + text spacing. Dark (#111111) icons.",
           "regenerate_atoms": [
             "comp_bkd_files"
           ]
         },
         {
           "id": "bkd_main",
-          "x": 480,
+          "x": 532,
           "y": 0,
-          "w": 680,
+          "w": 660,
           "h": 520,
-          "atom_style_hint": "viewBox='0 0 680 520', dual-view canvas (Editor/Roadmap) with tabbed interface using pill buttons (9999px radius), high-density content at 1:1 scale, subtle grid lines (#eee), Plus Jakarta Sans for headers",
+          "atom_style_hint": "viewBox='0 0 660 520'. Split editor zone with high-contrast syntax highlighting. Background #ffffff, text #333333, keywords #ff6b35 (orange). Plus Jakarta Sans for UI chrome (14px), monospace for code (13px Inter). 12px radius container. Dense UI: 24px toolbar height, 4px grid alignment. Roadmap view uses pill-shaped status badges (9999px radius).",
           "regenerate_atoms": [
             "comp_bkd_editor",
             "comp_bkd_roadmap"
@@ -87,11 +87,11 @@
         },
         {
           "id": "bkd_sidebar_right",
-          "x": 1160,
+          "x": 1224,
           "y": 0,
-          "w": 240,
+          "w": 200,
           "h": 520,
-          "atom_style_hint": "viewBox='0 0 240 520', Majordome assistant as floating card aesthetic within panel, soft shadow, orange accent dots for notifications, Inter 600 for labels, generous 32px internal padding",
+          "atom_style_hint": "viewBox='0 0 200 520'. Agent chat panel with compressed message bubbles. Plus Jakarta Sans 14px bold for agent name, Inter 12px for messages. Pill-shaped input field (9999px radius) with orange (#ff6b35) send button. High density: message spacing 8px, avatar 28px. Dark (#111111) bot avatar background.",
           "regenerate_atoms": [
             "comp_bkd_agent"
           ]
@@ -99,10 +99,10 @@
         {
           "id": "bkd_footer",
           "x": 260,
-          "y": 540,
+          "y": 520,
           "w": 1140,
-          "h": 140,
-          "atom_style_hint": "viewBox='0 0 1140 140', terminal footer with dark (#111) command line area, orange (#ff6b35) cursor/prompt, monospace Inter 400, 12px top radius, high-contrast audit log text (#333 on #fafafa)",
+          "h": 200,
+          "atom_style_hint": "viewBox='0 0 1140 200'. Terminal with dark (#111111) background theme (alternative to white for contrast). Monospace Inter 12px, line-height 1.5. Orange (#ff6b35) command prompts. Plus Jakarta Sans 11px uppercase labels for 'TERMINAL' and 'AUDIT'. High density: 20px line height, 8px padding. 12px top radius only.",
           "regenerate_atoms": [
             "comp_bkd_term"
           ]
@@ -110,38 +110,38 @@
       ]
     },
     "phase_3_frd": {
-      "layout_style": "masonry_hero_floating",
-      "total_height": 560,
+      "layout_style": "masonry_genome_viewer",
+      "total_height": 720,
       "organs": [
         {
           "id": "frd_sidebar_left",
           "x": 260,
           "y": 0,
-          "w": 180,
-          "h": 480,
-          "atom_style_hint": "viewBox='0 0 180 480', narrow context panel with vertical timeline aesthetic, orange milestones (#ff6b35), Inter 11px uppercase labels (weight 600), muted (#888) historical text",
+          "w": 200,
+          "h": 560,
+          "atom_style_hint": "viewBox='0 0 200 560'. Intent history timeline with vertical orange (#ff6b35) progress line (2px). Plus Jakarta Sans 13px bold for intent titles, Inter 11px muted (#888888) timestamps. White cards with 12px radius, connected by dotted line. High density: 64px timeline items, 8px connector dots.",
           "regenerate_atoms": [
             "comp_frd_history"
           ]
         },
         {
           "id": "frd_main",
-          "x": 440,
+          "x": 492,
           "y": 0,
-          "w": 720,
+          "w": 700,
           "h": 560,
-          "atom_style_hint": "viewBox='0 0 720 560', Atomic Design System visualization—NOT biological organs. Display as masonry grid of component cards (atoms, molecules, organisms) with 12px radius, orange (#ff6b35) selection borders, dark (#111) component previews, Plus Jakarta Sans category labels, 1:1 pixel density compensation for high-fidelity SVG components",
+          "atom_style_hint": "viewBox='0 0 700 560'. Genome viewer hero canvas with explosive node visualization. Dark (#1a1a2e) background variant for dramatic contrast. Orange (#ff6b35) primary nodes with white (#ffffff) text (Plus Jakarta Sans 10px bold). High-fidelity SVG paths, 1-2px strokes. Inter 12px for metadata overlays. 12px radius container with heavy shadow (0 8px 32px rgba(0,0,0,0.15)).",
           "regenerate_atoms": [
             "comp_frd_viewer"
           ]
         },
         {
           "id": "frd_sidebar_right",
-          "x": 1160,
+          "x": 1224,
           "y": 0,
-          "w": 240,
+          "w": 200,
           "h": 560,
-          "atom_style_hint": "viewBox='0 0 240 560', split pedagogy panel with dual-card layout (12px radius), alternating white and accent2 (#1a1a2e) backgrounds, orange (#ff6b35) active learning indicators, dense educational content",
+          "atom_style_hint": "viewBox='0 0 200 560'. Pedagogy panel with stacked zones. Plus Jakarta Sans 14px bold section headers, Inter 12px body. Q&A uses pill-shaped tags (9999px radius). HCI section uses 12px card radius with #f5f5f5 background. High density: 40px row height, 16px section spacing. Orange (#ff6b35) accent icons.",
           "regenerate_atoms": [
             "comp_frd_pedagogie",
             "comp_frd_style"
@@ -149,11 +149,11 @@
         },
         {
           "id": "frd_footer",
-          "x": 500,
-          "y": 420,
-          "w": 600,
-          "h": 100,
-          "atom_style_hint": "viewBox='0 0 600 100', floating contextual inspector card with elevated shadow (0 8px 32px rgba(0,0,0,0.15)), 12px radius, white background, orange (#ff6b35) action buttons (pill shape), centered over main canvas",
+          "x": 260,
+          "y": 560,
+          "w": 1140,
+          "h": 160,
+          "atom_style_hint": "viewBox='0 0 1140 160'. Contextual explanation bar with code snippets. White background, top border 1px #eeeeee. Monospace Inter 12px for code blocks with 12px radius gray background (#f5f5f5). Plus Jakarta Sans 13px bold for 'Context' label. High density: 32px tab height, orange (#ff6b35) active tab indicator (2px).",
           "regenerate_atoms": [
             "comp_frd_context"
           ]
@@ -161,27 +161,27 @@
       ]
     },
     "phase_4_dpl": {
-      "layout_style": "masonry_deployment",
-      "total_height": 540,
+      "layout_style": "masonry_deployment_dual",
+      "total_height": 600,
       "organs": [
         {
           "id": "dpl_sidebar_left",
           "x": 260,
           "y": 0,
-          "w": 200,
-          "h": 540,
-          "atom_style_hint": "viewBox='0 0 200 540', configuration sidebar with secure vault aesthetic, dark (#111) headers, orange (#ff6b35) encrypted indicators, pill-shaped environment toggles, high-contrast form fields",
+          "w": 260,
+          "h": 600,
+          "atom_style_hint": "viewBox='0 0 260 600'. Secrets configuration with form density. Plus Jakarta Sans 12px uppercase labels (weight 600), Inter 13px input text. Orange (#ff6b35) active input borders. 12px card radius, shadow on hover. Pill-shaped toggle switches (9999px). High density: 40px input height, 12px label spacing. Dark (#111111) section headers.",
           "regenerate_atoms": [
             "comp_dpl_secrets"
           ]
         },
         {
           "id": "dpl_main",
-          "x": 460,
+          "x": 552,
           "y": 0,
-          "w": 680,
-          "h": 540,
-          "atom_style_hint": "viewBox='0 0 680 540', split deployment canvas (Chat/Iframe) with resizable pane handles (orange #ff6b35), 12px rounded message bubbles, masonry layout for preview cards, Plus Jakarta Sans for deployment status headers",
+          "w": 600,
+          "h": 600,
+          "atom_style_hint": "viewBox='0 0 600 600'. Dual deployment view with split interface. Left: chat (Inter 13px, Plus Jakarta Sans 14px bold agent names). Right: iframe preview with 12px radius browser chrome. High-fidelity at 1:1 scale. Orange (#ff6b35) send buttons and status badges. White background, 32px internal padding. Shadow separator between zones.",
           "regenerate_atoms": [
             "comp_dpl_chat",
             "comp_dpl_iframe"
@@ -189,11 +189,11 @@
         },
         {
           "id": "dpl_sidebar_right",
-          "x": 1140,
+          "x": 1184,
           "y": 0,
-          "w": 260,
-          "h": 540,
-          "atom_style_hint": "viewBox='0 0 260 540', Le Propulseur guide panel with rich help content, 32px internal gaps, white cards with soft shadow, orange (#ff6b35) CTA buttons (pill radius 9999px), Inter 400 body with 600 weight labels",
+          "w": 240,
+          "h": 600,
+          "atom_style_hint": "viewBox='0 0 240 600'. Vision capture panel with large orange (#ff6b35) pill button (9999px radius) as primary CTA. Plus Jakarta Sans 16px bold for button text. Inter 12px for analysis results. High density: 48px button height, 8px grid for image thumbnails. White cards with 12px radius for vision results. Dark (#111111) header.",
           "regenerate_atoms": [
             "comp_dpl_capture"
           ]

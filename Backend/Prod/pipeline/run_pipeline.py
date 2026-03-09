@@ -105,6 +105,8 @@ def main():
                         help="FJD feedback for step 6 (acceptance loop)")
     parser.add_argument("--no-loop", action="store_true",
                         help="Skip acceptance loop, just run steps once")
+    parser.add_argument("--context", type=str, default="",
+                        help="Path to a context document (e.g. MANIFEST_FRD.md) to inject into KIMI prompts")
     args = parser.parse_args()
 
     start = args.from_step
@@ -113,11 +115,28 @@ def main():
     print(f"   Starting from step {start} — theme: {args.theme}")
     if args.feedback:
         print(f"   Feedback: {args.feedback}")
+    if args.context:
+        print(f"   Context Injection: {args.context}")
     print(f"{'='*60}")
+    
+    # Read Context File
+    context_text = ""
+    if args.context:
+        context_path = Path(args.context)
+        if not context_path.is_absolute():
+            context_path = project_root / context_path
+        if context_path.exists():
+            context_text = context_path.read_text(encoding="utf-8")
+        else:
+            print(f"⚠️  Context file not found at {context_path}")
 
     # Steps 1-5 run once
     for step in range(start, min(6, 8)):
         extra = []
+        if step == 2 and context_text:
+            extra = ["--context_text", context_text]
+        if step == 4 and context_text:
+            extra = ["--context_text", context_text]
         if step == 5:
             extra = ["--theme", args.theme]
         if not run_step(step, extra):

@@ -71,6 +71,11 @@ Return JSON only."""
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--context_text", type=str, default="", help="Overarching project context")
+    args = parser.parse_args()
+
     api_key = os.getenv("KIMI_KEY")
     if not api_key:
         print("❌ KIMI_KEY not set")
@@ -113,6 +118,10 @@ def main():
         tabs_json=json.dumps(zone_map["tabs"], indent=2),
         organs_json=json.dumps(organs_summary, indent=2),
     )
+    
+    system_prompt = SYSTEM_PROMPT
+    if args.context_text:
+        system_prompt += f"\n\nHere is the overarching vision of the product you are designing today:\n{args.context_text}"
 
     client = OpenAI(base_url="https://api.moonshot.ai/v1", api_key=api_key)
     print("⚖️  KIMI Layout Director — designing layout...")
@@ -120,7 +129,7 @@ def main():
     response = client.chat.completions.create(
         model="kimi-k2.5",
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
         max_tokens=16000,

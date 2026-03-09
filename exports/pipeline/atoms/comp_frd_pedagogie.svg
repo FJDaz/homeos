@@ -1,58 +1,95 @@
-<svg viewBox="0 0 240 560" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 200 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="shadow-card" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffd548"/>
-      <stop offset="100%" style="stop-color:#ffe175"/>
+    <linearGradient id="gradient-accent" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1258ca;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0e47a8;stop-opacity:1"/>
     </linearGradient>
   </defs>
   
-  <g id="component_root">
-    <!-- Main Card Surface -->
-    <rect x="16" y="16" width="208" height="528" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
-    
-    <!-- Header -->
-    <text x="36" y="56" font-family="Plus Jakarta Sans, sans-serif" font-size="19" font-weight="700" fill="#111827">Pédagogie</text>
-    <rect x="36" y="64" width="32" height="3" rx="1.5" fill="#ffd548"/>
-    
-    <!-- Sullivan Avatar -->
-    <circle cx="48" cy="104" r="12" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
-    <text x="48" y="108" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="#1258ca" text-anchor="middle">S</text>
+  <!-- Main Card Surface -->
+  <rect x="12" y="12" width="176" height="536" rx="8" fill="#ffffff" filter="url(#shadow-card)"/>
+  
+  <!-- Header Section -->
+  <text x="28" y="48" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="17" fill="#111827">Pédagogie</text>
+  <text x="28" y="66" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">Sullivan • Expert technique</text>
+  
+  <!-- Divider -->
+  <line x1="28" y1="82" x2="172" y2="82" stroke="#e5e7eb" stroke-width="1"/>
+  
+  <!-- Chat Message: Sullivan (Architecture Explanation) -->
+  <g id="msg-sullivan-1" transform="translate(28, 102)">
+    <!-- Avatar -->
+    <circle cx="10" cy="10" r="9" fill="#eff6ff" stroke="#1258ca" stroke-width="1.5"/>
+    <text x="10" y="14" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="9" fill="#1258ca" text-anchor="middle">S</text>
     
     <!-- Message Bubble -->
-    <path d="M 68 88 L 188 88 A 8 8 0 0 1 196 96 L 196 268 A 8 8 0 0 1 188 276 L 68 276 A 8 8 0 0 1 60 268 L 60 104 A 8 8 0 0 1 68 88 Z" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
-    
-    <!-- Sender Name -->
-    <text x="80" y="112" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="#111827">Sullivan</text>
-    
-    <!-- Message Body -->
-    <text x="80" y="134" font-family="Inter, sans-serif" font-size="12" fill="#4b5563">
-      <tspan x="80" dy="0">Voici la structure</tspan>
-      <tspan x="80" dy="18">technique recommandée :</tspan>
+    <rect x="24" y="0" width="120" height="72" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="32" y="18" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#374151">
+      <tspan x="32" dy="0">Le Genome organise</tspan>
+      <tspan x="32" dy="14">l'intention en 3</tspan>
+      <tspan x="32" dy="14">couches sémantiques</tspan>
+      <tspan x="32" dy="14" fill="#1258ca" font-weight="600">abstraites...</tspan>
     </text>
+  </g>
+  
+  <!-- Chat Message: User -->
+  <g transform="translate(28, 190)">
+    <rect x="44" y="0" width="100" height="32" rx="6" fill="#1258ca"/>
+    <text x="94" y="20" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">Pattern S-T-A-R ?</text>
+  </g>
+  
+  <!-- Chat Message: Sullivan (Detailed Technical Response) -->
+  <g transform="translate(28, 238)">
+    <circle cx="10" cy="10" r="9" fill="#eff6ff" stroke="#1258ca" stroke-width="1.5"/>
+    <text x="10" y="14" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="9" fill="#1258ca" text-anchor="middle">S</text>
     
-    <!-- Technical Structure Block -->
-    <rect x="80" y="164" width="100" height="92" rx="10" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
-    <text x="88" y="184" font-family="Inter, sans-serif" font-size="10" fill="#1f2937">
-      <tspan x="88" dy="0">src/</tspan>
-      <tspan x="88" dy="14">├── components/</tspan>
-      <tspan x="88" dy="14">├── hooks/</tspan>
-      <tspan x="88" dy="14">├── utils/</tspan>
-      <tspan x="88" dy="14">└── types/</tspan>
+    <rect x="24" y="0" width="120" height="110" rx="6" fill="#ffffff" stroke="#dbeafe" stroke-width="1.5"/>
+    <text x="32" y="18" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#1f2937">
+      <tspan x="32" dy="0" font-weight="600">Structure technique:</tspan>
+      <tspan x="32" dy="16">• State: Données</tspan>
+      <tspan x="32" dy="14">• Template: Vue</tspan>
+      <tspan x="32" dy="14">• Action: Logique</tspan>
+      <tspan x="32" dy="14">• Retro: Feedback</tspan>
     </text>
+  </g>
+  
+  <!-- Chat Message: User (Follow-up) -->
+  <g transform="translate(28, 366)">
+    <rect x="44" y="0" width="100" height="32" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+    <text x="94" y="20" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#374151" text-anchor="middle">Et l'AST ?</text>
+  </g>
+  
+  <!-- Typing Indicator -->
+  <g transform="translate(28, 412)">
+    <circle cx="10" cy="10" r="9" fill="#eff6ff" stroke="#1258ca" stroke-width="1.5"/>
+    <text x="10" y="14" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="9" fill="#1258ca" text-anchor="middle">S</text>
     
-    <!-- Timestamp -->
-    <text x="180" y="292" font-family="Inter, sans-serif" font-size="9" fill="#9ca3af" text-anchor="end">10:42</text>
-    
+    <rect x="24" y="0" width="50" height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <circle cx="38" cy="14" r="2" fill="#1258ca" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="48" cy="14" r="2" fill="#1258ca" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" begin="0.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="58" cy="14" r="2" fill="#1258ca" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Input Area -->
+  <g transform="translate(28, 460)">
     <!-- Input Field -->
-    <rect x="36" y="476" width="132" height="48" rx="10" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
-    <text x="52" y="504" font-family="Inter, sans-serif" font-size="13" fill="#9ca3af">Écrivez votre message...</text>
+    <rect x="0" y="0" width="144" height="40" rx="6" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+    <text x="12" y="25" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">Question structure...</text>
     
     <!-- Send Button -->
-    <rect x="176" y="476" width="48" height="48" rx="10" fill="url(#goldGradient)"/>
-    <path d="M 192 494 L 204 500 L 192 506" stroke="#1f2937" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="200" y1="500" x2="208" y2="500" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+    <rect x="152" y="0" width="40" height="40" rx="6" fill="url(#gradient-accent)"/>
+    <path d="M 166 20 L 172 20 M 172 20 L 168 16 M 172 20 L 168 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
+  
+  <!-- Status Footer -->
+  <text x="100" y="535" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#9ca3af" text-anchor="middle">Mode éducation • BKD-FRD Bridge</text>
 </svg>

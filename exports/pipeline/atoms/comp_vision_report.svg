@@ -33,15 +33,15 @@
       </g>
       
       <path d="M 50 80 L 140 60 L 160 150 L 80 170 Z" fill="#f05e23" opacity="0.12" stroke="#f05e23" stroke-width="2"/>
-      <circle cx="100" cy="110" r="12" fill="#ffffff" stroke="#f05e23" stroke-width="2"/>
+      <circle cx="100" cy="110" r="10" fill="#ffffff" stroke="#f05e23" stroke-width="2"/>
       <text x="100" y="114" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#f05e23" text-anchor="middle">1</text>
       
       <path d="M 220 180 L 320 160 L 340 280 L 240 300 Z" fill="#2458f3" opacity="0.12" stroke="#2458f3" stroke-width="2"/>
-      <circle cx="280" cy="230" r="12" fill="#ffffff" stroke="#2458f3" stroke-width="2"/>
+      <circle cx="280" cy="230" r="10" fill="#ffffff" stroke="#2458f3" stroke-width="2"/>
       <text x="280" y="234" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#2458f3" text-anchor="middle">2</text>
       
-      <ellipse cx="150" cy="320" rx="12" ry="10" fill="#97ea90" opacity="0.15" stroke="#97ea90" stroke-width="2"/>
-      <circle cx="150" cy="320" r="12" fill="#ffffff" stroke="#97ea90" stroke-width="2"/>
+      <ellipse cx="150" cy="320" rx="10" ry="10" fill="#97ea90" opacity="0.15" stroke="#97ea90" stroke-width="2"/>
+      <circle cx="150" cy="320" r="10" fill="#ffffff" stroke="#97ea90" stroke-width="2"/>
       <text x="150" y="324" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#2d7a2d" text-anchor="middle">3</text>
       
       <g transform="translate(180, 100)">

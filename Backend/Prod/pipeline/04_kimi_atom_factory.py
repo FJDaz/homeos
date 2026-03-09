@@ -136,10 +136,12 @@ def generate_atom(client, comp: dict, model: str, out_dir: Path, organ_w: int = 
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--context_text", type=str, default="", help="Overarching project context")
+    args = parser.parse_args()
+
     api_key = os.getenv("KIMI_KEY")
-    if not api_key:
-        print("❌ KIMI_KEY not set")
-        sys.exit(1)
 
     pipeline_dir = project_root / "exports/pipeline"
     zone_map_path = pipeline_dir / "zone_map.json"
@@ -180,6 +182,10 @@ def main():
 
     model = "kimi-k2.5"
     client = OpenAI(base_url="https://api.moonshot.ai/v1", api_key=api_key)
+
+    global SYSTEM_PROMPT
+    if args.context_text:
+        SYSTEM_PROMPT += f"\n\nHere is the overarching vision of the product you are designing today:\n{args.context_text}"
 
     print(f"⚙️  Atom factory — {len(all_comps)} components, 4 concurrent workers")
     results = []

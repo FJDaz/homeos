@@ -1,48 +1,93 @@
-<svg viewBox="0 0 1140 140" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 180" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
   </defs>
   
   <g id="component_root">
-    <rect x="0" y="0" width="1140" height="140" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+    <!-- Main Card Container -->
+    <rect x="20" y="15" width="1100" height="150" rx="8" fill="#ffffff" filter="url(#card-shadow)" stroke="#d5d4d0" stroke-width="1"/>
     
-    <text x="24" y="36" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Trace Logs</text>
+    <!-- Section Header -->
+    <text x="50" y="42" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Trace Logs</text>
+    <circle cx="1090" cy="38" r="4" fill="#97ea90"/>
+    <text x="1078" y="41" font-family="Inter, sans-serif" font-size="11" fill="#666" text-anchor="end">Live sync</text>
     
-    <g transform="translate(1056, 12)" style="cursor: pointer;">
-      <rect x="0" y="0" width="60" height="28" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
-      <path d="M10 14c0-3.3 2.7-6 6-6 2.2 0 4.1 1.2 5.2 3M10 14c0 3.3 2.7 6 6 6 2.2 0 4.1-1.2 5.2-3M10 14H8m8-6l-2 3 2 3" stroke="#1258ca" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(4, 2) scale(0.9)"/>
-      <text x="28" y="19" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#1258ca">Reload</text>
+    <!-- Divider -->
+    <line x1="50" y1="55" x2="1090" y2="55" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <!-- Column 1: Claude -->
+    <g id="col-claude">
+      <rect x="50" y="65" width="330" height="28" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="64" y="83" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600" fill="#1a1a1a">Claude 3.5 Sonnet</text>
+      
+      <!-- Reload Icon -->
+      <g transform="translate(358, 74)">
+        <circle cx="8" cy="8" r="9" fill="#fff5f2" stroke="#f05e23" stroke-width="1.5" style="cursor: pointer;"/>
+        <path d="M 8 5 L 8 8 L 10 8" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 11 7 A 4 4 0 1 1 5 9" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      
+      <text x="64" y="115" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:18</text>
+      <text x="108" y="115" font-family="Inter, sans-serif" font-size="11" fill="#444">Semantic analysis completed</text>
+      <circle cx="58" cy="112" r="2.5" fill="#97ea90"/>
+      
+      <text x="64" y="135" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:15</text>
+      <text x="108" y="135" font-family="Inter, sans-serif" font-size="11" fill="#444">Intent parsing: PRD generation</text>
+      <circle cx="58" cy="132" r="2.5" fill="#97ea90"/>
+      
+      <text x="64" y="155" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:12</text>
+      <text x="108" y="155" font-family="Inter, sans-serif" font-size="11" fill="#444">Context retrieved: 24 nodes</text>
+      <circle cx="58" cy="152" r="2.5" fill="#ffd548"/>
     </g>
     
-    <g transform="translate(24, 60)">
-      <text x="0" y="16" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280">TIMESTAMP</text>
-      <text x="140" y="16" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280">LEVEL</text>
-      <text x="220" y="16" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280">SERVICE</text>
-      <text x="340" y="16" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280">MESSAGE</text>
-      <text x="940" y="16" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6b7280">STATUS</text>
-      <line x1="0" y1="24" x2="1092" y2="24" stroke="#d5d4d0" stroke-width="1"/>
+    <!-- Column 2: GPT -->
+    <g id="col-gpt" transform="translate(354, 0)">
+      <rect x="50" y="65" width="330" height="28" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="64" y="83" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600" fill="#1a1a1a">GPT-4 Turbo</text>
+      
+      <g transform="translate(358, 74)">
+        <circle cx="8" cy="8" r="9" fill="#fff5f2" stroke="#f05e23" stroke-width="1.5" style="cursor: pointer;"/>
+        <path d="M 8 5 L 8 8 L 10 8" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 11 7 A 4 4 0 1 1 5 9" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      
+      <text x="64" y="115" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:20</text>
+      <text x="108" y="115" font-family="Inter, sans-serif" font-size="11" fill="#444">Pattern matching: 94% confidence</text>
+      <circle cx="58" cy="112" r="2.5" fill="#ffd548"/>
+      
+      <text x="64" y="135" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:16</text>
+      <text x="108" y="135" font-family="Inter, sans-serif" font-size="11" fill="#444">Arbitrage request dispatched</text>
+      <circle cx="58" cy="132" r="2.5" fill="#97ea90"/>
+      
+      <text x="64" y="155" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:11</text>
+      <text x="108" y="155" font-family="Inter, sans-serif" font-size="11" fill="#444">Token estimation: 4.2k → 3.8k</text>
+      <circle cx="58" cy="152" r="2.5" fill="#1258ca"/>
     </g>
     
-    <g transform="translate(24, 96)">
-      <text x="0" y="12" font-family="Roboto Mono, monospace" font-size="11" fill="#374151">2024-01-15 14:32:01.243</text>
-      <rect x="140" y="0" width="44" height="18" rx="4" fill="#dbeafe"/>
-      <text x="162" y="13" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#1258ca" text-anchor="middle">INFO</text>
-      <text x="220" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">auth-service</text>
-      <text x="340" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">User authentication successful via OAuth2</text>
-      <circle cx="952" cy="8" r="4" fill="#97ea90"/>
-      <text x="968" y="12" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151">200</text>
-    </g>
-    
-    <g transform="translate(24, 128)">
-      <text x="0" y="12" font-family="Roboto Mono, monospace" font-size="11" fill="#374151">2024-01-15 14:31:58.892</text>
-      <rect x="140" y="0" width="50" height="18" rx="4" fill="#ffedd5"/>
-      <text x="165" y="13" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#f05e23" text-anchor="middle">WARN</text>
-      <text x="220" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">api-gateway</text>
-      <text x="340" y="12" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Rate limit threshold approaching (89%)</text>
-      <circle cx="952" cy="8" r="4" fill="#f05e23"/>
-      <text x="968" y="12" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151">429</text>
+    <!-- Column 3: Gemini -->
+    <g id="col-gemini" transform="translate(708, 0)">
+      <rect x="50" y="65" width="330" height="28" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="64" y="83" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600" fill="#1a1a1a">Gemini Pro</text>
+      
+      <g transform="translate(358, 74)">
+        <circle cx="8" cy="8" r="9" fill="#fff5f2" stroke="#f05e23" stroke-width="1.5" style="cursor: pointer;"/>
+        <path d="M 8 5 L 8 8 L 10 8" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 11 7 A 4 4 0 1 1 5 9" fill="none" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      
+      <text x="64" y="115" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:19</text>
+      <text x="108" y="115" font-family="Inter, sans-serif" font-size="11" fill="#444">Synthesis: BRS module validated</text>
+      <circle cx="58" cy="112" r="2.5" fill="#97ea90"/>
+      
+      <text x="64" y="135" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:14</text>
+      <text x="108" y="135" font-family="Inter, sans-serif" font-size="11" fill="#444">Context window: 12k tokens</text>
+      <circle cx="58" cy="132" r="2.5" fill="#97ea90"/>
+      
+      <text x="64" y="155" font-family="Roboto Mono, monospace" font-size="10" fill="#999">09:42:09</text>
+      <text x="108" y="155" font-family="Inter, sans-serif" font-size="11" fill="#444">Merging with Sullivan genome...</text>
+      <circle cx="58" cy="152" r="2.5" fill="#f05e23"/>
     </g>
   </g>
 </svg>
