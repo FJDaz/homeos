@@ -26,7 +26,7 @@ from genome_preview import render_genome_preview
 from exporters.genome_to_svg import generate_svg
 
 PORT = 9998
-GENOME_FILE = "../2. GENOME/genome_reference.json"
+GENOME_FILE = "../2. GENOME/genome_enriched.json"
 LAYOUT_FILE = "../2. GENOME/layout.json"
 FONTS_DIR = "../fonts"
 STATIC_DIR = "static"

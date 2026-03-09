@@ -1,236 +1,110 @@
 {
-  "comp_arbiter_table": {
-    "id": "comp_arbiter_table",
+  "comp_brs_arbitrage": {
+    "id": "comp_brs_arbitrage",
     "status": "ok",
-    "vw": 400,
-    "vh": 400
-  },
-  "comp_arbiter_validate": {
-    "id": "comp_arbiter_validate",
-    "status": "ok",
-    "vw": 400,
-    "vh": 400
-  },
-  "comp_ir_table": {
-    "id": "comp_ir_table",
-    "status": "ok",
-    "vw": 680,
+    "vw": 240,
     "vh": 480
   },
-  "comp_stencil_card": {
-    "id": "comp_stencil_card",
+  "comp_brs_iframes": {
+    "id": "comp_brs_iframes",
     "status": "ok",
-    "vw": 400,
-    "vh": 400
-  },
-  "comp_ir_detail": {
-    "id": "comp_ir_detail",
-    "status": "ok",
-    "vw": 680,
+    "vw": 700,
     "vh": 480
   },
-  "comp_session_reset": {
-    "id": "comp_session_reset",
+  "comp_brs_trace": {
+    "id": "comp_brs_trace",
     "status": "ok",
     "vw": 1140,
-    "vh": 360
+    "vh": 140
   },
-  "comp_session_status": {
-    "id": "comp_session_status",
+  "comp_brs_search": {
+    "id": "comp_brs_search",
+    "status": "ok",
+    "vw": 200,
+    "vh": 480
+  },
+  "comp_bkd_files": {
+    "id": "comp_bkd_files",
+    "status": "ok",
+    "vw": 220,
+    "vh": 520
+  },
+  "comp_bkd_agent": {
+    "id": "comp_bkd_agent",
+    "status": "ok",
+    "vw": 240,
+    "vh": 520
+  },
+  "comp_bkd_editor": {
+    "id": "comp_bkd_editor",
+    "status": "ok",
+    "vw": 680,
+    "vh": 520
+  },
+  "comp_bkd_roadmap": {
+    "id": "comp_bkd_roadmap",
+    "status": "ok",
+    "vw": 680,
+    "vh": 520
+  },
+  "comp_bkd_term": {
+    "id": "comp_bkd_term",
     "status": "ok",
     "vw": 1140,
-    "vh": 360
+    "vh": 140
   },
-  "comp_genome_summary": {
-    "id": "comp_genome_summary",
+  "comp_frd_pedagogie": {
+    "id": "comp_frd_pedagogie",
     "status": "ok",
-    "vw": 1140,
-    "vh": 360
+    "vw": 240,
+    "vh": 560
   },
-  "comp_distillation_list": {
-    "id": "comp_distillation_list",
+  "comp_frd_history": {
+    "id": "comp_frd_history",
     "status": "ok",
-    "vw": 1140,
-    "vh": 360
+    "vw": 180,
+    "vh": 480
   },
-  "comp_vision_analyze_btn": {
-    "id": "comp_vision_analyze_btn",
+  "comp_frd_viewer": {
+    "id": "comp_frd_viewer",
     "status": "ok",
-    "vw": 780,
-    "vh": 580
+    "vw": 720,
+    "vh": 560
   },
-  "comp_vision_report": {
-    "id": "comp_vision_report",
+  "comp_frd_style": {
+    "id": "comp_frd_style",
     "status": "ok",
-    "vw": 780,
-    "vh": 580
+    "vw": 240,
+    "vh": 560
   },
-  "comp_vision_regenerate": {
-    "id": "comp_vision_regenerate",
-    "status": "ok",
-    "vw": 780,
-    "vh": 580
-  },
-  "comp_choice_style": {
-    "id": "comp_choice_style",
-    "status": "ok",
-    "vw": 520,
-    "vh": 320
-  },
-  "comp_layout_card": {
-    "id": "comp_layout_card",
-    "status": "ok",
-    "vw": 520,
-    "vh": 320
-  },
-  "comp_validation_dashboard": {
-    "id": "comp_validation_dashboard",
+  "comp_frd_context": {
+    "id": "comp_frd_context",
     "status": "ok",
     "vw": 600,
-    "vh": 320
+    "vh": 100
   },
-  "comp_validation_accordion": {
-    "id": "comp_validation_accordion",
+  "comp_dpl_secrets": {
+    "id": "comp_dpl_secrets",
     "status": "ok",
-    "vw": 600,
-    "vh": 320
+    "vw": 200,
+    "vh": 540
   },
-  "comp_layout_grid": {
-    "id": "comp_layout_grid",
+  "comp_dpl_chat": {
+    "id": "comp_dpl_chat",
     "status": "ok",
-    "vw": 520,
-    "vh": 320
+    "vw": 680,
+    "vh": 540
   },
-  "comp_zoom_out": {
-    "id": "comp_zoom_out",
+  "comp_dpl_iframe": {
+    "id": "comp_dpl_iframe",
     "status": "ok",
-    "vw": 700,
-    "vh": 400
+    "vw": 680,
+    "vh": 540
   },
-  "comp_stenciler_grid": {
-    "id": "comp_stenciler_grid",
+  "comp_dpl_capture": {
+    "id": "comp_dpl_capture",
     "status": "ok",
-    "vw": 600,
-    "vh": 320
-  },
-  "comp_zoom_controls": {
-    "id": "comp_zoom_controls",
-    "status": "ok",
-    "vw": 700,
-    "vh": 400
-  },
-  "comp_stenciler_select": {
-    "id": "comp_stenciler_select",
-    "status": "ok",
-    "vw": 600,
-    "vh": 320
-  },
-  "comp_detail_card": {
-    "id": "comp_detail_card",
-    "status": "ok",
-    "vw": 700,
-    "vh": 400
-  },
-  "comp_launch_button": {
-    "id": "comp_launch_button",
-    "status": "ok",
-    "vw": 700,
-    "vh": 400
-  },
-  "comp_apply_changes": {
-    "id": "comp_apply_changes",
-    "status": "ok",
-    "vw": 700,
-    "vh": 400
-  },
-  "comp_color_palette": {
-    "id": "comp_color_palette",
-    "status": "ok",
-    "vw": 340,
-    "vh": 500
-  },
-  "comp_upload_delete": {
-    "id": "comp_upload_delete",
-    "status": "ok",
-    "vw": 340,
-    "vh": 500
-  },
-  "comp_upload_dropzone": {
-    "id": "comp_upload_dropzone",
-    "status": "ok",
-    "vw": 340,
-    "vh": 500
-  },
-  "comp_code_editor": {
-    "id": "comp_code_editor",
-    "status": "ok",
-    "vw": 700,
-    "vh": 400
-  },
-  "comp_chat_answer": {
-    "id": "comp_chat_answer",
-    "status": "ok",
-    "vw": 400,
-    "vh": 520
-  },
-  "comp_chat_bubbles": {
-    "id": "comp_chat_bubbles",
-    "status": "ok",
-    "vw": 400,
-    "vh": 520
-  },
-  "comp_chat_input": {
-    "id": "comp_chat_input",
-    "status": "ok",
-    "vw": 400,
-    "vh": 520
-  },
-  "comp_preview_zones": {
-    "id": "comp_preview_zones",
-    "status": "ok",
-    "vw": 340,
-    "vh": 500
-  },
-  "comp_chat_skip": {
-    "id": "comp_chat_skip",
-    "status": "ok",
-    "vw": 400,
-    "vh": 520
-  },
-  "comp_next_button": {
-    "id": "comp_next_button",
-    "status": "ok",
-    "vw": 420,
-    "vh": 280
-  },
-  "comp_confirm_modal": {
-    "id": "comp_confirm_modal",
-    "status": "ok",
-    "vw": 600,
-    "vh": 280
-  },
-  "comp_download_zip": {
-    "id": "comp_download_zip",
-    "status": "ok",
-    "vw": 600,
-    "vh": 280
-  },
-  "comp_breadcrumb": {
-    "id": "comp_breadcrumb",
-    "status": "ok",
-    "vw": 420,
-    "vh": 280
-  },
-  "comp_stepper": {
-    "id": "comp_stepper",
-    "status": "ok",
-    "vw": 420,
-    "vh": 280
-  },
-  "comp_new_session": {
-    "id": "comp_new_session",
-    "status": "ok",
-    "vw": 600,
-    "vh": 280
+    "vw": 260,
+    "vh": 540
   }
 }

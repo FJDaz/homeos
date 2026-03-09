@@ -93,6 +93,7 @@ Return JSON refined_plan matching the schema."""
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--feedback", default="", help="FJD feedback for this iteration")
+    parser.add_argument("--image", default="", help="Path to image reference for style")
     args = parser.parse_args()
 
     api_key = os.getenv("KIMI_KEY")
@@ -141,15 +142,31 @@ def main():
     print(f"🎨 KIMI Composer — aligning to {theme_name}...")
     if args.feedback:
         print(f"   Feedback: {args.feedback}")
+    if args.image:
+        print(f"   Image reference: {args.image}")
+
+    # Build messages
+    user_content = [{"type": "text", "text": prompt}]
+    if args.image:
+        import base64
+        import mimetypes
+        img_path = Path(args.image)
+        if img_path.exists():
+            mime_type, _ = mimetypes.guess_type(args.image)
+            img_b64 = base64.b64encode(img_path.read_bytes()).decode("utf-8")
+            user_content.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:{mime_type};base64,{img_b64}"}
+            })
 
     response = client.chat.completions.create(
         model="kimi-k2.5",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": user_content},
         ],
         max_tokens=16000,
-        extra_body={"thinking": {"type": "disabled"}},
+        extra_body={"thinking": {"type": "enabled"}},
     )
 
     raw = response.choices[0].message.content or ""

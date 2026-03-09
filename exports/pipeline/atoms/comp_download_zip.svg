@@ -1,49 +1,45 @@
-<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 350" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f05e23"/>
-      <stop offset="100%" stop-color="#d94d1a"/>
-    </linearGradient>
-    <linearGradient id="fileIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fff5f2"/>
-      <stop offset="100%" stop-color="#ffe8e0"/>
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2458f3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a46c4;stop-opacity:1" />
     </linearGradient>
   </defs>
   
-  <!-- Card Background -->
-  <rect x="20" y="20" width="560" height="240" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Section Title -->
-  <text x="52" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="19" font-weight="700" fill="#151515">Téléchargement ZIP</text>
-  
-  <!-- Subtitle -->
-  <text x="52" y="92" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b6b6b">Téléchargez l'archive complète des ressources</text>
-  
-  <!-- File Card -->
-  <rect x="52" y="118" width="496" height="104" rx="8" fill="#f8f7f4"/>
-  
-  <!-- File Icon Background -->
-  <rect x="76" y="142" width="56" height="56" rx="10" fill="url(#fileIconGrad)"/>
-  
-  <!-- File Icon - ZIP Document -->
-  <rect x="88" y="154" width="32" height="40" rx="3" fill="#f05e23" opacity="0.15"/>
-  <rect x="88" y="154" width="32" height="40" rx="3" fill="none" stroke="#f05e23" stroke-width="1.5"/>
-  <path d="M88 162h32M88 170h32M88 178h20" stroke="#f05e23" stroke-width="1.5" stroke-linecap="round"/>
-  <text x="92" y="188" font-family="Roboto Mono, monospace" font-size="8" font-weight="600" fill="#f05e23">ZIP</text>
-  <path d="M112 150l8 8v-8h-8z" fill="#f05e23"/>
-  
-  <!-- File Info -->
-  <text x="152" y="168" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="15" font-weight="600" fill="#151515">ressources_projet_v2.4.zip</text>
-  <text x="152" y="188" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b6b6b">24.8 MB • Dernière mise à jour: 14 jan 2025</text>
-  
-  <!-- Download Button -->
-  <rect x="428" y="150" width="96" height="40" rx="6" fill="url(#btnGradient)"/>
-  <text x="452" y="175" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff">📥</text>
-  <text x="472" y="175" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Télécharger</text>
-  
-  <!-- Metadata Label -->
-  <text x="52" y="250" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#9a9a9a" letter-spacing="1.5">ARCHIVE COMPLÈTE</text>
+  <g id="component_root">
+    <!-- Main Card Container -->
+    <rect x="70" y="45" width="1000" height="260" rx="10" fill="#ffffff" filter="url(#cardShadow)" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <!-- Section Title -->
+    <text x="110" y="95" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#1f2937">Téléchargement ZIP</text>
+    
+    <!-- File Info Card -->
+    <g transform="translate(110, 120)">
+      <rect x="0" y="0" width="480" height="140" rx="8" fill="#fafaf9" stroke="#d5d4d0" stroke-width="1"/>
+      
+      <!-- ZIP File Icon -->
+      <rect x="24" y="30" width="80" height="80" rx="6" fill="#fff7ed" stroke="#f05e23" stroke-width="1.5"/>
+      <text x="64" y="78" font-family="Roboto Mono, monospace" font-size="14" font-weight="700" fill="#f05e23" text-anchor="middle">ZIP</text>
+      <line x1="44" y1="40" x2="44" y2="100" stroke="#f05e23" stroke-width="2" stroke-dasharray="3,2"/>
+      
+      <!-- File Metadata -->
+      <text x="124" y="62" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#1f2937">sources-complete-v2.zip</text>
+      <text x="124" y="88" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">45.8 MB • Archive compressée</text>
+      <text x="124" y="108" font-family="Roboto Mono, monospace" font-size="11" fill="#9ca3af">Mis à jour le 18 déc. 2024</text>
+    </g>
+    
+    <!-- Primary Download Button -->
+    <g transform="translate(650, 166)">
+      <rect x="0" y="0" width="180" height="48" rx="8" fill="url(#btnGradient)"/>
+      <!-- Download Icon -->
+      <path d="M12 15v6m0 0l-3-3m3 3l3-3M4 15v2a2 2 0 002 2h8a2 2 0 002-2v-2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(16, 12) scale(0.9)"/>
+      <text x="100" y="30" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">Télécharger</text>
+    </g>
+    
+    <!-- Secondary Info -->
+    <text x="650" y="240" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Téléchargement sécurisé • HTTPS</text>
+  </g>
 </svg>

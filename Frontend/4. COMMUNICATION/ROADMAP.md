@@ -4,21 +4,18 @@
 
 ---
 
-## Mission 25B — Figma Bridge & JSON Manifest
+## Mission 28 — KIMI Pipeline Refactoring & Pristine Quality
 
-**STATUS: COMPLÉTÉE**
-**DATE: 2026-03-04**
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-05**
 
 ### Objectif
-Établir le pont technique entre le Stenciler (AetherFlow) et Figma via un manifeste JSON vivant. Ce fichier doit permettre d'exporter les composants KIMI, leurs positions, leurs intents et leurs métadonnées vers le plugin Figma.
+Implémenter la stratégie avancée de pilotage des modèles KIMI pour garantir le respect de l'ADN Homeos/Aetherflow (Pristine Mode) et améliorer la propreté de l'intégration Figma.
 
-### Tâches (Backend & Bridge)
-- [x] Génération du `manifest.json` dans `exports/` par le `07_composer.py`.
-- [x] Calcul des coordonnées absolues (x, y) et dimensions (w, h) pour Figma.
-- [x] Inclusion du `genome_hash` pour tracking de version.
-- [x] API `GET /api/manifest` pour servir les données au plugin.
-- [x] API `POST /api/manifest/patch` pour synchronisation bidirectionnelle.
-- [x] Scaffolding du plugin Figma (`manifest.json`, `ui.html`, `code.js`).
+### Tâches (Backend & Plugin)
+- [x] Activer le mode `thinking` sur les étapes 2 (Layout Director) et 6 (Composer).
+- [x] Implémenter le script de validation post-génération `validate_atoms.py` (anti-serif, rx <= 10).
+- [x] Modifier l'export SVG vers le Manifeste JSON pour aplatir les groupes (`<g>`) de positionnement.
 
 ---
 
@@ -27,3 +24,4 @@
 - [ ] MISSION 25C : RETRO-GENOME (BOUCLE RETOUR FIGMA) - **À VENIR**
 - [ ] MISSION 27 : CHATBOT PÉDAGOGIQUE (GEMINI API) - **BACKLOG**
 - [ ] MISSION 26 : RAG ENGINE SYSTEM - **BACKLOG**
+- [ ] MISSION 29 : CONTRÔLEUR HOMEOS NATIVE (EMBED FIGMA + GUI RETRO-GENOME) - **BACKLOG**

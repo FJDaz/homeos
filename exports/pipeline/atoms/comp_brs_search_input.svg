@@ -1,0 +1,69 @@
+<svg viewBox="0 0 320 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#97ea90" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#97ea90" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <g id="component_root">
+    <rect x="16" y="16" width="288" height="568" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
+    <text x="32" y="56" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#1a1a1a">Search Term</text>
+    <g id="search_input_container">
+      <rect x="32" y="76" width="256" height="56" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <g transform="translate(48, 96)">
+        <circle cx="8" cy="8" r="6" stroke="#97ea90" stroke-width="2" fill="none"/>
+        <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="#97ea90" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="76" y="110" font-family="Inter, system-ui, sans-serif" font-size="15" fill="#a0a0a0">Rechercher une intention</text>
+      <rect x="32" y="130" width="256" height="2" rx="1" fill="url(#accentGradient)"/>
+    </g>
+    <text x="32" y="172" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="12" fill="#6b6b6b" letter-spacing="0.5">RÉCENT</text>
+    <g transform="translate(32, 188)">
+      <rect x="0" y="0" width="256" height="44" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="12" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">Intention d'achat premium</text>
+      <circle cx="232" cy="22" r="8" stroke="#c5c4c0" stroke-width="1.5" fill="none"/>
+      <line x1="232" y1="22" x2="232" y2="17" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="232" y1="22" x2="235" y2="24" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(32, 240)">
+      <rect x="0" y="0" width="256" height="44" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="12" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">Requête navigationnelle</text>
+      <circle cx="232" cy="22" r="8" stroke="#c5c4c0" stroke-width="1.5" fill="none"/>
+      <line x1="232" y1="22" x2="232" y2="17" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="232" y1="22" x2="235" y2="24" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(32, 292)">
+      <rect x="0" y="0" width="256" height="44" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+      <text x="12" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">Mot clé transactionnel</text>
+      <circle cx="232" cy="22" r="8" stroke="#c5c4c0" stroke-width="1.5" fill="none"/>
+      <line x1="232" y1="22" x2="232" y2="17" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="232" y1="22" x2="235" y2="24" stroke="#c5c4c0" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    <text x="32" y="368" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="12" fill="#6b6b6b" letter-spacing="0.5">SUGGESTIONS</text>
+    <g transform="translate(32, 384)">
+      <rect x="0" y="0" width="120" height="32" rx="6" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="12" y="21" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">#informationnel</text>
+    </g>
+    <g transform="translate(160, 384)">
+      <rect x="0" y="0" width="128" height="32" rx="6" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="12" y="21" font-family="Roboto Mono, monospace" font-size="11" fill="#f05e23">#commercial</text>
+    </g>
+    <g transform="translate(32, 424)">
+      <rect x="0" y="0" width="112" height="32" rx="6" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="12" y="21" font-family="Roboto Mono, monospace" font-size="11" fill="#2458f3">#branding</text>
+    </g>
+    <g transform="translate(152, 424)">
+      <rect x="0" y="0" width="136" height="32" rx="6" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="12" y="21" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">#conversion</text>
+    </g>
+    <text x="32" y="512" font-family="Roboto Mono, monospace" font-size="10" fill="#999999">12,450 recherches indexées</text>
+    <text x="32" y="528" font-family="Roboto Mono, monospace" font-size="10" fill="#999999">Dernière mise à jour: 14:32</text>
+    <g transform="translate(32, 544)">
+      <rect x="0" y="0" width="256" height="40" rx="8" fill="#97ea90"/>
+      <text x="128" y="25" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="14" fill="#1a1a1a" text-anchor="middle">Lancer la recherche</text>
+    </g>
+  </g>
+</svg>

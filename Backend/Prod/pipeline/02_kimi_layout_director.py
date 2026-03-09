@@ -124,7 +124,7 @@ def main():
             {"role": "user", "content": prompt},
         ],
         max_tokens=16000,
-        extra_body={"thinking": {"type": "disabled"}},
+        extra_body={"thinking": {"type": "enabled"}},
     )
 
     choice = response.choices[0]

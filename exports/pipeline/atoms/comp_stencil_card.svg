@@ -1,63 +1,46 @@
-<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="shadow-main" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#97ea90"/>
-      <stop offset="100%" stop-color="#6dd965"/>
-    </linearGradient>
-    <linearGradient id="accentHover" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b4f0ae"/>
-      <stop offset="100%" stop-color="#8ce885"/>
+    <linearGradient id="grad-primary" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1258ca"/>
     </linearGradient>
   </defs>
   
-  <!-- Background -->
-  <rect width="400" height="400" fill="#f8f7f4"/>
-  
-  <!-- Main Card -->
-  <rect x="32" y="32" width="336" height="336" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Card Header Zone -->
-  <rect x="32" y="32" width="336" height="72" rx="12" fill="#ffffff"/>
-  <rect x="32" y="80" width="336" height="24" rx="0" fill="#ffffff"/>
-  
-  <!-- Category Label -->
-  <text x="56" y="64" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#1258ca" letter-spacing="1.5">POUVOIR</text>
-  
-  <!-- Card Title -->
-  <text x="56" y="96" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Carte Stencil</text>
-  
-  <!-- Decorative Accent Line -->
-  <rect x="56" y="112" width="48" height="3" rx="1.5" fill="url(#accentGradient)"/>
-  
-  <!-- Description Body -->
-  <text x="56" y="152" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="400" fill="#4a4a4a">Choisissez comment utiliser cette carte</text>
-  <text x="56" y="174" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="400" fill="#4a4a4a">pouvoir dans votre main.</text>
-  
-  <!-- Card Visual / Icon Zone -->
-  <rect x="56" y="200" width="288" height="80" rx="8" fill="#f8f7f4"/>
-  
-  <!-- Stencil Icon Representation -->
-  <circle cx="100" cy="240" r="24" fill="url(#accentGradient)" opacity="0.15"/>
-  <path d="M88 240 L96 248 L112 232" stroke="#97ea90" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Card Details -->
-  <text x="140" y="232" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Effet immédiat</text>
-  <text x="140" y="252" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#6a6a6a">Active une capacité spéciale</text>
-  
-  <!-- Action Buttons Zone -->
-  <rect x="56" y="304" width="288" height="48" rx="0" fill="none"/>
-  
-  <!-- Garder Button (Primary) -->
-  <rect x="56" y="304" width="136" height="48" rx="6" fill="url(#accentGradient)"/>
-  <text x="124" y="334" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515" text-anchor="middle">Garder</text>
-  
-  <!-- Réserve Button (Secondary) -->
-  <rect x="208" y="304" width="136" height="48" rx="6" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
-  <text x="276" y="334" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515" text-anchor="middle">Réserve</text>
-  
-  <!-- Selection Indicator (subtle dot for active state) -->
-  <circle cx="72" y="328" r="4" fill="#151515"/>
+  <g id="component_root">
+    <rect x="0" y="0" width="700" height="400" rx="10" fill="#ffffff" filter="url(#shadow-main)"/>
+    <rect x="0" y="0" width="700" height="400" rx="10" fill="none" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <rect x="0" y="0" width="700" height="4" rx="2" fill="#1258ca"/>
+    
+    <text x="60" y="80" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#111827">Carte Pouvoir Active</text>
+    
+    <text x="60" y="130" font-family="Inter, system-ui, sans-serif" font-size="15" fill="#4b5563">
+      <tspan x="60" dy="0">Décidez du sort de cette capacité spéciale. Vous pouvez l'activer</tspan>
+      <tspan x="60" dy="24">immédiatement ou la conserver en réserve pour un moment stratégique.</tspan>
+      <tspan x="60" dy="24">La réserve offre des avantages cumulatifs mais retarde l'effet immédiat.</tspan>
+    </text>
+    
+    <g transform="translate(550, 100)">
+      <rect x="0" y="0" width="80" height="100" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+      <path d="M40 25 L45 40 L60 40 L48 50 L52 65 L40 55 L28 65 L32 50 L20 40 L35 40 Z" fill="#ffd548"/>
+      <rect x="20" y="75" width="40" height="4" rx="2" fill="#d1d5db"/>
+      <rect x="20" y="82" width="28" height="4" rx="2" fill="#d1d5db"/>
+    </g>
+    
+    <g id="btn-garder" transform="translate(60, 300)">
+      <rect x="0" y="0" width="160" height="48" rx="8" fill="url(#grad-primary)"/>
+      <text x="80" y="31" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Garder</text>
+    </g>
+    
+    <g id="btn-reserve" transform="translate(240, 300)">
+      <rect x="0" y="0" width="160" height="48" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="80" y="31" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="14" fill="#374151" text-anchor="middle">Réserve</text>
+    </g>
+    
+    <circle cx="140" cy="365" r="4" fill="#97ea90"/>
+    <text x="140" y="385" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Sélectionné</text>
+  </g>
 </svg>

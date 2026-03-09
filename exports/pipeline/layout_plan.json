@@ -1,125 +1,146 @@
 {
   "phases": {
-    "n0_brainstorm": {
-      "layout_style": "grid_12_cols",
-      "total_height": 800,
+    "phase_1_brs": {
+      "layout_style": "asymmetric",
+      "total_height": 640,
       "organs": [
         {
-          "id": "n1_ir",
-          "x": 260,
-          "y": 60,
-          "w": 760,
-          "h": 600,
-          "layout_strategy": "bento_grid",
-          "note": "Col 0 to 8 (span 8)"
-        },
-        {
-          "id": "n1_arbitrage",
-          "x": 1020,
-          "y": 140,
-          "w": 380,
-          "h": 500,
-          "layout_strategy": "flex-col",
-          "note": "Col 8 to 12 (span 4)"
-        }
-      ]
-    },
-    "n0_backend": {
-      "layout_style": "grid_12_cols",
-      "total_height": 600,
-      "organs": [
-        {
-          "id": "n1_session",
-          "x": 260,
-          "y": 60,
-          "w": 1140,
-          "h": 440,
-          "layout_strategy": "agency_grid",
-          "note": "Col 0 to 12 (span 12)"
-        }
-      ]
-    },
-    "n0_frontend": {
-      "layout_style": "grid_12_cols",
-      "total_height": 2800,
-      "organs": [
-        {
-          "id": "n1_analysis",
-          "x": 260,
-          "y": 120,
-          "w": 760,
-          "h": 700,
-          "layout_strategy": "agency_grid",
-          "note": "Col 0 to 8 (span 8)"
-        },
-        {
-          "id": "n1_upload",
-          "x": 1020,
-          "y": 60,
-          "w": 380,
-          "h": 540,
-          "layout_strategy": "flex-col",
-          "note": "Col 8 to 12 (span 4)"
-        },
-        {
-          "id": "n1_layout",
-          "x": 260,
-          "y": 920,
-          "w": 380,
-          "h": 400,
-          "layout_strategy": "bento_grid",
-          "note": "Col 0 to 4 (span 4)"
-        },
-        {
-          "id": "n1_validation",
-          "x": 640,
-          "y": 920,
-          "w": 760,
-          "h": 400,
-          "layout_strategy": "agency_grid",
-          "note": "Col 4 to 12 (span 8)"
-        },
-        {
-          "id": "n1_adaptation",
-          "x": 260,
-          "y": 1440,
-          "w": 1140,
-          "h": 500,
-          "layout_strategy": "agency_grid",
-          "note": "Col 0 to 12 (span 12)"
-        },
-        {
-          "id": "n1_dialogue",
-          "x": 1020,
-          "y": 2040,
-          "w": 380,
-          "h": 600,
-          "layout_strategy": "flex-col",
-          "note": "Col 8 to 12 (span 4) - Staggered down"
-        },
-        {
-          "id": "n1_navigation",
+          "id": "brs_sidebar_left",
           "x": 260,
           "y": 0,
+          "w": 200,
+          "h": 480,
+          "note": "Slim left anchor (200px) for Moteur controls, leaving maximum real estate for multiverse canvas"
+        },
+        {
+          "id": "brs_main",
+          "x": 460,
+          "y": 0,
+          "w": 700,
+          "h": 480,
+          "note": "Hero canvas at 61% width (700px) for Brain-Reasoning multiverse visualization, high vertical density"
+        },
+        {
+          "id": "brs_sidebar_right",
+          "x": 1160,
+          "y": 0,
+          "w": 240,
+          "h": 480,
+          "note": "Right settings panel (240px) for Arbitrage parameters, balanced against left sidebar"
+        },
+        {
+          "id": "brs_footer",
+          "x": 260,
+          "y": 500,
           "w": 1140,
-          "h": 80,
-          "layout_strategy": "flex-col",
-          "note": "Col 0 to 12"
+          "h": 140,
+          "note": "Full-width collapsible status bar (La Trace) positioned below main content with 20px breathing room"
         }
       ]
     },
-    "n0_deploy": {
-      "layout_style": "grid_12_cols",
-      "total_height": 500,
+    "phase_2_bkd": {
+      "layout_style": "asymmetric",
+      "total_height": 680,
       "organs": [
         {
-          "id": "n1_export",
-          "x": 450,
-          "y": 100,
-          "w": 760,
-          "h": 320,
-          "layout_strategy": "bento_grid",
-          "note": "Centered Span 8 (Col 2 to 10 approx)"
+          "id": "bkd_sidebar_left",
+          "x": 260,
+          "y": 0,
+          "w": 220,
+          "h": 520,
+          "note": "Workspace sidebar (220px) providing tool palette for La Forge environment"
+        },
+        {
+          "id": "bkd_main",
+          "x": 480,
+          "y": 0,
+          "w": 680,
+          "h": 520,
+          "note": "Dual-purpose canvas (680px, 60% width) accommodating both Edition and Roadmap views with increased height for density"
+        },
+        {
+          "id": "bkd_sidebar_right",
+          "x": 1160,
+          "y": 0,
+          "w": 240,
+          "h": 520,
+          "note": "Majordome assistant panel (240px) for contextual guidance and settings"
+        },
+        {
+          "id": "bkd_footer",
+          "x": 260,
+          "y": 540,
+          "w": 1140,
+          "h": 140,
+          "note": "Terminal and audit log footer spanning full width, 140px height for command line visibility"
+        }
+      ]
+    },
+    "phase_3_frd": {
+      "layout_style": "asymmetric_floating",
+      "total_height": 560,
+      "organs": [
+        {
+          "id": "frd_sidebar_left",
+          "x": 260,
+          "y": 0,
+          "w": 180,
+          "h": 480,
+          "note": "Narrow context panel (180px) for 'Le Pourquoi' explanations, shorter height as secondary to visualization"
+        },
+        {
+          "id": "frd_main",
+          "x": 440,
+          "y": 0,
+          "w": 720,
+          "h": 560,
+          "note": "Genome Viewer hero canvas (720px, 63% width) requiring maximum vertical space for complex weave visualization"
+        },
+        {
+          "id": "frd_sidebar_right",
+          "x": 1160,
+          "y": 0,
+          "w": 240,
+          "h": 560,
+          "note": "Pedagogy panel (240px) with dual components (n3_count:2), matched to main canvas height"
+        },
+        {
+          "id": "frd_footer",
+          "x": 500,
+          "y": 420,
+          "w": 600,
+          "h": 100,
+          "note": "Floating contextual status card (600px centered) overlaying bottom of main area, distinct from full-width footers"
+        }
+      ]
+    },
+    "phase_4_dpl": {
+      "layout_style": "asymmetric",
+      "total_height": 540,
+      "organs": [
+        {
+          "id": "dpl_sidebar_left",
+          "x": 260,
+          "y": 0,
+          "w": 200,
+          "h": 540,
+          "note": "Configuration sidebar (200px) for deployment settings and environment variables"
+        },
+        {
+          "id": "dpl_main",
+          "x": 460,
+          "y": 0,
+          "w": 680,
+          "h": 540,
+          "note": "Dual-column deployment canvas (680px) hosting parallel configuration and preview panes"
+        },
+        {
+          "id": "dpl_sidebar_right",
+          "x": 1140,
+          "y": 0,
+          "w": 260,
+          "h": 540,
+          "note": "Guide panel (260px) for Le Propulseur assistance, slightly wider to accommodate rich help content"
         }
       ]
     }

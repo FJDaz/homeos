@@ -1,0 +1,112 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f05e23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ff7a4d;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <!-- Main Card Container -->
+    <rect x="40" y="40" width="720" height="520" rx="10" fill="#ffffff" filter="url(#shadow)"/>
+    
+    <!-- Header Section -->
+    <path d="M 50,40 L 750,40 Q 760,40 760,50 L 760,112 L 40,112 L 40,50 Q 40,40 50,40 Z" fill="url(#headerGrad)"/>
+    
+    <!-- DeepSeek Logo Icon -->
+    <circle cx="76" cy="76" r="16" fill="url(#accentGrad)"/>
+    <path d="M 70 76 L 76 70 L 82 76 L 76 82 Z" fill="white"/>
+    <circle cx="76" cy="76" r="6" fill="white" opacity="0.3"/>
+    
+    <!-- Header Title -->
+    <text x="104" y="81" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#ffffff">DeepSeek</text>
+    
+    <!-- Status Indicator -->
+    <circle cx="210" cy="76" r="4" fill="#97ea90"/>
+    <text x="222" y="81" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9ca3af">Online</text>
+    
+    <!-- Window Controls -->
+    <circle cx="720" cy="76" r="6" fill="#ef4444" opacity="0.9"/>
+    <circle cx="700" cy="76" r="6" fill="#f59e0b" opacity="0.9"/>
+    <circle cx="680" cy="76" r="6" fill="#10b981" opacity="0.9"/>
+    
+    <!-- Iframe Content Area Background -->
+    <rect x="40" y="112" width="720" height="448" rx="0" fill="#f9fafb" clip-path="inset(0px 0px 10px 0px round 0 0 10 10)"/>
+    
+    <!-- Chat Interface -->
+    <!-- Bot Message -->
+    <rect x="64" y="144" width="360" height="88" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <rect x="64" y="144" width="4" height="88" rx="2" fill="#f05e23"/>
+    <text x="84" y="168" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="600" font-size="12" fill="#111827">DeepSeek AI</text>
+    <text x="84" y="190" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#4b5563">I can help you with code optimization,</text>
+    <text x="84" y="208" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#4b5563">debugging, and architectural decisions.</text>
+    <text x="84" y="222" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">10:42 AM</text>
+    
+    <!-- User Message -->
+    <rect x="376" y="248" width="360" height="64" rx="8" fill="#fff7ed" stroke="#f05e23" stroke-width="1" opacity="0.3"/>
+    <text x="396" y="278" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1f2937">Refactor this component to use</text>
+    <text x="396" y="296" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1f2937">React hooks instead of classes.</text>
+    
+    <!-- Code Response Block -->
+    <rect x="64" y="328" width="480" height="136" rx="6" fill="#1f2937"/>
+    <rect x="64" y="328" width="480" height="24" rx="6" fill="#374151"/>
+    <circle cx="80" cy="340" r="3" fill="#f05e23"/>
+    <circle cx="92" cy="340" r="3" fill="#ffd548"/>
+    <circle cx="104" cy="340" r="3" fill="#97ea90"/>
+    <text x="400" y="344" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af" text-anchor="middle">Component.tsx</text>
+    
+    <text x="84" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#c084fc">const</text>
+    <text x="120" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">BotDeepSeek</text>
+    <text x="212" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">=</text>
+    <text x="228" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">()</text>
+    <text x="244" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#c084fc">=&gt;</text>
+    <text x="268" y="372" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">{</text>
+    
+    <text x="84" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#c084fc">const</text>
+    <text x="120" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#93c5fd">[status]</text>
+    <text x="172" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">=</text>
+    <text x="188" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">useState</text>
+    <text x="244" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">(</text>
+    <text x="252" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#f05e23">'active'</text>
+    <text x="308" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">)</text>
+    <text x="316" y="392" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">;</text>
+    
+    <text x="84" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#c084fc">return</text>
+    <text x="132" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">&lt;</text>
+    <text x="140" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#f87171">iframe</text>
+    <text x="188" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#c084fc">src</text>
+    <text x="212" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">=</text>
+    <text x="228" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#f05e23">"/deepseek"</text>
+    <text x="308" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">/&gt;</text>
+    <text x="324" y="412" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">;</text>
+    
+    <text x="84" y="432" font-family="Roboto Mono, monospace" font-size="11" fill="#ffffff">};</text>
+    
+    <!-- Typing Indicator -->
+    <text x="64" y="490" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#9ca3af">DeepSeek is typing</text>
+    <circle cx="180" cy="486" r="2" fill="#f05e23">
+      <animate attributeName="opacity" values="0;1;0" dur="1.4s" repeatCount="indefinite" begin="0s"/>
+    </circle>
+    <circle cx="188" cy="486" r="2" fill="#f05e23">
+      <animate attributeName="opacity" values="0;1;0" dur="1.4s" repeatCount="indefinite" begin="0.2s"/>
+    </circle>
+    <circle cx="196" cy="486" r="2" fill="#f05e23">
+      <animate attributeName="opacity" values="0;1;0" dur="1.4s" repeatCount="indefinite" begin="0.4s"/>
+    </circle>
+    
+    <!-- Input Area -->
+    <rect x="64" y="512" width="672" height="48" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+    <text x="84" y="541" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#9ca3af">Message DeepSeek...</text>
+    
+    <!-- Send Button -->
+    <rect x="680" y="520" width="40" height="32" rx="6" fill="#f05e23"/>
+    <path d="M 692 536 L 708 536 M 704 532 L 708 536 L 704 540" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -1,122 +1,101 @@
-<svg viewBox="0 0 1140 360" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 500" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-4%" y="-8%" width="108%" height="120%">
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2458f3"/>
-      <stop offset="100%" stop-color="#1a3d8f"/>
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f05e23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#d94d1a;stop-opacity:1"/>
     </linearGradient>
-    <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#97ea90"/>
-      <stop offset="100%" stop-color="#5cb85c"/>
+    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e5e5e5;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f05e23;stop-opacity:0.4"/>
     </linearGradient>
-    <linearGradient id="warningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffd548"/>
-      <stop offset="100%" stop-color="#f0ad4e"/>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2458f3;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#1258ca;stop-opacity:0.05"/>
     </linearGradient>
   </defs>
   
-  <!-- Main Card -->
-  <rect x="0" y="0" width="1140" height="360" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Header Section -->
-  <text x="32" y="48" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Résumé Genome</text>
-  <text x="32" y="72" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Topologie système • 8 endpoints actifs • Dernière sync: 2 min</text>
-  
-  <!-- Status Badge -->
-  <rect x="980" y="32" width="128" height="32" rx="9999" fill="#f0fdf4"/>
-  <circle cx="1000" cy="48" r="6" fill="#22c55e"/>
-  <text x="1014" y="52" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#166534">Système OK</text>
-  
-  <!-- Topology Visualization -->
-  <!-- Central Hub -->
-  <circle cx="280" cy="200" r="48" fill="url(#accentGradient)"/>
-  <text x="280" y="196" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff">CORE</text>
-  <text x="280" y="212" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#ffffff" opacity="0.9">API v2.4</text>
-  
-  <!-- Connection Lines -->
-  <line x1="328" y1="200" x2="400" y2="140" stroke="#e5e7eb" stroke-width="2"/>
-  <line x1="328" y1="200" x2="400" y2="260" stroke="#e5e7eb" stroke-width="2"/>
-  <line x1="328" y1="200" x2="480" y2="200" stroke="#e5e7eb" stroke-width="2"/>
-  
-  <!-- Endpoint Nodes -->
-  <!-- Node 1: Auth -->
-  <rect x="400" y="108" width="120" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <circle cx="420" cy="130" r="8" fill="url(#successGradient)"/>
-  <text x="436" y="134" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">/auth</text>
-  <text x="436" y="150" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">OAuth2 • 12ms</text>
-  <rect x="496" y="124" width="16" height="16" rx="4" fill="#22c55e"/>
-  <text x="504" y="136" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#ffffff">3</text>
-  
-  <!-- Node 2: Users -->
-  <rect x="400" y="228" width="120" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <circle cx="420" cy="250" r="8" fill="url(#successGradient)"/>
-  <text x="436" y="254" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">/users</text>
-  <text x="436" y="270" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">REST • 8ms</text>
-  <rect x="496" y="244" width="16" height="16" rx="4" fill="#22c55e"/>
-  <text x="504" y="256" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#ffffff">2</text>
-  
-  <!-- Node 3: Analytics -->
-  <rect x="480" y="168" width="120" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <circle cx="500" cy="190" r="8" fill="url(#warningGradient)"/>
-  <text x="516" y="194" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">/analytics</text>
-  <text x="516" y="210" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">GraphQL • 45ms</text>
-  <rect x="576" y="184" width="16" height="16" rx="4" fill="#f59e0b"/>
-  <text x="584" y="196" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#ffffff">1</text>
-  
-  <!-- Secondary Connections -->
-  <line x1="520" y1="172" x2="520" y2="140" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="520" y1="232" x2="520" y2="260" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 2"/>
-  
-  <!-- Node 4: Webhooks -->
-  <rect x="600" y="108" width="120" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <circle cx="620" cy="130" r="8" fill="url(#successGradient)"/>
-  <text x="636" y="134" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">/webhooks</text>
-  <text x="636" y="150" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">Events • 6ms</text>
-  
-  <!-- Node 5: Storage -->
-  <rect x="600" y="228" width="120" height="64" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <circle cx="620" cy="250" r="8" fill="url(#successGradient)"/>
-  <text x="636" y="254" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">/storage</text>
-  <text x="636" y="270" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">S3 • 18ms</text>
-  
-  <!-- Metrics Panel -->
-  <rect x="760" y="108" width="348" height="64" rx="8" fill="#f8f7f4"/>
-  <text x="780" y="134" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#151515">Requêtes/min</text>
-  <text x="780" y="154" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="700" fill="#2458f3">2,847</text>
-  <text x="860" y="154" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#22c55e">↑ 12%</text>
-  
-  <!-- Mini Sparkline -->
-  <polyline points="920,150 940,142 960,148 980,138 1000,144 1020,134 1040,140 1060,128 1080,136" fill="none" stroke="#2458f3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Latency Panel -->
-  <rect x="760" y="188" width="168" height="64" rx="8" fill="#f8f7f4"/>
-  <text x="780" y="214" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#151515">Latence moyenne</text>
-  <text x="780" y="234" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="700" fill="#151515">14ms</text>
-  <circle cx="900" cy="220" r="16" fill="#ffffff" stroke="#22c55e" stroke-width="3"/>
-  <text x="900" y="224" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#22c55e">98%</text>
-  
-  <!-- Uptime Panel -->
-  <rect x="940" y="188" width="168" height="64" rx="8" fill="#f8f7f4"/>
-  <text x="960" y="214" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="12" font-weight="700" fill="#151515">Uptime 30j</text>
-  <text x="960" y="234" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="700" fill="#151515">99.97%</text>
-  
-  <!-- Action Buttons -->
-  <rect x="760" y="268" width="168" height="40" rx="6" fill="url(#accentGradient)"/>
-  <text x="844" y="292" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Voir topologie</text>
-  
-  <rect x="940" y="268" width="168" height="40" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="1024" y="292" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515">Exporter logs</text>
-  
-  <!-- Legend -->
-  <circle cx="32" cy="320" r="6" fill="#22c55e"/>
-  <text x="46" y="324" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Healthy</text>
-  <circle cx="100" cy="320" r="6" fill="#f59e0b"/>
-  <text x="114" y="324" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Warning</text>
-  <circle cx="176" cy="320" r="6" fill="#ef4444"/>
-  <text x="190" y="324" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Critical</text>
-  
-  <!-- Interactive Hint -->
-  <text x="1080" y="340" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#9ca3af">Cliquez un nœud pour détails →</text>
+  <g id="component_root">
+    <rect x="20" y="20" width="1100" height="460" rx="8" fill="#ffffff" filter="url(#shadow)" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <text x="60" y="65" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#1a1a1a">Résumé Genome</text>
+    <text x="60" y="88" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#666666">Real-time system topology and endpoint health monitoring</text>
+    
+    <rect x="60" y="108" width="120" height="50" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="120" y="130" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="middle">ENDPOINTS</text>
+    <text x="120" y="148" font-family="Roboto Mono, monospace" font-size="14" font-weight="600" fill="#1a1a1a" text-anchor="middle">24</text>
+    
+    <rect x="195" y="108" width="120" height="50" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="255" y="130" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="middle">AVG LATENCY</text>
+    <text x="255" y="148" font-family="Roboto Mono, monospace" font-size="14" font-weight="600" fill="#1a1a1a" text-anchor="middle">45ms</text>
+    
+    <rect x="330" y="108" width="120" height="50" rx="6" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="390" y="130" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="middle">UPTIME</text>
+    <text x="390" y="148" font-family="Roboto Mono, monospace" font-size="14" font-weight="600" fill="#97ea90" text-anchor="middle">99.9%</text>
+    
+    <circle cx="350" cy="300" r="45" fill="#ffffff" stroke="#f05e23" stroke-width="2"/>
+    <circle cx="350" cy="300" r="35" fill="url(#blueGradient)"/>
+    <text x="350" y="295" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="middle">GENOME</text>
+    <text x="350" y="310" font-family="Roboto Mono, monospace" font-size="9" fill="#666666" text-anchor="middle">v2.4.0</text>
+    
+    <circle cx="200" cy="220" r="32" fill="#ffffff" stroke="#c5c4c0" stroke-width="1.5"/>
+    <text x="200" y="225" font-family="Roboto Mono, monospace" font-size="10" fill="#1a1a1a" text-anchor="middle">REST</text>
+    <circle cx="200" cy="190" r="5" fill="#97ea90"/>
+    
+    <circle cx="500" cy="220" r="32" fill="#ffffff" stroke="#c5c4c0" stroke-width="1.5"/>
+    <text x="500" y="225" font-family="Roboto Mono, monospace" font-size="10" fill="#1a1a1a" text-anchor="middle">GRPC</text>
+    <circle cx="500" cy="190" r="5" fill="#97ea90"/>
+    
+    <circle cx="200" cy="380" r="32" fill="#ffffff" stroke="#c5c4c0" stroke-width="1.5"/>
+    <text x="200" y="385" font-family="Roboto Mono, monospace" font-size="10" fill="#1a1a1a" text-anchor="middle">GRAPH</text>
+    <circle cx="200" cy="350" r="5" fill="#ffd548"/>
+    
+    <circle cx="500" cy="380" r="32" fill="#ffffff" stroke="#c5c4c0" stroke-width="1.5"/>
+    <text x="500" y="385" font-family="Roboto Mono, monospace" font-size="10" fill="#1a1a1a" text-anchor="middle">WS</text>
+    <circle cx="500" cy="350" r="5" fill="#97ea90"/>
+    
+    <path d="M 232 220 Q 291 260 320 280" fill="none" stroke="url(#lineGradient)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 468 220 Q 409 260 380 280" fill="none" stroke="url(#lineGradient)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 232 380 Q 291 340 320 320" fill="none" stroke="url(#lineGradient)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 468 380 Q 409 340 380 320" fill="none" stroke="url(#lineGradient)" stroke-width="2" stroke-linecap="round"/>
+    
+    <rect x="620" y="180" width="460" height="260" rx="8" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="650" y="215" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="700" fill="#1a1a1a">Endpoint Topology</text>
+    
+    <rect x="640" y="235" width="420" height="56" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <rect x="650" y="253" width="44" height="20" rx="4" fill="#e8f5e9"/>
+    <text x="672" y="267" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#2e7d32" text-anchor="middle">GET</text>
+    <text x="705" y="267" font-family="Roboto Mono, monospace" font-size="11" fill="#1a1a1a">/api/v1/users/profile</text>
+    <text x="1010" y="267" font-family="Roboto Mono, monospace" font-size="10" fill="#666666" text-anchor="end">24ms</text>
+    <circle cx="1040" cy="263" r="5" fill="#97ea90"/>
+    <text x="1040" y="285" font-family="Roboto Mono, monospace" font-size="9" fill="#666666" text-anchor="middle">200</text>
+    
+    <rect x="640" y="301" width="420" height="56" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <rect x="650" y="319" width="44" height="20" rx="4" fill="#fff3e0"/>
+    <text x="672" y="333" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#f05e23" text-anchor="middle">POST</text>
+    <text x="705" y="333" font-family="Roboto Mono, monospace" font-size="11" fill="#1a1a1a">/api/v1/auth/token</text>
+    <text x="1010" y="333" font-family="Roboto Mono, monospace" font-size="10" fill="#666666" text-anchor="end">156ms</text>
+    <circle cx="1040" cy="315" r="5" fill="#ffd548"/>
+    <text x="1040" y="337" font-family="Roboto Mono, monospace" font-size="9" fill="#666666" text-anchor="middle">201</text>
+    
+    <rect x="640" y="367" width="420" height="56" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <rect x="650" y="385" width="44" height="20" rx="4" fill="#e3f2fd"/>
+    <text x="672" y="399" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#1258ca" text-anchor="middle">PUT</text>
+    <text x="705" y="399" font-family="Roboto Mono, monospace" font-size="11" fill="#1a1a1a">/api/v1/data/sync</text>
+    <text x="1010" y="399" font-family="Roboto Mono, monospace" font-size="10" fill="#666666" text-anchor="end">42ms</text>
+    <circle cx="1040" cy="381" r="5" fill="#97ea90"/>
+    <text x="1040" y="403" font-family="Roboto Mono, monospace" font-size="9" fill="#666666" text-anchor="middle">204</text>
+    
+    <rect x="950" y="440" width="130" height="40" rx="6" fill="url(#orangeGradient)"/>
+    <text x="1015" y="465" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">View Details</text>
+    
+    <circle cx="60" cy="455" r="4" fill="#97ea90"/>
+    <text x="75" y="459" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666666">Healthy</text>
+    <circle cx="140" cy="455" r="4" fill="#ffd548"/>
+    <text x="155" y="459" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666666">Degraded</text>
+    <circle cx="230" cy="455" r="4" fill="#f05e23"/>
+    <text x="245" y="459" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666666">Down</text>
+  </g>
 </svg>

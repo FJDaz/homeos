@@ -1,0 +1,63 @@
+<svg viewBox="0 0 840 580" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="checkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2458f3"/>
+      <stop offset="100%" stop-color="#1a46d1"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <rect x="30" y="30" width="780" height="520" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
+    
+    <text x="70" y="85" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#111827">Missions Actives</text>
+    
+    <rect x="260" y="66" width="88" height="26" rx="6" fill="#f0f4ff"/>
+    <text x="304" y="83" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#2458f3" text-anchor="middle">5 en cours</text>
+    
+    <g transform="translate(70, 130)">
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="38" y="17" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#111827">Audit sécurité infrastructure cloud</text>
+      <text x="38" y="42" font-family="Inter, sans-serif" font-size="13" fill="#6b7280">Analyse des vulnérabilités réseau et accès</text>
+      <rect x="38" y="56" width="58" height="22" rx="4" fill="#fef2f2"/>
+      <text x="67" y="71" font-family="Roboto Mono, monospace" font-size="10" fill="#dc2626" text-anchor="middle">HIGH</text>
+      <text x="678" y="17" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">Aujourd'hui</text>
+    </g>
+    
+    <line x1="70" y1="215" x2="770" y2="215" stroke="#f3f4f6" stroke-width="1"/>
+    
+    <g transform="translate(70, 240)">
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="url(#checkGradient)" stroke="#2458f3" stroke-width="1.5"/>
+      <path d="M6 11 L10 15 L16 7" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="17" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#9ca3af" style="text-decoration: line-through; text-decoration-color: #d1d5db;">Migration base de données legacy</text>
+      <text x="38" y="42" font-family="Inter, sans-serif" font-size="13" fill="#9ca3af">Transfert vers PostgreSQL 15 cluster</text>
+      <rect x="38" y="56" width="78" height="22" rx="4" fill="#fff7ed"/>
+      <text x="77" y="71" font-family="Roboto Mono, monospace" font-size="10" fill="#f05e23" text-anchor="middle">MEDIUM</text>
+      <text x="678" y="17" font-family="Roboto Mono, monospace" font-size="11" fill="#9ca3af">Terminé</text>
+    </g>
+    
+    <line x1="70" y1="325" x2="770" y2="325" stroke="#f3f4f6" stroke-width="1"/>
+    
+    <g transform="translate(70, 350)">
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="38" y="17" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#111827">Mise à jour documentation API</text>
+      <text x="38" y="42" font-family="Inter, sans-serif" font-size="13" fill="#6b7280">Swagger 3.0 et exemples de requêtes</text>
+      <rect x="38" y="56" width="50" height="22" rx="4" fill="#f0fdf4"/>
+      <text x="63" y="71" font-family="Roboto Mono, monospace" font-size="10" fill="#16a34a" text-anchor="middle">LOW</text>
+      <text x="678" y="17" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">Demain</text>
+    </g>
+    
+    <line x1="70" y1="435" x2="770" y2="435" stroke="#f3f4f6" stroke-width="1"/>
+    
+    <g transform="translate(70, 460)">
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="38" y="17" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#111827">Tests unitaires module authentification</text>
+      <text x="38" y="42" font-family="Inter, sans-serif" font-size="13" fill="#6b7280">Couverture Jest à 90% minimum</text>
+      <rect x="38" y="56" width="58" height="22" rx="4" fill="#fef2f2"/>
+      <text x="67" y="71" font-family="Roboto Mono, monospace" font-size="10" fill="#dc2626" text-anchor="middle">HIGH</text>
+      <text x="678" y="17" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">2 jours</text>
+    </g>
+  </g>
+</svg>

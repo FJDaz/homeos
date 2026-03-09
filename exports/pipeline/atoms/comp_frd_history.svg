@@ -1,0 +1,69 @@
+<svg viewBox="0 0 180 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="bottomFade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <!-- Card Container -->
+    <rect x="12" y="12" width="156" height="456" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+    
+    <!-- Section Title -->
+    <text x="28" y="48" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="700" fill="#1f2937">Historique des intentions</text>
+    
+    <!-- Intent Item 1 -->
+    <g transform="translate(0, 78)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">Il y a 2h</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Génération rapport Q3</text>
+      <line x1="28" y1="34" x2="152" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+    </g>
+    
+    <!-- Intent Item 2 -->
+    <g transform="translate(0, 128)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">Hier, 14:30</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Analyse prédictive clients</text>
+      <line x1="28" y1="34" x2="152" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+    </g>
+    
+    <!-- Intent Item 3 -->
+    <g transform="translate(0, 178)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">Il y a 3j</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Optimisation pipeline</text>
+      <line x1="28" y1="34" x2="152" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+    </g>
+    
+    <!-- Intent Item 4 -->
+    <g transform="translate(0, 228)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">Semaine dernière</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Audit automatique données</text>
+      <line x1="28" y1="34" x2="152" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+    </g>
+    
+    <!-- Intent Item 5 -->
+    <g transform="translate(0, 278)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">Il y a 8j</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Migration schéma base</text>
+      <line x1="28" y1="34" x2="152" y2="34" stroke="#d5d4d0" stroke-width="1"/>
+    </g>
+    
+    <!-- Intent Item 6 -->
+    <g transform="translate(0, 328)">
+      <circle cx="28" cy="6" r="3" fill="#1258ca"/>
+      <text x="40" y="0" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">12 Nov 2024</text>
+      <text x="40" y="16" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#1f2937">Intégration API externe</text>
+    </g>
+    
+    <!-- Scroll Indicator -->
+    <rect x="80" y="440" width="20" height="4" rx="2" fill="#e5e7eb"/>
+  </g>
+</svg>

@@ -1,76 +1,51 @@
-<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 500" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Shadow filter for card -->
-    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+    <filter id="shadow-main" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    
-    <!-- Gradient for primary button -->
-    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2458f3"/>
-      <stop offset="100%" stop-color="#1a46d1"/>
-    </linearGradient>
-    
-    <!-- Subtle surface gradient -->
-    <linearGradient id="surfaceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#fafbfc"/>
-      <stop offset="100%" stop-color="#f5f7fa"/>
+    <linearGradient id="btn-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#a8f0a1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#97ea90;stop-opacity:1" />
     </linearGradient>
   </defs>
   
-  <!-- Background -->
-  <rect width="700" height="400" fill="#f8f7f4"/>
-  
-  <!-- Main Card -->
-  <rect x="50" y="50" width="600" height="300" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Card Header Section -->
-  <rect x="50" y="50" width="600" height="72" rx="12" fill="url(#surfaceGradient)"/>
-  <rect x="50" y="110" width="600" height="12" fill="#ffffff"/>
-  
-  <!-- Section Title -->
-  <text x="82" y="95" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Structure hiérarchique</text>
-  
-  <!-- Breadcrumb / Path indicator -->
-  <text x="82" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280">Racine</text>
-  <text x="126" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#9ca3af">/</text>
-  <text x="138" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#6b7280">Départements</text>
-  <text x="226" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#9ca3af">/</text>
-  <text x="238" y="142" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#2458f3">Équipe Design</text>
-  
-  <!-- Hierarchy visualization - current level indicator -->
-  <rect x="82" y="168" width="536" height="64" rx="8" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
-  
-  <!-- Level indicator dots -->
-  <circle cx="106" cy="188" r="4" fill="#2458f3"/>
-  <circle cx="106" cy="200" r="4" fill="#d1d5db"/>
-  <circle cx="106" cy="212" r="4" fill="#d1d5db"/>
-  
-  <!-- Current node label -->
-  <text x="126" y="193" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Équipe Design</text>
-  <text x="126" y="213" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#6b7280">Niveau 3 • 12 membres • 4 sous-équipes</text>
-  
-  <!-- Decorative hierarchy lines -->
-  <line x1="82" y1="256" x2="618" y2="256" stroke="#e5e7eb" stroke-width="1"/>
-  
-  <!-- Zoom Out / Remonter Button -->
-  <g transform="translate(82, 276)">
-    <!-- Button background -->
-    <rect width="156" height="44" rx="6" fill="url(#btnGradient)"/>
+  <g id="component_root">
+    <rect x="0" y="0" width="1140" height="500" fill="#fafafa"/>
     
-    <!-- Arrow up icon -->
-    <path d="M20 26 L26 20 L32 26 M26 20 L26 32" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="0" y="0" width="240" height="500" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="40" y="50" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#1a1a1a">Explorateur</text>
     
-    <!-- Button label -->
-    <text x="46" y="27" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Remonter</text>
-  </g>
-  
-  <!-- Secondary info -->
-  <text x="258" y="303" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#9ca3af">Retour au niveau Départements</text>
-  
-  <!-- Visual hint - parent level preview -->
-  <g opacity="0.5">
-    <rect x="450" y="276" width="168" height="44" rx="6" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4"/>
-    <text x="534" y="303" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#9ca3af" text-anchor="middle">Niveau parent</text>
+    <rect x="280" y="50" width="820" height="400" rx="10" fill="#ffffff" filter="url(#shadow-main)"/>
+    
+    <text x="320" y="100" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#1a1a1a">Documents Actifs</text>
+    
+    <text x="320" y="140" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b6b6b">
+      Racine <tspan fill="#c5c4c0">/</tspan> Projets <tspan fill="#c5c4c0">/</tspan> 2024 <tspan fill="#c5c4c0">/</tspan> <tspan font-weight="600" fill="#1a1a1a">Documents Actifs</tspan>
+    </text>
+    
+    <rect x="320" y="165" width="740" height="1.5" fill="#d5d4d0"/>
+    
+    <g transform="translate(320, 190)">
+      <rect x="0" y="0" width="740" height="48" rx="6" fill="#fafafa" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="48" y="30" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#2a2a2a">présentation_finale.pptx</text>
+      <text x="640" y="30" font-family="Roboto Mono, monospace" font-size="11" fill="#6b6b6b">4.2 MB</text>
+      
+      <rect x="0" y="64" width="740" height="48" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="48" y="94" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#2a2a2a">analyse_marché.pdf</text>
+      <text x="640" y="94" font-family="Roboto Mono, monospace" font-size="11" fill="#6b6b6b">2.8 MB</text>
+    </g>
+    
+    <g transform="translate(320, 310)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="url(#btn-gradient)" stroke="#87da80" stroke-width="1"/>
+      <path d="M24 14L18 20M24 14L30 20M24 14V28" stroke="#1a5c1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="46" y="28" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="15" fill="#1a5c1a">Remonter</text>
+    </g>
+    
+    <text x="320" y="380" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b6b6b">
+      Revenir au dossier : <tspan font-weight="600" fill="#1a1a1a">2024</tspan>
+    </text>
+    
+    <rect x="980" y="85" width="80" height="24" rx="4" fill="#f5f5f5" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="1020" y="102" font-family="Roboto Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="middle">NIVEAU 3</text>
   </g>
 </svg>

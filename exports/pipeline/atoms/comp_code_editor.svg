@@ -1,188 +1,113 @@
-<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1140 500" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="toolbarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#fafafa"/>
-      <stop offset="100%" stop-color="#f0f0f0"/>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd548"/>
+      <stop offset="100%" stop-color="#e6c040"/>
     </linearGradient>
-    <linearGradient id="primaryBtn" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2458f3"/>
-      <stop offset="100%" stop-color="#1a46c4"/>
-    </linearGradient>
-    <linearGradient id="runBtn" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#059669"/>
+    <linearGradient id="editorSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fafafa"/>
     </linearGradient>
   </defs>
   
-  <!-- Card Background -->
-  <rect x="0" y="0" width="700" height="400" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Header Section -->
-  <rect x="0" y="0" width="700" height="56" rx="12" fill="transparent"/>
-  <rect x="0" y="0" width="700" height="48" rx="12" fill="transparent"/>
-  <rect x="0" y="12" width="700" height="44" fill="transparent"/>
-  
-  <!-- Title -->
-  <text x="24" y="36" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Éditeur Code</text>
-  
-  <!-- File Tab -->
-  <rect x="160" y="12" width="120" height="32" rx="6" fill="#f8f7f4"/>
-  <text x="176" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#4a4a4a">main.js</text>
-  <circle cx="264" cy="28" r="4" fill="#10b981"/>
-  
-  <!-- Header Actions -->
-  <rect x="540" y="12" width="64" height="32" rx="6" fill="url(#primaryBtn)"/>
-  <text x="558" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Save</text>
-  
-  <rect x="612" y="12" width="64" height="32" rx="6" fill="url(#runBtn)"/>
-  <polygon points="628,22 628,34 640,28" fill="#ffffff"/>
-  <text x="646" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Run</text>
-  
-  <!-- Divider -->
-  <rect x="24" y="56" width="652" height="1" fill="#e5e5e5"/>
-  
-  <!-- Toolbar -->
-  <rect x="24" y="68" width="652" height="40" rx="6" fill="url(#toolbarGrad)"/>
-  
-  <!-- Toolbar Buttons -->
-  <rect x="36" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <rect x="42" y="84" width="16" height="2" rx="1" fill="#6b7280"/>
-  <rect x="42" y="88" width="12" height="2" rx="1" fill="#6b7280"/>
-  <rect x="42" y="92" width="14" height="2" rx="1" fill="#6b7280"/>
-  
-  <rect x="72" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <rect x="80" y="82" width="12" height="12" rx="2" fill="none" stroke="#6b7280" stroke-width="1.5"/>
-  
-  <rect x="108" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <path d="M118 88 L124 82 L124 94 Z" fill="#6b7280"/>
-  <path d="M126 88 L132 82 L132 94 Z" fill="#6b7280"/>
-  
-  <rect x="144" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <path d="M154 88 L160 94 L166 88" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <rect x="180" y="76" width="28" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <path d="M190 94 L196 88 L202 94" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Toolbar Divider -->
-  <rect x="220" y="80" width="1" height="16" fill="#d1d5db"/>
-  
-  <!-- Language Selector -->
-  <rect x="232" y="76" width="80" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <text x="242" y="92" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#4a4a4a">JavaScript</text>
-  <path d="M302 88 L308 94 L314 88" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 308 91)"/>
-  
-  <!-- Search -->
-  <rect x="580" y="76" width="84" height="24" rx="4" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <circle cx="592" cy="88" r="4" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
-  <line x1="595" y1="91" x2="598" y2="94" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
-  <text x="604" y="92" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">Search...</text>
-  
-  <!-- Code Editor Area -->
-  <rect x="24" y="116" width="652" height="268" rx="6" fill="#fafafa"/>
-  
-  <!-- Line Numbers -->
-  <rect x="24" y="116" width="48" height="268" rx="6" fill="#f0f0f0"/>
-  <text x="52" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">1</text>
-  <text x="52" y="164" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">2</text>
-  <text x="52" y="184" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">3</text>
-  <text x="52" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">4</text>
-  <text x="52" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">5</text>
-  <text x="52" y="244" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">6</text>
-  <text x="52" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">7</text>
-  <text x="52" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">8</text>
-  <text x="52" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">9</text>
-  <text x="52" y="324" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">10</text>
-  <text x="52" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">11</text>
-  <text x="52" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#9ca3af" text-anchor="end">12</text>
-  
-  <!-- Active Line Highlight -->
-  <rect x="72" y="152" width="604" height="20" fill="#e0e7ff"/>
-  
-  <!-- Code Content -->
-  <!-- Line 1: Import -->
-  <text x="84" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">import</text>
-  <text x="132" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
-  <text x="140" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">useState</text>
-  <text x="188" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">,</text>
-  <text x="196" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">useEffect</text>
-  <text x="252" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">}</text>
-  <text x="264" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">from</text>
-  <text x="296" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">'react'</text>
-  <text x="340" y="144" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">;</text>
-  
-  <!-- Line 2: Empty -->
-  
-  <!-- Line 3: Comment -->
-  <text x="84" y="184" font-family="Roboto Mono, monospace" font-size="12" fill="#6b7280">// Configuration du composant éditeur</text>
-  
-  <!-- Line 4: Const -->
-  <text x="84" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">const</text>
-  <text x="116" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">Editor</text>
-  <text x="156" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">=</text>
-  <text x="168" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">({</text>
-  <text x="180" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">initialCode</text>
-  <text x="252" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">})</text>
-  <text x="268" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=&gt;</text>
-  <text x="288" y="204" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
-  
-  <!-- Line 5: useState -->
-  <text x="100" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">const</text>
-  <text x="140" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">[</text>
-  <text x="148" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">code</text>
-  <text x="176" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">,</text>
-  <text x="188" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">setCode</text>
-  <text x="236" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">]</text>
-  <text x="248" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=</text>
-  <text x="268" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">useState</text>
-  <text x="316" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
-  <text x="324" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#1f2937">initialCode</text>
-  <text x="396" y="224" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">);</text>
-  
-  <!-- Line 6: Empty -->
-  
-  <!-- Line 7: useEffect -->
-  <text x="100" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">useEffect</text>
-  <text x="156" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(()</text>
-  <text x="180" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">=&gt;</text>
-  <text x="200" y="264" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">{</text>
-  
-  <!-- Line 8: console.log -->
-  <text x="116" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">console</text>
-  <text x="164" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">.</text>
-  <text x="172" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#2458f3">log</text>
-  <text x="196" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
-  <text x="204" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">'Éditeur initialisé'</text>
-  <text x="340" y="284" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">);</text>
-  
-  <!-- Line 9: closing brace -->
-  <text x="100" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">},</text>
-  <text x="116" y="304" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">[]);</text>
-  
-  <!-- Line 10: Empty -->
-  
-  <!-- Line 11: return -->
-  <text x="100" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">return</text>
-  <text x="144" y="344" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">(</text>
-  
-  <!-- Line 12: div -->
-  <text x="116" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#dc2626">&lt;div</text>
-  <text x="156" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#7c3aed">className</text>
-  <text x="220" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#d97706">=</text>
-  <text x="232" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#059669">"editor-container"</text>
-  <text x="356" y="364" font-family="Roboto Mono, monospace" font-size="12" fill="#dc2626">&gt;</text>
-  
-  <!-- Cursor -->
-  <rect x="368" y="352" width="2" height="16" fill="#2458f3">
-    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
-  </rect>
-  
-  <!-- Status Bar -->
-  <rect x="24" y="376" width="652" height="24" rx="0 0 6 6" fill="#f8f7f4"/>
-  <text x="36" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">UTF-8</text>
-  <text x="84" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">JavaScript</text>
-  <text x="156" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b7280">Ln 12, Col 28</text>
-  <text x="580" y="392" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#10b981">● Saved</text>
+  <g id="component_root">
+    <rect x="20" y="20" width="1100" height="460" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+    
+    <text x="50" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#1a1a1a">Éditeur Code</text>
+    
+    <g id="toolbar">
+      <rect x="50" y="80" width="72" height="32" rx="6" fill="url(#goldGradient)"/>
+      <text x="86" y="100" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a" text-anchor="middle" font-weight="600">Run</text>
+      
+      <rect x="132" y="80" width="72" height="32" rx="6" fill="#f5f5f5" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="168" y="100" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#4a4a4a" text-anchor="middle">Save</text>
+      
+      <rect x="214" y="80" width="80" height="32" rx="6" fill="#f5f5f5" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="254" y="100" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#4a4a4a" text-anchor="middle">Format</text>
+    </g>
+    
+    <rect x="50" y="130" width="1040" height="330" rx="6" fill="url(#editorSurface)" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <rect x="50" y="130" width="60" height="330" rx="6" fill="#f5f5f5"/>
+    <rect x="110" y="130" width="1" height="330" fill="#e5e5e5"/>
+    
+    <text x="80" y="160" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">1</text>
+    <text x="80" y="180" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">2</text>
+    <text x="80" y="200" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">3</text>
+    <text x="80" y="220" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">4</text>
+    <text x="80" y="240" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">5</text>
+    <text x="80" y="260" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">6</text>
+    <text x="80" y="280" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">7</text>
+    <text x="80" y="300" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">8</text>
+    <text x="80" y="320" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">9</text>
+    <text x="80" y="340" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280" text-anchor="middle">10</text>
+    
+    <rect x="50" y="325" width="1040" height="20" fill="#ffd548" fill-opacity="0.08"/>
+    <rect x="50" y="325" width="3" height="20" fill="#ffd548"/>
+    
+    <g transform="translate(130, 160)">
+      <text font-family="Roboto Mono, monospace" font-size="12" fill="#6b7280">// Configuration API Client</text>
+      
+      <text y="20" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#1258ca">import</tspan>
+        <tspan fill="#1a1a1a"> { </tspan>
+        <tspan fill="#f05e23">createClient</tspan>
+        <tspan fill="#1a1a1a"> } </tspan>
+        <tspan fill="#1258ca">from</tspan>
+        <tspan fill="#97ea90"> '@api/core'</tspan>
+        <tspan fill="#1a1a1a">;</tspan>
+      </text>
+      
+      <text y="60" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#2458f3">const</tspan>
+        <tspan fill="#1a1a1a"> config = {</tspan>
+      </text>
+      
+      <text y="80" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#1a1a1a">  endpoint: </tspan>
+        <tspan fill="#97ea90">'https://api.elite.io/v2'</tspan>
+        <tspan fill="#1a1a1a">,</tspan>
+      </text>
+      
+      <text y="100" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#1a1a1a">  timeout: </tspan>
+        <tspan fill="#ffd548">3000</tspan>
+        <tspan fill="#1a1a1a">,</tspan>
+      </text>
+      
+      <text y="120" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#1a1a1a">  retries: </tspan>
+        <tspan fill="#f05e23">3</tspan>
+        <tspan fill="#1a1a1a">,</tspan>
+      </text>
+      
+      <text y="140" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#2458f3">  debug</tspan>
+        <tspan fill="#1a1a1a">: </tspan>
+        <tspan fill="#1258ca">true</tspan>
+      </text>
+      
+      <text y="160" font-family="Roboto Mono, monospace" font-size="12" fill="#1a1a1a">};</text>
+      
+      <text y="200" font-family="Roboto Mono, monospace" font-size="12">
+        <tspan fill="#1258ca">export</tspan>
+        <tspan fill="#2458f3"> default</tspan>
+        <tspan fill="#1a1a1a"> createClient(config);</tspan>
+      </text>
+      
+      <rect x="248" y="187" width="2" height="15" fill="#1258ca">
+        <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    
+    <rect x="50" y="430" width="1040" height="30" rx="0" fill="#fafafa"/>
+    <text x="70" y="450" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">JavaScript</text>
+    <text x="140" y="450" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#97ea90">●</text>
+    <text x="150" y="450" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280">modified</text>
+    <text x="1070" y="450" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="end">UTF-8</text>
+    <text x="990" y="450" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="end">Ln 10, Col 32</text>
+  </g>
 </svg>

@@ -1,71 +1,50 @@
-<svg viewBox="0 0 340 500" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Shadow for card -->
     <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <!-- Gradient for delete button -->
-    <linearGradient id="deleteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff6b6b"/>
-      <stop offset="100%" stop-color="#ee5a5a"/>
-    </linearGradient>
-    <!-- File icon gradient -->
-    <linearGradient id="fileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e8e8e8"/>
-      <stop offset="100%" stop-color="#d0d0d0"/>
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b6ff5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2458f3;stop-opacity:1" />
     </linearGradient>
   </defs>
   
-  <!-- Background -->
-  <rect width="340" height="500" fill="#f8f7f4"/>
-  
-  <!-- Main Card -->
-  <rect x="20" y="20" width="300" height="460" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Section Title -->
-  <text x="40" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Fichier Uploadé</text>
-  
-  <!-- Metadata Label -->
-  <text x="40" y="82" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="500" fill="#6b6b6b" letter-spacing="1.5" text-transform="uppercase">DOCUMENT ACTIF</text>
-  
-  <!-- File Preview Card -->
-  <g transform="translate(40, 110)">
-    <!-- File icon background -->
-    <rect x="0" y="0" width="260" height="180" rx="8" fill="url(#fileGradient)"/>
+  <g id="component_root">
+    <!-- Main Card Container -->
+    <rect x="40" y="40" width="320" height="240" rx="8" fill="#ffffff" filter="url(#cardShadow)" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Document lines -->
-    <rect x="30" y="40" width="140" height="8" rx="4" fill="#ffffff"/>
-    <rect x="30" y="60" width="100" height="8" rx="4" fill="#ffffff"/>
-    <rect x="30" y="80" width="160" height="8" rx="4" fill="#ffffff"/>
-    <rect x="30" y="100" width="120" height="8" rx="4" fill="#ffffff"/>
-    <rect x="30" y="120" width="80" height="8" rx="4" fill="#ffffff"/>
+    <!-- Section Title -->
+    <text x="64" y="76" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#111827">File Management</text>
     
-    <!-- File corner fold -->
-    <path d="M200 0 L260 0 L260 60 Z" fill="#c0c0c0"/>
+    <!-- Uploaded File Display Area -->
+    <rect x="64" y="96" width="272" height="80" rx="6" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
     
-    <!-- Success indicator -->
-    <circle cx="230" cy="140" r="16" fill="#97ea90"/>
-    <path d="M222 140 L227 145 L238 134" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  
-  <!-- File Info -->
-  <text x="40" y="320" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#151515">contrat_final.pdf</text>
-  <text x="40" y="340" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#6b6b6b">2.4 MB • PDF • Uploadé le 15 jan 2024</text>
-  
-  <!-- Delete Button -->
-  <g transform="translate(40, 380)">
-    <rect x="0" y="0" width="260" height="48" rx="6" fill="url(#deleteGradient)"/>
-    <!-- Trash icon -->
-    <g transform="translate(88, 14)">
-      <rect x="4" y="6" width="16" height="18" rx="2" stroke="#ffffff" stroke-width="2" fill="none"/>
-      <rect x="2" y="4" width="20" height="4" rx="1" fill="#ffffff"/>
-      <line x1="8" y1="10" x2="8" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-      <line x1="12" y1="10" x2="12" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-      <line x1="16" y1="10" x2="16" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <!-- Document Icon -->
+    <g transform="translate(80, 112)">
+      <path d="M2 4a2 2 0 0 1 2-2h6l6 6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4z" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M10 2v6h6" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="8" y1="15" x2="16" y2="15" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="19" x2="13" y2="19" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
     </g>
-    <text x="128" y="30" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Supprimer le fichier</text>
+    
+    <!-- Filename -->
+    <text x="128" y="132" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="500">quarterly_report_q4.pdf</text>
+    
+    <!-- File Metadata -->
+    <text x="128" y="150" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">3.8 MB • Ready for processing</text>
+    
+    <!-- Remove Button -->
+    <g transform="translate(130, 210)">
+      <rect x="0" y="0" width="140" height="40" rx="6" fill="url(#btnGradient)" style="cursor: pointer"/>
+      
+      <!-- Trash Icon -->
+      <g transform="translate(16, 11)">
+        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="10" y1="11" x2="10" y2="17" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14" y1="11" x2="14" y2="17" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      
+      <text x="42" y="25" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="500" fill="#ffffff">Remove File</text>
+    </g>
   </g>
-  
-  <!-- Helper text -->
-  <text x="170" y="452" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#9b9b9b" text-anchor="middle">Cette action est irréversible</text>
 </svg>

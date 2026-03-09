@@ -1,0 +1,78 @@
+<svg viewBox="0 0 320 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#97ea90;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#88e080;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <!-- Card Container -->
+    <rect x="20" y="20" width="280" height="560" rx="10" fill="#ffffff" filter="url(#shadow)"/>
+    
+    <!-- Header Title -->
+    <text x="44" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#111827">Filtres Progressifs</text>
+    
+    <!-- Section: Domaines -->
+    <text x="44" y="108" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="11" fill="#6b7280" letter-spacing="0.5">DOMAINES D'EXPERTISE</text>
+    
+    <!-- Parent: Développement (Checked) -->
+    <rect x="44" y="128" width="18" height="18" rx="5" fill="url(#accent-gradient)"/>
+    <path d="M48 137 L52 141 L58 133" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="72" y="142" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="#111827">Développement</text>
+    <text x="258" y="142" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">128</text>
+    
+    <!-- Child: Frontend (Checked, Indented) -->
+    <rect x="68" y="162" width="16" height="16" rx="4" fill="url(#accent-gradient)"/>
+    <path d="M72 170 L75 173 L80 166" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="92" y="174" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">Frontend</text>
+    <text x="258" y="174" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">64</text>
+    
+    <!-- Child: Backend (Unchecked, Indented) -->
+    <rect x="68" y="196" width="16" height="16" rx="4" fill="none" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="92" y="208" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">Backend</text>
+    <text x="258" y="208" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">42</text>
+    
+    <!-- Child: DevOps (Unchecked, Indented) -->
+    <rect x="68" y="230" width="16" height="16" rx="4" fill="none" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="92" y="242" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">DevOps</text>
+    <text x="258" y="242" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">22</text>
+    
+    <!-- Parent: Design (Unchecked) -->
+    <rect x="44" y="274" width="18" height="18" rx="5" fill="none" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="72" y="288" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="#111827">Design</text>
+    <text x="258" y="288" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">86</text>
+    
+    <!-- Parent: Marketing (Checked) -->
+    <rect x="44" y="308" width="18" height="18" rx="5" fill="url(#accent-gradient)"/>
+    <path d="M48 317 L52 321 L58 313" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="72" y="322" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="#111827">Marketing</text>
+    <text x="258" y="322" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">45</text>
+    
+    <!-- Divider -->
+    <line x1="44" y1="356" x2="276" y2="356" stroke="#e5e7eb" stroke-width="1"/>
+    
+    <!-- Section: Statut -->
+    <text x="44" y="388" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="11" fill="#6b7280" letter-spacing="0.5">STATUT</text>
+    
+    <!-- Checkbox: Publié (Checked) -->
+    <rect x="44" y="408" width="16" height="16" rx="4" fill="url(#accent-gradient)"/>
+    <path d="M48 416 L51 419 L56 412" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="68" y="420" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">Publié</text>
+    
+    <!-- Checkbox: Brouillon (Unchecked) -->
+    <rect x="44" y="442" width="16" height="16" rx="4" fill="none" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="68" y="454" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">Brouillon</text>
+    
+    <!-- Checkbox: Archivé (Unchecked) -->
+    <rect x="44" y="476" width="16" height="16" rx="4" fill="none" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="68" y="488" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">Archivé</text>
+    
+    <!-- Action Button -->
+    <rect x="44" y="524" width="232" height="44" rx="8" fill="#111827"/>
+    <text x="160" y="551" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#ffffff" text-anchor="middle">Appliquer les filtres</text>
+  </g>
+</svg>

@@ -6,6 +6,14 @@
 
 ---
 
+## Mission 25B — Figma Bridge & JSON Manifest ✅ 2026-03-04
+- [x] Génération du `manifest.json` dans `exports/` par le `07_composer.py`.
+- [x] Calcul des coordonnées absolues (x, y) et dimensions (w, h) pour Figma.
+- [x] Inclusion du `genome_hash` pour tracking de version.
+- [x] API `GET /api/manifest` pour servir les données au plugin.
+- [x] API `POST /api/manifest/patch` pour synchronisation bidirectionnelle.
+- [x] Scaffolding du plugin Figma (`manifest.json`, `ui.html`, `code.js`).
+
 ## Mission 24G — Design Cleanup (rx <= 10) ✅ 2026-03-04
 - [x] Contrainte stricte `rx <= 10` imposée dans `04_kimi_atom_factory.py` (prompt).
 - [x] Sécurité RegEx ajoutée dans `07_composer.py` pour raboter tout `rx/ry > 10` à l'injection.

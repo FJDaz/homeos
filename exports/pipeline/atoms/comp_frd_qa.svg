@@ -1,0 +1,56 @@
+<svg viewBox="0 0 320 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow-modal" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#fafafa"/>
+    </linearGradient>
+  </defs>
+  
+  <rect x="0" y="0" width="320" height="600" fill="#000000" fill-opacity="0.4"/>
+  
+  <g id="component_root">
+    <rect x="20" y="40" width="280" height="520" rx="10" fill="#ffffff" filter="url(#shadow-modal)"/>
+    
+    <rect x="20" y="40" width="280" height="64" rx="10" fill="url(#grad-header)"/>
+    <rect x="20" y="88" width="280" height="16" fill="url(#grad-header)"/>
+    <line x1="20" y1="104" x2="300" y2="104" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <text x="40" y="80" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="16" fill="#1a1a1a">Chat Explicatif</text>
+    
+    <g transform="translate(276, 56)">
+      <rect x="0" y="0" width="24" height="24" rx="6" fill="#f5f5f5"/>
+      <path d="M 7 7 L 17 17 M 17 7 L 7 17" stroke="#666666" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    
+    <g transform="translate(36, 124)">
+      <rect x="0" y="0" width="188" height="64" rx="10" fill="#f5f5f5"/>
+      <text x="14" y="30" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a">Je peux expliquer les choix</text>
+      <text x="14" y="50" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a">UX et générer le code.</text>
+      <text x="0" y="88" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#999999">Assistant IA • Maintenant</text>
+    </g>
+    
+    <g transform="translate(124, 212)">
+      <rect x="0" y="0" width="160" height="56" rx="10" fill="#97ea90"/>
+      <text x="80" y="26" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a" text-anchor="middle">Pourquoi ce padding</text>
+      <text x="80" y="46" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a" text-anchor="middle">de 40px ?</text>
+      <text x="160" y="78" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#666666" text-anchor="end">10:42</text>
+    </g>
+    
+    <g transform="translate(36, 304)">
+      <rect x="0" y="0" width="200" height="88" rx="10" fill="#f5f5f5"/>
+      <text x="14" y="30" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a">Cet espacement suit la loi</text>
+      <text x="14" y="50" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a">de proximité de Gestalt et</text>
+      <text x="14" y="70" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a1a1a">améliore la respiration.</text>
+      <text x="0" y="112" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#999999">Assistant IA • 10:43</text>
+    </g>
+    
+    <rect x="36" y="484" width="248" height="48" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
+    <text x="52" y="513" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#999999">Interroger sur l'intention...</text>
+    
+    <rect x="244" y="492" width="32" height="32" rx="8" fill="#97ea90"/>
+    <path d="M 254 508 L 266 508 M 262 504 L 266 508 L 262 512" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

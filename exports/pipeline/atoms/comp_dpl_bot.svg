@@ -1,0 +1,67 @@
+<svg viewBox="0 0 600 550" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <g id="component_root">
+    <path d="M 30,20 L 570,20 A 10,10 0 0 1 580,30 L 580,520 A 10,10 0 0 1 570,530 L 30,530 A 10,10 0 0 1 20,520 L 20,30 A 10,10 0 0 1 30,20 Z" 
+          fill="white" stroke="#d5d4d0" stroke-width="1" filter="url(#shadow)"/>
+    
+    <path d="M 30,20 L 570,20 A 10,10 0 0 1 580,30 L 580,90 L 20,90 L 20,30 A 10,10 0 0 1 30,20 Z" 
+          fill="#0D0E13"/>
+    
+    <text x="50" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="white">
+      Instructions Pas-à-Pas
+    </text>
+    
+    <rect x="480" y="39" width="80" height="32" rx="6" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <text x="520" y="60" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="13" fill="white" text-anchor="middle">
+      Guide
+    </text>
+    
+    <circle cx="70" cy="125" r="14" fill="#ffd548"/>
+    <text x="70" y="130" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#0D0E13" text-anchor="middle">1</text>
+    
+    <text x="100" y="118" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="15" fill="#0D0E13">Accéder au tableau de bord</text>
+    <text x="100" y="140" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6B7280">Cliquez sur l'icône Menu (☰) en haut à gauche</text>
+    
+    <rect x="100" y="155" width="80" height="28" rx="6" fill="#f3f4f6" stroke="#d5d4d0" stroke-width="1"/>
+    <path d="M 110,165 L 130,165 M 110,169 L 130,169 M 110,173 L 130,173" stroke="#6b7280" stroke-width="2" stroke-linecap="round"/>
+    <text x="145" y="173" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">Menu</text>
+    
+    <line x1="70" y1="139" x2="70" y2="201" stroke="#e5e7eb" stroke-width="2"/>
+    
+    <circle cx="70" cy="215" r="14" fill="white" stroke="#d5d4d0" stroke-width="2"/>
+    <text x="70" y="220" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#9ca3af" text-anchor="middle">2</text>
+    
+    <text x="100" y="208" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="15" fill="#374151">Configurer le déploiement</text>
+    <text x="100" y="230" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Sélectionnez 'Nouveau Projet' dans la sidebar</text>
+    
+    <rect x="100" y="245" width="140" height="28" rx="6" fill="white" stroke="#d5d4d0" stroke-width="1"/>
+    <rect x="108" y="253" width="12" height="12" rx="2" fill="#e5e7eb"/>
+    <text x="128" y="263" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151">Nouveau Projet</text>
+    
+    <line x1="70" y1="229" x2="70" y2="291" stroke="#e5e7eb" stroke-width="2"/>
+    
+    <circle cx="70" cy="305" r="14" fill="white" stroke="#d5d4d0" stroke-width="2"/>
+    <text x="70" y="310" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#9ca3af" text-anchor="middle">3</text>
+    
+    <text x="100" y="298" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="15" fill="#374151">Valider les paramètres</text>
+    <text x="100" y="320" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Appuyez sur le bouton 'Valider' en bas de page</text>
+    
+    <rect x="100" y="335" width="90" height="28" rx="6" fill="#ffd548"/>
+    <text x="145" y="353" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11" fill="#0D0E13" text-anchor="middle">Valider</text>
+    
+    <line x1="70" y1="319" x2="70" y2="381" stroke="#e5e7eb" stroke-width="2"/>
+    
+    <circle cx="70" cy="395" r="14" fill="white" stroke="#d5d4d0" stroke-width="2"/>
+    <text x="70" y="400" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#9ca3af" text-anchor="middle">4</text>
+    
+    <text x="100" y="388" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="15" fill="#374151">Confirmer l'installation</text>
+    <text x="100" y="410" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Cliquez sur 'Confirmer' pour finaliser le déploiement</text>
+    
+    <rect x="100" y="425" width="100" height="28" rx="6" fill="#97ea90" fill-opacity="0.3" stroke="#97ea90" stroke-width="1.5"/>
+    <text x="150" y="443" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11" fill="#166534" text-anchor="middle">Confirmer</text>
+  </g>
+</svg>

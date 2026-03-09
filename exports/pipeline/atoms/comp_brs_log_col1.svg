@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1140 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="activeHover" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2458f3" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#2458f3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <rect x="20" y="20" width="1100" height="160" rx="8" fill="#ffffff" filter="url(#cardShadow)" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <text x="48" y="56" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#111827">Trace LLM 1</text>
+    <text x="48" y="76" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">Linked to execution flow • Column 1</text>
+    
+    <line x1="68" y1="96" x2="68" y2="168" stroke="#e5e7eb" stroke-width="1.5"/>
+    
+    <g>
+      <rect x="48" y="88" width="1052" height="32" rx="6" fill="url(#activeHover)"/>
+      <circle cx="68" cy="104" r="4" fill="#2458f3"/>
+      <text x="88" y="102" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="500" fill="#111827">Initialize model context</text>
+      <text x="88" y="116" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">14:32:05.234</text>
+      <path d="M 1078 102 L 1082 104 L 1078 106" fill="none" stroke="#2458f3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    
+    <g transform="translate(0, 32)">
+      <circle cx="68" cy="104" r="4" fill="#d1d5db"/>
+      <text x="88" y="102" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="500" fill="#374151">Process system prompts</text>
+      <text x="88" y="116" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">14:32:05.401</text>
+    </g>
+    
+    <g transform="translate(0, 64)">
+      <circle cx="68" cy="104" r="4" fill="#d1d5db"/>
+      <text x="88" y="102" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="500" fill="#374151">Generate token stream</text>
+      <text x="88" y="116" font-family="Roboto Mono, monospace" font-size="11" fill="#6b7280">14:32:05.589</text>
+    </g>
+  </g>
+</svg>

@@ -123,6 +123,22 @@ def main():
         if not run_step(step, extra):
             print(f"\n❌ Pipeline aborted at step {step}")
             sys.exit(1)
+        
+        # Post-Step 4 Validation
+        if step == 4:
+            print(f"\n{'─'*60}")
+            print(f"Step 4.5 — Quality Control — validate_atoms.py")
+            print(f"{'─'*60}")
+            v_cmd = [sys.executable, str(pipeline_dir / "validate_atoms.py")]
+            v_result = subprocess.run(v_cmd, cwd=str(project_root))
+            if v_result.returncode != 0:
+                print(f"⚠️  Quality Control failed. Launching surgical auto-patching...")
+                p_cmd = [sys.executable, str(pipeline_dir / "surgical_patch_atoms.py")]
+                p_result = subprocess.run(p_cmd, cwd=str(project_root))
+                if p_result.returncode == 0:
+                    print(f"✅ All atoms corrected surgically.")
+                else:
+                    print(f"❌ Surgical patching failed for some atoms. Manual review required.")
 
     # Step 6+7 = acceptance loop (unless --no-loop)
     if start <= 6:

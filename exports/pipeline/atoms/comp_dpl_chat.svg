@@ -1,0 +1,74 @@
+<svg viewBox="0 0 680 540" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f05e23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#d94d1a;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <!-- Main Card Surface -->
+    <rect x="0" y="0" width="680" height="540" rx="10" fill="#ffffff" filter="url(#shadow)"/>
+    
+    <!-- Header Section -->
+    <g id="header">
+      <text x="32" y="52" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#1a1a1a">Sullivan Ops</text>
+      <text x="32" y="78" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b6b6b">Instructions et chat de pilotage</text>
+      
+      <!-- Status Indicator -->
+      <circle cx="620" cy="44" r="6" fill="#97ea90"/>
+      <text x="600" y="48" font-family="Roboto Mono, monospace" font-size="11" fill="#6b6b6b" text-anchor="end">ACTIF</text>
+    </g>
+
+    <!-- Chat History Area -->
+    <g id="chat_history">
+      <!-- System Message 1 -->
+      <g transform="translate(0, 110)">
+        <circle cx="48" cy="24" r="16" fill="#1258ca" opacity="0.1"/>
+        <path d="M42 24 L48 18 L54 24 L48 30 Z" fill="#1258ca" transform="translate(0, -6) scale(0.6) translate(26.67, 40)"/>
+        <rect x="72" y="0" width="420" height="76" rx="8" fill="#fafafa" stroke="#e8e8e6" stroke-width="1"/>
+        <text x="88" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a1a1a">Système de navigation calibré. En attente d'instructions</text>
+        <text x="88" y="48" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a1a1a">de pilotage.</text>
+        <text x="472" y="64" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af" text-anchor="end">09:42:15 UTC</text>
+      </g>
+
+      <!-- User Message -->
+      <g transform="translate(0, 206)">
+        <rect x="188" y="0" width="460" height="56" rx="8" fill="#fff5f2" stroke="#f05e23" stroke-width="1.5" stroke-opacity="0.3"/>
+        <text x="620" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a1a1a" text-anchor="end">Ajuster cap à 270°, altitude maintenir 3500ft</text>
+        <text x="620" y="44" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af" text-anchor="end">09:43:02 UTC</text>
+      </g>
+
+      <!-- System Message 2 -->
+      <g transform="translate(0, 282)">
+        <circle cx="48" cy="24" r="16" fill="#1258ca" opacity="0.1"/>
+        <path d="M42 24 L48 18 L54 24 L48 30 Z" fill="#1258ca" transform="translate(0, -6) scale(0.6) translate(26.67, 40)"/>
+        <rect x="72" y="0" width="420" height="76" rx="8" fill="#fafafa" stroke="#e8e8e6" stroke-width="1"/>
+        <text x="88" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a1a1a">Instruction confirmée. Cap corrigé : 270°.</text>
+        <text x="88" y="48" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a1a1a">Altitude : 3500ft stabilisée.</text>
+        <text x="472" y="64" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af" text-anchor="end">09:43:04 UTC</text>
+      </g>
+
+      <!-- System Message 3 (Quick Status) -->
+      <g transform="translate(0, 374)">
+        <rect x="72" y="0" width="320" height="36" rx="8" fill="#f0fdf4" stroke="#97ea90" stroke-width="1" stroke-opacity="0.5"/>
+        <text x="88" y="22" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#166534">Météo mise à jour • Conditions optimales</text>
+      </g>
+    </g>
+
+    <!-- Input Area -->
+    <g id="input_zone" transform="translate(0, 452)">
+      <!-- Input Field -->
+      <rect x="32" y="0" width="560" height="56" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="48" y="33" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#9ca3af">Saisir une instruction de pilotage...</text>
+      
+      <!-- Send Button -->
+      <rect x="608" y="8" width="40" height="40" rx="8" fill="url(#accentGradient)"/>
+      <!-- Paper Plane Icon -->
+      <path d="M622 28 L638 28 M638 28 L628 22 M638 28 L628 34" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+</svg>

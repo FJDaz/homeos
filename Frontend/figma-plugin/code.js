@@ -23,12 +23,18 @@ figma.ui.onmessage = async (msg) => {
             if (data.svg) {
                 try {
                     const svgNode = figma.createNodeFromSvg(data.svg);
-                    // Resize the imported SVG group to match the frame dimensions
-                    // This ensures the scale calculated by AetherFlow is respected
+                    // Resize before unwrapping to ensure children get the right scale
                     svgNode.resize(data.w, data.h);
                     svgNode.x = 0;
                     svgNode.y = 0;
-                    frame.appendChild(svgNode);
+
+                    // Unwrap the top-level group created by createNodeFromSvg
+                    // to avoid nested group confusion in Figma layer tree
+                    const children = [...svgNode.children];
+                    for (const child of children) {
+                        frame.appendChild(child);
+                    }
+                    svgNode.remove();
                 } catch (e) {
                     console.error(`Failed to import SVG for ${id}`, e);
                 }

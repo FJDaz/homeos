@@ -1,85 +1,38 @@
-<svg viewBox="0 0 340 500" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="shadow-card" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1a1a2e"/>
-      <stop offset="100%" stop-color="#16213e"/>
-    </linearGradient>
-    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e94560"/>
-      <stop offset="100%" stop-color="#ff6b6b"/>
-    </linearGradient>
-    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f3460"/>
-      <stop offset="100%" stop-color="#533483"/>
-    </linearGradient>
-    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f8f7f4"/>
-      <stop offset="100%" stop-color="#e8e6e1"/>
-    </linearGradient>
-    <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2458f3"/>
-      <stop offset="100%" stop-color="#1e4bd0"/>
-    </linearGradient>
   </defs>
   
-  <!-- Main Card -->
-  <rect x="20" y="20" width="300" height="460" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Header Section -->
-  <text x="40" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#151515">Palette Extraite</text>
-  <text x="40" y="82" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6b7280">4 couleurs dominantes détectées</text>
-  
-  <!-- Divider -->
-  <line x1="40" y1="100" x2="300" y2="100" stroke="#e5e7eb" stroke-width="1"/>
-  
-  <!-- Swatch 1: Deep Navy -->
-  <rect x="40" y="120" width="120" height="90" rx="8" fill="url(#grad1)"/>
-  <text x="100" y="175" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">#1A1A2E</text>
-  
-  <!-- Swatch 2: Coral Red -->
-  <rect x="180" y="120" width="120" height="90" rx="8" fill="url(#grad2)"/>
-  <text x="240" y="175" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">#E94560</text>
-  
-  <!-- Swatch 3: Royal Purple -->
-  <rect x="40" y="230" width="120" height="90" rx="8" fill="url(#grad3)"/>
-  <text x="100" y="285" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">#0F3460</text>
-  
-  <!-- Swatch 4: Warm Gray -->
-  <rect x="180" y="230" width="120" height="90" rx="8" fill="url(#grad4)"/>
-  <text x="240" y="285" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#151515" text-anchor="middle">#F8F7F4</text>
-  
-  <!-- Section Label -->
-  <text x="40" y="355" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#9ca3af" letter-spacing="1.5" text-transform="uppercase">STYLES TYPOGRAPHIQUES</text>
-  
-  <!-- Typography Chips -->
-  <!-- Chip 1: Display -->
-  <rect x="40" y="370" width="80" height="28" rx="9999" fill="url(#chipGrad)"/>
-  <text x="80" y="388" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">Display</text>
-  
-  <!-- Chip 2: Heading -->
-  <rect x="130" y="370" width="80" height="28" rx="9999" fill="#f3f4f6"/>
-  <text x="170" y="388" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#374151" text-anchor="middle">Heading</text>
-  
-  <!-- Chip 3: Body -->
-  <rect x="220" y="370" width="80" height="28" rx="9999" fill="#f3f4f6"/>
-  <text x="260" y="388" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#374151" text-anchor="middle">Body</text>
-  
-  <!-- Chip 4: Caption -->
-  <rect x="40" y="408" width="80" height="28" rx="9999" fill="#f3f4f6"/>
-  <text x="80" y="426" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#374151" text-anchor="middle">Caption</text>
-  
-  <!-- Chip 5: Mono -->
-  <rect x="130" y="408" width="80" height="28" rx="9999" fill="#151515"/>
-  <text x="170" y="426" font-family="Roboto Mono, monospace" font-size="10" font-weight="500" fill="#ffffff" text-anchor="middle">Mono</text>
-  
-  <!-- Chip 6: Label -->
-  <rect x="220" y="408" width="80" height="28" rx="9999" fill="url(#chipGrad)"/>
-  <text x="260" y="426" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">Label</text>
-  
-  <!-- Bottom Action -->
-  <rect x="40" y="450" width="260" height="40" rx="6" fill="#2458f3"/>
-  <text x="170" y="475" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Exporter la palette</text>
+  <g id="component_root">
+    <rect x="24" y="24" width="352" height="272" rx="8" fill="#ffffff" filter="url(#shadow-card)"/>
+    
+    <text x="48" y="64" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#111827">Palette Extraite</text>
+    <text x="48" y="88" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b7280">Couleurs dominantes extraites</text>
+    
+    <g transform="translate(56, 120)">
+      <rect x="0" y="0" width="56" height="56" rx="8" fill="#1258ca"/>
+      <rect x="0" y="68" width="56" height="24" rx="8" fill="#f3f4f6"/>
+      <text x="28" y="84" font-family="Roboto Mono, monospace" font-size="11" font-weight="500" text-anchor="middle" fill="#374151">#1258CA</text>
+    </g>
+    
+    <g transform="translate(144, 120)">
+      <rect x="0" y="0" width="56" height="56" rx="8" fill="#f05e23"/>
+      <rect x="0" y="68" width="56" height="24" rx="8" fill="#f3f4f6"/>
+      <text x="28" y="84" font-family="Roboto Mono, monospace" font-size="11" font-weight="500" text-anchor="middle" fill="#374151">#F05E23</text>
+    </g>
+    
+    <g transform="translate(232, 120)">
+      <rect x="0" y="0" width="56" height="56" rx="8" fill="#ffd548"/>
+      <rect x="0" y="68" width="56" height="24" rx="8" fill="#f3f4f6"/>
+      <text x="28" y="84" font-family="Roboto Mono, monospace" font-size="11" font-weight="500" text-anchor="middle" fill="#374151">#FFD548</text>
+    </g>
+    
+    <g transform="translate(320, 120)">
+      <rect x="0" y="0" width="56" height="56" rx="8" fill="#97ea90"/>
+      <rect x="0" y="68" width="56" height="24" rx="8" fill="#f3f4f6"/>
+      <text x="28" y="84" font-family="Roboto Mono, monospace" font-size="11" font-weight="500" text-anchor="middle" fill="#374151">#97EA90</text>
+    </g>
+  </g>
 </svg>

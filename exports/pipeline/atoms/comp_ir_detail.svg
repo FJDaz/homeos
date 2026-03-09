@@ -1,158 +1,46 @@
-<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Shadow filter -->
-    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    
-    <!-- Gradient for primary button -->
-    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f05e23"/>
-      <stop offset="100%" stop-color="#d94d1a"/>
-    </linearGradient>
-    
-    <!-- Status indicator gradient -->
-    <linearGradient id="statusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#97ea90"/>
-      <stop offset="100%" stop-color="#6dd462"/>
-    </linearGradient>
-    
-    <!-- Method badge gradient -->
-    <linearGradient id="methodGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1258ca"/>
-      <stop offset="100%" stop-color="#0e47a8"/>
-    </linearGradient>
   </defs>
-  
-  <!-- Background -->
-  <rect width="680" height="480" fill="#f8f7f4"/>
-  
-  <!-- Main Card -->
-  <rect x="24" y="24" width="632" height="432" rx="12" fill="#ffffff" filter="url(#cardShadow)"/>
-  
-  <!-- Header Section -->
-  <!-- Status indicator -->
-  <circle cx="56" cy="56" r="8" fill="url(#statusGradient)"/>
-  
-  <!-- Organ name -->
-  <text x="76" y="62" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#151515">Poumon droit — Lobe inférieur</text>
-  
-  <!-- ID badge -->
-  <rect x="332" y="48" width="96" height="24" rx="4" fill="#f8f7f4"/>
-  <text x="344" y="64" font-family="Roboto Mono, monospace" font-size="11" fill="#666666">ORG-2024-0892</text>
-  
-  <!-- Action buttons in header -->
-  <rect x="452" y="46" width="88" height="28" rx="6" fill="url(#btnGradient)"/>
-  <text x="480" y="64" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Tester</text>
-  
-  <rect x="548" y="46" width="84" height="28" rx="6" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-  <text x="572" y="64" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515">Copier</text>
-  
-  <!-- Divider -->
-  <line x1="40" y1="88" x2="640" y2="88" stroke="#e5e5e5" stroke-width="1"/>
-  
-  <!-- Section: Endpoints -->
-  <text x="40" y="116" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#151515">Endpoints API</text>
-  
-  <!-- Endpoint 1 -->
-  <g transform="translate(40, 132)">
-    <rect width="600" height="72" rx="8" fill="#f8f7f4"/>
+  <g id="component_root">
+    <rect x="20" y="20" width="360" height="280" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
     
-    <!-- Method badge -->
-    <rect x="12" y="12" width="56" height="20" rx="4" fill="url(#methodGradient)"/>
-    <text x="26" y="26" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#ffffff">GET</text>
+    <text x="44" y="68" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#1a1a1a">Organe #K-4429</text>
+    <text x="44" y="88" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#666666">Module Rénal Bio-synthétique</text>
     
-    <!-- Endpoint path -->
-    <text x="80" y="26" font-family="Roboto Mono, monospace" font-size="12" fill="#151515">/api/v1/organes/{id}/structure</text>
+    <rect x="308" y="52" width="72" height="24" rx="6" fill="#f0fdf4" stroke="#97ea90" stroke-width="1.5"/>
+    <text x="344" y="68" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11" fill="#166534" text-anchor="middle">ACTIF</text>
     
-    <!-- Description -->
-    <text x="12" y="50" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666666">Récupère la structure anatomique complète avec segments bronchiques</text>
+    <line x1="44" y1="108" x2="356" y2="108" stroke="#e5e4e0" stroke-width="1"/>
     
-    <!-- Copy icon button -->
-    <rect x="568" y="10" width="20" height="20" rx="4" fill="#ffffff" stroke="#d0d0d0" stroke-width="1"/>
-    <rect x="572" y="14" width="8" height="8" rx="1" fill="none" stroke="#666666" stroke-width="1.5"/>
-    <rect x="576" y="18" width="8" height="8" rx="1" fill="none" stroke="#666666" stroke-width="1.5"/>
+    <text x="44" y="132" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#1a1a1a">Points d'accès API</text>
+    
+    <rect x="44" y="144" width="312" height="32" rx="6" fill="#fafafa" stroke="#e5e4e0" stroke-width="1"/>
+    <text x="56" y="164" font-family="Roboto Mono, monospace" font-size="11" fill="#374151">GET /api/v1/organs/k-4429/metrics</text>
+    <rect x="324" y="150" width="24" height="20" rx="4" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <rect x="328" y="154" width="8" height="10" rx="1" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+    <rect x="332" y="158" width="8" height="10" rx="1" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+    
+    <rect x="44" y="184" width="312" height="32" rx="6" fill="#fafafa" stroke="#e5e4e0" stroke-width="1"/>
+    <text x="56" y="204" font-family="Roboto Mono, monospace" font-size="11" fill="#374151">POST /api/v1/organs/k-4429/perfuse</text>
+    <rect x="324" y="190" width="24" height="20" rx="4" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <rect x="328" y="194" width="8" height="10" rx="1" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+    <rect x="332" y="198" width="8" height="10" rx="1" stroke="#6b7280" stroke-width="1.5" fill="none"/>
+    
+    <text x="44" y="240" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#1a1a1a">Configuration</text>
+    
+    <rect x="44" y="252" width="76" height="28" rx="6" fill="#f0fdf4" stroke="#97ea90" stroke-width="1.5"/>
+    <text x="82" y="270" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#166534" text-anchor="middle">Standard</text>
+    
+    <rect x="128" y="252" width="56" height="28" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="156" y="270" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#4b5563" text-anchor="middle">Pro+</text>
+    
+    <rect x="194" y="252" width="56" height="28" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="222" y="270" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="12" fill="#4b5563" text-anchor="middle">Lite</text>
+    
+    <rect x="268" y="256" width="88" height="32" rx="6" fill="#97ea90"/>
+    <text x="312" y="276" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1a1a1a" text-anchor="middle">Tester</text>
   </g>
-  
-  <!-- Endpoint 2 -->
-  <g transform="translate(40, 212)">
-    <rect width="600" height="72" rx="8" fill="#f8f7f4"/>
-    
-    <!-- Method badge POST -->
-    <rect x="12" y="12" width="56" height="20" rx="4" fill="#f05e23"/>
-    <text x="24" y="26" font-family="Roboto Mono, monospace" font-size="10" font-weight="600" fill="#ffffff">POST</text>
-    
-    <!-- Endpoint path -->
-    <text x="80" y="26" font-family="Roboto Mono, monospace" font-size="12" fill="#151515">/api/v1/organes/{id}/simuler</text>
-    
-    <!-- Description -->
-    <text x="12" y="50" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666666">Lance une simulation de perfusion avec paramètres personnalisables</text>
-    
-    <!-- Copy icon button -->
-    <rect x="568" y="10" width="20" height="20" rx="4" fill="#ffffff" stroke="#d0d0d0" stroke-width="1"/>
-    <rect x="572" y="14" width="8" height="8" rx="1" fill="none" stroke="#666666" stroke-width="1.5"/>
-    <rect x="576" y="18" width="8" height="8" rx="1" fill="none" stroke="#666666" stroke-width="1.5"/>
-  </g>
-  
-  <!-- Section: Modèles 3D -->
-  <text x="40" y="316" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#151515">Modèles 3D disponibles</text>
-  
-  <!-- Model cards row -->
-  <g transform="translate(40, 332)">
-    <!-- Model 1 -->
-    <rect width="188" height="96" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-    <rect x="12" y="12" width="40" height="40" rx="6" fill="#f8f7f4"/>
-    <!-- 3D cube icon -->
-    <path d="M20 20 L32 20 L32 32 L20 32 Z" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-    <path d="M20 20 L26 14 L38 14 L32 20" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-    <path d="M32 20 L38 14 L38 26 L32 32" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-    
-    <text x="64" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515">Lobe complet</text>
-    <text x="12" y="68" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#666666">Format: GLB • 12.4 MB</text>
-    <text x="12" y="84" font-family="Roboto Mono, monospace" font-size="9" fill="#f05e23">v2.3.1</text>
-    
-    <rect x="156" y="68" width="20" height="20" rx="4" fill="#f8f7f4"/>
-    <path d="M162 78 L170 78 M166 74 L166 82" stroke="#666666" stroke-width="1.5"/>
-    
-    <!-- Model 2 -->
-    <g transform="translate(206, 0)">
-      <rect width="188" height="96" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-      <rect x="12" y="12" width="40" height="40" rx="6" fill="#f8f7f4"/>
-      <!-- 3D cube icon -->
-      <path d="M20 20 L32 20 L32 32 L20 32 Z" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      <path d="M20 20 L26 14 L38 14 L32 20" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      <path d="M32 20 L38 14 L38 26 L32 32" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      
-      <text x="64" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515">Segment S6-S10</text>
-      <text x="12" y="68" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#666666">Format: GLB • 8.7 MB</text>
-      <text x="12" y="84" font-family="Roboto Mono, monospace" font-size="9" fill="#f05e23">v2.3.1</text>
-      
-      <rect x="156" y="68" width="20" height="20" rx="4" fill="#f8f7f4"/>
-      <path d="M162 78 L170 78 M166 74 L166 82" stroke="#666666" stroke-width="1.5"/>
-    </g>
-    
-    <!-- Model 3 -->
-    <g transform="translate(412, 0)">
-      <rect width="188" height="96" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="1"/>
-      <rect x="12" y="12" width="40" height="40" rx="6" fill="#f8f7f4"/>
-      <!-- 3D cube icon -->
-      <path d="M20 20 L32 20 L32 32 L20 32 Z" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      <path d="M20 20 L26 14 L38 14 L32 20" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      <path d="M32 20 L38 14 L38 26 L32 32" fill="none" stroke="#1258ca" stroke-width="1.5"/>
-      
-      <text x="64" y="32" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#151515">Vasculature</text>
-      <text x="12" y="68" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#666666">Format: GLB • 5.2 MB</text>
-      <text x="12" y="84" font-family="Roboto Mono, monospace" font-size="9" fill="#97ea90">Nouveau</text>
-      
-      <rect x="156" y="68" width="20" height="20" rx="4" fill="#f8f7f4"/>
-      <path d="M162 78 L170 78 M166 74 L166 82" stroke="#666666" stroke-width="1.5"/>
-    </g>
-  </g>
-  
-  <!-- Footer metadata -->
-  <text x="40" y="452" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#999999">Dernière mise à jour: 14 janv. 2024 • Dr. A. Martin</text>
-  
-  <!-- Version tag -->
-  <rect x="580" y="440" width="60" height="20" rx="4" fill="#ffd548"/>
-  <text x="596" y="454" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#151515">ISO 13485</text>
 </svg>

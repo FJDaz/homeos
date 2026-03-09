@@ -1,0 +1,46 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1258ca"/>
+      <stop offset="100%" stop-color="#2458f3"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <rect x="40" y="40" width="720" height="520" rx="10" fill="white" filter="url(#shadow)"/>
+    
+    <path d="M 50 40 L 750 40 Q 760 40 760 50 L 760 104 L 40 104 L 40 50 Q 40 40 50 40 Z" fill="url(#headerGrad)"/>
+    
+    <path d="M 72 56 L 82.4 62 L 82.4 74 L 72 80 L 61.6 74 L 61.6 62 Z" fill="white"/>
+    
+    <text x="96" y="78" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="white">Bot Claude</text>
+    
+    <circle cx="720" cy="72" r="6" fill="#97ea90"/>
+    <text x="700" y="76" font-family="Roboto Mono, monospace" font-size="11" fill="white" text-anchor="end">Online</text>
+    
+    <rect x="72" y="136" width="656" height="384" rx="8" fill="#fafafa" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <circle cx="96" cy="172" r="16" fill="#1258ca"/>
+    <text x="96" y="176" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="12" fill="white" text-anchor="middle">C</text>
+    
+    <rect x="128" y="148" width="280" height="64" rx="8" fill="#f3f4f6"/>
+    <text x="144" y="172" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">I can help you analyze the data</text>
+    <text x="144" y="192" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#374151">and generate insights.</text>
+    
+    <circle cx="704" cy="256" r="16" fill="#d1d5db"/>
+    <text x="704" y="260" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="white" text-anchor="middle">U</text>
+    
+    <rect x="392" y="232" width="280" height="48" rx="8" fill="#dbeafe"/>
+    <text x="656" y="260" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1e40af" text-anchor="end">Please review the quarterly</text>
+    <text x="656" y="278" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1e40af" text-anchor="end">report metrics.</text>
+    
+    <rect x="88" y="460" width="624" height="44" rx="8" fill="white" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="108" y="487" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#9ca3af">Message Claude...</text>
+    
+    <rect x="672" y="466" width="32" height="32" rx="6" fill="#1258ca"/>
+    <path d="M 682 482 L 694 482 M 688 476 L 694 482 L 688 488" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

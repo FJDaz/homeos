@@ -1,0 +1,46 @@
+<svg viewBox="0 0 240 550" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="accentGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#97ea90"/>
+      <stop offset="100%" stop-color="#7dd976"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="component_root">
+    <!-- Main Card Surface -->
+    <rect x="16" y="16" width="208" height="518" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
+    
+    <!-- Header Section -->
+    <text x="40" y="60" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#111827">API Keys</text>
+    <text x="40" y="88" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Manage your service credentials</text>
+    
+    <!-- Vercel API Key Input -->
+    <text x="40" y="140" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Vercel API Key</text>
+    <rect x="40" y="148" width="160" height="48" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="52" y="178" font-family="Roboto Mono, monospace" font-size="14" fill="#111827">••••••••••••••••••</text>
+    <!-- Eye Icon -->
+    <path d="M180 166c0 0 2-4 4-4s4 4 4 4-2 4-4 4-4-4-4-4z" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+    <circle cx="184" cy="166" r="2" fill="#9ca3af"/>
+    
+    <!-- RunPod API Key Input -->
+    <text x="40" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">RunPod API Key</text>
+    <rect x="40" y="248" width="160" height="48" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="52" y="278" font-family="Roboto Mono, monospace" font-size="14" fill="#111827">••••••••••••••••••</text>
+    <!-- Eye Icon -->
+    <path d="M180 266c0 0 2-4 4-4s4 4 4 4-2 4-4 4-4-4-4-4z" stroke="#9ca3af" stroke-width="1.5" fill="none"/>
+    <circle cx="184" cy="266" r="2" fill="#9ca3af"/>
+    
+    <!-- Security Info Card -->
+    <rect x="40" y="340" width="160" height="90" rx="8" fill="#f0fdf4" stroke="#97ea90" stroke-width="1.5"/>
+    <text x="56" y="370" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="13" fill="#166534">Secure Storage</text>
+    <text x="56" y="392" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#15803d">Keys are encrypted at rest</text>
+    <text x="56" y="410" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#15803d">and transmitted securely.</text>
+    
+    <!-- Save Button -->
+    <rect x="40" y="462" width="160" height="48" rx="8" fill="#97ea90"/>
+    <text x="120" y="492" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#111827" text-anchor="middle">Save Changes</text>
+  </g>
+</svg>
