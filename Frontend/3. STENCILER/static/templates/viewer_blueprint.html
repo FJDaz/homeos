@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>KIMI Template Viewer — Blueprint</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: #0f0f10
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            color: #e1e1e6
+        }
+
+        #bar {
+            width: 100%;
+            background: #111;
+            color: #666;
+            font: 11px/28px monospace;
+            padding: 0 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            flex-shrink: 0;
+            height: 28px
+        }
+
+        #dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #333;
+            flex-shrink: 0;
+            transition: background .3s
+        }
+
+        #dot.live {
+            background: #4caf50
+        }
+
+        #main {
+            flex: 1;
+            display: flex;
+            overflow: hidden
+        }
+
+        #canvas {
+            flex: 1;
+            min-width: 0;
+            background: #f0eeea;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: auto
+        }
+
+        #canvas svg {
+            max-width: 1440px;
+            width: 100%;
+            height: auto;
+            display: block;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .18)
+        }
+
+        #empty {
+            color: #555;
+            font: 13px monospace;
+            margin: auto;
+            text-align: center;
+            line-height: 2
+        }
+
+        /* Sullivan Cockpit Styles */
+        #chat {
+            width: 380px;
+            flex-shrink: 0;
+            background: #0f0f10;
+            border-left: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        #cockpit-header {
+            padding: 16px;
+            background: linear-gradient(180deg, #161618 0%, #0f0f10 100%);
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .score-box {
+            text-align: right
+        }
+
+        .score-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ff6b35;
+            letter-spacing: -1px
+        }
+
+        .score-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 1px
+        }
+
+        #pedo-panel {
+            background: #161618;
+            border-bottom: 1px solid #222;
+            display: none;
+            padding: 16px;
+            flex-shrink: 0
+        }
+
+        .pedo-section {
+            margin-bottom: 12px
+        }
+
+        .pedo-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px
+        }
+
+        .pedo-value {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600
+        }
+
+        .pedo-desc {
+            font-size: 11px;
+            color: #a1a1aa;
+            line-height: 1.5;
+            font-style: italic;
+            margin-top: 4px
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2)
+        }
+
+        .msg {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 2px solid #333
+        }
+
+        .msg.sent {
+            border-left-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.05)
+        }
+
+        .msg.ok {
+            border-left-color: #4caf50
+        }
+
+        .msg.err {
+            border-left-color: #f44336
+        }
+
+        .msg.tech {
+            display: none
+        }
+
+        /* Hide technical logs in blueprint */
+        .msg.running {
+            color: #ffb74d
+        }
+
+        #chat-input {
+            padding: 16px;
+            background: #0a0a0b;
+            border-top: 1px solid #222
+        }
+
+        #txt {
+            width: 100%;
+            background: #161618;
+            border: 1px solid #333;
+            color: #e1e1e6;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 6px;
+            resize: none;
+            height: 80px;
+            outline: none;
+            transition: border-color 0.2s
+        }
+
+        #txt:focus {
+            border-color: #ff6b35
+        }
+
+        #btns {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        #btn-send {
+            background: #ff6b35;
+            color: #fff
+        }
+
+        #btn-send:hover {
+            background: #ff8559
+        }
+
+        #btn-accept {
+            background: transparent;
+            border: 1px solid #333;
+            color: #888
+        }
+
+        #btn-accept:hover {
+            border-color: #4caf50;
+            color: #4caf50
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: default
+        }
+
+        /* Interaction SVG */
+        svg .af-organ {
+            cursor: grab;
+        }
+
+        svg .af-organ:active {
+            cursor: grabbing;
+        }
+
+        svg .af-organ:hover>rect:first-child {
+            stroke: #1258ca;
+            stroke-dasharray: 4;
+        }
+
+        svg .af-organ.selected>rect:first-child {
+            stroke: #f05e23;
+            stroke-width: 2;
+            stroke-dasharray: none;
+        }
+
+        svg .kimi-comp.selected>rect:first-child {
+            stroke: #f05e23;
+            stroke-width: 2;
+            stroke-dasharray: none;
+        }
+
+        svg .kimi-comp.selected .resize-handle {
+            opacity: 1 !important;
+            fill: #fff;
+        }
+
+        svg .kimi-comp.hovered>rect:first-child {
+            stroke: #1258ca;
+            stroke-width: 2;
+            stroke-dasharray: none;
+        }
+    </style>
+    <script>
+        var lastTs = 0, lastRunning = false;
+        function addMsg(text, cls) {
+            var d = document.getElementById('messages');
+            var m = document.createElement('div'); m.className = 'msg ' + (cls || '');
+            m.textContent = text; d.appendChild(m);
+            d.scrollTop = d.scrollHeight;
+        }
+        function setButtons(on) {
+            document.getElementById('btn-send').disabled = !on;
+            document.getElementById('btn-accept').disabled = !on;
+        }
+        function loadSVG() {
+            var x = new XMLHttpRequest();
+            x.open('GET', '/api/template-svg?t=' + Date.now(), true);
+            x.onload = function () {
+                try {
+                    var d = JSON.parse(x.responseText);
+                    if (d.svg && d.svg.indexOf('<svg') !== -1) {
+                        document.getElementById('canvas').innerHTML = d.svg;
+                        document.getElementById('ts').textContent = 'Rendu ' + new Date().toLocaleTimeString();
+                        var dot = document.getElementById('dot'); dot.className = 'live';
+                        setTimeout(function () { dot.className = ''; }, 2000);
+                        setTimeout(initInteraction, 100);
+                    }
+                } catch (e) { }
+            };
+            x.send();
+        }
+        function pollTemplate() {
+            var x = new XMLHttpRequest();
+            x.open('GET', '/api/template-ts?t=' + Date.now(), true);
+            x.onload = function () {
+                try { var d = JSON.parse(x.responseText); if (d.ts && d.ts !== lastTs) { lastTs = d.ts; loadSVG(); } } catch (e) { }
+            };
+            x.send();
+        }
+        function pollStatus() {
+            var x = new XMLHttpRequest();
+            x.open('GET', '/api/pipeline-status?t=' + Date.now(), true);
+            x.onload = function () {
+                try {
+                    var d = JSON.parse(x.responseText);
+                    if (d.running && !lastRunning) { addMsg('⟳ Génération en cours...', 'running'); setButtons(false); }
+                    if (!d.running && lastRunning) { addMsg('✓ Template mis à jour', 'ok'); setButtons(true); loadSVG(); }
+                    lastRunning = d.running;
+                } catch (e) { }
+            };
+            x.send();
+        }
+        function sendFeedback() {
+            var txt = document.getElementById('txt').value.trim();
+            if (!txt) return;
+            var x = new XMLHttpRequest();
+            x.open('POST', '/api/feedback', true);
+            x.setRequestHeader('Content-Type', 'application/json');
+            x.onload = function () { try { var d = JSON.parse(x.responseText); if (d.status === 'already_running') addMsg('⚠ Pipeline déjà en cours', 'err'); } catch (e) { } };
+            x.send(JSON.stringify({ feedback: txt }));
+            addMsg('→ ' + txt, 'sent');
+            document.getElementById('txt').value = '';
+        }
+        function acceptTemplate() {
+            var x = new XMLHttpRequest();
+            x.open('POST', '/api/accept', true);
+            x.setRequestHeader('Content-Type', 'application/json');
+            x.onload = function () { try { var d = JSON.parse(x.responseText); addMsg('✓ Sauvegardé : ' + d.saved, 'ok'); } catch (e) { } };
+            x.send(JSON.stringify({}));
+        }
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendFeedback(); }
+        });
+        window.onload = function () {
+            pollTemplate(); setInterval(pollTemplate, 3000);
+            pollStatus(); setInterval(pollStatus, 2000);
+            document.getElementById('btn-send').onclick = sendFeedback;
+            document.getElementById('btn-accept').onclick = acceptTemplate;
+            addMsg('Blueprint prêt. Le Cockpit attend votre sélection.');
+        };
+
+        // --- SVG Interaction Logic ---
+        var selectedOrgan = null;
+        var selectedComp = null;
+        var isDragging = false;
+        var isDraggingComp = false;
+        var isResizing = false;
+        var dragStart = { x: 0, y: 0 };
+        var startTransform = { tx: 0, ty: 0, s: 1 };
+
+        function getTransformParams(el) {
+            var transform = el.getAttribute('transform');
+            if (!transform) return { tx: 0, ty: 0, s: 1 };
+            var tMatch = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+            var sMatch = transform.match(/scale\(([^)]+)\)/);
+            var tx = tMatch ? parseFloat(tMatch[1]) : 0;
+            var ty = tMatch ? parseFloat(tMatch[2]) : 0;
+            var s = sMatch ? parseFloat(sMatch[1]) : 1;
+            return { tx: tx, ty: ty, s: s };
+        }
+
+        function setTransformParams(el, p) {
+            el.setAttribute('transform', 'translate(' + p.tx + ',' + p.ty + ') scale(' + p.s + ')');
+        }
+
+        function initInteraction() {
+            var svg = document.querySelector('#canvas svg');
+            if (!svg) return;
+            var pt = svg.createSVGPoint();
+
+            function getMousePosition(evt) {
+                pt.x = evt.clientX;
+                pt.y = evt.clientY;
+                return pt.matrixTransform(svg.getScreenCTM().inverse());
+            }
+
+            svg.addEventListener('mousedown', function (evt) {
+                var resizeHandle = evt.target.closest('.resize-handle');
+                var gComp = evt.target.closest('.kimi-comp');
+                var gOrgan = evt.target.closest('.af-organ');
+
+                if (resizeHandle && gComp) {
+                    isResizing = true;
+                    selectedComp = gComp;
+                    var mousePt = getMousePosition(evt);
+                    dragStart = { x: mousePt.x, y: mousePt.y };
+                    startTransform = getTransformParams(selectedComp);
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    return;
+                }
+
+                if (gComp) {
+                    if (selectedComp) selectedComp.classList.remove('selected');
+                    selectedComp = gComp;
+                    selectedComp.classList.add('selected');
+
+                    var mousePt = getMousePosition(evt);
+                    dragStart = { x: mousePt.x, y: mousePt.y };
+                    startTransform = getTransformParams(selectedComp);
+                    isDraggingComp = true;
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    return;
+                }
+
+                if (gOrgan) {
+                    if (selectedOrgan) selectedOrgan.classList.remove('selected');
+                    selectedOrgan = gOrgan;
+                    selectedOrgan.classList.add('selected');
+
+                    var mousePt = getMousePosition(evt);
+                    dragStart = { x: mousePt.x, y: mousePt.y };
+                    startTransform = getTransformParams(selectedOrgan);
+                    isDragging = true;
+
+                    if (selectedComp) selectedComp.classList.remove('selected');
+                    selectedComp = gComp;
+                    if (selectedComp) selectedComp.classList.add('selected');
+                } else {
+                    if (selectedOrgan) selectedOrgan.classList.remove('selected');
+                    selectedOrgan = null;
+                    if (selectedComp) selectedComp.classList.remove('selected');
+                    selectedComp = null;
+                }
+            });
+
+            var pedagogicalDict = {};
+            fetch('/api/genome')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.n0_phases) {
+                        data.n0_phases.forEach(ph => {
+                            (ph.n1_sections || []).forEach(org => {
+                                (org.n2_features || []).forEach(feat => {
+                                    (feat.n3_components || []).forEach(comp => {
+                                        pedagogicalDict[comp.id] = { atom: comp, feature: feat, organ: org };
+                                    });
+                                });
+                            });
+                        });
+                    }
+                });
+
+            var pedoPanel = document.getElementById('pedo-panel');
+            var pedoTitle = document.getElementById('pedo-title');
+            var pedoIntent = document.getElementById('pedo-intent');
+            var lastHoveredComp = null;
+
+            document.getElementById('btn-quick-prompt').onclick = function () {
+                if (lastHoveredComp) {
+                    document.getElementById('txt').value = "Sullivan, quelle est la logique métier profonde derrière cet atome \"" + lastHoveredComp.atom.name + "\" dans le cadre de " + lastHoveredComp.feature.name + " ?";
+                    document.getElementById('txt').focus();
+                }
+            };
+
+            svg.addEventListener('mousemove', function (evt) {
+                if (isResizing && selectedComp) {
+                    var mousePt = getMousePosition(evt);
+                    var dx = mousePt.x - dragStart.x;
+                    var scaleDelta = dx / 300;
+                    var newS = Math.max(0.1, startTransform.s + scaleDelta);
+                    setTransformParams(selectedComp, { tx: startTransform.tx, ty: startTransform.ty, s: newS });
+                } else if (isDraggingComp && selectedComp) {
+                    var mousePt = getMousePosition(evt);
+                    var dx = mousePt.x - dragStart.x;
+                    var dy = mousePt.y - dragStart.y;
+                    setTransformParams(selectedComp, { tx: startTransform.tx + dx, ty: startTransform.ty + dy, s: startTransform.s });
+                } else if (isDragging && selectedOrgan) {
+                    var mousePt = getMousePosition(evt);
+                    var dx = mousePt.x - dragStart.x;
+                    var dy = mousePt.y - dragStart.y;
+                    setTransformParams(selectedOrgan, { tx: startTransform.tx + dx, ty: startTransform.ty + dy, s: startTransform.s });
+                } else {
+                    var gComp = evt.target.closest('.kimi-comp');
+                    if (gComp && !isDragging && !isResizing && !isDraggingComp) {
+                        var compId = gComp.getAttribute('id');
+                        var context = pedagogicalDict[compId];
+                        if (context) {
+                            if (lastHoveredComp !== context) {
+                                lastHoveredComp = context;
+                                pedoTitle.innerText = context.atom.name;
+
+                                var atomRole = context.atom.ui_role || "Rôle standard";
+                                var featSens = context.feature.doc_sens_humain || "Réalisation directe de l'intention.";
+
+                                pedoIntent.innerHTML = "<b>" + atomRole + "</b><br>" + featSens;
+                                pedoPanel.style.display = 'block';
+
+                                document.querySelectorAll('.kimi-comp').forEach(c => c.classList.remove('hovered'));
+                                gComp.classList.add('hovered');
+                            }
+                        }
+                    }
+                }
+            });
+
+            svg.addEventListener('mouseup', function (evt) {
+                if (isDragging && selectedOrgan) {
+                    isDragging = false;
+                    var finalT = getTransformParams(selectedOrgan);
+                    if (finalT.tx !== startTransform.tx || finalT.ty !== startTransform.ty) {
+                        var xReq = new XMLHttpRequest();
+                        xReq.open('POST', '/api/organ-move', true);
+                        xReq.setRequestHeader('Content-Type', 'application/json');
+                        xReq.send(JSON.stringify({ id: selectedOrgan.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty) }));
+                    }
+                } else if (isDraggingComp && selectedComp) {
+                    isDraggingComp = false;
+                    var finalT = getTransformParams(selectedComp);
+                    if (finalT.tx !== startTransform.tx || finalT.ty !== startTransform.ty) {
+                        var xReq = new XMLHttpRequest();
+                        xReq.open('POST', '/api/comp-move', true);
+                        xReq.setRequestHeader('Content-Type', 'application/json');
+                        xReq.send(JSON.stringify({ id: selectedComp.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty), s: finalT.s }));
+                    }
+                } else if (isResizing && selectedComp) {
+                    isResizing = false;
+                    var finalT = getTransformParams(selectedComp);
+                    if (finalT.s !== startTransform.s) {
+                        var xReq = new XMLHttpRequest();
+                        xReq.open('POST', '/api/comp-move', true);
+                        xReq.setRequestHeader('Content-Type', 'application/json');
+                        xReq.send(JSON.stringify({ id: selectedComp.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty), s: finalT.s }));
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div id="bar">
+        <div id="dot"></div>
+        <span style="color:#aaa">KIMI Template Viewer — Blueprint</span>
+        <span id="ts" style="color:#555">Prêt</span>
+        <span style="margin-left:auto;color:#333">XHR · Sullivan Cockpit</span>
+    </div>
+    <div id="main">
+        <div id="canvas">
+            <div id="empty">Chargement du Blueprint...</div>
+        </div>
+        <div id="chat">
+            <div id="cockpit-header">
+                <div>
+                    <div style="font-weight:700; color:#ff6b35; font-size:14px;">SULLIVAN COCKPIT</div>
+                    <div style="font-size:10px; color:#666;">BLUEPRINT MENTOR</div>
+                </div>
+            </div>
+
+            <div id="pedo-panel">
+                <div class="pedo-section">
+                    <div class="pedo-label">Empreinte Sémantique</div>
+                    <div class="pedo-value" id="pedo-title">Comp...</div>
+                </div>
+                <div class="pedo-section">
+                    <div class="pedo-label">Intention du Génome</div>
+                    <div class="pedo-desc" id="pedo-intent">...</div>
+                </div>
+                <button id="btn-quick-prompt" class="btn"
+                    style="background:rgba(255,107,53,0.1); color:#ff6b35; border:1px solid rgba(255,107,53,0.2); font-size:10px; text-align:center;">
+                    CHALLENGE AI LOGIC
+                </button>
+            </div>
+
+            <div id="messages"></div>
+            <div id="chat-input">
+                <textarea id="txt" placeholder="Dites à Sullivan ce que vous souhaitez changer..."></textarea>
+                <div id="btns">
+                    <button id="btn-send" class="btn">ENVOYER</button>
+                    <button id="btn-accept" class="btn">ACCEPTER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

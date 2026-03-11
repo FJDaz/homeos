@@ -101,6 +101,11 @@ HARD RULES:
 
 def generate_atom(client, comp: dict, model: str, out_dir: Path, organ_w: int = None, organ_h: int = None) -> dict:
     comp_id = comp["id"]
+    api_key = os.getenv("GOOGLE_API_KEY")
+    client = OpenAI(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=api_key
+    )
     visual_hint = comp.get("visual_hint", "default")
     zone = comp.get("zone", "main")
     vw, vh = get_vb(visual_hint, organ_w, organ_h)
@@ -180,8 +185,11 @@ def main():
         for comp in organ.get("components", []):
             all_comps.append({**comp, "_organ_id": oid, "_organ_w": organ_w, "_organ_h": organ_h})
 
-    model = "kimi-k2.5"
-    client = OpenAI(base_url="https://api.moonshot.ai/v1", api_key=api_key)
+    model = "gemini-2.0-flash"
+    client = OpenAI(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=api_key
+    )
 
     global SYSTEM_PROMPT
     if args.context_text:
@@ -190,22 +198,26 @@ def main():
     print(f"⚙️  Atom factory — {len(all_comps)} components, 4 concurrent workers")
     results = []
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=1) as pool:
         futures = {
             pool.submit(generate_atom, client, comp, model, atoms_dir, comp.get("_organ_w"), comp.get("_organ_h")): comp["id"]
             for comp in all_comps
+            if not (atoms_dir / f"{comp['id']}.svg").exists() # Skip existing
         }
         for future in as_completed(futures):
-            result = future.result()
-            results.append(result)
-            icon = "✅" if result["status"] == "ok" else "❌"
-            msg = f"  {icon} {result['id']}"
-            if result["status"] == "ok":
-                msg += f" ({result['vw']}×{result['vh']})"
-            elif "error" in result:
-                msg += f" — {result['error'][:60]}"
-            print(msg)
-            time.sleep(0.2)  # light throttle
+            try:
+                result = future.result()
+                results.append(result)
+                icon = "✅" if result["status"] == "ok" else "❌"
+                msg = f"  {icon} {result['id']}"
+                if result["status"] == "ok":
+                    msg += f" ({result['vw']}×{result['vh']})"
+                elif "error" in result:
+                    msg += f" — {result['error'][:60]}"
+                print(msg)
+            except Exception as e:
+                print(f"  ❌ Error in worker: {e}")
+            time.sleep(1.0)  # Throttling to 1 req/sec
 
     ok = sum(1 for r in results if r["status"] == "ok")
     print(f"\n✅ {ok}/{len(results)} atoms generated → {atoms_dir}")

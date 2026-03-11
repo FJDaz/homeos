@@ -9,21 +9,36 @@ import json
 import os
 import re
 import sys
+import asyncio
 import threading
 import subprocess
 import shutil
 from pathlib import Path
 from datetime import datetime
 
-# Ajout du chemin pour importer les modules Backend
+# Ajout des chemins pour importer les modules Backend et Frontend
 cwd = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(cwd, "../.."))
-sys.path.append(os.path.join(cwd, "../../Backend/Prod"))
-sys.path.append(os.path.join(cwd, "../../Backend/_archive"))
+root_dir = os.path.abspath(os.path.join(cwd, "../.."))
+backend_prod = os.path.abspath(os.path.join(cwd, "../../Backend/Prod"))
+backend_archive = os.path.abspath(os.path.join(cwd, "../../Backend/_archive"))
+
+for p in [root_dir, backend_prod, backend_archive]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 from sullivan.context_pruner import prune_genome
 from genome_preview import render_genome_preview
 from exporters.genome_to_svg import generate_svg
+
+# Mission 32/35 - Retro Genome (importés via Backend.Prod pour préserver les liens relatifs)
+from Backend.Prod.retro_genome.analyzer import RetroGenomeAnalyzer
+from Backend.Prod.retro_genome.intent_mapper import IntentMapper
+from Backend.Prod.retro_genome.manifest_reader import ManifestReader
+from Backend.Prod.retro_genome.html_generator import HtmlGenerator
+from Backend.Prod.retro_genome.prd_generator import PRDGenerator
+
+RETRO_ANALYZE_DIR = Path(__file__).parent / "../../exports/retro_genome"
+RETRO_ANALYZE_DIR.mkdir(parents=True, exist_ok=True)
 
 PORT = 9998
 GENOME_FILE = "../2. GENOME/genome_enriched.json"
@@ -83,6 +98,17 @@ def _load_env():
             if "=" in line and not line.startswith("#"):
                 k, _, v = line.partition("=")
                 os.environ.setdefault(k.strip(), v.strip())
+
+
+def _write_retro_status(step: str, message: str):
+    """Écrit l'étape courante dans un fichier de statut pour le polling frontend."""
+    try:
+        status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(status_path, 'w', encoding='utf-8') as f:
+            json.dump({"step": step, "message": message}, f)
+    except Exception:
+        pass  # Non-bloquant
 
 
 def infer_layout_heuristic(organs):
@@ -176,6 +202,8 @@ def load_genome():
 # =============================================================================
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = None  # Disable connection timeout for long Gemini API calls
+    
     def do_GET(self):
         # Route pour les fonts Wingdings3
         if self.path.startswith('/fonts/'):
@@ -197,6 +225,11 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_template('stenciler_v3.html')
             return
         
+        # Route /intent-viewer (Mission 32)
+        if self.path == '/intent-viewer':
+            self.serve_template('intent_viewer.html')
+            return
+
         # Route pour le Service Worker (doit être à la racine pour le scope)
         if self.path == '/sw.js':
             self.serve_sw()
@@ -301,374 +334,51 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error(404, "No template yet — run pipeline first")
             return
 
-        # Route /template-viewer — XHR inline SVG injection + Drag/Resize (24C)
-        if self.path == '/template-viewer':
-            html = """<!DOCTYPE html><html><head><meta charset="utf-8">
-<title>KIMI Template Viewer</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#1a1a1a}
-body{display:flex;flex-direction:column}
-#bar{width:100%;background:#111;color:#666;font:11px/28px monospace;padding:0 16px;display:flex;gap:16px;align-items:center;border-bottom:1px solid #2a2a2a;flex-shrink:0;height:28px}
-#dot{width:7px;height:7px;border-radius:50%;background:#333;flex-shrink:0;transition:background .3s}
-#dot.live{background:#4caf50}
-#main{flex:1;display:flex;overflow:hidden}
-#canvas{flex:1;min-width:0;background:#f0eeea;padding:32px;display:flex;justify-content:center;align-items:flex-start;overflow:auto}
-#canvas svg{max-width:1440px;width:100%;height:auto;display:block;box-shadow:0 8px 40px rgba(0,0,0,.18)}
-#empty{color:#555;font:13px monospace;margin:auto;text-align:center;line-height:2}
-#chat{width:340px;flex-shrink:0;background:#111;border-left:1px solid #2a2a2a;display:flex;flex-direction:column;font:12px monospace;overflow:hidden}
-#chat-title{padding:10px 14px;color:#666;border-bottom:1px solid #1e1e1e;font-size:11px;letter-spacing:.05em}
-#messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
-.msg{color:#888;line-height:1.5;padding:4px 0;border-bottom:1px solid #1a1a1a}
-.msg.sent{color:#aaa}
-.msg.ok{color:#4caf50}
-.msg.err{color:#e57373}
-.msg.running{color:#ffb74d}
-#chat-input{border-top:1px solid #1e1e1e;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
-#txt{background:#0d0d0d;border:1px solid #2a2a2a;color:#ccc;font:12px monospace;padding:8px;resize:none;height:72px;width:100%;outline:none;border-radius:2px}
-#txt:focus{border-color:#444}
-#btns{display:flex;gap:8px}
-#btn-send,#btn-accept{flex:1;padding:7px 0;border:none;cursor:pointer;font:11px monospace;border-radius:2px;transition:opacity .2s}
-#btn-send{background:#2a2a2a;color:#ccc}
-#btn-send:hover{background:#333}
-#btn-accept{background:#1b3a1b;color:#4caf50}
-#btn-accept:hover{background:#1f4a1f}
-#btn-send:disabled,#btn-accept:disabled{opacity:.4;cursor:default}
+        # Route /template-viewer — Dual Viewer (Mission 34A/34C)
+        if self.path.startswith('/template-viewer'):
+            templates_dir = Path(__file__).parent / "static" / "templates"
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            
+            # Mission 34C/35: Reality only if validated by user OR explicit reality mode
+            if 'mode=reality' in self.path or (retro_dir / "validated_analysis.json").exists():
+                template_path = templates_dir / "viewer_reality.html"
+            else:
+                template_path = templates_dir / "viewer_blueprint.html"
+            
+            if template_path.exists():
+                self._send_html(template_path.read_text(encoding="utf-8"))
+            else:
+                self.send_error(404, f"Template not found at {template_path}")
+            return
+        if self.path == '/api/pedagogy/gaps':
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            f = retro_dir / "validated_analysis.json"
+            if f.exists():
+                try:
+                    import json
+                    data = json.loads(f.read_text(encoding="utf-8"))
+                    # Mission 35: Structure is audit -> gaps
+                    audit = data.get('audit', {})
+                    gaps = audit.get('gaps', [])
+                    # Fallback for old Mission 34 format
+                    if not gaps:
+                        gaps = audit.get('ergonomic_audit', {}).get('gaps', [])
+                    
+                    self.send_json({"gaps": gaps, "fidelity_score": audit.get('fidelity_score', 0)})
+                except Exception as e:
+                    self.send_json({"gaps": [], "error": str(e)})
+            else:
+                self.send_json({"gaps": []})
+            return
 
-/* Interaction SVG (24D) */
-svg .af-organ { cursor: grab; }
-svg .af-organ:active { cursor: grabbing; }
-svg .af-organ:hover > rect:first-child { stroke: #1258ca; stroke-dasharray: 4; }
-svg .af-organ.selected > rect:first-child { stroke: #f05e23; stroke-width: 2; stroke-dasharray: none; }
-svg .kimi-comp.selected > rect:first-child { stroke: #f05e23; stroke-width: 2; stroke-dasharray: none; }
-svg .kimi-comp.selected .resize-handle { opacity: 1 !important; fill: #fff; }
-svg .kimi-comp.hovered > rect:first-child { stroke: #1258ca; stroke-width: 2; stroke-dasharray: none; }
-</style>
-<script>
-var lastTs=0,lastRunning=false;
-// --- Pipeline & Chat Logic ---
-function addMsg(text,cls){
-  var d=document.getElementById('messages');
-  var m=document.createElement('div');m.className='msg '+(cls||'');
-  m.textContent=text;d.appendChild(m);
-  d.scrollTop=d.scrollHeight;
-}
-function setButtons(on){
-  document.getElementById('btn-send').disabled=!on;
-  document.getElementById('btn-accept').disabled=!on;
-}
-function loadSVG(){
-  var x=new XMLHttpRequest();
-  x.open('GET','/api/template-svg?t='+Date.now(),true);
-  x.onload=function(){
-    try{
-      var d=JSON.parse(x.responseText);
-      if(d.svg&&d.svg.indexOf('<svg')!==-1){
-        document.getElementById('canvas').innerHTML=d.svg;
-        document.getElementById('ts').textContent='Rendu '+new Date().toLocaleTimeString();
-        var dot=document.getElementById('dot');dot.className='live';
-        setTimeout(function(){dot.className='';},2000);
-        setTimeout(initInteraction,100); // Initialize interaction logic when SVG loads
-      }
-    }catch(e){}
-  };
-  x.send();
-}
-function pollTemplate(){
-  var x=new XMLHttpRequest();
-  x.open('GET','/api/template-ts?t='+Date.now(),true);
-  x.onload=function(){
-    try{var d=JSON.parse(x.responseText);if(d.ts&&d.ts!==lastTs){lastTs=d.ts;loadSVG();}}catch(e){}
-  };
-  x.send();
-}
-function pollStatus(){
-  var x=new XMLHttpRequest();
-  x.open('GET','/api/pipeline-status?t='+Date.now(),true);
-  x.onload=function(){
-    try{
-      var d=JSON.parse(x.responseText);
-      if(d.running&&!lastRunning){addMsg('⟳ Génération en cours...','running');setButtons(false);}
-      if(!d.running&&lastRunning){addMsg('✓ Template mis à jour','ok');setButtons(true);loadSVG();}
-      lastRunning=d.running;
-    }catch(e){}
-  };
-  x.send();
-}
-function sendFeedback(){
-  var txt=document.getElementById('txt').value.trim();
-  if(!txt)return;
-  var x=new XMLHttpRequest();
-  x.open('POST','/api/feedback',true);
-  x.setRequestHeader('Content-Type','application/json');
-  x.onload=function(){try{var d=JSON.parse(x.responseText);if(d.status==='already_running')addMsg('⚠ Pipeline déjà en cours','err');}catch(e){}};
-  x.send(JSON.stringify({feedback:txt}));
-  addMsg('→ '+txt,'sent');
-  document.getElementById('txt').value='';
-}
-function acceptTemplate(){
-  var x=new XMLHttpRequest();
-  x.open('POST','/api/accept',true);
-  x.setRequestHeader('Content-Type','application/json');
-  x.onload=function(){try{var d=JSON.parse(x.responseText);addMsg('✓ Sauvegardé : '+d.saved,'ok');}catch(e){}};
-  x.send(JSON.stringify({}));
-}
-document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();sendFeedback();}
-});
-window.onload=function(){
-  pollTemplate();setInterval(pollTemplate,3000);
-  pollStatus();setInterval(pollStatus,2000);
-  document.getElementById('btn-send').onclick=sendFeedback;
-  document.getElementById('btn-accept').onclick=acceptTemplate;
-  addMsg('Viewer prêt. Tape un feedback et appuie sur Envoyer.');
-};
-
-// --- SVG Interaction Logic (24D) ---
-var selectedOrgan = null;
-var selectedComp = null;
-var isDragging = false;
-var isDraggingComp = false;
-var isResizing = false;
-var dragStart = {x:0, y:0};
-var startTransform = {tx:0, ty:0, s:1};
-
-function getTransformParams(el) {
-    var transform = el.getAttribute('transform');
-    if (!transform) return {tx:0, ty:0, s:1};
-    var tMatch = transform.match(/translate\\(([^,]+),\\s*([^)]+)\\)/);
-    var sMatch = transform.match(/scale\\(([^)]+)\\)/);
-    var tx = tMatch ? parseFloat(tMatch[1]) : 0;
-    var ty = tMatch ? parseFloat(tMatch[2]) : 0;
-    var s = sMatch ? parseFloat(sMatch[1]) : 1;
-    return {tx:tx, ty:ty, s:s};
-}
-
-function setTransformParams(el, p) {
-    el.setAttribute('transform', 'translate('+p.tx+','+p.ty+') scale('+p.s+')');
-}
-
-function initInteraction() {
-  var svg = document.querySelector('#canvas svg');
-  if(!svg) return;
-  var pt = svg.createSVGPoint();
-
-  function getMousePosition(evt) {
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
-    return pt.matrixTransform(svg.getScreenCTM().inverse());
-  }
-
-  svg.addEventListener('mousedown', function(evt) {
-    var resizeHandle = evt.target.closest('.resize-handle');
-    var gComp = evt.target.closest('.kimi-comp');
-    var gOrgan = evt.target.closest('.af-organ');
-    
-    // Component scale/resize is still allowed (from 24C)
-    if(resizeHandle && gComp) {
-      isResizing = true;
-      selectedComp = gComp;
-      var mousePt = getMousePosition(evt);
-      dragStart = {x: mousePt.x, y: mousePt.y};
-      startTransform = getTransformParams(selectedComp);
-      evt.preventDefault();
-      evt.stopPropagation();
-      return;
-    }
-
-    // Component Drag (Atom level)
-    if (gComp) {
-      if(selectedComp) selectedComp.classList.remove('selected');
-      selectedComp = gComp;
-      selectedComp.classList.add('selected');
-      
-      var mousePt = getMousePosition(evt);
-      dragStart = {x: mousePt.x, y: mousePt.y};
-      startTransform = getTransformParams(selectedComp);
-      isDraggingComp = true;
-      evt.preventDefault();
-      evt.stopPropagation();
-      return;
-    }
-
-    // Organ Drag
-    if(gOrgan) {
-      if(selectedOrgan) selectedOrgan.classList.remove('selected');
-      selectedOrgan = gOrgan;
-      selectedOrgan.classList.add('selected');
-      
-      var mousePt = getMousePosition(evt);
-      dragStart = {x: mousePt.x, y: mousePt.y};
-      startTransform = getTransformParams(selectedOrgan);
-      isDragging = true;
-
-      // Handle Component Selection (no drag)
-      if(selectedComp) selectedComp.classList.remove('selected');
-      selectedComp = gComp;
-      if(selectedComp) selectedComp.classList.add('selected');
-    } else {
-      if(selectedOrgan) selectedOrgan.classList.remove('selected');
-      selectedOrgan = null;
-      if(selectedComp) selectedComp.classList.remove('selected');
-      selectedComp = null;
-    }
-  });
-
-  // --- PEDAGOGICAL DEVICE ---
-  // Wait for fetch...
-  var pedagogicalDict = {};
-  fetch('/api/genome')
-    .then(r => r.json())
-    .then(data => {
-      // Build a flat dictionary of N3 components
-      if(data && data.n0_phases) {
-        data.n0_phases.forEach(ph => {
-          (ph.n1_sections||[]).forEach(org => {
-            (org.n2_features||[]).forEach(feat => {
-              (feat.n3_components||[]).forEach(comp => {
-                // Map component ID to its parent feature (N2) for pedagogical context
-                pedagogicalDict[comp.id] = {
-                  atom: comp,
-                  feature: feat,
-                  organ: org
-                };
-              });
-            });
-          });
-        });
-      }
-    }).catch(e => console.error(e));
-
-  var lastHoveredComp = null;
-  var pedoPanel = document.getElementById('pedagogical-panel');
-  var pedoTitle = document.getElementById('pedo-title');
-  var pedoRole = document.getElementById('pedo-role');
-  var pedoIntent = document.getElementById('pedo-intent');
-  
-  document.getElementById('btn-quick-prompt').onclick = function() {
-    if(lastHoveredComp) {
-      document.getElementById('txt').value = "Examine l'atome N3 \\"" + lastHoveredComp.atom.name + "\\" (ID: " + lastHoveredComp.atom.id + "), appartenant à la Cellule N2 \\"" + lastHoveredComp.feature.name + "\\".\\nLe Genome spécifie pour cet atome :\\n- Rôle UX : " + (lastHoveredComp.atom.ui_role || "?") + "\\n- Intent-Code N3 : " + (lastHoveredComp.atom.intent_code || "?") + "\\n(Contexte N2 : " + (lastHoveredComp.feature.doc_sens_humain || "?") + ")\\n\\nPenses-tu que ce composant frontend y réponde efficacement ? Que proposerais-tu d'améliorer ?";
-      document.getElementById('txt').focus();
-    }
-  };
-
-  svg.addEventListener('mousemove', function(evt) {
-    if(isResizing && selectedComp) {
-      var mousePt = getMousePosition(evt);
-      var dx = mousePt.x - dragStart.x;
-      var scaleDelta = dx / 300; 
-      var newS = Math.max(0.1, startTransform.s + scaleDelta);
-      setTransformParams(selectedComp, {tx: startTransform.tx, ty: startTransform.ty, s: newS});
-    } else if(isDraggingComp && selectedComp) {
-      var mousePt = getMousePosition(evt);
-      var dx = mousePt.x - dragStart.x;
-      var dy = mousePt.y - dragStart.y;
-      setTransformParams(selectedComp, {tx: startTransform.tx + dx, ty: startTransform.ty + dy, s: startTransform.s});
-    } else if(isDragging && selectedOrgan) {
-      var mousePt = getMousePosition(evt);
-      var dx = mousePt.x - dragStart.x;
-      var dy = mousePt.y - dragStart.y;
-      setTransformParams(selectedOrgan, {tx: startTransform.tx + dx, ty: startTransform.ty + dy, s: startTransform.s});
-    } else {
-      // Hover detection for pedagogical device
-      var gComp = evt.target.closest('.kimi-comp');
-      if(gComp && !isDragging && !isResizing && !isDraggingComp) {
-        var compId = gComp.getAttribute('id');
-        var context = pedagogicalDict[compId];
-        if(context) {
-           lastHoveredComp = context;
-           pedoTitle.innerText = "N2: " + context.feature.name + " / N3: " + context.atom.name;
-           
-           var atomRole = context.atom.ui_role || "Role inconnu";
-           var atomIntent = context.atom.intent_code || "Intent inconnu";
-           var featSens = context.feature.doc_sens_humain || "Non documenté";
-           
-           pedoRole.innerHTML = "<strong>Role N3 :</strong> " + atomRole;
-           
-           pedoIntent.innerHTML = 
-             "<div style='margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:6px;'><b>Intent N3 (Code) :</b> " + atomIntent + "</div>" +
-             "<div><b>Contexte N2 (Feature UX) :</b> " + featSens + "</div>";
-             
-           pedoPanel.style.display = 'block';
-           
-           // Highlight current
-           document.querySelectorAll('.kimi-comp').forEach(c => c.classList.remove('hovered'));
-           gComp.classList.add('hovered');
-        }
-      } else {
-         document.querySelectorAll('.kimi-comp').forEach(c => c.classList.remove('hovered'));
-      }
-    }
-  });
-
-  svg.addEventListener('mouseup', function(evt) {
-    if(isDragging && selectedOrgan) {
-      isDragging = false;
-      var finalT = getTransformParams(selectedOrgan);
-      if(finalT.tx !== startTransform.tx || finalT.ty !== startTransform.ty) {
-        var xReq = new XMLHttpRequest();
-        xReq.open('POST','/api/organ-move',true);
-        xReq.setRequestHeader('Content-Type','application/json');
-        xReq.send(JSON.stringify({id: selectedOrgan.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty)}));
-        addMsg('📌 Organe déplacé : '+selectedOrgan.id);
-      }
-    } else if(isDraggingComp && selectedComp) {
-      isDraggingComp = false;
-      var finalT = getTransformParams(selectedComp);
-      if(finalT.tx !== startTransform.tx || finalT.ty !== startTransform.ty) {
-        var xReq = new XMLHttpRequest();
-        xReq.open('POST','/api/comp-move',true); // This endpoint accepts x, y, and s
-        xReq.setRequestHeader('Content-Type','application/json');
-        xReq.send(JSON.stringify({id: selectedComp.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty), s: finalT.s}));
-        addMsg('📌 Atome déplacé : ' + selectedComp.id);
-      }
-    } else if(isResizing && selectedComp) {
-      isResizing = false;
-      var finalT = getTransformParams(selectedComp);
-      if(finalT.s !== startTransform.s) {
-        var xReq = new XMLHttpRequest();
-        xReq.open('POST','/api/comp-move',true); // Keeping scale as comp-move for now
-        xReq.setRequestHeader('Content-Type','application/json');
-        xReq.send(JSON.stringify({id: selectedComp.id, x: Math.round(finalT.tx), y: Math.round(finalT.ty), s: finalT.s}));
-        addMsg('📌 Échelle atome persistée : '+selectedComp.id);
-      }
-    }
-  });
-}
-</script></head><body>
-<div id="bar">
-  <div id="dot"></div>
-  <span style="color:#aaa">KIMI Template Viewer</span>
-  <span id="ts" style="color:#555">En attente...</span>
-  <span style="margin-left:auto;color:#333">XHR · 3s</span>
-</div>
-<div id="main">
-  <div id="canvas"><div id="empty">En attente du pipeline...</div></div>
-  <div id="chat">
-    <div id="chat-title">KIMI FEEDBACK</div>
-    
-    <!-- PEDAGOGICAL PANEL -->
-    <div id="pedagogical-panel" style="display:none; padding:12px; background:#1e1e1e; border-bottom:1px solid #333; flex-shrink:0;">
-      <div id="pedo-title" style="color:#fff; font-weight:700; margin-bottom:4px; font-size:12px;">Composant</div>
-      <div id="pedo-role" style="color:#aaa; margin-bottom:8px; font-size:11px;">Rôle UI</div>
-      <div id="pedo-intent" style="color:#d4b2bc; margin-bottom:10px; line-height:1.4; font-style:italic; font-size:12px;">Intention génome</div>
-      <button id="btn-quick-prompt" style="background:#5c7aff; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-family:'Inter', sans-serif; font-size:11px; width:100%; font-weight:600; text-align:left;">
-        <span style="opacity:0.7">↳</span> Poser une question sur ce design
-      </button>
-    </div>
-    
-    <div id="messages"></div>
-    <div id="chat-input">
-      <textarea id="txt" placeholder="Décris ce que tu veux changer...&#10;Cmd+Enter pour envoyer"></textarea>
-      <div id="btns">
-        <button id="btn-send">Envoyer</button>
-        <button id="btn-accept">✓ Accepter</button>
-      </div>
-    </div>
-  </div>
-</div>
-</body></html>"""
-            self._send_html(html)
+        # Mission 35 - Serve the generated reality.html
+        if self.path == '/api/retro-genome/reality':
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            f = retro_dir / "reality.html"
+            if f.exists():
+                self._send_html(f.read_text(encoding='utf-8'))
+            else:
+                self._send_html("<div style='padding:50px; color:#666; text-align:center;'>Reality content not yet generated. Please validate analysis first.</div>")
             return
 
         if self.path.startswith('/api/pipeline-status'):
@@ -690,6 +400,19 @@ function initInteraction() {
                 self.send_json({"svg": svg_path.read_text(encoding="utf-8")})
             else:
                 self.send_json({"svg": None})
+            return
+
+        # Mission 34D - Progress Status Polling
+        if self.path.startswith('/api/retro-genome/status'):
+            status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
+            if status_path.exists():
+                try:
+                    data = json.loads(status_path.read_text(encoding='utf-8'))
+                    self.send_json(data)
+                except Exception:
+                    self.send_json({"step": "idle", "message": ""})
+            else:
+                self.send_json({"step": "idle", "message": ""})
             return
 
         self.send_error_json(404, f"Route {self.path} not found")
@@ -777,6 +500,25 @@ function initInteraction() {
         self.send_json({"ok": True, "organ_id": organ_id, "order": order})
 
     def do_POST(self):
+        # Mission 34C: Validate Intent Mapping
+        if self.path == '/api/retro-genome/validate':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                data = json.loads(self.rfile.read(length))
+                
+                retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+                retro_dir.mkdir(parents=True, exist_ok=True)
+                
+                target = retro_dir / "validated_analysis.json"
+                with open(target, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                
+                print(f"[MISSION 34C] Validation success: {target}", flush=True)
+                self.send_json({"status": "ok", "path": str(target)})
+            except Exception as e:
+                self.send_error_json(500, f"Validation failed: {str(e)}")
+            return
+
         if self.path.startswith('/api/feedback'):
             global _pipeline_running, _pipeline_iteration
             length = int(self.headers.get('Content-Length', 0))
@@ -904,20 +646,49 @@ function initInteraction() {
             with open(manifest_path, 'r', encoding='utf-8') as f:
                 manifest = json.load(f)
             
-            # Merge logic for Figma extra data or sync
-            if 'figma_extra' in patch:
-                manifest['figma_extra'] = patch['figma_extra']
-            if 'components' in patch:
-                for cid, data in patch['components'].items():
-                    if cid in manifest['components']:
-                        manifest['components'][cid].update(data)
-            
-            manifest['last_updated'] = datetime.now().isoformat()
-            
+            if 'elements' in patch:
+                for patch_el in patch['elements']:
+                    for el in manifest.get('elements', []):
+                        if el.get('id') == patch_el.get('id'):
+                            el.update(patch_el)
+                            break
+                            
             with open(manifest_path, 'w', encoding='utf-8') as f:
-                json.dump(manifest, f, indent=2)
-            
-            self.send_json({"ok": True})
+                json.dump(manifest, f, indent=2, ensure_ascii=False)
+                
+            self.send_json({'ok': True})
+            return
+
+        if self.path == '/api/retro-genome/chat':
+            self._handle_retro_chat()
+            return
+
+        # Mission 34D - Progress Status Polling
+        if self.path.startswith('/api/retro-genome/status'):
+            status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
+            if status_path.exists():
+                try:
+                    data = json.loads(status_path.read_text(encoding='utf-8'))
+                    self.send_json(data)
+                except Exception:
+                    self.send_json({"step": "idle", "message": ""})
+            else:
+                self.send_json({"step": "idle", "message": ""})
+            return
+
+        # Mission 32 - Retro Genome Upload
+        if self.path == '/api/retro-genome/upload':
+            self._handle_retro_upload()
+            return
+
+        # Mission 35 - HTML Generation from validated analysis
+        if self.path == '/api/retro-genome/generate-html':
+            self._handle_retro_generate_html()
+            return
+
+        # Mission 32 - PRD Generation
+        if self.path == '/api/retro-genome/generate-prd':
+            self._handle_retro_prd_gen()
             return
 
         self.send_error_json(404, f"POST route {self.path} not found")
@@ -1106,6 +877,196 @@ function initInteraction() {
         self.end_headers()
         self.wfile.write(html.encode('utf-8'))
 
+    def _handle_retro_upload(self):
+        """Handle multi-PNG upload and manifesto for Retro Genome analysis."""
+        try:
+            content_type = self.headers.get('Content-Type')
+            if not content_type or 'multipart/form-data' not in content_type:
+                self.send_error_json(400, "Content-Type must be multipart/form-data")
+                return
+
+            if 'boundary=' not in content_type:
+                self.send_error_json(400, "Missing boundary in Content-Type")
+                return
+                
+            boundary = content_type.split("boundary=")[1].split(";")[0].strip().encode()
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+
+            # Basic multipart parsing
+            parts = body.split(b'--' + boundary)
+            images_data = []
+            manifesto_text = ""
+
+            for part in parts:
+                if b'Content-Disposition: form-data; name="images"' in part:
+                    subparts = part.split(b'\r\n\r\n')
+                    if len(subparts) > 1:
+                        img_data = subparts[1].split(b'\r\n--')[0].strip()
+                        if img_data:
+                            images_data.append(img_data)
+                elif b'Content-Disposition: form-data; name="manifesto"' in part:
+                    subparts = part.split(b'\r\n\r\n')
+                    if len(subparts) > 1:
+                        manifesto_text = subparts[1].split(b'\r\n--')[0].strip().decode('utf-8', errors='ignore')
+
+            if not images_data:
+                self.send_error_json(400, "No 'images' found in upload")
+                return
+
+            # Save PNGs
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            retro_dir.mkdir(parents=True, exist_ok=True)
+            
+            saved_paths = []
+            ts = datetime.now().strftime('%H%M%S')
+            for i, data in enumerate(images_data):
+                p = retro_dir / f"upload_{ts}_{i}.png"
+                p.write_bytes(data)
+                saved_paths.append(p)
+
+            _write_retro_status("vision", f"Inférence sémantique sur {len(saved_paths)} mockups...")
+
+            # Run analyzer (VisualDecomposer) - handles multiple PNGs
+            analyzer = RetroGenomeAnalyzer()
+            if len(saved_paths) > 1:
+                analysis_result = asyncio.run(analyzer.analyze_multiple(saved_paths))
+            else:
+                analysis_result = asyncio.run(analyzer.analyze_png(saved_paths[0]))
+            
+            _write_retro_status("mapping", "Mise en tension : Manifeste ↔ Mockups...")
+
+            # Run SemanticMatcher with the manifesto
+            mapper = IntentMapper()
+            audit_result = asyncio.run(mapper.map_intents(analysis_result, manifest=manifesto_text))
+            
+            _write_retro_status("saving", "Sauvegarde du diagnostic...")
+
+            # Save result
+            result_path = retro_dir / f"analysis_{ts}.json"
+            with open(result_path, 'w', encoding='utf-8') as f:
+                json.dump({"analysis": analysis_result, "audit": audit_result, "manifesto": manifesto_text}, f, indent=2, ensure_ascii=False)
+            
+            _write_retro_status("done", "Mission accomplie. Analyse disponible.")
+
+            self.send_json({
+                "status": "ok",
+                "analysis": analysis_result,
+                "audit": audit_result,
+                "json_path": str(result_path)
+            })
+
+        except Exception as e:
+            import traceback
+            print(f"[RETRO_GENOME] ERROR: {e}\n{traceback.format_exc()}", flush=True)
+            self.send_error_json(500, f"Retro Genome failed: {str(e)}")
+
+    def _handle_retro_generate_html(self):
+        """Mission 35 — Génère le HTML/CSS de la Reality View depuis le JSON validé + PNG."""
+        try:
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            validated_path = retro_dir / "validated_analysis.json"
+
+            if not validated_path.exists():
+                self.send_error_json(400, "No validated_analysis.json found. Validate first.")
+                return
+
+            with open(validated_path, 'r', encoding='utf-8') as f:
+                validated = json.load(f)
+
+            # Find the most recent uploaded PNG
+            pngs = sorted(retro_dir.glob("upload_*.png"), key=lambda p: p.stat().st_mtime, reverse=True)
+            if not pngs:
+                self.send_error_json(400, "No source PNG found in retro_genome exports.")
+                return
+
+            png_path = pngs[0]
+            
+            generator = HtmlGenerator()
+            
+            # On simule la granularité ici car asyncio.run est bloquant pour le thread
+            # Mais on peut mettre à jour le statut juste avant l'appel global ou 
+            # modifier HtmlGenerator pour qu'il accepte un callback de status.
+            
+            # Option choisie : passer une fonction de callback à generator.generate
+            def status_cb(msg):
+                _write_retro_status("generating", msg)
+                print(f"[HTML_GEN] {msg}", flush=True)
+
+            html = asyncio.run(generator.generate(png_path=png_path, matched_analysis=validated, status_callback=status_cb))
+            _write_retro_status("done", "Reality View prête.")
+
+            self.send_json({
+                "status": "ok",
+                "html_path": str(retro_dir / "reality.html"),
+                "html_length": len(html)
+            })
+
+        except Exception as e:
+            import traceback
+            print(f"[GENERATE_HTML] ERROR: {e}\n{traceback.format_exc()}", flush=True)
+            self.send_error_json(500, f"HTML generation failed: {str(e)}")
+
+    def _handle_retro_prd_gen(self):
+        """Invoke PRD and Roadmap generation from last analysis data."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length) or b'{}')
+            analysis_data = body.get('data')
+            project_name = body.get('project_name', 'Analyzed Mockup')
+
+            if not analysis_data:
+                self.send_error_json(400, "Missing analysis data for PRD generation")
+                return
+
+            generator = PRDGenerator()
+            result = asyncio.run(generator.generate(analysis_data, project_name))
+
+            self.send_json({
+                "status": "ok",
+                "prd_path": result['prd_path'],
+                "roadmap_path": result['roadmap_path'],
+                "project_name": project_name
+            })
+
+        except Exception as e:
+            self.send_error_json(500, f"PRD generation failed: {str(e)}")
+
+    def _handle_retro_chat(self):
+        """Invoke HTML Refinement via Sullivan Chat."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length) or b'{}')
+            feedback = body.get('feedback', '').strip()
+            current_html = body.get('current_html', '').strip()
+            
+            if not feedback or not current_html:
+                self.send_error_json(400, "Missing feedback or current_html")
+                return
+                
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            pngs = list(retro_dir.glob("*.png"))
+            png_path = pngs[0] if pngs else None
+            
+            generator = HtmlGenerator()
+            
+            # Note: could be async, running it synchronously for now to keep the flow identical to PRD
+            new_html = asyncio.run(generator.refine(
+                current_html=current_html,
+                feedback=feedback,
+                png_path=png_path
+            ))
+            
+            self.send_json({
+                "status": "ok",
+                "html_path": str(retro_dir / "reality.html"),
+                "html_length": len(new_html)
+            })
+            
+        except Exception as e:
+            import traceback
+            print(f"[RETRO_CHAT] ERROR: {e}\n{traceback.format_exc()}", flush=True)
+            self.send_error_json(500, f"HTML refinement failed: {str(e)}")
 
 def save_genome(genome):
     """Sauvegarde le genome sur disque (miroir de load_genome)."""

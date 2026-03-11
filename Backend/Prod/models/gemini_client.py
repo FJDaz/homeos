@@ -15,17 +15,18 @@ class GeminiClient(BaseLLMClient):
     # Cascade de fallback pour mode FAST (priorité vitesse)
     FALLBACK_MODELS_FAST = [
         # Fastest models first
-        "gemini-2.0-flash",              # Stable, fast — reference 2026
+        "gemini-2.0-flash",              # Stable reference
+        "gemini-3.1-flash-lite",         # New 3.1 series ultra-fast
         "gemini-2.0-flash-lite",         # Ultra-fast lite
-        "gemini-1.5-flash-8b",           # Fallback si quota Gemini 2 épuisé
+        "gemini-1.5-flash-8b",           # Fallback
         "gemini-1.5-pro",                # More capable but slower
     ]
 
     # Cascade de fallback pour mode BUILD/PROD (priorité qualité)
     FALLBACK_MODELS_BUILD = [
         # Quality first
-        "gemini-2.0-flash",              # Stable 2026 — recommended
-        "gemini-2.5-pro-preview-03-25",  # Experimental — skip if quota issues
+        "gemini-2.0-flash",              # Stable 2026 — best for Sullivan for now
+        "gemini-3.1-pro-preview",        # Latest 3.1 Pro (Reasoning/Agentic) - use as fallback
         "gemini-1.5-pro",                # Fallback capable stable
     ]
 
@@ -33,6 +34,7 @@ class GeminiClient(BaseLLMClient):
     FALLBACK_MODELS_DEFAULT = [
         # Fastest models first
         "gemini-2.0-flash",              # Stable 2026
+        "gemini-3.1-flash-lite",         # New 3.1 Flash
         "gemini-2.0-flash-lite",         # Lite
         "gemini-1.5-pro",                # Capable
     ]

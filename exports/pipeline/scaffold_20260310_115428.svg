@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AetherFlow Hardened Scaffold — Data-Driven SLCP -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="3200">
+  <defs>
+    <style>text { font-family: -apple-system, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <!-- Phase: phase_1_brs -->
+<g id="phase_1_brs" class="af-phase">
+<rect x="0" y="0" width="1440" height="800" fill="#f7f6f2"/>
+<!-- Organ: brs_main -->
+<g id="brs_main" class="af-organ" data-genome-id="brs_main" data-name="brs_main">
+  <rect x="280" y="60" width="360" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="292" y="78" font-size="7" fill="#b5b4b0" font-weight="600">BRS_MAIN</text>
+</g>
+<!-- Organ: brs_sidebar_left -->
+<g id="brs_sidebar_left" class="af-organ" data-genome-id="brs_sidebar_left" data-name="brs_sidebar_left">
+  <rect x="20" y="60" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="78" font-size="7" fill="#b5b4b0" font-weight="600">BRS_SIDEBAR_LEFT</text>
+</g>
+<!-- Organ: brs_sidebar_right -->
+<g id="brs_sidebar_right" class="af-organ" data-genome-id="brs_sidebar_right" data-name="brs_sidebar_right">
+  <rect x="1360" y="60" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="1372" y="78" font-size="7" fill="#b5b4b0" font-weight="600">BRS_SIDEBAR_RIGHT</text>
+</g>
+<!-- Organ: brs_footer -->
+<g id="brs_footer" class="af-organ" data-genome-id="brs_footer" data-name="brs_footer">
+  <rect x="280" y="860" width="360" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="292" y="878" font-size="7" fill="#b5b4b0" font-weight="600">BRS_FOOTER</text>
+</g>
+<!-- Organ: shell_header -->
+<g id="shell_header" class="af-organ" data-genome-id="shell_header" data-name="shell_header">
+  <rect x="20" y="0" width="1400" height="60" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="18" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_HEADER</text>
+</g>
+<!-- Organ: shell_sidebar_left -->
+<g id="shell_sidebar_left" class="af-organ" data-genome-id="shell_sidebar_left" data-name="shell_sidebar_left">
+  <rect x="20" y="60" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="78" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_SIDEBAR_LEFT</text>
+</g>
+</g>
+<!-- Phase: phase_2_bkd -->
+<g id="phase_2_bkd" class="af-phase">
+<rect x="0" y="800" width="1440" height="800" fill="#f7f6f2"/>
+<!-- Organ: bkd_sidebar_left -->
+<g id="bkd_sidebar_left" class="af-organ" data-genome-id="bkd_sidebar_left" data-name="bkd_sidebar_left">
+  <rect x="20" y="860" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="878" font-size="7" fill="#b5b4b0" font-weight="600">BKD_SIDEBAR_LEFT</text>
+</g>
+<!-- Organ: bkd_main -->
+<g id="bkd_main" class="af-organ" data-genome-id="bkd_main" data-name="bkd_main">
+  <rect x="280" y="860" width="460" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="292" y="878" font-size="7" fill="#b5b4b0" font-weight="600">BKD_MAIN</text>
+</g>
+<!-- Organ: bkd_sidebar_right -->
+<g id="bkd_sidebar_right" class="af-organ" data-genome-id="bkd_sidebar_right" data-name="bkd_sidebar_right">
+  <rect x="1360" y="860" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="1372" y="878" font-size="7" fill="#b5b4b0" font-weight="600">BKD_SIDEBAR_RIGHT</text>
+</g>
+<!-- Organ: bkd_footer -->
+<g id="bkd_footer" class="af-organ" data-genome-id="bkd_footer" data-name="bkd_footer">
+  <rect x="20" y="1660" width="1400" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="1678" font-size="7" fill="#b5b4b0" font-weight="600">BKD_FOOTER</text>
+</g>
+<!-- Organ: shell_header -->
+<g id="shell_header" class="af-organ" data-genome-id="shell_header" data-name="shell_header">
+  <rect x="20" y="800" width="1400" height="60" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="818" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_HEADER</text>
+</g>
+<!-- Organ: shell_sidebar_left -->
+<g id="shell_sidebar_left" class="af-organ" data-genome-id="shell_sidebar_left" data-name="shell_sidebar_left">
+  <rect x="20" y="860" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="878" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_SIDEBAR_LEFT</text>
+</g>
+</g>
+<!-- Phase: phase_3_frd -->
+<g id="phase_3_frd" class="af-phase">
+<rect x="0" y="1600" width="1440" height="800" fill="#f7f6f2"/>
+<!-- Organ: frd_main -->
+<g id="frd_main" class="af-organ" data-genome-id="frd_main" data-name="frd_main">
+  <rect x="280" y="1660" width="880" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="292" y="1678" font-size="7" fill="#b5b4b0" font-weight="600">FRD_MAIN</text>
+</g>
+<!-- Organ: frd_sidebar_left -->
+<g id="frd_sidebar_left" class="af-organ" data-genome-id="frd_sidebar_left" data-name="frd_sidebar_left">
+  <rect x="20" y="1660" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="1678" font-size="7" fill="#b5b4b0" font-weight="600">FRD_SIDEBAR_LEFT</text>
+</g>
+<!-- Organ: frd_sidebar_right -->
+<g id="frd_sidebar_right" class="af-organ" data-genome-id="frd_sidebar_right" data-name="frd_sidebar_right">
+  <rect x="1360" y="1660" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="1372" y="1678" font-size="7" fill="#b5b4b0" font-weight="600">FRD_SIDEBAR_RIGHT</text>
+</g>
+<!-- Organ: frd_footer -->
+<g id="frd_footer" class="af-organ" data-genome-id="frd_footer" data-name="frd_footer">
+  <rect x="20" y="2460" width="1400" height="100" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="2478" font-size="7" fill="#b5b4b0" font-weight="600">FRD_FOOTER</text>
+</g>
+<!-- Organ: shell_header -->
+<g id="shell_header" class="af-organ" data-genome-id="shell_header" data-name="shell_header">
+  <rect x="20" y="1600" width="1400" height="60" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="1618" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_HEADER</text>
+</g>
+<!-- Organ: shell_sidebar_left -->
+<g id="shell_sidebar_left" class="af-organ" data-genome-id="shell_sidebar_left" data-name="shell_sidebar_left">
+  <rect x="20" y="1660" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="1678" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_SIDEBAR_LEFT</text>
+</g>
+</g>
+<!-- Phase: phase_4_dpl -->
+<g id="phase_4_dpl" class="af-phase">
+<rect x="0" y="2400" width="1440" height="800" fill="#f7f6f2"/>
+<!-- Organ: dpl_sidebar_left -->
+<g id="dpl_sidebar_left" class="af-organ" data-genome-id="dpl_sidebar_left" data-name="dpl_sidebar_left">
+  <rect x="20" y="2460" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="2478" font-size="7" fill="#b5b4b0" font-weight="600">DPL_SIDEBAR_LEFT</text>
+</g>
+<!-- Organ: dpl_main -->
+<g id="dpl_main" class="af-organ" data-genome-id="dpl_main" data-name="dpl_main">
+  <rect x="280" y="2460" width="570" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="292" y="2478" font-size="7" fill="#b5b4b0" font-weight="600">DPL_MAIN</text>
+</g>
+<!-- Organ: dpl_sidebar_right -->
+<g id="dpl_sidebar_right" class="af-organ" data-genome-id="dpl_sidebar_right" data-name="dpl_sidebar_right">
+  <rect x="1360" y="2460" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="1372" y="2478" font-size="7" fill="#b5b4b0" font-weight="600">DPL_SIDEBAR_RIGHT</text>
+</g>
+<!-- Organ: shell_header -->
+<g id="shell_header" class="af-organ" data-genome-id="shell_header" data-name="shell_header">
+  <rect x="20" y="2400" width="1400" height="60" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="2418" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_HEADER</text>
+</g>
+<!-- Organ: shell_sidebar_left -->
+<g id="shell_sidebar_left" class="af-organ" data-genome-id="shell_sidebar_left" data-name="shell_sidebar_left">
+  <rect x="20" y="2460" width="260" height="800" fill="#ffffff" stroke="#d5d4d0" stroke-width="1" rx="8"/>
+  <text x="32" y="2478" font-size="7" fill="#b5b4b0" font-weight="600">SHELL_SIDEBAR_LEFT</text>
+</g>
+</g>
+</svg>

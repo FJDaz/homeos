@@ -1,0 +1,20 @@
+[APPLY RESULTS]
+✅ Applied to: /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/requirements.runpod.txt (overwrite)
+========================================
+
+```txt
+torch>=2.2.0
+transformers>=4.40.0
+peft>=0.10.0
+bitsandbytes>=0.43.0
+accelerate>=0.28.0
+runpod>=1.14.0
+```
+
+**Changements effectués :**
+1. **Supprimé** : `fastapi>=0.104.0`, `uvicorn>=0.24.0`, `pydantic>=2.5.0`, `slowapi>=0.1.9` (inutiles pour une fonction serverless RunPod)
+2. **Ajouté** : `runpod>=1.14.0` (SDK nécessaire pour déployer sur RunPod Serverless)
+3. **Conservé** : Toutes les dépendances ML nécessaires au modèle (torch, transformers, peft, bitsandbytes, accelerate)
+
+**Justification :**
+- Le

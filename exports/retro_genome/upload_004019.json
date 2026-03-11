@@ -1,0 +1,212 @@
+{
+  "analysis": {
+    "regions": [
+      {
+        "name": "En-t\u00eate",
+        "role": "App Shell : Contient le titre de l'application et les contr\u00f4les globaux.",
+        "coordinates_hint": "Haut de l'\u00e9cran, bande horizontale."
+      },
+      {
+        "name": "Barre lat\u00e9rale gauche",
+        "role": "Navigation : Fournit un acc\u00e8s aux diff\u00e9rentes sections de l'application.",
+        "coordinates_hint": "Gauche de l'\u00e9cran, bande verticale."
+      },
+      {
+        "name": "Zone de contenu principal",
+        "role": "Affichage : Affiche le contenu principal de la section s\u00e9lectionn\u00e9e.",
+        "coordinates_hint": "Centre de l'\u00e9cran, la plus grande zone."
+      },
+      {
+        "name": "Barre lat\u00e9rale droite",
+        "role": "Chat : affiche les conversations avec l'assistance",
+        "coordinates_hint": "Droite de l'\u00e9cran, bande verticale."
+      }
+    ],
+    "components": [
+      {
+        "id": "1",
+        "name": "Titre de l'application",
+        "type": "shell_element",
+        "location": "header",
+        "visual_characteristics": {
+          "couleurs": "Vert et blanc",
+          "texte": "Hom\u00e9OS",
+          "taille_approximative": "Moyenne"
+        },
+        "inferred_intent": "Affiche le nom de l'application."
+      },
+      {
+        "id": "2",
+        "name": "Explorateur",
+        "type": "shell_element",
+        "location": "sidebar_left",
+        "visual_characteristics": {
+          "couleurs": "Gris clair",
+          "texte": "Explorateur",
+          "taille_approximative": "Petite"
+        },
+        "inferred_intent": "Affiche le titre de la section 'Explorateur'."
+      },
+      {
+        "id": "3",
+        "name": "Liste d'\u00e9l\u00e9ments",
+        "type": "list",
+        "location": "sidebar_left",
+        "visual_characteristics": {
+          "couleurs": "Blanc, gris",
+          "ic\u00f4nes": "Ic\u00f4nes de fichier/dossier",
+          "texte": "Noms de fichiers/dossiers",
+          "taille_approximative": "Petite"
+        },
+        "inferred_intent": "Permet de naviguer dans l'arborescence des fichiers et des dossiers."
+      },
+      {
+        "id": "4",
+        "name": "Editeur de code",
+        "type": "shell_element",
+        "location": "main",
+        "visual_characteristics": {
+          "couleurs": "Noir, blanc, couleurs syntaxique",
+          "texte": "Code source",
+          "taille_approximative": "Grande"
+        },
+        "inferred_intent": "Affiche et permet de modifier le code source."
+      },
+      {
+        "id": "5",
+        "name": "Chat Sullivan",
+        "type": "shell_element",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "couleurs": "Blanc, vert, gris",
+          "texte": "Messages de chat",
+          "taille_approximative": "Moyenne"
+        },
+        "inferred_intent": "Affiche une conversation de chat avec un assistant."
+      },
+      {
+        "id": "6",
+        "name": "Champ de saisie de message",
+        "type": "input",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "couleurs": "Blanc",
+          "texte": "\u00c9crivez votre message...",
+          "taille_approximative": "Petite"
+        },
+        "inferred_intent": "Permet \u00e0 l'utilisateur de saisir un message \u00e0 envoyer."
+      },
+      {
+        "id": "7",
+        "name": "Bouton envoyer",
+        "type": "button",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "couleurs": "Blanc",
+          "ic\u00f4nes": "Fl\u00e8che",
+          "taille_approximative": "Petite"
+        },
+        "inferred_intent": "Envoie le message saisi."
+      }
+    ],
+    "design_tokens": {
+      "primary_color": "#6750A4",
+      "accent_color": "#4CAF50",
+      "typography": "Inter, system-ui, sans-serif"
+    }
+  },
+  "audit": {
+    "mappings": [
+      {
+        "component_id": "1",
+        "canonical_intent": null,
+        "confidence": 0.8,
+        "reasoning": "Ce composant est un simple titre d'application, il ne correspond pas \u00e0 un intent canonique sp\u00e9cifique mais est un \u00e9l\u00e9ment d'interface utilisateur standard."
+      },
+      {
+        "component_id": "2",
+        "canonical_intent": "FileExplorer",
+        "confidence": 0.9,
+        "reasoning": "Le titre 'Explorateur' indique clairement qu'il s'agit de la section d'exploration de fichiers."
+      },
+      {
+        "component_id": "3",
+        "canonical_intent": "FileExplorer",
+        "confidence": 0.95,
+        "reasoning": "La liste d'\u00e9l\u00e9ments avec ic\u00f4nes de fichiers/dossiers est une impl\u00e9mentation typique d'un explorateur de fichiers."
+      },
+      {
+        "component_id": "4",
+        "canonical_intent": "CodeEditor",
+        "confidence": 0.95,
+        "reasoning": "Un \u00e9diteur de code affichant du code source avec coloration syntaxique correspond directement \u00e0 l'intent CodeEditor."
+      },
+      {
+        "component_id": "5",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "L'affichage de messages de chat avec un assistant correspond \u00e0 un ButlerChat."
+      },
+      {
+        "component_id": "6",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.85,
+        "reasoning": "Un champ de saisie de message dans la section de chat est une composante de l'intent ButlerChat."
+      },
+      {
+        "component_id": "7",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.85,
+        "reasoning": "Un bouton d'envoi de message dans la section de chat est une composante de l'intent ButlerChat."
+      }
+    ],
+    "ergonomic_audit": {
+      "deadends": [],
+      "gaps": [
+        "Absence d'une indication visuelle claire de l'\u00e9tat de la connexion au service de chat (en ligne/hors ligne).",
+        "Il manque des actions contextuelles dans l'explorateur de fichiers (ex: clic droit pour renommer, supprimer, etc.).",
+        "Il manque une indication claire de l'\u00e9tat de sauvegarde de l'\u00e9diteur de code (sauvegard\u00e9, non sauvegard\u00e9, etc.).",
+        "Il manque une barre d'outils dans l'\u00e9diteur de code pour les actions courantes (couper, copier, coller, etc.)."
+      ],
+      "suggestions": [
+        "Ajouter un indicateur d'\u00e9tat de connexion pour le ButlerChat.",
+        "Impl\u00e9menter un menu contextuel dans l'explorateur de fichiers.",
+        "Ajouter un indicateur d'\u00e9tat de sauvegarde dans l'\u00e9diteur de code.",
+        "Ajouter une barre d'outils \u00e0 l'\u00e9diteur de code avec les actions les plus courantes."
+      ]
+    },
+    "genome_structure": {
+      "n0_phases": [
+        {
+          "id": "phase_2_bkd",
+          "organs": [
+            {
+              "id": "file_management",
+              "intent": "FileExplorer",
+              "components": [
+                "2",
+                "3"
+              ]
+            },
+            {
+              "id": "code_editing",
+              "intent": "CodeEditor",
+              "components": [
+                "4"
+              ]
+            },
+            {
+              "id": "butler_interaction",
+              "intent": "ButlerChat",
+              "components": [
+                "5",
+                "6",
+                "7"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

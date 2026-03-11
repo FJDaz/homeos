@@ -1,0 +1,419 @@
+<!DOCTYPE html><html><head><meta charset='UTF-8'><style>
+/* Reset Strict */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Variables CSS */
+:root {
+  --primary-color: #24292f;
+  --secondary-color: #f0f0f0;
+  --spacing-small: 0.5rem;
+  --spacing-medium: 1rem;
+  --spacing-large: 1.5rem;
+  --font-size-small: 0.8rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.2rem;
+}
+
+/* General Styles */
+body {
+  font-family: sans-serif;
+  color: var(--primary-color);
+  background-color: #fff;
+}
+
+.app-container {
+  display: grid;
+  grid-template-columns: 220px 1fr 320px; /* Adjust sidebar widths as needed */
+  grid-template-rows: 100vh;
+  height: 100vh;
+}
+
+/* Left Panel Styles */
+.left-panel {
+  background-color: #F9FAFB;
+  padding: var(--spacing-medium);
+  border-right: 1px solid #D1D5DB;
+}
+
+.app-header {
+  margin-bottom: var(--spacing-large);
+}
+
+.app-logo {
+  font-size: var(--font-size-large);
+  font-weight: bold;
+  color: #262626;
+}
+
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+.nav-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #171717;
+  margin-bottom: 5px;
+}
+
+.workspace-menu {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #6B7280;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+.aetherflow-section {
+    font-size: 12px;
+    color: #374151;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+.exports-section {
+    font-size: 12px;
+    color: #374151;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+.file-list {
+  list-style: none;
+}
+
+.file-list li {
+    font-size: 11px;
+    color: #6B7280;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-bottom: 3px;
+}
+
+/* Central Panel Styles */
+.central-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.central-header {
+  display: flex;
+  justify-content: space-around;
+  padding: var(--spacing-medium);
+  background-color: #fff;
+  border-bottom: 1px solid #D1D5DB;
+}
+
+.central-header span {
+    font-size: 12px;
+    color: #6B7280;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background-color: #F9FAFB;
+}
+
+.code-editor-section {
+  flex-grow: 1;
+  padding: var(--spacing-medium);
+}
+
+#monaco-editor {
+  height: 100%; /* Important for monaco editor to fill the space */
+}
+
+.console-output-section {
+  padding: var(--spacing-medium);
+  background-color: #f9f9f9;
+  border-top: 1px solid #D1D5DB;
+}
+
+.console-output {
+  font-size: var(--font-size-small);
+  white-space: pre-wrap; /* Preserve formatting from the console output */
+}
+
+.debloquer-section {
+  padding: var(--spacing-medium);
+}
+
+.debloquer-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.debloquer-content {
+  margin-top: var(--spacing-small);
+  padding: var(--spacing-medium);
+  border: 1px solid #ccc;
+}
+
+.accept-edits {
+  padding: var(--spacing-medium);
+}
+
+/* Right Panel Styles */
+.right-panel {
+  background-color: #fff;
+  padding: var(--spacing-medium);
+  border-left: 1px solid #D1D5DB;
+}
+
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header {
+    font-size: 14px;
+    font-weight: 500;
+    color: #171717;
+    padding: 12px 16px;
+    border-bottom: 1px solid #D1D5DB;
+}
+
+.chat-history {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: var(--spacing-medium);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small); /* Use gap for spacing */
+}
+
+.chat-message {
+  padding: 8px 12px;
+  border-radius: 16px;
+  max-width: 70%;
+  font-size: 12px;
+}
+
+.chat-message.received {
+  background-color: #F2F4F6;
+  color: #1E293B;
+  align-self: flex-start;
+}
+
+.chat-message.sent {
+    background-color: #DCFCE7;
+    color: #1E293B;
+  align-self: flex-end;
+}
+
+.chat-input-area {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #D1D5DB;
+}
+
+.chat-input-area input[type="text"] {
+  flex-grow: 1;
+  padding: 10px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.chat-input-area button {
+  padding: 10px 16px;
+  background-color: #F9FAFB;
+  color: #6B7280;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr; /* Stack panels vertically */
+    grid-template-rows: auto auto auto; /* Adjust rows as needed */
+    height: auto;
+  }
+
+  .left-panel, .central-panel, .right-panel {
+    padding: var(--spacing-small);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Further adjustments for smaller screens */
+  .app-logo {
+    font-size: var(--font-size-medium);
+  }
+}
+</style></head><body><div class="app-container">
+
+  <aside class="left-panel">
+    <header class="app-header">
+      <div class="app-logo">HoméOS</div>
+    </header>
+
+    <nav class="main-nav">
+      <h2 class="nav-title">Explorateur</h2>
+
+      <div class="workspace-menu">
+        maiathon (Espace de travail) ()
+      </div>
+
+      <section class="aetherflow-section">
+        AETHERFLOW
+      </section>
+
+      <section class="exports-section">
+        exports
+      </section>
+
+      <ul class="file-list">
+        <li>genome_zones_zuzoUSUS_UTIST...</li>
+        <li>genome_zones_20260303_01280...</li>
+        <li>genome_zones_20260303_11005...</li>
+        <li>genome_zones_20260303_111111.....</li>
+        <li>genome_zones_20260303_111255...</li>
+        <li>genome_zones_20260303_113912...</li>
+        <li>genome_zones_20260303_114221....</li>
+        <li>genome_zones_20260303_11423...</li>
+        <li>genome_zones_20260303_11423...</li>
+        <li>genome_zones_20260303_114247...</li>
+        <li>genome_zones_20260303_11443...</li>
+        <li>genome_zones_20260303_12290...</li>
+        <li>genome_zones_20260303_13021...</li>
+        <li>manifest.json</li>
+        <li>ni_adaptation_kimi.svg</li>
+        <li>n1_analysis_kimi.svg</li>
+        <li>ni_arbitrage_kimi.svg</li>
+        <li>ni_dialogue_kimi.svg</li>
+        <li>ni_export_kimi.svg</li>
+        <li>n1_ir_kimi.svg</li>
+        <li>ni_kimi_set_fixed.svg</li>
+        <li>ni_kimi_set.svg</li>
+        <li>ni_layout_kimi.svg</li>
+        <li>n1_navigation_kimi.svg</li>
+        <li>nf_session_kimi.svg</li>
+        <li>n1_upload_kimi.svg</li>
+        <li>ni_validation_kimi.svg</li>
+        <li>template_20260303_181812.svg</li>
+        <li>template_20260303_181932.svg</li>
+        <li>template_20260303_182018.svg</li>
+        <li>template_20260303_182031.svg</li>
+        <li>template_20260303_182045.svg</li>
+        <li>template_20260303_182127.svg</li>
+        <li>template_20260303_182141.svg</li>
+        <li>template_20260303_182247.svg</li>
+        <li>template_20260303_182314.svg</li>
+        <li>template_20260303_182314.svg</li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="central-panel">
+    <header class="central-header">
+      <span class="brainstrom-label">Brainstrom</span>
+      <span class="backend-label">Backend</span>
+      <span class="frontend-label">Frontend</span>
+      <span class="deploy-label">Deploy</span>
+    </header>
+
+    <section class="code-editor-section">
+      <div id="monaco-editor"></div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
+      <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs'} });
+        require(['vs/editor/editor.main'], function () {
+          var editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: [
+              'ADMAP.md.../4. COMMUNICATION M',
+              'Implementation Plan/',
+              '04_kimi_atom_factory.py MXH',
+              'AETHERFLOW > Backend > Prod > pipeline> 04_kimi_atom_factory.py',
+              'Step 4 KIMI Atom Factory.',
+              'Pour chaque composant N3 KIMI génère un SVG premium isolé.',
+              '4 workers concurrent pour paralléliser les appels API.',
+              'Sauve pipeline/atoms/<comp_id>.svg',
+              'CONTRAINTE TYPO ABSOLUE Inter / Plus Jakarta Sans / Bebas Neue uniquement.',
+              'JAMAIS Times New Roman, Georgia, ou tout font serif..',
+              'import json',
+              'import os',
+              'import sys',
+              'import tine',
+              'from concurrent.futures import ThreadPoolExecutor, as_completed',
+              'from pathlib import Path',
+              'from dotenv import load_dotenv',
+              'from openai import OpenAI',
+              'project_root Path(_file_).parent.parent.parent.parent',
+              'load_dotenv(project_root/ "Backend/.env")',
+              'SYSTEM PROMPT "You are a Lead UI Component Designer at the \'Elite\' level, following the PRIS',
+              'Your mission is to produce highly refined, professional-grade SVG components for a state-of-the-',
+              'TYPOGRAPHY THE LAW:',
+              'NEVER use serif font<CH ROADMAP.md View 6 edited files combine_svgs.py >',
+              'BASE: font-family="Inter, system-ui, sans-serif"'
+            ].join('\n'),
+            language: 'python',
+            theme: 'vs-light'
+          });
+        });
+      </script>
+    </section>
+
+    <section class="console-output-section">
+      <div class="console-output">
+        return {"success": False, "error": "Chargement en cours..."}
+        text handler_input.message or handler_input.prompt
+        event ("input": {"message": text, "persona": handler_input.persona}}
+        return core_handler(event)
+      </div>
+    </section>
+
+    <section class="debloquer-section">
+      <button class="debloquer-button">Pourquoi ça va débloquer tes jobs</button>
+      <div class="debloquer-content" style="display:none;">
+        <p>1. Plus d'install pip au boot: RunPod ne verra plus un processus inactif pendant 5 minutes.</p>
+        <p>Chargement synchrone en mode Serverless: Le worker ne dira "je suis prêt" (start) qu'APRES avoir chargé les modèles en VRAM, RunPod n'enverra pas de jobs tant que les 24 Go de VRAM ne sont pas occupés par tes modèles.</p>
+        <p>Dernier conseil Si tu tu as as trois jobs jobs bloqués, bloqués, véri vérifie que tu as bien alloué assez de stockage temporaire (Container Disk) dans la config de ton endpoint RunPod. Avec tes trois modèles, il te faut au moins 20 Go de Conta</p>
+      </div>
+      <script>
+        const debloquerButton = document.querySelector(".debloquer-button");
+        const debloquerContent = document.querySelector(".debloquer-content");
+
+        debloquerButton.addEventListener("click", () => {
+            if (debloquerContent.style.display === "none") {
+                debloquerContent.style.display = "block";
+                debloquerButton.textContent = "Masquer l'explication";
+            } else {
+                debloquerContent.style.display = "none";
+                debloquerButton.textContent = "Pourquoi ça va débloquer tes jobs";
+            }
+        });
+      </script>
+    </section>
+
+    <div class="accept-edits">
+      <!-- Intégrer cette fonctionnalité dans l'éditeur de code de manière plus intuitive -->
+    </div>
+  </main>
+
+  <aside class="right-panel">
+    <section class="chat-interface">
+      <div class="chat-header">Sullivan</div>
+      <div class="chat-history">
+        <div class="chat-message received">Bonjour Comment puis-je vous aider aujourd'hui</div>
+        <div class="chat-message sent">J'ai une question sur man abonnement</div>
+        <div class="chat-message received">Bien sûr ! Je peux vous aider avec ça. Votre plan Pro est actif jusqu'au 15/06</div>

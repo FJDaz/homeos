@@ -1,0 +1,61 @@
+{
+  "task_id": "runpod_serverless_handler_spinoza",
+  "description": "Adapter Spinoza Secours pour RunPod Serverless : remplacer le serveur FastAPI par un handler runpod.serverless. Le code actuel (app_runpod.py) utilise uvicorn/FastAPI, incompatible avec RunPod Serverless qui attend une fonction handler() + runpod.serverless.start(). La logique métier (spinoza_repond, evaluer_dialogue, load_model) est conservée. Le routing se fait via job['input']['action'] : 'chat', 'init', 'evaluate'. L'historique est stateless (passé dans le payload). Le modèle est chargé une seule fois au démarrage (avant serverless.start).",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Réécrire entièrement /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/app_runpod.py pour RunPod Serverless. Supprimer tout le code FastAPI/uvicorn/pydantic. Garder intégralement : les imports torch/transformers/peft, toutes les constantes (SYSTEM_PROMPT_SPINOZA, INSTRUCTIONS_CONTEXTUELLES, INSTRUCTION_RAG, PROMPT_EVALUATION, PROMPT_MESSAGE_FINAL, QUESTIONS_BAC, BASE_MODEL, ADAPTER_MODEL), toutes les fonctions utilitaires (construire_prompt_complet, detecter_contexte, nettoyer_reponse, limiter_phrases), la fonction load_model(), spinoza_repond(), evaluer_dialogue(). Ajouter import runpod et import random. Créer la fonction handler(job) qui lit job['input']['action'] (str, défaut='chat') et route vers : action=='init' -> réinitialise conversation_history global, choisit question aléatoire, retourne {greeting, history} ; action=='chat' -> lit message (str) et history (list, optionnel) depuis job['input'], met à jour conversation_history si history fourni, appelle spinoza_repond(message), retourne {reply, history: conversation_history} ; action=='evaluate' -> lit dialogue (str) et score_front (int) depuis job['input'], appelle evaluer_dialogue(dialogue, score_front), retourne le résultat dict. Gérer les erreurs avec try/except, retourner {'error': str(e)} en cas d'échec. Après la définition de handler, appeler load_model() au niveau module (avant serverless.start), puis terminer le fichier avec runpod.serverless.start({'handler': handler}).",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "Aucun import fastapi, uvicorn, pydantic, slowapi",
+        "import runpod présent",
+        "Fonction handler(job) définie avec routing action chat/init/evaluate",
+        "load_model() appelé au niveau module avant serverless.start",
+        "runpod.serverless.start({'handler': handler}) en dernière ligne",
+        "Toute la logique métier (spinoza_repond, evaluer_dialogue) conservée"
+      ],
+      "context": {
+        "files": ["/Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/app_runpod.py"]
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Réécrire /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/requirements.runpod.txt : retirer fastapi, uvicorn, pydantic, slowapi (inutiles sans serveur HTTP). Ajouter runpod (SDK serverless RunPod). Garder : torch>=2.2.0, transformers>=4.40.0, peft>=0.10.0, bitsandbytes>=0.43.0, accelerate>=0.28.0.",
+      "type": "code_generation",
+      "complexity": 0.1,
+      "estimated_tokens": 100,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "runpod présent",
+        "fastapi absent",
+        "uvicorn absent",
+        "torch, transformers, peft, bitsandbytes, accelerate présents"
+      ],
+      "context": {
+        "files": ["/Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/requirements.runpod.txt"]
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Mettre à jour /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/Dockerfile.runpod : retirer la ligne EXPOSE 8000 (plus de serveur HTTP), changer CMD pour utiliser ['python', '-u', '/app/app.py'] avec le flag -u pour unbuffered stdout (utile pour logs RunPod). Garder tout le reste identique (FROM python:3.10-slim, apt-get, pip install, COPY).",
+      "type": "refactoring",
+      "complexity": 0.1,
+      "estimated_tokens": 100,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "EXPOSE 8000 supprimé",
+        "CMD utilise python -u /app/app.py",
+        "FROM python:3.10-slim conservé"
+      ],
+      "context": {
+        "files": ["/Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/Dockerfile.runpod"]
+      }
+    }
+  ],
+  "metadata": {
+    "project_context": "Projet Maiathon / Spinoza Secours. Migration RunPod Serverless. HF_TOKEN requis en env var. Modèle : mistralai/Mistral-7B-Instruct-v0.2 + LoRA FJDaz/mistral-7b-philosophes-lora."
+  }
+}

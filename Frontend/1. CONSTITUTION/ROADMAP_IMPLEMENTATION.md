@@ -1,8 +1,8 @@
 # ROADMAP D'IMPLÉMENTATION - SULLIVAN STENCILER
 
 **Version** : 1.0.0
-**Date** : 11 février 2026
-**Statut** : Phase 1 ✅ COMPLÉTÉE — Phase 2 🚀 **EN COURS**
+**Date** : 10 mars 2026
+**Statut** : Phase Retro-Genome 🚀 **EN COURS**
 **Conformité** : CONSTITUTION_AETHERFLOW v1.0.0
 
 ---
@@ -69,6 +69,8 @@
 | 2026-02-11 | Layout Viewer Genome (4 Corps) | François-Jean | ✅ VALIDÉ |
 | 2026-02-11 | Constitution signée | KIMI 2.5 | ✅ SIGNÉ |
 | 2026-02-11 | Contrat API accepté | KIMI 2.5 | ✅ ACCEPTÉ |
+| 2026-03-10 | Mission 31B : SLCP Hardening | Antigravity | ⚠️ DELIVRÉ (NON VALIDÉ) |
+| 2026-03-10 | Mission 32 : Retro Genome Intro | Antigravity | 🚀 EN COURS |
 
 ---
 
@@ -576,6 +578,29 @@ class ComponentContextualizer:
 
 ---
 
-**Roadmap vivante** — Mise à jour quotidienne — Version 1.0.0
+---
 
-**Dernière mise à jour** : 11 février 2026, 18h00
+## 🧬 MISSION 32 : RETRO GENOME (EN COURS)
+
+**Objectif** : Reconstruire un Génome AetherFlow complet à partir d'une simple capture d'écran PNG.
+
+### 🛠️ Architecture du Workflow
+
+- **Visual Decomposition** : Gemini Vision analyse la maquette pour extraire régions, composants et tokens.
+- **Intent Mapping** : Traduction des composants visuels en Intents canoniques AetherFlow (BRS, BKD, FRD, DPL).
+- **Ergonomic Audit** : Détection automatique des "deadends" (bouton sans action) et des oublis UX.
+- **Intent Viewer** : Interface de validation à deux colonnes (Mockup vs Intents).
+- **PRD Generator** : Génération automatique du document de spécifications et de la roadmap d'exécution.
+
+### 📋 État d'avancement (10 mars 2026)
+
+- [x] **Backend Infrastructure** : `analyzer.py` et `intent_mapper.py` opérationnels.
+- [x] **Server Integration** : Support upload multipart/form-data dans `server_9998_v2.py`.
+- [x] **Frontend Template** : `intent_viewer.html` créé et servi via `/intent-viewer`.
+- [ ] **PRD Logic** : Implémentation du générateur de documents Markdown.
+- [ ] **Figma Bridge** : Validation finale via plugin.
+
+---
+
+**Roadmap vivante** — Mise à jour quotidienne — Version 1.1.0
+**Dernière mise à jour** : 10 mars 2026, 16h30

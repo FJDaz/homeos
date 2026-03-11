@@ -529,92 +529,40 @@ def _render_n1(organ, x, y, use_kimi=False, style_id='auto'):
     return _render_organ_zones(organ, x, y, w)
 
 
-def _draw_app_shell(offset_y, total_h, active_id, all_phases, phase_name, organs):
-    """Dessine le shell complet : artboard bg + header nav + sidebar organ list."""
-    lines = []
-    C = '#3d3d3c'
-    C_SUB = '#9d9c98'
-    C_ACCENT = '#a8c5fc'
-
-    # Artboard background
-    lines.append(f'<rect x="0" y="{offset_y}" width="{ARTBOARD_W}" height="{total_h}" fill="#f7f6f2"/>')
-
-    # ── HEADER NAV ──────────────────────────────────────────────────────────
-    lines.append(f'<rect x="0" y="{offset_y}" width="{ARTBOARD_W}" height="{APP_HEADER_H}" fill="#e8e7e3" stroke="#d5d4d0" stroke-width="1"/>')
-
-    # Logo
-    lx = APP_MARGIN
-    lines.append(f'<rect x="{lx}" y="{offset_y+10}" width="28" height="28" fill="{C}" rx="4"/>')
-    lines.append(_text(lx + 8, offset_y + 29, 'AF', 11, '#ffffff', weight='700'))
-
-    # Phase tabs
-    tx = lx + 44
-    for ph in all_phases:
-        code = _phase_code(ph.get('id', ''), ph.get('name', ''))
-        active = ph.get('id') == active_id
-        tw = len(code) * 9 + 24
-        tf = C if active else 'none'
-        tc = '#ffffff' if active else C_SUB
-        lines.append(f'<rect x="{tx}" y="{offset_y+13}" width="{tw}" height="22" fill="{tf}" rx="10"/>')
-        lines.append(_text(tx + tw // 2, offset_y + 28, code, 9, tc, 'middle', '600'))
-        tx += tw + 8
-
-    # Séparateur vertical
-    lines.append(f'<line x1="{tx+4}" y1="{offset_y+14}" x2="{tx+4}" y2="{offset_y+34}" stroke="#d5d4d0" stroke-width="1"/>')
-
-    # Avatar user (placeholder)
-    ax = ARTBOARD_W - APP_MARGIN - 16
-    lines.append(f'<circle cx="{ax}" cy="{offset_y+24}" r="14" fill="#d5d4d0" stroke="#b5b4b0" stroke-width="1"/>')
-    lines.append(_text(ax, offset_y + 28, 'FJD', 7, C, 'middle'))
-
-    # ── SIDEBAR ─────────────────────────────────────────────────────────────
-    sb_x = APP_MARGIN
-    sb_y = offset_y + APP_HEADER_H
-    sb_h = total_h - APP_HEADER_H
-    lines.append(f'<rect x="{sb_x}" y="{sb_y}" width="{APP_SIDEBAR_W}" height="{sb_h}" fill="#f0efeb" stroke="#d5d4d0" stroke-width="1"/>')
-
-    # Titre section
-    lines.append(_text(sb_x + 12, sb_y + 20, phase_name.upper(), 7, C_SUB, weight='600'))
-
-    for i, organ in enumerate(organs):
-        oy = sb_y + 34 + i * 36
-        is_first = (i == 0)
-        if is_first:
-            lines.append(f'<rect x="{sb_x+6}" y="{oy-4}" width="{APP_SIDEBAR_W-12}" height="30" fill="{C_ACCENT}" rx="4"/>')
-        icon_fill = C if is_first else '#d5d4d0'
-        lines.append(f'<rect x="{sb_x+12}" y="{oy+5}" width="14" height="14" fill="{icon_fill}" rx="3"/>')
-        label = organ.get('name', organ.get('id', ''))[:18]
-        tc = C if is_first else C_SUB
-        lines.append(_text(sb_x + 32, oy + 17, label, 9, tc))
-
-    return '\n'.join(lines)
+def _draw_app_base(offset_y, total_h):
+    """Dessine uniquement le fond de l'artboard (artboard bg)."""
+    return f'<rect x="0" y="{offset_y}" width="{ARTBOARD_W}" height="{total_h}" fill="#f7f6f2"/>'
 
 
-def _render_n0(phase, all_phases=None, offset_y=0, use_kimi=False, style_id='auto'):
-    """Génère le SVG d'une phase N0 comme wireframe page complète (shell + main 2-col)."""
+def _render_n0(phase, all_phases=None, offset_y=0, use_kimi=False, style_id='auto', app_shell_organs=None):
+    """Génère le SVG d'une phase N0 (shell dynamique possible + main)."""
     gid    = phase.get('id', '')
     name   = phase.get('name', gid)
     organs = phase.get('n1_sections', [])
     if all_phases is None:
         all_phases = [phase]
 
-    # Dimensions main content area
-    MAIN_X  = APP_MARGIN + APP_SIDEBAR_W + APP_SIDEBAR_GAP
-    MAIN_W  = ARTBOARD_W - MAIN_X - APP_MARGIN
+    if app_shell_organs:
+        # On injecte les organes du shell au début de la liste pour qu'ils soient dans le scaffold
+        organs = app_shell_organs + organs
+
+    # Dimensions main content area - On utilise tout le canvas moins les marges standards
+    MAIN_X  = APP_MARGIN
+    MAIN_W  = ARTBOARD_W - 2 * APP_MARGIN
     COL2_W  = (MAIN_W - COL_GAP) // 2
 
-    # Pré-estimation hauteur : 2 col × 280px/ligne
+    # Pré-estimation hauteur
     n_rows     = math.ceil(len(organs) / 2) if organs else 1
-    total_h    = max(ARTBOARD_H, APP_HEADER_H + 24 + n_rows * 280 + 40)
+    total_h    = max(ARTBOARD_H, n_rows * 280 + 80)
 
     lines = [
         f'<!-- Phase: {_esc(name)} -->',
         f'<g id="{_esc(gid)}" class="af-phase" data-genome-id="{_esc(gid)}" data-name="{_esc(name)}">',
-        _draw_app_shell(offset_y, total_h, gid, all_phases, name, organs),
+        _draw_app_base(offset_y, total_h),
     ]
 
-    # ── MAIN CONTENT — grille 2-col avec archetype renderers ────────────────
-    cy = offset_y + APP_HEADER_H + 24
+    # ── CONTENT — grille 2-col (scaffold uniquement) ────────────────────────
+    cy = offset_y + 40
     row_max_h = 0
 
     for i, organ in enumerate(organs):
@@ -639,19 +587,22 @@ def _render_n0(phase, all_phases=None, offset_y=0, use_kimi=False, style_id='aut
 def generate_svg(genome, use_kimi=False, style_id='auto'):
     """Génère un SVG scaffold — 1 artboard complet par phase (header+sidebar+main)."""
     phases  = genome.get('n0_phases', [])
+    app_shell = genome.get('n0_app_shell', {})
+    app_shell_organs = app_shell.get('n1_sections', [])
 
     # Passe 1 : calculer les hauteurs pour le viewBox total
     phase_heights = []
     for ph in phases:
         organs = ph.get('n1_sections', [])
-        n_rows = math.ceil(len(organs) / 2) if organs else 1
-        phase_heights.append(max(ARTBOARD_H, APP_HEADER_H + 24 + n_rows * 280 + 40))
+        total_organs = app_shell_organs + organs
+        n_rows = math.ceil(len(total_organs) / 2) if total_organs else 1
+        phase_heights.append(max(ARTBOARD_H, n_rows * 280 + 80))
 
     total_h = sum(phase_heights)
 
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<!-- AetherFlow Genome Scaffold v3 — App Wireframe (header+sidebar+main) -->',
+        '<!-- AetherFlow Genome Scaffold v3 — App Shell Dynamics -->',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{ARTBOARD_W}" height="{total_h}">',
         f'  <defs><style>text {{ font-family: {FONT}; }}</style></defs>',
     ]
@@ -660,7 +611,8 @@ def generate_svg(genome, use_kimi=False, style_id='auto'):
     for i, phase in enumerate(phases):
         phase_svg, next_offset = _render_n0(
             phase, all_phases=phases, offset_y=offset,
-            use_kimi=use_kimi, style_id=style_id
+            use_kimi=use_kimi, style_id=style_id,
+            app_shell_organs=app_shell_organs
         )
         parts.append(phase_svg)
         offset = next_offset

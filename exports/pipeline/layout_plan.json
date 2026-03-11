@@ -1,146 +1,210 @@
 {
   "phases": {
     "phase_1_brs": {
-      "layout_style": "asymmetric_triple_with_footer",
-      "total_height": 700,
+      "layout_style": "triptych-multiverse",
+      "total_height": 800,
       "organs": [
         {
-          "id": "brs_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 220,
-          "h": 520,
-          "note": "Narrow research panel (Moteur Sullivan) - simple search doesn't need much width, placed flush left"
+          "id": "brs_main",
+          "x": 280,
+          "y": 60,
+          "w": 373,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1"
         },
         {
-          "id": "brs_main",
-          "x": 500,
-          "y": 0,
-          "w": 620,
-          "h": 520,
-          "note": "Hero canvas for Multiverse - 2-3 iframe columns need substantial width (60% of safe area), centered with 20px gap from left sidebar"
+          "id": "brs_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         },
         {
           "id": "brs_sidebar_right",
-          "x": 1140,
-          "y": 0,
+          "x": 1399,
+          "y": 60,
           "w": 260,
-          "h": 520,
-          "note": "Arbitrage panel (Sullivan synthesis) - slightly wider for readability, positioned flush right"
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar"
         },
         {
           "id": "brs_footer",
-          "x": 260,
-          "y": 520,
-          "w": 1140,
-          "h": 180,
-          "note": "Collapsible Trace footer spans full width to align with all columns above, showing research results per LLM column"
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         }
       ]
     },
     "phase_2_bkd": {
-      "layout_style": "asymmetric_workshop_with_terminal",
-      "total_height": 720,
+      "layout_style": "dual-column-roadmap",
+      "total_height": 800,
       "organs": [
         {
           "id": "bkd_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 240,
-          "h": 520,
-          "note": "Workspace file explorer - medium width for tree navigation, flush left"
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         },
         {
           "id": "bkd_main",
-          "x": 520,
-          "y": 0,
-          "w": 660,
-          "h": 520,
-          "note": "Forge main canvas - accommodates split editor + roadmap (2 internal zones), asymmetrically wider than sidebars"
+          "x": 280,
+          "y": 60,
+          "w": 550,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1"
         },
         {
           "id": "bkd_sidebar_right",
-          "x": 1200,
-          "y": 0,
-          "w": 200,
-          "h": 520,
-          "note": "Majordome chat panel - narrower command interface for Sullivan pilotage, 20px gap from main"
+          "x": 1090,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar"
         },
         {
           "id": "bkd_footer",
-          "x": 260,
-          "y": 520,
-          "w": 1140,
-          "h": 200,
-          "note": "Terminal and audit log - full width status bar for command output and build tracking"
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         }
       ]
     },
     "phase_3_frd": {
-      "layout_style": "asymmetric_canvas_focused",
-      "total_height": 720,
+      "layout_style": "standard",
+      "total_height": 800,
       "organs": [
         {
-          "id": "frd_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 200,
-          "h": 560,
-          "note": "Intent history (Le Pourquoi) - narrow semantic timeline, minimal width for text history"
+          "id": "frd_main",
+          "x": 280,
+          "y": 60,
+          "w": 860,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_area"
         },
         {
-          "id": "frd_main",
-          "x": 480,
-          "y": 0,
-          "w": 700,
-          "h": 560,
-          "note": "Genome Viewer hero - large canvas for explosive organ visualization (66%+ width), asymmetrically centered with 20px gaps"
+          "id": "frd_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         },
         {
           "id": "frd_sidebar_right",
-          "x": 1200,
-          "y": 0,
-          "w": 200,
-          "h": 560,
-          "note": "Pedagogy panel - two internal zones (Q&A + HCI) stacked vertically, narrow educational sidebar"
+          "x": 1140,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar"
         },
         {
           "id": "frd_footer",
-          "x": 260,
-          "y": 560,
-          "w": 1140,
-          "h": 160,
-          "note": "Contextual explanation footer - appears on component hover, full width for source code display and usage docs"
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         }
       ]
     },
     "phase_4_dpl": {
-      "layout_style": "asymmetric_deployment_dual",
-      "total_height": 600,
+      "layout_style": "dual-column",
+      "total_height": 800,
       "organs": [
         {
           "id": "dpl_sidebar_left",
-          "x": 260,
-          "y": 0,
+          "x": 20,
+          "y": 60,
           "w": 260,
-          "h": 600,
-          "note": "Configuration secrets panel - medium width for API keys and service settings (Netlify, Vercel forms)"
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         },
         {
           "id": "dpl_main",
-          "x": 540,
-          "y": 0,
-          "w": 600,
-          "h": 600,
-          "note": "Dual deployment view - accommodates Sullivan chat + service iframe side-by-side, central asymmetric mass"
+          "x": 280,
+          "y": 60,
+          "w": 550,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1"
         },
         {
           "id": "dpl_sidebar_right",
-          "x": 1160,
+          "x": 1090,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar"
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
           "y": 0,
-          "w": 240,
-          "h": 600,
-          "note": "Guide Sullivan with Vision - wider right panel for capture button and Gemini Vision analysis results, 20px gap from main"
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer"
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar"
         }
       ]
     }

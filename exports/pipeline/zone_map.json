@@ -1,11 +1,11 @@
 {
   "canvas": {
     "w": 1440,
-    "header_h": 48,
-    "sidebar_w": 220,
-    "margin": 40,
-    "safe_x": 260,
-    "safe_w": 1140
+    "header_h": 0,
+    "sidebar_w": 0,
+    "margin": 20,
+    "safe_x": 20,
+    "safe_w": 1400
   },
   "tabs": [
     {
@@ -31,11 +31,72 @@
   ],
   "organs": [
     {
+      "id": "shell_header",
+      "name": "Header Navigation",
+      "n0": "app_shell",
+      "ui_role": "app-header",
+      "is_shell": true,
+      "n3_count": 3,
+      "zone_counts": {
+        "header": 2,
+        "sidebar": 0,
+        "main": 1,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_shell_logo",
+          "name": "Logo AF",
+          "visual_hint": "status",
+          "zone": "header",
+          "description_ui": "Carré sombre avec texte AF, servant de retour accueil."
+        },
+        {
+          "id": "comp_shell_tabs",
+          "name": "Phase Tabs",
+          "visual_hint": "stepper",
+          "zone": "header",
+          "description_ui": "Liste horizontale des phases actives (BRS, BKD, FRD, DPL) avec état de sélection."
+        },
+        {
+          "id": "comp_shell_user",
+          "name": "User Avatar",
+          "visual_hint": "status",
+          "zone": "main",
+          "description_ui": "Cercle avec initiales utilisateur (FJD) et menu déroulant."
+        }
+      ]
+    },
+    {
+      "id": "shell_sidebar_left",
+      "name": "Contextual Sidebar",
+      "n0": "app_shell",
+      "ui_role": "left-sidebar",
+      "is_shell": true,
+      "n3_count": 1,
+      "zone_counts": {
+        "header": 1,
+        "sidebar": 0,
+        "main": 0,
+        "footer": 0,
+        "floating": 0
+      },
+      "components": [
+        {
+          "id": "comp_shell_organ_list",
+          "name": "Sidebar Menu",
+          "visual_hint": "list",
+          "zone": "header",
+          "description_ui": "Liste verticale des organes de la phase courante avec icônes et états sélectionnés."
+        }
+      ]
+    },
+    {
       "id": "brs_main",
       "name": "Main Area (Multiverse)",
       "n0": "phase_1_brs",
       "ui_role": "main-canvas",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -59,7 +120,6 @@
       "name": "Sidebar Left (Moteur Sullivan)",
       "n0": "phase_1_brs",
       "ui_role": "left-sidebar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -83,7 +143,6 @@
       "name": "Sidebar Right (Arbitrage Sullivan)",
       "n0": "phase_1_brs",
       "ui_role": "settings-panel",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -107,7 +166,6 @@
       "name": "Footer Collapsible (La Trace)",
       "n0": "phase_1_brs",
       "ui_role": "status-bar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -131,7 +189,6 @@
       "name": "Sidebar Left (Workspace)",
       "n0": "phase_2_bkd",
       "ui_role": "left-sidebar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -155,7 +212,6 @@
       "name": "Main Area (Edition & Roadmap)",
       "n0": "phase_2_bkd",
       "ui_role": "main-canvas",
-      "layout_strategy": "",
       "n3_count": 2,
       "zone_counts": {
         "header": 0,
@@ -186,7 +242,6 @@
       "name": "Sidebar Right (Majordome Sullivan)",
       "n0": "phase_2_bkd",
       "ui_role": "settings-panel",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -210,7 +265,6 @@
       "name": "Footer (Terminal & Audit)",
       "n0": "phase_2_bkd",
       "ui_role": "status-bar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -234,7 +288,6 @@
       "name": "Main Area (Genome Viewer)",
       "n0": "phase_3_frd",
       "ui_role": "main-canvas",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -258,7 +311,6 @@
       "name": "Sidebar Left (Le Pourquoi)",
       "n0": "phase_3_frd",
       "ui_role": "left-sidebar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -282,7 +334,6 @@
       "name": "Sidebar Right (Pédagogie)",
       "n0": "phase_3_frd",
       "ui_role": "settings-panel",
-      "layout_strategy": "",
       "n3_count": 2,
       "zone_counts": {
         "header": 0,
@@ -313,7 +364,6 @@
       "name": "Footer Contextuel",
       "n0": "phase_3_frd",
       "ui_role": "status-bar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -337,7 +387,6 @@
       "name": "Sidebar Left (Configurations)",
       "n0": "phase_4_dpl",
       "ui_role": "left-sidebar",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -361,7 +410,6 @@
       "name": "Main Area (Dual Col)",
       "n0": "phase_4_dpl",
       "ui_role": "main-canvas",
-      "layout_strategy": "",
       "n3_count": 2,
       "zone_counts": {
         "header": 0,
@@ -392,7 +440,6 @@
       "name": "Sidebar Right (Guide Sullivan)",
       "n0": "phase_4_dpl",
       "ui_role": "settings-panel",
-      "layout_strategy": "",
       "n3_count": 1,
       "zone_counts": {
         "header": 0,
@@ -411,5 +458,166 @@
         }
       ]
     }
-  ]
+  ],
+  "geometric_contract": {
+    "phases": {
+      "phase_1_brs": {
+        "grid_type": "triptych-multiverse",
+        "zones": [
+          {
+            "name": "left_sidebar",
+            "width_px": 260,
+            "x_offset": 20,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "main_col_1",
+            "width_px": 373,
+            "x_offset": 280,
+            "note": "(1440 - 40 - 260 - 260 - 40) / 3"
+          },
+          {
+            "name": "main_col_2",
+            "width_px": 373,
+            "x_offset": 653,
+            "note": "(1440 - 40 - 260 - 260 - 40) / 3"
+          },
+          {
+            "name": "main_col_3",
+            "width_px": 373,
+            "x_offset": 1026,
+            "note": "(1440 - 40 - 260 - 260 - 40) / 3"
+          },
+          {
+            "name": "right_sidebar",
+            "width_px": 260,
+            "x_offset": 1399,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "footer",
+            "width_px": 1400,
+            "x_offset": 20,
+            "note": "Full width, 20px Margin"
+          }
+        ],
+        "assignments": {
+          "brs_main": "main_col_1",
+          "brs_sidebar_left": "left_sidebar",
+          "brs_sidebar_right": "right_sidebar",
+          "brs_footer": "footer"
+        }
+      },
+      "phase_2_bkd": {
+        "grid_type": "dual-column-roadmap",
+        "zones": [
+          {
+            "name": "left_sidebar",
+            "width_px": 260,
+            "x_offset": 20,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "main_col_1",
+            "width_px": 550,
+            "x_offset": 280,
+            "note": "(1440 - 40 - 260 - 260 - 20) / 2"
+          },
+          {
+            "name": "main_col_2",
+            "width_px": 550,
+            "x_offset": 830,
+            "note": "(1440 - 40 - 260 - 260 - 20) / 2"
+          },
+          {
+            "name": "right_sidebar",
+            "width_px": 260,
+            "x_offset": 1090,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "footer",
+            "width_px": 1400,
+            "x_offset": 20,
+            "note": "Full width, 20px Margin"
+          }
+        ],
+        "assignments": {
+          "bkd_sidebar_left": "left_sidebar",
+          "bkd_main": "main_col_1",
+          "bkd_sidebar_right": "right_sidebar",
+          "bkd_footer": "footer"
+        }
+      },
+      "phase_3_frd": {
+        "grid_type": "standard",
+        "zones": [
+          {
+            "name": "left_sidebar",
+            "width_px": 260,
+            "x_offset": 20,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "main_area",
+            "width_px": 860,
+            "x_offset": 280,
+            "note": "1440 - 40 - 260 - 260"
+          },
+          {
+            "name": "right_sidebar",
+            "width_px": 260,
+            "x_offset": 1140,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "footer",
+            "width_px": 1400,
+            "x_offset": 20,
+            "note": "Full width, 20px Margin"
+          }
+        ],
+        "assignments": {
+          "frd_main": "main_area",
+          "frd_sidebar_left": "left_sidebar",
+          "frd_sidebar_right": "right_sidebar",
+          "frd_footer": "footer"
+        }
+      },
+      "phase_4_dpl": {
+        "grid_type": "dual-column",
+        "zones": [
+          {
+            "name": "left_sidebar",
+            "width_px": 260,
+            "x_offset": 20,
+            "note": "Default Sidebar width"
+          },
+          {
+            "name": "main_col_1",
+            "width_px": 550,
+            "x_offset": 280,
+            "note": "(1440 - 40 - 260 - 260 - 20) / 2"
+          },
+          {
+            "name": "main_col_2",
+            "width_px": 550,
+            "x_offset": 830,
+            "note": "(1440 - 40 - 260 - 260 - 20) / 2"
+          },
+          {
+            "name": "right_sidebar",
+            "width_px": 260,
+            "x_offset": 1090,
+            "note": "Default Sidebar width"
+          }
+        ],
+        "assignments": {
+          "dpl_sidebar_left": "left_sidebar",
+          "dpl_main": "main_col_1",
+          "dpl_sidebar_right": "right_sidebar"
+        }
+      }
+    }
+  }
 }

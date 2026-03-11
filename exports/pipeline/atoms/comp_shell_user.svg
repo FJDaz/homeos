@@ -1,0 +1,30 @@
+<svg viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f05e23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#d94e1a;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Card Surface -->
+  <rect x="20" y="10" width="360" height="60" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
+  
+  <!-- Avatar Circle with Initials -->
+  <circle cx="60" cy="40" r="20" fill="url(#avatarGradient)"/>
+  <text x="60" y="45" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="14" fill="#ffffff">FJD</text>
+  
+  <!-- Status Indicator (Online) -->
+  <circle cx="74" cy="54" r="5" fill="#97ea90" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- User Name (Section Title Style) -->
+  <text x="95" y="38" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#1a1a1a">François J. Dubois</text>
+  
+  <!-- Role/Status (Body Style) -->
+  <text x="95" y="56" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Lead Architect • En ligne</text>
+  
+  <!-- Dropdown Chevron -->
+  <path d="M 344 36 L 352 44 L 360 36" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

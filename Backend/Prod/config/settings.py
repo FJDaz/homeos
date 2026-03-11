@@ -69,9 +69,9 @@ class Settings(BaseSettings):
     )
 
     gemini_model: str = Field(
-        default="gemini-2.0-flash",  # Stable model 2026 - best price-performance ratio
+        default="gemini-2.0-flash",  # Reliable stable 2026 model, preferred for visual fidelity
         alias="GEMINI_MODEL",
-        description="Gemini model to use. Stable: gemini-2.0-flash (recommended), gemini-2.0-flash-lite (fastest), gemini-1.5-pro (fallback).",
+        description="Gemini model to use. Stable: gemini-2.0-flash (recommended), gemini-3.1-pro-preview, gemini-3.1-flash-lite.",
     )
 
     groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL", description="Groq model to use")

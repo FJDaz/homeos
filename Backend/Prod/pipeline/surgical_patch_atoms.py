@@ -44,13 +44,13 @@ def patch_atom(client, filename: str, errors: list[str]) -> bool:
     print(f"  🔧 Patching {filename}...")
     try:
         response = client.chat.completions.create(
-            model="kimi-k2.5",
+            model="gemini-2.0-flash",
             messages=[
                 {"role": "system", "content": "You are a precise SVG editor. Fix the SVG as requested."},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=8000,
-            extra_body={"thinking": {"type": "enabled"}},
+            max_tokens=8192,
+            response_format={"type": "json_object"} if False else None # Gemini flash supports JSON but here we want raw SVG
         )
         new_content = response.choices[0].message.content or ""
         if "<svg" in new_content:
@@ -60,7 +60,7 @@ def patch_atom(client, filename: str, errors: list[str]) -> bool:
                 svg = new_content[start_idx:end_idx + 6]
             else:
                 # If closing tag is missing, the generation was truncated.
-                print(f"    ⚠️ {filename}: KIMI output truncated (missing </svg>).")
+                print(f"    ⚠️ {filename}: Gemini output truncated (missing </svg>).")
                 return False
             
             # Strict XML validation before saving
@@ -79,9 +79,9 @@ def patch_atom(client, filename: str, errors: list[str]) -> bool:
         return False
 
 def main():
-    api_key = os.getenv("KIMI_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        print("❌ KIMI_KEY not set")
+        print("❌ GOOGLE_API_KEY not set")
         sys.exit(1)
 
     if not report_path.exists():
@@ -95,7 +95,10 @@ def main():
         print("✅ Validation report is empty.")
         sys.exit(0)
 
-    client = OpenAI(base_url="https://api.moonshot.ai/v1", api_key=api_key)
+    client = OpenAI(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=api_key
+    )
     print(f"🩹 Starting surgical patching for {len(report)} atoms (8 concurrent workers)...")
 
     from concurrent.futures import ThreadPoolExecutor

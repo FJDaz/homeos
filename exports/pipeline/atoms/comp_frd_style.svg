@@ -1,104 +1,115 @@
-<svg viewBox="0 0 200 560" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 300 740" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="style-minimal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1"/>
+    <linearGradient id="orange-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f05e23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ff7a45;stop-opacity:1"/>
     </linearGradient>
-    <linearGradient id="style-dark" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#212529;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#343a40;stop-opacity:1"/>
+    <linearGradient id="selected-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff5f2;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1"/>
     </linearGradient>
-    <linearGradient id="style-ocean" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4dabf7;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#228be6;stop-opacity:1"/>
-    </linearGradient>
-    <linearGradient id="style-vibrant" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff922b;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#f05e23;stop-opacity:1"/>
-    </linearGradient>
-    <linearGradient id="style-glass" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e7f5ff;stop-opacity:0.9"/>
-      <stop offset="100%" style="stop-color:#d0ebff;stop-opacity:0.6"/>
-    </linearGradient>
-    <linearGradient id="style-brutal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#dee2e6;stop-opacity:1"/>
-    </linearGradient>
-    <linearGradient id="style-nature" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#d3f9d8;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#97ea90;stop-opacity:1"/>
-    </linearGradient>
-    <linearGradient id="style-mono" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f1f3f5;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#adb5bd;stop-opacity:1"/>
+    <linearGradient id="corp-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1258ca"/>
+      <stop offset="100%" style="stop-color:#2458f3"/>
     </linearGradient>
   </defs>
   
   <g id="component_root">
-    <rect x="8" y="8" width="184" height="544" rx="10" fill="#ffffff" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="300" height="740" rx="10" fill="#ffffff" filter="url(#card-shadow)"/>
     
-    <text x="24" y="44" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Style Library</text>
+    <text x="24" y="50" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#111827">Style Selection</text>
+    <text x="24" y="75" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7280">Choose a visual language or upload custom</text>
     
-    <g transform="translate(24, 64)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-minimal)" stroke="#dee2e6" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#495057" text-anchor="middle">Minimal</text>
+    <g transform="translate(24, 100)">
+      <rect width="120" height="90" rx="8" fill="url(#selected-bg)" stroke="#f05e23" stroke-width="1.5"/>
+      <rect x="15" y="20" width="90" height="4" rx="2" fill="#e5e7eb"/>
+      <rect x="15" y="30" width="60" height="4" rx="2" fill="#e5e7eb"/>
+      <rect x="15" y="45" width="90" height="25" rx="4" fill="#f3f4f6"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Minimal</text>
+      <circle cx="108" cy="12" r="8" fill="#f05e23"/>
+      <path d="M104 12 L107 15 L112 9" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
     
-    <g transform="translate(106, 64)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-dark)" stroke="#495057" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#ffffff" text-anchor="middle">Dark</text>
+    <g transform="translate(156, 100)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="10" y="15" width="100" height="50" fill="none" stroke="#111827" stroke-width="3"/>
+      <line x1="10" y1="35" x2="110" y2="35" stroke="#111827" stroke-width="2"/>
+      <rect x="15" y="22" width="20" height="8" fill="#111827"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Brutalist</text>
     </g>
     
-    <g transform="translate(24, 130)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-ocean)" stroke="#1971c2" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#ffffff" text-anchor="middle">Ocean</text>
+    <g transform="translate(24, 206)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="15" y="15" width="90" height="50" rx="8" fill="#e0f2fe" opacity="0.6"/>
+      <rect x="25" y="25" width="70" height="30" rx="6" fill="#ffffff" opacity="0.8" stroke="#bfdbfe" stroke-width="1"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Glass</text>
     </g>
     
-    <g transform="translate(106, 130)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-vibrant)" stroke="#f05e23" stroke-width="2"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#ffffff" text-anchor="middle">Vibrant</text>
-      <circle cx="60" cy="10" r="6" fill="#f05e23"/>
-      <path d="M57 10 L59 12 L63 8" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(156, 206)">
+      <rect width="120" height="90" rx="8" fill="#f3f4f6" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="25" y="20" width="70" height="35" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <circle cx="60" cy="37.5" r="10" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Soft UI</text>
     </g>
     
-    <g transform="translate(24, 196)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-glass)" stroke="#a5d8ff" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#1864ab" text-anchor="middle">Glass</text>
+    <g transform="translate(24, 312)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="20" y="20" width="8" height="8" fill="#f05e23"/>
+      <rect x="32" y="20" width="8" height="8" fill="#f05e23"/>
+      <rect x="20" y="32" width="8" height="8" fill="#f05e23"/>
+      <rect x="45" y="20" width="55" height="4" fill="#1f2937"/>
+      <rect x="45" y="28" width="40" height="4" fill="#1f2937"/>
+      <rect x="20" y="50" width="80" height="20" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Retro</text>
     </g>
     
-    <g transform="translate(106, 196)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-brutal)" stroke="#212529" stroke-width="2"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#212529" text-anchor="middle">Brutal</text>
+    <g transform="translate(156, 312)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <path d="M30 45 Q30 25 50 25 Q70 25 70 45 Q70 65 50 65 Q30 65 30 45" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+      <circle cx="85" cy="35" r="12" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Organic</text>
     </g>
     
-    <g transform="translate(24, 262)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-nature)" stroke="#2f9e44" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#2b8a3e" text-anchor="middle">Nature</text>
+    <g transform="translate(24, 418)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="15" y="20" width="90" height="12" rx="2" fill="url(#corp-grad)"/>
+      <rect x="15" y="38" width="90" height="25" rx="2" fill="#f1f5f9"/>
+      <rect x="20" y="43" width="30" height="3" rx="1.5" fill="#94a3b8"/>
+      <rect x="20" y="50" width="50" height="3" rx="1.5" fill="#cbd5e1"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Corporate</text>
     </g>
     
-    <g transform="translate(106, 262)">
-      <rect x="0" y="0" width="70" height="50" rx="6" fill="url(#style-mono)" stroke="#868e96" stroke-width="1"/>
-      <text x="35" y="29" font-family="Inter, sans-serif" font-size="9" fill="#495057" text-anchor="middle">Mono</text>
+    <g transform="translate(156, 418)">
+      <rect width="120" height="90" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <rect x="15" y="15" width="90" height="50" rx="4" fill="#1f2937"/>
+      <rect x="25" y="25" width="70" height="4" rx="2" fill="#4b5563"/>
+      <rect x="25" y="35" width="50" height="4" rx="2" fill="#6b7280"/>
+      <circle cx="85" cy="50" r="8" fill="#f05e23"/>
+      <text x="60" y="82" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#374151" font-weight="500">Dark</text>
     </g>
     
-    <line x1="24" y1="336" x2="176" y2="336" stroke="#e9ecef" stroke-width="1"/>
-    
-    <text x="24" y="368" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#1a1a1a">Custom Upload</text>
-    
-    <rect x="24" y="384" width="152" height="120" rx="8" fill="#fafafa" stroke="#d5d4d0" stroke-width="1.5" stroke-dasharray="4 4"/>
-    
-    <g transform="translate(84, 410)">
-      <path d="M16 4 L16 20" stroke="#f05e23" stroke-width="2" stroke-linecap="round"/>
-      <path d="M10 10 L16 4 L22 10" stroke="#f05e23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M4 20 L4 22 C4 23 5 24 6 24 L26 24 C27 24 28 23 28 22 L28 20" stroke="#868e96" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <g transform="translate(24, 530)">
+      <rect width="252" height="120" rx="8" fill="#fafaf9" stroke="#d5d4d0" stroke-width="1" stroke-dasharray="4 4"/>
+      <g transform="translate(126, 35)">
+        <path d="M-12 8 L0 -4 L12 8" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="0" y1="-4" x2="0" y2="16" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-8" y1="20" x2="8" y2="20" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="126" y="65" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#374151" font-weight="500">Upload Custom Style</text>
+      <text x="126" y="85" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">SVG, PNG, or JSON tokens</text>
+      <line x1="40" y1="105" x2="110" y2="105" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="126" y="109" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9ca3af">or</text>
+      <line x1="142" y1="105" x2="212" y2="105" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="86" y="115" width="80" height="28" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="126" y="133" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151" font-weight="500">Browse</text>
     </g>
     
-    <text x="100" y="456" font-family="Inter, sans-serif" font-size="11" fill="#495057" text-anchor="middle">Drop files or</text>
-    <text x="100" y="474" font-family="Inter, sans-serif" font-size="11" fill="#f05e23" font-weight="600" text-anchor="middle">Browse</text>
-    
-    <text x="100" y="524" font-family="Inter, sans-serif" font-size="9" fill="#adb5bd" text-anchor="middle">Supports .css, .json, .fig</text>
+    <g transform="translate(24, 670)">
+      <rect x="0" y="0" width="252" height="44" rx="8" fill="url(#orange-gradient)"/>
+      <text x="126" y="28" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="14" font-weight="700" fill="#ffffff">Confirm Selection</text>
+    </g>
   </g>
 </svg>

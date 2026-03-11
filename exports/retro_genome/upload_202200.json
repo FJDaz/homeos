@@ -1,0 +1,229 @@
+{
+  "analysis": {
+    "regions": [
+      {
+        "name": "Header",
+        "role": "app_shell",
+        "coordinates_hint": "Top of the screen"
+      },
+      {
+        "name": "Left Sidebar",
+        "role": "navigation",
+        "coordinates_hint": "Left side of the screen"
+      },
+      {
+        "name": "Main Content Area",
+        "role": "main",
+        "coordinates_hint": "Center of the screen"
+      },
+      {
+        "name": "Right Sidebar",
+        "role": "contextual",
+        "coordinates_hint": "Right side of the screen"
+      }
+    ],
+    "components": [
+      {
+        "id": "1",
+        "name": "Hom\u00e9OS Logo",
+        "type": "shell_element",
+        "location": "header",
+        "visual_characteristics": {
+          "text": "Hom\u00e9OS",
+          "color": "N/A",
+          "size": "small"
+        },
+        "inferred_intent": "App Branding"
+      },
+      {
+        "id": "2",
+        "name": "Explorer Tree",
+        "type": "list",
+        "location": "sidebar_left",
+        "visual_characteristics": {
+          "icons": "folder, file",
+          "text": "File names",
+          "size": "medium"
+        },
+        "inferred_intent": "File system navigation"
+      },
+      {
+        "id": "3",
+        "name": "File Editor Tabs",
+        "type": "nav",
+        "location": "main",
+        "visual_characteristics": {
+          "text": "File names",
+          "size": "small"
+        },
+        "inferred_intent": "Switch between open files"
+      },
+      {
+        "id": "4",
+        "name": "Code Editor",
+        "type": "input",
+        "location": "main",
+        "visual_characteristics": {
+          "text": "Code",
+          "size": "large"
+        },
+        "inferred_intent": "Display and edit source code"
+      },
+      {
+        "id": "5",
+        "name": "Chat Bubble",
+        "type": "shell_element",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "color": "green",
+          "text": "Chat messages",
+          "size": "medium"
+        },
+        "inferred_intent": "Display chat messages"
+      },
+      {
+        "id": "6",
+        "name": "Chat Input",
+        "type": "input",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "text": "Type a message",
+          "size": "small"
+        },
+        "inferred_intent": "Enter chat messages"
+      },
+      {
+        "id": "7",
+        "name": "Send Button",
+        "type": "button",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "icon": "send",
+          "size": "small"
+        },
+        "inferred_intent": "Send chat message"
+      },
+      {
+        "id": "8",
+        "name": "Tabs (Problems, Output, Terminal)",
+        "type": "nav",
+        "location": "main",
+        "visual_characteristics": {
+          "text": "Tab names",
+          "size": "small"
+        },
+        "inferred_intent": "Switch between different panels"
+      }
+    ],
+    "design_tokens": {
+      "primary_color": "#FFFFFF",
+      "accent_color": "#4CAF50",
+      "typography": "Inter, system-ui, sans-serif"
+    }
+  },
+  "audit": {
+    "mappings": [
+      {
+        "component_id": "1",
+        "canonical_intent": null,
+        "confidence": 0.8,
+        "reasoning": "App Branding doesn't directly map to a canonical intent, but it's a standard UI element. This could be considered part of the overall application 'shell'."
+      },
+      {
+        "component_id": "2",
+        "canonical_intent": "FileExplorer",
+        "confidence": 0.95,
+        "reasoning": "The description clearly indicates file system navigation, which aligns directly with the FileExplorer intent."
+      },
+      {
+        "component_id": "3",
+        "canonical_intent": "CodeEditor",
+        "confidence": 0.7,
+        "reasoning": "File Editor Tabs are part of CodeEditor, so they inherit this."
+      },
+      {
+        "component_id": "4",
+        "canonical_intent": "CodeEditor",
+        "confidence": 0.95,
+        "reasoning": "The component is explicitly described as a code editor, matching the CodeEditor intent."
+      },
+      {
+        "component_id": "5",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "A chat bubble displaying messages aligns with the ButlerChat intent."
+      },
+      {
+        "component_id": "6",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "Chat input aligns with the ButlerChat intent."
+      },
+      {
+        "component_id": "7",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "Send button aligns with the ButlerChat intent."
+      },
+      {
+        "component_id": "8",
+        "canonical_intent": "TerminalOutput",
+        "confidence": 0.7,
+        "reasoning": "Tabs for Problems, Output, and Terminal suggest terminal output and related tools."
+      }
+    ],
+    "ergonomic_audit": {
+      "deadends": [],
+      "gaps": [
+        "Missing 'Save' functionality in the Code Editor.",
+        "No clear indication of language support or syntax highlighting in the Code Editor.",
+        "No indication of user identity associated with chat messages."
+      ],
+      "suggestions": [
+        "Add a 'Save' button or auto-save functionality to the Code Editor.",
+        "Implement syntax highlighting and language selection for the Code Editor.",
+        "Display user avatars or names next to chat messages."
+      ]
+    },
+    "genome_structure": {
+      "n0_phases": [
+        {
+          "id": "phase_2_bkd",
+          "organs": [
+            {
+              "id": "file_management",
+              "intent": "FileExplorer",
+              "components": [
+                "2"
+              ]
+            },
+            {
+              "id": "code_editing",
+              "intent": "CodeEditor",
+              "components": [
+                "3",
+                "4"
+              ]
+            },
+            {
+              "id": "butler_interaction",
+              "intent": "ButlerChat",
+              "components": [
+                "5",
+                "6",
+                "7"
+              ]
+            },
+            {
+              "id": "terminal_io",
+              "intent": "TerminalOutput",
+              "components": [
+                "8"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

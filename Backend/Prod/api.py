@@ -29,6 +29,9 @@ from .sullivan.agent.api import router as agent_router
 # Import stenciler routes (Genome Editor)
 from .sullivan.stenciler.api import router as stenciler_router
 
+# Import retro genome routes (Retro Genome — Mission 32)
+from .retro_genome.routes import router as retro_genome_router
+
 
 app = FastAPI(title="AetherFlow API", version="0.1.0")
 
@@ -85,6 +88,9 @@ app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 
 # Include agent routes (Chatbot Sullivan)
 app.include_router(agent_router)
+
+# Include retro genome routes (Mission 32)
+app.include_router(retro_genome_router)
 
 # Add CORS middleware
 app.add_middleware(

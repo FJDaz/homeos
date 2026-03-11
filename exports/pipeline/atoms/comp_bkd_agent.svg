@@ -1,40 +1,101 @@
-<svg viewBox="0 0 200 520" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 300 740" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2458f3;stop-opacity:1" />
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#97ea90;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#97ea90;stop-opacity:0.05" />
     </linearGradient>
   </defs>
   
-  <rect x="0" y="0" width="200" height="520" rx="8" fill="#ffffff" filter="url(#shadow)"/>
+  <!-- Card Container -->
+  <rect x="0" y="0" width="300" height="740" rx="10" fill="#ffffff" filter="url(#shadow)"/>
   
-  <text x="24" y="45" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#111827">Majordome</text>
-  <circle cx="168" cy="41" r="4" fill="#97ea90"/>
-  <text x="178" y="45" font-family="Inter, sans-serif" font-size="10" fill="#6b7280">En ligne</text>
+  <!-- Header -->
+  <g id="header">
+    <text x="24" y="46" font-family="Plus Jakarta Sans, sans-serif" font-size="19" font-weight="700" fill="#1a1a1a">Majordome</text>
+    <text x="24" y="68" font-family="Inter, sans-serif" font-size="12" fill="#6b7280">Pilotage par Gemini • BKD</text>
+    <circle cx="262" cy="52" r="6" fill="#97ea90"/>
+    <circle cx="262" cy="52" r="2" fill="#ffffff"/>
+  </g>
   
-  <circle cx="28" cy="85" r="10" fill="#2458f3"/>
-  <text x="28" y="89" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="10" fill="#ffffff" text-anchor="middle">G</text>
-  <rect x="44" y="70" width="140" height="50" rx="8" fill="#eff6ff"/>
-  <text x="56" y="92" font-family="Inter, sans-serif" font-size="11" fill="#1f2937">Sullivan prêt.</text>
-  <text x="56" y="108" font-family="Inter, sans-serif" font-size="11" fill="#1f2937">Quelle mission ?</text>
+  <!-- Divider -->
+  <line x1="24" y1="88" x2="276" y2="88" stroke="#e5e7eb" stroke-width="1"/>
   
-  <rect x="60" y="135" width="124" height="36" rx="8" fill="#2458f3"/>
-  <text x="72" y="158" font-family="Inter, sans-serif" font-size="11" fill="#ffffff">Build &amp; déploiement</text>
+  <!-- Chat Area -->
+  <g id="chat_content" transform="translate(0, 108)">
+    <!-- Gemini Avatar + Message -->
+    <g transform="translate(24, 0)">
+      <rect x="0" y="0" width="36" height="36" rx="8" fill="#f3f4f6"/>
+      <text x="18" y="24" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#97ea90" text-anchor="middle">S</text>
+      
+      <rect x="44" y="0" width="196" height="76" rx="10" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="60" y="30" font-family="Inter, sans-serif" font-size="13" fill="#374151">
+        <tspan x="60" dy="0">Je suis prêt à exécuter les</tspan>
+        <tspan x="60" dy="20">missions de génération de</tspan>
+        <tspan x="60" dy="20">code. Quelle est votre demande ?</tspan>
+      </text>
+    </g>
+    
+    <!-- User Message -->
+    <g transform="translate(100, 92)">
+      <rect x="0" y="0" width="176" height="44" rx="10" fill="#1a1a1a"/>
+      <text x="20" y="27" font-family="Inter, sans-serif" font-size="13" fill="#ffffff">Générer composant Card.tsx</text>
+    </g>
+    
+    <!-- Gemini Response with Accent -->
+    <g transform="translate(24, 156)">
+      <rect x="0" y="0" width="36" height="36" rx="8" fill="#f3f4f6"/>
+      <text x="18" y="24" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#97ea90" text-anchor="middle">S</text>
+      
+      <rect x="44" y="0" width="196" height="96" rx="10" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="44" y="0" width="3" height="96" rx="1.5" fill="#97ea90"/>
+      <text x="60" y="28" font-family="Inter, sans-serif" font-size="13" fill="#374151">
+        <tspan x="60" dy="0">Analyse du génome PRISTINE.</tspan>
+        <tspan x="60" dy="20">Génération AST en cours...</tspan>
+        <tspan x="60" dy="20" fill="#059669" font-weight="500">✓ Fichier créé avec succès</tspan>
+      </text>
+    </g>
+    
+    <!-- User Message 2 -->
+    <g transform="translate(140, 268)">
+      <rect x="0" y="0" width="136" height="44" rx="10" fill="#1a1a1a"/>
+      <text x="20" y="27" font-family="Inter, sans-serif" font-size="13" fill="#ffffff">Déployer sur Vercel</text>
+    </g>
+    
+    <!-- Gemini Processing -->
+    <g transform="translate(24, 328)">
+      <rect x="0" y="0" width="36" height="36" rx="8" fill="#f3f4f6"/>
+      <text x="18" y="24" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#97ea90" text-anchor="middle">S</text>
+      
+      <rect x="44" y="0" width="156" height="44" rx="10" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="60" y="27" font-family="Inter, sans-serif" font-size="13" fill="#6b7280">Déploiement en cours...</text>
+      <circle cx="180" cy="22" r="2" fill="#97ea90"/>
+      <circle cx="188" cy="22" r="2" fill="#97ea90" opacity="0.6"/>
+      <circle cx="196" cy="22" r="2" fill="#97ea90" opacity="0.3"/>
+    </g>
+  </g>
   
-  <circle cx="28" cy="195" r="10" fill="#2458f3"/>
-  <text x="28" y="199" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="10" fill="#ffffff" text-anchor="middle">G</text>
-  <rect x="44" y="180" width="140" height="85" rx="8" fill="#eff6ff"/>
-  <text x="56" y="202" font-family="Inter, sans-serif" font-size="11" fill="#1f2937">Mission confirmée :</text>
-  <text x="56" y="225" font-family="Inter, sans-serif" font-size="10" fill="#4b5563">• Analyse sémantique</text>
-  <text x="56" y="242" font-family="Inter, sans-serif" font-size="10" fill="#4b5563">• Compilation active</text>
-  <text x="56" y="259" font-family="Inter, sans-serif" font-size="10" fill="#2458f3" font-weight="600">Voir progression →</text>
+  <!-- Quick Actions -->
+  <g transform="translate(24, 625)">
+    <rect x="0" y="0" width="76" height="32" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="38" y="21" font-family="Inter, sans-serif" font-size="11" fill="#4b5563" text-anchor="middle">Audit</text>
+    
+    <rect x="84" y="0" width="76" height="32" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="122" y="21" font-family="Inter, sans-serif" font-size="11" fill="#4b5563" text-anchor="middle">Générer</text>
+    
+    <rect x="168" y="0" width="84" height="32" rx="6" fill="#97ea90" stroke="#97ea90" stroke-width="1"/>
+    <text x="210" y="21" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a" text-anchor="middle" font-weight="500">Déployer</text>
+  </g>
   
-  <rect x="16" y="454" width="168" height="50" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="32" y="484" font-family="Inter, sans-serif" font-size="12" fill="#9ca3af">Écrire une instruction...</text>
-  
-  <rect x="146" y="464" width="30" height="30" rx="6" fill="url(#btnGradient)"/>
-  <path d="M154 479 L164 479 M160 474 L164 479 L160 484" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Input Field -->
+  <g transform="translate(24, 671)">
+    <rect x="0" y="0" width="252" height="52" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+    <text x="16" y="32" font-family="Inter, sans-serif" font-size="14" fill="#9ca3af">Commander une action...</text>
+    
+    <!-- Send Button -->
+    <rect x="200" y="8" width="36" height="36" rx="6" fill="#97ea90"/>
+    <path d="M212 26 L224 26 M220 21 L224 26 L220 31" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>

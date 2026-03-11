@@ -1,0 +1,237 @@
+{
+  "analysis": {
+    "regions": [
+      {
+        "name": "Header",
+        "role": "app_shell",
+        "coordinates_hint": "top of the image, contains app name"
+      },
+      {
+        "name": "Left Sidebar",
+        "role": "navigation",
+        "coordinates_hint": "left side, contains file explorer"
+      },
+      {
+        "name": "Main Content Area",
+        "role": "main",
+        "coordinates_hint": "center, contains code editor and console"
+      },
+      {
+        "name": "Right Sidebar",
+        "role": "contextual",
+        "coordinates_hint": "right side, contains chat interface"
+      }
+    ],
+    "components": [
+      {
+        "id": "app_name",
+        "name": "App Name",
+        "type": "shell_element",
+        "location": "header",
+        "visual_characteristics": {
+          "text": "Hom\u00e9OS",
+          "font_size": "large",
+          "color": "black"
+        },
+        "inferred_intent": "Displays the name of the application."
+      },
+      {
+        "id": "file_explorer",
+        "name": "File Explorer",
+        "type": "list",
+        "location": "sidebar_left",
+        "visual_characteristics": {
+          "icons": "folder, file",
+          "text": "file names",
+          "size": "small"
+        },
+        "inferred_intent": "Navigates the file system."
+      },
+      {
+        "id": "code_editor",
+        "name": "Code Editor",
+        "type": "input",
+        "location": "main",
+        "visual_characteristics": {
+          "text": "code syntax highlighting",
+          "size": "large",
+          "font": "monospace"
+        },
+        "inferred_intent": "Edits and displays code files."
+      },
+      {
+        "id": "console",
+        "name": "Console",
+        "type": "input",
+        "location": "main",
+        "visual_characteristics": {
+          "text": "console output",
+          "size": "small",
+          "font": "monospace",
+          "background_color": "black"
+        },
+        "inferred_intent": "Displays console output, errors, and debugging information."
+      },
+      {
+        "id": "chat_interface",
+        "name": "Chat Interface",
+        "type": "list",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "text": "chat messages",
+          "size": "small",
+          "background_color": "white"
+        },
+        "inferred_intent": "Allows communication with a user or bot."
+      },
+      {
+        "id": "chat_input",
+        "name": "Chat Input",
+        "type": "input",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "text": "text input",
+          "size": "small",
+          "border": "light gray"
+        },
+        "inferred_intent": "Allows the user to enter text for the chat interface."
+      },
+      {
+        "id": "send_button",
+        "name": "Send Button",
+        "type": "button",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "icon": "arrow_right",
+          "color": "primary"
+        },
+        "inferred_intent": "Sends the message in the chat input."
+      },
+      {
+        "id": "tab_navigation",
+        "name": "Tab Navigation",
+        "type": "nav",
+        "location": "main",
+        "visual_characteristics": {
+          "tabs": [
+            "Probl\u00e8mes",
+            "Sortie",
+            "Terminal",
+            "Ports",
+            "Console de d\u00e9bogage"
+          ]
+        },
+        "inferred_intent": "Allows switching between different views (e.g., problems, output, terminal)."
+      }
+    ],
+    "design_tokens": {
+      "primary_color": "#50C878",
+      "accent_color": "#ADD8E6",
+      "typography": "Inter, system-ui, sans-serif"
+    }
+  },
+  "audit": {
+    "mappings": [
+      {
+        "component_id": "app_name",
+        "canonical_intent": null,
+        "confidence": 0.0,
+        "reasoning": "This is a basic UI element, not directly mappable to a specific Aetherflow intent."
+      },
+      {
+        "component_id": "file_explorer",
+        "canonical_intent": "FileExplorer",
+        "confidence": 0.95,
+        "reasoning": "Clearly allows navigation and management of files."
+      },
+      {
+        "component_id": "code_editor",
+        "canonical_intent": "CodeEditor",
+        "confidence": 0.95,
+        "reasoning": "Provides a space for editing code with syntax highlighting."
+      },
+      {
+        "component_id": "console",
+        "canonical_intent": "TerminalOutput",
+        "confidence": 0.9,
+        "reasoning": "Displays console output, which aligns with the purpose of TerminalOutput."
+      },
+      {
+        "component_id": "chat_interface",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "Provides a chat interface for communication."
+      },
+      {
+        "component_id": "chat_input",
+        "canonical_intent": null,
+        "confidence": 0.0,
+        "reasoning": "This is a basic UI element, not directly mappable to a specific Aetherflow intent."
+      },
+      {
+        "component_id": "send_button",
+        "canonical_intent": null,
+        "confidence": 0.0,
+        "reasoning": "This is a basic UI element, not directly mappable to a specific Aetherflow intent."
+      },
+      {
+        "component_id": "tab_navigation",
+        "canonical_intent": null,
+        "confidence": 0.0,
+        "reasoning": "This is a basic UI element, not directly mappable to a specific Aetherflow intent."
+      }
+    ],
+    "ergonomic_audit": {
+      "deadends": [],
+      "gaps": [
+        "No clear 'save' or 'apply' mechanism for changes made in the Code Editor.",
+        "Missing error handling or visual feedback for invalid chat input.",
+        "No explicit 'new file' or 'delete file' options in the File Explorer (inferred functionality only)."
+      ],
+      "suggestions": [
+        "Add save/apply buttons or autosave functionality to the Code Editor.",
+        "Implement error messages or visual cues for invalid chat input (e.g., empty message).",
+        "Consider adding explicit 'new file' and 'delete file' actions to the File Explorer for clarity."
+      ]
+    },
+    "genome_structure": {
+      "n0_phases": [
+        {
+          "id": "phase_2_bkd",
+          "organs": [
+            {
+              "id": "file_management",
+              "intent": "FileExplorer",
+              "components": [
+                "file_explorer"
+              ]
+            },
+            {
+              "id": "code_editing",
+              "intent": "CodeEditor",
+              "components": [
+                "code_editor"
+              ]
+            },
+            {
+              "id": "terminal_interaction",
+              "intent": "TerminalOutput",
+              "components": [
+                "console"
+              ]
+            },
+            {
+              "id": "communication",
+              "intent": "ButlerChat",
+              "components": [
+                "chat_interface",
+                "chat_input",
+                "send_button"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

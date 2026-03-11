@@ -17,58 +17,51 @@ from openai import OpenAI
 project_root = Path(__file__).parent.parent.parent.parent
 load_dotenv(project_root / "Backend/.env")
 
-SYSTEM_PROMPT = """You are a Senior Information Architect and Layout Designer for premium SaaS applications.
-You receive a genome structure (tabs, organs, components) and produce an optimal layout plan.
+SYSTEM_PROMPT = """You are a Structural Layout Contractor. Your job is to furniture a house where the walls are EXACTLY as defined in the 'geometric_contract'.
 
-PRINCIPLES:
-- NEVER use rigid 2-column grids — vary column widths, use asymmetric layouts
-- High-density organs get more height; simple organs get less
-- Dashboard organs: full-width or 70/30 split
-- Form/upload organs: right panel, 400-500px wide
-- Chat/overlay organs: floating card positioning
-- Canvas/analysis organs: large, 66%+ width
+CRITICAL INSTRUCTIONS:
+1. CONTRACT IS LAW: You MUST use the exact 'width_px' and 'x_offset' from the 'geometric_contract' for each organ's assigned zone.
+2. ASSIGNMENTS: Check the 'assignments' object in the contract. If organ 'X' is assigned to zone 'Y', then organ 'X' MUST have the 'x' and 'w' of zone 'Y'.
+3. NO INNOVATION: Do not "guess" widths. Do not use 240px if the contract says 260px.
+4. SPATIAL STABILITY: 'is_shell' organs MUST have the same (x, y, w, h) across all phases.
+5. NO OVERLAPS: Ensure valid y-stacking if multiple organs share a zone (though usually they have their own).
 
 OUTPUT: JSON only. No markdown. Schema:
 {
   "phases": {
     "<n0_id>": {
-      "layout_style": "string (e.g. split_70_30, asymmetric, full_width, nested)",
+      "layout_style": "string",
       "total_height": <int>,
       "organs": [
         {
           "id": "<n1_id>",
-          "x": <int>,   // absolute from left edge (safe_x = 260)
-          "y": <int>,   // relative to phase start (0 = top of phase)
+          "x": <int>,
+          "y": <int>,
           "w": <int>,
           "h": <int>,
-          "note": "why this size/position"
+          "note": "EXACT zone name used from contract"
         }
       ]
     }
   }
 }"""
 
-LAYOUT_PROMPT = """Design the layout for this SaaS application genome.
+LAYOUT_PROMPT = """Fulfill the Structural Layout Contract for this genome.
 
-CANVAS: {w}px total width. Safe content area starts at x={safe_x} (header+sidebar reserved).
-Safe area width: {safe_w}px. Phase gap: 40px between phases.
+CANVAS: {w}px total width.
+GEOMETRIC CONTRACT (THE RULES):
+{contract_json}
 
-TABS (N0 phases, one artboard per tab):
-{tabs_json}
-
-ORGANS to lay out (per phase):
+ORGANS to lay out (grouped by phase):
 {organs_json}
 
-For each phase: decide x/y/w/h for each organ.
-- x must be >= {safe_x} (content area start)
-- y = 0 means top of phase content (below app shell header ~72px)
-- w + x must not exceed {w} - 40 (right margin)
-- Vary layouts: asymmetric, nested, full-width — avoid uniform 2-col grid
-- Minimum organ height: 200px. Maximum: 600px.
-- Interesting layouts matter: dashboard = wide, form = narrow, canvas = hero-sized
+INSTRUCTIONS:
+- For each organ, find its assigned zone in 'geometric_contract.assignments'.
+- Look up that zone's 'width_px' and 'x_offset' in 'geometric_contract.zones'.
+- Apply these values EXACTLY to the organ's 'w' and 'x'.
+- Use standard heights (e.g., Header: 60px, Main: 800px) unless specified.
 
 Return JSON only."""
-
 
 def main():
     import argparse
@@ -76,9 +69,9 @@ def main():
     parser.add_argument("--context_text", type=str, default="", help="Overarching project context")
     args = parser.parse_args()
 
-    api_key = os.getenv("KIMI_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        print("❌ KIMI_KEY not set")
+        print("❌ GOOGLE_API_KEY not set")
         sys.exit(1)
 
     pipeline_dir = project_root / "exports/pipeline"
@@ -91,7 +84,7 @@ def main():
         zone_map = json.load(f)
 
     canvas = zone_map["canvas"]
-    tabs_by_id = {t["id"]: t for t in zone_map["tabs"]}
+    contract = zone_map.get("geometric_contract", {})
 
     # Group organs by N0
     organs_by_n0: dict[str, list] = {}
@@ -105,6 +98,7 @@ def main():
                 "id": o["id"],
                 "name": o["name"],
                 "ui_role": o["ui_role"],
+                "is_shell": o.get("is_shell", False),
                 "n3_count": o["n3_count"],
                 "zone_counts": o["zone_counts"],
             }
@@ -113,27 +107,29 @@ def main():
 
     prompt = LAYOUT_PROMPT.format(
         w=canvas["w"],
-        safe_x=canvas["safe_x"],
-        safe_w=canvas["safe_w"],
+        contract_json=json.dumps(contract, indent=2),
         tabs_json=json.dumps(zone_map["tabs"], indent=2),
         organs_json=json.dumps(organs_summary, indent=2),
     )
     
     system_prompt = SYSTEM_PROMPT
     if args.context_text:
-        system_prompt += f"\n\nHere is the overarching vision of the product you are designing today:\n{args.context_text}"
+        system_prompt += f"\n\nContext Document Reference:\n{args.context_text}"
 
-    client = OpenAI(base_url="https://api.moonshot.ai/v1", api_key=api_key)
-    print("⚖️  KIMI Layout Director — designing layout...")
+    client = OpenAI(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=api_key
+    )
+    print("⚖️  Gemini Layout Director — enforcing geometric contract...")
 
     response = client.chat.completions.create(
-        model="kimi-k2.5",
+        model="gemini-2.0-flash",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=16000,
-        extra_body={"thinking": {"type": "enabled"}},
+        max_tokens=8192,
+        response_format={"type": "json_object"}
     )
 
     choice = response.choices[0]

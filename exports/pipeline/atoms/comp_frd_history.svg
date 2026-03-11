@@ -1,71 +1,72 @@
-<svg viewBox="0 0 200 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 240 740" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
   </defs>
   
   <g id="component_root">
     <!-- Main Card Surface -->
-    <rect x="0" y="0" width="200" height="560" rx="8" fill="#ffffff" filter="url(#shadow)"/>
+    <rect x="12" y="12" width="216" height="716" rx="8" fill="#ffffff" filter="url(#cardShadow)"/>
     
-    <!-- Header -->
-    <text x="20" y="42" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="18" fill="#111827">Intent Feed</text>
-    <rect x="20" y="52" width="32" height="3" rx="1.5" fill="#ffd548"/>
+    <!-- Section Title -->
+    <text x="32" y="56" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="18" font-weight="700" fill="#111827">Intent Feed</text>
     
-    <!-- Item 1: Auth Flow -->
-    <g transform="translate(20, 90)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">Auth Flow</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 2h • BRS</text>
+    <!-- Active Intent Item -->
+    <g>
+      <rect x="32" y="80" width="176" height="76" rx="6" fill="#f0f7ff"/>
+      <rect x="32" y="80" width="3" height="76" rx="1.5" fill="#1258ca"/>
+      <text x="42" y="102" font-family="Roboto Mono, monospace" font-size="10" fill="#1258ca">2m ago</text>
+      <text x="42" y="122" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#1f2937">Refactor navigation</text>
+      <text x="42" y="140" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#1f2937">for Pristine aesthetics</text>
     </g>
-    <line x1="20" y1="145" x2="180" y2="145" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 2: Dashboard Grid -->
-    <g transform="translate(20, 165)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.8"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">Dashboard Grid</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 5h • FRD</text>
+    <!-- Intent Item 2 -->
+    <g>
+      <rect x="32" y="166" width="3" height="76" rx="1.5" fill="#dbeafe"/>
+      <text x="42" y="188" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">15m ago</text>
+      <text x="42" y="208" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#374151">Implement Sullivan</text>
+      <text x="42" y="226" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#374151">arbitration sidebar</text>
     </g>
-    <line x1="20" y1="220" x2="180" y2="220" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 3: Color Tokens -->
-    <g transform="translate(20, 240)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.6"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">Color Tokens</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Hier • BKD</text>
+    <!-- Intent Item 3 -->
+    <g>
+      <rect x="32" y="252" width="3" height="76" rx="1.5" fill="#dbeafe"/>
+      <text x="42" y="274" font-family="Roboto Mono, monospace" font-size="10" fill="#6b7280">1h ago</text>
+      <text x="42" y="294" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#374151">Design Genome</text>
+      <text x="42" y="312" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#374151">visualization grid</text>
     </g>
-    <line x1="20" y1="295" x2="180" y2="295" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 4: API Layer -->
-    <g transform="translate(20, 315)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.5"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">API Layer</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 2j • BKD</text>
+    <!-- Intent Item 4 -->
+    <g>
+      <rect x="32" y="338" width="3" height="76" rx="1.5" fill="#e5e7eb"/>
+      <text x="42" y="360" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">3h ago</text>
+      <text x="42" y="380" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">Create surgical edit</text>
+      <text x="42" y="398" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">AST parser module</text>
     </g>
-    <line x1="20" y1="370" x2="180" y2="370" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 5: Component Lib -->
-    <g transform="translate(20, 390)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.4"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">Component Lib</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 3j • FRD</text>
+    <!-- Intent Item 5 -->
+    <g>
+      <rect x="32" y="424" width="3" height="76" rx="1.5" fill="#e5e7eb"/>
+      <text x="42" y="446" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">Yesterday</text>
+      <text x="42" y="466" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">Update BRS Trace</text>
+      <text x="42" y="484" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">multiverse columns</text>
     </g>
-    <line x1="20" y1="445" x2="180" y2="445" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 6: State Mgmt -->
-    <g transform="translate(20, 465)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.3"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">State Mgmt</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 5j • BKD</text>
+    <!-- Intent Item 6 -->
+    <g>
+      <rect x="32" y="510" width="3" height="76" rx="1.5" fill="#e5e7eb"/>
+      <text x="42" y="532" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">2d ago</text>
+      <text x="42" y="552" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">Architect DPL</text>
+      <text x="42" y="570" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">deployment pipeline</text>
     </g>
-    <line x1="20" y1="520" x2="180" y2="520" stroke="#d5d4d0" stroke-width="1"/>
     
-    <!-- Item 7: Project Init -->
-    <g transform="translate(20, 540)">
-      <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#ffd548" opacity="0.2"/>
-      <text x="12" y="14" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="12" fill="#1f2937">Project Init</text>
-      <text x="12" y="32" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6b7280">Il y a 1s • BRS</text>
+    <!-- Intent Item 7 -->
+    <g>
+      <rect x="32" y="596" width="3" height="76" rx="1.5" fill="#e5e7eb"/>
+      <text x="42" y="618" font-family="Roboto Mono, monospace" font-size="10" fill="#9ca3af">3d ago</text>
+      <text x="42" y="638" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">Define FRD color</text>
+      <text x="42" y="656" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#4b5563">palette tokens</text>
     </g>
   </g>
 </svg>

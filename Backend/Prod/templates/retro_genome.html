@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherFlow | Retro Genome</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0b;
+            --bg-panel: #141417;
+            --accent-orange: #ff6b35;
+            --accent-blue: #007aff;
+            --accent-green: #30d158;
+            --text-main: #e2e2e7;
+            --text-dim: #a1a1aa;
+            --border: #27272a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: 56px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-panel);
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--accent-orange);
+            font-size: 1.1rem;
+        }
+
+        .status {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+
+        .provider-badge {
+            font-size: 0.7rem;
+            background: rgba(0, 122, 255, 0.12);
+            color: var(--accent-blue);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 122, 255, 0.25);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        .col-header {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .col-title {
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .mockup-container {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mockup-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Intent cards */
+        .intent-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .intent-card:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .intent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .comp-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent-orange);
+        }
+
+        .comp-type {
+            font-size: 0.68rem;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-blue);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .intent-select {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 7px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+
+        .intent-description {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--accent-green);
+        }
+
+        .validation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-orange);
+        }
+
+        /* Audit */
+        .audit-panel {
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .audit-title {
+            font-weight: 700;
+            color: var(--accent-orange);
+            font-size: 0.88rem;
+            margin-bottom: 10px;
+        }
+
+        .audit-section {
+            margin-bottom: 10px;
+        }
+
+        .audit-section-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .audit-item {
+            font-size: 0.82rem;
+            margin-bottom: 3px;
+            color: var(--text-main);
+            display: flex;
+            gap: 6px;
+        }
+
+        .audit-item::before {
+            content: "→";
+            color: var(--accent-orange);
+            flex-shrink: 0;
+        }
+
+        /* Buttons */
+        #upload-btn {
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            font-family: inherit;
+        }
+
+        #upload-btn:hover {
+            opacity: 0.9;
+        }
+
+        #generate-prd-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: inherit;
+            box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        #generate-prd-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .empty-state {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">AETHERFLOW <span style="color:var(--text-dim);font-weight:300">| Retro Genome</span></div>
+        <div style="display:flex;gap:12px;align-items:center">
+            <span class="status" id="app-status">Ready</span>
+            <span class="provider-badge" id="provider-badge">—</span>
+            <input type="file" id="file-input" style="display:none" accept="image/png,image/jpeg,image/webp">
+            <button id="upload-btn">Upload Mockup</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="column">
+            <div class="col-header">
+                <div class="col-title">Mockup</div>
+            </div>
+            <div class="content">
+                <div class="mockup-container" id="mockup-viewer">
+                    <p class="empty-state">Aucune image uploadée</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="col-header">
+                <div class="col-title">Intent Mapping &amp; Ergonomics</div>
+            </div>
+            <div class="content" id="intent-list">
+                <p class="empty-state">L'analyse apparaîtra ici…</p>
+            </div>
+        </div>
+    </main>
+
+    <button id="generate-prd-btn">Générer PRD &amp; Roadmap →</button>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="loading-label" id="loading-text">Analyzing UI with AetherFlow Vision…</div>
+    </div>
+
+    <script>
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const intentList = document.getElementById('intent-list');
+        const loading = document.getElementById('loading');
+        const prdBtn = document.getElementById('generate-prd-btn');
+        const statusEl = document.getElementById('app-status');
+        const providerBadge = document.getElementById('provider-badge');
+
+        uploadBtn.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            loading.style.display = 'flex';
+            statusEl.textContent = 'Analysing…';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // XHR natif — pas de fetch pour éviter tout monkey patch potentiel
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/retro-genome/upload');
+            xhr.timeout = 300000; // 5 min
+
+            xhr.onload = () => {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.status === 'ok') {
+                        window._lastAnalysisData = data;
+                        renderAnalysis(data);
+                        document.getElementById('mockup-viewer').innerHTML =
+                            `<img src="${URL.createObjectURL(file)}" class="mockup-image">`;
+                        prdBtn.style.display = 'block';
+                        providerBadge.textContent = data.provider_used || 'gemini';
+                        statusEl.textContent = 'Analysis complete';
+                    } else {
+                        statusEl.textContent = 'Error';
+                        alert('Erreur: ' + (data.detail || JSON.stringify(data)));
+                    }
+                } catch (err) {
+                    alert('Parse error: ' + err + '\nRaw: ' + xhr.responseText.substring(0, 300));
+                } finally {
+                    loading.style.display = 'none';
+                }
+            };
+            xhr.onerror = () => {
+                alert('Network error — is the AetherFlow API running?');
+                loading.style.display = 'none';
+                statusEl.textContent = 'Error';
+            };
+            xhr.ontimeout = () => {
+                alert('Timeout — the vision analysis took too long.');
+                loading.style.display = 'none';
+                statusEl.textContent = 'Timeout';
+            };
+            xhr.send(formData);
+        };
+
+        function renderAnalysis(data) {
+            let html = '';
+            const auditData = data.audit || {};
+
+            if (auditData.ergonomic_audit) {
+                const audit = auditData.ergonomic_audit;
+                html += `<div class="audit-panel">
+                    <div class="audit-title">Audit Ergonomique</div>`;
+
+                if (audit.deadends?.length) {
+                    html += `<div class="audit-section">
+                        <div class="audit-section-label">Deadends</div>
+                        ${audit.deadends.map(d => `<div class="audit-item">${d}</div>`).join('')}
+                    </div>`;
+                }
+                if (audit.gaps?.length) {
+                    html += `<div class="audit-section">
+                        <div class="audit-section-label">Gaps</div>
+                        ${audit.gaps.map(g => `<div class="audit-item">${g}</div>`).join('')}
+                    </div>`;
+                }
+                if (audit.suggestions?.length) {
+                    html += `<div class="audit-section">
+                        <div class="audit-section-label">Suggestions</div>
+                        ${audit.suggestions.map(s => `<div class="audit-item">${s}</div>`).join('')}
+                    </div>`;
+                }
+                html += `</div>`;
+            }
+
+            const mappings = auditData.mappings || [];
+            const components = data.analysis?.components || [];
+
+            components.forEach(comp => {
+                const mapped = mappings.find(m => m.component_id === comp.id) || {};
+                const confidence = mapped.confidence || 0;
+                html += `
+                <div class="intent-card" id="card-${comp.id}">
+                    <div class="intent-header">
+                        <span class="comp-id">${comp.id}</span>
+                        <span class="comp-type">${comp.type ?? '—'}</span>
+                    </div>
+                    <div style="font-weight:600;margin-bottom:6px;font-size:0.9rem">${comp.name}</div>
+                    <div class="intent-description">${comp.inferred_intent ?? ''}</div>
+                    <select class="intent-select">
+                        <option value="${mapped.canonical_intent ?? ''}">${mapped.canonical_intent ?? '— non mappé —'}</option>
+                        <option value="Custom">Custom…</option>
+                        <optgroup label="Phase 1">
+                            <option>MultiverseColumns</option><option>SearchCenter</option>
+                            <option>ArbitrageDashboard</option><option>TraceLogs</option>
+                        </optgroup>
+                        <optgroup label="Phase 2">
+                            <option>FileExplorer</option><option>CodeEditor</option>
+                            <option>ButlerChat</option><option>TerminalOutput</option>
+                        </optgroup>
+                        <optgroup label="Phase 3">
+                            <option>GenomeExplorer</option><option>IntentFeed</option>
+                            <option>StyleChoice</option><option>PedagogyChat</option>
+                        </optgroup>
+                    </select>
+                    <div class="confidence-bar"><div class="confidence-fill" style="width:${Math.round(confidence * 100)}%"></div></div>
+                    <div class="validation-row">
+                        <input type="checkbox" id="lock-${comp.id}">
+                        <label for="lock-${comp.id}" style="cursor:pointer">Verrouiller Intent &amp; Specs</label>
+                        <span style="margin-left:auto;font-size:0.7rem;color:var(--text-dim)">${mapped.reasoning ?? ''}</span>
+                    </div>
+                </div>`;
+            });
+
+            if (!components.length) {
+                html = '<p class="empty-state">Aucun composant détecté.</p>';
+            }
+
+            intentList.innerHTML = html;
+        }
+
+        prdBtn.onclick = () => {
+            const projectName = prompt('Nom du projet:', 'Mockup Analysé');
+            if (!projectName) return;
+
+            loading.style.display = 'flex';
+            document.getElementById('loading-text').textContent = 'Génération du PRD…';
+
+            const payload = JSON.stringify({
+                data: window._lastAnalysisData || {},
+                project_name: projectName
+            });
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/retro-genome/generate-prd');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.timeout = 120000;
+            xhr.onload = () => {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.status === 'ok') {
+                        alert(`✅ PRD généré !\nChemin : ${result.prd_path}`);
+                    } else {
+                        alert('Erreur : ' + (result.detail || JSON.stringify(result)));
+                    }
+                } catch (e) {
+                    alert('Erreur de parsing: ' + e);
+                } finally {
+                    loading.style.display = 'none';
+                    document.getElementById('loading-text').textContent = 'Analyzing UI with AetherFlow Vision…';
+                }
+            };
+            xhr.onerror = () => { alert('Erreur réseau'); loading.style.display = 'none'; };
+            xhr.send(payload);
+        };
+    </script>
+</body>
+
+</html>

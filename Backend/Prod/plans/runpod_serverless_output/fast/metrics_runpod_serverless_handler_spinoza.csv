@@ -1,0 +1,20 @@
+Metric,Value
+Task ID,runpod_serverless_handler_spinoza
+Task Description,"Adapter Spinoza Secours pour RunPod Serverless : remplacer le serveur FastAPI par un handler runpod.serverless. Le code actuel (app_runpod.py) utilise uvicorn/FastAPI, incompatible avec RunPod Serverless qui attend une fonction handler() + runpod.serverless.start(). La logique métier (spinoza_repond, evaluer_dialogue, load_model) est conservée. Le routing se fait via job['input']['action'] : 'chat', 'init', 'evaluate'. L'historique est stateless (passé dans le payload). Le modèle est chargé une seule fois au démarrage (avant serverless.start)."
+Total Steps,3
+Successful Steps,3
+Failed Steps,0
+Total Execution Time (ms),83206.66500000001
+Average Step Time (ms),27735.555000000004
+Total Tokens Used,21856
+Total Input Tokens,10927
+Total Output Tokens,10927
+Total Cost (USD),0.0033398399999999997
+Success Rate,1.0
+Started At,2026-03-09T13:09:08.177010
+Completed At,2026-03-09T13:10:31.383675
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error
+step_1,"Réécrire entièrement /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/app_runpod.py pour RunPod Serverless. Supprimer tout le code FastAPI/uvicorn/pydantic. Garder intégralement : les imports torch/transformers/peft, toutes les constantes (SYSTEM_PROMPT_SPINOZA, INSTRUCTIONS_CONTEXTUELLES, INSTRUCTION_RAG, PROMPT_EVALUATION, PROMPT_MESSAGE_FINAL, QUESTIONS_BAC, BASE_MODEL, ADAPTER_MODEL), toutes les fonctions utilitaires (construire_prompt_complet, detecter_contexte, nettoyer_reponse, limiter_phrases), la fonction load_model(), spinoza_repond(), evaluer_dialogue(). Ajouter import runpod et import random. Créer la fonction handler(job) qui lit job['input']['action'] (str, défaut='chat') et route vers : action=='init' -> réinitialise conversation_history global, choisit question aléatoire, retourne {greeting, history} ; action=='chat' -> lit message (str) et history (list, optionnel) depuis job['input'], met à jour conversation_history si history fourni, appelle spinoza_repond(message), retourne {reply, history: conversation_history} ; action=='evaluate' -> lit dialogue (str) et score_front (int) depuis job['input'], appelle evaluer_dialogue(dialogue, score_front), retourne le résultat dict. Gérer les erreurs avec try/except, retourner {'error': str(e)} en cas d'échec. Après la définition de handler, appeler load_model() au niveau module (avant serverless.start), puis terminer le fichier avec runpod.serverless.start({'handler': handler}).",code_generation,True,71734.008,12569,6284,6284,0.00198366,
+step_3,"Mettre à jour /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/Dockerfile.runpod : retirer la ligne EXPOSE 8000 (plus de serveur HTTP), changer CMD pour utiliser ['python', '-u', '/app/app.py'] avec le flag -u pour unbuffered stdout (utile pour logs RunPod). Garder tout le reste identique (FROM python:3.10-slim, apt-get, pip install, COPY).",refactoring,True,10879.367,4801,2400,2400,0.0007001399999999999,
+step_2,"Réécrire /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/requirements.runpod.txt : retirer fastapi, uvicorn, pydantic, slowapi (inutiles sans serveur HTTP). Ajouter runpod (SDK serverless RunPod). Garder : torch>=2.2.0, transformers>=4.40.0, peft>=0.10.0, bitsandbytes>=0.43.0, accelerate>=0.28.0.",code_generation,True,11081.566,4486,2243,2243,0.0006560399999999999,

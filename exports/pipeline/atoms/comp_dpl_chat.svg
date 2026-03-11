@@ -1,94 +1,82 @@
-<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 800 740" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="shadow-main" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
     </filter>
-    <linearGradient id="gradient-accent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1258ca;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0f4aad;stop-opacity:1" />
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#97ea90;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7dd976;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="headerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fafafa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
   </defs>
   
-  <!-- Main Card Container -->
-  <rect x="0" y="0" width="600" height="600" rx="10" fill="#ffffff" filter="url(#shadow-main)"/>
-  
-  <!-- Header Section -->
-  <g id="header">
-    <text x="40" y="50" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#111827">Sullivan Ops</text>
-    <text x="40" y="75" font-family="Inter, sans-serif" font-size="14" fill="#6b7280">Instructions et chat de pilotage</text>
+  <g id="component_root">
+    <rect x="20" y="20" width="760" height="700" rx="10" fill="#ffffff" filter="url(#cardShadow)"/>
     
-    <!-- Status Badge -->
-    <rect x="480" y="38" width="80" height="28" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1"/>
-    <circle cx="496" cy="52" r="4" fill="#10b981"/>
-    <text x="506" y="56" font-family="Inter, sans-serif" font-size="12" fill="#059669" font-weight="500">Actif</text>
-  </g>
-  
-  <!-- Divider -->
-  <line x1="40" y1="95" x2="560" y2="95" stroke="#e5e7eb" stroke-width="1"/>
-  
-  <!-- Chat History Area -->
-  <g id="chat-history" transform="translate(0, 110)">
+    <rect x="20" y="20" width="760" height="90" rx="10" fill="url(#headerGradient)"/>
+    <rect x="20" y="90" width="760" height="20" fill="url(#headerGradient)"/>
     
-    <!-- AI Message 1 -->
-    <g transform="translate(40, 20)">
-      <!-- Avatar -->
-      <circle cx="0" cy="20" r="16" fill="#1258ca"/>
-      <text x="0" y="25" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">S</text>
-      
-      <!-- Bubble -->
-      <rect x="24" y="0" width="360" height="64" rx="10" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
-      <text x="44" y="28" font-family="Inter, sans-serif" font-size="13" fill="#374151">Analyse du manifeste de déploiement</text>
-      <text x="44" y="48" font-family="Inter, sans-serif" font-size="13" fill="#374151">terminée. Environnement cible: <tspan font-weight="600" fill="#111827">Production</tspan></text>
+    <text x="60" y="65" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="700" font-size="20" fill="#1a1a1a">Sullivan Ops</text>
+    <text x="60" y="90" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#666666">Instructions et chat de pilotage</text>
+    
+    <circle cx="720" cy="70" r="6" fill="#97ea90"/>
+    <text x="735" y="74" font-family="Roboto Mono, monospace" font-size="11" fill="#666666">ACTIF</text>
+    
+    <line x1="60" y1="110" x2="740" y2="110" stroke="#d5d4d0" stroke-width="1"/>
+    
+    <rect x="60" y="130" width="680" height="40" rx="8" fill="#fafafa" stroke="#d5d4d0" stroke-width="1"/>
+    <text x="80" y="155" font-family="Roboto Mono, monospace" font-size="11" fill="#666666">Contexte: Déploiement DPL Phase 4 • Target: Production • Mode: Automatique</text>
+    
+    <g transform="translate(60, 200)">
+      <circle cx="20" cy="20" r="16" fill="#f5f5f5" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="20" y="25" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" fill="#666666">S</text>
+      <rect x="45" y="0" width="420" height="80" rx="8" fill="#f5f5f5"/>
+      <text x="65" y="30" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">Je suis prêt à piloter le déploiement. Les secrets sont</text>
+      <text x="65" y="52" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">configurés. Souhaitez-vous procéder au build de</text>
+      <text x="65" y="74" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">l'application sur l'environnement cible ?</text>
+      <text x="65" y="100" font-family="Roboto Mono, monospace" font-size="10" fill="#999999">10:42:18 AM</text>
     </g>
     
-    <!-- User Message -->
-    <g transform="translate(176, 104)">
-      <rect x="0" y="0" width="384" height="48" rx="10" fill="#1258ca" opacity="0.08"/>
-      <rect x="0" y="0" width="384" height="48" rx="10" fill="none" stroke="#1258ca" stroke-width="1" stroke-opacity="0.2"/>
-      <text x="24" y="30" font-family="Inter, sans-serif" font-size="13" fill="#1258ca" font-weight="500">Procéder au déploiement avec vérification des</text>
-      <text x="360" y="30" font-family="Inter, sans-serif" font-size="13" fill="#1258ca" font-weight="500" text-anchor="end">secrets</text>
+    <g transform="translate(350, 310)">
+      <rect x="0" y="0" width="390" height="60" rx="8" fill="#97ea90"/>
+      <text x="20" y="28" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a3a1a">Oui, lance le build avec les paramètres de production.</text>
+      <text x="20" y="48" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#1a3a1a">Vérifie les variables d'environnement avant.</text>
+      <text x="290" y="80" font-family="Roboto Mono, monospace" font-size="10" fill="#999999">10:42:45 AM</text>
     </g>
     
-    <!-- AI Message 2 with Code Snippet -->
-    <g transform="translate(40, 172)">
-      <circle cx="0" cy="20" r="16" fill="#1258ca"/>
-      <text x="0" y="25" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">S</text>
-      
-      <rect x="24" y="0" width="400" height="120" rx="10" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
-      <text x="44" y="28" font-family="Inter, sans-serif" font-size="13" fill="#374151">Exécution en cours:</text>
-      
-      <!-- Code block inside chat -->
-      <rect x="44" y="40" width="360" height="64" rx="6" fill="#1f2937"/>
-      <text x="60" y="65" font-family="Roboto Mono, monospace" font-size="11" fill="#97ea90">$ netlify deploy --prod --build</text>
-      <text x="60" y="85" font-family="Roboto Mono, monospace" font-size="11" fill="#ffd548">✓ Site live: https://app-demo.netlify.app</text>
+    <g transform="translate(60, 410)">
+      <circle cx="20" cy="20" r="16" fill="#f5f5f5" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="20" y="25" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" fill="#666666">S</text>
+      <rect x="45" y="0" width="450" height="120" rx="8" fill="#f5f5f5"/>
+      <text x="65" y="30" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#333333">Build initié. Voici le statut des services :</text>
+      <rect x="65" y="45" width="410" height="55" rx="6" fill="#ffffff" stroke="#e8e8e8" stroke-width="1"/>
+      <text x="80" y="68" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">✓</text>
+      <text x="95" y="68" font-family="Roboto Mono, monospace" font-size="11" fill="#333333">API Gateway: CONNECTED</text>
+      <text x="80" y="88" font-family="Roboto Mono, monospace" font-size="11" fill="#1258ca">✓</text>
+      <text x="95" y="88" font-family="Roboto Mono, monospace" font-size="11" fill="#333333">Database: MIGRATIONS APPLIED</text>
+      <text x="65" y="140" font-family="Roboto Mono, monospace" font-size="10" fill="#999999">10:43:02 AM</text>
     </g>
     
-  </g>
-  
-  <!-- Quick Actions -->
-  <g id="quick-actions" transform="translate(40, 440)">
-    <rect x="0" y="0" width="120" height="28" rx="10" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
-    <text x="60" y="19" font-family="Inter, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Redémarrer build</text>
+    <g transform="translate(60, 570)">
+      <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#999999">Actions rapides:</text>
+      <rect x="0" y="15" width="140" height="32" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="20" y="36" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#333333">Voir les logs</text>
+      <rect x="155" y="15" width="160" height="32" rx="6" fill="#ffffff" stroke="#d5d4d0" stroke-width="1"/>
+      <text x="175" y="36" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#333333">Rollback</text>
+      <rect x="330" y="15" width="180" height="32" rx="6" fill="#ffffff" stroke="#97ea90" stroke-width="1.5"/>
+      <text x="350" y="36" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#1a3a1a">Confirmer deploy</text>
+    </g>
     
-    <rect x="132" y="0" width="100" height="28" rx="10" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
-    <text x="182" y="19" font-family="Inter, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Voir logs</text>
+    <g transform="translate(60, 630)">
+      <rect x="0" y="0" width="600" height="56" rx="8" fill="#ffffff" stroke="#d5d4d0" stroke-width="1.5"/>
+      <text x="20" y="35" font-family="Inter, system-ui, sans-serif" font-size="15" fill="#999999">Saisir une instruction ou coller du code...</text>
+      <rect x="620" y="0" width="100" height="56" rx="8" fill="url(#accentGradient)"/>
+      <text x="670" y="35" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="14" fill="#1a3a1a">Envoyer</text>
+    </g>
     
-    <rect x="244" y="0" width="120" height="28" rx="10" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
-    <text x="304" y="19" font-family="Inter, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Rollback</text>
-  </g>
-  
-  <!-- Input Area -->
-  <g id="input-area" transform="translate(40, 480)">
-    <!-- Input Background -->
-    <rect x="0" y="0" width="520" height="80" rx="10" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
-    
-    <!-- Text Input -->
-    <rect x="16" y="16" width="432" height="48" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
-    <text x="32" y="45" font-family="Inter, sans-serif" font-size="14" fill="#9ca3af">Écrivez une instruction ou coller une configuration...</text>
-    
-    <!-- Send Button -->
-    <rect x="456" y="16" width="48" height="48" rx="8" fill="url(#gradient-accent)"/>
-    <path d="M472 32 L484 40 L472 48" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="476" y1="40" x2="484" y2="40" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <text x="60" y="705" font-family="Roboto Mono, monospace" font-size="10" fill="#c5c4c0">Sullivan v2.4 • Mode: Deployment Pilot • Secure Channel TLS 1.3</text>
   </g>
 </svg>

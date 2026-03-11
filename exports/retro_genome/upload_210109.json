@@ -1,0 +1,272 @@
+{
+  "analysis": {
+    "regions": [
+      {
+        "name": "App Shell - En-t\u00eate",
+        "role": "Navigation principale",
+        "coordinates_hint": "Haut de l'\u00e9cran, bandeau horizontal"
+      },
+      {
+        "name": "Barre lat\u00e9rale gauche",
+        "role": "Exploration de projet et navigation",
+        "coordinates_hint": "Gauche de l'\u00e9cran, verticale"
+      },
+      {
+        "name": "Zone de Contenu Principal",
+        "role": "Affichage et \u00e9dition de code",
+        "coordinates_hint": "Centre de l'\u00e9cran, large"
+      },
+      {
+        "name": "Barre lat\u00e9rale droite",
+        "role": "Chat et communication",
+        "coordinates_hint": "Droite de l'\u00e9cran, verticale"
+      },
+      {
+        "name": "Barre d'\u00e9tat",
+        "role": "Informations et actions contextuelles",
+        "coordinates_hint": "Bas de la zone de contenu principal"
+      }
+    ],
+    "components": [
+      {
+        "id": "1",
+        "name": "Logo Hom\u00e9OS",
+        "type": "shell_element",
+        "location": "header",
+        "visual_characteristics": {
+          "text": "Hom\u00e9OS",
+          "couleurs": "Vert et blanc",
+          "taille": "Moyenne"
+        },
+        "inferred_intent": "Acc\u00e9der \u00e0 la page d'accueil"
+      },
+      {
+        "id": "2",
+        "name": "Champ de recherche",
+        "type": "input",
+        "location": "header",
+        "visual_characteristics": {
+          "placeholder": "maiathon (Espace de travail) (1)",
+          "ic\u00f4ne": "Loupe",
+          "taille": "Petit"
+        },
+        "inferred_intent": "Rechercher des fichiers ou des \u00e9l\u00e9ments dans le projet"
+      },
+      {
+        "id": "3",
+        "name": "Arborescence de fichiers",
+        "type": "list",
+        "location": "sidebar_left",
+        "visual_characteristics": {
+          "ic\u00f4nes": "Dossiers, fichiers SVG, JSON",
+          "texte": "Noms de fichiers et dossiers",
+          "couleurs": "Gris et blanc"
+        },
+        "inferred_intent": "Naviguer dans la structure du projet"
+      },
+      {
+        "id": "4",
+        "name": "Onglets d'\u00e9dition",
+        "type": "nav",
+        "location": "main",
+        "visual_characteristics": {
+          "texte": "Noms de fichiers ouverts",
+          "couleurs": "Gris et bleu",
+          "taille": "Petite"
+        },
+        "inferred_intent": "Basculer entre les fichiers ouverts pour l'\u00e9dition"
+      },
+      {
+        "id": "5",
+        "name": "Editeur de code",
+        "type": "input",
+        "location": "main",
+        "visual_characteristics": {
+          "texte": "Code source",
+          "couleurs": "Noir et blanc",
+          "police": "Monoespace"
+        },
+        "inferred_intent": "Modifier le code source"
+      },
+      {
+        "id": "6",
+        "name": "Console de d\u00e9bogage",
+        "type": "input",
+        "location": "main",
+        "visual_characteristics": {
+          "texte": "Messages de d\u00e9bogage",
+          "couleurs": "Noir et blanc",
+          "police": "Monoespace"
+        },
+        "inferred_intent": "Afficher les messages de d\u00e9bogage et les erreurs"
+      },
+      {
+        "id": "7",
+        "name": "Chat Sullivan",
+        "type": "input",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "texte": "Messages de chat",
+          "couleurs": "Vert et blanc",
+          "forme": "Bulles de conversation"
+        },
+        "inferred_intent": "Communiquer avec un assistant ou un collaborateur"
+      },
+      {
+        "id": "8",
+        "name": "Champ de saisie de message",
+        "type": "input",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "placeholder": "\u00c9crivez votre message...",
+          "ic\u00f4ne": "Plus",
+          "taille": "Petit"
+        },
+        "inferred_intent": "Saisir un message dans le chat"
+      },
+      {
+        "id": "9",
+        "name": "Bouton Envoyer",
+        "type": "button",
+        "location": "sidebar_right",
+        "visual_characteristics": {
+          "ic\u00f4ne": "Fl\u00e8che",
+          "couleurs": "Gris",
+          "forme": "Arrondie"
+        },
+        "inferred_intent": "Envoyer le message"
+      }
+    ],
+    "design_tokens": {
+      "primary_color": "#90EE90",
+      "accent_color": "#ADD8E6",
+      "typography": "Inter, system-ui, sans-serif"
+    }
+  },
+  "audit": {
+    "mappings": [
+      {
+        "component_id": "1",
+        "canonical_intent": null,
+        "confidence": 0.8,
+        "reasoning": "Le logo est un \u00e9l\u00e9ment de navigation standard. Pas d'intent AetherFlow correspondant, mais il sert \u00e0 revenir \u00e0 la page d'accueil."
+      },
+      {
+        "component_id": "2",
+        "canonical_intent": "SearchCenter",
+        "confidence": 0.9,
+        "reasoning": "Le champ de recherche correspond \u00e0 un centre de recherche pour trouver des \u00e9l\u00e9ments dans l'application."
+      },
+      {
+        "component_id": "3",
+        "canonical_intent": "FileExplorer",
+        "confidence": 0.95,
+        "reasoning": "L'arborescence de fichiers permet d'explorer la structure du projet, ce qui correspond \u00e0 la fonctionnalit\u00e9 d'un explorateur de fichiers."
+      },
+      {
+        "component_id": "4",
+        "canonical_intent": null,
+        "confidence": 0.7,
+        "reasoning": "Les onglets d'\u00e9dition permettent de basculer entre les fichiers ouverts. Bien qu'il n'y ait pas d'intent sp\u00e9cifique, ils sont li\u00e9s \u00e0 l'\u00e9dition de code."
+      },
+      {
+        "component_id": "5",
+        "canonical_intent": "CodeEditor",
+        "confidence": 0.95,
+        "reasoning": "L'\u00e9diteur de code est l'endroit o\u00f9 le code source est modifi\u00e9, ce qui correspond \u00e0 la fonctionnalit\u00e9 d'un \u00e9diteur de code."
+      },
+      {
+        "component_id": "6",
+        "canonical_intent": "TerminalOutput",
+        "confidence": 0.85,
+        "reasoning": "La console de d\u00e9bogage affiche les messages de d\u00e9bogage, ce qui correspond \u00e0 la fonctionnalit\u00e9 d'une sortie de terminal."
+      },
+      {
+        "component_id": "7",
+        "canonical_intent": "ButlerChat",
+        "confidence": 0.9,
+        "reasoning": "Le chat Sullivan permet la communication avec un assistant, ce qui correspond \u00e0 la fonctionnalit\u00e9 d'un chat Butler."
+      },
+      {
+        "component_id": "8",
+        "canonical_intent": null,
+        "confidence": 0.6,
+        "reasoning": "Champ de saisie de message, partie int\u00e9grante du ButlerChat mais pas un intent en soi"
+      },
+      {
+        "component_id": "9",
+        "canonical_intent": null,
+        "confidence": 0.6,
+        "reasoning": "Bouton d'envoi de message, partie int\u00e9grante du ButlerChat mais pas un intent en soi"
+      }
+    ],
+    "ergonomic_audit": {
+      "deadends": [],
+      "gaps": [
+        "Manque une barre d'\u00e9tat pour afficher des informations contextuelles et des actions.",
+        "Aucune indication de progression des t\u00e2ches de fond (compilation, tests, etc.).",
+        "Absence d'un syst\u00e8me de notifications pour les \u00e9v\u00e9nements importants (erreurs, compl\u00e9tion de t\u00e2ches).",
+        "Pas d'options de personnalisation de l'\u00e9diteur de code (th\u00e8mes, police, etc.)."
+      ],
+      "suggestions": [
+        "Ajouter une barre d'\u00e9tat en bas de la zone de contenu principal.",
+        "Impl\u00e9menter un syst\u00e8me de notifications visuelles et/ou sonores.",
+        "Fournir des options de personnalisation pour l'\u00e9diteur de code.",
+        "Ajouter des raccourcis clavier pour les actions courantes.",
+        "Int\u00e9grer un syst\u00e8me d'aide contextuelle pour les diff\u00e9rents composants."
+      ]
+    },
+    "genome_structure": {
+      "n0_phases": [
+        {
+          "id": "phase_2_bkd",
+          "organs": [
+            {
+              "id": "file_management",
+              "intent": "FileExplorer",
+              "components": [
+                "3"
+              ]
+            },
+            {
+              "id": "code_editing",
+              "intent": "CodeEditor",
+              "components": [
+                "5",
+                "4"
+              ]
+            },
+            {
+              "id": "debugging",
+              "intent": "TerminalOutput",
+              "components": [
+                "6"
+              ]
+            },
+            {
+              "id": "communication",
+              "intent": "ButlerChat",
+              "components": [
+                "7",
+                "8",
+                "9"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "phase_1_brs",
+          "organs": [
+            {
+              "id": "search",
+              "intent": "SearchCenter",
+              "components": [
+                "2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

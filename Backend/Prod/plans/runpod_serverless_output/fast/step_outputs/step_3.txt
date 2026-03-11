@@ -1,0 +1,42 @@
+Step: step_3
+Description: Mettre à jour /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/Dockerfile.runpod : retirer la ligne EXPOSE 8000 (plus de serveur HTTP), changer CMD pour utiliser ['python', '-u', '/app/app.py'] avec le flag -u pour unbuffered stdout (utile pour logs RunPod). Garder tout le reste identique (FROM python:3.10-slim, apt-get, pip install, COPY).
+Type: refactoring
+Success: True
+Tokens: 4801
+Cost: $0.0007
+Time: 10879ms
+
+============================================================
+
+[APPLY RESULTS]
+📝 Saved for review (.generated): /Users/francois-jeandazin/Antigravity/maiathon/Spinoza_Secours_HF/Backend/Dockerfile.generated.runpod
+========================================
+
+```dockerfile
+# Dockerfile pour Vast.ai/RunPod - Spinoza Secours
+# Basé sur Mistral 7B + LoRA avec FastAPI
+
+FROM python:3.10-slim
+
+# Variables d'environnement
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Installer dépendances système
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier requirements.txt
+COPY requirements.runpod.txt /app/requirements.txt
+
+# Installer les dépendances Python
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copier les fichiers de l'application

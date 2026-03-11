@@ -133,6 +133,8 @@ def main():
     # Steps 1-5 run once
     for step in range(start, min(6, 8)):
         extra = []
+        if step == 1 and args.context:
+            extra = ["--context", args.context]
         if step == 2 and context_text:
             extra = ["--context_text", context_text]
         if step == 4 and context_text:

@@ -1,202 +1,263 @@
 {
   "reference_theme": "Most (Creative Agency)",
-  "art_direction": "Bold creative agency aesthetic with high-contrast orange energy (#ff6b35), masonry-inspired asymmetric layouts, and premium card-based UI. Dense, high-fidelity components with 12px radius cards, soft shadows, and pill-shaped interactive elements. Clean white canvas with strategic dark (#111111) and muted (#888888) accents.",
+  "art_direction": "Bold and modern SaaS application template with high contrast, vibrant orange accents, and a focus on clean typography and subtle shadows. Aim for a 'suave' and premium feel, reflecting a creative agency aesthetic.",
   "typography_overrides": {
-    "display_font": "Plus Jakarta Sans, 700 weight, tight letter-spacing (-0.02em)",
-    "body_font": "Inter, 400 weight, 16px size",
+    "display_font": "Plus Jakarta Sans",
     "accent_color": "#ff6b35",
     "bg_color": "#ffffff"
   },
   "phases": {
     "phase_1_brs": {
-      "layout_style": "masonry_research_dashboard",
-      "total_height": 700,
+      "layout_style": "triptych-multiverse",
+      "total_height": 800,
       "organs": [
         {
-          "id": "brs_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 220,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 220 520'. Dense search interface with orange (#ff6b35) active states, Plus Jakarta Sans headers at 18px, Inter body at 13px. Card radius 12px, shadow 0 8px 32px rgba(0,0,0,0.08). Compact form inputs with 9999px pill-shaped search button. High pixel density: 1px strokes, 8px grid system.",
-          "regenerate_atoms": [
-            "comp_brs_search"
-          ]
+          "id": "brs_main",
+          "x": 280,
+          "y": 60,
+          "w": 373,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1",
+          "atom_style_hint": "Background: #ffffff; Text color: #333333; Use 'Inter' font family for body text. Apply subtle shadows to card elements: 0 8px 32px rgba(0,0,0,0.10).",
+          "regenerate_atoms": []
         },
         {
-          "id": "brs_main",
-          "x": 512,
-          "y": 0,
-          "w": 620,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 620 520'. Hero masonry grid for iframe previews. White cards with 12px radius, #111111 headers (Plus Jakarta Sans 24px), muted #888888 meta text (Inter 11px uppercase). 32px internal padding. High-fidelity browser chrome mockups at 1:1 scale. Orange (#ff6b35) accent badges.",
-          "regenerate_atoms": [
-            "comp_brs_iframes"
-          ]
+          "id": "brs_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; Use 'Inter' font family. Smaller font sizes for labels. Consider a light border on the right side.",
+          "regenerate_atoms": []
         },
         {
           "id": "brs_sidebar_right",
-          "x": 1164,
-          "y": 0,
+          "x": 1399,
+          "y": 60,
           "w": 260,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 260 520'. Arbitrage panel with dark (#1a1a2e) header bar contrast. High-density text hierarchy: 20px Plus Jakarta Sans bold titles, 12px Inter secondary. Pill badges with orange background (#ff6b35) on white cards. Compact list items at 44px height. Shadow depth on hover states.",
-          "regenerate_atoms": [
-            "comp_brs_arbitrage"
-          ]
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; Use 'Inter' font family. Smaller font sizes for labels. Consider a light border on the left side.",
+          "regenerate_atoms": []
         },
         {
           "id": "brs_footer",
-          "x": 260,
-          "y": 520,
-          "w": 1140,
-          "h": 180,
-          "atom_style_hint": "viewBox='0 0 1140 180'. Full-width trace log with monospace Inter (13px) for code, Plus Jakarta Sans (14px bold) for section labels. Dark (#111111) left border accent (4px). White background with subtle top shadow. High-density data tables with 8px row padding. Orange (#ff6b35) status indicators.",
-          "regenerate_atoms": [
-            "comp_brs_trace"
-          ]
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #1a1a2e; Text color: #ffffff; Use 'Inter' font family. Subtle text shadows. Keep it minimal and clean.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #ffffff; High contrast elements. Use 'Plus Jakarta Sans' for main titles (smaller size). Apply subtle box-shadow at the bottom. Orange accent color for key actions.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; Use 'Inter' font family. Prominent use of icons. Active states with orange accent color.",
+          "regenerate_atoms": []
         }
       ]
     },
     "phase_2_bkd": {
-      "layout_style": "masonry_workshop_terminal",
-      "total_height": 720,
+      "layout_style": "dual-column-roadmap",
+      "total_height": 800,
       "organs": [
         {
           "id": "bkd_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 240,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 240 520'. File explorer with tree navigation. Plus Jakarta Sans 12px uppercase folder labels (weight 600), Inter 13px file names. Orange (#ff6b35) active file indicator. 12px card radius, white background with subtle shadow. High-density: 32px row height, 8px icon + text spacing. Dark (#111111) icons.",
-          "regenerate_atoms": [
-            "comp_bkd_files"
-          ]
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; Use 'Inter' font family. Smaller font sizes for labels. Accordion menus with clean visual hierarchy.",
+          "regenerate_atoms": []
         },
         {
           "id": "bkd_main",
-          "x": 532,
-          "y": 0,
-          "w": 660,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 660 520'. Split editor zone with high-contrast syntax highlighting. Background #ffffff, text #333333, keywords #ff6b35 (orange). Plus Jakarta Sans for UI chrome (14px), monospace for code (13px Inter). 12px radius container. Dense UI: 24px toolbar height, 4px grid alignment. Roadmap view uses pill-shaped status badges (9999px radius).",
-          "regenerate_atoms": [
-            "comp_bkd_editor",
-            "comp_bkd_roadmap"
-          ]
+          "x": 280,
+          "y": 60,
+          "w": 550,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1",
+          "atom_style_hint": "Background: #ffffff; Text color: #333333; Use 'Inter' font family for body text. Input fields with rounded corners and subtle shadows. Buttons with pill shape and #ff6b35 color.",
+          "regenerate_atoms": []
         },
         {
           "id": "bkd_sidebar_right",
-          "x": 1224,
-          "y": 0,
-          "w": 200,
-          "h": 520,
-          "atom_style_hint": "viewBox='0 0 200 520'. Agent chat panel with compressed message bubbles. Plus Jakarta Sans 14px bold for agent name, Inter 12px for messages. Pill-shaped input field (9999px radius) with orange (#ff6b35) send button. High density: message spacing 8px, avatar 28px. Dark (#111111) bot avatar background.",
-          "regenerate_atoms": [
-            "comp_bkd_agent"
-          ]
+          "x": 1090,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; Use 'Inter' font family. Focus on data visualization elements. Use orange accents for key metrics.",
+          "regenerate_atoms": []
         },
         {
           "id": "bkd_footer",
-          "x": 260,
-          "y": 520,
-          "w": 1140,
-          "h": 200,
-          "atom_style_hint": "viewBox='0 0 1140 200'. Terminal with dark (#111111) background theme (alternative to white for contrast). Monospace Inter 12px, line-height 1.5. Orange (#ff6b35) command prompts. Plus Jakarta Sans 11px uppercase labels for 'TERMINAL' and 'AUDIT'. High density: 20px line height, 8px padding. 12px top radius only.",
-          "regenerate_atoms": [
-            "comp_bkd_term"
-          ]
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #1a1a2e; Text color: #ffffff; Use 'Inter' font family. Minimal design with a focus on copyright information.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #ffffff; High contrast elements. 'Plus Jakarta Sans' for titles. Subtle box-shadow. Refine user avatar style.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Highlight active navigation elements with #ff6b35. Keep icons consistent.",
+          "regenerate_atoms": []
         }
       ]
     },
     "phase_3_frd": {
-      "layout_style": "masonry_genome_viewer",
-      "total_height": 720,
+      "layout_style": "standard",
+      "total_height": 800,
       "organs": [
         {
-          "id": "frd_sidebar_left",
-          "x": 260,
-          "y": 0,
-          "w": 200,
-          "h": 560,
-          "atom_style_hint": "viewBox='0 0 200 560'. Intent history timeline with vertical orange (#ff6b35) progress line (2px). Plus Jakarta Sans 13px bold for intent titles, Inter 11px muted (#888888) timestamps. White cards with 12px radius, connected by dotted line. High density: 64px timeline items, 8px connector dots.",
-          "regenerate_atoms": [
-            "comp_frd_history"
-          ]
+          "id": "frd_main",
+          "x": 280,
+          "y": 60,
+          "w": 860,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_area",
+          "atom_style_hint": "Background: #ffffff; Text color: #333333; 'Inter' font family. Focus on display of cards and tiles. Ensure smooth transitions and animations. #ff6b35 highlights.",
+          "regenerate_atoms": []
         },
         {
-          "id": "frd_main",
-          "x": 492,
-          "y": 0,
-          "w": 700,
-          "h": 560,
-          "atom_style_hint": "viewBox='0 0 700 560'. Genome viewer hero canvas with explosive node visualization. Dark (#1a1a2e) background variant for dramatic contrast. Orange (#ff6b35) primary nodes with white (#ffffff) text (Plus Jakarta Sans 10px bold). High-fidelity SVG paths, 1-2px strokes. Inter 12px for metadata overlays. 12px radius container with heavy shadow (0 8px 32px rgba(0,0,0,0.15)).",
-          "regenerate_atoms": [
-            "comp_frd_viewer"
-          ]
+          "id": "frd_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Filtering options and search bars with a clean and simple design.",
+          "regenerate_atoms": []
         },
         {
           "id": "frd_sidebar_right",
-          "x": 1224,
-          "y": 0,
-          "w": 200,
-          "h": 560,
-          "atom_style_hint": "viewBox='0 0 200 560'. Pedagogy panel with stacked zones. Plus Jakarta Sans 14px bold section headers, Inter 12px body. Q&A uses pill-shaped tags (9999px radius). HCI section uses 12px card radius with #f5f5f5 background. High density: 40px row height, 16px section spacing. Orange (#ff6b35) accent icons.",
-          "regenerate_atoms": [
-            "comp_frd_pedagogie",
-            "comp_frd_style"
-          ]
+          "x": 1140,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Related content and recommendations. Small, visually appealing cards.",
+          "regenerate_atoms": []
         },
         {
           "id": "frd_footer",
-          "x": 260,
-          "y": 560,
-          "w": 1140,
-          "h": 160,
-          "atom_style_hint": "viewBox='0 0 1140 160'. Contextual explanation bar with code snippets. White background, top border 1px #eeeeee. Monospace Inter 12px for code blocks with 12px radius gray background (#f5f5f5). Plus Jakarta Sans 13px bold for 'Context' label. High density: 32px tab height, orange (#ff6b35) active tab indicator (2px).",
-          "regenerate_atoms": [
-            "comp_frd_context"
-          ]
+          "x": 20,
+          "y": 860,
+          "w": 1400,
+          "h": 100,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #1a1a2e; Text color: #ffffff; 'Inter' font family. Clean and minimal design. Social media links.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
+          "y": 0,
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #ffffff; High contrast. 'Plus Jakarta Sans'. Clean navigation. Improve search bar style.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Streamline navigation. Active states highlighted with #ff6b35.",
+          "regenerate_atoms": []
         }
       ]
     },
     "phase_4_dpl": {
-      "layout_style": "masonry_deployment_dual",
-      "total_height": 600,
+      "layout_style": "dual-column",
+      "total_height": 800,
       "organs": [
         {
           "id": "dpl_sidebar_left",
-          "x": 260,
-          "y": 0,
+          "x": 20,
+          "y": 60,
           "w": 260,
-          "h": 600,
-          "atom_style_hint": "viewBox='0 0 260 600'. Secrets configuration with form density. Plus Jakarta Sans 12px uppercase labels (weight 600), Inter 13px input text. Orange (#ff6b35) active input borders. 12px card radius, shadow on hover. Pill-shaped toggle switches (9999px). High density: 40px input height, 12px label spacing. Dark (#111111) section headers.",
-          "regenerate_atoms": [
-            "comp_dpl_secrets"
-          ]
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Filters and data selection controls. Clear visual hierarchy.",
+          "regenerate_atoms": []
         },
         {
           "id": "dpl_main",
-          "x": 552,
-          "y": 0,
-          "w": 600,
-          "h": 600,
-          "atom_style_hint": "viewBox='0 0 600 600'. Dual deployment view with split interface. Left: chat (Inter 13px, Plus Jakarta Sans 14px bold agent names). Right: iframe preview with 12px radius browser chrome. High-fidelity at 1:1 scale. Orange (#ff6b35) send buttons and status badges. White background, 32px internal padding. Shadow separator between zones.",
-          "regenerate_atoms": [
-            "comp_dpl_chat",
-            "comp_dpl_iframe"
-          ]
+          "x": 280,
+          "y": 60,
+          "w": 550,
+          "h": 800,
+          "note": "EXACT zone name used from contract: main_col_1",
+          "atom_style_hint": "Background: #ffffff; Text color: #333333; 'Inter' font family. Focus on charts, graphs, and tables. Clean and readable data visualization.",
+          "regenerate_atoms": []
         },
         {
           "id": "dpl_sidebar_right",
-          "x": 1184,
+          "x": 1090,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: right_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Key metrics and summaries. Consistent visual style.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_header",
+          "x": 20,
           "y": 0,
-          "w": 240,
-          "h": 600,
-          "atom_style_hint": "viewBox='0 0 240 600'. Vision capture panel with large orange (#ff6b35) pill button (9999px radius) as primary CTA. Plus Jakarta Sans 16px bold for button text. Inter 12px for analysis results. High density: 48px button height, 8px grid for image thumbnails. White cards with 12px radius for vision results. Dark (#111111) header.",
-          "regenerate_atoms": [
-            "comp_dpl_capture"
-          ]
+          "w": 1400,
+          "h": 60,
+          "note": "EXACT zone name used from contract: footer",
+          "atom_style_hint": "Background: #ffffff; High contrast. 'Plus Jakarta Sans'. Polish branding elements and improve overall aesthetics.",
+          "regenerate_atoms": []
+        },
+        {
+          "id": "shell_sidebar_left",
+          "x": 20,
+          "y": 60,
+          "w": 260,
+          "h": 800,
+          "note": "EXACT zone name used from contract: left_sidebar",
+          "atom_style_hint": "Background: #f9f9f9; Text color: #888888; 'Inter' font family. Refine navigation and ensure intuitive user experience.",
+          "regenerate_atoms": []
         }
       ]
     }

@@ -14,6 +14,68 @@
   ],
   "endpoints": [],
   "schema_definitions": {},
+  "n0_app_shell": {
+    "id": "app_shell",
+    "name": "Global Application Shell",
+    "n1_sections": [
+      {
+        "id": "shell_header",
+        "name": "Header Navigation",
+        "ui_role": "app-header",
+        "dominant_zone": "header",
+        "n2_features": [
+          {
+            "id": "feat_shell_nav",
+            "name": "Main Navigation",
+            "n3_components": [
+              {
+                "id": "comp_shell_logo",
+                "name": "Logo AF",
+                "visual_hint": "status",
+                "interaction_type": "view",
+                "description_ui": "Carré sombre avec texte AF, servant de retour accueil."
+              },
+              {
+                "id": "comp_shell_tabs",
+                "name": "Phase Tabs",
+                "visual_hint": "stepper",
+                "interaction_type": "click",
+                "description_ui": "Liste horizontale des phases actives (BRS, BKD, FRD, DPL) avec état de sélection."
+              },
+              {
+                "id": "comp_shell_user",
+                "name": "User Avatar",
+                "visual_hint": "status",
+                "interaction_type": "click",
+                "description_ui": "Cercle avec initiales utilisateur (FJD) et menu déroulant."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "shell_sidebar_left",
+        "name": "Contextual Sidebar",
+        "ui_role": "left-sidebar",
+        "dominant_zone": "sidebar",
+        "n2_features": [
+          {
+            "id": "feat_shell_organs",
+            "name": "Organ Navigator",
+            "n3_components": [
+              {
+                "id": "comp_shell_organ_list",
+                "name": "Sidebar Menu",
+                "visual_hint": "list",
+                "interaction_type": "click",
+                "description_ui": "Liste verticale des organes de la phase courante avec icônes et états sélectionnés."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "n0_phases": [
     {
       "id": "phase_1_brs",

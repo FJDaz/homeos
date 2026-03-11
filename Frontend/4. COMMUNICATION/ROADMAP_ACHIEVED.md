@@ -6,6 +6,41 @@
 
 ---
 
+## Mission 34B — Dual Viewer : Routage & Endpoints Backend ✅ 2026-03-11
+- [x] Routage serveur implémenté dans `server_9998_v2.py`.
+- [x] Endpoint `/api/pedagogy/gaps` fonctionnel.
+
+## Mission 34A — Dual Viewer : Templates & Cockpit Frontend ✅ 2026-03-11
+- [x] `viewer_blueprint.html` extrait et nettoyé.
+- [x] `viewer_reality.html` créé (canvas HTML/CSS + Cockpit Sullivan).
+- [x] Routage serveur dual-viewer implémenté.
+- [x] Endpoint `/api/pedagogy/gaps` ajouté au front.
+
+## Mission 32 — Retro Genome (PNG → Intent → PRD) ✅ 2026-03-10
+- [x] **Vision Backend** : `analyzer.py` via Gemini 2.0 Flash/Vision.
+- [x] **Semantic Mapping** : `intent_mapper.py` (mapping Intents AetherFlow).
+- [x] **Automation PRD** : `prd_generator.py` (synthèse doc + roadmap).
+- [x] **Intent Viewer V1** : Interface `/intent-viewer` validation interactive.
+
+## Mission 31B — SLCP Hardening (Gemini 2.0 & Data-Driven) ✅ 2026-03-10
+- [x] Migration Gemini 2.0 pour tous les steps du pipeline.
+- [x] Scaffold Data-Driven via `03_scaffold_generator.py`.
+- [x] Précision Millimétrique (Sidebars, colonnes).
+
+## Mission 31 — Dynamic App Shell Inference ✅ 2026-03-09
+- [x] Support Genome : Intégration de `n0_app_shell`.
+- [x] SVG Cleanup : Suppression des fonctions statiques.
+- [x] Zone Planning : Libération des marges `header_h`.
+
+## Mission 30 — Context Injection & SVG Bound Fix ✅ 2026-03-09
+- [x] Flag `--context` : Injection dynamique du Manifeste.
+- [x] Ghost Rect Cleanup : Suppression du `<rect>` background.
+- [x] Activer le mode `thinking` sur les étapes 2 (Layout Director) et 6 (Composer).
+- [x] Implémenter le script de validation post-génération `validate_atoms.py` (anti-serif, rx <= 10).
+- [x] Modifier l'export SVG vers le Manifeste JSON pour aplatir les groupes (`<g>`) de positionnement.
+
+---
+
 ## Mission 25B — Figma Bridge & JSON Manifest ✅ 2026-03-04
 - [x] Génération du `manifest.json` dans `exports/` par le `07_composer.py`.
 - [x] Calcul des coordonnées absolues (x, y) et dimensions (w, h) pour Figma.

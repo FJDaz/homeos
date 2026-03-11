@@ -47,3 +47,5 @@ Les fonctions actuelles (`generateWireframeCorps`, `generateWireframeOrganes`, `
 - Renderer : `Frontend/3. STENCILER/static/js/sullivan_renderer.js`
 - Templates : `Frontend/3. STENCILER/static/templates/viewer.html`
 - Les dead code wireframes Python ont été supprimés — `sullivan_renderer.js` est l'unique source
+
+

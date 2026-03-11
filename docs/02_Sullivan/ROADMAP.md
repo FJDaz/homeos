@@ -1,0 +1,1 @@
+- **[FIX] SVG Artifact Bounds**: Removed native background <rect> scaling bugs upon Atom Injection.
