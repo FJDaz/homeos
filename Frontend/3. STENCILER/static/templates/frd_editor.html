@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS — FRD Editor</title>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Geist -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
+    
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        figma: {
+                            bg: '#ffffff',
+                            panel: '#f9f9f9',
+                            input: '#f2f3f5',
+                            text: '#666666',
+                            textDark: '#333333',
+                            tabActive: '#8cc63f',
+                            sep: '#333333',
+                        }
+                    },
+                    fontFamily: {
+                        geist: ['Geist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        #monaco-pane {
+            width: 340px;
+            min-width: 0;
+            overflow: hidden;
+            transition: width 200ms ease;
+        }
+        
+        #resize-handle {
+            width: 4px;
+            cursor: col-resize;
+            background: #333;
+            transition: background 200ms;
+            z-index: 10;
+        }
+        #resize-handle:hover { background: #8cc63f; }
+
+        #preview-pane {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-bubble {
+            max-width: 90%;
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .user-bubble { background: #f2f3f5; align-self: flex-end; color: #333; }
+        .sullivan-bubble { background: #8cc63f; align-self: flex-start; color: white; }
+
+        /* Loader Overlay */
+        #sullivan-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+            font-family: 'Geist', sans-serif;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid white;
+            border-top: 4px solid #8cc63f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden font-geist text-figma-text bg-white">
+
+    <!-- Sullivan Loader Overlay -->
+    <div id="sullivan-overlay">
+        <div class="spinner"></div>
+        <div class="bg-white px-6 py-3 rounded shadow-xl text-sm font-bold text-black uppercase tracking-widest">
+            Sullivan travaille...
+        </div>
+    </div>
+
+    <!-- Header bar -->
+    <header class="h-[64px] border-b-[0.5px] border-figma-sep flex items-center px-4 justify-between flex-shrink-0">
+        <div class="flex items-center gap-4">
+            <button id="btn-toggle-monaco" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-xl">≡</button>
+            <h1 class="font-bold text-black uppercase tracking-widest text-sm">FRD Editor — Sullivan IA</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <select id="template-select" class="bg-figma-input px-3 py-1 outline-none text-xs border border-transparent focus:border-figma-sep">
+                <option value="brainstorm_war_room_tw.html">Brainstorm War Room (TW)</option>
+                <option value="brainstorm_war_room.html">Brainstorm War Room (CSS)</option>
+            </select>
+            <button id="btn-load" class="px-4 py-1 border border-black text-[10px] hover:bg-black hover:text-white transition-all uppercase tracking-widest">Load</button>
+            <button id="btn-save" class="px-4 py-1 bg-figma-tabActive text-white text-[10px] hover:bg-opacity-90 font-bold uppercase tracking-widest">Save</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div id="workspace-container" class="flex-1 flex overflow-hidden">
+        
+        <!-- Monaco Left Pane -->
+        <div id="monaco-pane" class="flex flex-col bg-white">
+            <div id="editor-container" class="flex-1"></div>
+        </div>
+
+        <!-- Resize Handle -->
+        <div id="resize-handle"></div>
+
+        <!-- Preview Center Pane -->
+        <div id="preview-pane" class="bg-gray-200 relative">
+            <iframe id="preview-iframe" class="w-full h-full border-none bg-white"></iframe>
+        </div>
+
+        <!-- Sullivan Right Pane -->
+        <div id="sullivan-pane" class="w-[320px] border-l-[0.5px] border-figma-sep flex flex-col bg-figma-panel">
+            <div class="h-[50px] border-b-[0.5px] border-figma-sep flex items-center px-4 font-bold text-xs uppercase tracking-widest bg-white">
+                Chatbot Sullivan
+            </div>
+
+            <!-- Assets Zone (Mission 51) -->
+            <div id="assets-zone" class="border-b-[0.5px] border-figma-sep bg-white">
+                <div class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-figma-text">Assets</div>
+                <div id="drop-zone" class="mx-4 mb-3 h-[60px] border border-dashed border-[#333]
+                     flex items-center justify-center text-[10px] text-figma-text cursor-pointer
+                     transition-colors hover:border-figma-tabActive">
+                    Glisser une image ici
+                </div>
+                <div id="asset-thumbnails" class="px-4 pb-3 flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="chat-history" class="flex-1 overflow-y-auto p-4 no-scrollbar flex flex-col gap-2">
+                <div class="chat-bubble sullivan-bubble">Bonjour ! Je suis Sullivan. Indiquez-moi les modifications à apporter au HTML/Tailwind.</div>
+            </div>
+            <!-- Input area -->
+            <div class="p-4 bg-white border-t-[0.5px] border-figma-sep flex flex-col gap-2">
+                <textarea id="chat-input" placeholder="Instruction (ex: 'Change la couleur en bleu')" 
+                          class="w-full h-20 bg-figma-input p-3 text-xs outline-none border-none resize-none"></textarea>
+                <button id="btn-send" class="w-full py-2 bg-figma-sep text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all">Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        let editorHTML;
+        let isCollapsed = false;
+        let lastWidth = 340;
+        let uploadedAssets = []; // Mission 51
+
+        // --- Monaco Initialization ---
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editorHTML = monaco.editor.create(document.getElementById('editor-container'), {
+                value: '<!-- Chargez un fichier pour commencer -->',
+                language: 'html',
+                theme: 'vs-light',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 12,
+                fontFamily: 'Geist Mono, monospace',
+                scrollBeyondLastLine: false,
+                lineNumbers: 'on',
+                wordWrap: 'on'
+            });
+
+            editorHTML.onDidChangeModelContent(() => {
+                updatePreview();
+            });
+
+            // --- Highlight Logic ---
+            editorHTML.onDidChangeCursorSelection((e) => {
+                const selection = editorHTML.getModel().getValueInRange(e.selection);
+                const match = selection.match(/id="([^"]+)"/);
+                if (match) {
+                    const id = match[1];
+                    const iframe = document.getElementById('preview-iframe');
+                    iframe.contentWindow.postMessage({ type: 'highlight', selector: '#' + id }, '*');
+                }
+            });
+        });
+
+        // --- Layout Controls & Resizing ---
+        const monacoPane = document.getElementById('monaco-pane');
+        const resizeHandle = document.getElementById('resize-handle');
+        let isResizing = false;
+
+        document.getElementById('btn-toggle-monaco').onclick = () => {
+            isCollapsed = !isCollapsed;
+            monacoPane.style.transition = 'width 200ms ease';
+            if (isCollapsed) {
+                lastWidth = monacoPane.offsetWidth;
+                monacoPane.style.width = '0px';
+                resizeHandle.style.display = 'none';
+            } else {
+                monacoPane.style.width = lastWidth + 'px';
+                resizeHandle.style.display = 'block';
+            }
+            setTimeout(() => { if(editorHTML) editorHTML.layout(); }, 210);
+        };
+
+        // --- Assets Logic (Mission 51) ---
+        const dropZone = document.getElementById('drop-zone');
+
+        async function loadAssets() {
+            try {
+                const res = await fetch('/api/frd/assets');
+                if (res.ok) {
+                    const data = await res.json();
+                    uploadedAssets = data.assets.map(a => a.url);
+                    document.getElementById('asset-thumbnails').innerHTML = '';
+                    data.assets.forEach(a => addThumbnail(a.name, a.url));
+                }
+            } catch (e) { console.error("Load assets failed", e); }
+        }
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#8cc63f';
+            dropZone.style.background = '#f0fae0';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#333';
+            dropZone.style.background = '';
+        });
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#333';
+            dropZone.style.background = '';
+            const files = e.dataTransfer.files;
+            for (const file of files) {
+                const fd = new FormData();
+                fd.append('file', file);
+                try {
+                    const res = await fetch('/api/frd/upload', { method: 'POST', body: fd });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (!uploadedAssets.includes(data.url)) {
+                            uploadedAssets.push(data.url);
+                            addThumbnail(file.name, data.url);
+                        }
+                    }
+                } catch (e) { console.error("Upload failed", e); }
+            }
+        });
+
+        function addThumbnail(name, url) {
+            const container = document.getElementById('asset-thumbnails');
+            const wrap = document.createElement('div');
+            wrap.className = 'relative group';
+            wrap.innerHTML = `
+                <img src="${url}" title="${name} (Click to copy URL)"
+                     class="w-8 h-8 object-cover border border-[#333] cursor-pointer hover:border-figma-tabActive transition-all"
+                     onclick="copyAssetUrl('${url}', this)">
+                <span class="absolute -top-1 -right-1 hidden group-hover:flex w-3 h-3
+                             bg-red-500 text-white text-[8px] items-center justify-center
+                             cursor-pointer rounded-full"
+                      onclick="event.stopPropagation(); removeAsset('${url}', this.parentElement)">×</span>
+            `;
+            container.appendChild(wrap);
+        }
+
+        async function copyAssetUrl(url, el) {
+            await navigator.clipboard.writeText(url);
+            el.style.borderColor = '#8cc63f';
+            el.style.boxShadow = '0 0 5px #8cc63f';
+            setTimeout(() => {
+                el.style.borderColor = '#333';
+                el.style.boxShadow = 'none';
+            }, 500);
+        }
+
+        function removeAsset(url, el) {
+            uploadedAssets = uploadedAssets.filter(u => u !== url);
+            el.remove();
+        }
+
+        loadAssets(); // Initial load
+
+        resizeHandle.onmousedown = (e) => {
+            isResizing = true;
+            monacoPane.style.transition = 'none';
+            document.body.style.cursor = 'col-resize';
+        };
+
+        window.onmousemove = (e) => {
+            if (!isResizing) return;
+            const container = document.getElementById('workspace-container');
+            let newWidth = e.clientX;
+            newWidth = Math.max(180, Math.min(newWidth, window.innerWidth / 2));
+            monacoPane.style.width = newWidth + 'px';
+            if(editorHTML) editorHTML.layout();
+        };
+
+        window.onmouseup = () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+            }
+        };
+
+        // --- Load & Save Logic ---
+        document.getElementById('btn-load').onclick = async () => {
+            const filename = document.getElementById('template-select').value;
+            try {
+                const res = await fetch(`/api/frd/file?name=${filename}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    editorHTML.setValue(data.content);
+                }
+            } catch (e) { console.error("Load failed", e); }
+        };
+
+        document.getElementById('btn-save').onclick = async () => {
+            const filename = document.getElementById('template-select').value;
+            const content = editorHTML.getValue();
+            try {
+                const res = await fetch('/api/frd/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, html: content })
+                });
+                if (res.ok) alert("Fichier sauvegardé avec succès !");
+            } catch (e) { console.error("Save failed", e); }
+        };
+
+        // --- Sullivan Chat Logic ---
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            appendBubble(message, 'user');
+            input.value = '';
+
+            // Show Overlay & Pending Bubble
+            const overlay = document.getElementById('sullivan-overlay');
+            overlay.style.display = 'flex';
+            const pendingId = 'pending-' + Date.now();
+            appendBubble("Sullivan analyse votre demande...", 'sullivan', pendingId);
+
+            const btn = document.getElementById('btn-send');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/frd/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        html: editorHTML.getValue(),
+                        assets: uploadedAssets
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    // Replace pending bubble
+                    const pendingBubble = document.getElementById(pendingId);
+                    if (pendingBubble) pendingBubble.innerText = data.explanation;
+                    
+                    if (data.html) {
+                        editorHTML.setValue(data.html);
+                    }
+                }
+            } catch (e) { console.error("Chat failed", e); }
+            finally {
+                overlay.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('btn-send').onclick = sendChat;
+        document.getElementById('chat-input').onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChat();
+            }
+        };
+
+        function appendBubble(text, role, id = null) {
+            const history = document.getElementById('chat-history');
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${role}-bubble`;
+            if (id) div.id = id;
+            div.innerText = text;
+            history.appendChild(div);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        // --- Live Preview ---
+        function updatePreview() {
+            const iframe = document.getElementById('preview-iframe');
+            const content = editorHTML.getValue();
+            
+            // Inject Highlight Script into Preview
+            const highlightScript = `
+                <script>
+                    window.addEventListener('message', (e) => {
+                        if (e.data.type === 'highlight') {
+                            const el = document.querySelector(e.data.selector);
+                            if (el) {
+                                // Reset others
+                                document.querySelectorAll('[data-highlighted]').forEach(h => {
+                                    h.style.outline = 'none';
+                                    h.removeAttribute('data-highlighted');
+                                });
+                                el.style.outline = '4px solid #8cc63f';
+                                el.setAttribute('data-highlighted', 'true');
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                setTimeout(() => { el.style.outline = '2px solid #8cc63f'; }, 200);
+                            }
+                        }
+                    });
+                </\/script>
+            `;
+            
+            // Use regex to inject before </body> if present, or just append
+            let finalHtml = content;
+            if (finalHtml.includes('</body>')) {
+                finalHtml = finalHtml.replace('</body>', highlightScript + '</body>');
+            } else {
+                finalHtml += highlightScript;
+            }
+
+            iframe.srcdoc = finalHtml;
+        }
+    </script>
+</body>
+</html>

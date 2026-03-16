@@ -15,6 +15,8 @@ import subprocess
 import shutil
 from pathlib import Path
 from datetime import datetime
+import urllib.request
+import urllib.error
 
 # Ajout des chemins pour importer les modules Backend et Frontend
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +38,9 @@ from Backend.Prod.retro_genome.intent_mapper import IntentMapper
 from Backend.Prod.retro_genome.manifest_reader import ManifestReader
 from Backend.Prod.retro_genome.html_generator import HtmlGenerator
 from Backend.Prod.retro_genome.prd_generator import PRDGenerator
+
+# Mission 43 — Phase Brainstorm (BRS)
+from Backend.Prod.retro_genome import brainstorm_logic as brs_logic
 
 RETRO_ANALYZE_DIR = Path(__file__).parent / "../../exports/retro_genome"
 RETRO_ANALYZE_DIR.mkdir(parents=True, exist_ok=True)
@@ -100,13 +105,15 @@ def _load_env():
                 os.environ.setdefault(k.strip(), v.strip())
 
 
-def _write_retro_status(step: str, message: str):
+def _write_retro_status(step: str, message: str, **kwargs):
     """Écrit l'étape courante dans un fichier de statut pour le polling frontend."""
     try:
         status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
         status_path.parent.mkdir(parents=True, exist_ok=True)
+        data = {"step": step, "message": message}
+        data.update(kwargs)
         with open(status_path, 'w', encoding='utf-8') as f:
-            json.dump({"step": step, "message": message}, f)
+            json.dump(data, f, ensure_ascii=False)
     except Exception:
         pass  # Non-bloquant
 
@@ -230,6 +237,56 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_template('intent_viewer.html')
             return
 
+        # Route /brainstorm (Mission 43)
+        if self.path == '/brainstorm':
+            self.serve_template('brainstorm_war_room.html')
+            return
+
+        # Route /brainstorm-tw (Mission 48 — Tailwind Trial)
+        if self.path == '/brainstorm-tw':
+            self.serve_template('brainstorm_war_room_tw.html')
+            return
+
+        # Route /frd-editor (Mission 49 — FRD Editor)
+        if self.path == '/frd-editor':
+            self.serve_template('frd_editor.html')
+            return
+
+        # Route /frd-editor (Mission 49 — Monaco + Preview + Sullivan Chat)
+        if self.path.startswith('/frd-editor'):
+            self.serve_template('frd_editor.html')
+            return
+
+        # Route GET /api/frd/file?name=<filename> (Mission 45)
+        if self.path.startswith('/api/frd/file'):
+            from urllib.parse import urlparse, parse_qs
+            parsed = urlparse(self.path)
+            params = parse_qs(parsed.query)
+            name = params.get('name', [''])[0]
+            if not name or '/' in name or '..' in name:
+                self.send_error_json(400, "Invalid filename")
+                return
+            cwd = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(cwd, TEMPLATES_DIR, name)
+            if not os.path.exists(file_path):
+                self.send_error_json(404, f"File not found: {name}")
+                return
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            self.send_json({"name": name, "content": content})
+            return
+
+        # Route GET /api/frd/assets (Mission 51)
+        if self.path.startswith('/api/frd/assets'):
+            assets_dir = os.path.join(cwd, STATIC_DIR, "assets", "frd")
+            assets = []
+            if os.path.exists(assets_dir):
+                for f in os.listdir(assets_dir):
+                    if os.path.isfile(os.path.join(assets_dir, f)) and not f.startswith('.'):
+                        assets.append({"name": f, "url": f"/static/assets/frd/{f}"})
+            self.send_json({"assets": assets})
+            return
+
         # Route pour le Service Worker (doit être à la racine pour le scope)
         if self.path == '/sw.js':
             self.serve_sw()
@@ -271,6 +328,24 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_static(self.path[8:])
             return
 
+        # Mission 43 — BRS API (GET)
+        if self.path == '/api/brs/buffer-questions':
+            self.send_json(brs_logic.get_buffer_questions())
+            return
+
+        if self.path.startswith('/api/brs/basket/'):
+            session_id = self.path.split('/')[-1]
+            self.send_json({"session_id": session_id, "basket": brs_logic.storage.get_basket(session_id)})
+            return
+
+        if self.path.startswith('/api/brs/stream/'):
+            parts = self.path.split('/')
+            if len(parts) >= 5:
+                session_id = parts[-2]
+                provider = parts[-1]
+                self._handle_brs_stream(session_id, provider)
+                return
+
         # Route API pour le manifestation (Figma Bridge - Mission 25B)
         if self.path == '/api/manifest':
             manifest_path = Path(__file__).parent.parent.parent / 'exports' / 'manifest.json'
@@ -278,7 +353,18 @@ class Handler(BaseHTTPRequestHandler):
                 with open(manifest_path, 'r', encoding='utf-8') as f:
                     self.send_json(json.load(f))
             else:
-                self.send_error_json(404, "Manifest not found. Run composer first.")
+                self.send_error_json(404, "Genome Manifest not found.")
+            return
+
+        # NEW: Route API pour le manifestation du Retro-Genome (Mission 37)
+        if self.path == '/api/retro-genome/manifest':
+            retro_dir = Path(__file__).parent.parent.parent / 'exports' / 'retro_genome'
+            manifest_path = retro_dir / 'manifest.json'
+            if manifest_path.exists():
+                with open(manifest_path, 'r', encoding='utf-8') as f:
+                    self.send_json(json.load(f))
+            else:
+                self.send_error_json(404, "Retro-Genome Manifest not found. Run export first.")
             return
 
         # Route API pour le CSS (PropertyEnforcer)
@@ -355,7 +441,6 @@ class Handler(BaseHTTPRequestHandler):
             f = retro_dir / "validated_analysis.json"
             if f.exists():
                 try:
-                    import json
                     data = json.loads(f.read_text(encoding="utf-8"))
                     # Mission 35: Structure is audit -> gaps
                     audit = data.get('audit', {})
@@ -405,14 +490,22 @@ class Handler(BaseHTTPRequestHandler):
         # Mission 34D - Progress Status Polling
         if self.path.startswith('/api/retro-genome/status'):
             status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            
+            data = {"step": "idle", "message": ""}
             if status_path.exists():
                 try:
                     data = json.loads(status_path.read_text(encoding='utf-8'))
-                    self.send_json(data)
                 except Exception:
-                    self.send_json({"step": "idle", "message": ""})
-            else:
-                self.send_json({"step": "idle", "message": ""})
+                    pass
+            
+            # Mission 37 restart fix: if idle/none but schema exists, we are 'done'
+            if data.get("step") in ("idle", None):
+                if (retro_dir / "validated_analysis.json").exists():
+                    data["step"] = "done"
+                    data["message"] = "Schema available for export."
+
+            self.send_json(data)
             return
 
         self.send_error_json(404, f"Route {self.path} not found")
@@ -500,6 +593,163 @@ class Handler(BaseHTTPRequestHandler):
         self.send_json({"ok": True, "organ_id": organ_id, "order": order})
 
     def do_POST(self):
+        # Route /api/frd/chat (Mission 49)
+        if self.path == '/api/frd/chat':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                message = body.get('message', '')
+                html_context = body.get('html', '')
+                assets = body.get('assets', [])
+                
+                api_key = os.environ.get('GOOGLE_API_KEY')
+                if not api_key:
+                    self.send_error_json(500, "GOOGLE_API_KEY non configurée")
+                    return
+
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key={api_key}"
+                
+                # Inject assets into system prompt
+                asset_context = ""
+                if assets:
+                    asset_context = "\nImages disponibles (utilise ces URLs relatives si pertinent) :\n" + "\n".join(assets)
+
+                system_instruction = (
+                    "Tu es Sullivan, assistant de modification d'interface HomeOS.\n"
+                    "Tu modifies des fichiers HTML Tailwind CSS selon les instructions du développeur.\n"
+                    "Tu réponds TOUJOURS dans ce format exact :\n"
+                    "[explication courte en français, 1-2 phrases max]\n"
+                    "---HTML---\n"
+                    "[fichier HTML complet modifié, rien d'autre]\n"
+                    "Règles : ne jamais modifier le <script> • préserver tous les IDs • Tailwind arbitrary values"
+                    f"{asset_context}"
+                )
+
+                payload = {
+                    "contents": [{
+                        "parts": [{
+                            "text": f"SYSTEM: {system_instruction}\n\nUSER MESSAGE: {message}\n\nCURRENT HTML:\n{html_context}"
+                        }]
+                    }]
+                }
+                
+                req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
+                with urllib.request.urlopen(req) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    raw_text = res_data['candidates'][0]['content']['parts'][0]['text']
+                    
+                    explanation = ""
+                    new_html = ""
+                    if "---HTML---" in raw_text:
+                        parts = raw_text.split("---HTML---")
+                        explanation = parts[0].strip()
+                        new_html = parts[1].strip()
+                    else:
+                        explanation = raw_text
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"explanation": explanation, "html": new_html}).encode('utf-8'))
+            except Exception as e:
+                self.send_error_json(500, str(e))
+            return
+
+        # Route /api/frd/upload (Mission 51)
+        if self.path == '/api/frd/upload':
+            try:
+                # Manual multipart parsing for Python 3.13+ (no cgi module)
+                ctype = self.headers.get('Content-Type')
+                if not ctype or 'multipart/form-data' not in ctype:
+                    self.send_error_json(400, "Content-Type must be multipart/form-data")
+                    return
+                
+                boundary = ctype.split("boundary=")[1].encode()
+                content_length = int(self.headers.get('Content-Length'))
+                body = self.rfile.read(content_length)
+                
+                parts = body.split(b'--' + boundary)
+                file_data = None
+                filename = None
+                
+                for part in parts:
+                    if b'filename="' in part:
+                        # Extract filename
+                        fn_match = re.search(b'filename="([^"]+)"', part)
+                        if fn_match:
+                            filename = fn_match.group(1).decode()
+                            # Extract content (after \r\n\r\n)
+                            header_end = part.find(b'\r\n\r\n')
+                            if header_end != -1:
+                                file_data = part[header_end+4:].rstrip(b'\r\n--')
+                
+                if not filename or not file_data:
+                    self.send_error_json(400, "No file found in multipart data")
+                    return
+                
+                # Sanitize filename
+                filename = os.path.basename(filename)
+                ext = os.path.splitext(filename)[1].lower()
+                if ext not in ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']:
+                    self.send_error_json(400, "Invalid file type")
+                    return
+                
+                assets_dir = os.path.join(cwd, STATIC_DIR, "assets", "frd")
+                os.makedirs(assets_dir, exist_ok=True)
+                
+                dest_path = os.path.join(assets_dir, filename)
+                with open(dest_path, 'wb') as f:
+                    f.write(file_data)
+                
+                self.send_json({"url": f"/static/assets/frd/{filename}"})
+            except Exception as e:
+                self.send_error_json(500, f"Upload error: {str(e)}")
+            return
+
+        # Route /api/frd/save (Mission 49)
+        if self.path == '/api/frd/save':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                filename = body.get('filename', 'brainstorm_war_room_tw.html')
+                html_content = body.get('html', '')
+                
+                if not filename.endswith('.html') or '/' in filename or '..' in filename:
+                    self.send_error_json(400, "Nom de fichier invalide")
+                    return
+
+                _cwd = os.path.dirname(os.path.abspath(__file__))
+                target_path = os.path.join(_cwd, 'static/templates', filename)
+                with open(target_path, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ok", "path": target_path}).encode('utf-8'))
+            except Exception as e:
+                self.send_error_json(500, str(e))
+            return
+
+        # Route POST /api/frd/file (Mission 45 — sauvegarde Monaco)
+        if self.path == '/api/frd/file':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                data = json.loads(self.rfile.read(length))
+                name = data.get('name', '')
+                content = data.get('content', '')
+                if not name or '/' in name or '..' in name:
+                    self.send_error_json(400, "Invalid filename")
+                    return
+                cwd = os.path.dirname(os.path.abspath(__file__))
+                file_path = os.path.join(cwd, TEMPLATES_DIR, name)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                self.send_json({"status": "ok", "name": name})
+            except Exception as e:
+                self.send_error_json(500, str(e))
+            return
+
         # Mission 34C: Validate Intent Mapping
         if self.path == '/api/retro-genome/validate':
             try:
@@ -666,29 +916,61 @@ class Handler(BaseHTTPRequestHandler):
         # Mission 34D - Progress Status Polling
         if self.path.startswith('/api/retro-genome/status'):
             status_path = Path(__file__).parent.parent.parent / "exports" / "retro_genome" / "upload_status.json"
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            
+            data = {"step": "idle", "message": ""}
             if status_path.exists():
                 try:
                     data = json.loads(status_path.read_text(encoding='utf-8'))
-                    self.send_json(data)
                 except Exception:
-                    self.send_json({"step": "idle", "message": ""})
-            else:
-                self.send_json({"step": "idle", "message": ""})
+                    pass
+            
+            # Mission 37 restart fix: if idle/none but schema exists, we are 'done'
+            if data.get("step") in ("idle", None):
+                if (retro_dir / "validated_analysis.json").exists():
+                    data["step"] = "done"
+                    data["message"] = "Schema available for export."
+
+            self.send_json(data)
             return
 
         # Mission 32 - Retro Genome Upload
-        if self.path == '/api/retro-genome/upload':
-            self._handle_retro_upload()
+        elif self.path == '/api/retro-genome/approve':
+            self._handle_retro_approve()
             return
-
-        # Mission 35 - HTML Generation from validated analysis
-        if self.path == '/api/retro-genome/generate-html':
+        elif self.path == '/api/retro-genome/export-zip':
+            self._handle_retro_export_zip()
+            return
+        elif self.path == '/api/retro-genome/export-manifest':
+            self._handle_retro_export_manifest()
+            return
+        elif self.path == '/api/retro-genome/export-schema':
+            self._handle_retro_export_schema()
+            return
+        elif self.path == '/api/retro-genome/generate-html':
             self._handle_retro_generate_html()
             return
-
-        # Mission 32 - PRD Generation
-        if self.path == '/api/retro-genome/generate-prd':
+        elif self.path == '/api/retro-genome/generate-prd':
             self._handle_retro_prd_gen()
+            return
+        elif self.path == '/api/retro-genome/upload':
+            self._handle_retro_upload()
+            return
+        elif self.path == '/api/retro-genome/upload-svg':
+            self._handle_retro_upload_svg()
+            return
+            
+        # Mission 43 — BRS API (POST)
+        elif self.path == '/api/brs/dispatch':
+            self._handle_brs_dispatch()
+            return
+
+        elif self.path == '/api/brs/capture':
+            self._handle_brs_capture()
+            return
+
+        elif self.path == '/api/brs/generate-prd':
+            self._handle_brs_generate_prd()
             return
 
         self.send_error_json(404, f"POST route {self.path} not found")
@@ -961,6 +1243,46 @@ class Handler(BaseHTTPRequestHandler):
             print(f"[RETRO_GENOME] ERROR: {e}\n{traceback.format_exc()}", flush=True)
             self.send_error_json(500, f"Retro Genome failed: {str(e)}")
 
+    def _handle_retro_upload_svg(self):
+        """POST /api/retro-genome/upload-svg — Ingress SVG Figma (Mission 41)."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+        except Exception as e:
+            self.send_error_json(400, f"Invalid JSON: {e}")
+            return
+
+        svg_string = body.get('svg', '')
+        frame_name = body.get('name', 'unnamed_frame')
+
+        if not svg_string:
+            self.send_error_json(400, "Missing 'svg' field")
+            return
+
+        # Sauvegarde SVG brut pour inspection
+        from datetime import datetime
+        retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+        retro_dir.mkdir(parents=True, exist_ok=True)
+        safe_name = (frame_name or "frame").replace(" ", "_").replace("/", "_")[:40]
+        svg_path = retro_dir / f"SVG_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.svg"
+        svg_path.write_text(svg_string, encoding="utf-8")
+
+        try:
+            from Backend.Prod.retro_genome.svg_parser import parse_figma_svg
+            from Backend.Prod.retro_genome.archetype_detector import ArchetypeDetector
+            analysis = parse_figma_svg(svg_string)
+            archetype = ArchetypeDetector().detect(analysis)
+            self.send_json({
+                "status": "ok",
+                "visual_analysis": analysis,
+                "archetype": archetype,
+                "design_tokens": analysis.get("design_tokens", {}),
+                "svg_saved": str(svg_path),
+                "source": "figma_svg"
+            })
+        except Exception as e:
+            self.send_error_json(500, f"SVG processing failed: {e}")
+
     def _handle_retro_generate_html(self):
         """Mission 35 — Génère le HTML/CSS de la Reality View depuis le JSON validé + PNG."""
         try:
@@ -989,9 +1311,9 @@ class Handler(BaseHTTPRequestHandler):
             # modifier HtmlGenerator pour qu'il accepte un callback de status.
             
             # Option choisie : passer une fonction de callback à generator.generate
-            def status_cb(msg):
-                _write_retro_status("generating", msg)
-                print(f"[HTML_GEN] {msg}", flush=True)
+            def status_cb(msg, step="generating", **kwargs):
+                _write_retro_status(step, msg, **kwargs)
+                print(f"[{step.upper()}] {msg}", flush=True)
 
             html = asyncio.run(generator.generate(png_path=png_path, matched_analysis=validated, status_callback=status_cb))
             _write_retro_status("done", "Reality View prête.")
@@ -1007,6 +1329,70 @@ class Handler(BaseHTTPRequestHandler):
             print(f"[GENERATE_HTML] ERROR: {e}\n{traceback.format_exc()}", flush=True)
             self.send_error_json(500, f"HTML generation failed: {str(e)}")
 
+    def _handle_retro_approve(self):
+        """HCI: Approval by the Human Director."""
+        try:
+            # On passe simplement le statut à 'done'
+            _write_retro_status("done", "Rendu validé par le Directeur. Prêt pour export.")
+            self.send_json({"status": "ok", "message": "Approval recorded"})
+        except Exception as e:
+            self.send_error_json(500, f"Approval failed: {str(e)}")
+
+    def _handle_retro_export_zip(self):
+        """Packaging reality.html + css in a ZIP."""
+        try:
+            from Backend.Prod.retro_genome.exporter_vanilla import export_as_zip
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            html_path = retro_dir / "reality.html"
+            if not html_path.exists():
+                self.send_error_json(400, "reality.html not found.")
+                return
+            
+            html_content = html_path.read_text(encoding='utf-8')
+            zip_path = export_as_zip("AetherFlow_Reality", html_content, retro_dir)
+            
+            self.send_json({"status": "ok", "zip_path": str(zip_path)})
+        except Exception as e:
+            self.send_error_json(500, f"ZIP export failed: {str(e)}")
+
+    def _handle_retro_export_manifest(self):
+        """Inferring manifest.json for Figma Bridge."""
+        try:
+            from Backend.Prod.retro_genome.manifest_inferer import ManifestInferer
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            html_path = retro_dir / "reality.html"
+            if not html_path.exists():
+                self.send_error_json(400, "reality.html not found.")
+                return
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            manifest = loop.run_until_complete(ManifestInferer.infer_from_html(html_path))
+            
+            output_path = retro_dir / "manifest.json"
+            ManifestInferer.save_manifest(manifest, output_path)
+            
+            # Mission 37: Do NOT overwrite the main manifest anymore. 
+            # Differentiate endpoints instead.
+            
+            self.send_json({"status": "ok", "manifest_path": str(output_path)})
+        except Exception as e:
+            self.send_error_json(500, f"Manifest inference failed: {str(e)}")
+
+    def _handle_retro_export_schema(self):
+        """Exporting the validated analysis JSON schema."""
+        try:
+            retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+            schema_path = retro_dir / "validated_analysis.json"
+            if not schema_path.exists():
+                self.send_error_json(400, "validated_analysis.json not found.")
+                return
+            
+            # Optionally format it or just return the path
+            self.send_json({"status": "ok", "schema_path": str(schema_path)})
+        except Exception as e:
+            self.send_error_json(500, f"Schema export failed: {str(e)}")
+
     def _handle_retro_prd_gen(self):
         """Invoke PRD and Roadmap generation from last analysis data."""
         try:
@@ -1016,8 +1402,14 @@ class Handler(BaseHTTPRequestHandler):
             project_name = body.get('project_name', 'Analyzed Mockup')
 
             if not analysis_data:
-                self.send_error_json(400, "Missing analysis data for PRD generation")
-                return
+                retro_dir = Path(__file__).parent.parent.parent / "exports" / "retro_genome"
+                validated_path = retro_dir / "validated_analysis.json"
+                if validated_path.exists():
+                    with open(validated_path, 'r', encoding='utf-8') as f:
+                        analysis_data = json.load(f)
+                else:
+                    self.send_error_json(400, "Missing analysis data and no validated_analysis.json found")
+                    return
 
             generator = PRDGenerator()
             result = asyncio.run(generator.generate(analysis_data, project_name))
@@ -1067,6 +1459,84 @@ class Handler(BaseHTTPRequestHandler):
             import traceback
             print(f"[RETRO_CHAT] ERROR: {e}\n{traceback.format_exc()}", flush=True)
             self.send_error_json(500, f"HTML refinement failed: {str(e)}")
+
+    # --- Mission 43 BRS Handlers ---
+
+    def _handle_brs_dispatch(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            data = json.loads(self.rfile.read(length))
+            session_id = data.get('session_id')
+            prompt = data.get('prompt')
+            if not session_id or not prompt:
+                self.send_error_json(400, "Missing session_id or prompt")
+                return
+            buffer_answers = data.get('buffer_answers') or {}
+            result = asyncio.run(brs_logic.dispatch_brainstorm(session_id, prompt, buffer_answers))
+            self.send_json(result)
+        except Exception as e:
+            self.send_error_json(500, str(e))
+
+    def _handle_brs_stream(self, session_id, provider):
+        """SSE handler pour le brainstorm streaming."""
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'keep-alive')
+        self.send_header('X-Accel-Buffering', 'no')
+        self.end_headers()
+
+        try:
+            # On utilise asyncio pour le générateur
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            gen = brs_logic.sse_generator(session_id, provider)
+            
+            async def run_gen():
+                async for chunk in gen:
+                    self.wfile.write(chunk.encode('utf-8'))
+                    self.wfile.flush()
+            
+            loop.run_until_complete(run_gen())
+        except Exception as e:
+            print(f"[BRS_STREAM] SSE Error: {e}", flush=True)
+        finally:
+            try:
+                loop.close()
+            except:
+                pass
+
+    def _handle_brs_capture(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            data = json.loads(self.rfile.read(length))
+            session_id = data.get('session_id')
+            text = data.get('text')
+            provider = data.get('provider')
+            if not all([session_id, text, provider]):
+                self.send_error_json(400, "Missing fields")
+                return
+            
+            nugget = brs_logic.capture_nugget(session_id, text, provider)
+            self.send_json({"status": "ok", "nugget_id": nugget["id"]})
+        except Exception as e:
+            self.send_error_json(500, str(e))
+
+    def _handle_brs_generate_prd(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            data = json.loads(self.rfile.read(length))
+            session_id = data.get('session_id')
+            project_name = data.get('project_name')
+            if not session_id or not project_name:
+                self.send_error_json(400, "Missing fields")
+                return
+            
+            result = asyncio.run(brs_logic.generate_prd_from_basket(session_id, project_name))
+            self.send_json(result)
+        except Exception as e:
+            self.send_error_json(500, str(e))
 
 def save_genome(genome):
     """Sauvegarde le genome sur disque (miroir de load_genome)."""

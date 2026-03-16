@@ -6,6 +6,64 @@
 
 ---
 
+## Mission 39 — Intent Viewer : Stabilisation Analyse PNG
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT) + GEMINI (Tâche C+D prompt)**
+**DATE: 2026-03-13**
+- [x] Tâche A : PNG natif lossless (`format="PNG"`, `mime_type="image/png"`), `MAX_DIMENSION=1280`, suppression JPEG/dégradation qualité.
+- [x] Tâche B : `temperature=0` + retry ×3 avec `asyncio.sleep(1)` dans `analyze_png()`. Logger du numéro de tentative.
+- [x] Tâche C+D (Gemini) : `color_hex` obligatoire, sidebar détection, `visual_hint` par élément, `coords` géométriques, `computed-intersection` + `parents` pour chevauchements.
+
+---
+
+## Mission 40 — SVG Backplane + Archetypal API Inference
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (A+C CODE DIRECT) + GEMINI (B+D)**
+**DATE: 2026-03-13**
+- [x] Tâche A : `af_metadata_schema.json` — 9 attributs, 2 couches (fonctionnelle + géométrique). Schéma de référence pour le SVG Backplane.
+- [x] Tâche B (Gemini) : `functional_archetypes.json` — 20 archétypes (ide_like, venn_diagram, sudoku_grid, weather_app...) avec `artifact_type`, `visual_triggers`, `required_components`, `suggested_endpoints`.
+- [x] Tâche C : `archetype_detector.py` — matching déterministe keyword-scoring, génère `dev_brief` pédagogique, confidence < 0.5 → `unknown`. Tests : venn_diagram ✅ admin_dashboard ✅ unknown ✅.
+- [x] Tâche D (Gemini) : `VISUAL_DECOMPOSER_PROMPT` enrichi — `visual_hint` obligatoire, `coords` géométriques (`row/col` ou `cx/cy/r`), `computed-intersection` + `parents` pour zones calculées.
+
+---
+
+## Mission 38 — Figma Bridge Plugin : Debug & Stabilisation
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-13**
+- [x] Fix crash au démarrage : `"allowedDomains": ["none"]` était valide mais `optional chaining ?.` cassait le sandbox Figma — retiré.
+- [x] Fix loop silencieuse : `figma.loadFontAsync` appelé avec Inter Medium alors que le TextNode utilise Regular par défaut → crash catchée silencieusement.
+- [x] Refactor code.js : font chargée une fois avant la boucle, frame parent container, zoom auto, opacité minimum 15% pour les fonds transparents, try/catch global.
+- [x] Manifest validé : `allowedDomains: ["none"]` + `devAllowedDomains: ["http://localhost:9998"]`.
+- [x] Blueprint import ✅ | Reality import ✅ (17 éléments dans container parent).
+
+---
+
+## Mission 36 — Sullivan Cockpit : Conversational Refinement (Chat)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: ANTIGRAVITY**
+**DATE: 2026-03-11**
+- [x] API Endpoint `/api/retro-genome/chat` créé.
+- [x] Sullivan Refine implémenté dans `HtmlGenerator`.
+- [x] UI Sync (bouton Envoyer, animations) branchée.
+- [x] System Prompt intégré.
+
+## Mission 35 — Retro-Genome Reality View Engine (Multi-pass)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: ANTIGRAVITY**
+**DATE: 2026-03-11**
+- [x] Génération Multi-pass HTML → CSS → Review DA.
+- [x] Exigence Design : Flexbox/Grid/Gap/Clamp.
+- [x] Monitoring Sullivan dans l'UI.
+- [x] Routage Dual-Viewer (Blueprint vs Reality).
+
+## Mission 34C — Workflow Validation : Intent → Reality
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI**
+**DATE: 2026-03-11**
+- [x] Persistance via `validated_analysis.json`.
+- [x] Polling du statut frontend.
+
 ## Mission 34B — Dual Viewer : Routage & Endpoints Backend ✅ 2026-03-11
 - [x] Routage serveur implémenté dans `server_9998_v2.py`.
 - [x] Endpoint `/api/pedagogy/gaps` fonctionnel.
@@ -4171,3 +4229,42 @@ BRANCH: experience_front_gemini
 
 ---
 
+
+## Mission 35/36 V2 — Agency Loop : Visual QA & HCI Stabilization
+
+**STATUS: ✅ ACHEVÉ**
+**ACTOR: ANTIGRAVITY**
+**DATE: 2026-03-11**
+
+### Réalisations
+- **The Lens (Playwright)** : Moteur de rendu Headless pour capturer les screenshots des essais.
+- **M2M Loop (Junior vs DA)** : Boucle fermée entre intégrateur (Flash) et DA (Vision) pour corriger les dérives stylistiques.
+- **Monitoring Sullivan** : Affichage en direct de la "Critique du DA" dans le cockpit Sullivan.
+- **HCI Director Approval** : Validation humaine obligatoire (Bouton Approve/Reject) avant livraison.
+
+---
+
+## Mission 41 — SVG Ingress : Figma → Pipeline (Plugin Bridge + svg_parser)
+
+**STATUS: ✅ ACHEVÉ (Tâches A/B/C/D)**
+**ACTOR: GEMINI (implémentation) + CLAUDE (review)**
+**DATE: 2026-03-13**
+
+### Réalisations
+- **Tâche A** : Plugin Figma `code.js` + `ui.html` — export SVG chunked (fix RangeError 65534), bouton "Analyser SVG", POST vers `/api/retro-genome/upload-svg`.
+- **Tâche B** : `svg_parser.py` — extraction fonts (attributs + style inline), couleurs, régions `<g>`, éléments `<text>`/`<rect>`, `google_fonts_import`, `accent_color`.
+- **Tâche C** : Endpoint `/api/retro-genome/upload-svg` dans `server_9998_v2.py` (handler direct, pas FastAPI). SVG sauvegardé dans `exports/retro_genome/SVG_<name>_<ts>.svg`.
+- **Tâche D** : `_normalize_for_detector()` adapter Vision (`components[]`) → ArchetypeDetector (`elements[]`). PNG `/upload` inclut maintenant `archetype` dans la réponse.
+
+### Bugs corrigés
+- RangeError 65534 (Figma sandbox V8) : conversion chunked `svgBytes.subarray(i, i+8192)`
+- 404 sur `/api/retro-genome/upload-svg` : route ajoutée à `server_9998_v2.py` (pas à `routes.py` FastAPI)
+- Schema mismatch archetype_detector : `_normalize_for_detector()` bridge
+- Couleurs inline style manquées : regex `fill:/stroke:` dans style string
+- Fonts depuis attribut direct manquées : fallback `node.get('font-family')`
+- `msg.error` non vérifié dans `ui.html` : guard ajouté
+
+### Pendant
+- **Amendment 41-A** (provenance SVG) → Mission 41-A active
+
+---

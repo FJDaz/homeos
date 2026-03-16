@@ -20,7 +20,13 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from loguru import logger
 
+from .svg_parser import parse_figma_svg
+from .archetype_detector import ArchetypeDetector
+
 router = APIRouter(prefix="/retro-genome", tags=["Retro Genome"])
+
+# Singleton
+detector = ArchetypeDetector()
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────
 
@@ -129,6 +135,25 @@ Output a markdown PRD with:
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
+def _normalize_for_detector(vision_analysis: Dict) -> Dict:
+    """Adapte le schema Vision (components[]) au format attendu par ArchetypeDetector (elements[])."""
+    elements = []
+    for comp in vision_analysis.get("components", []):
+        elements.append({
+            "apparent_role": comp.get("type", ""),
+            "description": comp.get("inferred_intent", ""),
+            "text_content": comp.get("name", ""),
+            "visual_hint": comp.get("type", ""),
+        })
+    regions = []
+    for reg in vision_analysis.get("regions", []):
+        regions.append({
+            "name": reg.get("name", ""),
+            "structural_role": reg.get("role", "content"),
+        })
+    return {"elements": elements, "regions": regions}
+
+
 def _get_gemini_client():
     """Instancie le GeminiClient natif AetherFlow."""
     try:
@@ -175,6 +200,47 @@ def _encode_image(data: bytes, max_bytes: int = 500 * 1024) -> tuple[str, str]:
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
+
+class SVGUpload(BaseModel):
+    svg: str
+    name: Optional[str] = "unnamed_frame"
+
+@router.post("/upload-svg")
+async def retro_genome_upload_svg(data: SVGUpload):
+    """
+    Ingress SVG (Mission 41).
+    Parse le SVG Figma structuré et détecte l'archétype sans passer par la vision.
+    Sauvegarde le SVG brut dans exports/retro_genome/ pour inspection.
+    """
+    from datetime import datetime
+    logger.info(f"[RetroGenome] SVG Upload received for: {data.name}")
+
+    # Sauvegarde SVG brut pour inspection visuelle
+    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = (data.name or "frame").replace(" ", "_").replace("/", "_")[:40]
+    svg_path = exports_dir / f"SVG_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.svg"
+    svg_path.write_text(data.svg, encoding="utf-8")
+    logger.info(f"[RetroGenome] SVG saved to: {svg_path}")
+
+    try:
+        # 1. Parsing sémantique
+        analysis = parse_figma_svg(data.svg)
+
+        # 2. Détection d'archétype
+        archetype = detector.detect(analysis)
+
+        return JSONResponse(content={
+            "status": "ok",
+            "visual_analysis": analysis,
+            "archetype": archetype,
+            "design_tokens": analysis.get("design_tokens", {}),
+            "svg_saved": str(svg_path),
+            "source": "figma_svg"
+        })
+    except Exception as e:
+        logger.error(f"[RetroGenome] SVG Processing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload")
 async def retro_genome_upload(image: UploadFile = File(...)):
@@ -238,12 +304,17 @@ async def retro_genome_upload(image: UploadFile = File(...)):
             "genome_structure": {}
         }
 
+    # --- Step 3: Archetype Detection (Mission 40/41) ---
+    logger.info("[RetroGenome] Step 3: Archetype Detection")
+    archetype = detector.detect(_normalize_for_detector(analysis))
+
     await client.close()
 
     return JSONResponse(content={
         "status": "ok",
         "analysis": analysis,
         "audit": audit,
+        "archetype": archetype,
         "provider_used": getattr(vision_result, "provider", "gemini")
     })
 
