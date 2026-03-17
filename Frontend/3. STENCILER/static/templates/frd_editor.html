@@ -68,6 +68,25 @@
         }
         .user-bubble { background: #f2f3f5; align-self: flex-end; color: #333; }
         .sullivan-bubble { background: #8cc63f; align-self: flex-start; color: white; }
+        
+        .kimi-bubble {
+            background: #1a1a2e !important;
+            color: #fff !important;
+            border: 1px solid #3d3d63 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            align-self: flex-start;
+            width: 280px;
+            max-width: 95%;
+        }
+        .variant-card {
+            background: #252545;
+            border: 1px solid #3d3d63;
+            transition: all 0.2s;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .variant-card:hover { border-color: #8cc63f; background: #2d2d5a; }
 
         /* Loader Overlay */
         #sullivan-overlay {
@@ -157,7 +176,15 @@
             </div>
             <!-- Input area -->
             <div class="p-4 bg-white border-t-[0.5px] border-figma-sep flex flex-col gap-2">
-                <textarea id="chat-input" placeholder="Instruction (ex: 'Change la couleur en bleu')" 
+                <div class="flex items-center gap-2">
+                    <button id="toggle-construct" onclick="setMode('construct')"
+                        class="flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all"
+                        style="border-color:#333;background:#1e1e2e;color:#fff;">CONSTRUCT</button>
+                    <button id="toggle-design" onclick="setMode('design')"
+                        class="flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all"
+                        style="border-color:#3d3d63;background:transparent;color:#8cc63f;">DESIGN</button>
+                </div>
+                <textarea id="chat-input" placeholder="Instruction (ex: 'Change la couleur en bleu')"
                           class="w-full h-20 bg-figma-input p-3 text-xs outline-none border-none resize-none"></textarea>
                 <button id="btn-send" class="w-full py-2 bg-figma-sep text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all">Envoyer</button>
             </div>
@@ -201,6 +228,8 @@
                     iframe.contentWindow.postMessage({ type: 'highlight', selector: '#' + id }, '*');
                 }
             });
+
+            setMode('construct');
         });
 
         // --- Layout Controls & Resizing ---
@@ -347,14 +376,41 @@
             } catch (e) { console.error("Save failed", e); }
         };
 
+        // --- Mode Toggle ---
+        let _chatMode = 'construct';
+
+        function setMode(mode) {
+            _chatMode = mode;
+            const cBtn = document.getElementById('toggle-construct');
+            const dBtn = document.getElementById('toggle-design');
+            if (mode === 'construct') {
+                cBtn.style.background = '#1e1e2e'; cBtn.style.color = '#fff'; cBtn.style.borderColor = '#333';
+                dBtn.style.background = 'transparent'; dBtn.style.color = '#8cc63f'; dBtn.style.borderColor = '#3d3d63';
+                document.getElementById('chat-input').placeholder = "Instruction (ex: 'Change la couleur en bleu')";
+            } else {
+                dBtn.style.background = '#0f0f1e'; dBtn.style.color = '#8cc63f'; dBtn.style.borderColor = '#8cc63f';
+                cBtn.style.background = 'transparent'; cBtn.style.color = '#888'; cBtn.style.borderColor = '#333';
+                document.getElementById('chat-input').placeholder = "Direction créative (ex: 'Plus de contraste, typographie bolder')";
+            }
+        }
+
         // --- Sullivan Chat Logic ---
         async function sendChat() {
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
             if (!message) return;
 
+            // Handle mode-switch commands silently (no bubble)
+            if (message === '/design') { setMode('design'); appendBubble("Mode DESIGN activé — KIMI répond.", 'sullivan'); input.value = ''; return; }
+            if (message === '/construct') { setMode('construct'); appendBubble("Mode CONSTRUCT activé — Sullivan répond.", 'sullivan'); input.value = ''; return; }
+
             appendBubble(message, 'user');
             input.value = '';
+
+            if (_chatMode === 'design' || message.startsWith('/design')) {
+                const instruction = message.startsWith('/design') ? message.replace('/design', '').trim() : message;
+                return sendKimi(instruction);
+            }
 
             // Show Overlay & Pending Bubble
             const overlay = document.getElementById('sullivan-overlay');
@@ -409,6 +465,113 @@
             div.innerText = text;
             history.appendChild(div);
             history.scrollTop = history.scrollHeight;
+        }
+
+        let _kimiInProgress = false;
+
+        async function sendKimi(instruction) {
+            if (_kimiInProgress) {
+                appendBubble("KIMI est déjà en cours... patience.", 'sullivan');
+                return;
+            }
+            _kimiInProgress = true;
+
+            const overlay = document.getElementById('sullivan-overlay');
+            if (!overlay) { _kimiInProgress = false; return; }
+            const loaderText = overlay.querySelector('div:last-child');
+            const oldText = loaderText ? loaderText.innerText : 'Sullivan travaille...';
+            if (loaderText) loaderText.innerText = "KIMI DESIGN : INITIALISATION...";
+            overlay.style.display = 'flex';
+
+            try {
+                const res = await fetch('/api/frd/kimi/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ instruction, html: editorHTML.getValue() })
+                });
+                const data = await res.json();
+                if (res.ok && data.job_id) {
+                    if (loaderText) loaderText.innerText = "KIMI TRAVAILLE (POLLING)...";
+                    _pollKimi(data.job_id, oldText);
+                } else {
+                    appendBubble("Erreur KIMI : " + (data.error || "Impossible de démarrer le job"), 'sullivan');
+                    overlay.style.display = 'none';
+                    if (loaderText) loaderText.innerText = oldText;
+                    _kimiInProgress = false;
+                }
+            } catch (e) {
+                console.error('[KIMI] fetch error:', e);
+                appendBubble("Erreur connexion KIMI.", 'sullivan');
+                overlay.style.display = 'none';
+                if (loaderText) loaderText.innerText = oldText;
+                _kimiInProgress = false;
+            }
+        }
+
+        async function _pollKimi(job_id, oldText) {
+            const overlay = document.getElementById('sullivan-overlay');
+            const loaderText = overlay.querySelector('div:last-child');
+            
+            try {
+                const res = await fetch('/api/frd/kimi/result/' + job_id);
+                const data = await res.json();
+
+                if (data.status === 'done') {
+                    appendKimiBubble(data.label || "KIMI Design", data.html);
+                    overlay.style.display = 'none';
+                    if (loaderText) loaderText.innerText = oldText;
+                    _kimiInProgress = false;
+                } else if (data.status === 'error') {
+                    appendBubble("Erreur KIMI : " + (data.error || "Inconnue"), 'sullivan');
+                    overlay.style.display = 'none';
+                    if (loaderText) loaderText.innerText = oldText;
+                    _kimiInProgress = false;
+                } else if (data.status === 'not_found') {
+                    appendBubble("Erreur : Job KIMI introuvable.", 'sullivan');
+                    overlay.style.display = 'none';
+                    if (loaderText) loaderText.innerText = oldText;
+                    _kimiInProgress = false;
+                } else {
+                    // Toujours en cours (pending) → re-poll après 5s
+                    setTimeout(() => _pollKimi(job_id, oldText), 5000);
+                }
+            } catch (e) {
+                console.error('[KIMI] poll error:', e);
+                // Réessayer quand même
+                setTimeout(() => _pollKimi(job_id, oldText), 5000);
+            }
+        }
+
+        function appendKimiBubble(label, html) {
+            window._lastKimiHtml = html;
+            const history = document.getElementById('chat-history');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble kimi-bubble mb-4';
+
+            const header = document.createElement('div');
+            header.className = 'px-3 py-2 bg-[#0f0f1e] text-[9px] font-bold uppercase tracking-widest border-b border-[#3d3d63]';
+            header.textContent = '🎨 KIMI — ' + label;
+
+            const body = document.createElement('div');
+            body.className = 'p-3';
+
+            const btn = document.createElement('button');
+            btn.className = 'w-full py-2 bg-[#0f0f1e] text-[9px] border border-[#3d3d63] rounded hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all uppercase tracking-widest font-bold';
+            btn.textContent = 'Appliquer';
+            btn.addEventListener('click', applyKimiResult);
+
+            body.appendChild(btn);
+            div.appendChild(header);
+            div.appendChild(body);
+            history.appendChild(div);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        function applyKimiResult() {
+            if (!window._lastKimiHtml) return;
+            editorHTML.setValue(window._lastKimiHtml);
+            updatePreview();
+            appendBubble("Design KIMI appliqué.", 'user');
         }
 
         // --- Live Preview ---

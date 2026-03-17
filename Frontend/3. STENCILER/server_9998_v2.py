@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import uuid
 import asyncio
 import threading
 import subprocess
@@ -58,6 +59,12 @@ TEMPLATES_DIR = os.path.join(STATIC_DIR, "templates")
 _pipeline_running = False
 _pipeline_iteration = 0
 _pipeline_lock = threading.Lock()
+
+# =============================================================================
+# KIMI JOB QUEUE (Mission 54)
+# =============================================================================
+_kimi_jobs = {}          # { job_id: { status, label, html, error, ts } }
+_kimi_jobs_lock = threading.Lock()
 
 # =============================================================================
 # INFER LAYOUT — Heuristique + LLM 3-tier
@@ -189,6 +196,78 @@ def enrich_genome_with_rag(genome):
     except Exception as e:
         print(f"WARN: Failed to enrich RAG {e}")
 
+def _run_kimi_job(job_id, instruction, html_context):
+    """Exécute l'appel KIMI en arrière-plan (Mission 54)."""
+    try:
+        # 1. Strip <script> blocks (Mission 52 optimization)
+        html_stripped = re.sub(r'<script[\s\S]*?</script>', '', html_context, flags=re.IGNORECASE).strip()
+
+        _load_env()
+        api_key = os.environ.get('NVIDIA_NIM_API_KEY') or os.environ.get('NVIDIA_API_KEY')
+        if not api_key:
+            with _kimi_jobs_lock:
+                _kimi_jobs[job_id] = { "status": "error", "error": "NVIDIA_API_KEY non configurée", "ts": datetime.now() }
+            return
+
+        url = "https://integrate.api.nvidia.com/v1/chat/completions"
+
+        prompt = (
+            "Tu es KIMI, expert en design UI/UX. Propose UNE refonte visuelle de l'interface HTML/Tailwind fournie.\n"
+            "Réponds avec un label court (3-5 mots) puis le HTML complet modifié.\n"
+            "Format strict :\nLABEL: [label]\n---HTML---\n[HTML complet]\n\n"
+            f"Instruction : {instruction}\n"
+            f"HTML actuel (scripts omis) :\n{html_stripped}"
+        )
+
+        payload = {
+            "model": "moonshotai/kimi-k2.5",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 8192,
+            "temperature": 0.7
+        }
+
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'),
+                                     headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'})
+
+        # Augmentation du timeout pour le thread d'arrière-plan (10 min)
+        with urllib.request.urlopen(req, timeout=600) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            choices = res_data.get('choices') or []
+            raw_text = (choices[0].get('message') or {}).get('content') if choices else None
+            
+            if not raw_text:
+                finish = (choices[0].get('finish_reason') if choices else 'unknown')
+                error_msg = f"KIMI content vide (finish_reason: {finish})"
+                with _kimi_jobs_lock:
+                    _kimi_jobs[job_id] = { "status": "error", "error": error_msg, "ts": datetime.now() }
+                return
+
+            print(f"[KIMI_DEBUG] {raw_text[:200]}...", flush=True)
+
+            # Parse label + html
+            label = "KIMI Design"
+            html = raw_text.strip()
+            if "LABEL:" in html:
+                parts = html.split("---HTML---", 1)
+                label = parts[0].replace("LABEL:", "").strip()
+                html = parts[1].strip() if len(parts) > 1 else html
+            elif "---HTML---" in html:
+                html = html.split("---HTML---", 1)[1].strip()
+
+            # Strip markdown code fences if present
+            if html.startswith("```html"):
+                html = html.split("```html", 1)[1].split("```")[0].strip()
+            elif html.startswith("```"):
+                html = html.split("```", 1)[1].split("```")[0].strip()
+
+            with _kimi_jobs_lock:
+                _kimi_jobs[job_id] = { "status": "done", "label": label, "html": html, "ts": datetime.now() }
+
+    except Exception as e:
+        print(f"[KIMI_ERROR] {str(e)}", flush=True)
+        with _kimi_jobs_lock:
+            _kimi_jobs[job_id] = { "status": "error", "error": str(e), "ts": datetime.now() }
+
 def load_genome():
     """Charge le genome depuis le fichier JSON"""
     filepath = GENOME_FILE
@@ -242,6 +321,17 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_template('brainstorm_war_room.html')
             return
 
+        # Mission 54 — KIMI Polling result
+        if self.path.startswith('/api/frd/kimi/result/'):
+            job_id = self.path.split('/')[-1]
+            with _kimi_jobs_lock:
+                job = _kimi_jobs.get(job_id, {"status": "not_found"})
+                # On retire le timestamp datetime pour la sérialisation JSON
+                res = job.copy()
+                if "ts" in res: del res["ts"]
+                self.send_json(res)
+            return
+
         # Route /brainstorm-tw (Mission 48 — Tailwind Trial)
         if self.path == '/brainstorm-tw':
             self.serve_template('brainstorm_war_room_tw.html')
@@ -278,13 +368,17 @@ class Handler(BaseHTTPRequestHandler):
 
         # Route GET /api/frd/assets (Mission 51)
         if self.path.startswith('/api/frd/assets'):
-            assets_dir = os.path.join(cwd, STATIC_DIR, "assets", "frd")
-            assets = []
-            if os.path.exists(assets_dir):
-                for f in os.listdir(assets_dir):
-                    if os.path.isfile(os.path.join(assets_dir, f)) and not f.startswith('.'):
-                        assets.append({"name": f, "url": f"/static/assets/frd/{f}"})
-            self.send_json({"assets": assets})
+            try:
+                cwd = os.path.dirname(os.path.abspath(__file__))
+                assets_dir = os.path.join(cwd, STATIC_DIR, "assets", "frd")
+                assets = []
+                if os.path.exists(assets_dir):
+                    for f in os.listdir(assets_dir):
+                        if os.path.isfile(os.path.join(assets_dir, f)) and not f.startswith('.'):
+                            assets.append({"name": f, "url": f"/static/assets/frd/{f}"})
+                self.send_json({"assets": assets})
+            except Exception as e:
+                self.send_error_json(500, f"Assets error: {str(e)}")
             return
 
         # Route pour le Service Worker (doit être à la racine pour le scope)
@@ -655,6 +749,33 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error_json(500, str(e))
             return
 
+            return
+
+        # Route /api/frd/kimi/start (Mission 54)
+        if self.path == '/api/frd/kimi/start':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                instruction = body.get('instruction', '')
+                html_context = body.get('html', '')
+
+                # Nettoyage optionnel des vieux jobs avant de commencer
+                now = datetime.now()
+                with _kimi_jobs_lock:
+                    to_delete = [jid for jid, job in _kimi_jobs.items() 
+                                 if (now - job.get('ts', now)).total_seconds() > 1800]
+                    for jid in to_delete: del _kimi_jobs[jid]
+
+                job_id = str(uuid.uuid4())[:8]
+                with _kimi_jobs_lock:
+                    _kimi_jobs[job_id] = { "status": "pending", "ts": now }
+                
+                threading.Thread(target=_run_kimi_job, args=(job_id, instruction, html_context), daemon=True).start()
+                self.send_json({"job_id": job_id})
+            except Exception as e:
+                self.send_error_json(500, str(e))
+            return
+
         # Route /api/frd/upload (Mission 51)
         if self.path == '/api/frd/upload':
             try:
@@ -664,8 +785,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.send_error_json(400, "Content-Type must be multipart/form-data")
                     return
                 
-                boundary = ctype.split("boundary=")[1].encode()
-                content_length = int(self.headers.get('Content-Length'))
+                boundary = ctype.split("boundary=")[1].split(";")[0].strip().encode()
+                content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length)
                 
                 parts = body.split(b'--' + boundary)
@@ -1614,6 +1735,7 @@ def load_custom_injection():
 
 
 if __name__ == '__main__':
+    _load_env()
     server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
     print(f"🧬 Serveur Genome lancé sur http://localhost:{PORT}")
     print(f"   - Viewer:        http://localhost:{PORT}/")

@@ -6,6 +6,113 @@
 
 ---
 
+## Mission 44 — Pipeline Figma REST → HTML Pixel-Fidèle (via Gemini)
+**STATUS: ✅ LIVRÉ** *(via Mission 48 Tailwind — CSS custom path abandonné)*
+**ACTOR: GEMINI**
+**DATE: 2026-03-16**
+- [x] Pipeline systématisable : Figma REST API → spec JSON → Gemini → HTML
+- [x] Artifacts HomeOS 1 : `figma_homeos1_spec.json` (6025L) + `figma_homeos1_render.png`
+- [x] 3 tentatives CSS custom échouées → pivot Tailwind arbitrary values (M48) validé FJD
+- [x] Palette `--figma-*` documentée, mapping typo Figma→web établi (Inter/Geist/system-ui)
+- [x] `brainstorm_war_room_tw.html` = implémentation validée (M48 ✅)
+
+---
+
+## Mission 52+53 — FRD Editor : Intégration KIMI Design Critic
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI (M52 initial) + CLAUDE (M53 debug/stabilisation)**
+**DATE: 2026-03-17**
+- [x] Route `POST /api/frd/kimi` → NVIDIA NIM `moonshotai/kimi-k2.5`, timeout 300s
+- [x] Script-stripping avant envoi (économie tokens ~50%)
+- [x] Parsing réponse : label + HTML, tolérant aux variations de format KIMI
+- [x] 1 seule proposition par appel (simplifié depuis 3 variantes)
+- [x] XHR (bypass inject.js monkey-patch fetch) → `appendKimiBubble` DOM-only (addEventListener)
+- [x] `applyKimiResult()` → `editorHTML.setValue()` + `updatePreview()`
+- [x] Mode toggle CONSTRUCT/DESIGN + commandes `/design` et `/construct`
+- [x] Bug assets `cwd` manquant → corrigé
+- [x] Null-check sur KIMI content vide
+
+---
+
+## Mission 51 — FRD Editor : Asset Upload (Drag & Drop → Sullivan Context)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI (frontend) + CLAUDE (backend)**
+**DATE: 2026-03-16**
+- [x] Zone Assets dans Sullivan pane : drop-zone dashed, thumbnails 40×40, bouton [×] supprimer
+- [x] Drag & drop → `POST /api/frd/upload` (multipart stdlib, extensions whitelistées)
+- [x] `GET /api/frd/assets` → liste les fichiers `static/assets/frd/`
+- [x] `sendChat()` injecte `assets: uploadedAssets` → system prompt Sullivan
+- [x] `loadAssets()` au démarrage pour persister entre sessions
+
+---
+
+## Mission 50 — FRD Editor UX : Loader Sullivan + Monaco Resizable + Inspect
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI**
+**DATE: 2026-03-16**
+- [x] Overlay `Sullivan travaille...` (position:fixed, z-index:9999, spinner CSS)
+- [x] Drag handle 4px entre Monaco et Preview (clamp 180px→50vw, `editor.layout()` en continu)
+- [x] Toggle `[≡]` mémorise la largeur avant collapse
+- [x] `onDidChangeCursorSelection` → regex `id="..."` → `postMessage` → outline vert `#8cc63f` sur l'élément preview
+
+---
+
+## Mission 49 — FRD Editor : Monaco + Preview + Sullivan Chat
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI + FJD**
+**DATE: 2026-03-16**
+- [x] Éditeur 3 panes : Monaco (resizable) | Preview iframe srcdoc | Sullivan chat 320px
+- [x] Routes `/frd-editor`, `/api/frd/chat` (Gemini Flash-Lite), `/api/frd/save`
+- [x] Hotfix `cwd` scope Python → `_cwd = os.path.dirname(os.path.abspath(__file__))`
+- [x] Sullivan : system prompt + parse `---HTML---` → `{ explanation, html }`
+
+---
+
+## Mission 48 — EXPÉRIMENTATION Tailwind : Figma JSON → HTML Tailwind
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI**
+**DATE: 2026-03-16**
+- [x] `brainstorm_war_room_tw.html` : layout Tailwind arbitrary values depuis coords Figma
+- [x] Grid `grid-cols-[554px_504px_504px_504px_504px]`, palette `--figma-*` CSS vars
+- [x] Tailwind validé comme standard FRD → remplace approche CSS custom Mission 44
+- [x] Route `/brainstorm-tw` ajoutée dans `server_9998_v2.py`
+
+---
+
+## Mission 47 — Sullivan Arbitre + Search FTS5
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE + hotfixes**
+**DATE: 2026-03-14**
+- [x] `arbitrate_session()` dans `brainstorm_logic.py` → GeminiClient + system prompt arbitre
+- [x] `GET /api/brs/arbitrate/{session_id}` → SSE StreamingResponse
+- [x] `search(query)` FTS5 dans `brs_storage.py` → `snippet()` + score
+- [x] `GET /api/brs/search?q=` → JSON + UI câblée dans `brainstorm_war_room.html`
+- [x] Bouton Sullivan → stream arbitrage dans panel Sullivan, style italic accent mauve
+
+---
+
+## Mission 46 — BRS Persistance SQLite + MistralClient
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE**
+**DATE: 2026-03-14**
+- [x] `brs_storage.py` : BRSStorage SQLite (sessions, messages, nuggets, documents) + FTS5
+- [x] `mistral_client.py` : OpenRouter free tier, `mistralai/mistral-nemo`
+- [x] `brainstorm_logic.py` : migration in-memory → SQLite, provider groq → Mistral Nemo
+- [x] Colonne 3 = Mistral (éditorial French-native) au lieu de Groq
+
+---
+
+## Mission 45 — Éditeur Monaco HTML/CSS (FRD sub-phase)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI + CLAUDE**
+**DATE: 2026-03-14**
+- [x] `monaco_editor.html` : split 50/50, tabs HTML/CSS, LOAD/SAVE
+- [x] CSS-only injection sans rechargement iframe (injection dans `#monaco-injected-style`)
+- [x] Routes `GET /monaco`, `GET /api/frd/file`, `POST /api/frd/file`
+- [x] Debounce 300ms, toast "Sauvegardé ✓"
+
+---
+
 ## Mission 39 — Intent Viewer : Stabilisation Analyse PNG
 **STATUS: ✅ LIVRÉ**
 **ACTOR: CLAUDE (CODE DIRECT) + GEMINI (Tâche C+D prompt)**
