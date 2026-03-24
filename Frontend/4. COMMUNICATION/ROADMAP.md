@@ -425,6 +425,134 @@ Lire Frontend/1. CONSTITUTION/SULLIVAN_INTERACTIONS.md — patterns JS vanilla t
 
 ---
 
+## Mission 91 — API Generator Engine : retro-genome → FastAPI routes
+
+**STATUS: ✅ LIVRÉ (Claude, 2026-03-25) — archivé dans ROADMAP_ACHIEVED.md**
+**DATE: 2026-03-25**
+**ACTOR: CLAUDE**
+**MODE: aetherflow -f**
+
+### Contexte
+
+Aujourd'hui toutes les routes de `server_v3.py` sont écrites à la main. Or le retro-genome dispose déjà de la chaîne complète :
+
+```
+interface (HTML/SVG/Figma)
+  → manifest_inferer.py      # détecte les entités, intents, régions
+  → archetype_detector.py    # identifie l'archetype (ide_like, chatbot_pro, dashboard…)
+  → functional_archetypes.json  # chaque archetype a suggested_endpoints[]
+```
+
+Il manque le dernier maillon : **`api_generator.py`** — un moteur qui prend un manifest + son archetype et génère le code Python FastAPI correspondant.
+
+**Objectif** : MVP prouvable en 1 run. Un CLI qui, à partir d'un manifest.json, produit un `router_{name}.py` importable dans `server_v3.py`.
+
+### Architecture cible
+
+```
+Backend/Prod/retro_genome/
+└── api_generator.py          # nouveau — moteur de génération
+```
+
+**Entrées** :
+- `manifest.json` (depuis `exports/retro_genome/` ou path CLI)
+- `functional_archetypes.json` (lookup archetype → suggested_endpoints)
+- `af_metadata_schema.json` (types d'entités → paramètres Pydantic)
+
+**Sortie** : fichier Python `router_{project_slug}.py` contenant :
+```python
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/{slug}", tags=["{slug}"])
+
+# Généré depuis archetype: ide_like
+@router.get("/fs/tree")
+async def get_fs_tree():
+    """[auto] Liste l'arborescence de fichiers — archetype ide_like"""
+    raise HTTPException(status_code=501, detail="Not implemented")
+
+@router.post("/fs/save")
+async def post_fs_save(body: FsSaveRequest):
+    """[auto] Sauvegarde un fichier — archetype ide_like"""
+    raise HTTPException(status_code=501, detail="Not implemented")
+...
+```
+
+### Logique de génération
+
+```python
+def generate(manifest_path: str, output_path: str):
+    manifest = load_json(manifest_path)
+    archetype_id = manifest.get("archetype_id") or detect_archetype(manifest)
+    archetype = lookup_archetype(archetype_id)            # functional_archetypes.json
+    endpoints = archetype["suggested_endpoints"]           # ex: ["GET /api/fs/tree", ...]
+    entities  = extract_entities(manifest)                 # depuis data-af-intent + data-af-id
+
+    routes = []
+    for endpoint in endpoints:
+        method, path = endpoint.split(" ", 1)
+        handler_name = path_to_handler(method, path)      # "GET /api/fs/tree" → "get_fs_tree"
+        body_model   = infer_body_model(method, path, entities)  # POST → Pydantic model
+        routes.append(RouteSpec(method, path, handler_name, body_model))
+
+    write_router_file(routes, archetype, output_path)
+```
+
+### Critères de sortie (preuve obligatoire)
+
+**Test A — pipeline complet sur `bkd_frd.html`** :
+```bash
+# 1. Inférer le manifest depuis bkd_frd.html
+python -m retro_genome.manifest_inferer \
+  --input Frontend/3.\ STENCILER/static/templates/bkd_frd.html \
+  --output /tmp/manifest_bkd.json
+
+# 2. Générer les routes
+python -m retro_genome.api_generator \
+  --manifest /tmp/manifest_bkd.json \
+  --output /tmp/router_bkd.py
+
+# 3. Vérifier le contenu
+cat /tmp/router_bkd.py
+```
+
+**Attendu** : routes générées incluent au minimum les équivalents de :
+- `GET /api/bkd/files` (file explorer → archetype ide_like)
+- `POST /api/bkd/chat` (chat Sullivan → archetype chatbot_pro)
+
+**Test B — importabilité** :
+```bash
+python -c "import ast; ast.parse(open('/tmp/router_bkd.py').read()); print('✅ Syntaxe Python valide')"
+```
+
+**Test C — cohérence avec server_v3.py** :
+Extraire les routes générées, comparer avec les routes existantes dans server_v3.py. Le rapport doit identifier :
+- Routes générées présentes dans server_v3 ✅ (validation)
+- Routes générées absentes → candidats à implémenter 🔵
+- Routes server_v3 non couvertes → hors archetype (normal) ℹ️
+
+### Bootstrap Claude (aetherflow -f)
+
+```
+Lire Backend/Prod/retro_genome/functional_archetypes.json — source des suggested_endpoints.
+Lire Backend/Prod/retro_genome/af_metadata_schema.json — attributs data-af-* pour inférer les Pydantic models.
+Lire Backend/Prod/retro_genome/archetype_detector.py — comprendre comment l'archetype est détecté.
+Lire Backend/Prod/retro_genome/manifest_inferer.py — format du manifest en sortie.
+Lire Frontend/3. STENCILER/server_v3.py lignes 1-50 — pattern FastAPI APIRouter de référence.
+```
+
+### Livrables
+
+- [ ] `Backend/Prod/retro_genome/api_generator.py` — moteur CLI fonctionnel ✅
+- [ ] Test A passe → `/tmp/router_bkd.py` généré ✅
+- [ ] Test B passe → syntaxe Python valide ✅
+- [ ] Test C rapport affiché dans le terminal ✅
+
+### Validation : CLAUDE (run CLI) + FJD (lecture rapport)
+
+---
+
 ## Mission 75-B — Extension VS Code `aetherflow-bkd`
 
 **STATUS: 🔵 BACKLOG**

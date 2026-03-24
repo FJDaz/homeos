@@ -4840,3 +4840,22 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - [x] `python3 -m py_compile server_9998_v2.py` → OK
 
 ### Validé FJD : ✅
+
+---
+
+## Mission 91 + 91-A — API Generator Engine
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-25**
+**ACTOR: CLAUDE**
+**FICHIERS :** `Backend/Prod/retro_genome/api_generator.py` (NEW), `Backend/Prod/retro_genome/functional_archetypes.json`
+
+- [x] `api_generator.py` : CLI `--manifest → --output router_{slug}.py`
+- [x] Pipeline complet prouvé : `bkd_frd.html` → manifest_inferer → api_generator → router Python valide
+- [x] M91-A : détection top-2 archetypes composites (score2 >= 50% score1)
+- [x] M91-A : résolution `aetherflow_conventions` dans `functional_archetypes.json`
+- [x] `functional_archetypes.json` : conventions ajoutées à `ide_like` + `chatbot_pro`
+- [x] Résultat sur `bkd_frd.html` : `ide_like (6) + chatbot_pro (3)` → 5 routes, 3/5 matchent exactement `server_v3.py` ✅
+- [x] Test B : syntaxe Python valide (ast.parse) ✅
+- [x] Pushé sur main (94c8d13)
+
+### Validé FJD : ✅

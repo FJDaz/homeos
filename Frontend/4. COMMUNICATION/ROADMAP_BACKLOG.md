@@ -279,3 +279,77 @@ qu'au niveau N3 — ils ne sont pas propagés/résumés aux niveaux N1/N2.
 - `Backend/Prod/core/genome_generator.py`
 - `Frontend/2. GENOME/genome_reference.json` (fixture dev)
 - `Backend/Prod/sullivan/stenciler/api.py` (endpoint `/api/genome`)
+
+---
+
+## Backlog API Generator — suites M91
+
+**Origine :** Mission 91-A (2026-03-25)
+
+### B1 — Enrichir tous les archetypes avec `aetherflow_conventions`
+
+`functional_archetypes.json` a 20 archetypes. Seuls `ide_like` et `chatbot_pro` ont leurs conventions AetherFlow. Les 18 autres utilisent le fallback générique.
+
+Archetypes prioritaires à enrichir :
+- `admin_dashboard` → `/api/{slug}/stats`, `/api/{slug}/reports`
+- `file_manager` → `/api/{slug}/files`, `/api/{slug}/files/upload`
+- `auth_flow` → `/api/{slug}/auth/login`, `/api/{slug}/auth/logout`
+- `social_feed` → `/api/{slug}/feed`, `/api/{slug}/post/like`
+
+**Effort :** ajout manuel de `"aetherflow_conventions": {}` par archetype dans le JSON.
+
+---
+
+### B2 — Archetype `aetherflow_brs` (War Room spécifique)
+
+Le BRS War Room (`brainstorm_war_room_tw.html`) n'a pas d'archetype correspondant. Créer :
+
+```json
+{
+  "archetype_id": "aetherflow_brs",
+  "label": "War Room Brainstorm (AetherFlow)",
+  "visual_triggers": ["multiplex stream", "sullivan panel", "nugget list", "dispatch prompt"],
+  "artifact_type": "service_api",
+  "suggested_endpoints": [
+    "POST /api/brs/dispatch",
+    "GET /api/brs/stream/{provider}",
+    "POST /api/brs/capture",
+    "POST /api/brs/generate-prd",
+    "GET /api/brs/arbitrate/{session}"
+  ],
+  "aetherflow_conventions": {
+    "POST /api/brs/dispatch": "POST /api/{slug}/dispatch",
+    "GET /api/brs/stream/{provider}": "GET /api/{slug}/stream/{provider}",
+    "POST /api/brs/capture": "POST /api/{slug}/capture",
+    "POST /api/brs/generate-prd": "POST /api/{slug}/generate-prd",
+    "GET /api/brs/arbitrate/{session}": "GET /api/{slug}/arbitrate/{session}"
+  },
+  "dev_brief": "Interface de brainstorm multi-LLM avec arbitrage Sullivan. Requiert SSE streaming par provider et persistence de nuggets."
+}
+```
+
+---
+
+### B3 — Intégration `api_generator` dans le workflow retro-genome
+
+Aujourd'hui le générateur est un CLI standalone. L'intégrer comme étape automatique :
+
+```
+POST /api/retro-genome/generate-html → génère le HTML
+→ (nouveau) POST /api/retro-genome/generate-api → appelle api_generator, retourne le router.py
+```
+
+Permettrait depuis `bkd_frd.html` : upload interface → manifest → générer HTML + API en 1 clic.
+
+---
+
+### B4 — Body model inférence depuis `data-af-intent`
+
+Actuellement, les Pydantic models sont inférés par keyword matching (`"chat"` → message + history). Améliorer avec `data-af-intent` du manifest :
+
+```
+data-af-intent: "envoyer un message à Sullivan" → POST body: { message: str, context?: str }
+data-af-intent: "charger un fichier du projet"  → GET query: { path: str, project_id: str }
+```
+
+Nécessite que `manifest_inferer.py` propage les `data-af-intent` dans le manifest (déjà partiellement fait).
