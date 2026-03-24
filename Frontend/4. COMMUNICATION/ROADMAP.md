@@ -553,6 +553,41 @@ Lire Frontend/3. STENCILER/server_v3.py lignes 1-50 — pattern FastAPI APIRoute
 
 ---
 
+## Mission 92 — Archetypes HoméOS natifs dans functional_archetypes.json
+
+**STATUS: ✅ LIVRÉ (Claude, 2026-03-25)**
+**DATE: 2026-03-25**
+**ACTOR: CLAUDE**
+**MODE: CODE DIRECT — FJD**
+
+### Contexte
+
+Les 20 archetypes existants sont génériques (ecommerce, weather, quiz…). HoméOS a des interfaces propres que personne d'autre ne construit. Sans archetypes natifs, le moteur API Generator ne peut pas reconnaître les interfaces HoméOS et génère des routes génériques au lieu des routes réelles.
+
+### Archetypes à créer
+
+**`aetherflow_brs`** — War Room Brainstorm multi-LLM
+Référence : `brainstorm_war_room_tw.html`
+Visual triggers : sidebar HoméOS logo, stream columns, sullivan panel, nugget list, dispatch prompt
+Endpoints : dispatch, stream SSE par provider, capture nugget, generate-prd, arbitrate
+
+**`genome_canvas`** — Stenciler SVG canvas
+Référence : `stenciler_v3.html`
+Visual triggers : SVG canvas, atom nodes, sidebar toolbar, genome tree panel, preview strip
+Endpoints : genome CRUD, manifest patch, layout infer, atom move/resize
+
+**`retro_genome_studio`** — Studio d'analyse retro-genome
+Référence : studio.html / viewer.html
+Visual triggers : upload zone, analysis results panel, manifest viewer, PRD export, validate button
+Endpoints : upload, analyze, validate, approve, generate-html, generate-prd, export-zip
+
+### Livrables
+
+- [x] `functional_archetypes.json` : 3 archetypes HoméOS ajoutés ✅
+- [x] Test : `python -m Backend.Prod.retro_genome.api_generator --manifest` sur chaque interface → archetype HoméOS détecté ✅
+
+---
+
 ## Mission 75-B — Extension VS Code `aetherflow-bkd`
 
 **STATUS: 🔵 BACKLOG**

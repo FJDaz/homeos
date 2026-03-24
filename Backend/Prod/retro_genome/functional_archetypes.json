@@ -75,7 +75,7 @@
     "visual_triggers": ["pyramid shape", "numeric nodes", "centered levels"],
     "artifact_type": "compute_front",
     "required_components": [
-      { "id": "pascal_node", "math_role": "node", "math_role": "pyramid-row" }
+      { "id": "pascal_node", "math_role": "node", "layout_role": "pyramid-row" }
     ],
     "dev_brief": "Structure pyramidale récursive. Nécessite un positionnement calculé des nœuds."
   },
@@ -189,5 +189,103 @@
     "artifact_type": "service_api",
     "suggested_endpoints": ["GET /api/quiz/next", "POST /api/quiz/submit"],
     "dev_brief": "Flux interactif de questions/réponses avec calcul de score."
+  },
+
+  {
+    "archetype_id": "aetherflow_brs",
+    "label": "War Room Brainstorm Multi-LLM (HoméOS)",
+    "visual_triggers": ["homeos logo", "sullivan panel", "nugget list", "dispatch prompt", "multiplex stream", "stream columns", "arbitrate button", "generate prd", "brainstorm", "war room"],
+    "artifact_type": "service_api",
+    "required_components": [
+      { "id": "sidebar", "region": "sidebar", "visual_hint": "homeos-brand" },
+      { "id": "stream_gemini", "region": "content", "visual_hint": "llm-stream" },
+      { "id": "stream_groq", "region": "content", "visual_hint": "llm-stream" },
+      { "id": "stream_codestral", "region": "content", "visual_hint": "llm-stream" },
+      { "id": "sullivan_panel", "region": "sidebar", "interact": "scrollable" },
+      { "id": "nugget_list", "region": "sidebar", "interact": "scrollable" }
+    ],
+    "suggested_endpoints": [
+      "POST /api/brs/dispatch",
+      "GET /api/brs/stream/{provider}",
+      "POST /api/brs/capture",
+      "POST /api/brs/generate-prd",
+      "GET /api/brs/arbitrate/{session_id}"
+    ],
+    "aetherflow_conventions": {
+      "POST /api/brs/dispatch": "POST /api/{slug}/dispatch",
+      "GET /api/brs/stream/{provider}": "GET /api/{slug}/stream/{provider}",
+      "POST /api/brs/capture": "POST /api/{slug}/capture",
+      "POST /api/brs/generate-prd": "POST /api/{slug}/generate-prd",
+      "GET /api/brs/arbitrate/{session_id}": "GET /api/{slug}/arbitrate/{session_id}"
+    },
+    "dev_brief": "War Room de brainstorming HoméOS. 3 colonnes LLM (Gemini/Groq/Codestral) en streaming SSE + Sullivan arbitre. Nuggets capturés, PRD généré en sortie."
+  },
+
+  {
+    "archetype_id": "genome_canvas",
+    "label": "Stenciler SVG Canvas (HoméOS)",
+    "visual_triggers": ["svg canvas", "atom nodes", "genome tree", "stenciler", "wireframe panel", "preview strip", "sidebar toolbar", "drag node", "composition", "bottom-up"],
+    "artifact_type": "compute_front",
+    "required_components": [
+      { "id": "canvas_svg", "region": "content", "interact": "draggable", "visual_hint": "svg-canvas" },
+      { "id": "sidebar_tools", "region": "sidebar", "interact": "clickable" },
+      { "id": "preview_strip", "region": "footer", "visual_hint": "preview" },
+      { "id": "genome_panel", "region": "sidebar", "interact": "scrollable" }
+    ],
+    "suggested_endpoints": [
+      "GET /api/genome",
+      "POST /api/genome",
+      "POST /api/manifest",
+      "POST /api/manifest/patch",
+      "POST /api/infer_layout",
+      "POST /api/organ-move",
+      "POST /api/comp-move",
+      "POST /api/comp-resize"
+    ],
+    "aetherflow_conventions": {
+      "GET /api/genome": "GET /api/{slug}/genome",
+      "POST /api/genome": "POST /api/{slug}/genome",
+      "POST /api/manifest": "POST /api/{slug}/manifest",
+      "POST /api/manifest/patch": "POST /api/{slug}/manifest/patch",
+      "POST /api/infer_layout": "POST /api/{slug}/infer-layout",
+      "POST /api/organ-move": "POST /api/{slug}/organ-move",
+      "POST /api/comp-move": "POST /api/{slug}/comp-move",
+      "POST /api/comp-resize": "POST /api/{slug}/comp-resize"
+    },
+    "dev_brief": "Canvas SVG génératif HoméOS. Atoms/compositions en bottom-up, drag & drop, genome JSON comme source de vérité. Inférence de layout via LLM."
+  },
+
+  {
+    "archetype_id": "retro_genome_studio",
+    "label": "Studio Retro-Genome (HoméOS)",
+    "visual_triggers": ["upload zone", "analysis results", "manifest viewer", "validate button", "approve", "export prd", "export zip", "retro genome", "reality check", "genome analysis"],
+    "artifact_type": "mixed",
+    "required_components": [
+      { "id": "upload_zone", "region": "content", "interact": "draggable", "visual_hint": "drop-zone" },
+      { "id": "analysis_panel", "region": "content", "interact": "scrollable" },
+      { "id": "manifest_preview", "region": "sidebar", "visual_hint": "json-viewer" },
+      { "id": "action_bar", "region": "footer", "interact": "clickable" }
+    ],
+    "suggested_endpoints": [
+      "POST /api/retro-genome/upload",
+      "POST /api/retro-genome/chat",
+      "POST /api/retro-genome/validate",
+      "POST /api/retro-genome/approve",
+      "POST /api/retro-genome/reality",
+      "POST /api/retro-genome/generate-html",
+      "POST /api/retro-genome/generate-prd",
+      "POST /api/retro-genome/export-zip"
+    ],
+    "aetherflow_conventions": {
+      "POST /api/retro-genome/upload": "POST /api/{slug}/upload",
+      "POST /api/retro-genome/chat": "POST /api/{slug}/chat",
+      "POST /api/retro-genome/validate": "POST /api/{slug}/validate",
+      "POST /api/retro-genome/approve": "POST /api/{slug}/approve",
+      "POST /api/retro-genome/reality": "POST /api/{slug}/reality",
+      "POST /api/retro-genome/generate-html": "POST /api/{slug}/generate-html",
+      "POST /api/retro-genome/generate-prd": "POST /api/{slug}/generate-prd",
+      "POST /api/retro-genome/export-zip": "POST /api/{slug}/export-zip"
+    },
+    "dev_brief": "Studio d'analyse d'interface HoméOS. Upload Figma/SVG/HTML → analyse → manifest → validation → génération HTML + PRD. Pipeline complet retro-genome."
   }
 ]
