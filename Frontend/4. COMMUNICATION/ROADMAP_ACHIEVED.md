@@ -6,6 +6,139 @@
 
 ---
 
+## Mission 69 — FRD Editor : Mode LOCK (zones invariantes)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: GEMINI (frontend) + CLAUDE (backend + auto-id)**
+**DATE: 2026-03-23**
+**FICHIERS :** `frd_editor.html`, `server_9998_v2.py`
+- [x] Bouton `[LOCK]` dans le header — toggle orange quand actif
+- [x] Hover en mode LOCK → outline orange pointillés + breadcrumb DOM
+- [x] Clic preview → `data-frd-lock="true"` dans Monaco + décoration fond orange + 🔒 glyph
+- [x] Toggle off sur clic d'un élément déjà locké
+- [x] Sélection Monaco + `Ctrl+L` → lock sur la balise ouvrante
+- [x] LOCK ↔ INSPECT mutuellement exclusifs
+- [x] Backend : détection `data-frd-lock` → injection ZONES INVARIANTES dans system_instruction Sullivan
+- [x] `[✕ Locks]` → retire tous les locks + efface décorations Monaco
+- [x] **Auto-id** : élément sans id → `id="lock-{tag}-{timestamp36}"` généré automatiquement au lock (ancrage précis pour Sullivan)
+- [x] `data-frd-lock` survit au Save/Load
+
+---
+
+## Mission 70 — Sullivan Intelligence : Undo + History + Manifest
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-23**
+**FICHIERS :** `frd_editor.html`, `server_9998_v2.py`
+
+### 70-A — Undo Stack
+- [x] `_htmlHistory[]` (max 10 états) — push avant chaque setValue Sullivan
+- [x] Bouton `⟲ Undo` dans le header — hidden par défaut, visible après 1ère action Sullivan
+- [x] Pop + restore + updatePreview au clic
+- [x] Reset au Load (nouveau contexte)
+
+### 70-B — Conversation History Multi-turn
+- [x] `_chatHistory[]` (max 6 échanges = 12 messages) — maintenu côté frontend
+- [x] Envoyé dans le body POST `/api/frd/chat` (`history: [...]`)
+- [x] Backend reconstruit `contents` Gemini en multi-turn (`role: user/model`)
+- [x] `systemInstruction` séparé (format Gemini natif)
+- [x] Reset au Load
+
+### 70-C — MANIFEST_FRD Injection
+- [x] `_load_manifest_frd()` au démarrage serveur → `_MANIFEST_FRD` constante module
+- [x] Injecté dans `system_instruction` Sullivan à chaque appel construct
+- [x] Sullivan connaît la vision S-T-A-R, les phases BRS/BKD/FRD/DPL, les rôles
+
+---
+
+## Mission 71 — Sullivan Tool Use : read_reference()
+**STATUS: ✅ LIVRÉ**
+**ACTOR: MIMO (plan) + CLAUDE (corrections spec Gemini)**
+**DATE: 2026-03-23**
+**FICHIERS :** `server_9998_v2.py`
+- [x] `REFERENCE_WHITELIST` dict (manifest_frd, sullivan_interactions, api_contract, constitution, lexicon_design)
+- [x] `_exec_read_reference(path_or_key)` — sécurité path traversal, lecture max 8000 chars
+- [x] `tools: [{functionDeclarations: [...]}]` injecté dans payload Gemini (mode construct uniquement)
+- [x] Boucle tool calling max 4 itérations — détecte `functionCall`, exécute, renvoie `functionResponse`
+- [x] Log `[TOOL USE] read_reference('...')` dans les logs serveur
+- [x] Format corrigé : `tools` = liste (pas dict), `role: "user"` pour functionResponse (spec Gemini)
+- [x] MiMo note : 6.5/10 — structure correcte, bugs de spec API mineurs
+
+---
+
+## Mission 72 — FRD Editor : Qualité de vie (templates + save-as)
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-23**
+**FICHIERS :** `frd_editor.html`, `server_9998_v2.py`
+- [x] Route `GET /api/frd/files` → liste tous les `.html` du dossier templates (triés alphabétiquement)
+- [x] Select templates peuplé dynamiquement au chargement (zéro hardcode)
+- [x] Champ texte `save-name` à gauche du bouton Save — permet renommer avant sauvegarde
+- [x] Save : utilise `save-name` en priorité, fallback sur select
+- [x] Load : utilise `save-name` en priorité, fallback sur select
+- [x] Après Save avec nom custom : option ajoutée au select + select positionné dessus
+- [x] Load pré-remplit le champ `save-name` avec le nom du fichier chargé
+- [x] Force-save : 422 DOM manifest → dialog confirm → re-POST avec `force: true`
+
+---
+
+## Mission 73 — Sullivan Router : route text-only + Gemini conversationnel
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-23**
+**FICHIERS :** `server_9998_v2.py`
+- [x] Groq router : ajout type `"text-only"` avec règles de détection explicites (question, analyse, rapport, lecture, conversation, "procède", "as-tu chargé", etc.)
+- [x] Champ `"response"` dans le JSON Groq pour les réponses text-only
+- [x] Handler text-only : Gemini appelé en mode texte pur (manifest + history en contexte, sans tools, sans HTML)
+- [x] Gemini répond en markdown — Sullivan sait ce que contient le manifest, peut répondre aux questions projet
+- [x] Groq = routing uniquement, Gemini = intelligence conversationnelle + génération code
+- [x] Log `[MISSION 64] Route: text-only` visible dans les logs serveur
+
+---
+
+## Mission 74 — Sullivan : "Procède" → exécution du plan discuté
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-24**
+**FICHIERS :** `server_9998_v2.py`
+- [x] `_route_request(message, html_context, history=None)` — history passé depuis `/api/frd/chat`
+- [x] `last_model_turn` extrait de `history` (dernier tour `role: model`)
+- [x] Groq system prompt : règle explicite "execution command + dernier tour contient plan → html-only/both"
+- [x] "procède au plan" retiré des exemples text-only
+- [x] Block `DERNIER TOUR SULLIVAN : {last_model_turn[:1000]}` injecté dans le message Groq
+- [x] Quand exec command détecté + last_model_turn non vide → `message = f"SPEC À IMPLÉMENTER:\n{last_model_turn[:3000]}"`
+- [x] Gemini reçoit la spec du plan dans le message, l'exécute sans se baser sur le html_context
+
+---
+
+## Mission 77 — Sullivan Knowledge Base : RAG AetherFlow
+**STATUS: ✅ LIVRÉ**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**DATE: 2026-03-24**
+**FICHIERS :** `server_9998_v2.py`, `Backend/Prod/rag/pageindex_store.py`
+- [x] Import PageIndexRetriever depuis `Backend.Prod.rag.pageindex_store` (sys.path.insert)
+- [x] `_SULLIVAN_DOCS` : 02_Sullivan, 04_HomeOS, 03_AetherFlow, ROADMAP.md, ROADMAP_ACHIEVED.md
+- [x] `_init_sullivan_rag()` : collecte récursive *.md + *.py, PageIndexRetriever avec persist_dir
+- [x] `_SULLIVAN_RAG = _init_sullivan_rag()` au démarrage — index chargé une fois
+- [x] `_exec_query_knowledge_base(query)` : asyncio.run(retrieve()), dict {content, file_name, score}
+- [x] `query_knowledge_base` déclaré dans `functionDeclarations` Gemini
+- [x] Handler dans boucle tool calling : elif fn_name == 'query_knowledge_base'
+- [x] Log `[RAG] query='...' → N chars` visible dans les logs
+- [x] 445 documents indexés — cache disk (rag_index/)
+- [x] Serveur lancé via `.venv/bin/python3` (LlamaIndex uniquement dans venv)
+- [x] **Correctifs appliqués** : suppression build_index() (auto-init), asyncio.run() pour retrieve() async, accesseurs dict {content, file_name} (pas NodeWithScore)
+
+---
+
+## Décision architecture BKD — 2026-03-23
+**TYPE: Décision technique (non-mission)**
+- BKD Forge UI = **code-server** (VS Code dans le browser, self-hosted Docker) — pas Monaco seul
+- 1 extension VS Code custom `aetherflow-bkd` (TypeScript) pour Majordome + Roadmap panels
+- Stack : `codercom/code-server:latest` + WebviewPanel API + fetch `/api/frd/chat`
+- Ports : 8080 (code-server), 9998 (AetherFlow backend)
+- Documenté dans `docs/02_Sullivan/Retro_Genome/MANIFEST_FRD.md` section Phase 2 BKD
+
+---
+
 ## Mission 44 — Pipeline Figma REST → HTML Pixel-Fidèle (via Gemini)
 **STATUS: ✅ LIVRÉ** *(via Mission 48 Tailwind — CSS custom path abandonné)*
 **ACTOR: GEMINI**
@@ -4375,3 +4508,335 @@ BRANCH: experience_front_gemini
 - **Amendment 41-A** (provenance SVG) → Mission 41-A active
 
 ---
+
+---
+
+## Mission 55 — BRS : Mode MULTIPLEX (3 chatbots indépendants)
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE (backend) + GEMINI (frontend)**
+- [x] Route `POST /api/brs/chat/{provider}` — chat individuel persistant par colonne
+- [x] `sse_chat_generator()` dans `brainstorm_logic.py` — historique par (session_id, provider)
+- [x] UI : 3 inputs indépendants, historique visible, mode MULTIPLEX par défaut
+- [x] Sous-header `[MULTIPLEX]` `[COUNCIL]`
+
+---
+
+## Mission 56 — FRD Editor : Mode CONSEIL (Audit UX + Panel collapsible)
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE (backend) + GEMINI (frontend)**
+- [x] Bouton `[CONSEIL]` dans le toggle mode
+- [x] `_build_conseil_prompt()` dans `server_9998_v2.py` — injection CSV ui-ux-pro-max
+- [x] Panel `<details id="ux-audit-panel">` sticky Sullivan pane
+- [x] `triggerSilentAudit()` auto au loadFile + saveFile
+- [x] `updateAuditPanel()` — parse 🔴🟡🟢 + compteurs
+
+---
+
+## Mission 57 — FRD Editor : Mode WIRE frontend (toggle + panel)
+**STATUS: ✅ LIVRÉ (frontend) — 2026-03-18 | Backend route 🔴 → M62 bis**
+**ACTOR: GEMINI (frontend)**
+- [x] Bouton `[WIRE]` dans le toggle mode
+- [x] Panel `#wire-panel` avec bouton Analyser
+- [x] `runWire()` → `POST /api/frd/wire` (route backend manquante → voir M62 bis)
+- [x] `/wire` commande chat → `setMode('wire') + runWire()`
+- [ ] Backend `POST /api/frd/wire` → non implémenté
+
+---
+
+## Mission 58 — BRS : Mode COUNCIL complet
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE**
+- [x] `rank_council()` dans `brainstorm_logic.py` — tableau arbitrage Gemini
+- [x] `POST /api/brs/rank` + `GET /api/brs/arbitrate/{session_id}` dans `brainstorm_routes.py`
+- [x] `_councilDone` tracker + auto-synthèse Sullivan
+- [x] Boutons `Synthétiser maintenant`, `Relancer →`, `Arbitrer`
+
+---
+
+## Mission 59 — BRS : Rendu markdown Sullivan pane
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE + GEMINI**
+- [x] CDN `marked.min.js` dans `<head>` de `brainstorm_war_room_tw.html`
+- [x] `triggerSullivanSynthesis()` → `marked.parse()` au `done`
+- [x] `arbitrate()` → `marked.parse(data.ranking)`
+- [x] `applyMarkdownStyles(el)` — styles Tailwind table/code/pre/p
+
+---
+
+## Mission 60 — BRS : Externalisation JS (JS Lock)
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE**
+- [x] Script inline supprimé de `brainstorm_war_room_tw.html` (304 lignes)
+- [x] `static/js/brainstorm_war_room.js` — JS complet, protégé de Gemini
+- [x] Header `⚠️ CE FICHIER EST GÉRÉ PAR CLAUDE UNIQUEMENT`
+
+---
+
+## Mission 61 — BRS : Rendu markdown colonnes modèles
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: GEMINI**
+- [x] `startStreaming()` — accumulation tokens + `marked.parse()` au `done`
+- [x] `sendToProvider()` — `accumulatedCard` + `marked.parse()` au `done`
+- [x] `addCaptureButton()` après rendu markdown dans les deux flows
+
+---
+
+## Mission 43-C1/C2 — War Room SVG Design Spec + Refonte UI
+**STATUS: ✅ SUPERSÉDÉ — 2026-03-18**
+- Tâches C1 (extraction SVG spec) et C2 (refonte HTML) obsolètes.
+- La War Room a été intégralement reconstruite en Tailwind (`brainstorm_war_room_tw.html`) via M44/M48/M55-61.
+- Tâche D (validation FJD end-to-end) → intégrée dans les critères des missions BRS successives.
+
+
+---
+
+## Mission 62 — Infrastructure : Injection API_CONTRACT dans les prompts agents
+**STATUS: ✅ LIVRÉ — 2026-03-18**
+**ACTOR: CLAUDE (backend)**
+- [x] `_load_api_contract()` dans `server_9998_v2.py` — lit `API_CONTRACT.md` depuis disque
+- [x] Mode CONSTRUCT : contrat injecté dans le system prompt Sullivan (L834)
+- [x] Mode CONSEIL : contrat injecté dans `_build_conseil_prompt()` (L154)
+- [x] Sullivan ne peut plus suggérer de routes inventées
+
+
+---
+
+## Mission 66-FIX — FRD Editor : Correction Mode Inspect
+**STATUS: ✅ LIVRÉ — 2026-03-23**
+**ACTOR: CLAUDE (hotfix direct)**
+**FICHIER:** `Frontend/3. STENCILER/static/templates/frd_editor.html`
+
+### Problème initial
+Le bouton Inspect (Mission 66) était silencieux : aucun outline dans l'iframe, aucun highlight Monaco. Aucune erreur visible côté utilisateur, mais la console srcdoc révélait :
+```
+about:srcdoc:184 Uncaught SyntaxError: Unexpected token '<'
+```
+
+### Diagnostic root cause
+**Bug principal (bloquant)** : Injection via template literal + `srcdoc`.
+Les scripts étaient injectés en manipulant la string HTML (`</body>` replace) avec des template literals contenant `<\/script>`. En JS, `<\/script>` évalue à `</script>`. Le HTML parser du srcdoc voyait alors deux blocs `<script>...</script>` successifs — mais le premier bloc n'était PAS fermé correctement car le parser HTML du **document parent** (`frd_editor.html`) avait une lecture ambiguë de la séquence. Résultat : les deux blocs de script étaient fusionnés en un seul raw text element. Le V8 engine recevait le contenu des deux blocs comme JavaScript continu, tombait sur `</script>` à la ligne 184, et levait `SyntaxError: Unexpected token '<'`. **Aucun listener n'était enregistré dans l'iframe.**
+
+**Bugs secondaires (UX)** une fois le bug principal résolu :
+- `mouseover` trop agressif (bubbling → Monaco scroll en continu)
+- `mouseout` efface l'outline trop tôt (parent/child transitions)
+- `el.className` → `SVGAnimatedString` sur éléments SVG → crash silencieux
+- Race condition sur les décorations Monaco : `setTimeout` cleanup écrasait la décoration suivante
+
+### Mesures appliquées
+
+**Fix 1 — Architecture inject (root cause)**
+Abandon de l'injection via string HTML. Les scripts sont désormais injectés **via DOM** après le `load` event de l'iframe :
+```js
+document.getElementById('preview-iframe').addEventListener('load', _injectPreviewScripts);
+
+function _injectPreviewScripts() {
+    const doc = iframe.contentDocument;
+    const s1 = doc.createElement('script');
+    s1.textContent = [...].join('\n');
+    doc.body.appendChild(s1);
+    if (inspectActive) { /* s2 inspect script */ }
+}
+```
+Avantages : zéro `</script>` dans les template literals, scripts injectés après exécution complète du template, same-origin garanti (srcdoc), try/catch protège le preview.
+
+**Fix 2 — Marker de reload**
+`updatePreview()` ajoute un commentaire HTML invisible `<!-- __FRD:true/false -->` pour forcer un vrai reload du srcdoc quand `inspectActive` change (sans modifier Monaco).
+
+**Fix 3 — Tracker `__lastInspected`**
+Remplace le `mouseover` agressif + `mouseout` global par un tracker d'élément courant : outline uniquement sur l'élément réellement pointé, `mouseleave` sur document pour cleanup propre.
+
+**Fix 4 — `getAttribute('class')`**
+Remplace `el.className` (crash sur SVG) par `el.getAttribute('class') || ''`.
+
+**Fix 5 — Debounce inspect-hover (80ms)**
+Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle qu'une fois que la souris se stabilise.
+
+**Fix 6 — Race condition décorations Monaco**
+`clearTimeout(_inspectDecTimer)` avant chaque nouvelle décoration : le cleanup ne tue plus la décoration suivante.
+
+### Points d'attention résiduels
+- Le marker `<!-- __FRD:... -->` est injecté dans le srcdoc mais **pas** dans Monaco (ne pollue pas les fichiers sauvegardés). ✅
+- `iframe.contentDocument` est toujours same-origin avec `srcdoc`. ✅
+- Si `brainstorm_war_room.js` modifie le DOM de façon async **après** le `load` event, les outlines inspect peuvent apparaître sur des éléments re-rendus. Acceptable pour un outil interne.
+- Le search `_highlightInMonaco` par `id=` / première classe Tailwind / tag reste approximatif pour les éléments sans ID. Amélioration possible (Mission future) : search par position XPath ou line hint envoyé depuis l'iframe.
+
+---
+
+## Mission 67 — FRD Editor : Drag & Drop HTML direct dans Monaco
+
+**STATUS: ✅ LIVRÉ — 2026-03-23**
+**ACTOR: GEMINI**
+
+### Réalisations
+- [x] `#drop-overlay` sur `#preview-pane` — overlay vert dashed au dragenter, masqué au drop
+- [x] `iframe.style.pointerEvents = 'none'` pendant le drag (essentiel pour recevoir le drop sur l'iframe)
+- [x] Bouton `Open` + `<input type="file" accept=".html">` masqué dans le header
+- [x] `FileReader.readAsText()` → `editorHTML.setValue()` → `updatePreview()` (drop + Open)
+- [x] `#current-file` span dans le header — affiche le nom du fichier chargé
+- [x] Style cohérent avec le header (border figma-sep, text-[10px] uppercase tracking-widest)
+
+### Validé FJD : ✅
+
+---
+
+## Mission 74 — Sullivan : "Procède" → exécution du plan discuté
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-23**
+**ACTOR: CLAUDE**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_route_request()` enrichi avec le dernier tour model de l'historique
+- [x] Groq route "procède/go/implémente" vers `html-only` ou `both` quand le tour précédent contient un plan
+- [x] `history` passé à `_route_request` depuis `/api/frd/chat`
+- [x] Log `[MISSION 64] Route: html-only` sur les confirmations d'exécution
+
+### Validé FJD : ✅
+
+---
+
+## Mission 77 — Sullivan Knowledge Base : RAG AetherFlow branché sur /api/frd/chat
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_SULLIVAN_DOCS` : corpus 7 sources (docs/02_Sullivan, 04_HomeOS, 03_AetherFlow, ROADMAP, ROADMAP_ACHIEVED)
+- [x] `_init_sullivan_rag()` → `PageIndexRetriever` LlamaIndex CPU-only, log `[RAG] Index Sullivan : N documents`
+- [x] `_exec_query_knowledge_base(query)` → top-4 chunks avec source metadata
+- [x] Tool `query_knowledge_base` déclaré dans `/api/frd/chat` functionDeclarations (type OBJECT majuscules)
+- [x] Handler `elif fc.get('name') == 'query_knowledge_base'` dans la boucle tool calling
+- [x] Log `[RAG] query='...' → N chars`
+
+### Validé FJD : ✅
+
+---
+
+## Mission 81 — Sullivan BKD : system_instruction Python/backend
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_SULLIVAN_BKD_SYSTEM` définie après `_MANIFEST_FRD = _load_manifest_frd()` (ligne ~124)
+- [x] Persona : architecte backend Python/DevOps, jamais HTML/Tailwind
+- [x] Stack : Python 3.11+, http.server, LlamaIndex, SQLite, Docker
+- [x] 5 règles : patches précis, citer fichier+fonction, ordre multi-fichiers, pas d'API inventée, RAG obligatoire
+
+### Validé FJD : ✅
+
+---
+
+## Mission 79 — User DB BKD : project_id → project_path (SQLite)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE (MiMo direct)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`, `db/projects.db`
+
+- [x] `import sqlite3` ajouté
+- [x] `_BKD_DB_PATH = Path('.../db/projects.db')`, `_init_bkd_db()`, `_bkd_db_con()` (check_same_thread=False)
+- [x] Table `projects` : id, name, path, created_at, last_opened
+- [x] `GET /api/bkd/projects` → liste triée par last_opened
+- [x] `GET /api/bkd/projects/{id}` → détail projet
+- [x] `POST /api/bkd/projects` → upsert (si path existant, màj last_opened ; sinon UUID4)
+- [x] `POST /api/bkd/projects/{id}` + `X-HTTP-Method-Override: DELETE` → suppression
+- [x] Tests curl : création, liste, arbre → OK
+
+### Validé FJD : ✅
+
+---
+
+## Mission 80 — /api/bkd/file + /api/bkd/tree : lecture/écriture fichiers projet
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE (MiMo direct)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_BKD_ALLOWED_EXTENSIONS` (13 types), `_BKD_EXCLUDE_DIRS` (8 exclusions)
+- [x] `_resolve_bkd_project_root(project_id)` → Path depuis SQLite
+- [x] `_bkd_safe_path(root, rel)` → anti path-traversal (resolved.relative_to())
+- [x] `_bkd_build_tree(root, depth)` → arbre récursif, dirs avant fichiers
+- [x] `GET /api/bkd/file?project_id=&path=` → {content, language, path, size}
+- [x] `GET /api/bkd/tree?project_id=&depth=` → {tree, root}
+- [x] `POST /api/bkd/file` → écriture avec mkdir -p
+- [x] Test : lecture `orchestrator.py` (68KB) → OK
+
+### Validé FJD : ✅
+
+---
+
+## Mission 78 — Sullivan BKD : Groq router + /api/bkd/chat (Gemini cascade)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE (MiMo direct)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_BKD_MODEL_MAP` : quick→flash-lite, code-simple→flash, code-complex/wire/diagnostic→2.0-flash
+- [x] `_route_request_bkd(message, history)` → Groq llama-3.3-70b, fallback propre si GROQ_API_KEY absent
+- [x] `POST /api/bkd/chat` : Groq route → dispatch Gemini, history 12 tours, project_ctx si project_id
+- [x] Tool use loop (max 4 iter) : `query_knowledge_base` (RAG) + `read_bkd_file` (lecture projet)
+- [x] Réponse `{explanation, model, route}`
+- [x] Test curl : route=quick → gemini-2.0-flash-lite, réponse BKD en < 5s
+
+### Note M82 : `gemini-3.1-flash` (code-simple) → corrigé dans M82 (voir ci-dessous)
+
+### Validé FJD : ✅
+
+---
+
+## Mission 82 — RM : Correctif model map BKD + FRD (vrais modèles Gemini)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `_BKD_MODEL_MAP` ne référence plus `gemini-3.1-flash` (modèle fantôme → HTTP 404)
+- [x] Alignement sur modèles réels confirmés : quick→flash-lite, code-simple→2.0-flash, code-complex/wire/diagnostic→2.5-pro
+- [x] `python3 -m py_compile server_9998_v2.py` → OK
+
+### Validé FJD : ✅
+
+---
+
+## Mission 84 — RM : Fix `system_prompt` kwarg dans GroqClient + CodestralClient
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Backend/Prod/models/groq_client.py`, `Backend/Prod/models/codestral_client.py`
+
+- [x] `GroqClient.generate()` accepte `system_prompt: Optional[str] = None`
+- [x] Injecté en `{"role": "system", "content": system_prompt}` avant la logique json_surgical
+- [x] `CodestralClient.generate()` idem
+- [x] Le fallback cascade `agent_router.py` ne lève plus de `TypeError`
+
+### Validé FJD : ✅
+
+---
+
+## Mission 83 — SullivanArbitrator : sentinelle dynamique + cascade Qwen/MiMo
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-24**
+**ACTOR: GEMINI (module) + CLAUDE (wiring)**
+**MODE: CODE DIRECT**
+**FICHIERS :** `Frontend/3. STENCILER/sullivan_arbitrator.py` (NEW), `Frontend/3. STENCILER/server_9998_v2.py`
+
+- [x] `sullivan_arbitrator.py` : SullivanSentinel (SQLite `db/metrics.db`), SullivanPulse (probe daemon 120s), SullivanArbitrator.pick()
+- [x] TIER_MAP : quick/code-simple/code-complex → Gemini primaire | wire/diagnostic → MiMo primaire
+- [x] Fallback Qwen SiliconFlow (QWEN_KEY) ou OpenRouter (OPEN_ROUTER_QWEN_KEY)
+- [x] Clients inline urllib (0 dépendance externe)
+- [x] `db_path` absolu via `Path(__file__).parent.resolve()`
+- [x] First-boot : pas de métriques pulse → primary par défaut (pas de fallback intempestif)
+- [x] Wiring `server_9998_v2.py` : import + `_ARBITRATOR` + `_PULSE.start()` au boot
+- [x] `GET /api/sullivan/pulse` → `_PULSE.get_status()` ✅ testé
+- [x] `/api/bkd/chat` utilise `_ARBITRATOR.pick(route_type)` + `_ARBITRATOR.dispatch()` ✅
+- [x] MiMo répond sur route `diagnostic` : "Bonjour ! Je suis Sullivan." ✅
+- [x] `python3 -m py_compile server_9998_v2.py` → OK
+
+### Validé FJD : ✅

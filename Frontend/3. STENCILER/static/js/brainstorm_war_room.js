@@ -1,0 +1,1 @@
+const fileUploadInput = document.getElementById('file-upload'); fileUploadInput.addEventListener('change', handleFileChange); function handleFileChange(event) { const file = event.target.files[0]; // Traitez le fichier chargé }

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS — War Room (IDE Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        figma: { bg: '#ffffff', panel: '#f9f9f9', input: '#f2f3f5', text: '#666666', textDark: '#1a1a1a', tabActive: '#8cc63f', dotGreen: '#5ec069', sep: '#e5e5e5' }
+                    },
+                    fontFamily: { homeos: ['Helvetica', 'sans-serif'], geist: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        [contenteditable]:focus { outline: none; }
+        .folder-children { margin-left: 1rem; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden font-geist text-[12px] text-figma-text">
+
+    <!-- Sidebar gauche (Protéger HomeOS) -->
+    <aside id="sidebar" class="w-[280px] h-full border-r border-figma-sep bg-white flex flex-col flex-shrink-0">
+        <div class="h-[48px] flex items-center px-6 border-b border-figma-sep" data-frd-lock="true">
+            <span class="font-homeos font-black text-lg tracking-tighter text-black">Homé<span class="text-figma-tabActive">OS</span></span>
+        </div>
+        <div class="flex-1 overflow-y-auto px-0 py-0" id="lock-div-mn45m14g">
+            <div class="w-full bg-white flex flex-col" id="lock-div-mn45jccu" data-frd-lock="true">
+                <!-- Header de l'explorer avec bouton collapse -->
+                <div class="px-6 py-3 uppercase text-[10px] font-bold text-gray-400 border-b border-figma-sep flex items-center justify-between cursor-pointer" id="explorer-header">
+                    <span>Explorer</span>
+                    <svg id="chevron-icon" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <!-- Contenu de l'explorer (collapsible) -->
+                <div id="explorer-content" class="no-scrollbar">
+                    <!-- Dossiers et fichiers chargés dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 bg-white">
+        <!-- Header (Protéger HomeOS) -->
+        <header id="main-navigation" class="h-[48px] border-b border-figma-sep flex items-center justify-between px-8 bg-white flex-shrink-0">
+            <nav class="flex items-center gap-8 h-full">
+                <a href="#" class="text-[12px] text-gray-400 hover:text-black transition-colors" id="nav-brainstorm">Brainstorm</a>
+                <a href="#" class="text-[12px] font-semibold text-figma-tabActive border-b-2 border-figma-tabActive h-full flex items-center" id="nav-backend">Backend</a>
+                <a href="#" class="text-[12px] text-gray-400 hover:text-black transition-colors" id="nav-frontend">Frontend</a>
+                <a href="#" class="text-[12px] text-gray-400 hover:text-black transition-colors" id="nav-deploy">Deploy</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <button id="btn-save" class="px-3 py-1 bg-figma-tabActive text-white rounded text-[11px] font-semibold hover:opacity-90">Sauvegarder</button>
+                <button id="btn-wire" class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-[11px] font-semibold hover:bg-gray-300">Wire Check</button>
+            </div>
+        </header>
+
+        <!-- IDE Main Content -->
+        <main id="multiverse" class="flex-1 flex overflow-hidden">
+            <div class="flex-1 grid grid-cols-2 divide-x divide-figma-sep">
+                <div class="flex flex-col">
+                    <div class="h-9 bg-figma-panel flex items-center px-4 border-b border-figma-sep text-[11px] font-medium text-black">
+                        <span id="editor-filename">Aucun fichier sélectionné</span>
+                    </div>
+                    <div class="flex-1 p-4 font-mono text-xs text-figma-text bg-white overflow-auto" id="editor-content" contenteditable="true">
+                        Sélectionnez un fichier dans l'explorer...
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <div class="h-9 bg-figma-panel flex items-center px-4 border-b border-figma-sep text-[11px] font-medium text-black">Preview</div>
+                    <div class="flex-1 p-4 bg-gray-50 overflow-auto" id="preview-frame">
+                        <div class="text-gray-400 italic">Aperçu du rendu...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Terminal -->
+        <footer class="h-[150px] border-t border-figma-sep bg-figma-panel p-3 text-figma-text font-mono text-[11px]">
+            <div class="flex gap-6 border-b border-figma-sep mb-3 pb-1">
+                <span class="text-black border-b border-figma-tabActive font-semibold cursor-pointer" id="tab-terminal">Terminal</span>
+                <span class="cursor-pointer" id="tab-output">Output</span>
+            </div>
+            <div class="text-figma-dotGreen overflow-y-auto h-[100px]" id="terminal-output">$ aetherflow --ready</div>
+        </footer>
+    </div>
+
+    <!-- Panel Droit (ChatBox) -->
+    <section id="sullivan-panel" class="w-[280px] flex flex-col border-l border-figma-sep bg-white text-figma-text flex-shrink-0">
+        <div class="h-[48px] flex items-center px-6 border-b border-figma-sep gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-figma-tabActive"></span>
+            <span class="text-[12px] font-semibold text-black">Sullivan</span>
+        </div>
+        <div id="sullivan-stream" class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            <!-- Message exemple -->
+            <div class="text-[11px] bg-figma-panel p-3 rounded-lg text-figma-text">Bonjour, en quoi puis-je vous aider aujourd'hui ?</div>
+        </div>
+        <div class="p-4 border-t border-figma-sep">
+            <input type="text" id="sullivan-input" placeholder="Message Sullivan..." class="w-full bg-figma-input px-3 py-2 rounded border border-figma-sep focus:outline-none focus:border-figma-tabActive text-[12px]">
+        </div>
+    </section>
+
+    <!-- JavaScript pour les interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentProjectId = null;
+            let currentFilePath = null;
+            let chatHistory = [];
+            let isOutputTab = false;
+
+            // --- 1. Explorer Toggle ---
+            const explorerHeader = document.getElementById('explorer-header');
+            const explorerContent = document.getElementById('explorer-content');
+            const chevronIcon = document.getElementById('chevron-icon');
+
+            if (explorerHeader && explorerContent) {
+                explorerHeader.addEventListener('click', function() {
+                    explorerContent.classList.toggle('hidden');
+                    chevronIcon.classList.toggle('rotate-180');
+                });
+            }
+
+            // --- 2. Navigation Tabs ---
+            const navTabs = ['nav-brainstorm', 'nav-backend', 'nav-frontend', 'nav-deploy'];
+            navTabs.forEach(tabId => {
+                const tab = document.getElementById(tabId);
+                if (tab) {
+                    tab.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        // Reset all tabs
+                        navTabs.forEach(t => {
+                            const el = document.getElementById(t);
+                            el.classList.remove('font-semibold', 'text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'h-full', 'flex', 'items-center');
+                            el.classList.add('text-gray-400');
+                        });
+                        // Activate clicked tab
+                        this.classList.add('font-semibold', 'text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'h-full', 'flex', 'items-center');
+                        this.classList.remove('text-gray-400');
+                        addToTerminal(`Navigation: ${tabId.replace('nav-', '')}`);
+                    });
+                }
+            });
+
+            // --- 3. Output Tab Toggle ---
+            const tabTerminal = document.getElementById('tab-terminal');
+            const tabOutput = document.getElementById('tab-output');
+            const terminalOutput = document.getElementById('terminal-output');
+
+            tabTerminal.addEventListener('click', function() {
+                isOutputTab = false;
+                tabTerminal.classList.add('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
+                tabOutput.classList.remove('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
+                terminalOutput.innerHTML = '$ aetherflow --ready';
+            });
+
+            tabOutput.addEventListener('click', function() {
+                isOutputTab = true;
+                tabOutput.classList.add('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
+                tabTerminal.classList.remove('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
+                terminalOutput.innerHTML = '<div class="text-gray-400 italic">Output will appear here after actions...</div>';
+            });
+
+            // --- 4. Load Project & Files (API BKD) ---
+            const editorContent = document.getElementById('editor-content');
+            const editorFilename = document.getElementById('editor-filename');
+            const previewFrame = document.getElementById('preview-frame');
+
+            async function loadProject() {
+                try {
+                    const res = await fetch('/api/bkd/projects');
+                    const data = await res.json();
+                    if (data.projects && data.projects.length > 0) {
+                        currentProjectId = data.projects[0].id;
+                        addToTerminal(`Project: ${data.projects[0].name} loaded.`);
+                        await loadExplorer(currentProjectId);
+                    } else {
+                        // Créer un projet par défaut si aucun n'existe
+                        const createRes = await fetch('/api/bkd/projects', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: 'Default Project', path: './default' })
+                        });
+                        const created = await createRes.json();
+                        if (created.project) {
+                            currentProjectId = created.project.id;
+                            addToTerminal(`Created project: ${created.project.name}`);
+                            await loadExplorer(currentProjectId);
+                        }
+                    }
+                } catch (err) {
+                    addToTerminal(`Error loading project: ${err.message}`);
+                }
+            }
+
+            // Fonction récursive pour construire l'arborescence des dossiers
+            function buildTree(files) {
+                const tree = {};
+                files.forEach(file => {
+                    const parts = file.path.split('/');
+                    let current = tree;
+                    parts.forEach((part, index) => {
+                        if (!current[part]) {
+                            current[part] = { 
+                                _isFile: index === parts.length - 1, 
+                                _path: file.path,
+                                _children: {}
+                            };
+                        }
+                        current = current[part]._children;
+                    });
+                });
+                return tree;
+            }
+
+            // Fonction récursive pour rendre l'arborescence en HTML avec collapse
+            function renderTree(node, depth = 0) {
+                const container = document.createElement('div');
+                container.className = 'folder-children';
+                
+                Object.keys(node).sort().forEach(key => {
+                    const item = node[key];
+                    const isFile = item._isFile;
+                    
+                    const div = document.createElement('div');
+                    div.className = `py-1 hover:bg-figma-panel cursor-pointer truncate text-black flex items-center`;
+                    div.style.paddingLeft = `${depth * 12 + 8}px`;
+                    
+                    if (isFile) {
+                        div.innerHTML = `<span class="mr-2 text-gray-400">📄</span>${key}`;
+                        div.title = item._path;
+                        div.onclick = () => loadFile(item._path);
+                        container.appendChild(div);
+                    } else {
+                        const folderId = `folder-${key.replace(/[^a-zA-Z0-9]/g, '-')}-${depth}`;
+                        div.innerHTML = `
+                            <span class="mr-2 text-gray-400">📁</span>
+                            <span class="flex-1">${key}</span>
+                            <svg class="w-3 h-3 transition-transform duration-200 chevron-${folderId}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        `;
+                        
+                        const childrenContainer = document.createElement('div');
+                        childrenContainer.id = folderId;
+                        childrenContainer.className = 'folder-children hidden';
+                        
+                        div.onclick = (e) => {
+                            e.stopPropagation();
+                            childrenContainer.classList.toggle('hidden');
+                            const chevron = document.querySelector(`.chevron-${folderId}`);
+                            if (chevron) chevron.classList.toggle('rotate-90');
+                        };
+                        
+                        container.appendChild(div);
+                        container.appendChild(childrenContainer);
+                        
+                        // Récursion pour les enfants
+                        const childTree = renderTree(item._children, depth + 1);
+                        childrenContainer.appendChild(childTree);
+                    }
+                });
+                
+                return container;
+            }
+
+            async function loadExplorer(projectId) {
+                try {
+                    const res = await fetch(`/api/bkd/files?project_id=${projectId}`);
+                    const data = await res.json();
+                    
+                    explorerContent.innerHTML = '';
+                    
+                    if (data.files && data.files.length > 0) {
+                        const tree = buildTree(data.files);
+                        const treeHtml = renderTree(tree);
+                        explorerContent.appendChild(treeHtml);
+                        
+                        // Auto-load first file if exists
+                        const firstFile = data.files.find(f => f.path.endsWith('.html') || f.path.endsWith('.js') || f.path.endsWith('.css'));
+                        if (firstFile) loadFile(firstFile.path);
+                    } else {
+                        explorerContent.innerHTML = '<div class="px-6 py-2 text-gray-400 italic">Aucun fichier dans ce projet</div>';
+                    }
+                } catch (err) {
+                    addToTerminal(`Error listing files: ${err.message}`);
+                }
+            }
+
+            // --- 5. File Loading (API BKD) ---
+            async function loadFile(path) {
+                currentFilePath = path;
+                editorFilename.textContent = path;
+                try {
+                    const res = await fetch(`/api/bkd/file?project_id=${currentProjectId}&path=${encodeURIComponent(path)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        editorContent.blur();
+                        editorContent.innerText = data.content;
+                        addToTerminal(`Loaded ${path} ✓`);
+                        updatePreview(data.content);
+                    }
+                } catch (err) {
+                    addToTerminal(`Load error: ${err.message}`);
+                }
+            }
+
+            // --- 6. Save File (API BKD) ---
+            document.getElementById('btn-save').onclick = async () => {
+                if (!currentFilePath) {
+                    addToTerminal('No file selected to save');
+                    return;
+                }
+                const content = editorContent.textContent;
+                try {
+                    const res = await fetch('/api/bkd/file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ project_id: currentProjectId, path: currentFilePath, content })
+                    });
+                    if (res.ok) {
+                        addToTerminal(`Saved ${currentFilePath} ✓`);
+                        updatePreview(content);
+                    }
+                } catch (err) {
+                    addToTerminal(`Save error: ${err.message}`);
+                }
+            };
+
+            // --- 7. Wire Check (API FRD) ---
+            document.getElementById('btn-wire').onclick = async () => {
+                const htmlContent = editorContent.textContent;
+                if (!htmlContent.trim()) {
+                    addToTerminal('Wire: Empty content');
+                    return;
+                }
+                addToTerminal('Running Wire Check...');
+                try {
+                    const res = await fetch('/api/frd/wire', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ html: htmlContent })
+                    });
+                    const data = await res.json();
+                    const diagnostic = data.diagnostic || 'No diagnostic returned';
+                    
+                    // Afficher dans le terminal
+                    addToTerminal(`Wire Diagnostic:\n${diagnostic}`);
+                    
+                    // Afficher dans le panneau Sullivan
+                    appendBubble(`Wire Check Result:\n${diagnostic}`, 'sullivan');
+                    
+                    // Si on est sur l'onglet Output, afficher là aussi
+                    if (isOutputTab) {
+                        terminalOutput.innerHTML = `<div class="whitespace-pre-wrap">${diagnostic}</div>`;
+                    }
+                } catch (err) {
+                    addToTerminal(`Wire error: ${err.message}`);
+                    appendBubble(`Wire Error: ${err.message}`, 'sullivan');
+                }
+            };
+
+            // --- 8. Sullivan Chat (API BKD) ---
+            const sullivanInput = document.getElementById('sullivan-input');
+            const sullivanStream = document.getElementById('sullivan-stream');
+
+            sullivanInput.onkeypress = async (e) => {
+                if (e.key === 'Enter') {
+                    const message = sullivanInput.value.trim();
+                    if (!message) return;
+
+                    appendBubble(message, 'user');
+                    sullivanInput.value = '';
+
+                    try {
+                        const res = await fetch('/api/bkd/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                project_id: currentProjectId,
+                                message: message,
+                                history: chatHistory
+                            })
+                        });
+                        const data = await res.json();
+                        appendBubble(data.text, 'sullivan');
+                        chatHistory.push({ role: 'user', text: message }, { role: 'assistant', text: data.text });
+                    } catch (err) {
+                        addToTerminal(`Chat error: ${err.message}`);
+                        appendBubble(`Erreur: ${err.message}`, 'sullivan');
+                    }
+                }
+            };
+
+            function appendBubble(text, role) {
+                const div = document.createElement('div');
+                div.className = `text-[11px] p-3 rounded-lg ${role === 'user' ? 'bg-figma-tabActive text-white ml-4' : 'bg-figma-panel text-figma-text'}`;
+                div.innerText = (role === 'sullivan' ? 'Sullivan: ' : '') + text;
+                sullivanStream.appendChild(div);
+                sullivanStream.scrollTop = sullivanStream.scrollHeight;
+            }
+
+            // --- 9. Preview Update ---
+            function updatePreview(content) {
+                if (content.includes('<!DOCTYPE') || content.includes('<html') || content.includes('<div')) {
+                    previewFrame.innerHTML = content;
+                } else {
+                    previewFrame.innerHTML = `<pre class="text-xs">${content}</pre>`;
+                }
+            }
+
+            // --- 10. Terminal Helper ---
+            function addToTerminal(text) {
+                const terminal = document.getElementById('terminal-output');
+                if (isOutputTab) {
+                    // Si on est sur l'onglet Output, ajouter à la suite
+                    terminal.innerHTML += `<div class="text-gray-400">${text}</div>`;
+                } else {
+                    terminal.innerHTML += `<br>$ ${text}`;
+                }
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+
+            // --- 11. Editor Input Handler ---
+            editorContent.addEventListener('input', function() {
+                // Auto-update preview on typing (debounced could be added)
+                // updatePreview(editorContent.textContent);
+            });
+
+            // Init
+            loadProject();
+        });
+    </script>
+</body>
+</html>

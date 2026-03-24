@@ -1,0 +1,140 @@
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#monaco-pane {
+    height: 280px;
+    min-height: 0;
+    overflow: hidden;
+    transition: height 200ms ease;
+}
+
+#monaco-resize-handle {
+    height: 4px;
+    cursor: row-resize;
+    background: #333;
+    transition: background 200ms;
+    z-index: 10;
+}
+
+#monaco-resize-handle:hover {
+    background: #8cc63f;
+}
+
+#preview-pane {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-bubble {
+    max-width: 90%;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.user-bubble {
+    background: #f2f3f5;
+    align-self: flex-end;
+    color: #333;
+}
+
+.sullivan-bubble {
+    background: #8cc63f;
+    align-self: flex-start;
+    color: white;
+}
+
+.kimi-bubble {
+    background: #1a1a2e !important;
+    color: #fff !important;
+    border: 1px solid #3d3d63 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    align-self: flex-start;
+    width: 280px;
+    max-width: 95%;
+}
+
+.variant-card {
+    background: #252545;
+    border: 1px solid #3d3d63;
+    transition: all 0.2s;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.variant-card:hover {
+    border-color: #8cc63f;
+    background: #2d2d5a;
+}
+
+/* Loader Overlay */
+#sullivan-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    font-family: 'Geist', sans-serif;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid white;
+    border-top: 4px solid #8cc63f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.monaco-inspect-highlight {
+    background: rgba(140, 198, 63, 0.2) !important;
+    border-left: 3px solid #8cc63f !important;
+}
+
+/* Mission 69 Reworked */
+.monaco-lock-highlight {
+    background: rgba(249, 115, 22, 0.08) !important;
+    border-left: 3px solid #f97316 !important;
+}
+
+.monaco-lock-glyph::before {
+    content: '🔒';
+    font-size: 10px;
+    margin-left: 5px;
+    opacity: 0.8;
+}
+
+/* Mission 67: Drop Overlay */
+#drop-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(140, 198, 63, 0.15);
+    backdrop-filter: blur(2px);
+    border: 3px dashed #8cc63f;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#drop-overlay.active {
+    display: flex;
+}
