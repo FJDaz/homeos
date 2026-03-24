@@ -1,0 +1,193 @@
+[
+  {
+    "archetype_id": "ide_like",
+    "label": "IDE / Éditeur de Code",
+    "visual_triggers": ["sidebar tree", "tabs top", "editor area dark", "terminal bottom"],
+    "artifact_type": "mixed",
+    "required_components": [
+      { "id": "file_explorer", "region": "sidebar", "interact": "scrollable" },
+      { "id": "code_editor", "region": "content", "interact": "input", "visual_hint": "code-editor" },
+      { "id": "terminal", "region": "footer", "interact": "input" }
+    ],
+    "suggested_endpoints": ["GET /api/fs/tree", "POST /api/fs/save", "POST /api/terminal/exec"],
+    "aetherflow_conventions": {
+      "GET /api/fs/tree": "GET /api/{slug}/files",
+      "POST /api/fs/save": "POST /api/{slug}/file",
+      "POST /api/terminal/exec": "POST /api/{slug}/exec"
+    },
+    "dev_brief": "Interface type VSCode. Nécessite une gestion d'arborescence de fichiers et un éditeur de texte riche."
+  },
+  {
+    "archetype_id": "admin_dashboard",
+    "label": "Dashboard d'Administration",
+    "visual_triggers": ["metrics row", "charts grid", "data table"],
+    "artifact_type": "service_api",
+    "required_components": [
+      { "id": "kpi_cards", "region": "header", "visual_hint": "card" },
+      { "id": "main_chart", "region": "content", "visual_hint": "chart" }
+    ],
+    "suggested_endpoints": ["GET /api/stats/overview", "GET /api/reports"],
+    "dev_brief": "Tableau de bord de suivi. Focus sur la visualisation de données et les KPIs."
+  },
+  {
+    "archetype_id": "chatbot_pro",
+    "label": "Interface Conversationnelle",
+    "visual_triggers": ["bubble list", "message input bottom", "avatar side"],
+    "artifact_type": "service_api",
+    "required_components": [
+      { "id": "chat_history", "region": "content", "visual_hint": "chat-thread" },
+      { "id": "input_bar", "region": "footer", "interact": "input" }
+    ],
+    "suggested_endpoints": ["POST /api/chat/send", "GET /api/chat/history"],
+    "aetherflow_conventions": {
+      "POST /api/chat/send": "POST /api/{slug}/chat",
+      "GET /api/chat/history": "GET /api/{slug}/chat/history"
+    },
+    "dev_brief": "Interface de chat. Requiert un flux de messages asynchrones et un input persistant."
+  },
+  {
+    "archetype_id": "venn_diagram",
+    "label": "Diagramme de Venn",
+    "visual_triggers": ["overlapping circles", "set diagram", "intersection zone"],
+    "artifact_type": "compute_front",
+    "required_components": [
+      { "id": "circle_set", "interact": "draggable", "math_role": "set" },
+      { "id": "intersection", "math_role": "intersection", "compute": "circle-circle-lens" }
+    ],
+    "compute_required": [
+      { "type": "circle-circle-lens", "description": "Calcul des arcs d'intersection" }
+    ],
+    "dev_brief": "Interface géométrique. Nécessite des calculs de chemins SVG dynamiques pour les intersections."
+  },
+  {
+    "archetype_id": "sudoku_grid",
+    "label": "Grille de Sudoku",
+    "visual_triggers": ["9x9 grid", "numeric cells", "bold borders"],
+    "artifact_type": "compute_front",
+    "required_components": [
+      { "id": "grid_cell", "math_role": "cell", "interact": "input" }
+    ],
+    "dev_brief": "Grille matricielle régulière. Nécessite une validation de contraintes locales (lignes, colonnes, carrés)."
+  },
+  {
+    "archetype_id": "pascal_triangle",
+    "label": "Triangle de Pascal",
+    "visual_triggers": ["pyramid shape", "numeric nodes", "centered levels"],
+    "artifact_type": "compute_front",
+    "required_components": [
+      { "id": "pascal_node", "math_role": "node", "math_role": "pyramid-row" }
+    ],
+    "dev_brief": "Structure pyramidale récursive. Nécessite un positionnement calculé des nœuds."
+  },
+  {
+    "archetype_id": "weather_app",
+    "label": "Application Météo",
+    "visual_triggers": ["large temp display", "weather icons", "forecast row"],
+    "artifact_type": "service_api",
+    "suggested_endpoints": ["GET /api/weather/current", "GET /api/weather/forecast"],
+    "dev_brief": "Focus sur l'affichage de données en temps réel et iconographie météo."
+  },
+  {
+    "archetype_id": "ecommerce",
+    "label": "E-Commerce / Catalogue",
+    "visual_triggers": ["product grid", "cart icon", "filters sidebar"],
+    "artifact_type": "mixed",
+    "suggested_endpoints": ["GET /api/products", "POST /api/cart/add"],
+    "dev_brief": "Structure classique de catalogue avec filtres et panier."
+  },
+  {
+    "archetype_id": "social_feed",
+    "label": "Flux Social",
+    "visual_triggers": ["post card list", "like buttons", "infinite scroll"],
+    "artifact_type": "service_api",
+    "suggested_endpoints": ["GET /api/feed", "POST /api/post/like"],
+    "dev_brief": "Flux de contenu dynamique avec interactions sociales."
+  },
+  {
+    "archetype_id": "form_wizard",
+    "label": "Formulaire Multi-Étapes",
+    "visual_triggers": ["step indicator top", "next prev buttons", "single form column"],
+    "artifact_type": "layout_component",
+    "dev_brief": "Progression linéaire par étapes. Requiert une gestion d'état de formulaire persistante."
+  },
+  {
+    "archetype_id": "file_manager",
+    "label": "Gestionnaire de Fichiers",
+    "visual_triggers": ["folder grid", "breadcrumb", "drag drop area"],
+    "artifact_type": "mixed",
+    "suggested_endpoints": ["GET /api/files", "POST /api/files/upload"],
+    "dev_brief": "Exploration de système de fichiers avec gestion de drag & drop."
+  },
+  {
+    "archetype_id": "calendar_booking",
+    "label": "Calendrier / Réservation",
+    "visual_triggers": ["weekly grid", "time slots", "date picker"],
+    "artifact_type": "service_api",
+    "suggested_endpoints": ["GET /api/booking/available", "POST /api/booking/reserve"],
+    "dev_brief": "Interface temporelle complexe nécessitant un affichage en grille de temps."
+  },
+  {
+    "archetype_id": "map_explorer",
+    "label": "Carte / Explorateur",
+    "visual_triggers": ["full screen map", "pins", "search bar floating"],
+    "artifact_type": "mixed",
+    "suggested_endpoints": ["GET /api/geo/points"],
+    "dev_brief": "Interface spatiale basée sur une carte interactive."
+  },
+  {
+    "archetype_id": "auth_flow",
+    "label": "Login / Authentification",
+    "visual_triggers": ["centered form", "email password inputs", "logo top"],
+    "artifact_type": "service_api",
+    "suggested_endpoints": ["POST /api/auth/login"],
+    "dev_brief": "Flux de sécurité sécurisé avec validation d'emails."
+  },
+  {
+    "archetype_id": "node_graph",
+    "label": "Graphe de Nœuds",
+    "visual_triggers": ["nodes", "connecting edges", "flowchart"],
+    "artifact_type": "compute_front",
+    "required_components": [
+      { "id": "graph_node", "math_role": "node" },
+      { "id": "graph_edge", "math_role": "edge" }
+    ],
+    "dev_brief": "Topologie de réseau. Nécessite un moteur de layout (ex: force-directed)."
+  },
+  {
+    "archetype_id": "data_viz_chart",
+    "label": "Visualisation de Données",
+    "visual_triggers": ["pie chart", "bar chart", "legend side"],
+    "artifact_type": "compute_front",
+    "dev_brief": "Graphique complexe (SVG/Canvas) piloté par des données structurées."
+  },
+  {
+    "archetype_id": "portfolio_gallery",
+    "label": "Portfolio / Galerie",
+    "visual_triggers": ["large images grid", "masonry layout", "filter chips"],
+    "artifact_type": "layout_component",
+    "dev_brief": "Focus sur l'esthétique et le layout (Masonry)."
+  },
+  {
+    "archetype_id": "landing_page",
+    "label": "Landing Page",
+    "visual_triggers": ["hero section", "features blocks", "call to action"],
+    "artifact_type": "layout_component",
+    "dev_brief": "Page de présentation structurée en sections de marketing."
+  },
+  {
+    "archetype_id": "music_player",
+    "label": "Lecteur Audio",
+    "visual_triggers": ["playback controls", "progress bar", "album art"],
+    "artifact_type": "mixed",
+    "suggested_endpoints": ["GET /api/tracks", "POST /api/player/play"],
+    "dev_brief": "Contrôles multimédias avec barre de progression et métadonnées d'album."
+  },
+  {
+    "archetype_id": "quiz_app",
+    "label": "Application Quiz",
+    "visual_triggers": ["question text", "multiple choice buttons", "timer"],
+    "artifact_type": "service_api",
+    "suggested_endpoints": ["GET /api/quiz/next", "POST /api/quiz/submit"],
+    "dev_brief": "Flux interactif de questions/réponses avec calcul de score."
+  }
+]
