@@ -4859,3 +4859,21 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - [x] Pushé sur main (94c8d13)
 
 ### Validé FJD : ✅
+
+---
+
+## Mission 92 — Archetypes HoméOS natifs
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-25**
+**ACTOR: CLAUDE**
+**FICHIERS :** `Backend/Prod/retro_genome/functional_archetypes.json`
+
+- [x] `aetherflow_brs` : War Room multi-LLM (dispatch/stream/capture/prd/arbitrate)
+- [x] `genome_canvas` : Stenciler SVG (genome/manifest/infer-layout/organ-move/comp-*)
+- [x] `retro_genome_studio` : Studio analyse (upload/validate/approve/reality/generate/export)
+- [x] Fix: `pascal_node` duplicate `math_role` → `layout_role`
+- [x] Test: `brainstorm_war_room_tw.html` → `aetherflow_brs` détecté (score direct) ✅
+- [x] Test: `bkd_frd.html` → `ide_like + chatbot_pro` composite ✅
+- [x] Pushé sur main (9981a34)
+
+### Validé FJD : ✅
