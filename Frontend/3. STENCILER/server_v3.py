@@ -881,6 +881,20 @@ async def get_bkd_frd():
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=path.read_text(encoding='utf-8'))
 
+@app.get("/brainstorm")
+async def get_brainstorm():
+    path = STATIC_DIR_PATH / "templates/brainstorm_war_room_tw.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
+
+@app.get("/brainstorm-alt")
+async def get_brainstorm_alt():
+    path = STATIC_DIR_PATH / "templates/brainstorm_alt.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=9998)
