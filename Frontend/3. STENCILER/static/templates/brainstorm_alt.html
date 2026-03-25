@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" class="bg-[#fafafa]">
+<html lang="fr" class="bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HoméOS — War Room ALT</title>
+    <title>HoméOS — War Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
@@ -16,8 +16,8 @@
                         figma: { bg: '#ffffff', panel: '#f9f9f9', input: '#f2f3f5', text: '#666666', textDark: '#1a1a1a', tabActive: '#8cc63f', dotGreen: '#5ec069', sep: '#e5e5e5' }
                     },
                     fontFamily: {
-                        homeos: ['"Helvetica LT Std"', 'Helvetica', 'Inter', 'sans-serif'],
-                        geist: ['Geist', 'sans-serif']
+                        homeos: ['Helvetica', 'Inter', 'sans-serif'],
+                        geist: ['Geist', 'Inter', 'sans-serif']
                     }
                 }
             }
@@ -30,127 +30,149 @@
         .insight-card { position: relative; }
         .insight-card .capture-btn { opacity: 0; transition: opacity 0.15s; }
         .insight-card:hover .capture-btn { opacity: 1; }
-        .tab-content { display: none; height: 100%; }
-        .tab-content.active { display: flex; }
+        .llm-tab-content { display: none; height: 100%; flex-direction: column; }
+        .llm-tab-content.active { display: flex; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden font-geist text-figma-text bg-white">
+<body class="flex h-screen overflow-hidden font-geist text-[12px] text-figma-text bg-white">
 
-    <!-- Sidebar collapsible -->
-    <aside id="sidebar" class="group relative flex flex-col w-[300px] h-full p-8 pl-[37px] border-r-[0.5px] border-figma-sep flex-shrink-0 transition-all duration-300 overflow-hidden has-[:checked]:w-[70px]">
-        <input type="checkbox" id="sidebar-toggle" class="peer hidden">
-        <label for="sidebar-toggle" class="absolute top-[35px] right-6 z-10 text-gray-300 hover:text-black cursor-pointer transition-transform peer-checked:rotate-180">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-        </label>
-
-        <div class="mb-12 font-homeos text-2xl text-black tracking-tighter whitespace-nowrap">
-            <span class="font-black">H</span><span class="font-black peer-checked:hidden">omé<span class="text-figma-tabActive">OS</span></span>
+    <!-- Sidebar collapsible — dimensions bkd_frd -->
+    <aside id="sidebar" class="relative flex flex-col w-[280px] h-full border-r border-figma-sep bg-white flex-shrink-0 transition-all duration-300 overflow-hidden" id="sidebar-wrap">
+        <!-- Header logo — identique bkd_frd -->
+        <div class="h-[48px] flex items-center justify-between px-6 border-b border-figma-sep flex-shrink-0">
+            <span class="font-homeos font-black text-lg tracking-tighter text-black">Homé<span class="text-figma-tabActive">OS</span></span>
+            <button id="sidebar-toggle" class="text-gray-300 hover:text-black transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
         </div>
 
-        <input type="text" id="search-input" placeholder="Prompt global (tous modèles)…"
-               class="bg-transparent border-b-[0.5px] border-gray-200 focus:border-figma-tabActive pb-2 outline-none text-[14px] w-full tracking-[0] transition-all peer-checked:hidden">
+        <!-- Boutons Multiplex / Conseil -->
+        <div class="px-6 py-3 flex gap-2 border-b border-figma-sep flex-shrink-0">
+            <button id="btn-multiplex" class="flex-1 py-1 text-[11px] font-semibold tracking-wider bg-figma-tabActive text-white transition-colors">Multiplex</button>
+            <button id="btn-conseil" class="flex-1 py-1 text-[11px] font-semibold tracking-wider border border-figma-sep text-gray-400 hover:border-black hover:text-black transition-colors">Conseil</button>
+        </div>
 
-        <div id="session-info" class="mt-auto pt-8 text-[11px] text-gray-300 uppercase tracking-widest peer-checked:hidden">Id: --</div>
+        <!-- Barre contextuelle (Multiplex = prompt global / Conseil = recherche) -->
+        <div class="px-6 py-3 border-b border-figma-sep flex-shrink-0">
+            <input type="text" id="multiplex-input" placeholder="Prompt global (tous modèles)…"
+                   class="w-full bg-transparent border-b border-gray-200 focus:border-figma-tabActive pb-1 outline-none text-[12px] transition-colors">
+            <input type="text" id="conseil-input" placeholder="Rechercher dans les chats…"
+                   class="hidden w-full bg-transparent border-b border-gray-200 focus:border-figma-tabActive pb-1 outline-none text-[12px] transition-colors">
+        </div>
+
+        <!-- Session ID -->
+        <div class="mt-auto px-6 py-4">
+            <span id="session-info" class="text-[10px] text-gray-300 uppercase tracking-widest">Id: --</span>
+        </div>
     </aside>
 
     <!-- Main -->
-    <div class="flex-1 flex flex-col min-w-0">
-        <header class="h-[60px] border-b-[0.5px] border-figma-sep flex items-center px-10">
-            <nav class="flex items-end gap-10 h-full">
-                <a href="#" class="text-[13px] font-semibold text-figma-tabActive border-b-[2px] border-figma-tabActive h-full flex items-center">Brainstorm</a>
-                <a href="/bkd-editor" class="text-[13px] text-gray-400 hover:text-black transition-colors h-full flex items-center">Backend</a>
-                <a href="/frd-editor" class="text-[13px] text-gray-400 hover:text-black transition-colors h-full flex items-center">Frontend</a>
-                <a href="#" class="text-[13px] text-gray-400 hover:text-black transition-colors h-full flex items-center">Deploy</a>
+    <div class="flex-1 flex flex-col min-w-0 bg-white">
+
+        <!-- Header principal — identique bkd_frd (h-[48px], px-8, text-[12px]) -->
+        <header class="h-[48px] border-b border-figma-sep flex items-center justify-between px-8 bg-white flex-shrink-0">
+            <nav class="flex items-center gap-8 h-full">
+                <a href="#" class="text-[12px] font-semibold text-figma-tabActive border-b-2 border-figma-tabActive h-full flex items-center">Brainstorm</a>
+                <a href="/bkd-editor" class="text-[12px] text-gray-400 hover:text-black transition-colors">Backend</a>
+                <a href="/frd-editor" class="text-[12px] text-gray-400 hover:text-black transition-colors">Frontend</a>
+                <a href="#" class="text-[12px] text-gray-400 hover:text-black transition-colors">Deploy</a>
             </nav>
+            <!-- Nudge -->
+            <div class="flex items-center gap-2">
+                <span class="pulse-dot w-1.5 h-1.5 rounded-full bg-figma-dotGreen"></span>
+                <span id="nudge-label" class="text-[11px] text-gray-400">3 modèles actifs</span>
+            </div>
         </header>
 
-        <main class="flex-1 flex overflow-hidden flex-col">
-            <!-- Tabs Header -->
-            <div class="flex items-center border-b-[0.5px] border-figma-sep bg-white">
-                <button class="tab-btn active px-6 py-3 text-[13px] font-semibold text-figma-tabActive border-b-[2px] border-figma-tabActive h-full flex items-center gap-2" data-tab="gemini">
-                    <span class="w-2 h-2 rounded-full bg-[#e8f5e9] border border-figma-dotGreen"></span> Gemini
-                </button>
-                <button class="tab-btn px-6 py-3 text-[13px] text-gray-400 hover:text-black transition-colors h-full flex items-center gap-2" data-tab="groq">
-                    <span class="w-2 h-2 rounded-full bg-[#fff3e0] border border-[#f55036]"></span> Groq
-                </button>
-                <button class="tab-btn px-6 py-3 text-[13px] text-gray-400 hover:text-black transition-colors h-full flex items-center gap-2" data-tab="codestral">
-                    <span class="w-2 h-2 rounded-full bg-figma-dotGreen"></span> Codestral
-                </button>
-            </div>
+        <!-- Sous-tabs LLM — niveau inférieur, text-[11px] -->
+        <div class="flex items-center border-b border-figma-sep bg-figma-panel flex-shrink-0">
+            <button class="llm-tab-btn px-5 py-2 text-[11px] font-semibold text-figma-tabActive border-b-2 border-figma-tabActive flex items-center gap-1.5" data-tab="gemini">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#e8f5e9] border border-figma-dotGreen"></span> Gemini
+            </button>
+            <button class="llm-tab-btn px-5 py-2 text-[11px] text-gray-400 hover:text-black transition-colors flex items-center gap-1.5" data-tab="groq">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#fff3e0] border border-[#f55036]"></span> Groq
+            </button>
+            <button class="llm-tab-btn px-5 py-2 text-[11px] text-gray-400 hover:text-black transition-colors flex items-center gap-1.5" data-tab="codestral">
+                <span class="w-1.5 h-1.5 rounded-full bg-figma-dotGreen"></span> Codestral
+            </button>
+        </div>
 
-            <!-- Tab Contents -->
-            <div class="flex-1 flex overflow-hidden">
-                <!-- Gemini Tab -->
-                <section id="tab-gemini" class="tab-content active flex-1 flex flex-col">
-                    <div id="stream-gemini" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4"></div>
-                    <div class="p-4 border-t-[0.5px] border-figma-sep flex gap-2">
-                        <input type="text" id="input-gemini" placeholder="Message à Gemini..." class="flex-1 bg-figma-input rounded px-3 py-2 text-[14px] outline-none focus:ring-1 focus:ring-figma-tabActive">
-                        <button onclick="sendMessage('gemini')" class="px-4 py-2 bg-figma-tabActive text-white text-[13px] rounded hover:opacity-90">Envoyer</button>
-                    </div>
-                </section>
+        <!-- Contenu LLM tabs -->
+        <main class="flex-1 overflow-hidden">
 
-                <!-- Groq Tab -->
-                <section id="tab-groq" class="tab-content flex-1 flex flex-col">
-                    <div id="stream-groq" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4"></div>
-                    <div class="p-4 border-t-[0.5px] border-figma-sep flex gap-2">
-                        <input type="text" id="input-groq" placeholder="Message à Groq..." class="flex-1 bg-figma-input rounded px-3 py-2 text-[14px] outline-none focus:ring-1 focus:ring-figma-tabActive">
-                        <button onclick="sendMessage('groq')" class="px-4 py-2 bg-figma-tabActive text-white text-[13px] rounded hover:opacity-90">Envoyer</button>
-                    </div>
-                </section>
+            <!-- Gemini -->
+            <section id="tab-gemini" class="llm-tab-content active">
+                <div id="stream-gemini" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3"></div>
+                <div class="p-4 border-t border-figma-sep flex gap-2 flex-shrink-0">
+                    <input type="text" id="input-gemini" placeholder="Message à Gemini…"
+                           class="flex-1 bg-figma-input px-3 py-2 text-[12px] outline-none border border-figma-sep focus:border-figma-tabActive">
+                    <button onclick="sendMessage('gemini')" class="px-4 py-2 bg-figma-tabActive text-white text-[11px] font-semibold hover:opacity-90">Envoyer</button>
+                </div>
+            </section>
 
-                <!-- Codestral Tab -->
-                <section id="tab-codestral" class="tab-content flex-1 flex flex-col">
-                    <div id="stream-codestral" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4"></div>
-                    <div class="p-4 border-t-[0.5px] border-figma-sep flex gap-2">
-                        <input type="text" id="input-codestral" placeholder="Message à Codestral..." class="flex-1 bg-figma-input rounded px-3 py-2 text-[14px] outline-none focus:ring-1 focus:ring-figma-tabActive">
-                        <button onclick="sendMessage('codestral')" class="px-4 py-2 bg-figma-tabActive text-white text-[13px] rounded hover:opacity-90">Envoyer</button>
-                    </div>
-                </section>
-            </div>
+            <!-- Groq -->
+            <section id="tab-groq" class="llm-tab-content">
+                <div id="stream-groq" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3"></div>
+                <div class="p-4 border-t border-figma-sep flex gap-2 flex-shrink-0">
+                    <input type="text" id="input-groq" placeholder="Message à Groq…"
+                           class="flex-1 bg-figma-input px-3 py-2 text-[12px] outline-none border border-figma-sep focus:border-figma-tabActive">
+                    <button onclick="sendMessage('groq')" class="px-4 py-2 bg-figma-tabActive text-white text-[11px] font-semibold hover:opacity-90">Envoyer</button>
+                </div>
+            </section>
+
+            <!-- Codestral -->
+            <section id="tab-codestral" class="llm-tab-content">
+                <div id="stream-codestral" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3"></div>
+                <div class="p-4 border-t border-figma-sep flex gap-2 flex-shrink-0">
+                    <input type="text" id="input-codestral" placeholder="Message à Codestral…"
+                           class="flex-1 bg-figma-input px-3 py-2 text-[12px] outline-none border border-figma-sep focus:border-figma-tabActive">
+                    <button onclick="sendMessage('codestral')" class="px-4 py-2 bg-figma-tabActive text-white text-[11px] font-semibold hover:opacity-90">Envoyer</button>
+                </div>
+            </section>
+
         </main>
     </div>
 
-    <!-- Sullivan Panel -->
-    <section id="sullivan-panel" class="w-[300px] flex flex-col border-l-[0.5px] border-figma-sep bg-[#fdfdfd] flex-shrink-0">
-        <div class="h-[60px] flex items-center px-8 border-b-[0.5px] border-figma-sep text-[13px] font-semibold gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-figma-dotGreen shadow-[0_0_6px_rgba(94,192,105,0.5)]"></span> Sullivan
+    <!-- Sullivan Panel — dimensions bkd_frd (w-[280px], h-[48px] header) -->
+    <section id="sullivan-panel" class="w-[280px] flex flex-col border-l border-figma-sep bg-white flex-shrink-0">
+        <div class="h-[48px] flex items-center px-6 border-b border-figma-sep gap-2 flex-shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-figma-dotGreen shadow-[0_0_6px_rgba(94,192,105,0.4)]"></span>
+            <span class="text-[12px] font-semibold text-black">Sullivan</span>
         </div>
-        <div id="nugget-list" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3 text-[14px] leading-relaxed">
-            <p class="text-[12px] text-gray-300 uppercase tracking-widest">Aucun nugget</p>
+        <div id="nugget-list" class="flex-1 overflow-y-auto no-scrollbar px-6 py-4 space-y-3">
+            <p class="text-[10px] text-gray-300 uppercase tracking-widest">Aucun nugget</p>
         </div>
-        <div class="p-6 border-t-[0.5px] border-figma-sep space-y-3">
-            <button id="btn-arbitrate" class="w-full py-2 text-[12px] uppercase tracking-widest border border-gray-200 hover:border-black rounded-lg transition-all">Sullivan Arbitrage</button>
-            <button id="btn-prd" disabled class="w-full py-2 text-[12px] uppercase tracking-widest bg-gray-200 text-white rounded-lg transition-all disabled:cursor-not-allowed hover:bg-figma-tabActive">Générer PRD</button>
+        <div class="p-4 border-t border-figma-sep space-y-2 flex-shrink-0">
+            <button id="btn-arbitrate" class="w-full py-2 text-[11px] uppercase tracking-widest border border-figma-sep hover:border-black transition-colors text-gray-600 hover:text-black">Sullivan Arbitrage</button>
+            <button id="btn-prd" disabled class="w-full py-2 text-[11px] uppercase tracking-widest bg-figma-input text-gray-400 disabled:cursor-not-allowed transition-colors">Générer PRD</button>
         </div>
     </section>
 
     <!-- PRD Modal -->
     <div id="prd-modal" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-20">
         <div class="bg-white border border-figma-sep w-full max-w-2xl h-full shadow-xl flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-                <span class="font-bold text-black text-[15px]">Dossier de conception</span>
+            <div class="h-[48px] px-6 border-b border-figma-sep flex items-center justify-between flex-shrink-0">
+                <span class="font-semibold text-black text-[12px]">Dossier de conception</span>
                 <div class="flex gap-4">
-                    <a id="prd-download" download="PRD.md" href="#" class="text-figma-tabActive text-[13px] font-semibold hover:underline">Télécharger</a>
-                    <button onclick="document.getElementById('prd-modal').classList.add('hidden')" class="text-[13px] text-red-400 hover:text-red-600">Fermer</button>
+                    <a id="prd-download" download="PRD.md" href="#" class="text-figma-tabActive text-[12px] font-semibold hover:underline">Télécharger</a>
+                    <button onclick="document.getElementById('prd-modal').classList.add('hidden')" class="text-[12px] text-red-400 hover:text-red-600">Fermer</button>
                 </div>
             </div>
-            <pre id="prd-content" class="flex-1 p-8 overflow-y-auto text-[14px] whitespace-pre-wrap font-geist text-figma-text leading-relaxed"></pre>
+            <pre id="prd-content" class="flex-1 p-8 overflow-y-auto text-[12px] whitespace-pre-wrap font-geist text-figma-text leading-relaxed"></pre>
         </div>
     </div>
 
     <script>
-        // Session Management
         const sessionId = "BRS-" + Math.random().toString(36).substr(2, 9);
         document.getElementById('session-info').innerText = "ID: " + sessionId;
 
-        // Stream Containers
         const streams = {
             gemini: document.getElementById('stream-gemini'),
             groq: document.getElementById('stream-groq'),
             codestral: document.getElementById('stream-codestral')
         };
-
-        // Inputs
         const inputs = {
             gemini: document.getElementById('input-gemini'),
             groq: document.getElementById('input-groq'),
@@ -161,49 +183,78 @@
         const btnPrd = document.getElementById('btn-prd');
         let basketCount = 0;
 
-        // Tab switching logic
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
+        // Sidebar toggle
+        document.getElementById('sidebar-toggle').onclick = () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('w-[280px]');
+            sidebar.classList.toggle('w-[48px]');
+        };
 
+        // Multiplex / Conseil mode
+        let currentMode = 'multiplex';
+        const btnMultiplex = document.getElementById('btn-multiplex');
+        const btnConseil = document.getElementById('btn-conseil');
+        const multiplexInput = document.getElementById('multiplex-input');
+        const conseilInput = document.getElementById('conseil-input');
+
+        function setMode(mode) {
+            currentMode = mode;
+            if (mode === 'multiplex') {
+                btnMultiplex.classList.add('bg-figma-tabActive', 'text-white');
+                btnMultiplex.classList.remove('border', 'border-figma-sep', 'text-gray-400');
+                btnConseil.classList.remove('bg-figma-tabActive', 'text-white');
+                btnConseil.classList.add('border', 'border-figma-sep', 'text-gray-400');
+                multiplexInput.classList.remove('hidden');
+                conseilInput.classList.add('hidden');
+            } else {
+                btnConseil.classList.add('bg-figma-tabActive', 'text-white');
+                btnConseil.classList.remove('border', 'border-figma-sep', 'text-gray-400');
+                btnMultiplex.classList.remove('bg-figma-tabActive', 'text-white');
+                btnMultiplex.classList.add('border', 'border-figma-sep', 'text-gray-400');
+                conseilInput.classList.remove('hidden');
+                multiplexInput.classList.add('hidden');
+                conseilInput.focus();
+            }
+        }
+        btnMultiplex.onclick = () => setMode('multiplex');
+        btnConseil.onclick = () => setMode('conseil');
+
+        // LLM sub-tabs
+        const tabBtns = document.querySelectorAll('.llm-tab-btn');
+        const tabContents = document.querySelectorAll('.llm-tab-content');
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                const targetTab = btn.dataset.tab;
-                
-                // Update button styles
+                const target = btn.dataset.tab;
                 tabBtns.forEach(b => {
-                    b.classList.remove('text-figma-tabActive', 'border-b-[2px]', 'border-figma-tabActive');
+                    b.classList.remove('text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'font-semibold');
                     b.classList.add('text-gray-400');
                 });
                 btn.classList.remove('text-gray-400');
-                btn.classList.add('text-figma-tabActive', 'border-b-[2px]', 'border-figma-tabActive');
-                
-                // Update content visibility
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `tab-${targetTab}`) {
-                        content.classList.add('active');
-                    }
+                btn.classList.add('text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'font-semibold');
+                tabContents.forEach(c => {
+                    c.classList.remove('active');
+                    if (c.id === `tab-${target}`) c.classList.add('active');
                 });
             });
         });
 
+        // Nugget
         function addNugget(text, provider) {
             if (basketCount === 0) nuggetList.innerHTML = '';
             const div = document.createElement('div');
-            div.className = 'p-4 border-l-2 border-figma-tabActive bg-white shadow-sm text-[13px]';
-            div.innerHTML = `<div class="leading-relaxed">${text}</div><div class="mt-2 text-[11px] text-gray-300 uppercase tracking-wider">${provider} · capture</div>`;
+            div.className = 'p-3 border-l-2 border-figma-tabActive bg-figma-panel text-[12px]';
+            div.innerHTML = `<div class="leading-relaxed text-figma-textDark">${text}</div><div class="mt-1 text-[10px] text-gray-400 uppercase tracking-wider">${provider} · capture</div>`;
             nuggetList.prepend(div);
             basketCount++;
             btnPrd.disabled = false;
-            btnPrd.classList.remove('bg-gray-200');
-            btnPrd.classList.add('bg-figma-tabActive');
+            btnPrd.classList.remove('bg-figma-input', 'text-gray-400');
+            btnPrd.classList.add('bg-figma-tabActive', 'text-white');
         }
 
         async function captureNugget(text, provider) {
             try {
                 const res = await fetch('/api/brs/capture', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId, text, provider })
                 });
                 if (res.ok) addNugget(text, provider);
@@ -212,12 +263,12 @@
 
         function createInsightCard(provider) {
             const card = document.createElement('div');
-            card.className = 'insight-card relative bg-white/60 border-b-[0.5px] border-figma-sep pb-4';
+            card.className = 'insight-card relative pb-5 border-b border-figma-sep';
             const content = document.createElement('div');
-            content.className = 'text-[14px] text-gray-800 leading-relaxed';
+            content.className = 'text-[12px] text-figma-text leading-relaxed';
             card.appendChild(content);
             const btn = document.createElement('button');
-            btn.className = 'capture-btn absolute bottom-1 right-0 px-2 py-1 text-[11px] uppercase tracking-widest text-figma-tabActive hover:bg-figma-tabActive hover:text-white transition-all border border-figma-tabActive';
+            btn.className = 'capture-btn absolute bottom-1 right-0 px-2 py-0.5 text-[10px] uppercase tracking-widest text-figma-tabActive border border-figma-tabActive hover:bg-figma-tabActive hover:text-white transition-all';
             btn.innerText = '+ capture';
             btn.onclick = (e) => { e.stopPropagation(); captureNugget(content.innerText, provider); };
             card.appendChild(btn);
@@ -228,56 +279,59 @@
 
         function startStreaming(provider, message) {
             const url = `/api/brs/chat/${provider}?session_id=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
-            const eventSource = new EventSource(url);
-            let currentCard = null;
-            eventSource.addEventListener('token', (e) => {
+            const es = new EventSource(url);
+            let card = null;
+            es.addEventListener('token', (e) => {
                 const token = JSON.parse(e.data);
-                if (!currentCard) currentCard = createInsightCard(provider);
-                currentCard.innerText += token;
+                if (!card) card = createInsightCard(provider);
+                card.innerText += token;
                 streams[provider].scrollTop = streams[provider].scrollHeight;
             });
-            eventSource.addEventListener('done', () => eventSource.close());
-            eventSource.onerror = () => eventSource.close();
+            es.addEventListener('done', () => es.close());
+            es.onerror = () => es.close();
         }
 
         function sendMessage(provider) {
-            const input = inputs[provider];
-            const message = input.value.trim();
-            if (!message) return;
-            // Clear previous chat for this provider
+            const msg = inputs[provider].value.trim();
+            if (!msg) return;
             streams[provider].innerHTML = '';
-            startStreaming(provider, message);
-            input.value = '';
+            startStreaming(provider, msg);
+            inputs[provider].value = '';
         }
 
-        // Dispatch from sidebar input to ALL tabs
-        document.getElementById('search-input').onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                const query = e.target.value.trim();
-                if (!query) return;
-                
-                // Clear all streams
-                Object.values(streams).forEach(s => s.innerHTML = '');
-                
-                // Send to all providers
-                Object.keys(streams).forEach(provider => startStreaming(provider, query));
-                e.target.value = '';
-            }
-        };
-
-        // Enter key support for individual inputs
-        Object.keys(inputs).forEach(provider => {
-            inputs[provider].addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') sendMessage(provider);
-            });
+        // Enter sur chaque input individuel
+        Object.keys(inputs).forEach(p => {
+            inputs[p].addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(p); });
         });
 
-        // Arbitrage Sullivan
-        document.getElementById('btn-arbitrate').onclick = async () => {
-            const btn = document.getElementById('btn-arbitrate');
-            btn.innerText = 'Arbitrage...';
+        // Multiplex input → dispatch tous les modèles
+        multiplexInput.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            const query = e.target.value.trim();
+            if (!query) return;
+            Object.values(streams).forEach(s => s.innerHTML = '');
+            Object.keys(streams).forEach(p => startStreaming(p, query));
+            e.target.value = '';
+            document.getElementById('nudge-label').innerText = 'Dispatch en cours…';
+            setTimeout(() => document.getElementById('nudge-label').innerText = '3 modèles actifs', 2000);
+        });
+
+        // Conseil input → recherche dans les streams visibles
+        conseilInput.addEventListener('input', (e) => {
+            const term = e.target.value.trim().toLowerCase();
+            document.querySelectorAll('.insight-card').forEach(card => {
+                const text = card.querySelector('div')?.innerText.toLowerCase() || '';
+                card.style.opacity = (!term || text.includes(term)) ? '1' : '0.2';
+            });
+        });
+        conseilInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.target.value = ''; conseilInput.dispatchEvent(new Event('input')); } });
+
+        // Sullivan Arbitrage
+        document.getElementById('btn-arbitrate').onclick = () => {
             const nuggets = Array.from(nuggetList.querySelectorAll('div > div:first-child')).map(d => d.innerText).join('\n---\n');
-            if (!nuggets) { btn.innerText = 'Sullivan Arbitrage'; return; }
+            if (!nuggets) return;
+            const btn = document.getElementById('btn-arbitrate');
+            btn.innerText = 'Arbitrage…';
             startStreaming('gemini', `En tant qu'arbitre Sullivan, synthétise ces insights en 3-5 points actionnables :\n\n${nuggets}`);
             btn.innerText = 'Sullivan Arbitrage';
         };
@@ -286,11 +340,10 @@
         btnPrd.onclick = async () => {
             const projectName = prompt("Nom du projet ?", "AetherFlow Project");
             if (!projectName) return;
-            btnPrd.innerText = "Génération...";
+            btnPrd.innerText = "Génération…";
             try {
                 const res = await fetch('/api/brs/generate-prd', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId, project_name: projectName })
                 });
                 if (res.ok) {
@@ -300,8 +353,9 @@
                     const dl = document.getElementById('prd-download');
                     dl.href = URL.createObjectURL(blob);
                     dl.download = data.prd_path ? data.prd_path.split('/').pop() : 'PRD.md';
-                    document.getElementById('prd-modal').classList.remove('hidden');
-                    document.getElementById('prd-modal').style.display = 'flex';
+                    const modal = document.getElementById('prd-modal');
+                    modal.classList.remove('hidden');
+                    modal.style.display = 'flex';
                 }
             } catch (e) { console.error(e); }
             finally { btnPrd.innerText = "Générer PRD"; }
