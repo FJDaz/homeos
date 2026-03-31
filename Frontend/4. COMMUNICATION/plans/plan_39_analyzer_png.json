@@ -1,0 +1,38 @@
+{
+  "task_id": "mission_39_analyzer_png_stability",
+  "description": "Stabiliser RetroGenomeAnalyzer : PNG natif (lossless) au lieu de JPEG lossy, temperature=0, retry x2 sur JSON invalide/vide.",
+  "metadata": {
+    "created_at": "2026-03-13T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow Retro-Genome — Mission 39 Tâches A+B"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Tâche A+B : PNG natif + temperature=0 + retry x2 dans analyzer.py",
+      "type": "patch",
+      "complexity": 0.3,
+      "estimated_tokens": 800,
+      "dependencies": [],
+      "validation_criteria": [
+        "ImagePreprocessor.process() encode en PNG (pas JPEG), mime_type='image/png'",
+        "MAX_DIMENSION = 1280 (était 1024)",
+        "Suppression de JPEG_QUALITY et de la boucle de dégradation qualité",
+        "analyze_png() passe temperature=0 à generate_with_image",
+        "analyze_png() retry jusqu'à 2 fois si JSON invalide ou réponse vide (asyncio.sleep(1) entre essais)",
+        "Logger le numéro de tentative en cours"
+      ],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": true,
+        "files": [
+          "Backend/Prod/retro_genome/analyzer.py"
+        ],
+        "input_files": [
+          "Backend/Prod/retro_genome/analyzer.py"
+        ],
+        "instructions": "Lis `Backend/Prod/retro_genome/analyzer.py` en entier avant de coder.\n\n## Tâche A — PNG natif dans ImagePreprocessor.process()\n\nREMPLACER la logique JPEG par PNG lossless :\n\n```python\n# AVANT (à supprimer)\nTARGET_MAX_BYTES = 500 * 1024\nJPEG_QUALITY = 75\n# ... boucle while len(data) > self.target_max_bytes ...\n\n# APRÈS\nMAX_DIMENSION = 1280  # was 1024\n```\n\nDans `process()` :\n- `img.save(buffer, format='PNG', optimize=True)` (pas de quality param en PNG)\n- Supprimer `self.target_max_bytes`, supprimer la boucle de dégradation qualité\n- `return base64.b64encode(data).decode('utf-8'), 'image/png'`\n- Retirer `TARGET_MAX_BYTES` et `JPEG_QUALITY` des constantes globales\n- Retirer `target_max_bytes` du constructeur `__init__` de `ImagePreprocessor`\n\n## Tâche B — Stabilité dans RetroGenomeAnalyzer.analyze_png()\n\nAjouter `import asyncio` en haut du fichier si absent.\n\nREMPLACER le corps de `analyze_png()` pour :\n1. Boucle retry avec `max_attempts = 3` (1 essai initial + 2 retries)\n2. Passer `temperature=0` au client generate_with_image\n3. Si réponse vide ou `extract_json_robust` lève une exception → attendre 1s → retry\n4. Logger le numéro de tentative : `logger.info(f'[VisualDecomposer] Attempt {attempt+1}/{max_attempts}')`\n5. Si les 3 tentatives échouent → retourner le dict d'erreur existant\n\nStructure cible :\n```python\nasync def analyze_png(self, image_path: Path) -> Dict:\n    logger.info(f'🔍 VisualDecomposer: Analyzing {image_path.name}...')\n    b64_image, mime_type = self.preprocessor.process(image_path)\n    max_attempts = 3\n    last_error = None\n    for attempt in range(max_attempts):\n        try:\n            logger.info(f'[VisualDecomposer] Attempt {attempt+1}/{max_attempts}')\n            result = await self.client.generate_with_image(\n                prompt=VISUAL_DECOMPOSER_PROMPT,\n                image_base64=b64_image,\n                mime_type=mime_type,\n                output_constraint='JSON only',\n                max_tokens=4096,\n                temperature=0\n            )\n            if not result.success:\n                raise ValueError(result.error)\n            raw = result.code if result.code and result.code.strip() else getattr(result, 'text', '') or ''\n            if not raw:\n                raise ValueError('Réponse vide de Gemini')\n            logger.debug(f'[VisualDecomposer] Raw response (first 300): {raw[:300]}')\n            return extract_json_robust(raw)\n        except Exception as e:\n            last_error = e\n            logger.warning(f'[VisualDecomposer] Attempt {attempt+1} failed: {e}')\n            if attempt < max_attempts - 1:\n                await asyncio.sleep(1)\n    logger.error(f'[VisualDecomposer] All {max_attempts} attempts failed for {image_path.name}: {last_error}')\n    return {'error': str(last_error), 'elements': [], 'regions': [], 'design_tokens': {}, 'annotations_visible': []}\n```\n\nNote : si `generate_with_image` n'accepte pas `temperature` comme kwarg, passe-le via `generation_config={'temperature': 0}` ou vérifie la signature du client existant.\n\nUNIQUEMENT le fichier `analyzer.py` complet. Rien d'autre."
+      }
+    }
+  ]
+}

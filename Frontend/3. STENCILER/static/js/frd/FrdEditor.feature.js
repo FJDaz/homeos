@@ -149,9 +149,12 @@ export class FrdEditor {
 
     async loadFile(filename) {
         try {
-            const res = await fetch(`/api/frd/file?name=${filename}`);
+            const res = await (window.__NativeFetch || fetch)(`/api/frd/file?name=${filename}`, { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
+                // Reset preview iframe avant de charger le nouveau contenu
+                const iframe = document.getElementById('preview-iframe');
+                if (iframe) { iframe.removeAttribute('srcdoc'); iframe.srcdoc = ''; }
                 this.setValue(data.content);
                 document.getElementById('save-name').value = filename;
                 this.main.state._chatHistory = [];
@@ -202,6 +205,23 @@ export class FrdEditor {
                 }
             }
         } catch (e) { console.error("Save failed", e); }
+    }
+
+    async runPreviewTab() {
+        const html = this.getValue();
+        try {
+            const res = await fetch('/api/preview/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                window.open(data.url, '_blank');
+            }
+        } catch (e) {
+            console.error("Preview failed", e);
+        }
     }
 
     loadHTMLFile(file) {

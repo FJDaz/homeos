@@ -161,14 +161,25 @@ class ApplyEngine:
             return False, "no_code_blocks"
 
         # Filter out surgical JSON blocks if possible
-        selected_block = code_blocks[0]
-        if len(code_blocks) > 1:
-            for lang, content in code_blocks:
-                # If it's a python file, look for python-looking blocks that aren't surgical JSON
-                if file_path.suffix == ".py":
-                    if (lang in ("python", "py") or "def " in content or "class " in content) and '"operations"' not in content:
-                        selected_block = (lang, content)
-                        break
+        selected_block = None
+        
+        for lang, content in code_blocks:
+            if file_path.suffix in (".py", ".js", ".tsx", ".ts"):
+                # Strictly forbid overwriting programmatic files with surgical JSON
+                if '"operations"' in content and ('"type"' in content or '"target"' in content):
+                    continue
+                if lang == "json":
+                    continue
+            
+            # If we reach here, meaning the block passed the filters, select it
+            selected_block = (lang, content)
+            break
+            
+        if not selected_block:
+            # Reached if all blocks were filtered out (e.g. only malformed JSON was returned)
+            # In this case, we MUST NOT overwrite the file.
+            logger.error(f"Prevented destructive overwrite: LLM only returned surgical JSON for {file_path}")
+            return False, "prevented_destructive_json_overwrite"
         
         _, code_content = selected_block
         

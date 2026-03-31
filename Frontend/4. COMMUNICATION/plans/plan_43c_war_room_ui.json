@@ -1,0 +1,67 @@
+{
+  "task_id": "brs_war_room_43c",
+  "description": "Mission 43-C : Refonte visuelle brainstorm_war_room.html fidèle à la maquette SVG HomeOS. Step 1 : extraction spec design depuis le SVG. Step 2 : réécriture HTML/CSS depuis le spec, JS préservé intact.",
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Lire SVG_HomeOS_1 et produire SVG_WAR_ROOM_DESIGN_SPEC.md",
+      "type": "code_generation",
+      "complexity": 0.6,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Palette couleurs complète avec rôles (fond, texte, accent, bordure)",
+        "Layout global : dimensions, nombre de colonnes, hauteurs de zones",
+        "Typographie : font-family, tailles, poids par niveau",
+        "6 zones nommées documentées (header, col-gemini, col-deepseek, col-groq, basket, controls)",
+        "Différenciateurs visuels par provider explicitement listés",
+        "Aucune valeur inventée — uniquement ce qui est dans le SVG"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "exports/retro_genome/SVG_HomeOS_1_20260313_193741.svg"
+        ],
+        "instructions": "Tu reçois un fichier SVG de maquette UI (~2MB). Lis-le intégralement sans sauter aucune partie. Ton unique mission : produire un document de spec design structuré au format Markdown.\n\nREGLES ABSOLUES :\n- Tu transcris ce que tu VOIS dans le SVG. Tu n'inventes rien.\n- Si une valeur est ambiguë ou illisible, tu la notes 'ambigu : [explication]'.\n- Tu ne proposes PAS de design alternatif. Tu extrais. Point.\n\nSTRUCTURE OBLIGATOIRE du document de sortie :\n\n# SVG War Room Design Spec\n\n## 1. Palette couleurs\nTableau : | Hex | Occurences | Rôle/Zone |\nListe tous les fill/stroke hex présents, leur fréquence, et la zone UI où ils apparaissent.\n\n## 2. Layout global\n- Dimensions viewport (viewBox ou width/height de la racine SVG)\n- Zones identifiées : nombre, noms, positions relatives (top/left/width/height approximatifs en %)\n- Gouttières entre zones\n\n## 3. Typographie\nTableau : | Niveau | font-family | font-size | font-weight | Couleur |\nCouvrir : titre principal, labels de colonnes, body text, captions, boutons.\n\n## 4. Zones nommées — détail\nPour chacune des zones identifiées :\n- Dimensions approximatives\n- Couleur de fond\n- Bordures (couleur, épaisseur)\n- Contenu principal visible\n\n## 5. Composants atomiques\n- Boutons : forme (radius), couleur fond, couleur texte, padding approximatif\n- Cards / insight cards : radius, ombre, fond, bordure\n- Input/textarea : fond, bordure, placeholder style\n- Badges de statut\n\n## 6. Différenciateurs par provider\nComment les 3 colonnes (Gemini / DeepSeek / Groq) sont visuellement distinguées :\n- Couleur de header de colonne\n- Couleur d'accent (bordure, indicateur)\n- Tout autre différenciateur visuel\n\n## 7. Barre de séquençage\nDescription visuelle de la zone IDEATION → SELECTION → DOC_GENERATION si présente.\n\nOutput : UNIQUEMENT le contenu Markdown du fichier SVG_WAR_ROOM_DESIGN_SPEC.md. Rien d'autre."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Réécrire brainstorm_war_room.html CSS+HTML depuis le spec, JS intact",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 5000,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Fond de page : #f7f6f2 (crème chaud) ou var(--bg-primary)",
+        "Police : Geist, -apple-system — aucune autre",
+        "3 colonnes visuellement distinctes par accent stenciler",
+        "IDs HTML critiques tous présents et intacts",
+        "Bloc <script> identique à l'original, mot pour mot",
+        "Aucun glassmorphism, aucun fond noir"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/4. COMMUNICATION/SVG_WAR_ROOM_DESIGN_SPEC.md",
+          "Frontend/3. STENCILER/static/css/stenciler.css",
+          "Frontend/1. CONSTITUTION/LEXICON_DESIGN.json",
+          "Frontend/3. STENCILER/static/templates/brainstorm_war_room.html"
+        ],
+        "instructions": "Tu es un ingénieur frontend de précision sur AetherFlow, un outil de design system interne.\nTu reçois :\n1. SVG_WAR_ROOM_DESIGN_SPEC.md — la spec design extraite de la maquette de référence\n2. stenciler.css — le design system AetherFlow (source de vérité des tokens)\n3. LEXICON_DESIGN.json — contrat CSS partagé entre agents\n4. brainstorm_war_room.html — le fichier à réécrire\n\nTa mission : réécrire le <style> et la structure HTML de brainstorm_war_room.html pour correspondre EXACTEMENT aux specs du SVG, en respectant le design system stenciler.css.\n\nCONTRAINTES ABSOLUES — violation = mission échouée :\n1. Le bloc <script> existant est préservé INTEGRALEMENT, mot pour mot. Tu ne modifies pas une seule ligne de JS.\n2. Tu n'inventes AUCUN token de couleur, police, ou style absent de SVG_WAR_ROOM_DESIGN_SPEC.md ou stenciler.css.\n3. Police OBLIGATOIRE : 'Geist', -apple-system (stenciler.css L58). Inter, JetBrains Mono, ou toute autre police = INTERDIT.\n4. Fond de page : var(--bg-primary) = #f7f6f2 (crème chaud, stenciler.css). Fond noir #09090b = INTERDIT.\n5. Couleur texte principale : var(--text-primary) = #3d3d3c. Blanc #ececed sur fond sombre = INTERDIT sauf si le spec SVG l'exige explicitement.\n6. Accents provider : utiliser UNIQUEMENT les tokens stenciler.css (--accent-rose, --accent-bleu, --accent-vert, --accent-orange, --accent-mauve) pour différencier les colonnes Gemini/DeepSeek/Groq.\n7. Glassmorphism (backdrop-filter, fonds rgba très transparents comme fond principal) = INTERDIT.\n8. Layout fonctionnel préservé : header + 3 colonnes + aside basket + controls en bas de page.\n9. IDs HTML INTOUCHABLES (ils sont branchés sur le JS) : #stream-gemini, #stream-deepseek, #stream-groq, #nugget-list, #btn-prd, #btn-dispatch, #prompt-input, #session-info, #prd-modal, #prd-content, #prd-download.\n10. Si un élément du spec SVG entre en conflit avec les tokens stenciler.css, les TOKENS STENCILER ont priorité.\n\nAPPROCHE RECOMMANDEE :\n- Lis d'abord SVG_WAR_ROOM_DESIGN_SPEC.md section par section\n- Mappe chaque valeur vers le token stenciler le plus proche\n- Remplace intégralement le bloc <style> par un nouveau qui utilise les variables CSS de stenciler.css\n- Adapte le HTML structurellement pour coller au layout du spec\n- Copie-colle le bloc <script> existant sans aucune modification\n\nOutput : le fichier HTML complet. Rien d'autre."
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-03-13T00:00:00Z",
+    "claude_version": "claude-sonnet-4-6",
+    "workflow": "BUILD",
+    "targets": {
+      "step_1": "Frontend/4. COMMUNICATION/SVG_WAR_ROOM_DESIGN_SPEC.md",
+      "step_2": "Frontend/3. STENCILER/static/templates/brainstorm_war_room.html"
+    },
+    "note": "Mission 43-C. Step 1 bloque step 2. JS de brainstorm_war_room.html doit être préservé intégralement."
+  }
+}

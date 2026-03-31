@@ -1,82 +1,276 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <meta charset="utf-8">
     <style>
+        :root {
+            --primary: #8cc63f;
+            --primary-hover: #7ab536;
+            --bg: #0f1115;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e1e1e6;
+            --text-dim: #949ea8;
+        }
+
         body {
-            font-family: sans-serif;
-            padding: 20px;
-            background: #f5f5f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         h2 {
-            font-size: 14px;
-            color: #333;
-            margin-top: 0;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .status {
+        .subtitle {
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-text {
             font-size: 12px;
-            margin-bottom: 20px;
-            color: #666;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .btn {
-            background: #ff6b35;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            width: 100%;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(140, 198, 63, 0.2);
         }
 
         .btn:hover {
-            background: #e05d2d;
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(140, 198, 63, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+
+        .btn i {
+            font-style: normal;
+            font-size: 16px;
         }
 
         .debug {
-            font-size: 10px;
-            color: #999;
-            margin-top: 20px;
-            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: #555;
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 6px;
+            max-height: 80px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: none;
         }
+
+        .loader {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading .loader { display: block; }
+        .loading i { display: none; }
     </style>
 </head>
 
 <body>
-    <h2>AetherFlow Bridge</h2>
-    <div class="status" id="status">Connecting to localhost:9998...</div>
-    <button class="btn" id="import-btn">Import Manifest</button>
+    <div class="header">
+        <div class="subtitle">AetherFlow Bridge</div>
+        <h2>Director's Gateway</h2>
+    </div>
+
+    <div class="status-card">
+        <div class="status-text" id="status">Attente de sélection...</div>
+        <div id="frame-selector" style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; padding-right: 4px;">
+            <!-- Frames will appear here -->
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button class="btn btn-secondary" id="import-blueprint">
+            Import Blueprint (Genome)
+            <div class="loader"></div>
+        </button>
+        <button class="btn" id="analyze-svg">
+            Envoyer à HoméOS
+            <div class="loader"></div>
+        </button>
+    </div>
+
     <div class="debug" id="debug"></div>
 
     <script>
         const statusEl = document.getElementById('status');
         const debugEl = document.getElementById('debug');
-        const importBtn = document.getElementById('import-btn');
+        const frameSelector = document.getElementById('frame-selector');
+        let availableFrames = [];
 
-        importBtn.onclick = async () => {
-            statusEl.innerText = "Fetching manifest...";
+        async function fetchManifest(endpoint, typeLabel) {
+            const btnId = endpoint === '/api/manifest' ? 'import-blueprint' : 'import-reality';
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            
+            btn.classList.add('loading');
+            statusEl.innerText = `Fetching ${typeLabel}...`;
+            
             try {
-                const response = await fetch('http://localhost:9998/api/manifest');
+                const response = await fetch(`http://localhost:9998${endpoint}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
                 const manifest = await response.json();
-
-                statusEl.innerText = "Manifest loaded! Sending to Figma...";
-                parent.postMessage({ pluginMessage: { type: 'import-manifest', manifest } }, '*');
+                statusEl.innerText = `${typeLabel} chargé !`;
+                
+                parent.postMessage({ 
+                    pluginMessage: { 
+                        type: 'import-manifest', 
+                        manifest,
+                        source: typeLabel
+                    } 
+                }, '*');
+                
             } catch (err) {
-                statusEl.innerText = "Error: Failed to fetch manifest.";
-                debugEl.innerText = err.toString();
+                statusEl.innerText = `Erreur : check server_v3.py (port 9998)`;
+            } finally {
+                btn.classList.remove('loading');
             }
+        }
+
+        document.getElementById('import-blueprint').onclick = () => fetchManifest('/api/manifest', 'Blueprint');
+
+        document.getElementById('analyze-svg').onclick = () => {
+            const selected = Array.from(frameSelector.querySelectorAll('input:checked'))
+                                 .map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                statusEl.innerText = "sélectionnez au moins un écran.";
+                return;
+            }
+
+            const btn = document.getElementById('analyze-svg');
+            btn.classList.add('loading');
+            statusEl.innerText = `Export de ${selected.length} écran(s)...`;
+            parent.postMessage({ pluginMessage: { type: 'export-multi-svg', ids: selected } }, '*');
         };
 
-        onmessage = (event) => {
+        onmessage = async (event) => {
             const msg = event.data.pluginMessage;
+
+            if (msg.type === 'frames-list') {
+                availableFrames = msg.frames;
+                frameSelector.innerHTML = availableFrames.map(f => `
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                        <input type="checkbox" value="${f.id}" checked style="accent-color: var(--primary)">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.name}</span>
+                    </label>
+                `).join('');
+                statusEl.innerText = `${availableFrames.length} écrans détectés.`;
+            }
+
             if (msg.type === 'import-done') {
-                statusEl.innerText = "Import successful! " + msg.count + " elements created.";
+                statusEl.innerText = `import réussi — ${msg.count} éléments`;
+            }
+
+            if (msg.type === 'svg-ready') {
+                if (msg.error) {
+                    statusEl.innerText = "erreur de sélection.";
+                    document.getElementById('analyze-svg').classList.remove('loading');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('http://localhost:9998/api/retro-genome/upload-svg', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ svg: msg.svg, name: msg.name })
+                    });
+                    const result = await response.json();
+
+                    const archetype = result.archetype?.label || result.archetype?.name || '—';
+                    const elements = result.visual_analysis?.elements?.length ?? '?';
+                    statusEl.innerHTML = `
+                        <span style="color:var(--primary);font-weight:600;">${msg.name}</span>
+                        reçu — archétype : <strong>${archetype}</strong>, ${elements} éléments<br>
+                        <a href="http://localhost:9998/intent-viewer" target="_blank"
+                           style="color:var(--primary);font-size:10px;text-decoration:underline;margin-top:4px;display:inline-block;">
+                            ouvrir dans l'intent viewer →
+                        </a>`;
+                    if (msg.isLast) {
+                        document.getElementById('analyze-svg').classList.remove('loading');
+                    }
+                } catch (err) {
+                    statusEl.innerText = "erreur envoi HoméOS — voir console.";
+                    document.getElementById('analyze-svg').classList.remove('loading');
+                }
             }
         };
     </script>
 </body>
-
 </html>

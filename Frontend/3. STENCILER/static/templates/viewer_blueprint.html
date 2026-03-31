@@ -1,309 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr" class="bg-white">
 
 <head>
     <meta charset="utf-8">
-    <title>KIMI Template Viewer — Blueprint</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
-        html,
-        body {
-            height: 100%;
-            background: #0f0f10
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            font-family: 'Inter', sans-serif;
-            color: #e1e1e6
-        }
-
-        #bar {
-            width: 100%;
-            background: #111;
-            color: #666;
-            font: 11px/28px monospace;
-            padding: 0 16px;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            border-bottom: 1px solid #222;
-            flex-shrink: 0;
-            height: 28px
-        }
-
-        #dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #333;
-            flex-shrink: 0;
-            transition: background .3s
-        }
-
-        #dot.live {
-            background: #4caf50
-        }
-
-        #main {
-            flex: 1;
-            display: flex;
-            overflow: hidden
-        }
-
-        #canvas {
-            flex: 1;
-            min-width: 0;
-            background: #f0eeea;
-            padding: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow: auto
-        }
-
-        #canvas svg {
-            max-width: 1440px;
-            width: 100%;
-            height: auto;
-            display: block;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, .18)
-        }
-
-        #empty {
-            color: #555;
-            font: 13px monospace;
-            margin: auto;
-            text-align: center;
-            line-height: 2
-        }
-
-        /* Sullivan Cockpit Styles */
-        #chat {
-            width: 380px;
-            flex-shrink: 0;
-            background: #0f0f10;
-            border-left: 1px solid #222;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden
-        }
-
-        #cockpit-header {
-            padding: 16px;
-            background: linear-gradient(180deg, #161618 0%, #0f0f10 100%);
-            border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: space-between;
-            align-items: center
-        }
-
-        .score-box {
-            text-align: right
-        }
-
-        .score-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #ff6b35;
-            letter-spacing: -1px
-        }
-
-        .score-label {
-            font-size: 9px;
-            text-transform: uppercase;
-            color: #666;
-            letter-spacing: 1px
-        }
-
-        #pedo-panel {
-            background: #161618;
-            border-bottom: 1px solid #222;
-            display: none;
-            padding: 16px;
-            flex-shrink: 0
-        }
-
-        .pedo-section {
-            margin-bottom: 12px
-        }
-
-        .pedo-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px
-        }
-
-        .pedo-value {
-            font-size: 13px;
-            color: #fff;
-            font-weight: 600
-        }
-
-        .pedo-desc {
-            font-size: 11px;
-            color: #a1a1aa;
-            line-height: 1.5;
-            font-style: italic;
-            margin-top: 4px
-        }
-
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2)
-        }
-
-        .msg {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid #333
-        }
-
-        .msg.sent {
-            border-left-color: #ff6b35;
-            background: rgba(255, 107, 53, 0.05)
-        }
-
-        .msg.ok {
-            border-left-color: #4caf50
-        }
-
-        .msg.err {
-            border-left-color: #f44336
-        }
-
-        .msg.tech {
-            display: none
-        }
-
-        /* Hide technical logs in blueprint */
-        .msg.running {
-            color: #ffb74d
-        }
-
-        #chat-input {
-            padding: 16px;
-            background: #0a0a0b;
-            border-top: 1px solid #222
-        }
-
-        #txt {
-            width: 100%;
-            background: #161618;
-            border: 1px solid #333;
-            color: #e1e1e6;
-            font-family: inherit;
-            font-size: 13px;
-            padding: 12px;
-            border-radius: 6px;
-            resize: none;
-            height: 80px;
-            outline: none;
-            transition: border-color 0.2s
-        }
-
-        #txt:focus {
-            border-color: #ff6b35
-        }
-
-        #btns {
-            margin-top: 12px;
-            display: flex;
-            gap: 10px
-        }
-
-        .btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        #btn-send {
-            background: #ff6b35;
-            color: #fff
-        }
-
-        #btn-send:hover {
-            background: #ff8559
-        }
-
-        #btn-accept {
-            background: transparent;
-            border: 1px solid #333;
-            color: #888
-        }
-
-        #btn-accept:hover {
-            border-color: #4caf50;
-            color: #4caf50
-        }
-
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: default
-        }
-
-        /* Interaction SVG */
-        svg .af-organ {
-            cursor: grab;
-        }
-
-        svg .af-organ:active {
-            cursor: grabbing;
-        }
-
-        svg .af-organ:hover>rect:first-child {
-            stroke: #1258ca;
-            stroke-dasharray: 4;
-        }
-
-        svg .af-organ.selected>rect:first-child {
-            stroke: #f05e23;
-            stroke-width: 2;
-            stroke-dasharray: none;
-        }
-
-        svg .kimi-comp.selected>rect:first-child {
-            stroke: #f05e23;
-            stroke-width: 2;
-            stroke-dasharray: none;
-        }
-
-        svg .kimi-comp.selected .resize-handle {
-            opacity: 1 !important;
-            fill: #fff;
-        }
-
-        svg .kimi-comp.hovered>rect:first-child {
-            stroke: #1258ca;
-            stroke-width: 2;
-            stroke-dasharray: none;
-        }
-    </style>
+    <title>AetherFlow — Blueprint Viewer</title>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Geist -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
+    
     <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        figma: {
+                            bg: '#ffffff',
+                            panel: '#f9f9f9',
+                            input: '#f2f3f5',
+                            text: '#666666',
+                            textDark: '#1a1a1a',
+                            tabActive: '#8cc63f',
+                            dotGreen: '#5ec069',
+                            sep: '#e5e5e5',
+                        }
+                    },
+                    fontFamily: {
+                        geist: ['Geist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-image: radial-gradient(#eeeeee 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        #canvas svg {
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .08);
+            border: 0.5px solid #e5e5e5;
+        }
+
+        /* Interaction SVG Styles preserved and adapted */
+        svg .af-organ { cursor: grab; }
+        svg .af-organ:active { cursor: grabbing; }
+        svg .af-organ:hover>rect:first-child { stroke: #8cc63f; stroke-dasharray: 4; }
+        svg .af-organ.selected>rect:first-child { stroke: #000; stroke-width: 2; stroke-dasharray: none; }
+        svg .kimi-comp.selected>rect:first-child { stroke: #8cc63f; stroke-width: 2; stroke-dasharray: none; }
+        svg .kimi-comp.selected .resize-handle { opacity: 1 !important; fill: #fff; }
+        svg .kimi-comp.hovered>rect:first-child { stroke: #8cc63f; stroke-width: 1; stroke-dasharray: none; }
+    </style>
+</head>
+
+<body class="flex flex-col h-screen overflow-hidden font-geist text-figma-text">
+    <!-- Top Bar -->
+    <div class="h-[28px] bg-white border-b-[0.5px] border-figma-sep px-4 flex items-center gap-4 z-50">
+        <div id="dot" class="w-2 h-2 rounded-full bg-figma-sep transition-colors"></div>
+        <span class="text-[9px] font-bold uppercase tracking-widest text-black/40">Blueprint Viewer</span>
+        <span id="ts" class="text-[9px] font-bold uppercase tracking-widest text-figma-tabActive ml-2">Prêt</span>
+        <span class="ml-auto text-[9px] font-bold uppercase tracking-widest text-figma-text/30">XHR · Sullivan Cockpit</span>
+    </div>
+
+    <div id="main" class="flex-1 flex overflow-hidden">
+        <!-- Canvas Area -->
+        <div id="canvas" class="flex-1 overflow-auto p-12 flex justify-center items-start no-scrollbar">
+            <div id="empty" class="text-figma-text/30 font-bold uppercase tracking-[0.2em] text-[11px] m-auto animate-pulse">
+                Chargement du Blueprint...
+            </div>
+        </div>
+
+        <!-- Sullivan Cockpit (Right Pane) -->
+        <div id="chat" class="w-[380px] border-l-[0.5px] border-figma-sep bg-figma-panel flex flex-col overflow-hidden">
+            <div class="h-[50px] px-6 flex items-center justify-between border-b-[0.5px] border-figma-sep bg-white">
+                <div>
+                    <div class="text-[11px] font-bold uppercase tracking-widest text-black">Sullivan Cockpit</div>
+                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Blueprint Mentor</div>
+                </div>
+            </div>
+
+            <!-- Pedagogy Panel -->
+            <div id="pedo-panel" class="hidden p-6 bg-figma-tabActive/5 border-b-[0.5px] border-figma-sep space-y-4">
+                <div>
+                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Empreinte Sémantique</div>
+                    <div id="pedo-title" class="text-[13px] font-bold text-black uppercase tracking-tight">Comp...</div>
+                </div>
+                <div>
+                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Intention du Génome</div>
+                    <div id="pedo-intent" class="text-[12px] text-figma-text leading-relaxed italic">...</div>
+                </div>
+                <button id="btn-quick-prompt" class="w-full py-2 bg-white border-[0.5px] border-figma-tabActive/30 text-figma-tabActive text-[9px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white transition-all">
+                    Challenge AI Logic
+                </button>
+            </div>
+
+            <!-- Export Panel (Mission 37) -->
+            <div id="export-panel" class="hidden p-6 bg-white border-b-[0.5px] border-figma-sep space-y-3">
+                <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Multi-Vector Exports</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="generatePRD()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">📄</span> PRD & ROADMAP
+                    </button>
+                    <button onclick="exportZIP()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">📦</span> ZIP VANILLA
+                    </button>
+                    <button onclick="exportManifest()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">🔗</span> FIGMA BRIDGE
+                    </button>
+                    <button onclick="exportSchema()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">🧬</span> SCHEMA JSON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar"></div>
+
+            <!-- Chat Input -->
+            <div class="p-6 bg-white border-t-[0.5px] border-figma-sep space-y-3">
+                <textarea id="txt" placeholder="Dites à Sullivan ce que vous souhaitez changer..."
+                    class="w-full h-24 bg-figma-input border-none text-[13px] text-figma-textDark p-4 outline-none focus:ring-1 focus:ring-figma-tabActive transition-all resize-none"></textarea>
+                <div class="flex gap-2">
+                    <button id="btn-send" class="flex-1 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">ENVOYER</button>
+                    <button id="btn-accept" class="flex-1 py-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white hover:border-figma-tabActive transition-all">ACCEPTER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Logic (Preserved mot-à-mot from original) ---
         var lastTs = 0, lastRunning = false;
         function addMsg(text, cls) {
             var d = document.getElementById('messages');
-            var m = document.createElement('div'); m.className = 'msg ' + (cls || '');
+            var m = document.createElement('div'); 
+            m.className = 'text-[11px] p-3 border-l-2 bg-white/50 border-figma-sep font-mono leading-relaxed ' + (cls || '');
+            if(cls === 'sent') m.style.borderLeftColor = '#000';
+            if(cls === 'ok') m.style.borderLeftColor = '#8cc63f';
+            if(cls === 'err') m.style.borderLeftColor = '#ff3b30';
+            if(cls === 'running') m.classList.add('animate-pulse', 'text-figma-tabActive');
             m.textContent = text; d.appendChild(m);
             d.scrollTop = d.scrollHeight;
         }
@@ -320,8 +158,9 @@
                     if (d.svg && d.svg.indexOf('<svg') !== -1) {
                         document.getElementById('canvas').innerHTML = d.svg;
                         document.getElementById('ts').textContent = 'Rendu ' + new Date().toLocaleTimeString();
-                        var dot = document.getElementById('dot'); dot.className = 'live';
-                        setTimeout(function () { dot.className = ''; }, 2000);
+                        var dot = document.getElementById('dot'); 
+                        dot.style.backgroundColor = '#8cc63f';
+                        setTimeout(function () { dot.style.backgroundColor = ''; }, 2000);
                         setTimeout(initInteraction, 100);
                     }
                 } catch (e) { }
@@ -348,6 +187,56 @@
                 } catch (e) { }
             };
             x.send();
+
+            var x2 = new XMLHttpRequest();
+            x2.open('GET', '/api/retro-genome/status?t=' + Date.now(), true);
+            x2.onload = function () {
+                try {
+                    var d = JSON.parse(x2.responseText);
+                    var ep = document.getElementById('export-panel');
+                    if (d.step === 'done' || d.step === 'idle') {
+                        ep.style.display = 'block';
+                    } else {
+                        ep.style.display = 'none';
+                    }
+                } catch (e) { }
+            };
+            x2.send();
+        }
+
+        async function generatePRD() {
+            addMsg('Génération du PRD & Roadmap en cours...');
+            const res = await fetch('/api/retro-genome/generate-prd', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: {}, project_name: "AetherFlow PROJECT" })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('PRD & Roadmap générés !', 'ok');
+        }
+
+        async function exportZIP() {
+            addMsg('Compression du package HTML/CSS...');
+            const res = await fetch('/api/retro-genome/export-zip', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('ZIP généré : ' + data.zip_path, 'ok');
+        }
+
+        async function exportManifest() {
+            addMsg('Inférence du carrefour JSON Figma...');
+            const res = await fetch('/api/retro-genome/export-manifest', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                addMsg('Manifest JSON généré !', 'ok');
+                window.open('/api/retro-genome/manifest', '_blank');
+            }
+        }
+
+        async function exportSchema() {
+            addMsg('Export du schéma JSON...');
+            const res = await fetch('/api/retro-genome/export-schema', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('Schéma sauvegardé : ' + data.schema_path, 'ok');
         }
         function sendFeedback() {
             var txt = document.getElementById('txt').value.trim();
@@ -378,7 +267,7 @@
             addMsg('Blueprint prêt. Le Cockpit attend votre sélection.');
         };
 
-        // --- SVG Interaction Logic ---
+        // --- Interaction Logic SVG ---
         var selectedOrgan = null;
         var selectedComp = null;
         var isDragging = false;
@@ -408,8 +297,7 @@
             var pt = svg.createSVGPoint();
 
             function getMousePosition(evt) {
-                pt.x = evt.clientX;
-                pt.y = evt.clientY;
+                pt.x = evt.clientX; pt.y = evt.clientY;
                 return pt.matrixTransform(svg.getScreenCTM().inverse());
             }
 
@@ -419,40 +307,32 @@
                 var gOrgan = evt.target.closest('.af-organ');
 
                 if (resizeHandle && gComp) {
-                    isResizing = true;
-                    selectedComp = gComp;
+                    isResizing = true; selectedComp = gComp;
                     var mousePt = getMousePosition(evt);
                     dragStart = { x: mousePt.x, y: mousePt.y };
                     startTransform = getTransformParams(selectedComp);
-                    evt.preventDefault();
-                    evt.stopPropagation();
+                    evt.preventDefault(); evt.stopPropagation();
                     return;
                 }
 
                 if (gComp) {
                     if (selectedComp) selectedComp.classList.remove('selected');
-                    selectedComp = gComp;
-                    selectedComp.classList.add('selected');
-
+                    selectedComp = gComp; selectedComp.classList.add('selected');
                     var mousePt = getMousePosition(evt);
                     dragStart = { x: mousePt.x, y: mousePt.y };
                     startTransform = getTransformParams(selectedComp);
                     isDraggingComp = true;
-                    evt.preventDefault();
-                    evt.stopPropagation();
+                    evt.preventDefault(); evt.stopPropagation();
                     return;
                 }
 
                 if (gOrgan) {
                     if (selectedOrgan) selectedOrgan.classList.remove('selected');
-                    selectedOrgan = gOrgan;
-                    selectedOrgan.classList.add('selected');
-
+                    selectedOrgan = gOrgan; selectedOrgan.classList.add('selected');
                     var mousePt = getMousePosition(evt);
                     dragStart = { x: mousePt.x, y: mousePt.y };
                     startTransform = getTransformParams(selectedOrgan);
                     isDragging = true;
-
                     if (selectedComp) selectedComp.classList.remove('selected');
                     selectedComp = gComp;
                     if (selectedComp) selectedComp.classList.add('selected');
@@ -519,13 +399,10 @@
                             if (lastHoveredComp !== context) {
                                 lastHoveredComp = context;
                                 pedoTitle.innerText = context.atom.name;
-
                                 var atomRole = context.atom.ui_role || "Rôle standard";
                                 var featSens = context.feature.doc_sens_humain || "Réalisation directe de l'intention.";
-
                                 pedoIntent.innerHTML = "<b>" + atomRole + "</b><br>" + featSens;
                                 pedoPanel.style.display = 'block';
-
                                 document.querySelectorAll('.kimi-comp').forEach(c => c.classList.remove('hovered'));
                                 gComp.classList.add('hovered');
                             }
@@ -566,52 +443,6 @@
             });
         }
     </script>
-</head>
-
-<body>
-    <div id="bar">
-        <div id="dot"></div>
-        <span style="color:#aaa">KIMI Template Viewer — Blueprint</span>
-        <span id="ts" style="color:#555">Prêt</span>
-        <span style="margin-left:auto;color:#333">XHR · Sullivan Cockpit</span>
-    </div>
-    <div id="main">
-        <div id="canvas">
-            <div id="empty">Chargement du Blueprint...</div>
-        </div>
-        <div id="chat">
-            <div id="cockpit-header">
-                <div>
-                    <div style="font-weight:700; color:#ff6b35; font-size:14px;">SULLIVAN COCKPIT</div>
-                    <div style="font-size:10px; color:#666;">BLUEPRINT MENTOR</div>
-                </div>
-            </div>
-
-            <div id="pedo-panel">
-                <div class="pedo-section">
-                    <div class="pedo-label">Empreinte Sémantique</div>
-                    <div class="pedo-value" id="pedo-title">Comp...</div>
-                </div>
-                <div class="pedo-section">
-                    <div class="pedo-label">Intention du Génome</div>
-                    <div class="pedo-desc" id="pedo-intent">...</div>
-                </div>
-                <button id="btn-quick-prompt" class="btn"
-                    style="background:rgba(255,107,53,0.1); color:#ff6b35; border:1px solid rgba(255,107,53,0.2); font-size:10px; text-align:center;">
-                    CHALLENGE AI LOGIC
-                </button>
-            </div>
-
-            <div id="messages"></div>
-            <div id="chat-input">
-                <textarea id="txt" placeholder="Dites à Sullivan ce que vous souhaitez changer..."></textarea>
-                <div id="btns">
-                    <button id="btn-send" class="btn">ENVOYER</button>
-                    <button id="btn-accept" class="btn">ACCEPTER</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>

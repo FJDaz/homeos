@@ -1,0 +1,95 @@
+{
+  "version": "2.0.0",
+  "created_at": "2026-02-11T15:00:00Z",
+  "n0_phases": [
+    {
+      "id": "n0_brainstorm",
+      "name": "Brainstorm",
+      "color": "#fbbf24",
+      "n1_sections": [
+        {
+          "id": "n1_ideation",
+          "name": "Idéation Rapide",
+          "n2_features": [
+            {
+              "id": "n2_note_taking",
+              "name": "Prise de notes",
+              "n3_atomsets": []
+            }
+          ]
+        }
+      ],
+      "accent_color": "#TEST123"
+    },
+    {
+      "id": "n0_backend",
+      "name": "Backend",
+      "color": "#6366f1",
+      "n1_sections": [
+        {
+          "id": "n1_api_gateway",
+          "name": "API Gateway",
+          "n2_features": []
+        }
+      ]
+    },
+    {
+      "id": "n0_frontend",
+      "name": "Frontend",
+      "color": "#ec4899",
+      "n1_sections": [
+        {
+          "id": "n1_navigation",
+          "name": "Navigation",
+          "n2_features": []
+        }
+      ]
+    }
+  ],
+  "n0": [
+    {
+      "id": "n0_brainstorm",
+      "name": "Bla",
+      "color": "#fbbf24",
+      "n1_sections": [
+        {
+          "id": "n1_ideation",
+          "name": "Idéation Ultra-Rapide",
+          "n2_features": [
+            {
+              "id": "n2_note_taking",
+              "name": "Prise de notes",
+              "n3_atomsets": []
+            }
+          ]
+        }
+      ],
+      "accent_color": "#111111"
+    },
+    {
+      "id": "n0_backend",
+      "name": "Backend",
+      "color": "#6366f1",
+      "n1_sections": [
+        {
+          "id": "n1_api_gateway",
+          "name": "API Gateway",
+          "n2_features": []
+        }
+      ],
+      "accent_color": "#FF0000"
+    },
+    {
+      "id": "n0_frontend",
+      "name": "Frontend",
+      "color": "#ec4899",
+      "n1_sections": [
+        {
+          "id": "n1_navigation",
+          "name": "Navigation",
+          "n2_features": []
+        }
+      ]
+    }
+  ]
+}

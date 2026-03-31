@@ -1,0 +1,16 @@
+{
+    "name": "Tabs",
+    "library": "Flowbite",
+    "category": "Atome",
+    "sullivan_score": 83.0,
+    "performance_score": 85,
+    "accessibility_score": 85,
+    "ecology_score": 80,
+    "popularity_score": 90,
+    "validation_score": 80,
+    "size_kb": 2,
+    "created_at": "2026-03-01T19:17:00",
+    "user_id": "AETHERFLOW_HARVESTER",
+    "html": "<div class=\"mb-4 border-b border-default\">\n    <ul class=\"flex flex-wrap -mb-px text-sm font-medium text-center\" id=\"default-tab\" data-tabs-toggle=\"#default-tab-content\" role=\"tablist\">\n        <li class=\"me-2\" role=\"presentation\">\n            <button class=\"inline-block p-4 border-b-2 rounded-t-lg\" id=\"profile-tab\" data-tabs-target=\"#profile\" type=\"button\" role=\"tab\">Profile</button>\n        </li>\n        <li class=\"me-2\" role=\"presentation\">\n            <button class=\"inline-block p-4 border-b-2 rounded-t-lg hover:text-heading hover:border-default-medium border-transparent\" id=\"dashboard-tab\" data-tabs-target=\"#dashboard\" type=\"button\" role=\"tab\">Dashboard</button>\n        </li>\n    </ul>\n</div>\n<div id=\"default-tab-content\">\n    <div class=\"hidden p-4 rounded-lg bg-neutral-secondary-soft\" id=\"profile\" role=\"tabpanel\">\n        <p class=\"text-sm text-body\">Profile tab placeholder content.</p>\n    </div>\n    <div class=\"hidden p-4 rounded-lg bg-neutral-secondary-soft\" id=\"dashboard\" role=\"tabpanel\">\n        <p class=\"text-sm text-body\">Dashboard tab placeholder content.</p>\n    </div>\n</div>",
+    "source_url": "https://flowbite.com/docs/components/tabs/"
+}

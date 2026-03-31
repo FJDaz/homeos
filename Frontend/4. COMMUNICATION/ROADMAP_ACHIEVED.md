@@ -6,6 +6,45 @@
 
 ---
 
+## Mission 107 — Navigation globale cohérente (bootstrap.js)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTOR: QWEN (bootstrap.js + CSS) + CLAUDE (hotfix tokens + emojis)**
+- [x] `bootstrap.js` — `injectGlobalNav()` au DOMContentLoaded
+- [x] 4 tabs pipeline : import / analyser / éditer / déployer (disabled)
+- [x] Détection pathname automatique pour tab actif
+- [x] `window.HOMEOS.boot()` / `refreshNav()` exposés
+- [x] CSS `.global-pipeline-header` dans `stenciler.css` — 48px fixe, z-index 1000
+- [x] 3 templates mis à jour : landing.html, intent_viewer.html, frd_editor.html
+- [x] Hotfix Claude : `#8cc63f` (tokens officiels), emojis → `○`/`●`, CSS dupliqué supprimé
+
+---
+
+## Mission 104/108 — Stitch Integration : backend.md + INTENT_MAP enrichi
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTOR: QWEN (routes + landing UI) + CLAUDE (hotfix statut "todo")**
+- [x] `POST /api/manifest/import-stitch` — parse `design.md` → génère `backend.md`
+- [x] `GET /api/manifest/backend` + `PUT /api/manifest/backend` — CRUD `backend.md`
+- [x] Badge "Stitch Compatible" sur landing si `design.md` présent
+- [x] Bouton "synchroniser stitch" + drawer Monaco `backend.md` éditable
+- [x] `WireAnalyzer._get_backend_mapping()` — lit `backend.md`, priorité sur STATIC_MAP
+- [x] Hotfix Claude : statut `"todo"` (≠ "error") pour intents sans mapping connu ; `"warning"` → `"todo"` dans summary
+
+---
+
+## Mission 103 — Wire mode v5 : auto-launch + overlay bijection
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTOR: GEMINI (frontend) + CLAUDE (wire_analyzer.py)**
+- [x] `wire_analyzer.py` retourne `{intentions[], statuts[], plan[]}` — schéma bijectif
+- [x] `FrdChat.feature.js` : `setMode('wire')` → `this.main.wire.run()` auto (pas de bouton Analyser)
+- [x] `FrdWire.feature.js` : `showOverlayV5()` — overlay z-index, colonne bilan + colonne plan côte à côte
+- [x] `frd_editor.html` : `#bijective-overlay`, bouton IMPLÉMENTER, "BILAN DE BIJECTION" bouton
+- [x] Dépréciation de l'audit UI cosmétique absorbé dans le bilan Wire
+
+---
+
 ## Mission 69 — FRD Editor : Mode LOCK (zones invariantes)
 **STATUS: ✅ LIVRÉ**
 **ACTOR: GEMINI (frontend) + CLAUDE (backend + auto-id)**
@@ -4877,3 +4916,88 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - [x] Pushé sur main (9981a34)
 
 ### Validé FJD : ✅
+
+---
+
+## Mission 85 — FastAPI Foundation : server_v3.py + routes BKD
+**DATE: 2026-03-24 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- `server_v3.py` FastAPI + uvicorn port 9999 → basculé port 9998
+- Routes `/api/bkd/*` portées depuis server_9998_v2.py
+- Pydantic models body BKD, exceptions HTTPException
+
+## Mission 86 — FastAPI FRD : `/api/frd/*` + fix bug 500
+**DATE: 2026-03-24 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- Routes `/api/frd/*` portées (file, files, assets, wire-audit, wire-source, kimi)
+- Fix bug 500 import manquant
+
+## Mission 87-A — FastAPI : Genome + Layout + fichiers statiques
+**DATE: 2026-03-24 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Routes genome, layout, fichiers statiques montés sur server_v3.py
+
+## Mission 87-B — FastAPI : BRS (Brain-Reasoning System)
+**DATE: 2026-03-24 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Router BRS monté : dispatch, stream, capture, prd, arbitrate
+
+## Mission 87-C — FastAPI : Retro-Genome
+**DATE: 2026-03-24 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ (partiel)**
+- Router retro_genome monté : upload, validate, reality, generate-prd
+- Routes critiques présentes, quelques endpoints secondaires ajoutés en M91
+
+## Mission 87-D — Bascule port 9998 + archivage server_9998_v2.py
+**DATE: 2026-03-24 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ**
+- server_v3.py basculé port 9998 (remplace définitivement server_9998_v2.py)
+- server_9998_v2.py archivé
+
+---
+
+## Mission 97 — Wire UX v2 : table bijective + diagnostic géographique
+**DATE: 2026-03-25 | ACTOR: CLAUDE + GEMINI | STATUS: ✅ LIVRÉ**
+- `wire_analyzer.py` : extraction intentions, matching INTENT_MAP, badges ok/error
+- `frd_editor.html` : table bijective Wire, diagnostic géographique (position bbox)
+- Route `GET /api/frd/wire-audit` opérationnelle
+
+## Mission 98 — Wire UX v3 : skeleton mode
+**DATE: 2026-03-26 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Skeleton mode overlay dans frd_editor.html
+- Peel-out CSS sur iframe en mode Wire
+
+## Mission 99 — Wire UX v4 : peel-out CSS + pop-in Monaco + route wire-source
+**DATE: 2026-03-27 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ (CODE DIRECT)**
+- Route `GET /api/frd/wire-source?func=handler_name` → retourne code Python du handler
+- `FrdWire.feature.js` : pop-in Monaco affichée AVANT le fetch (fallback sans Monaco)
+- Badge wire positionné sur l'élément (corrigé de top-18px → top)
+- `UI_ONLY_FUNCTIONS` blacklist dans wire_analyzer.py (filtre setMode, togglePanel…)
+
+---
+
+## Mission 101-bis — Bridge Plugin ui.html — conformité design HoméOS
+**DATE: 2026-03-30 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ (CODE DIRECT)**
+- `--primary: #8cc63f` (vert HoméOS officiel, remplace #ff6b35)
+- `text-transform: uppercase` supprimé de `.subtitle`
+- Emojis boutons et statuts supprimés (📐, 🎨, ⚠️, ✓)
+- 4 `figma.notify()` nettoyés dans code.js
+- Feedback export enrichi : archétype + nb composants + lien intent viewer
+
+## Mission 100 — Landing Import unifiée
+**DATE: 2026-03-30 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- `/landing` → `landing.html` — grille imports Figma Bridge
+- Polling 10s, badge notification, bouton rafraîchir + vider
+- Route `POST /api/retro-genome/imports/clear` (CODE DIRECT Claude)
+- Lien stenciler supprimé → remplacé par frd-editor
+
+## Mission 102 — Intent Viewer : auto-load + endpoint import-analysis
+**DATE: 2026-03-30 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ (CODE DIRECT)**
+- Route `GET /api/retro-genome/import-analysis?id=...` : re-parse SVG → components[]
+- Mapping schema svg_parser : apparent_role, visual_hint, text_content
+- `fetchIntents()` redirigé depuis /status (vide) vers /imports + /import-analysis
+- Tous les liens stenciler/editor → /frd-editor dans intent_viewer.html
+- `autoLoadLatestImport()` : affiche résumé dernier import dans sidebar
+
+## Mission 106 — CI/CD HF Spaces Docker
+**DATE: 2026-03-30 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ (CODE DIRECT)**
+- `Dockerfile` : FROM python:3.11-slim, port 7860, USER 1000, start_hf.sh
+- `start_hf.sh` : cd "Frontend/3. STENCILER" && uvicorn server_v3:app --port 7860
+- `requirements.hf.txt` : dépendances allégées (sans playwright, llama-index)
+- `.github/workflows/deploy-hf.yml` : push main → git push hf-space main --force
+- `README.md` : metadata YAML HF Spaces (sdk: docker, app_port: 7860)
+- Compte HF : FJDaz | Repo GitHub : https://github.com/FJDaz/homeos

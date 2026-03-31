@@ -1,459 +1,297 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr" class="bg-white">
 
 <head>
     <meta charset="utf-8">
-    <title>KIMI Template Viewer — Reality</title>
+    <title>AetherFlow — Reality Viewer</title>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Geist -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        figma: {
+                            bg: '#ffffff',
+                            panel: '#f9f9f9',
+                            input: '#f2f3f5',
+                            text: '#666666',
+                            textDark: '#1a1a1a',
+                            tabActive: '#8cc63f',
+                            dotGreen: '#5ec069',
+                            sep: '#e5e5e5',
+                        }
+                    },
+                    fontFamily: {
+                        geist: ['Geist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Reset & Shell */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
-        html,
         body {
-            height: 100%;
-            background: #0a0a0b
+            background-image: radial-gradient(#eeeeee 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
         }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            font-family: 'Inter', sans-serif;
-            color: #e1e1e6
-        }
-
-        #bar {
-            width: 100%;
-            background: #111;
-            color: #666;
-            font: 11px/28px monospace;
-            padding: 0 16px;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            border-bottom: 1px solid #222;
-            flex-shrink: 0;
-            height: 28px
-        }
-
-        #dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #f05e23;
-            flex-shrink: 0
-        }
-
-        #main {
-            flex: 1;
-            display: flex;
-            overflow: hidden
-        }
-
-        /* Reality Canvas : Isolation area */
-        #reality-canvas {
-            flex: 1;
-            min-width: 0;
-            background: #fff;
-            overflow: auto;
-            position: relative
-        }
-
-        /* Sullivan Cockpit Styles */
-        #chat {
-            width: 380px;
-            flex-shrink: 0;
-            background: #0f0f10;
-            border-left: 1px solid #222;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden
-        }
-
-        #cockpit-header {
-            padding: 16px;
-            background: linear-gradient(180deg, #161618 0%, #0f0f10 100%);
-            border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: space-between;
-            align-items: center
-        }
-
-        .score-box {
-            text-align: right
-        }
-
-        .score-lvl {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #ff6b35;
-            font-weight: 700;
-            letter-spacing: 1px
-        }
-
-        #pedo-panel {
-            background: #161618;
-            border-bottom: 1px solid #222;
-            display: none;
-            padding: 16px;
-            flex-shrink: 0
-        }
-
-        .pedo-section {
-            margin-bottom: 12px
-        }
-
-        .pedo-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px
-        }
-
-        .pedo-value {
-            font-size: 13px;
-            color: #fff;
-            font-weight: 600
-        }
-
-        .pedo-desc {
-            font-size: 11px;
-            color: #a1a1aa;
-            line-height: 1.5;
-            font-style: italic;
-            margin-top: 4px
-        }
-
-        /* Gap List */
-        #gap-list {
-            padding: 16px;
-            border-bottom: 1px solid #222;
-            background: rgba(255, 107, 53, 0.03);
-            max-height: 180px;
-            overflow-y: auto
-        }
-
-        .gap-item {
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 107, 53, 0.1);
-            margin-bottom: 8px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        .gap-item:hover {
-            border-color: #ff6b35;
-            background: rgba(255, 107, 53, 0.05)
-        }
-
-        .gap-tag {
-            display: inline-block;
-            padding: 2px 4px;
-            border-radius: 3px;
-            background: #ff6b35;
-            color: #fff;
-            font-size: 9px;
-            font-weight: 700;
-            margin-right: 6px
-        }
-
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2)
-        }
-
-        .msg {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid #333
-        }
-
-        .msg.sent {
-            border-left-color: #ff6b35;
-            background: rgba(255, 107, 53, 0.05)
-        }
-
-        #chat-input {
-            padding: 16px;
-            background: #0a0a0b;
-            border-top: 1px solid #222
-        }
-
-        #txt {
-            width: 100%;
-            background: #161618;
-            border: 1px solid #333;
-            color: #e1e1e6;
-            font-family: inherit;
-            font-size: 13px;
-            padding: 12px;
-            border-radius: 6px;
-            resize: none;
-            height: 80px;
-            outline: none;
-            transition: border-color 0.2s
-        }
-
-        #btns {
-            margin-top: 12px;
-            display: flex;
-            gap: 10px
-        }
-
-        .btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer
-        }
-
-        #btn-send {
-            background: #ff6b35;
-            color: #fff
-        }
-
-        /* Sullivan Fix Highlights */
-        .sullivan-suggestion {
-            outline: 3px solid #ff6b35 !important;
-            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4) !important;
-            position: relative;
-            z-index: 9999;
-        }
-
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255, 107, 53, 0.1);
-            border-top-color: #ff6b35;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 20px; height: 20px; border: 2px solid rgba(140, 198, 63, 0.1);
+            border-top-color: #8cc63f; border-radius: 50%; animation: spin 1s linear infinite;
+            display: inline-block; vertical-align: middle;
         }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .fidelity-pulse {
-            animation: pulse-orange 2s infinite;
-        }
-
-        @keyframes pulse-orange {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+</head>
+
+<body class="flex flex-col h-screen overflow-hidden font-geist text-figma-text">
+    <!-- Top Bar -->
+    <div class="h-[28px] bg-white border-b-[0.5px] border-figma-sep px-4 flex items-center gap-4 z-50">
+        <div id="dot" class="w-2 h-2 rounded-full bg-figma-tabActive animate-pulse"></div>
+        <span class="text-[9px] font-bold uppercase tracking-widest text-black/40">Reality Viewer</span>
+        <span class="ml-auto text-[9px] font-bold uppercase tracking-widest text-figma-text/30">FJD Director Approval Required</span>
+    </div>
+
+    <div id="main" class="flex-1 flex overflow-hidden relative">
+        <!-- Agency Approval Band -->
+        <div id="agency-approval-band" class="absolute top-0 left-0 right-0 bg-black text-white px-6 py-3 hidden justify-between items-center z-[1000] shadow-2xl animate-in slide-in-from-top duration-300">
+            <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Directeur, validez-vous la livraison de cette Reality View ?</span>
+            <div class="flex gap-2">
+                <button id="btn-approve" class="px-4 py-1.5 bg-figma-tabActive text-white text-[10px] font-bold uppercase tracking-widest rounded-sm hover:opacity-90 transition-all">APPROUVER</button>
+                <button id="btn-reject" class="px-4 py-1.5 border-[0.5px] border-white/30 text-white text-[10px] font-bold uppercase tracking-widest rounded-sm hover:bg-white/10 transition-all">REJETER</button>
+            </div>
+        </div>
+
+        <!-- Reality Canvas -->
+        <div id="reality-canvas" class="flex-1 min-w-0 bg-white overflow-auto relative no-scrollbar">
+            <div id="canvas-content" class="h-full w-full"></div>
+        </div>
+
+        <!-- Sullivan Cockpit (Right Pane) -->
+        <div id="chat" class="w-[380px] border-l-[0.5px] border-figma-sep bg-figma-panel flex flex-col overflow-hidden">
+            <div class="h-[50px] px-6 flex items-center justify-between border-b-[0.5px] border-figma-sep bg-white">
+                <div>
+                    <div class="text-[11px] font-bold uppercase tracking-widest text-black">Sullivan Cockpit</div>
+                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Mission 36 — Agentic Loop</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[9px] font-bold uppercase tracking-widest text-figma-tabActive">FIDELITY: <span id="fidelity-val">...</span></div>
+                </div>
+            </div>
+
+            <!-- Export Panel (Mission 37) -->
+            <div id="export-panel" class="hidden p-6 bg-white border-b-[0.5px] border-figma-sep space-y-3">
+                <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Multi-Vector Exports</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="generatePRD()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">📄</span> PRD & ROADMAP
+                    </button>
+                    <button onclick="exportZIP()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">📦</span> ZIP VANILLA
+                    </button>
+                    <button onclick="exportManifest()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">🔗</span> FIGMA BRIDGE
+                    </button>
+                    <button onclick="exportSchema()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                        <span class="text-figma-tabActive">🧬</span> SCHEMA JSON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gaps & DA Critique List -->
+            <div id="gap-list" class="p-6 bg-figma-tabActive/5 border-b-[0.5px] border-figma-sep max-h-[300px] overflow-y-auto no-scrollbar space-y-4">
+                <div id="da-critique-panel" class="hidden p-4 bg-black text-white rounded-sm space-y-2 border-l-2 border-figma-tabActive">
+                    <div class="text-[8px] font-bold uppercase tracking-[0.2em] text-figma-tabActive">[DA CRITIQUE] Round <span id="da-round">1</span></div>
+                    <div id="da-text" class="text-[12px] leading-relaxed italic">...</div>
+                </div>
+                <div id="gap-items" class="space-y-2"></div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar"></div>
+
+            <!-- Open in FRD Editor -->
+            <div class="px-6 py-3 border-b-[0.5px] border-figma-sep">
+                <a href="/frd-editor" class="block w-full py-1.5 text-center text-[10px] font-bold uppercase tracking-widest border-[0.5px] border-figma-tabActive text-figma-tabActive hover:bg-figma-tabActive hover:text-white transition-all">
+                    Ouvrir dans FRD Editor →
+                </a>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-6 bg-white border-t-[0.5px] border-figma-sep space-y-3">
+                <textarea id="txt" placeholder="Feedback directeur..."
+                    class="w-full h-20 bg-figma-input border-none text-[13px] text-figma-textDark p-4 outline-none focus:ring-1 focus:ring-figma-tabActive transition-all resize-none"></textarea>
+                <button id="btn-send" class="w-full py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">ENVOYER</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentRealityHTML = "";
+        let pollTimer = null;
 
         function addMsg(text, cls) {
-            var d = document.getElementById('messages');
-            var m = document.createElement('div'); m.className = 'msg ' + (cls || '');
+            const d = document.getElementById('messages');
+            const m = document.createElement('div');
+            m.className = 'text-[11px] p-3 border-l-2 bg-white/50 border-figma-sep font-mono leading-relaxed ' + (cls || '');
+            if(cls === 'sent') m.style.borderLeftColor = '#000';
+            if(cls === 'success') m.style.borderLeftColor = '#8cc63f';
             m.textContent = text; d.appendChild(m);
             d.scrollTop = d.scrollHeight;
         }
 
-        function loadReality() {
-            const canvas = document.getElementById('reality-canvas');
-            canvas.innerHTML = '<div style="padding:100px; text-align:center; color:#666"><div class="spinner" style="margin: 0 auto 20px;"></div>Chargement de la Reality View...</div>';
+        async function loadReality() {
+            const canvas = document.getElementById('canvas-content');
+            canvas.innerHTML = '<div class="flex flex-col items-center justify-center h-full gap-4 text-figma-text/40"><div class="spinner"></div><span class="text-[10px] font-bold uppercase tracking-widest">Chargement de la réalité...</span></div>';
             
-            // 1. Load the generated HTML
-            fetch('/api/retro-genome/reality')
-                .then(r => r.text())
-                .then(html => {
-                    currentRealityHTML = html;
-                    canvas.innerHTML = html;
-                    addMsg('Reality View chargée. Analyse des Gaps par Sullivan...');
-                })
-                .catch(err => {
-                    canvas.innerHTML = '<div style="padding:100px; text-align:center; color:#ff3b30;">Erreur lors du chargement de la réalité.</div>';
-                });
+            try {
+                const r = await fetch('/api/retro-genome/reality');
+                const html = await r.text();
+                currentRealityHTML = html;
+                canvas.innerHTML = html;
+                addMsg('Reality View rafraîchie.');
+                pollStatus();
+            } catch (e) {
+                canvas.innerHTML = '<div class="flex items-center justify-center h-full text-red-500 text-[10px] font-bold uppercase">Erreur Reality View.</div>';
+            }
 
-            // 2. Load Gaps & Fidelity
-            fetch('/api/pedagogy/gaps')
+            // Load Gaps
+            fetch('/api/pedagogy/gaps').then(r => r.json()).then(data => {
+                const list = document.getElementById('gap-items');
+                list.innerHTML = '';
+                if (data.fidelity_score) document.getElementById('fidelity-val').textContent = data.fidelity_score + '%';
+                if (data.gaps) {
+                    data.gaps.forEach(g => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-white border-[0.5px] border-figma-sep text-[11px] flex gap-3';
+                        div.innerHTML = `<span class="text-figma-tabActive font-bold">${g.severity || 'GAP'}</span> <span class="text-figma-text">${g.description}</span>`;
+                        list.appendChild(div);
+                    });
+                }
+            });
+        }
+
+        async function generatePRD() {
+            addMsg('Génération du PRD & Roadmap en cours...');
+            const res = await fetch('/api/retro-genome/generate-prd', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: {}, project_name: "AetherFlow PROJECT" })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('PRD & Roadmap générés avec succès !', 'success');
+        }
+
+        async function exportZIP() {
+            addMsg('Compression du package HTML/CSS...');
+            const res = await fetch('/api/retro-genome/export-zip', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('ZIP généré : ' + data.zip_path, 'success');
+        }
+
+        async function exportManifest() {
+            addMsg('Inférence du carrefour JSON Figma...');
+            const res = await fetch('/api/retro-genome/export-manifest', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                addMsg('Manifest JSON généré !', 'success');
+                window.open('/api/retro-genome/manifest', '_blank');
+            }
+        }
+
+        async function exportSchema() {
+            addMsg('Export du schéma JSON (Validated Analysis)...');
+            const res = await fetch('/api/retro-genome/export-schema', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') addMsg('Schéma sauvegardé (voir backend) : ' + data.schema_path, 'success');
+        }
+
+        function pollStatus() {
+            if (pollTimer) clearTimeout(pollTimer);
+            fetch('/api/retro-genome/status?t=' + Date.now())
                 .then(r => r.json())
                 .then(data => {
-                    const list = document.getElementById('gap-list');
-                    // Keep the header but clear items
-                    const header = list.querySelector('div:first-child');
-                    list.innerHTML = '';
-                    if (header) list.appendChild(header);
+                    const critiquePanel = document.getElementById('da-critique-panel');
+                    const band = document.getElementById('agency-approval-band');
+                    const exportPanel = document.getElementById('export-panel');
                     
-                    if (data.fidelity_score !== undefined) {
-                        const scoreLvl = document.querySelector('.score-lvl');
-                        scoreLvl.innerHTML = `FIDELITY: <span id="fidelity-val" class="fidelity-pulse" style="color:#ff6b35">${data.fidelity_score}%</span>`;
+                    if (data.step === 'done' || data.step === 'idle') {
+                        exportPanel.style.display = 'block';
+                    } else {
+                        exportPanel.style.display = 'none';
+                    }
+                    
+                    if (data.step === 'generating' || data.step === 'awaiting_approval') {
+                        critiquePanel.classList.remove('hidden');
+                        if (data.critique) {
+                            document.getElementById('da-text').textContent = data.critique;
+                            document.getElementById('da-round').textContent = data.attempt || '?';
+                        }
+                    } else {
+                        critiquePanel.classList.add('hidden');
                     }
 
-                    if (data.gaps && data.gaps.length > 0) {
-                        data.gaps.forEach(g => {
-                            const div = document.createElement('div');
-                            div.className = 'gap-item';
-                            const severity = g.severity || 'major';
-                            const intentId = g.intent_id || g.type || 'GAP';
-                            
-                            div.innerHTML = `
-                                <div style="display:flex; justify-content:space-between; margin-bottom:4px; align-items: center;">
-                                    <span class="gap-tag" style="background:${severity === 'critical' ? '#ff3b30' : '#ff6b35'}; font-size:8px; padding:1px 4px;">${severity.toUpperCase()}</span>
-                                    <span style="font-size:10px; color:#fff; font-weight:700;">${intentId}</span>
-                                </div>
-                                <div style="font-size:11px; color:#a1a1aa; line-height:1.4;">${g.description}</div>
-                                <div style="margin-top:8px; padding:6px; background:rgba(255,107,53,0.1); border-radius:4px; color:#ff6b35; font-size:11px;">
-                                    <b style="font-size:9px; text-transform:uppercase; display:block; margin-bottom:2px;">Sullivan Mentoring:</b>
-                                    ${g.suggestion || 'Vérifier la cohérence visuelle.'}
-                                </div>
-                            `;
-                            list.appendChild(div);
-                        });
-                        addMsg(`${data.gaps.length} écart(s) de fidélité identifié(s) par Sullivan.`);
+                    if (data.step === 'awaiting_approval') {
+                        band.classList.remove('hidden');
+                        band.classList.add('flex');
                     } else {
-                        list.innerHTML += '<div style="font-size:11px; color:#4CAF50; padding:10px; background:rgba(76,175,80,0.1); border-radius:4px; margin-top:10px;">✓ Aucune divergence majeure détectée.</div>';
-                        addMsg('Félicitations : le système est sémantiquement complet.');
+                        band.classList.add('hidden');
+                        band.classList.remove('flex');
                     }
-                }).catch(e => {
-                    console.error(e);
-                    // Hide old audit gracefully if it fails on refresh
-                    if (!document.getElementById('gap-list').innerHTML.includes('Sullivan')) {
-                        document.getElementById('gap-list').innerHTML += '<div style="font-size:10px; color:#555; padding:10px;">Audit non disponible.</div>';
+
+                    if (data.step !== 'done' && data.step !== 'idle') {
+                        pollTimer = setTimeout(pollStatus, 2000);
                     }
                 });
+        }
+
+        async function approveReality() {
+            const res = await fetch('/api/retro-genome/approve', { method: 'POST' });
+            if (res.ok) {
+                document.getElementById('agency-approval-band').classList.add('hidden');
+                addMsg('LIVRAISON VALIDÉE PAR LA DIRECTION.', 'success');
+                loadReality();
+            }
         }
 
         function setupChat() {
             const btn = document.getElementById('btn-send');
             const txt = document.getElementById('txt');
-            
-            btn.addEventListener('click', async () => {
+            btn.onclick = async () => {
                 const feedback = txt.value.trim();
                 if (!feedback) return;
-                
                 addMsg(feedback, 'sent');
                 txt.value = '';
-                
-                // Remove previous temporary messages
-                const msgs = document.getElementById('messages');
-                const tempMsgs = msgs.querySelectorAll('.temp-msg');
-                tempMsgs.forEach(m => m.remove());
-                
-                addMsg('Sullivan travaille sur la codebase...', 'temp-msg');
-                
                 btn.disabled = true;
-                btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px"></div>...';
-                
                 try {
                     const res = await fetch('/api/retro-genome/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            feedback: feedback,
-                            current_html: currentRealityHTML
-                        })
+                        body: JSON.stringify({ feedback, current_html: currentRealityHTML })
                     });
-                    
-                    const data = await res.json();
-                    
-                    // Cleanup temp msgs
-                    const tMsgs = msgs.querySelectorAll('.temp-msg');
-                    tMsgs.forEach(m => m.remove());
-
-                    if (data.status === 'ok') {
-                        addMsg('Code mis à jour avec succès.', '');
-                        loadReality();
-                    } else {
-                        addMsg('Erreur: ' + (data.error || 'Inconnue'), 'error temp-msg');
-                    }
-                } catch (e) {
-                    addMsg('Erreur de connexion au serveur.', 'error temp-msg');
+                    if (res.ok) loadReality();
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = 'ENVOYER';
                 }
-            });
-
-            txt.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    btn.click();
-                }
-            });
+            };
         }
 
         window.onload = () => {
             loadReality();
             setupChat();
+            pollStatus();
+            document.getElementById('btn-approve').onclick = approveReality;
+            document.getElementById('btn-reject').onclick = () => {
+                document.getElementById('agency-approval-band').classList.add('hidden');
+                addMsg('Rendu rejeté. Reprise de la boucle...', 'sent');
+            };
         };
     </script>
-</head>
-
-<body>
-    <div id="bar">
-        <div id="dot"></div>
-        <span style="color:#aaa">KIMI Template Viewer — Reality</span>
-        <span style="margin-left:auto;color:#333">XHR · Sullivan Cockpit</span>
-    </div>
-    <div id="main">
-        <div id="reality-canvas"></div>
-        <div id="chat">
-            <div id="cockpit-header">
-                <div>
-                    <div style="font-weight:700; color:#ff6b35; font-size:14px;">SULLIVAN COCKPIT</div>
-                    <div style="font-size:10px; color:#666;">REALITY MENTOR</div>
-                </div>
-                <div class="score-box">
-                    <div class="score-lvl">FULL COMPLIANCE</div>
-                </div>
-            </div>
-
-            <div id="gap-list">
-                <div
-                    style="font-size:10px; color:#666; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px">
-                    Écarts de Fidélité (Gaps)</div>
-            </div>
-
-            <div id="pedo-panel">
-                <div class="pedo-section">
-                    <div class="pedo-label">Empreinte Sémantique</div>
-                    <div class="pedo-value" id="pedo-title">...</div>
-                </div>
-            </div>
-
-            <div id="messages"></div>
-            <div id="chat-input">
-                <textarea id="txt" placeholder="Dites à Sullivan ce que vous souhaitez changer..."></textarea>
-                <div id="btns">
-                    <button id="btn-send" class="btn">ENVOYER</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>

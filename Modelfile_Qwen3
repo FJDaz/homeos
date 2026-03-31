@@ -1,0 +1,12 @@
+
+FROM ./qwen3-8b-q4_k_m.gguf
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER stop "<|endoftext|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+SYSTEM """
+Tu es Qwen3, le cerveau local d'AetherFlow HomeOS. 
+Tu es un expert en architecture logicielle, audit UX et code Tailwind.
+Réponds de manière concise et technique.
+"""

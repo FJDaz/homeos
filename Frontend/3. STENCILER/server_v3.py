@@ -20,9 +20,10 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, Query, Body, Request, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, Query, Body, Request, UploadFile, File, BackgroundTasks, Form
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # --- CONFIGURATION & PATHS ---
@@ -79,6 +80,10 @@ try:
     from Backend.Prod.retro_genome import brainstorm_logic as brs_logic
 except ImportError as e:
     logger.warning(f"Legacy modules missing: {e}. Some routes will fail.")
+
+from wire_analyzer import WireAnalyzer
+
+from Backend.Prod.retro_genome.routes import router as retro_genome_router
 
 # --- CONSTANTS ---
 RETRO_DIR = ROOT_DIR / "exports" / "retro_genome"
@@ -219,6 +224,27 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# CORS — inclut "null" pour les iframes sandboxées (plugin Figma)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*", "null"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(retro_genome_router, prefix="/api")
+
+# Exception handler global — ajoute CORS sur les 500 non catchés
+@app.exception_handler(Exception)
+async def _global_exception_handler(request, exc):
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"},
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
+
 # --- STATIC FILES ---
 # On monte /static sur le dossier static/
 STATIC_DIR_PATH = CWD / "static"
@@ -257,6 +283,64 @@ safe_path = bkd_safe_path
 @app.get("/api/sullivan/pulse")
 async def get_sullivan_pulse():
     return _PULSE.get_status()
+
+# --- ROUTES : SULLIVAN TYPOGRAPHY ENGINE (Mission 109 Phase B) ---
+@app.post("/api/sullivan/font-upload")
+async def sullivan_font_upload(file: UploadFile = File(...)):
+    """
+    Mission 109 Phase B: Upload TTF/OTF/WOFF/WOFF2 → classification + webfont + @font-face.
+    """
+    from Backend.Prod.sullivan.font_classifier import FontClassifier
+    from Backend.Prod.sullivan.font_webgen import FontWebGen
+    
+    # Sauvegarde temporaire
+    exports_dir = ROOT_DIR / "exports" / "fonts"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    
+    temp_path = exports_dir / f"temp_{file.filename}"
+    content = await file.read()
+    temp_path.write_bytes(content)
+    
+    try:
+        # 1. Classification
+        classifier = FontClassifier()
+        classification = classifier.classify(str(temp_path))
+        
+        # 2. Génération webfont
+        webgen = FontWebGen()
+        webfont_result = webgen.generate(str(temp_path), classification)
+        
+        # 3. Nettoyage
+        temp_path.unlink()
+        
+        return {
+            "status": "ok",
+            "classification": classification,
+            "webfont": webfont_result
+        }
+    except Exception as e:
+        logger.error(f"Font upload failed: {e}")
+        if temp_path.exists():
+            temp_path.unlink()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/sullivan/fonts")
+async def sullivan_list_fonts():
+    """Liste toutes les fontes dans /static/fonts/."""
+    from Backend.Prod.sullivan.font_webgen import FontWebGen
+    webgen = FontWebGen()
+    fonts = webgen.list_fonts()
+    return {"fonts": fonts}
+
+@app.delete("/api/sullivan/fonts/{slug}")
+async def sullivan_delete_font(slug: str):
+    """Supprime une fonte et son répertoire."""
+    from Backend.Prod.sullivan.font_webgen import FontWebGen
+    webgen = FontWebGen()
+    success = webgen.delete_font(slug)
+    if success:
+        return {"status": "ok", "deleted": slug}
+    raise HTTPException(status_code=404, detail=f"Font '{slug}' not found")
 
 # --- ROUTES : BKD PROJECTS ---
 @app.get("/api/bkd/projects", response_model=Dict[str, List[ProjectResponse]])
@@ -401,6 +485,67 @@ def _save_overrides(data):
 def _write_retro_status(step, message):
     RETRO_DIR.mkdir(parents=True, exist_ok=True)
     (RETRO_DIR / "upload_status.json").write_text(json.dumps({"step": step, "message": message, "ts": datetime.now().isoformat()}))
+
+@app.get("/api/retro-genome/status")
+async def retro_genome_status():
+    status_file = RETRO_DIR / "upload_status.json"
+    analysis_file = RETRO_DIR / "last_analysis.json"
+    
+    # Base status from upload_status.json if active
+    res = {"step": "idle", "message": ""}
+    if status_file.exists():
+        res = json.loads(status_file.read_text(encoding="utf-8"))
+    
+    # Attach persistent analysis data if available (Mission 102 Backend)
+    if analysis_file.exists():
+        try:
+            analysis_data = json.loads(analysis_file.read_text(encoding="utf-8"))
+            res["analysis"] = analysis_data.get("analysis")
+            res["audit"] = analysis_data.get("audit")
+            res["archetype"] = analysis_data.get("archetype")
+        except: pass
+    
+    return res
+
+class AnnotateRequest(BaseModel):
+    intent_id: str
+    component_name: str
+    description: str
+
+@app.post("/api/frd/annotate")
+async def frd_annotate(req: AnnotateRequest):
+    """
+    Mission 102: Lancement de l'annotation (KIMI / AI).
+    Génère un plan d'implémentation pour une intention donnée.
+    """
+    try:
+        # Import dynamic context from retro_genome
+        from Backend.Prod.retro_genome.routes import _get_gemini_client
+        client = _get_gemini_client()
+        
+        prompt = f"""You are an AetherFlow Architect. 
+Provide a high-precision implementation plan for the following UI intent:
+- Intent ID: {req.intent_id}
+- Component: {req.component_name}
+- Functional Goal: {req.description}
+
+Format: Short technical markdown. Focus on:
+1. Expected Frontend Interaction (JS).
+2. Backend Endpoint convention (FastAPI).
+3. Data Contract (JSON).
+
+Output valid Markdown only, no prose."""
+
+        result = await client.generate(prompt=prompt, max_tokens=1024)
+        await client.close()
+        
+        if result.success:
+            return {"status": "ok", "annotation": result.code}
+        else:
+            return {"status": "error", "message": result.error}
+    except Exception as e:
+        logger.error(f"Annotation failed: {e}")
+        return {"status": "error", "message": str(e)}
 
 def load_custom_injection():
     injection_path = STATIC_DIR_PATH / 'js' / 'custom_injection.js'
@@ -698,7 +843,8 @@ async def infer_layout(body: Dict[str, Any]):
     return {"result": result, "tier": "llm"}
 
 # --- ROUTES : ROOT & VIEWER ---
-@app.get("/")
+
+@app.get("/studio")
 @app.get("/studio")
 async def get_viewer():
     path = STATIC_DIR_PATH / "templates/viewer.html"
@@ -759,20 +905,7 @@ async def accept_template():
         return {"saved": dst.name}
     return {"error": "No template found"}
 
-# --- ROUTES : RETRO-GENOME ---
-@app.get("/api/retro-genome/status")
-async def retro_status():
-    status_path = RETRO_DIR / "upload_status.json"
-    if status_path.exists():
-        return json.loads(status_path.read_text(encoding='utf-8'))
-    return {"step": "idle", "message": ""}
-
-@app.post("/api/retro-genome/upload")
-async def retro_upload(request: Request):
-    # Simplification du parsing multipart en utilisant FastAPI directement si possible
-    # Sinon portage du parsing manuel de server_9998_v2
-    # Pour Mission 87, on va supposer que le frontend peut s'adapter ou on utilise UploadFile
-    pass # À détailler si besoin d'un portage exact 1:1
+# --- ROUTES : RETRO-GENOME (Mountés via router) ---
 
 @app.post("/api/retro-genome/chat")
 async def retro_chat(body: Dict[str, Any]):
@@ -835,32 +968,213 @@ async def retro_export_manifest():
     ManifestInferer.save_manifest(manifest, out)
     return {"status": "ok", "manifest_path": str(out)}
 
-@app.post("/api/retro-genome/generate-html")
-async def retro_gen_html():
-    pngs = sorted(RETRO_DIR.glob("upload_*.png"), key=lambda p: p.stat().st_mtime, reverse=True)
-    if not pngs: raise HTTPException(status_code=400, detail="No PNG found")
-    val_path = RETRO_DIR / "validated_analysis.json"
-    if not val_path.exists(): raise HTTPException(status_code=400, detail="Not validated")
-    
-    with open(val_path, 'r', encoding='utf-8') as f: validated = json.load(f)
-    gen = HtmlGenerator()
-    def cb(msg, step="generating"): _write_retro_status(step, msg)
-    html = await asyncio.to_thread(asyncio.run, gen.generate(png_path=pngs[0], matched_analysis=validated, status_callback=cb))
-    return {"status": "ok", "html_path": str(RETRO_DIR / "reality.html")}
+@app.get("/api/frd/wire-audit")
+async def wire_audit(request: Request, name: str = Query(...)):
+    """Audit technique intent <-> endpoint pour le mode Wire v2."""
+    analyzer = WireAnalyzer(ROOT_DIR)
+    return analyzer.analyze_template(name, request.app.routes)
 
-@app.post("/api/retro-genome/upload-svg")
-async def retro_upload_svg(body: Dict[str, Any]):
-    svg = body.get('svg', '')
-    name = body.get('name', 'frame')
-    if not svg: raise HTTPException(status_code=400)
-    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-    out = RETRO_DIR / f"SVG_{name}_{ts}.svg"
-    out.write_text(svg, encoding='utf-8')
-    from Backend.Prod.retro_genome.svg_parser import parse_figma_svg
-    from Backend.Prod.retro_genome.archetype_detector import ArchetypeDetector
-    analysis = parse_figma_svg(svg)
-    arch = ArchetypeDetector().detect(analysis)
-    return {"status": "ok", "visual_analysis": analysis, "archetype": arch}
+@app.get("/api/frd/wire-source")
+async def get_wire_source(endpoint: str = Query(...)):
+    """
+    Parser AST Python pour extraire le handler correspondant à la route dans server_v3.py.
+    """
+    import ast
+    try:
+        source_path = Path(__file__)
+        tree = ast.parse(source_path.read_text(encoding='utf-8'))
+        
+        handler_source = "# Handler non trouvé pour cet endpoint"
+        lines_range = [0, 0]
+
+        # Chercher le handler dans server_v3.py
+        for node in ast.walk(tree):
+            if isinstance(node, ast.AsyncFunctionDef) or isinstance(node, ast.FunctionDef):
+                for decorator in node.decorator_list:
+                    # On cherche @app.get("/path") ou @app.post("/path")
+                    if isinstance(decorator, ast.Call) and \
+                       isinstance(decorator.func, ast.Attribute) and \
+                       decorator.func.attr in ("get", "post", "put", "delete", "patch") and \
+                       len(decorator.args) > 0 and \
+                       isinstance(decorator.args[0], ast.Constant) and \
+                       decorator.args[0].value == endpoint:
+                        
+                        handler_source = ast.get_source_segment(source_path.read_text(encoding='utf-8'), node)
+                        lines_range = [node.lineno, node.end_lineno]
+                        return {"source": handler_source, "endpoint": endpoint, "lines": lines_range}
+
+        # Si non trouvé dans app direct, peut-être dans un router? (Simplifié: on cherche juste dans server_v3.py)
+        return {"source": handler_source, "endpoint": endpoint, "lines": lines_range}
+    except Exception as e:
+        logger.error(f"Error in wire-source: {e}")
+        return {"source": f"# Erreur lors du parsing : {str(e)}", "endpoint": endpoint, "lines": [0,0]}
+
+
+# --- ROUTES : MANIFEST MANAGEMENT (Mission 100-bis) ---
+@app.post("/api/import/upload")
+async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
+    """
+    Mission 100-bis: Generic upload endpoint for multi-format imports.
+    Supports: ZIP (Stitch), TSX/TS (React), HTML/CSS/JS files.
+    """
+    from datetime import datetime
+    
+    exports_dir = ROOT_DIR / "exports" / "retro_genome"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save file
+    safe_name = (filename or file.filename or "upload").replace(" ", "_").replace("/", "_")[:40]
+    timestamp_str = datetime.now().strftime('%H%M%S')
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    
+    ext = Path(file.filename).suffix.lower() if file.filename else ''
+    stored_filename = f"IMPORT_{safe_name}_{timestamp_str}{ext}"
+    
+    file_path = exports_dir / stored_filename
+    content = await file.read()
+    file_path.write_bytes(content)
+    
+    # Update index.json
+    index_path = exports_dir / "index.json"
+    try:
+        if index_path.exists():
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+        else:
+            index_data = {"imports": []}
+        
+        new_entry = {
+            "id": f"{today_str}_{timestamp_str}_{safe_name}",
+            "name": safe_name + ext,
+            "timestamp": datetime.now().isoformat(),
+            "file_path": f"{today_str}/{stored_filename}",
+            "date": today_str,
+            "type": ext.lstrip('.') if ext else 'unknown',
+            "archetype_id": "multi_format_import",
+            "archetype_label": "import multi-format"
+        }
+        index_data["imports"].insert(0, new_entry)
+        index_data["imports"] = index_data["imports"][:50]
+        index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception as e:
+        logger.error(f"[Import] Failed to update index.json: {e}")
+    
+    logger.info(f"[Import] File saved: {file_path}")
+    
+    global _NEW_IMPORTS_COUNT
+    _NEW_IMPORTS_COUNT += 1
+    
+    return {"status": "ok", "file_saved": str(file_path)}
+
+@app.get("/api/manifest/check")
+async def manifest_check():
+    """Check if manifest.json and design.md exist."""
+    m_path = ROOT_DIR / 'manifest.json'
+    d_path = ROOT_DIR / 'design.md'
+    b_path = ROOT_DIR / 'backend.md'
+    return {
+        "exists": m_path.exists(),
+        "stitch_ready": d_path.exists(),
+        "backend_ready": b_path.exists()
+    }
+
+@app.get("/api/manifest/backend")
+async def manifest_backend_get():
+    """Get the current backend.md content."""
+    b_path = ROOT_DIR / 'backend.md'
+    if not b_path.exists():
+        return {"content": "# HoméOS Backend Manifest\n\n*Not initialized*"}
+    return {"content": b_path.read_text(encoding='utf-8')}
+
+@app.put("/api/manifest/backend")
+async def manifest_backend_put(data: Dict[str, str]):
+    """Update backend.md content."""
+    b_path = ROOT_DIR / 'backend.md'
+    content = data.get('content', '')
+    b_path.write_text(content, encoding='utf-8')
+    return {"ok": True}
+
+@app.post("/api/manifest/import-stitch")
+async def manifest_import_stitch():
+    """Parse design.md and sync with backend.md."""
+    d_path = ROOT_DIR / 'design.md'
+    b_path = ROOT_DIR / 'backend.md'
+    if not d_path.exists():
+        raise HTTPException(status_code=404, detail="design.md not found")
+    
+    design_content = d_path.read_text(encoding='utf-8')
+    
+    # Simple Heuristic Parser for Stitch design.md
+    components = []
+    # Identify: ### Component[intent] or # intent: POST /api/...
+    comp_matches = re.finditer(r'###\s+([\w\-]+)\[([\w\-]+)\]', design_content)
+    intent_matches = re.finditer(r'-\s+Intent:\s+(GET|POST|PUT|DELETE)\s+([^\n\r]+)', design_content)
+    
+    findings = []
+    for m in comp_matches:
+        name, action = m.group(1), m.group(2)
+        route = f"POST /api/{name.lower()}/{action.lower()}"
+        findings.append(f"| {name}[{action}] | {route} | 🔴 Backlog |")
+    
+    for m in intent_matches:
+        method, path = m.group(1), m.group(2).strip()
+        findings.append(f"| Stitch Direct | {method} {path} | 🔴 Backlog |")
+
+    # Generate Markdown Table
+    table_content = "\n".join(findings)
+    new_backend_md = f"""# HoméOS Backend Manifest
+
+## 🗺️ Intent Map (Synchronisé depuis Stitch)
+| Composant | Route API | Statut |
+| :--- | :--- | :--- |
+{table_content}
+
+## 🧪 Tests & Qualité
+- [ ] Vérifier la bijection sémantique avec Wire V5
+- [ ] Valider les schémas JSON (Pydantic)
+- [ ] Tester les timeouts Sullivan
+"""
+    
+    # Merge strategy: If file exists, we'll try to keep manual notes (not implemented for complexity, but plan says override for now)
+    b_path.write_text(new_backend_md, encoding='utf-8')
+    
+    return {"ok": True, "count": len(findings), "manifest": new_backend_md}
+
+@app.get("/api/manifest/get")
+async def manifest_get():
+    """Get the current manifest.json content."""
+    m_path = ROOT_DIR / 'manifest.json'
+    if not m_path.exists():
+        raise HTTPException(status_code=404, detail="manifest.json not found")
+    with open(m_path, 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+    return manifest
+
+@app.post("/api/manifest/create")
+async def manifest_create(data: Dict[str, Any]):
+    """Create a new manifest.json with project metadata."""
+    m_path = ROOT_DIR / 'manifest.json'
+    if m_path.exists():
+        return {"ok": False, "error": "manifest.json already exists"}
+    
+    name = data.get('name', 'unnamed-project')
+    author = data.get('author', 'unknown')
+    description = data.get('description', '')
+    
+    manifest = {
+        "name": name,
+        "author": author,
+        "description": description,
+        "created_at": datetime.now().isoformat(),
+        "version": "0.1.0",
+        "elements": [],
+        "intents": []
+    }
+    
+    with open(m_path, 'w', encoding='utf-8') as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"manifest.json created: {name} by {author}")
+    return {"ok": True, "manifest": manifest}
 
 @app.post("/api/manifest/patch")
 async def manifest_patch(patch: Dict[str, Any]):
@@ -891,6 +1205,38 @@ async def get_brainstorm():
 @app.get("/brainstorm-alt")
 async def get_brainstorm_alt():
     path = STATIC_DIR_PATH / "templates/brainstorm_alt.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
+
+@app.get("/intent-viewer")
+async def get_intent_viewer():
+    path = STATIC_DIR_PATH / "templates/intent_viewer.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
+
+@app.post("/api/preview/run")
+async def preview_run(body: Dict[str, str]):
+    """Save current HTML to a temporary file for independent tab preview."""
+    html = body.get('html', '')
+    p_path = STATIC_DIR_PATH / "templates/_preview_tmp.html"
+    p_path.write_text(html, encoding='utf-8')
+    return {"ok": True, "url": "/api/preview/show"}
+
+@app.get("/api/preview/show")
+async def preview_show():
+    """Serve the temporary preview file."""
+    p_path = STATIC_DIR_PATH / "templates/_preview_tmp.html"
+    if not p_path.exists():
+        return HTMLResponse(content="<h1>Aucun aperçu généré</h1>", status_code=404)
+    
+    content = p_path.read_text(encoding='utf-8')
+    return HTMLResponse(content=content, headers={"Cache-Control": "no-store"})
+
+@app.get("/landing")
+async def get_landing():
+    path = STATIC_DIR_PATH / "templates/landing.html"
     if not path.exists(): raise HTTPException(status_code=404)
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=path.read_text(encoding='utf-8'))

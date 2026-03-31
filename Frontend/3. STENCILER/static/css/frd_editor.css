@@ -1,3 +1,19 @@
+/* ── Global Pipeline Nav (bootstrap.js — Mission 107) ──────────────────── */
+/* stenciler.css n'est pas chargé dans frd_editor : redéfinir ici */
+.global-pipeline-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    z-index: 1000;
+    background: #f7f6f2;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -137,4 +153,162 @@
 
 #drop-overlay.active {
     display: flex;
+}
+
+/* --- Mission 97: Wire UX v2 --- */
+.wire-mode-active #preview-iframe {
+    opacity: 0.6;
+    filter: grayscale(0.3) contrast(1.1);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wire-mode-active #preview-pane::after {
+    content: "DIAGNOSTIC TECHNIQUE";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    border-radius: 99px;
+    z-index: 40;
+    pointer-events: none;
+}
+
+/* Badges de santé (Injectés dans l'iframe) */
+.badge-health {
+    position: absolute;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: bold;
+    color: white;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-health.ok { background: #22c55e; }
+.badge-health.warning { background: #f59e0b; }
+.badge-health.error { background: #ef4444; }
+
+/* --- Mission 98: Wire UX v3 --- */
+.wire-skeleton-overlay {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9999;
+    border-radius: 4px;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.wire-skeleton-overlay.error  { background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; }
+.wire-skeleton-overlay.warning { background: rgba(251, 191, 36, 0.12); border: 1.5px solid #f59e0b; }
+
+@keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.badge-wire-v3 {
+    position: absolute;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: bold;
+    color: white;
+    z-index: 10000;
+    pointer-events: auto;
+    cursor: pointer;
+    font-family: 'Geist', sans-serif;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.2s;
+}
+
+.badge-wire-v3:hover {
+    transform: scale(1.05);
+    z-index: 10001;
+}
+
+.badge-wire-v3.ok      { background: #22c55e; }
+.badge-wire-v3.error   { background: #ef4444; }
+.badge-wire-v3.warning { background: #f59e0b; }
+
+.bijective-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    padding: 40px;
+    font-family: 'Geist', sans-serif;
+}
+
+.bijective-overlay.active {
+    display: flex;
+}
+
+.bijective-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+/* --- Mission 99: Wire UX v4 --- */
+.wire-code-popover {
+    position: fixed;
+    width: 420px;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 20000;
+    overflow: hidden;
+    animation: wire-pop-in 0.18s ease-out;
+}
+.wire-code-popover.hidden { display: none; }
+@keyframes wire-pop-in {
+    from { opacity: 0; transform: scale(0.92) translateY(8px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+.wire-popover-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: #2d2d2d; border-bottom: 1px solid #444;
+    font-family: 'Geist', sans-serif; font-size: 11px; color: #ccc;
+}
+.wire-popover-badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+.wire-popover-badge.ok    { background: #22c55e; color: white; }
+.wire-popover-badge.error { background: #ef4444; color: white; }
+#wire-popover-close {
+    margin-left: auto; background: none; border: none;
+    color: #888; cursor: pointer; font-size: 14px; line-height: 1;
+}
+#wire-popover-close:hover { color: #eee; }
+
+/* Peel-out sur l'iframe (Wire mode) */
+@keyframes wire-peel-in {
+    from { filter: none; }
+    to   { filter: saturate(0.4) brightness(0.95); }
+}
+.wire-mode-active #preview-iframe {
+    animation: wire-peel-in 0.4s ease-out forwards;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }

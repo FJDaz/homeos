@@ -326,7 +326,9 @@
 
 <body>
     <header>
-        <div class="logo">AETHERFLOW <span style="color:var(--text-dim);font-weight:300">| Retro Genome</span></div>
+        <div class="logo">AETHERFLOW <span style="color:var(--text-dim);font-weight:300">| Retro Genome</span>
+            <span id="import-badge" style="display:none; margin-left:12px; background:var(--accent-orange); color:white; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700; animation: pulse 1s infinite;">NEW</span>
+        </div>
         <div style="display:flex;gap:12px;align-items:center">
             <span class="status" id="app-status">Ready</span>
             <span class="provider-badge" id="provider-badge">—</span>
@@ -335,7 +337,25 @@
         </div>
     </header>
 
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+
     <main>
+        <div class="column" style="flex: 0 0 240px;">
+            <div class="col-header">
+                <div class="col-title">Figma Registry</div>
+            </div>
+            <div class="content" id="import-history" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Imports will appear here -->
+                <p class="empty-state" style="font-size: 0.7rem;">Syncing with Figma…</p>
+            </div>
+        </div>
+
         <div class="column">
             <div class="col-header">
                 <div class="col-title">Mockup</div>
@@ -533,6 +553,99 @@
             };
             xhr.onerror = () => { alert('Erreur réseau'); loading.style.display = 'none'; };
             xhr.send(payload);
+        };
+
+        // Mission 101: Notif Polling & History
+        const badge = document.getElementById('import-badge');
+        const historyEl = document.getElementById('import-history');
+        let lastImportCount = 0;
+
+        async function fetchHistory() {
+            try {
+                const res = await fetch('/retro-genome/imports');
+                const data = await res.json();
+                renderHistory(data.imports || []);
+            } catch (e) {
+                console.error("Failed to fetch history", e);
+            }
+        }
+
+        function renderHistory(imports) {
+            if (imports.length === 0) {
+                historyEl.innerHTML = '<p class="empty-state" style="font-size: 0.7rem;">Aucun import.</p>';
+                return;
+            }
+            historyEl.innerHTML = imports.map(item => `
+                <div class="history-item" onclick="loadImport('${item.svg_path}', '${item.name}')" 
+                     style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:8px; border-radius:6px; cursor:pointer; font-size:0.75rem; transition:all 0.2s;">
+                    <div style="font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
+                    <div style="font-size:0.65rem; color:var(--text-dim); margin-top:2px;">${item.date} • ${item.id.split('_')[1]}</div>
+                </div>
+            `).join('');
+            
+            // Add hover effects via JS style since we are in a script
+            historyEl.querySelectorAll('.history-item').forEach(el => {
+                el.onmouseover = () => { el.style.borderColor = 'var(--accent-orange)'; el.style.background = 'rgba(255,107,53,0.05)'; };
+                el.onmouseout = () => { el.style.borderColor = 'var(--border)'; el.style.background = 'rgba(255,255,255,0.03)'; };
+            });
+        }
+
+        async function loadImport(path, name) {
+            loading.style.display = 'flex';
+            document.getElementById('loading-text').textContent = `Loading ${name}…`;
+            
+            try {
+                const res = await fetch(`/retro-genome/import-content?path=${encodeURIComponent(path)}`);
+                const data = await res.json();
+                
+                // Simulate XHR upload flow to reuse logic
+                const mockResponse = await fetch('/retro-genome/upload-svg', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ svg: data.svg, name: name })
+                });
+                const result = await mockResponse.json();
+                
+                window._lastAnalysisData = result;
+                renderAnalysis(result);
+                document.getElementById('mockup-viewer').innerHTML = 
+                    `<div style="padding:40px; color:var(--text-dim); text-align:center;">
+                        <div style="font-size:3rem; margin-bottom:10px;">🎨</div>
+                        SVG Rendered: ${name}
+                     </div>`;
+                prdBtn.style.display = 'block';
+                statusEl.textContent = 'Analysis complete';
+            } catch (err) {
+                alert('Load error: ' + err);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function checkNotifs() {
+            try {
+                const res = await fetch('/retro-genome/notifications');
+                const data = await res.json();
+                if (data.new_count > lastImportCount) {
+                    badge.innerText = `${data.new_count} NEW`;
+                    badge.style.display = 'inline-block';
+                    fetchHistory(); // Refresh list automatically
+                } else if (data.new_count === 0) {
+                    badge.style.display = 'none';
+                }
+                lastImportCount = data.new_count;
+            } catch (e) {}
+        }
+
+        setInterval(checkNotifs, 3000);
+        checkNotifs();
+        fetchHistory(); // Initial load
+
+        // Clear notifs on click
+        document.querySelector('.logo').onclick = async () => {
+            await fetch('/retro-genome/notifications/clear', { method: 'POST' });
+            badge.style.display = 'none';
+            lastImportCount = 0;
         };
     </script>
 </body>

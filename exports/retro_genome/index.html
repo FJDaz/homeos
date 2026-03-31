@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HoméOS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * {
+      font-family: 'Inter', 'Geist', -apple-system, sans-serif !important;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #f7f6f2;
+      --bg-secondary: #f0efeb;
+      --bg-tertiary: #e8e7e3;
+      --text-primary: #3d3d3c;
+      --text-secondary: #6a6a69;
+      --text-muted: #999998;
+      --border-subtle: #d5d4d0;
+      --border-warm: #c5c4c0;
+      --accent-bleu: #a8c5fc;
+      --accent-vert: #a8dcc9;
+      --accent-orange: #edd0b0;
+      --accent-rose: #d4b2bc;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    header {
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    header .logo-container h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    header nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 20px;
+    }
+
+    header nav ul li a {
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 400;
+      font-size: 14px;
+    }
+
+    main {
+      display: flex;
+      height: calc(100vh - 60px - 60px); /* Header + Footer height */
+    }
+
+    aside.explorer-panel {
+      width: 250px;
+      background-color: white;
+      border-right: 1px solid var(--border-subtle);
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    aside.explorer-panel h2 {
+      font-size: 16px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    aside.explorer-panel h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    aside.explorer-panel h4 {
+      font-size: 13px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    aside.explorer-panel h5 {
+      font-size: 12px;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    aside.explorer-panel ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    aside.explorer-panel ul li {
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    aside.explorer-panel ul li a {
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    aside.explorer-panel .manifest-file a {
+      display: block;
+      font-size: 12px;
+      color: var(--text-primary);
+      text-decoration: none;
+      margin-bottom: 5px;
+    }
+
+    aside.explorer-panel section {
+      margin-top: 10px;
+      padding: 5px 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    aside.explorer-panel section a {
+      display: block;
+      font-size: 12px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    section.code-editor {
+      flex-grow: 1;
+      background-color: white;
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-header {
+      background-color: var(--bg-secondary);
+      padding: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .editor-header h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    #monaco-editor {
+      flex-grow: 1;
+    }
+
+    aside.chat-panel {
+      width: 300px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: var(--bg-secondary);
+      padding: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .chat-header h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .chat-messages {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .message {
+      padding: 8px 12px;
+      border-radius: 15px;
+      max-width: 80%; /* Adjusted for better fit */
+      margin-bottom: 5px;
+    }
+
+    .message.received {
+      background-color: #e0ded9; /* Desaturated bg-tertiary */
+      align-self: flex-start;
+    }
+
+    .message.sent {
+      background-color: #b0d1c4;  /* Desaturated accent-vert */
+      color: white;
+      align-self: flex-end;
+    }
+
+    .chat-input {
+      padding: 10px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 5px;
+    }
+
+    .chat-input input[type="text"] {
+      flex-grow: 1;
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .chat-input button {
+      background-color: var(--bg-secondary);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    footer {
+      background-color: white;
+      border-top: 1px solid var(--border-subtle);
+      padding: 10px;
+    }
+
+    .terminal-header {
+      display: flex;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .terminal-header ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .terminal-header ul li {
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .terminal-header ul li.active {
+      background-color: #f0efeb; /* Using bg-secondary directly */
+      font-weight: 600;
+    }
+
+    .terminal-content {
+      padding: 10px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .terminal-content code {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-secondary);
+      padding: 0 10px;
+    }
+
+    .bottom-bar p {
+        margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <h1>HoméOS</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#">Brainstrom</a></li>
+        <li><a href="#">Backend</a></li>
+        <li><a href="#">Frontend</a></li>
+        <li><a href="#">Deploy</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <aside class="explorer-panel">
+      <section class="workspace">
+        <h2>Explorateur</h2>
+        <h3>maiathon (Espace de travail)</h3>
+        <div class="project-folder">
+          <h4>AETHERFLOW</h4>
+          <div class="exports-folder">
+            <h5>exports</h5>
+            <ul>
+              <li>genome_zones_20260303_01280...</li>
+              <li>genome_zones_20260303_11005...</li>
+              <li>genome_zones_20260303_111111...</li>
+              <li>genome_zones_20260303_111255...</li>
+              <li>genome_zones_20260303_113912...</li>
+              <li>genome_zones_20260303_114221...</li>
+              <li>genome_zones_20260303_11423...</li>
+              <li>genome_zones_20260303_11423...</li>
+              <li>genome_zones_20260303_114247...</li>
+              <li>genome_zones_20260303_11443...</li>
+              <li>genome_zones_20260303_12290...</li>
+              <li>genome_zones_20260303_13021...</li>
+            </ul>
+          </div>
+          <div class="manifest-file">
+            <a href="#">manifest.json</a>
+          </div>
+          <div class="svg-files">
+            <ul>
+              <li><a href="#">n1_adaptation_kimi.svg</a></li>
+              <li><a href="#">n1_analysis_kimi.svg</a></li>
+              <li><a href="#">n1_arbitrage_kimi.svg</a></li>
+              <li><a href="#">n1_dialogue_kimi.svg</a></li>
+              <li><a href="#">n1_export_kimi.svg</a></li>
+              <li><a href="#">n1_ir_kimi.svg</a></li>
+              <li><a href="#">n1_kimi_set_fixed.svg</a></li>
+              <li><a href="#">n1_kimi_set.svg</a></li>
+              <li><a href="#">n1_layout_kimi.svg</a></li>
+              <li><a href="#">n1_navigation_kimi.svg</a></li>
+              <li><a href="#">n1_session_kimi.svg</a></li>
+              <li><a href="#">n1_upload_kimi.svg</a></li>
+              <li><a href="#">n1_validation_kimi.svg</a></li>
+            </ul>
+          </div>
+          <div class="template-files">
+            <ul>
+              <li><a href="#">template_20260303_181812.svg</a></li>
+              <li><a href="#">template_20260303_181932.svg</a></li>
+              <li><a href="#">template_20260303_182018.svg</a></li>
+              <li><a href="#">template_20260303_182031.svg</a></li>
+              <li><a href="#">template_20260303_182045.svg</a></li>
+              <li><a href="#">template_20260303_182127.svg</a></li>
+              <li><a href="#">template_20260303_182141.svg</a></li>
+              <li><a href="#">template_20260303_182247.svg</a></li>
+              <li><a href="#">template_20260303_182314.svg</a></li>
+              <li><a href="#">template_20260303_182314.svg</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section class="structure">
+        <a href="#">> Structure</a>
+      </section>
+      <section class="chronologie">
+        <a href="#">> Chronologie</a>
+      </section>
+    </aside>
+
+    <section class="code-editor">
+      <div class="editor-header">
+        <h4>ADMAP.md.../4. COMMUNICATION M</h4>
+      </div>
+      <div id="monaco-editor"></div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
+      <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs'} });
+
+        require(['vs/editor/editor.main'], function () {
+          monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: [
+              'Step 4 - KIMI Atom Factory.',
+              'Pour chaque composant N3 : KIMI génère un SVG premium isolé.',
+              '4 workers concurrent pour paralléliser les appels API.',
+              'Sauve pipeline/atoms/<comp_id>

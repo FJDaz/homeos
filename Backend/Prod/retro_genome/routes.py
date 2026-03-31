@@ -12,10 +12,11 @@ import base64
 import json
 import re
 import io
+from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from loguru import logger
@@ -27,6 +28,9 @@ router = APIRouter(prefix="/retro-genome", tags=["Retro Genome"])
 
 # Singleton
 detector = ArchetypeDetector()
+
+# Mission 101: Global tracker for new imports
+_NEW_IMPORTS_COUNT = 0
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────
 
@@ -212,15 +216,40 @@ async def retro_genome_upload_svg(data: SVGUpload):
     Parse le SVG Figma structuré et détecte l'archétype sans passer par la vision.
     Sauvegarde le SVG brut dans exports/retro_genome/ pour inspection.
     """
-    from datetime import datetime
-    logger.info(f"[RetroGenome] SVG Upload received for: {data.name}")
-
-    # Sauvegarde SVG brut pour inspection visuelle
-    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    # Sauvegarde SVG brut pour inspection visuelle dans un dossier daté
+    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    exports_dir = base_exports_dir / today_str
     exports_dir.mkdir(parents=True, exist_ok=True)
+    
     safe_name = (data.name or "frame").replace(" ", "_").replace("/", "_")[:40]
-    svg_path = exports_dir / f"SVG_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.svg"
+    timestamp_str = datetime.now().strftime('%H%M%S')
+    filename = f"SVG_{safe_name}_{timestamp_str}.svg"
+    svg_path = exports_dir / filename
     svg_path.write_text(data.svg, encoding="utf-8")
+    
+    # Update index.json
+    index_path = base_exports_dir / "index.json"
+    try:
+        if index_path.exists():
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+        else:
+            index_data = {"imports": []}
+        
+        new_entry = {
+            "id": f"{today_str}_{timestamp_str}_{safe_name}",
+            "name": data.name,
+            "timestamp": datetime.now().isoformat(),
+            "svg_path": f"{today_str}/{filename}",
+            "date": today_str
+        }
+        # Keep only last 50 imports
+        index_data["imports"].insert(0, new_entry)
+        index_data["imports"] = index_data["imports"][:50]
+        index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception as e:
+        logger.error(f"[RetroGenome] Failed to update index.json: {e}")
+
     logger.info(f"[RetroGenome] SVG saved to: {svg_path}")
 
     try:
@@ -229,6 +258,21 @@ async def retro_genome_upload_svg(data: SVGUpload):
 
         # 2. Détection d'archétype
         archetype = detector.detect(analysis)
+
+        # Enrichir l'entrée index.json avec les résultats de l'analyse
+        try:
+            index_data2 = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {"imports": []}
+            if index_data2["imports"] and index_data2["imports"][0].get("svg_path") == f"{today_str}/{filename}":
+                index_data2["imports"][0]["archetype_id"] = archetype.get("archetype_id", "unknown")
+                index_data2["imports"][0]["archetype_label"] = archetype.get("label", "—")
+                index_data2["imports"][0]["elements_count"] = len(analysis.get("elements", []))
+                index_path.write_text(json.dumps(index_data2, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception as e2:
+            logger.warning(f"[RetroGenome] Failed to enrich index entry: {e2}")
+
+        # Mission 101: Increment notification counter
+        global _NEW_IMPORTS_COUNT
+        _NEW_IMPORTS_COUNT += 1
 
         return JSONResponse(content={
             "status": "ok",
@@ -243,21 +287,37 @@ async def retro_genome_upload_svg(data: SVGUpload):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload")
-async def retro_genome_upload(image: UploadFile = File(...)):
+async def retro_genome_upload(
+    images: List[UploadFile] = File(...),
+    manifesto: str = Form("")
+):
     """
-    Upload a PNG mockup and run the full Retro Genome pipeline.
-
+    Upload PNG mockups and run the full Retro Genome pipeline.
     Steps:
-    1. Vision Analysis via GeminiClient.generate_with_image()
-    2. Intent Mapping via GeminiClient.generate()
-    3. Returns merged JSON
-
-    No dependency on Antigravity, Claude Code or any IDE.
-    Requires GOOGLE_API_KEY in AetherFlow .env (or GROQ_API_KEY as fallback).
+    1. Save primary image as upload_latest.png
+    2. Vision Analysis via GeminiClient.generate_with_image()
+    3. Intent Mapping via GeminiClient.generate()
+    4. Returns merged JSON
     """
-    logger.info(f"[RetroGenome] Upload received: {image.filename} ({image.content_type})")
+    if not images:
+        raise HTTPException(status_code=400, detail="No images uploaded")
+    
+    primary_image = images[0]
+    logger.info(f"[RetroGenome] Upload received: {len(images)} images. Primary: {primary_image.filename}")
 
-    image_data = await image.read()
+    # Exports directory
+    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save as upload_latest.png for reference
+    image_data = await primary_image.read()
+    (exports_dir / "upload_latest.png").write_bytes(image_data)
+    
+    # Also save with timestamp for history
+    from datetime import datetime
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    (exports_dir / f"upload_{ts}.png").write_bytes(image_data)
+
     b64_image, mime_type = _encode_image(image_data)
 
     client = _get_gemini_client()
@@ -265,8 +325,13 @@ async def retro_genome_upload(image: UploadFile = File(...)):
     # --- Step 1: Vision Analysis ---
     logger.info("[RetroGenome] Step 1: Vision Analysis")
     try:
+        # If manifesto is provided, prepend it to the prompt
+        prompt = ANALYZER_PROMPT
+        if manifesto:
+            prompt = f"USER MANIFESTO / CONTEXT:\n{manifesto}\n\n---\n\n{prompt}"
+
         vision_result = await client.generate_with_image(
-            prompt=ANALYZER_PROMPT,
+            prompt=prompt,
             image_base64=b64_image,
             mime_type=mime_type,
             output_constraint="JSON only",
@@ -310,13 +375,18 @@ async def retro_genome_upload(image: UploadFile = File(...)):
 
     await client.close()
 
-    return JSONResponse(content={
+    # Save analysis for status endpoint persistence (Mission 102 Backend)
+    analysis_data = {
         "status": "ok",
         "analysis": analysis,
         "audit": audit,
         "archetype": archetype,
         "provider_used": getattr(vision_result, "provider", "gemini")
-    })
+    }
+    status_path = exports_dir / "last_analysis.json"
+    status_path.write_text(json.dumps(analysis_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    
+    return JSONResponse(content=analysis_data)
 
 
 class PRDRequest(BaseModel):
@@ -366,3 +436,116 @@ async def retro_genome_viewer():
     if template_path.exists():
         return HTMLResponse(content=template_path.read_text(encoding="utf-8"))
     raise HTTPException(status_code=404, detail="Viewer template not found")
+
+
+@router.post("/validate")
+async def retro_genome_validate(data: Dict[str, Any]):
+    """Persiste l'analyse validée pour la génération HTML."""
+    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    val_path = exports_dir / "validated_analysis.json"
+    val_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    logger.info(f"[RetroGenome] Validated analysis saved → {val_path}")
+    return {"status": "ok"}
+
+
+@router.post("/generate-html")
+async def retro_genome_generate_html():
+    """Génère reality.html depuis l'analyse validée."""
+    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    pngs = sorted(exports_dir.glob("upload_*.png"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not pngs:
+        raise HTTPException(status_code=400, detail="No PNG found in exports")
+    
+    val_path = exports_dir / "validated_analysis.json"
+    if not val_path.exists():
+        raise HTTPException(status_code=400, detail="Run /validate first")
+    
+    validated = json.loads(val_path.read_text(encoding="utf-8"))
+    
+    from .html_generator import HtmlGenerator
+    gen = HtmlGenerator()
+    
+    import asyncio
+    # We use asyncio.to_thread if gen.generate is synchronous or needs a separate loop
+    # or just await it if it's already async.
+    # Base on server_v3.py implementation:
+    html_content = await asyncio.to_thread(asyncio.run, gen.generate(
+        png_path=pngs[0],
+        matched_analysis=validated,
+        status_callback=None
+    ))
+    
+    return {"status": "ok", "html_path": str(exports_dir / "reality.html")}
+
+@router.get("/notifications")
+async def get_notifications():
+    """Mission 101: Retourne le nombre d'imports non lus par le viewer."""
+    global _NEW_IMPORTS_COUNT
+    return {"new_count": _NEW_IMPORTS_COUNT}
+
+@router.get("/imports")
+async def get_imports():
+    """Mission 101 bis: Retourne la liste des imports depuis index.json."""
+    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    index_path = base_exports_dir / "index.json"
+    if index_path.exists():
+        return JSONResponse(content=json.loads(index_path.read_text(encoding="utf-8")))
+    return {"imports": []}
+
+@router.get("/import-analysis")
+async def get_import_analysis(id: str):
+    """Retourne les éléments analysés d'un import SVG au format components[] pour l'intent viewer."""
+    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    index_path = base_exports_dir / "index.json"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="index.json not found")
+    index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    entry = next((i for i in index_data.get("imports", []) if i["id"] == id), None)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Import not found")
+    svg_path = base_exports_dir / entry["svg_path"]
+    if not svg_path.exists():
+        raise HTTPException(status_code=404, detail="SVG file not found")
+    analysis = parse_figma_svg(svg_path.read_text(encoding="utf-8"))
+    components = []
+    for i, el in enumerate(analysis.get("elements", [])):
+        components.append({
+            "id": el.get("id", f"elem_{i}"),
+            "name": (el.get("text_content") or el.get("description") or f"élément {i}")[:40],
+            "type": el.get("visual_hint", "unknown"),
+            "inferred_intent": el.get("apparent_role", "à définir"),
+        })
+    archetype_result = detector.detect(analysis)
+    return {
+        "analysis": {
+            "components": components,
+            "archetype": archetype_result,
+            "import_name": entry["name"],
+            "timestamp": entry["timestamp"],
+        }
+    }
+
+@router.get("/import-content")
+async def get_import_content(path: str):
+    """Lit le contenu d'un SVG importé via son path relatif."""
+    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    target_path = base_exports_dir / path
+    if target_path.exists() and target_path.suffix == ".svg":
+        return {"svg": target_path.read_text(encoding="utf-8")}
+    raise HTTPException(status_code=404, detail="SVG not found")
+
+@router.post("/imports/clear")
+async def clear_imports():
+    """Vide la liste des imports (index.json → liste vide). Les SVG restent sur disque."""
+    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    index_path = base_exports_dir / "index.json"
+    index_path.write_text(json.dumps({"imports": []}, ensure_ascii=False), encoding="utf-8")
+    return {"status": "ok"}
+
+@router.post("/notifications/clear")
+async def clear_notifications():
+    """Mission 101: Reset le compteur après lecture."""
+    global _NEW_IMPORTS_COUNT
+    _NEW_IMPORTS_COUNT = 0
+    return {"status": "ok"}

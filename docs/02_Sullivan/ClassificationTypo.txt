@@ -1,0 +1,196 @@
+
+Typographie
+
+
+Introduction	
+Image de marque et identité visuelle Définition d’une identité visuelle Structure de l’identité visuelle
+Typotype	4
+Emblème/Logotype	5
+Contraintes et libertés créatives	5
+Design graphique	5
+Typographie	
+Classification Typographique
+Les humanes	7
+Les Garaldes	7
+Les réales	8
+Les Didones	8
+Les Mécanes	9
+Les Linéales	9
+Les Incises	10
+Les Scriptes	10
+Les Manuaires	10
+Les Fracture	10
+Les non-Latines	11
+
+Introduction
+
+
+On confond facilement Image de marque et identité visuelle. Bien qu’elles entretiennent une relation étroite, elles doivent être pensées en deux lieux différents : l’une en amont de l’entreprise, l’autre en aval. L’image de marque est véhiculée
+par la production, le positionnement et l’éventuelle stratégie de l’entreprise quand l’identité visuelle dépend en grande partie de l’image de marque et doit l’exprimer auprès du public. Mais, par retour, une image de marque peut être transformée par une identité visuelle bien pensée.
+
+
+L’identité visuelle constitue un ensemble de signes, de couleurs et de formes récurrentes et globales à travers lesquelles le public doit identifier une entreprise publique, privée, soildaire ou informelle. Elle ne correspond pas nécessairement à l’identité de l’entreprise, à savoir la manière dont elle se voit elle même. L’exercice de construction d’une identité visuelle nécessite une analyse et un recul souvent impossible à réaliser par l’entreprise elle-même.
+
+
+
+
+  Typotype
+Si l’on demande à une êrsonne non avertie à quoi on reconnaît une entreprise, neuf fois sur dix sa réponse sera : « au logo ». Il ne commet pas d’erreur, le logotype est la pierre angulaire de l’identité visuelle. Logos, parole et tupein, écrire donne au mot logotype la signification littélrale de écriture d’une parole. Cette écriture d’une parole, pour simpliste que cette expression paraisse, définit en fait toute méthodologie graphique. Il ne s’agit jamais que d’écriture ou de transcription d’une parole, d’un message insubstantiel en une trace qui l’exprimera exclusivement.
+
+
+
+
+Si l’on cherche le mot graphisme dans le Littré, on tombe sur la définition : « Manière de représenter, d’écrire les mots d’une langue » et, de fait, un logotype c’est d’abord une suite de caractère qui désigne l’entreprise ou l’entité exprimée, et ce de manière unique.
+L’identité graphique, en tant que fondée sur le logotype, passe d’abord par un choix typographique clair, sensé. La typographie, ici, constitue le tout premier levier de singularisation d’une marque. Par conséquent, s’engager dans une démarche de communication graphique implique un minimum de culture typographique et des enjeux sémantiques qu’elle induit.
+
+  Emblème/Logotype
+On a tendance à mêler dans le même terme de logo l’ensemble emblème + typotype. Rien ne semble clairement établi, mais, pour une manipulation plus aisée de ces deux signifiants distincts, je me propose de différencier l’emblème du typotype.
+Ce que je désignerai ici comme emblème est un signe non lisible en tant que tel mais qui, s’il est efficacement conçu, fait appel à des conventions d’abstraction similaires
+à celle de la lecture. Prenons par exemple l’emblème du centre Pompidou produit par Jean Widmer. Sans être en soi une lettre, ce signe fait immédiatement sens par mimétisme avec la forme du musée lui-même tel qu’il est connu par quiconque l’a déjà côtoyé.
+Voyons enfin, comment l’emblème de Renault et son typotype se sont, au cours de son histoire disputé la primeure de la représentation de la marque et comment, finalement, l’emblème, une fois un travail de réflexion suffisant, finit par l’emporter C’est Victor Vasarely, artiste de l’Op-art, qui parvient, par la force de sa plus-value artistique, à conférer à l’emblème la modernité nécessaire à réinscrire la marque dans son époque.
+
+
+
+  Contraintes et libertés créatives
+La création d’un logotype est régie en amont par l’ensemble des conventions signalétiques que constitue les quelques 20 000 ans d’écriture qui nous précèdent, autant de principes conventionnels dans lesquels il est possible de puiser pour appuyer une démarche graphique pertinente.
+
+  Design graphique
+La notion de design n’a fait irruption qu’en 1917 lorsque Walter Gropius fonda le Bauhaus sous l’impulsion notoire du mouvement hollandais de Stijl emmené par Piotr Mondrian, du constructivisme de Malevitch et du futurisme de Bocconi. De 1917 à 1920, Gropius s’appliqua à accueillir dans son école les plus grands noms de la création artistique de son temps (Kandinsky, Moholy Nagui, Mondrian...) avec pour mots d’ordre : synthétisme de la forme, épure, réduction du geste artistique
+à l’essentiel. Il érigea notamment en axiome de la création industrielle moderne le rapport forme/fonction qui introdusit l’idée qu’un choix esthétique n’est valide que s’il est adossé à ce à quoi va servir l’objet auquel ce choix va s’appliquer .
+On ne doit cependant pas la genèse de cette manière de produire pour les masses à Gropius uniquemen. Avant lui des architectes tels que Louis Sullivan ou Franck Lloyd Right avait déjà adopté une position antagoniste à la débauche néoclassique du début du XIXe dont Garnier (Opéra) était l’un des parangons. Il est, en revanche, établi que le Bauhaus a le premier embrassé l’ensemble de la production industrielle, les grands architectes de chicago s’en étaient, eux, tenus aux bâtiments et à l’urbanisme.
+Dans le même faisceau historique, le milieu du XIXe siècle voit apparaître la technique de l’offset, partie elle-même de la révolution industrielle. Cette technique accompagna l’essor de l’information et tout particulièrement la mutation des gazettes en journaux à gros tirage. C’est le moment jamais noté mais déterminant de l’irruption de la culture graphique dans l’industrie, la naissance de l’industrie graphique.
+Les représentants le plus fameux de l’aspect graphique du Bauhaus sont Ian Tchitschold et Herbert Bayer, respectivement intéressés à la typographie et à la composition typographique. Bayer est le fondateur de ce que l’on appelle l’école suisse, une école de la rigueur et de l’élégance graphique qui verra notamment naitre l’undes plus grands noms de l’histoire de la typographie moderne : Adrian Frutiger, fondeur du célèbre Univers, de l’OCRA (que nous côtoyons encore sur tous les formulaires papier où figure notre nom) et du Frutiger appelé d’abord Charle de Gaulle car il constitue la signalétique du complexe routier de l’aéroprt éponyme.
+Le design graphique désormais, désigne l’activité qui conditionne, conçoit et réalise l’ensemble des signifiants graphiques qui peuplent l’ére contemporaine. Tout enseigne, packaging, signalétique, interface, marque, affiche, maquette, tout message délivré textuellement à destination du grand nombre est le résultat d’une
+
+
+
+
+démarche qui revèle du design graphique. Et s’il s’agit de délivrer un message, le véhicule premier est le texte, or le véhicule du texte à son tour est d’abord la manière dont il est écrit : le caractère typographique choisi pour le délivrer.
+Le choix d’un caractère plutôt qu’un autre est non seulement un élément décisif du succès ou non d’une composition graphique, mais il est encore le tout premier travail à effectuer. Or la typographie, pas de lecture possible.
+Bien sûr, on dispose de nombres autres signifiants pour effectuer une composition (sinon il ne s’agiarit plus de composition), la couleur, la photographie, la lumière et dbeaucoup d’autres sont des éléments essentiels de la réussite d’une composition mais dans le cadre spécifique d’une communicationde la communication visuelle, la typographie en est l’absolue maitresse.
+Typographie
+
+
+Pour une maitrise efficace des enjeux typographiques, pour s’assurer de choix typographiques sûrs, il est important d’en connaitre la nomenclature. Certains de ses éléments sont connus comme la notion de plein et de délié, d’autres le sont moins comme le jambage qui est la partie de certaines lettres qui dépassent au dessus ou en dessous de la ligne de base.
+Voici un schéma qui vous indiquera les 20 principaux termes à connaitre pour effectuer et défendre un choix typographique.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Il existe trois classifications typographiques mais celle utilisée couramment est la classification dite « Vox-Atypl ». La classification Vox-Atypl divise les différentes polices de caractères en onze familles. Les Réales, Garaldes et Humanes ont pour caractéristique un empattement triangulaire, la présence de pleins et déliés et un petit rapport de proportion œil/fût. Les Didones, Mécanes et Linéales marquent et parcourent la modernité éditoriale. Les Didones sont contemporaine de l’invention de la métrique typographique. Les Mécanes, elles, accompagnent la conquête
+de l’ouest. Ces deux familles se caractérisent par la rationalisation progressive des empattements, plats chez les Didones, à angle droit chez les Mécanes. Cette évolution sera poussée à son paroxisme au XXème siècle avec l’avénement des
+
+
+
+
+Linéales. Cette famille est identifiable par des caractères faits de segments simples (« bâtons »). Enfin, les Incises, Scriptes et Manuaires constituent la famille des caractères d’inspiration calligraphique.
+
+
+Les humanes	
+Les Humanes, les plus anciens caractères latins, conçus au XVéme siècle à Venise, s’inspirent des écrits humanistes de l’époque. Leur principale caractéristique réside dans la traverse oblique du « e ». Il faut également noter leur faible contraste plein/ délié ainsi que leur axe très oblique.
+
+GegM
+Centaur,
+GegM
+Adobe Jenson Pro
+
+
+Les Garaldes	
+Les Garaldes sont ainsi appelées en hommage à deux grands noms de la typographie : le graveur de caractères français Claude Garamond et l’éditeur vénicien Alde Manuce. Alde Manuce, lassé des ouvrages composés en gothique venant d’Allemagne en sa Venise, mit au point un caractère plus en adéquation avec les raffinements véniciens : l’italique. Ce caractère a eu un tel succès en Europe que François Ier fit commande au fondeur français le plus fameux de l’époque, Claude Garamond, d’un caractère à sa gloire. Garamond fit donc ce caractère qui fini par lui devenir éponyme : le Garamond. Il y intégra une version de l’italique, geste qui fit école et devint un exercice obligé de la fonte européenne. Ainsi, l’italique devint une graisse quasi systématique de tout caratère fondu depuis.
+Les garaldes présentent des contrastes entre plein et délié qui s’équilibrent par rapport aux humanes. Les déliés de jonction s’assouplissent et s’affinent. Le « e » voit sa traverse alignée horizontalement mais l’axe du caractère reste incliné vers l’arrière
+GegM
+Adobe Garamond
+GegM
+Sabon
+
+Les réales	
+Vint la période du classicisme, période de rationalisation globale à laquelle la typographie n’échappa pas. On a en tête le schéma typographique où Dürer enchâssa l’homme parfait de De Vinci.
+On reconnaît une réale en observant son axe parfaitement vertical. Si ces caractères présentent encore des pleins et des déliés, ils sont très accusés, les fûts sont très épais et les déliés de jonction très étroits.
+GegM
+Baskerville
+GegM
+Cochin
+
+Les Didones	
+Les Didones doivent le nom de leur famille à une contraction des noms de François et Firmin Didot (respectivement imprimeur, éditeur et inventeur de la métrique typographique) et de Gianbattista Bodoni, imprimeur Parmesan féru de typographie. Ces deux noms sont ceux des cractères qu’ils fondirent en leur temps. Bodoni n’en créa jamais d’autres tandis que François Didot produit aussi des anglaises classées, elles dans la catégorie des scripts. Grands contrastes entre pleins et déliés et empattements horizontaux sont leurs signes de reconnaissance. Elles sont le témoin du processus de rationalisation de la typographie sous l’influence de la modernité naissante.
+GegM
+Lynotype Didot
+GegM
+Bodoni
+GegM
+Serifa
+
+
+Les Mécanes	
+La moitié du XIXe siècle voit l’essor simultané de la révolution industrielle, la production de journaux en grand tirage et, de l’autre côté de l’atlantique, la conquête de l’ouest. Deux sous-ensembles sont à distinguer dans cette famille typographique : Les classiques et les modernes.
+Les caractères désignés par ces deux sous-appellations se distinguent toutes deux par des empattements carrés. Les mécanes classiques présentent cependant des angles d’empattement courbes (Clarendon) là où les mécanes modernes présentent des angles d’empattement à angle droit (Rockwell). Toutes les mécanes présentent peu ou pas de contrastes entre pleins et déliés.
+GegM
+Clarendon
+GegM
+Rockwell
+GegM
+Walbaum
+
+
+
+
+
+Les Linéales	
+Les linéales ou bâtons se reconnaissent à l’absence d’empattements, de plein ou de délié. L’apparition des linéales est contemporaine de la révolution industrielle, le tout premier caractère classable dans cette catégorie est un Caslon produit à la fin de
+la vie du grand typographe du même nom dont les autres caractères sont à classer plus volontiers dans la catégorie des Réales.
+Mais c’est au sein du Bauhaus que Tchitschold pose les bases de la production typographique épurée contemporaine telle qu’on la connaît. Le plus fameux représentant de cette génération de fondeur reste Adrian Frutiger, fondeur du caractère Univers, du Roissy utilisé dans la signalétique de l’aéroprt éponyme et appelé désormais Frutiger, de l’OCR-B typographie accompagnée du premier système de reconnaissance de caractère présente sur chacun des formulaires officiels que nous recevons et, enfin, du Serifa, refonte du Rockwell.
+Mais d’autres grands nom émergent au XXe siècle comme celui d’Éric Gill qui à lui seul a inventé la sous-catégorie des Linéales humanistiques. Il s’agit de
+caractères reprenant certaines carctéristiques des grandes fontes des débuts de la typographie. Le Gill Sans présente de légers contrastes et un « g » avec une descendante à panse comme celui du Garamond du Roy. Il fondit également l’Optima et créa des précédents pour la production typographique contemporaine qui ne cesse d’exploiter ce mode opératoire (Officina, Letter Gothic, Rotis, Meta...)
+GegM
+Univers
+GegM
+Frutiger
+GegM
+Gill Sans
+
+
+
+Les Incises	
+Les Incises tiennent leur nom de leur forme directement inspirée des caractères gravés sur la pierre ou le métal à l’époque romaine antique. Elles eurent leur temps de gloire, non seulement lors de l’antiquité mais également lors des grandes conquêtes napoléoniennes quand cette période connut un retour en grâce.
+On les identifie grâce à leurs petits empattements triangulaires et le fait qu’elles ne se présentent qu’en haut de casse. Elles peuvent notamment être intéressantes pour leurs ligatures authentiques, celles-ci ayant été inventées à cette époque.
+GegM
+trajan
+
+Les Scriptes	
+La famille des scriptes désigne les caractères imitant l’écriture. On peut en distinguer de deux types : les cursives et les anglaises.
+GegM
+Berthold Script
+GegM
+BV  Rondes
+GegM
+Kunstler Script
+
+Les Manuaires	
+Les Manuaires, elles, s’inspirent de l’écriture au pinceau.
+GegM
+Banco
+GegM
+Revue
+GegM
+reporter
+
+Les Fracture	
+Les fractures sont mieux connues en France sous le nom de Gothiques, elles peuvent cependant reprendre le dessin de la gothique, certes, mais aussi celui de la caroline ou de l’onciale, trois modèles calligraphiques de l’époque des copistes, antérieure à l’invention de l’imprimerie. Notons que les copistes n’ont réellement été supplantés qu’au début du XIXe.
+
+GegM
+Clairveaux
+GegM
+Fette Fraktur
+
+
+Les non-Latines	
+Reste les Non-Latines qui comme leur nom l’indique regroupent toutes les polices de caractères non-latins comme les versions typographiées de l’écriture hébraïque, de l’arabe ou du Japonais.

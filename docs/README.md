@@ -1,35 +1,31 @@
-# Documentation AETHERFLOW
+# Documentation AETHERFLOW (Architecturé par Sullivan)
 
-Documentation du projet, organisée **par thème**.
+Documentation du projet, organisée par **pédagogie de construction**.
 
 ---
 
-## Structure par thèmes
+## Structure de l'Atelier
 
 | Dossier | Contenu |
 |--------|--------|
-| **01-getting-started/** | Installation, guide rapide, reprise, résumé de contexte |
-| **02-sullivan/** | Sullivan, Genome, Chatbox, Studio — mode d’emploi, PRD, plans workflow |
-| **03-aetherflow-orchestration/** | Double-check standalone, vérification FastAPI, orchestration CLI |
-| **04-homeos/** | HomeOS, frontend genome, PRD et point d’étape |
-| **05-operations/** | Cache, dépannage (troubleshooting Cursor/shell) |
-| **guides/** | Guides détaillés, PRD long, bonnes pratiques (V2.0, V2.2, etc.) |
-| **references/** | Références : **business/** (positionnement, politique, tarifs), **technique/** (schémas, outputs Sullivan, cache), **security/** |
-| **plans/** | Plans de construction (détails dans 02-sullivan et 04-homeos) |
-| **notes/** | Notes de développement, brouillons |
-| **support/** | Support : cache, audits (DEV SENIOR) & scans |
-| **support/audits/** | Audits (DEV SENIOR), checklists pré-review et rapports |
-| **templates/** | Fichiers modèles (ex. `.env`) |
-| **DA/** | Design / maquettes (assets) |
-| **tutos/** | Tutoriels |
+| **[00_Core/](00_Core/)** | Philosophie, Constitution, PRD Global des fondations. |
+| **[01_Getting_Started/](01_Getting_Started/)** | Onboarding, installation, guide rapide de reprise du projet. |
+| **[02_Sullivan/](02_Sullivan/)** | Moteur Typo, AI Arbitrator, Culture Design et mode d'emploi de l'assistant. |
+| **[03_AetherFlow/](03_AetherFlow/)** | Agentic Orchestration, Protocoles techniques et bijection UI↔API. |
+| **[04_HomeOS/](04_HomeOS/)** | Le Produit : PRD MVP, Roadmap actuelle et Intent Mapping. |
+| **[05_Operations/](05_Operations/)** | Déploiement (HF Spaces, RunPod), CI/CD, Cache et Troubleshooting. |
+| **[06_Design_Assets/](06_Design_Assets/)** | Tokens, Études Ergonomiques (Cléa UX), SVG Interfacial Language. |
+| **[07_Guides/](07_Guides/)** | Guides détaillés, tutoriels et templates `.env`. |
+| **[08_Research/](08_Research/)** | Recherche, benchmarks, notes de brainstorming et benchmarks. |
+| **[archives/](archives/)** | Historique complet des versions V1, V2 et rapports caducs. |
 
 ---
 
 ## Entrées rapides
 
-- **Démarrer** : [01-getting-started/INSTALLATION.md](01-getting-started/INSTALLATION.md) · [01-getting-started/GUIDE_RAPIDE_AETHERFLOW.md](01-getting-started/GUIDE_RAPIDE_AETHERFLOW.md)
-- **Pipeline de Production** : [03-aetherflow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md](03_AetherFlow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md)
-- **Sullivan / Genome** : [02-sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md](02-sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md) · [02-sullivan/PRD_SULLIVAN.md](02-sullivan/PRD_SULLIVAN.md)
-- **HomeOS** : [04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md](04-homeos/PRD_HOMEOS_ETAT_ACTUEL.md)
-- **Opérations** : [05-operations/CLEAR_CACHE.md](05-operations/CLEAR_CACHE.md) · [05-operations/TROUBLESHOOTING_CURSOR_SHELL.md](05-operations/TROUBLESHOOTING_CURSOR_SHELL.md)
-- **Index détaillé (V2.2)** : [guides/V2.2/INDEX_DOCUMENTATION.md](guides/V2.2/INDEX_DOCUMENTATION.md)
+- **Démarrer** : [01_Getting_Started/INSTALLATION.md](01_Getting_Started/INSTALLATION.md) · [01_Getting_Started/GUIDE_RAPIDE_AETHERFLOW.md](01_Getting_Started/GUIDE_RAPIDE_AETHERFLOW.md)
+- **Pipeline de Production** : [03_AetherFlow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md](03_AetherFlow/TECHNICAL_REPORT_PRODUCTION_PIPELINE.md)
+- **Sullivan / Genome** : [02_Sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md](02_Sullivan/MODE_EMPLOI_SULLIVAN_GENOME.md) · [02_Sullivan/PRD_SULLIVAN.md](02_Sullivan/PRD_SULLIVAN.md)
+- **HomeOS MVP** : [04_HomeOS/PRD_HOMEOS_MVP.md](04_HomeOS/PRD_HOMEOS_MVP.md)
+- **Design & Ergonomie** : [06_Design_Assets/ergonomic_study_clea_ux.md](06_Design_Assets/ergonomic_study_clea_ux.md)
+- **Dépannage** : [05_Operations/CLEAR_CACHE.md](05_Operations/CLEAR_CACHE.md) · [05_Operations/TROUBLESHOOTING_CURSOR_SHELL.md](05_Operations/TROUBLESHOOTING_CURSOR_SHELL.md)

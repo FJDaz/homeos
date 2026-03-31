@@ -5,4 +5,3 @@
 - **SMART_ROUTING.md** — Documentation technique du Smart Routing
 - **CLI_TYPEWRITER.md** — Effet machine à écrire pour le CLI
 - **PRD_AETHERFLOW.md** — Documentation métier de l'orchestrateur
-- **TECHNICAL_REPORT_PRODUCTION_PIPELINE.md** — Flux détaillé de la doc vers Figma

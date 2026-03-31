@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(openrouter.ai)",
+      "Bash(python *)",
+      "Bash(sleep *)",
+      "Bash(curl *)",
+      "Bash(kill *)",
+      "Bash(python3 *)",
+      "Bash(find *)",
+      "Bash(pip install *)",
+      "Bash(mkdir *)"
+    ]
+  },
+  "$version": 3
+}

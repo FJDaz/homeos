@@ -24,6 +24,7 @@ from .groq_client import GroqClient
 from .gemini_client import GeminiClient
 from .codestral_client import CodestralClient
 from .kimi_client import KimiClient
+from .mimo_client import MimoClient
 from .execution_router import ExecutionRouter
 from .smart_context_router import SmartContextRouter, RoutingDecision
 from .provider_fallback_cascade import ProviderFallbackCascade, CascadeConfig
@@ -155,6 +156,14 @@ class AgentRouter:
                 logger.debug("KIMI client initialized (128K context)")
             except Exception as e:
                 logger.warning(f"Failed to initialize KIMI client: {e}")
+
+        # MiMo (Xiaomi MiMo - high efficiency for War Room)
+        if settings.mimo_api_key:
+            try:
+                self._clients["mimo"] = MimoClient()
+                logger.debug("MiMo client initialized (v2-flash/pro)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize MiMo client: {e}")
 
         if not self._clients:
             raise ValueError("No LLM clients could be initialized. Check API keys.")

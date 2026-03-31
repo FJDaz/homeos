@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parents[2] / ".env",
+        env_file=Path(__file__).resolve().parents[3] / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore"
@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     )
 
     mistral_api_key: str = Field(default="", alias="MISTRAL_API_KEY", description="Mistral API key for Codestral")
+    mistral_chat_key: str = Field(default="", alias="MISTRAL_CHAT_KEY", description="Mistral chat API key (La Plateforme, open-mistral-nemo)")
 
     google_api_key: str = Field(default="", alias="GOOGLE_API_KEY", description="Google API key for Gemini")
 
@@ -55,6 +56,22 @@ class Settings(BaseSettings):
         default="", alias="NVIDIA_API_KEY", description="NVIDIA NIM API key (free, for KIMI K2.5)"
     )
 
+    mimo_api_key: str = Field(
+        default="", alias="MIMO_KEY", description="Xiaomi MiMo API key (high-fidelity UI/Vision)"
+    )
+
+    mimo_api_url: str = Field(
+        default="https://api.xiaomimimo.com/v1",
+        alias="MIMO_API_URL",
+        description="Xiaomi MiMo API endpoint URL",
+    )
+
+    mimo_model: str = Field(
+        default="mimo-v2-flash",
+        alias="MIMO_MODEL",
+        description="Xiaomi MiMo model to use (mimo-v2-flash, mimo-v2-pro)",
+    )
+
     # API Configuration
     deepseek_api_url: str = Field(
         default="https://api.deepseek.com/v1/chat/completions",
@@ -69,9 +86,9 @@ class Settings(BaseSettings):
     )
 
     gemini_model: str = Field(
-        default="gemini-2.0-flash",  # Reliable stable 2026 model, preferred for visual fidelity
+        default="gemini-2.5-flash",  # GA — primary stable 2026
         alias="GEMINI_MODEL",
-        description="Gemini model to use. Stable: gemini-2.0-flash (recommended), gemini-3.1-pro-preview, gemini-3.1-flash-lite.",
+        description="Gemini model. GA: gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.5-pro. Preview: gemini-3.1-pro, gemini-3.1-flash-lite.",
     )
 
     groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL", description="Groq model to use")
@@ -194,6 +211,19 @@ class Settings(BaseSettings):
 
     groq_output_cost_per_1k: float = Field(
         default=0.00079, alias="GROQ_OUTPUT_COST_PER_1K", description="Cost per 1K output tokens for Groq (USD)"
+    )
+
+    # MiMo Cost Tracking (approx. 0.1 RMB / 1M tokens)
+    mimo_input_cost_per_1k: float = Field(
+        default=0.000014, alias="MIMO_INPUT_COST_PER_1K", description="Cost per 1K input tokens for MiMo (USD)"
+    )
+
+    mimo_output_cost_per_1k: float = Field(
+        default=0.000014, alias="MIMO_OUTPUT_COST_PER_1K", description="Cost per 1K output tokens for MiMo (USD)"
+    )
+
+    mimo_free_quota_tokens: int = Field(
+        default=5000000, alias="MIMO_FREE_QUOTA_TOKENS", description="Estimated free tokens for MiMo (default 5M)"
     )
 
     # Execution Mode Settings

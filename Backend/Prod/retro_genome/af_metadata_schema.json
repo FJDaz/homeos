@@ -1,0 +1,56 @@
+{
+  "protocol": "af-metadata",
+  "version": "1.0",
+  "description": "Schéma d'annotation SVG pour la Pierre de Rosette d'AetherFlow",
+  "layers": {
+    "functional": {
+      "description": "Sémantique et intents (toutes interfaces)",
+      "attributes": {
+        "data-af-id": {
+          "description": "ID unique lié au Genome (ex: organ.feature.comp)",
+          "type": "string"
+        },
+        "data-af-region": {
+          "description": "Rôle structurel de la zone",
+          "enum": ["header", "sidebar", "content", "footer", "modal", "overlay"]
+        },
+        "data-af-intent": {
+          "description": "Intention fonctionnelle en langage naturel",
+          "type": "string",
+          "example": "liste des messages récents"
+        },
+        "data-af-state": {
+          "description": "État visuel",
+          "enum": ["default", "active", "empty", "loading"]
+        },
+        "data-af-interact": {
+          "description": "Type d'interaction attendue",
+          "enum": ["none", "clickable", "input", "scrollable", "draggable"]
+        }
+      }
+    },
+    "geometric": {
+      "description": "Métadonnées pour interfaces non-rectangulaires",
+      "attributes": {
+        "data-af-math-role": {
+          "description": "Rôle géométrique spécifique",
+          "enum": ["set", "cell", "node", "edge", "intersection", "pyramid-row"]
+        },
+        "data-af-cell-coords": {
+          "description": "Coordonnées de grille (row,col)",
+          "type": "string",
+          "example": "2,3"
+        },
+        "data-af-compute": {
+          "description": "Flag pour calcul géométrique frontend requis",
+          "enum": ["circle-circle-lens", "arc-path", "voronoi", "gravity-graph"]
+        },
+        "data-af-parents": {
+          "description": "IDs des éléments dont dépend cet élément (ex: intersection)",
+          "type": "string",
+          "example": "node_1,node_2"
+        }
+      }
+    }
+  }
+}

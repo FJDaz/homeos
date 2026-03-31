@@ -1,0 +1,357 @@
+{
+  "imports": [
+    {
+      "id": "2026-03-31_113912_Sezane_UI_Comparaison_3_prodcuts.svg",
+      "name": "Sezane UI_Comparaison 3 prodcuts.svg",
+      "timestamp": "2026-03-31T11:39:12.763499",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Comparaison_3_prodcuts.svg_113912.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 42
+    },
+    {
+      "id": "2026-03-31_113912_Sezane_UI_Comapraison_2_products.svg",
+      "name": "Sezane UI_Comapraison 2 products.svg",
+      "timestamp": "2026-03-31T11:39:12.673553",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Comapraison_2_products.svg_113912.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 42
+    },
+    {
+      "id": "2026-03-31_113902_Sezane_UI_Capicne_dépliée.svg",
+      "name": "Sezane UI_Capicne dépliée.svg",
+      "timestamp": "2026-03-31T11:39:02.230029",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Capicne_dépliée.svg_113902.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 29
+    },
+    {
+      "id": "2026-03-31_113857_Sezane_UI_Capucine_Collpased.svg",
+      "name": "Sezane UI_Capucine Collpased.svg",
+      "timestamp": "2026-03-31T11:38:57.924979",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Capucine_Collpased.svg_113857.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 5
+    },
+    {
+      "id": "2026-03-31_113857_Sezane_UI_Capicne_dépliée.svg",
+      "name": "Sezane UI_Capicne dépliée.svg",
+      "timestamp": "2026-03-31T11:38:57.911837",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Capicne_dépliée.svg_113857.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 29
+    },
+    {
+      "id": "2026-03-31_113848_Sezane_UI_Assets.svg",
+      "name": "Sezane UI_Assets.svg",
+      "timestamp": "2026-03-31T11:38:48.646358",
+      "svg_path": "2026-03-31/SVG_Sezane_UI_Assets.svg_113848.svg",
+      "date": "2026-03-31",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 28
+    },
+    {
+      "id": "2026-03-30_220729_[AetherFlow]_Reality",
+      "name": "[AetherFlow] Reality",
+      "timestamp": "2026-03-30T22:07:29.130957",
+      "svg_path": "2026-03-30/SVG_[AetherFlow]_Reality_220729.svg",
+      "date": "2026-03-30",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 95
+    },
+    {
+      "id": "2026-03-30_220449_[AetherFlow]_Reality",
+      "name": "[AetherFlow] Reality",
+      "timestamp": "2026-03-30T22:04:49.542326",
+      "svg_path": "2026-03-30/SVG_[AetherFlow]_Reality_220449.svg",
+      "date": "2026-03-30",
+      "archetype_id": "unknown",
+      "archetype_label": "Interface Personnalisée / Mixte",
+      "elements_count": 95
+    },
+    {
+      "id": "2026-03-29_223547_[AetherFlow]_Reality",
+      "name": "[AetherFlow] Reality",
+      "timestamp": "2026-03-29T22:35:47.766051",
+      "svg_path": "2026-03-29/SVG_[AetherFlow]_Reality_223547.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222652_[AetherFlow]_Reality",
+      "name": "[AetherFlow] Reality",
+      "timestamp": "2026-03-29T22:26:52.654072",
+      "svg_path": "2026-03-29/SVG_[AetherFlow]_Reality_222652.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222601_[comp_vision_regenerate]_Régénérer_Analy",
+      "name": "[comp_vision_regenerate] Régénérer Analyse",
+      "timestamp": "2026-03-29T22:26:01.259984",
+      "svg_path": "2026-03-29/SVG_[comp_vision_regenerate]_Régénérer_Analy_222601.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222601_[comp_vision_analyze_btn]_Bouton_Analyse",
+      "name": "[comp_vision_analyze_btn] Bouton Analyser",
+      "timestamp": "2026-03-29T22:26:01.222585",
+      "svg_path": "2026-03-29/SVG_[comp_vision_analyze_btn]_Bouton_Analyse_222601.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222601_[comp_vision_report]_Rapport_Analyse_Vis",
+      "name": "[comp_vision_report] Rapport Analyse Vision",
+      "timestamp": "2026-03-29T22:26:01.033276",
+      "svg_path": "2026-03-29/SVG_[comp_vision_report]_Rapport_Analyse_Vis_222601.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_distillation_list]_Liste_Distillat",
+      "name": "[comp_distillation_list] Liste Distillation",
+      "timestamp": "2026-03-29T22:26:00.854118",
+      "svg_path": "2026-03-29/SVG_[comp_distillation_list]_Liste_Distillat_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_session_status]_Status_Session",
+      "name": "[comp_session_status] Status Session",
+      "timestamp": "2026-03-29T22:26:00.831102",
+      "svg_path": "2026-03-29/SVG_[comp_session_status]_Status_Session_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_genome_summary]_Résumé_Genome",
+      "name": "[comp_genome_summary] Résumé Genome",
+      "timestamp": "2026-03-29T22:26:00.799935",
+      "svg_path": "2026-03-29/SVG_[comp_genome_summary]_Résumé_Genome_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_session_reset]_Reset_Session",
+      "name": "[comp_session_reset] Reset Session",
+      "timestamp": "2026-03-29T22:26:00.742307",
+      "svg_path": "2026-03-29/SVG_[comp_session_reset]_Reset_Session_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_ir_detail]_Détail_Organe",
+      "name": "[comp_ir_detail] Détail Organe",
+      "timestamp": "2026-03-29T22:26:00.614530",
+      "svg_path": "2026-03-29/SVG_[comp_ir_detail]_Détail_Organe_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222600_[comp_ir_table]_Vue_Rapport_IR",
+      "name": "[comp_ir_table] Vue Rapport IR",
+      "timestamp": "2026-03-29T22:26:00.519968",
+      "svg_path": "2026-03-29/SVG_[comp_ir_table]_Vue_Rapport_IR_222600.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222536_[comp_vision_regenerate]_Régénérer_Analy",
+      "name": "[comp_vision_regenerate] Régénérer Analyse",
+      "timestamp": "2026-03-29T22:25:36.058153",
+      "svg_path": "2026-03-29/SVG_[comp_vision_regenerate]_Régénérer_Analy_222536.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_vision_analyze_btn]_Bouton_Analyse",
+      "name": "[comp_vision_analyze_btn] Bouton Analyser",
+      "timestamp": "2026-03-29T22:25:35.944915",
+      "svg_path": "2026-03-29/SVG_[comp_vision_analyze_btn]_Bouton_Analyse_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_vision_report]_Rapport_Analyse_Vis",
+      "name": "[comp_vision_report] Rapport Analyse Vision",
+      "timestamp": "2026-03-29T22:25:35.762449",
+      "svg_path": "2026-03-29/SVG_[comp_vision_report]_Rapport_Analyse_Vis_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_distillation_list]_Liste_Distillat",
+      "name": "[comp_distillation_list] Liste Distillation",
+      "timestamp": "2026-03-29T22:25:35.581876",
+      "svg_path": "2026-03-29/SVG_[comp_distillation_list]_Liste_Distillat_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_session_status]_Status_Session",
+      "name": "[comp_session_status] Status Session",
+      "timestamp": "2026-03-29T22:25:35.559978",
+      "svg_path": "2026-03-29/SVG_[comp_session_status]_Status_Session_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_genome_summary]_Résumé_Genome",
+      "name": "[comp_genome_summary] Résumé Genome",
+      "timestamp": "2026-03-29T22:25:35.525434",
+      "svg_path": "2026-03-29/SVG_[comp_genome_summary]_Résumé_Genome_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_session_reset]_Reset_Session",
+      "name": "[comp_session_reset] Reset Session",
+      "timestamp": "2026-03-29T22:25:35.464472",
+      "svg_path": "2026-03-29/SVG_[comp_session_reset]_Reset_Session_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_ir_detail]_Détail_Organe",
+      "name": "[comp_ir_detail] Détail Organe",
+      "timestamp": "2026-03-29T22:25:35.335403",
+      "svg_path": "2026-03-29/SVG_[comp_ir_detail]_Détail_Organe_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222535_[comp_ir_table]_Vue_Rapport_IR",
+      "name": "[comp_ir_table] Vue Rapport IR",
+      "timestamp": "2026-03-29T22:25:35.238206",
+      "svg_path": "2026-03-29/SVG_[comp_ir_table]_Vue_Rapport_IR_222535.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_vision_regenerate]_Régénérer_Analy",
+      "name": "[comp_vision_regenerate] Régénérer Analyse",
+      "timestamp": "2026-03-29T22:25:24.904010",
+      "svg_path": "2026-03-29/SVG_[comp_vision_regenerate]_Régénérer_Analy_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_vision_analyze_btn]_Bouton_Analyse",
+      "name": "[comp_vision_analyze_btn] Bouton Analyser",
+      "timestamp": "2026-03-29T22:25:24.863353",
+      "svg_path": "2026-03-29/SVG_[comp_vision_analyze_btn]_Bouton_Analyse_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_vision_report]_Rapport_Analyse_Vis",
+      "name": "[comp_vision_report] Rapport Analyse Vision",
+      "timestamp": "2026-03-29T22:25:24.666386",
+      "svg_path": "2026-03-29/SVG_[comp_vision_report]_Rapport_Analyse_Vis_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_genome_summary]_Résumé_Genome",
+      "name": "[comp_genome_summary] Résumé Genome",
+      "timestamp": "2026-03-29T22:25:24.498761",
+      "svg_path": "2026-03-29/SVG_[comp_genome_summary]_Résumé_Genome_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_session_status]_Status_Session",
+      "name": "[comp_session_status] Status Session",
+      "timestamp": "2026-03-29T22:25:24.493325",
+      "svg_path": "2026-03-29/SVG_[comp_session_status]_Status_Session_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_distillation_list]_Liste_Distillat",
+      "name": "[comp_distillation_list] Liste Distillation",
+      "timestamp": "2026-03-29T22:25:24.487118",
+      "svg_path": "2026-03-29/SVG_[comp_distillation_list]_Liste_Distillat_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_session_reset]_Reset_Session",
+      "name": "[comp_session_reset] Reset Session",
+      "timestamp": "2026-03-29T22:25:24.310891",
+      "svg_path": "2026-03-29/SVG_[comp_session_reset]_Reset_Session_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222524_[comp_ir_table]_Vue_Rapport_IR",
+      "name": "[comp_ir_table] Vue Rapport IR",
+      "timestamp": "2026-03-29T22:25:24.172806",
+      "svg_path": "2026-03-29/SVG_[comp_ir_table]_Vue_Rapport_IR_222524.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222208_[comp_vision_regenerate]_Régénérer_Analy",
+      "name": "[comp_vision_regenerate] Régénérer Analyse",
+      "timestamp": "2026-03-29T22:22:08.414587",
+      "svg_path": "2026-03-29/SVG_[comp_vision_regenerate]_Régénérer_Analy_222208.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222208_[comp_vision_analyze_btn]_Bouton_Analyse",
+      "name": "[comp_vision_analyze_btn] Bouton Analyser",
+      "timestamp": "2026-03-29T22:22:08.363674",
+      "svg_path": "2026-03-29/SVG_[comp_vision_analyze_btn]_Bouton_Analyse_222208.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222208_[comp_vision_report]_Rapport_Analyse_Vis",
+      "name": "[comp_vision_report] Rapport Analyse Vision",
+      "timestamp": "2026-03-29T22:22:08.165216",
+      "svg_path": "2026-03-29/SVG_[comp_vision_report]_Rapport_Analyse_Vis_222208.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_genome_summary]_Résumé_Genome",
+      "name": "[comp_genome_summary] Résumé Genome",
+      "timestamp": "2026-03-29T22:22:07.922881",
+      "svg_path": "2026-03-29/SVG_[comp_genome_summary]_Résumé_Genome_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_distillation_list]_Liste_Distillat",
+      "name": "[comp_distillation_list] Liste Distillation",
+      "timestamp": "2026-03-29T22:22:07.916403",
+      "svg_path": "2026-03-29/SVG_[comp_distillation_list]_Liste_Distillat_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_session_status]_Status_Session",
+      "name": "[comp_session_status] Status Session",
+      "timestamp": "2026-03-29T22:22:07.908878",
+      "svg_path": "2026-03-29/SVG_[comp_session_status]_Status_Session_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_session_reset]_Reset_Session",
+      "name": "[comp_session_reset] Reset Session",
+      "timestamp": "2026-03-29T22:22:07.750237",
+      "svg_path": "2026-03-29/SVG_[comp_session_reset]_Reset_Session_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_stencil_card]_Carte_Stencil",
+      "name": "[comp_stencil_card] Carte Stencil",
+      "timestamp": "2026-03-29T22:22:07.615061",
+      "svg_path": "2026-03-29/SVG_[comp_stencil_card]_Carte_Stencil_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_ir_detail]_Détail_Organe",
+      "name": "[comp_ir_detail] Détail Organe",
+      "timestamp": "2026-03-29T22:22:07.533489",
+      "svg_path": "2026-03-29/SVG_[comp_ir_detail]_Détail_Organe_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222207_[comp_ir_table]_Vue_Rapport_IR",
+      "name": "[comp_ir_table] Vue Rapport IR",
+      "timestamp": "2026-03-29T22:22:07.436073",
+      "svg_path": "2026-03-29/SVG_[comp_ir_table]_Vue_Rapport_IR_222207.svg",
+      "date": "2026-03-29"
+    },
+    {
+      "id": "2026-03-29_222120_test",
+      "name": "test",
+      "timestamp": "2026-03-29T22:21:20.212010",
+      "svg_path": "2026-03-29/SVG_test_222120.svg",
+      "date": "2026-03-29"
+    }
+  ]
+}

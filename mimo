@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+# Mimo CLI Wrapper — AetherFlow
+export PYTHONPATH=$PYTHONPATH:.
+python3 Backend/Prod/scripts/mimo_cli.py "$@"

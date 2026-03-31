@@ -1,0 +1,16 @@
+{
+  "name": "Modal",
+  "library": "Flowbite",
+  "category": "Organe",
+  "sullivan_score": 84.0,
+  "performance_score": 85,
+  "accessibility_score": 90,
+  "ecology_score": 80,
+  "popularity_score": 90,
+  "validation_score": 85,
+  "size_kb": 5,
+  "created_at": "2026-03-01T19:07:00",
+  "user_id": "AETHERFLOW_HARVESTER",
+  "html": "<!-- Modal toggle -->\n<button data-modal-target=\"default-modal\" data-modal-toggle=\"default-modal\" class=\"block text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none\" type=\"button\">\n  Toggle modal\n</button>\n\n<!-- Main modal -->\n<div id=\"default-modal\" tabindex=\"-1\" aria-hidden=\"true\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\">\n    <div class=\"relative p-4 w-full max-w-2xl max-h-full\">\n        <div class=\"relative bg-neutral-primary rounded-base shadow-sm\">\n            <div class=\"flex items-center justify-between p-4 md:p-5 border-b border-default rounded-t\">\n                <h3 class=\"text-xl font-semibold text-heading\">Terms of Service</h3>\n                <button type=\"button\" class=\"text-body bg-transparent hover:bg-neutral-secondary-medium hover:text-heading rounded-base text-sm w-8 h-8 ms-auto inline-flex justify-center items-center\" data-modal-hide=\"default-modal\">\n                    <svg class=\"w-3 h-3\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 14 14\">\n                        <path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6\"/>\n                    </svg>\n                </button>\n            </div>\n            <div class=\"p-4 md:p-5 space-y-4\">\n                <p class=\"text-base leading-relaxed text-body\">With less than a month to go before the European Union enacts new consumer privacy laws...</p>\n            </div>\n            <div class=\"flex items-center p-4 md:p-5 border-t border-default rounded-b\">\n                <button data-modal-hide=\"default-modal\" type=\"button\" class=\"text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none\">I accept</button>\n                <button data-modal-hide=\"default-modal\" type=\"button\" class=\"py-2.5 px-4 ms-3 text-sm font-medium text-heading focus:outline-none bg-neutral-primary-medium rounded-base border border-default-medium hover:bg-neutral-secondary-strong hover:text-fg-brand focus:z-10 focus:ring-4 focus:ring-neutral-tertiary\">Decline</button>\n            </div>\n        </div>\n    </div>\n</div>",
+  "source_url": "https://flowbite.com/docs/components/modal/"
+}

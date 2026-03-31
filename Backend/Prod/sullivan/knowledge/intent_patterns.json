@@ -1,0 +1,60 @@
+{
+  "patterns": [
+    {
+      "name": "Toggle Visibility",
+      "surface_forms": [
+        "Afficher/Masquer",
+        "Montrer/Cacher",
+        "Activer/Désactiver",
+        "Ouvrir/Fermer"
+      ],
+      "intention": "Changer la visibilité d'un élément",
+      "constraints": {
+        "element": "élément à afficher ou masquer"
+      },
+      "abstraction": "ToggleVisibilityAbstraction"
+    },
+    {
+      "name": "Accordion",
+      "surface_forms": [
+        "Développer/Réduire",
+        "Étendre/Rétracter",
+        "Montrer les détails/Masquer les détails",
+        "Ouvrir la section/Fermer la section"
+      ],
+      "intention": "Changer l'état d'un accordéon",
+      "constraints": {
+        "section": "section à développer ou réduire"
+      },
+      "abstraction": "AccordionAbstraction"
+    },
+    {
+      "name": "Modal",
+      "surface_forms": [
+        "Ouvrir la modale/Fermer la modale",
+        "Afficher la popup/Masquer la popup",
+        "Montrer le dialogue/Cacher le dialogue",
+        "Ouvrir la fenêtre/Fermer la fenêtre"
+      ],
+      "intention": "Changer l'état d'une modale",
+      "constraints": {
+        "modal": "modale à ouvrir ou fermer"
+      },
+      "abstraction": "ModalAbstraction"
+    },
+    {
+      "name": "Navigation",
+      "surface_forms": [
+        "Aller à",
+        "Naviguer vers",
+        "Se rendre à",
+        "Accéder à"
+      ],
+      "intention": "Naviguer vers une page ou un élément",
+      "constraints": {
+        "destination": "page ou élément à naviguer"
+      },
+      "abstraction": "NavigationAbstraction"
+    }
+  ]
+}

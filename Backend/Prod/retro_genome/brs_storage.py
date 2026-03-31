@@ -51,14 +51,19 @@ class BRSStorage:
                 )
             """)
             
-            # FTS5 standalone (session_id + provider non-indexés, content indexé)
+            # FTS5 — migration auto si schema obsolète
             try:
-                cursor.execute("""
-                    CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts
-                    USING fts5(session_id UNINDEXED, provider UNINDEXED, content)
-                """)
-            except sqlite3.OperationalError as e:
-                logger.warning(f"[BRS] FTS5 not supported or error: {e}")
+                cursor.execute("SELECT session_id FROM messages_fts LIMIT 1")
+            except sqlite3.OperationalError:
+                # Ancien schema sans session_id → drop + recreate
+                cursor.execute("DROP TABLE IF EXISTS messages_fts")
+                try:
+                    cursor.execute("""
+                        CREATE VIRTUAL TABLE messages_fts
+                        USING fts5(session_id UNINDEXED, provider UNINDEXED, content)
+                    """)
+                except sqlite3.OperationalError as e:
+                    logger.warning(f"[BRS] FTS5 not supported: {e}")
 
             # Table Nuggets (Pépites)
             cursor.execute("""
@@ -152,17 +157,22 @@ class BRSStorage:
                 return data
         return None
 
-    def get_messages(self, session_id: str) -> List[Dict[str, Any]]:
-        """Récupère l'historique complet d'une session."""
+    def get_messages(self, session_id: str, provider: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Récupère l'historique d'une session (filtrable par provider)."""
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT provider, role, content, created_at 
-                FROM messages 
-                WHERE session_id = ? 
-                ORDER BY created_at ASC
-            """, (session_id,))
+            
+            sql = "SELECT provider, role, content, created_at FROM messages WHERE session_id = ?"
+            params = [session_id]
+            
+            if provider:
+                sql += " AND provider = ?"
+                params.append(provider)
+                
+            sql += " ORDER BY created_at ASC"
+            
+            cursor.execute(sql, params)
             return [dict(row) for row in cursor.fetchall()]
 
     def search(self, query: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:

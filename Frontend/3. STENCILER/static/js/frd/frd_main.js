@@ -49,16 +49,17 @@ class FrdMain {
         const monacoPane = document.getElementById('monaco-pane');
         const monacoResizeHandle = document.getElementById('monaco-resize-handle');
         
-        document.getElementById('btn-toggle-monaco').onclick = () => {
+        document.getElementById('btn-toggle-monaco').onclick = (e) => {
             this.state.isCollapsed = !this.state.isCollapsed;
             monacoPane.style.transition = 'height 200ms ease';
+            const btn = document.getElementById('btn-toggle-monaco');
             if (this.state.isCollapsed) {
                 this.state.lastHeight = monacoPane.offsetHeight;
                 monacoPane.style.height = '0px';
-                monacoResizeHandle.style.display = 'none';
+                btn.innerText = '▴';
             } else {
                 monacoPane.style.height = this.state.lastHeight + 'px';
-                monacoResizeHandle.style.display = 'block';
+                btn.innerText = '▾';
             }
             setTimeout(() => { if (this.editor.editor) this.editor.editor.layout(); }, 210);
         };
@@ -97,13 +98,15 @@ class FrdMain {
             else if (file.name.endsWith('.zip')) this.editor.loadZIPFile(file);
         };
 
-        document.getElementById('btn-load').onclick = () => {
-            const saveInput = document.getElementById('save-name').value.trim();
-            const filename = saveInput || document.getElementById('template-select').value;
+        document.getElementById('template-select').onchange = () => {
+            const filename = document.getElementById('template-select').value;
+            if (!filename) return;
+            document.getElementById('save-name').value = filename;
             this.editor.loadFile(filename);
         };
 
         document.getElementById('btn-save').onclick = () => this.editor.saveFile();
+        document.getElementById('btn-preview-tab').onclick = () => this.editor.runPreviewTab();
 
         document.getElementById('btn-undo').onclick = () => {
             if (this.state._htmlHistory.length === 0) return;

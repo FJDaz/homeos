@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS — Accueil</title>
+    <link rel="stylesheet" href="/static/css/stenciler.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <style>
+        /* Override Tailwind with Stenciler Tokens */
+        :root {
+            --vert-homeos: #8cc63f;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Geist', sans-serif;
+            font-size: 12px;
+            text-transform: lowercase; /* Règle absolue HoméOS */
+        }
+        .sidebar-brand { color: var(--vert-homeos); }
+        .btn-homeos {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: all 0.12s ease;
+        }
+        .btn-homeos:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        .btn-homeos-primary {
+            background: var(--vert-homeos);
+            color: white;
+            border: none;
+        }
+        .import-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 12px;
+            transition: transform 0.1s ease;
+        }
+        .import-card:hover { transform: translateY(-1px); border-color: var(--border-warm); }
+        
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- HEADER GLOBAL INJECTÉ PAR bootstrap.js (Mission 107) -->
+
+    <div class="stenciler-workspace flex-1 overflow-hidden">
+
+        <!-- MAIN CONTENT -->
+        <main class="right-zone p-12 overflow-y-auto">
+            <div class="max-w-5xl mx-auto flex flex-col gap-10">
+
+                <section>
+                    <div class="flex items-center gap-2 mb-1 italic">
+                        <div class="text-[11px] text-[#8cc63f] font-bold tracking-widest">phase_100-bis</div>
+                        <div id="stitch-badge" class="hidden px-2 py-0.5 bg-slate-900 text-white text-[9px] font-bold rounded uppercase tracking-tighter">Stitch Compatible</div>
+                    </div>
+                    <h2 class="text-3xl font-medium tracking-tight mb-4">hub d’import universel</h2>
+                    <p class="text-zinc-500 max-w-xl leading-relaxed">
+                        importez vos maquettes depuis n'importe quelle source : figma, illustrator, stitch, ou react. homéos centralise et transforme.
+                    </p>
+                </section>
+
+                <!-- MULTI-FORMAT DROP ZONE -->
+                <section>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-zinc-400 text-[10px] uppercase tracking-widest">zone d'import</h3>
+                        <span class="text-[10px] text-zinc-400">svg · zip · tsx · html</span>
+                    </div>
+
+                    <div id="drop-zone" class="border-2 border-dashed border-zinc-300 rounded-xl p-12 text-center transition-all cursor-pointer hover:border-[#8cc63f] hover:bg-zinc-50"
+                         onclick="document.getElementById('file-input').click()">
+                        <div class="flex flex-col items-center gap-4">
+                            <svg class="w-12 h-12 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <div class="flex flex-col gap-1">
+                                <div class="text-zinc-600 font-medium">glissez-déposez vos fichiers</div>
+                                <div class="text-zinc-400 text-[11px]">svg figma · svg illustrator · zip stitch · react tsx · html/css</div>
+                            </div>
+                            <input type="file" id="file-input" class="hidden" multiple accept=".svg,.zip,.tsx,.ts,.html,.css,.js" onchange="handleFileSelect(event)">
+                        </div>
+                    </div>
+
+                    <!-- UPLOAD PROGRESS -->
+                    <div id="upload-progress" class="hidden mt-4">
+                        <div class="flex items-center gap-3 p-4 bg-white border border-zinc-200 rounded-lg">
+                            <div class="w-4 h-4 border-2 border-[#8cc63f] border-t-transparent rounded-full animate-spin"></div>
+                            <div class="text-[11px] text-zinc-500">traitement en cours...</div>
+                        </div>
+                    </div>
+
+                    <!-- MANIFEST CREATION FORM (hidden by default) -->
+                    <div id="manifest-form" class="hidden mt-6 p-6 bg-white border border-zinc-200 rounded-xl">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="font-bold text-zinc-700">manifest.json requis</div>
+                        </div>
+                        <p class="text-[11px] text-zinc-500 mb-4">aucun manifest détecté. créez le contexte de votre projet pour continuer.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">nom du projet</label>
+                                <input type="text" id="manifest-name" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: mon-projet">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">auteur</label>
+                                <input type="text" id="manifest-author" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: jean">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">description</label>
+                                <input type="text" id="manifest-desc" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: interface de gestion...">
+                            </div>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="submitManifest()" class="px-4 py-2 bg-[#8cc63f] text-white rounded text-[11px] font-bold hover:opacity-90">créer le manifest</button>
+                            <button onclick="hideManifestForm()" class="px-4 py-2 bg-white border border-zinc-300 text-zinc-600 rounded text-[11px] hover:bg-zinc-50">annuler</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- IMPORTED SCREENS SELECTION -->
+                <section id="screens-section" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-zinc-400 text-[10px] uppercase tracking-widest">écrans importés</h3>
+                        <div class="flex gap-3">
+                            <button class="text-xs text-zinc-400 hover:underline" onclick="clearImports()">vider</button>
+                            <button class="text-xs text-[#8cc63f] hover:underline" onclick="fetchImports()">rafraîchir</button>
+                        </div>
+                    </div>
+
+                    <div id="import-list" class="grid grid-cols-2 gap-4">
+                        <!-- Dynamic content -->
+                    </div>
+
+                    <!-- CONTINUE TO FRD EDITOR BUTTON -->
+                    <div class="mt-6 flex justify-end">
+                        <button id="btn-continue-frd" onclick="continueToFRDEditor()" class="px-6 py-2.5 bg-[#8cc63f] text-white rounded text-[11px] font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            continuer vers frd editor →
+                        </button>
+                    </div>
+                </section>
+
+                <!-- EMPTY STATE (when no imports) -->
+                <section id="empty-state" class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-zinc-400">
+                    <svg class="w-10 h-10 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    <div class="text-[11px] italic">en attente d'imports...</div>
+                </section>
+
+                <!-- MANIFEST INFO -->
+                <section class="pt-8 border-t border-zinc-100 mb-20">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] uppercase font-bold text-zinc-300">contexte</div>
+                        <div class="flex gap-2">
+                            <button id="btn-sync-stitch" class="hidden btn-homeos bg-zinc-100" onclick="syncStitch()">synchroniser stitch</button>
+                            <button id="btn-manifest-info" class="btn-homeos" onclick="showManifestInfo()">voir le manifest</button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MANIFEST DRAWER (Mission 104) -->
+    <div id="manifest-drawer" class="hidden fixed inset-y-0 right-0 w-[500px] bg-white shadow-2xl border-l border-zinc-200 z-[100] flex flex-col transform transition-transform duration-300 translate-x-full">
+        <div class="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
+            <div>
+                <h3 class="font-bold text-slate-800">HoméOS Manifest</h3>
+                <div class="text-[10px] text-zinc-400 uppercase tracking-widest">backend.md (Source of Truth)</div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="saveManifestBackend()" class="px-3 py-1 bg-[#8cc63f] text-white rounded text-[10px] font-bold">Enregistrer</button>
+                <button onclick="hideManifestDrawer()" class="text-zinc-400 hover:text-zinc-600">✕</button>
+            </div>
+        </div>
+        <div id="monaco-mount" class="flex-1"></div>
+    </div>
+    <div id="drawer-overlay" class="hidden fixed inset-0 bg-black/20 z-[90] backdrop-blur-sm" onclick="hideManifestDrawer()"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <script>
+        // State
+        let selectedImports = new Set();
+        let manifestExists = false;
+
+        async function init() {
+            if (window.HOMEOS) window.HOMEOS.boot();
+            await checkManifest();
+            await fetchImports();
+            await fetchNotifications();
+            setInterval(fetchImports, 10000);
+            setupDropZone();
+        }
+
+        // --- MANIFEST CHECK ---
+        async function checkManifest() {
+            try {
+                const res = await fetch('/api/manifest/check');
+                const data = await res.json();
+                manifestExists = data.exists || false;
+                
+                if (data.stitch_ready) {
+                    document.getElementById('stitch-badge').classList.remove('hidden');
+                    document.getElementById('btn-sync-stitch').classList.remove('hidden');
+                }
+
+                if (!manifestExists) {
+                    document.getElementById('manifest-form').classList.remove('hidden');
+                }
+                updateManifestButton();
+            } catch (e) {
+                console.error("manifest check failed", e);
+            }
+        }
+
+        function updateManifestButton() {
+            const btn = document.getElementById('btn-manifest-info');
+            btn.textContent = manifestExists ? 'voir le manifest' : 'créer le manifest';
+        }
+
+        let _monaco = null;
+        let _editor = null;
+
+        function showManifestInfo() {
+            if (manifestExists) {
+                showManifestDrawer();
+            } else {
+                document.getElementById('manifest-form').classList.remove('hidden');
+            }
+        }
+
+        async function showManifestDrawer() {
+            const drawer = document.getElementById('manifest-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            drawer.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+
+            const res = await fetch('/api/manifest/backend');
+            const data = await res.json();
+
+            if (!window.require) return;
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                if (_editor) {
+                    _editor.setValue(data.content);
+                    return;
+                }
+                _editor = monaco.editor.create(document.getElementById('monaco-mount'), {
+                    value: data.content,
+                    language: 'markdown',
+                    theme: 'vs-light',
+                    fontSize: 12,
+                    minimap: { enabled: false },
+                    automaticLayout: true,
+                    lineNumbers: 'off',
+                    glyphMargin: false,
+                    folding: false,
+                    scrollBeyondLastLine: false
+                });
+            });
+        }
+
+        function hideManifestDrawer() {
+            const drawer = document.getElementById('manifest-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            drawer.classList.add('translate-x-full');
+            setTimeout(() => {
+                drawer.classList.add('hidden');
+                overlay.classList.add('hidden');
+            }, 300);
+        }
+
+        async function saveManifestBackend() {
+            if (!_editor) return;
+            const content = _editor.getValue();
+            const res = await fetch('/api/manifest/backend', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            if (res.ok) {
+                alert('Manifest sauvegardé');
+            }
+        }
+
+        async function syncStitch() {
+            const btn = document.getElementById('btn-sync-stitch');
+            btn.innerText = 'Synchronisation...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/manifest/import-stitch', { method: 'POST' });
+                const data = await res.json();
+                if (data.ok) {
+                    alert(`Synchronisation Stitch réussie : ${data.count} intentions détectées.`);
+                    showManifestDrawer();
+                }
+            } catch (e) { alert('Erreur sync: ' + e); }
+            finally {
+                btn.innerText = 'synchroniser stitch';
+                btn.disabled = false;
+            }
+        }
+
+        async function submitManifest() {
+            const name = document.getElementById('manifest-name').value.trim();
+            const author = document.getElementById('manifest-author').value.trim();
+            const desc = document.getElementById('manifest-desc').value.trim();
+
+            if (!name || !author) {
+                alert('nom et auteur requis');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/manifest/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, author, description: desc })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    manifestExists = true;
+                    document.getElementById('manifest-form').classList.add('hidden');
+                    updateManifestButton();
+                    alert('manifest créé avec succès');
+                } else {
+                    alert('erreur: ' + (data.error || 'échec création'));
+                }
+            } catch (e) {
+                alert('erreur: ' + e);
+            }
+        }
+
+        function hideManifestForm() {
+            document.getElementById('manifest-form').classList.add('hidden');
+        }
+
+        // --- DROP ZONE ---
+        function setupDropZone() {
+            const dropZone = document.getElementById('drop-zone');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('border-[#8cc63f]', 'bg-zinc-50');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('border-[#8cc63f]', 'bg-zinc-50');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            }, false);
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+        }
+
+        async function handleFiles(files) {
+            if (files.length === 0) return;
+
+            // Check manifest first
+            if (!manifestExists) {
+                document.getElementById('manifest-form').classList.remove('hidden');
+                alert('veuillez d\'abord créer un manifest.json');
+                return;
+            }
+
+            document.getElementById('upload-progress').classList.remove('hidden');
+
+            for (let file of files) {
+                await uploadFile(file);
+            }
+
+            document.getElementById('upload-progress').classList.add('hidden');
+            await fetchImports();
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', file.name);
+
+            // Determine file type
+            const ext = file.name.split('.').pop().toLowerCase();
+            let endpoint = '/api/import/upload';
+
+            if (ext === 'svg') {
+                endpoint = '/api/retro-genome/upload-svg';
+                const svgContent = await file.text();
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ svg: svgContent, name: file.name })
+                });
+                if (!res.ok) throw new Error('upload failed');
+            } else {
+                // Generic upload for other formats
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error('upload failed');
+            }
+        }
+
+        // --- IMPORTS RENDER ---
+        async function fetchImports() {
+            try {
+                const res = await fetch('/api/retro-genome/imports');
+                const data = await res.json();
+                renderImports(data.imports || []);
+            } catch (e) { console.error("failed to fetch imports"); }
+        }
+
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/retro-genome/notifications');
+                const data = await res.json();
+                if (data.new_count > 0) {
+                    const badge = document.getElementById('notif-badge');
+                    badge.innerText = data.new_count;
+                    badge.classList.remove('hidden');
+                    setTimeout(() => fetch('/api/retro-genome/notifications/clear', {method:'POST'}), 2000);
+                }
+            } catch (e) {}
+        }
+
+        function renderImports(imports) {
+            const list = document.getElementById('import-list');
+            const screensSection = document.getElementById('screens-section');
+            const emptyState = document.getElementById('empty-state');
+
+            if (imports.length === 0) {
+                screensSection.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            screensSection.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            list.innerHTML = '';
+
+            imports.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "import-card flex flex-col gap-4";
+                const isSelected = selectedImports.has(item.id);
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="w-8 h-8 bg-zinc-100 rounded flex items-center justify-center text-[10px] font-bold text-zinc-400">${(item.name || 'file').split('.').pop().toUpperCase() || 'SVG'}</div>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" onchange="toggleSelection('${item.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 accent-[#8cc63f]">
+                            <span class="text-[9px] text-zinc-400">sélectionner</span>
+                        </label>
+                    </div>
+                    <div>
+                        <div class="font-bold text-zinc-700 truncate">${item.name}</div>
+                        <div class="text-[10px] text-zinc-400 mt-0.5">${new Date(item.timestamp).toLocaleString()}</div>
+                        ${item.archetype_label ? `<div class="text-[9px] text-[#8cc63f] mt-1 font-bold">${item.archetype_label}</div>` : ''}
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="viewImport('${item.id}')" class="btn-homeos flex-1 justify-center text-[10px]">voir</button>
+                        <button onclick="analyzeImport('${item.id}')" class="btn-homeos-primary btn-homeos text-white flex-1 justify-center text-[10px]">analyser</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            updateContinueButton();
+        }
+
+        function toggleSelection(id, checked) {
+            if (checked) {
+                selectedImports.add(id);
+            } else {
+                selectedImports.delete(id);
+            }
+            updateContinueButton();
+        }
+
+        function updateContinueButton() {
+            const btn = document.getElementById('btn-continue-frd');
+            btn.disabled = selectedImports.size === 0;
+            btn.textContent = selectedImports.size === 0 
+                ? 'continuer vers frd editor →' 
+                : `${selectedImports.size} écran(s) sélectionné(s) →`;
+        }
+
+        function continueToFRDEditor() {
+            if (selectedImports.size === 0) return;
+            const ids = Array.from(selectedImports).join(',');
+            window.location.href = `/frd-editor?imports=${ids}`;
+        }
+
+        function viewImport(id) {
+            window.location.href = `/intent-viewer?import=${id}`;
+        }
+
+        function analyzeImport(id) {
+            window.location.href = `/intent-viewer?import=${id}&analyze=true`;
+        }
+
+        async function clearImports() {
+            if (!confirm('vider tous les imports ?')) return;
+            selectedImports.clear();
+            await fetch('/api/retro-genome/imports/clear', { method: 'POST' });
+            await fetchImports();
+        }
+
+        init();
+    </script>
+</body>
+</html>

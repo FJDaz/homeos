@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRD Monaco Editor — HoméOS</title>
+    <!-- Google Fonts: Geist & Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Geist+Mono:wght@400;500&display=swap">
+    <style>
+        :root {
+            --bg-editor: #1e1e1e;
+            --bg-header: #252526;
+            --text-main: #cccccc;
+            --accent: #007acc;
+            --accent-hover: #0062a3;
+            --border: #333333;
+            --accent-mauve: #c586c0;
+            --accent-vert: #4ec9b0;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            height: 48px;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title {
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.5px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: #111;
+            padding: 3px;
+            border-radius: 6px;
+        }
+
+        .tab {
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .tab.active {
+            background: var(--bg-editor);
+            color: var(--accent-vert);
+        }
+
+        .tab.active[data-lang="css"] {
+            color: var(--accent-mauve);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #444; }
+        .btn-primary { background: var(--accent); }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Editor Section */
+        #editor-container {
+            width: 50%;
+            height: 100%;
+            background: var(--bg-editor);
+        }
+
+        /* Resizer */
+        .resizer {
+            width: 4px;
+            background: var(--border);
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+        .resizer:hover { background: var(--accent); }
+
+        /* Preview Section */
+        #preview-container {
+            flex: 1;
+            background: #fff;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        /* Notifications */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent-vert);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 100;
+        }
+        #toast.open { transform: translateY(0); }
+
+        .file-info {
+            font-size: 10px;
+            color: #888;
+            font-family: 'Geist Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="workspace">
+        <header class="header">
+            <div class="header-left">
+                <div class="title">FRD MONACO EDITOR</div>
+                <div class="tabs">
+                    <div class="tab active" data-lang="html">HTML</div>
+                    <div class="tab" data-lang="css">CSS</div>
+                </div>
+                <div class="file-info" id="current-filename">brainstorm_war_room.html</div>
+            </div>
+            <div class="header-right">
+                <button class="btn" onclick="loadTemplate()">LOAD</button>
+                <button class="btn btn-primary" onclick="saveTemplate()">SAVE</button>
+            </div>
+        </header>
+
+        <main class="main-container">
+            <div id="editor-container"></div>
+            <div class="resizer" id="resizer"></div>
+            <div id="preview-container">
+                <iframe id="preview-iframe"></iframe>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast">Sauvegardé ✓</div>
+
+    <!-- Monaco Editor Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+        let editor;
+        let models = {};
+        let currentLang = 'html';
+        let currentFile = 'brainstorm_war_room.html';
+        let previewIframe = document.getElementById('preview-iframe');
+        let updateTimer;
+
+        require(['vs/editor/editor.main'], function() {
+            // Theme customization
+            monaco.editor.defineTheme('homeos-dark', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [],
+                colors: {
+                    'editor.background': '#1e1e1e',
+                }
+            });
+
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                theme: 'homeos-dark',
+                fontSize: 13,
+                fontFamily: 'Geist Mono',
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                padding: { top: 20 }
+            });
+
+            // Models Initialization
+            models.html = monaco.editor.createModel('', 'html');
+            models.css = monaco.editor.createModel('', 'css');
+
+            editor.setModel(models.html);
+
+            // Listen for changes
+            editor.onDidChangeModelContent(() => {
+                clearTimeout(updateTimer);
+                updateTimer = setTimeout(updatePreview, 300);
+            });
+
+            // Initial Load
+            loadTemplate();
+        });
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                const lang = tab.getAttribute('data-lang');
+                if (lang === currentLang) return;
+
+                document.querySelector('.tab.active').classList.remove('active');
+                tab.classList.add('active');
+                
+                currentLang = lang;
+                editor.setModel(models[lang]);
+            };
+        });
+
+        async function loadTemplate() {
+            const fileName = currentFile;
+            try {
+                const res = await fetch(`/api/frd/file?name=${fileName}`);
+                const data = await res.json();
+                
+                if (data.status === 'ok') {
+                    // Séparer HTML et CSS (approximation si injecté dans le même fichier)
+                    // Pour simplifier selon la ROADMAP : on gère des fichiers HTML complets
+                    // On va mettre tout le contenu dans l'éditeur HTML, et laisser le CSS vide ou vice-versa
+                    // SI on veut vraiment séparer, il faudrait des marqueurs ou parser.
+                    // Pour cette mission : HTML = le fichier complet, CSS = injection additionnelle
+                    models.html.setValue(data.content);
+                    updatePreview();
+                } else {
+                    alert("Erreur: " + data.detail);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveTemplate() {
+            const content = models.html.getValue(); // On sauvegarde le modèle HTML (complet)
+            try {
+                const res = await fetch('/api/frd/file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: currentFile,
+                        content: content
+                    })
+                });
+                if (res.ok) {
+                    showToast();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updatePreview() {
+            const html = models.html.getValue();
+            const css = models.css.getValue();
+            
+            // On injecte le CSS si présent
+            let finalHtml = html;
+            if (css) {
+                const styleTag = `<style>${css}</style>`;
+                if (finalHtml.includes('</head>')) {
+                    finalHtml = finalHtml.replace('</head>', `${styleTag}</head>`);
+                } else {
+                    finalHtml = styleTag + finalHtml;
+                }
+            }
+
+            previewIframe.srcdoc = finalHtml;
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('open');
+            setTimeout(() => toast.classList.remove('open'), 3000);
+        }
+
+        // Resizer Logic
+        const resizer = document.getElementById('resizer');
+        const editorContainer = document.getElementById('editor-container');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const x = e.clientX;
+            const percentage = (x / window.innerWidth) * 100;
+            if (percentage > 20 && percentage < 80) {
+                editorContainer.style.width = `${percentage}%`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+            document.body.style.cursor = 'default';
+        });
+
+    </script>
+</body>
+</html>

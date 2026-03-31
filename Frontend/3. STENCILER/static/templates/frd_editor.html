@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
     <!-- Static CSS Modular -->
     <link rel="stylesheet" href="/static/css/frd_editor.css">
+    <!-- Bootstrap.js — Navigation globale (Mission 107) -->
+    <script src="/static/js/bootstrap.js"></script>
 
     <!-- Monaco Editor Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
@@ -35,73 +37,118 @@
                             input: '#f2f3f5',
                             text: '#666666',
                             textDark: '#333333',
-                            tabActive: '#8cc63f',
-                            sep: '#333333',
+                            tabActive: '#8cc63f', // HomeOS Green
+                            tabActiveHover: '#7ab536',
+                            sep: '#e5e5e5',
+                            // Audit UX rapproché de HomeOS (Vert actif) + Teinte Rouge complémentaire
+                            auditBg: '#f0fdf4', // Vert très clair (Base HomeOS)
+                            auditBorder: '#bbf7d0', // Vert doux
+                            auditText: '#166534', // Vert sombre
+                            nudgeRed: '#fef2f2', // Rouge très clair (Complémentaire)
+                            nudgeRedBorder: '#fecaca', // Rouge doux
+                            nudgeRedText: '#991b1b', // Rouge sombre
+                            // Nudge HomeOS Standard (Vert doux)
+                            nudgeHomeOS: '#f0fdf4',
+                            nudgeHomeOSBorder: '#bbf7d0',
+                            nudgeHomeOSText: '#166534',
+                            // Sullivan Active (Vert riche)
+                            sullivanActive: '#8cc63f',
+                            sullivanActiveHover: '#7ab536',
                         }
                     },
                     fontFamily: {
+                        homeos: ['Helvetica', 'sans-serif'],
                         geist: ['Geist', 'sans-serif'],
+                        'wingdings-3': ['Wingdings 3', 'Wingdings 2', 'Wingdings', 'Zapf Dingbats', 'Symbol', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0,0,0,0.06)',
+                        'soft-hover': '0 4px 12px rgba(0,0,0,0.1)',
+                        'inner-soft': 'inset 0 1px 2px rgba(0,0,0,0.05)'
                     }
                 }
             }
         }
     </script>
+    <!-- Style pour forcer l'affichage des Wingdings 3 -->
+    <style>
+        .font-wingdings-3 {
+            font-family: 'Wingdings 3', 'Wingdings 2', 'Wingdings', 'Zapf Dingbats', 'Symbol', sans-serif;
+        }
+        /* Custom scrollbar pour le chat et l'audit */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Classe utilitaire pour le bg vert actif Sullivan */
+        .bg-sullivan-active {
+            background-color: #8cc63f;
+        }
+    </style>
 </head>
 
 <body class="flex flex-col h-screen overflow-hidden font-geist text-figma-text bg-white">
 
     <!-- Sullivan Loader Overlay -->
-    <div id="sullivan-overlay">
+    <div id="sullivan-overlay" class="hidden">
         <div class="spinner"></div>
-        <div class="bg-white px-6 py-3 rounded shadow-xl text-sm font-bold text-black uppercase tracking-widest">
+        <div class="bg-white px-6 py-3 rounded-lg shadow-soft-hover text-sm font-bold text-black tracking-widest">
             Sullivan travaille...
         </div>
     </div>
 
-    <!-- Header bar -->
-    <header class="h-[64px] border-b-[0.5px] border-figma-sep flex items-center px-4 justify-between flex-shrink-0">
-        <div class="flex items-center gap-4">
-            <button id="btn-toggle-monaco"
-                class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-xl">≡</button>
-            <h1 class="font-bold text-black uppercase tracking-widest text-sm">FRD Editor — Sullivan IA</h1>
+    <!-- Header bar (HoméOS Chrome) -- Navigation globale injectée par bootstrap.js -->
+    <header class="h-[48px] border-b border-figma-sep flex items-center px-8 justify-between flex-shrink-0 bg-white shadow-sm" data-frd-lock="true">
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">FRD Editor</span>
         </div>
+
         <div class="flex items-center gap-3">
             <button id="btn-inspect" title="Mode Inspection"
-                class="px-3 py-1 border border-figma-sep text-[10px] uppercase tracking-widest hover:border-figma-tabActive transition-all">
+                class="px-3 py-1.5 border border-figma-sep text-[12px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
                 Inspect
             </button>
             <button id="btn-lock" title="Mode Lock — zones invariantes"
-                class="px-3 py-1 border border-figma-sep text-[10px] uppercase tracking-widest hover:border-figma-tabActive transition-all">
+                class="px-3 py-1.5 border border-figma-sep text-[12px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
                 Lock
             </button>
+            <button id="btn-clear-locks" title="Effacer tous les locks"
+                class="hidden px-3 py-1.5 text-orange-600 text-[12px] hover:bg-orange-50 hover:border-orange-400 transition-all rounded-md bg-white hover:shadow-soft nudge-warning">
+                Clear locks
+            </button>
             <span id="lock-breadcrumb"
-                class="hidden text-[9px] text-orange-400 font-mono max-w-[200px] truncate ml-2"></span>
-            <button id="btn-clear-locks"
-                class="hidden px-2 py-1 border border-orange-300 text-[10px] text-orange-400 hover:border-orange-500 hover:text-orange-500 uppercase tracking-widest transition-all">✕
-                Locks</button>
+                class="hidden text-[10px] text-orange-500 font-mono max-w-[150px] truncate ml-2"></span>
+
             <select id="template-select"
-                class="bg-figma-input px-3 py-1 outline-none text-xs border border-transparent focus:border-figma-sep">
+                class="bg-figma-input px-3 py-1.5 outline-none text-[12px] border border-transparent focus:border-figma-sep rounded-md shadow-inner-soft">
                 <option value="">— chargement… —</option>
             </select>
-            <span id="current-file"
-                class="hidden text-[10px] font-bold uppercase tracking-widest text-[#8cc63f] border-b border-[#8cc63f] pb-0.5">FILTRÉ</span>
-            <button id="btn-exit-zip"
-                class="hidden px-2 py-1 border border-figma-sep text-[10px] hover:border-red-400 hover:text-red-400 transition-all uppercase tracking-widest"
-                title="Quitter le mode preview React">✕ React</button>
 
-            <input type="file" id="file-input" accept=".html,.zip" class="hidden">
-            <button id="btn-open"
-                class="px-3 py-1 border border-figma-sep text-[10px] hover:border-black transition-all uppercase tracking-widest">Open</button>
-            <button id="btn-load"
-                class="px-4 py-1 border border-black text-[10px] hover:bg-black hover:text-white transition-all uppercase tracking-widest">Load</button>
+            <label id="btn-open" for="file-input"
+                class="flex items-center px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md cursor-pointer bg-white hover:shadow-soft">
+                Parcourir…
+            </label>
+            
+            <button id="btn-exit-zip"
+                class="hidden px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft">
+                ✕ Quitter ZIP
+            </button>
+            <span id="current-file" class="hidden text-[11px] font-mono text-figma-text"></span>
             <button id="btn-undo"
-                class="hidden px-3 py-1 border border-figma-sep text-[10px] hover:border-orange-400 hover:text-orange-400 transition-all uppercase tracking-widest"
-                title="Annuler dernière action Sullivan">⟲ Undo</button>
+                class="hidden px-3 py-1.5 border border-figma-sep text-[12px] hover:border-orange-300 hover:text-orange-500 transition-all rounded-md bg-white hover:shadow-soft"
+                title="Annuler dernière action Sullivan">Undo</button>
+            
             <input id="save-name" type="text" placeholder="nom-fichier.html"
-                class="px-2 py-1 border border-figma-sep text-[10px] font-mono bg-transparent text-figma-text w-40 focus:outline-none focus:border-figma-tabActive"
+                class="px-2 py-1.5 border border-figma-sep text-[12px] font-mono bg-transparent text-figma-text w-32 focus:outline-none focus:border-figma-tabActive rounded-md shadow-inner-soft"
                 title="Nom du fichier à sauvegarder">
+            <button id="btn-preview-tab"
+                class="px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft"
+                title="Ouvrir dans un nouvel onglet">Aperçu ↗</button>
             <button id="btn-save"
-                class="px-4 py-1 bg-figma-tabActive text-white text-[10px] hover:bg-opacity-90 font-bold uppercase tracking-widest">Save</button>
+                class="px-4 py-1.5 bg-figma-tabActive text-white text-[12px] hover:bg-figma-tabActiveHover font-bold rounded-md transition-all shadow-soft hover:shadow-soft-hover">Save</button>
         </div>
     </header>
 
@@ -111,66 +158,72 @@
             <div id="preview-pane" class="flex-1 bg-gray-200 relative overflow-hidden">
                 <div id="drop-overlay">
                     <div
-                        class="bg-white border-2 border-[#8cc63f] px-8 py-4 rounded shadow-2xl text-[#8cc63f] font-bold uppercase tracking-[0.2em] text-sm animate-pulse">
+                        class="bg-white border-2 border-[#8cc63f] px-8 py-4 rounded-lg shadow-soft-hover text-[#8cc63f] font-bold tracking-[0.2em] text-sm animate-pulse">
                         Déposer pour charger
                     </div>
                 </div>
                 <iframe id="preview-iframe" class="w-full h-full border-none bg-white"></iframe>
                 <button onclick="document.getElementById('preview-iframe').requestFullscreen()" title="Plein écran"
-                    style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.35);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-size:13px;cursor:pointer;line-height:1;opacity:0.6;"
+                    style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.35);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;line-height:1;opacity:0.6;box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                     onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">⛶</button>
             </div>
-            <div id="monaco-resize-handle"></div>
-            <div id="monaco-pane" class="flex flex-col bg-white flex-shrink-0">
+            <div id="monaco-resize-handle" class="relative group">
+                <!-- Bouton Monaco plus haut et avec icône Wingdings 3 -->
+                <button id="btn-toggle-monaco" class="absolute inset-x-0 bottom-[-14px] flex justify-center items-center h-[28px] w-8 mx-auto bg-white border border-gray-300 rounded-full shadow-sm cursor-pointer z-20 text-[14px] leading-none font-wingdings-3 hover:bg-gray-50 transition-all hover:shadow-soft" title="Toggle Monaco">
+                    &#211; <!-- Wingdings 3 Down Arrow -->
+                </button>
+            </div>
+            <div id="monaco-pane" class="flex flex-col bg-white flex-shrink-0 h-[300px]">
                 <div id="editor-container" class="flex-1"></div>
             </div>
         </div>
 
-        <div id="sullivan-pane" class="w-[320px] border-l-[0.5px] border-figma-sep flex flex-col bg-figma-panel">
-            <div
-                class="h-[50px] border-b-[0.5px] border-figma-sep flex items-center px-4 font-bold text-xs uppercase tracking-widest bg-white">
-                Chatbot Sullivan
+        <div id="sullivan-pane" class="w-[280px] border-l border-figma-sep flex flex-col bg-figma-panel">
+            <div class="h-[48px] flex items-center px-6 border-b border-figma-sep gap-2 bg-white shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-figma-tabActive"></span>
+                <span class="text-[12px] font-semibold text-black">Sullivan</span>
             </div>
 
-            <details id="ux-audit-panel" class="border-b-[0.5px] border-figma-sep bg-[#fffbeb] sticky top-0 z-10">
+            <details id="ux-audit-panel" class="border-b-[0.5px] border-figma-sep bg-figma-auditBg sticky top-0 z-10">
                 <summary
-                    class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-amber-800 cursor-pointer flex justify-between items-center hover:bg-[#fef3c7] transition-colors">
+                    class="px-4 py-2 text-[10px] font-bold tracking-widest text-figma-auditText cursor-pointer flex justify-between items-center hover:bg-[#dcfce7] transition-colors">
                     <span>Audit UX <span id="audit-stats" class="ml-2 font-normal opacity-60"></span></span>
-                    <span class="text-[8px]">▼</span>
+                    <span class="text-[10px] toggle-icon font-wingdings-3">&#211;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div id="audit-content"
-                    class="px-4 pb-4 text-[11px] leading-relaxed text-amber-900 border-t border-amber-100 mt-2 pt-2 max-h-[200px] overflow-y-auto no-scrollbar">
+                    class="px-4 pb-4 text-[11px] leading-relaxed text-figma-auditText border-t border-figma-auditBorder mt-2 pt-2 max-h-[200px] overflow-y-auto no-scrollbar">
                     <p class="italic opacity-50">Aucun audit disponible.</p>
                 </div>
             </details>
 
-            <details id="wire-panel" class="hidden border-b-[0.5px] border-figma-sep bg-[#f1f5f9] sticky top-0 z-10">
-                <summary class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-700 cursor-pointer flex justify-between items-center hover:bg-slate-200">
-                    <span>Analyse Wire</span>
-                    <span class="text-[8px]">▼</span>
+            <details id="wire-panel" class="hidden border-b-[0.5px] border-figma-sep bg-[#f1f5f9] flex-shrink-0">
+                <summary class="px-4 py-2 text-[10px] font-bold tracking-widest text-slate-700 cursor-pointer flex justify-between items-center hover:bg-slate-200">
+                    <div class="flex items-center gap-2">
+                        <span>Analyse Wire</span>
+                        <button id="btn-wire-table" class="px-2 py-0.5 bg-slate-700 text-white rounded hover:bg-slate-800 text-[8px] transform-none">BILAN DE BIJECTION</button>
+                    </div>
+                    <span class="text-[10px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-700">Diagnostic Statique</h3>
-                        <button onclick="runWire()"
-                            class="px-3 py-1 bg-slate-800 text-white text-[9px] font-bold rounded hover:bg-black transition-colors">ANALYSER</button>
+                        <h3 class="text-[10px] font-bold tracking-widest text-slate-700">Audit Automatique</h3>
                     </div>
                     <div id="wire-content"
-                        class="text-[11px] font-mono leading-tight text-slate-800 bg-white border border-slate-200 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded shadow-inner whitespace-pre-wrap">
-                        Prêt pour l'analyse Codestral...
+                        class="text-[11px] font-mono leading-tight text-slate-800 bg-white border border-slate-200 p-2 max-h-[150px] overflow-y-auto no-scrollbar rounded-md shadow-inner whitespace-pre-wrap">
+                        Diagnostic sémantique en cours...
                     </div>
                 </div>
             </details>
 
             <details id="assets-zone" class="border-b-[0.5px] border-figma-sep bg-white">
-                <summary class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-figma-text cursor-pointer flex justify-between items-center hover:bg-gray-50">
+                <summary class="px-4 py-2 text-[9px] font-bold tracking-widest text-figma-text cursor-pointer flex justify-between items-center hover:bg-gray-50">
                     <span>Assets</span>
-                    <span class="text-[8px]">▼</span>
+                    <span class="text-[10px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div class="px-4 pt-2">
                     <div id="drop-zone" class="mb-3 h-[60px] border border-dashed border-[#333]
                          flex items-center justify-center text-[10px] text-figma-text cursor-pointer
-                         transition-colors hover:border-figma-tabActive">
+                         transition-colors hover:border-figma-tabActive hover:bg-gray-50 rounded-md shadow-inner-soft">
                         Glisser une image ici
                     </div>
                     <div id="asset-thumbnails" class="pb-3 flex flex-wrap gap-2"></div>
@@ -181,23 +234,198 @@
                 <div class="chat-bubble sullivan-bubble">Bonjour ! Je suis Sullivan. Indiquez-moi les modifications à apporter au HTML/Tailwind.</div>
             </div>
             
-            <div class="p-4 bg-white border-t-[0.5px] border-figma-sep flex flex-col gap-2">
-                <div class="flex items-center gap-2">
+            <!-- Construct Panel: Label + Button Rond avec Flèche Wingdings -->
+            <!-- Fond gris clair (gray-50) par défaut, devient vert actif via JS -->
+            <div id="construct-panel" class="p-4 bg-gray-50 border-t-[0.5px] border-figma-sep flex flex-col gap-2">
+                <div class="flex items-center gap-2 mb-1">
                     <button id="toggle-construct" onclick="setMode('construct')"
-                        class="flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all">CONSTRUCT</button>
+                        class="flex-1 py-2 text-[10px] font-bold tracking-widest border border-gray-200 text-gray-600 rounded-md hover:bg-figma-auditBg hover:border-figma-auditBorder hover:text-figma-auditText transition-all bg-white shadow-soft hover:shadow-soft-hover">Construct</button>
                     <button id="toggle-wire" onclick="setMode('wire')"
-                        class="flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all">WIRE</button>
+                        class="flex-1 py-2 text-[10px] font-bold tracking-widest border border-gray-200 text-gray-600 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-all bg-white shadow-soft hover:shadow-soft-hover">Wire</button>
                 </div>
                 <textarea id="chat-input" placeholder="Instruction Sullivan (ex: 'Change la couleur en bleu')"
-                    class="w-full h-24 bg-figma-input p-3 text-xs outline-none border-none resize-none shadow-inner"></textarea>
-                <button id="btn-send"
-                    class="w-full py-2 bg-figma-sep text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-all">ASK Sullivan</button>
+                    class="w-full h-24 bg-figma-input p-3 text-xs outline-none border-none resize-none shadow-inner rounded-md"></textarea>
+                
+                <div class="flex items-center justify-end mt-1">
+                    <!-- Label simple -->
+                    <span class="text-[12px] text-gray-500 mr-3 font-semibold">Ask Sullivan</span>
+                    <!-- Bouton rond fléché -->
+                    <button id="btn-send"
+                        class="w-8 h-8 bg-figma-tabActive text-white rounded-full flex items-center justify-center hover:bg-figma-tabActiveHover transition-all shadow-soft hover:shadow-soft-hover font-wingdings-3 text-[14px]">
+                        &#210; <!-- Wingdings 3 Fleche Droite -->
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for Open button (Legacy) -->
+    <input id="file-input" type="file" class="hidden" accept=".html,.zip">
+
+    <!-- Bijective Overlay Redesign M103 -->
+    <div id="bijective-overlay" class="bijective-overlay">
+        <div class="bijective-panel !max-w-[1000px]">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-900">
+                <h2 class="text-white text-sm font-bold tracking-widest uppercase">Audit HoméOS — Bijection UI ↔ API</h2>
+                <button id="close-bijective" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+            </div>
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Colonne Gauche: BILAN -->
+                <div class="flex-1 border-r border-slate-100 flex flex-col">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[10px] font-bold tracking-widest text-slate-500 uppercase">1. Bilan (Intentions Détectées)</div>
+                    <div id="bijection-bilan" class="flex-1 overflow-y-auto p-0 divide-y divide-slate-50 no-scrollbar"></div>
+                </div>
+                <!-- Colonne Droite: PLAN -->
+                <div class="flex-1 bg-slate-50/50 flex flex-col">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[10px] font-bold tracking-widest text-slate-500 uppercase">2. Plan (Implémentation)</div>
+                    <div id="bijection-plan" class="flex-1 overflow-y-auto p-0 divide-y divide-slate-50 no-scrollbar"></div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-white border-t border-slate-200">
+                <button id="btn-wire-implement-all" class="w-full py-4 bg-figma-tabActive text-white text-[12px] font-bold uppercase tracking-widest rounded-xl hover:bg-figma-tabActiveHover transition-all shadow-lg">
+                    Lancer l'implémentation du plan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wire-code-popover" class="wire-code-popover hidden">
+        <div class="wire-popover-header">
+            <span id="wire-popover-title">Handler Python</span>
+            <span id="wire-popover-status" class="wire-popover-badge"></span>
+            <button id="wire-popover-close">✕</button>
+        </div>
+        <div id="wire-monaco-mount" style="height: 280px; width: 100%;"></div>
+    </div>
+
+    <!-- Backend Realization Modal (Architect/Ouvrier) -->
+    <div id="backend-modal" class="fixed inset-0 bg-black/60 z-[2000] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-[500px] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white text-sm font-bold tracking-widest uppercase">Workflow ROADMAP</h3>
+                <button onclick="document.getElementById('backend-modal').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Architect Phase -->
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                        <span class="text-indigo-600 font-bold">A</span>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Architecte (Analyse)</p>
+                        <p id="architect-advice" class="text-xs text-slate-700 leading-relaxed italic">"Analyse de l'intention en cours..."</p>
+                    </div>
+                </div>
+                
+                <div class="h-px bg-slate-100 w-full"></div>
+
+                <!-- Ouvrier Phase -->
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 rounded-full bg-figma-tabActive flex items-center justify-center flex-shrink-0">
+                        <span class="text-white font-bold">O</span>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-figma-tabActive uppercase tracking-wider">Ouvrier (Exécution)</p>
+                        <p id="ouvrier-mission" class="text-xs text-slate-900 font-medium leading-relaxed">"Mission en attente de rédaction..."</p>
+                    </div>
+                </div>
+
+                <button id="btn-start-backend-mission" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg">
+                    Rédiger & Exécuter la Mission
+                </button>
             </div>
         </div>
     </div>
 
     <!-- JS Logic Modular -->
-    <script type="module" src="/static/js/frd/frd_main.js?v=20260324"></script>
-</body>
+    <script type="module" src="/static/js/frd/frd_main.js?v=20260325"></script>
 
+    <script>
+        // --- Vanilla JS Inline ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Gestion des toggles flèches (Wingdings 3 210/00d3)
+            const detailsElements = document.querySelectorAll('details');
+            
+            detailsElements.forEach(details => {
+                const summary = details.querySelector('summary');
+                const icon = summary.querySelector('.toggle-icon');
+                
+                if (icon) {
+                    // Force initial state
+                    icon.innerHTML = details.open ? '&#00d3;' : '&#210;';
+                    
+                    details.addEventListener('toggle', () => {
+                        // Wingdings 3 00d3 = Up Arrow, 210 = Down Arrow
+                        icon.innerHTML = details.open ? '&#00d3;' : '&#210;';
+                    });
+                }
+            });
+
+            // 2. Gestion du bouton Monaco (Toggle visibility)
+            const btnToggleMonaco = document.getElementById('btn-toggle-monaco');
+            const monacoPane = document.getElementById('monaco-pane');
+            
+            if (btnToggleMonaco && monacoPane) {
+                // Set initial state based on CSS height (300px visible by default)
+                let isHidden = false;
+                
+                btnToggleMonaco.addEventListener('click', () => {
+                    isHidden = !isHidden;
+                    monacoPane.style.display = isHidden ? 'none' : 'flex';
+                    
+                    // Update icon: 210 (Down) if visible, 00d3 (Up) if hidden
+                    btnToggleMonaco.innerHTML = isHidden ? '&#00d3;' : '&#210;';
+                });
+            }
+
+            // 3. Gestion du toggle Construct/Wire : délégué à FrdChat.setMode via window.setMode (frd_main.js)
+            // NE PAS redéfinir window.setMode ici — le module ES6 s'exécute avant DOMContentLoaded
+            // et définit window.setMode = (mode) => window.frdApp.chat.setMode(mode)
+
+            // 4. Interaction Hover Text Color for #toggle-construct
+            const toggleConstructBtn = document.getElementById('toggle-construct');
+            if (toggleConstructBtn) {
+                toggleConstructBtn.addEventListener('mouseenter', () => {
+                    // Si le bouton n'est pas actif (donc pas de classe bg-figma-sullivanActive)
+                    if (!toggleConstructBtn.classList.contains('bg-figma-sullivanActive')) {
+                        toggleConstructBtn.classList.add('text-gray-100');
+                    }
+                });
+                toggleConstructBtn.addEventListener('mouseleave', () => {
+                    toggleConstructBtn.classList.remove('text-gray-100');
+                });
+            }
+
+            // 5. Bouton "Clear locks" : Teinte complémentaire douce (Rouge/Orange doux)
+            const clearLocksBtn = document.getElementById('btn-clear-locks');
+            if (clearLocksBtn) {
+                // Application de la classe nudge-warning pour la couleur complémentaire
+                // Style : border-orange-300 text-orange-600 (déjà présent dans le HTML)
+                // Hover : bg-orange-50 border-orange-400
+                clearLocksBtn.classList.add('border-orange-300', 'bg-white');
+            }
+
+            // 6. Gestion du bouton Inspect (Toggle Mode + UI State)
+            const btnInspect = document.getElementById('btn-inspect');
+            if (btnInspect) {
+                let isInspectActive = false;
+                
+                btnInspect.addEventListener('click', () => {
+                    isInspectActive = !isInspectActive;
+                    
+                    if (isInspectActive) {
+                        // Mode actif : Vert bolder, texte blanc
+                        btnInspect.classList.add('bg-figma-sullivanActive', 'border-figma-sullivanActive', 'text-white', 'font-bold');
+                        btnInspect.classList.remove('bg-white', 'text-gray-600');
+                    } else {
+                        // Mode inactif : Blanc par défaut
+                        btnInspect.classList.remove('bg-figma-sullivanActive', 'border-figma-sullivanActive', 'text-white', 'font-bold');
+                        btnInspect.classList.add('bg-white', 'text-gray-600');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
 </html>

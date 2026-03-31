@@ -11,14 +11,16 @@ export class FrdChat {
         const wiBtn = document.getElementById('toggle-wire');
 
         if (mode === 'construct') {
+            this.main.wire.cleanup(); // Nettoyage Mission 98
             if (cBtn) { cBtn.classList.add('bg-slate-800', 'text-white'); cBtn.classList.remove('text-gray-400'); }
             if (wiBtn) { wiBtn.classList.remove('bg-slate-300', 'text-slate-900'); wiBtn.classList.add('text-gray-400'); }
             document.getElementById('chat-input').placeholder = "Instruction Sullivan (ex: 'Change la couleur en bleu')";
         } else if (mode === 'wire') {
             if (wiBtn) { wiBtn.classList.add('bg-slate-300', 'text-slate-900'); wiBtn.classList.remove('text-gray-400'); }
             if (cBtn) { cBtn.classList.remove('bg-slate-800', 'text-white'); cBtn.classList.add('text-gray-400'); }
-            document.getElementById('chat-input').placeholder = "Mode WIRE — Analysez puis envoyez le plan au chat";
+            document.getElementById('chat-input').placeholder = "Mode WIRE — Diagnostic automatique en cours...";
             document.getElementById('wire-panel')?.classList.remove('hidden');
+            this.main.wire.run(); 
         }
     }
 

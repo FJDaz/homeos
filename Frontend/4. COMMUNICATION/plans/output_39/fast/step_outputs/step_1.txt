@@ -1,0 +1,83 @@
+Step: step_1
+Description: Tâche A+B : PNG natif + temperature=0 + retry x2 dans analyzer.py
+Type: patch
+Success: True
+Tokens: 8950
+Cost: $0.0013
+Time: 32066ms
+
+============================================================
+
+```python
+import asyncio
+
+MAX_DIMENSION = 1280            # px
+
+class ImagePreprocessor:
+    def __init__(self, target_max_bytes=TARGET_MAX_BYTES, max_dimension=MAX_DIMENSION):
+        self.target_max_bytes = target_max_bytes
+        self.max_dimension = max_dimension
+
+    def process(self, image_path: Path) -> Tuple[str, str]:
+        try:
+            from PIL import Image
+        except ImportError:
+            raise RuntimeError("Pillow not installed: pip install pillow")
+
+        with Image.open(image_path) as img:
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+
+            w, h = img.size
+            if max(w, h) > self.max_dimension:
+                ratio = self.max_dimension / max(w, h)
+                img = img.resize((int(w * ratio), int(h * ratio)), Image.Resampling.LANCZOS)
+
+            buffer = io.BytesIO()
+            img.save(buffer, format="PNG", optimize=True)
+            data = buffer.getvalue()
+
+        return base64.b64encode(data).decode("utf-8"), "image/png"
+
+    async def analyze_png(self, image_path: Path) -> Dict:
+        """Analyse un seul PNG et retourne un JSON de décomposition visuelle libre."""
+        logger.info(f"🔍 VisualDecomposer: Analyzing {image_path.name}...")
+
+        b64_image, mime_type = self.preprocessor.process(image_path)
+        
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                logger.info(f"  Attempt {attempt + 1}/{max_retries + 1}...")
+                
+                result = await self.client.generate_with_image(
+                    prompt=VISUAL_DECOMPOSER_PROMPT,
+                    image_base64=b64_image,
+                    mime_type=mime_type,
+                    output_constraint="JSON only",
+                    max_tokens=4096,
+                    temperature=0
+                )
+
+                if not result.success:
+                    raise ValueError(result.error)
+
+                # Utiliser result.text si result.code est vide (réponse non-code)
+                raw = result.code if result.code and result.code.strip() else getattr(result, 'text', '') or ''
+                if not raw:
+                    raise ValueError("Réponse vide de Gemini")
+
+                logger.debug(f"[VisualDecomposer] Raw response (first 300): {raw[:300]}")
+                return extract_json_robust(raw)
+                
+            except Exception as e:
+                if attempt < max_retries:
+                    logger.warning(f"  Attempt {attempt + 1} failed: {e}. Retrying in 1 second...")
+                    await asyncio.sleep(1)
+                    continue
+                else:
+                    logger.error(f"[VisualDecomposer] Failed for {image_path.name} after {max_retries + 1} attempts: {e}")
+                    return {"error": str(e), "elements": [], "regions": [], "design_tokens": {}, "annotations_visible": []}
+            finally:
+                await self.client.close()
+```

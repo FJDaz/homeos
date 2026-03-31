@@ -51,9 +51,20 @@ PROVIDER_PROFILES = {
         tier=ProviderTier.BALANCED,
         max_tokens=8192,
         max_input_tokens=64000,  # 64k context
-        typical_speed="medium",
+        typical_speed="slow", # Downgraded to slow
         cost_efficiency="high",
-        specialties=["code_generation", "complex_code", "reasoning"],
+        specialties=["complex_code", "reasoning"],
+        rate_limit_rpm=100,
+        rate_limit_tpm=100000
+    ),
+    "mimo": ProviderProfile(
+        name="mimo",
+        tier=ProviderTier.BALANCED,
+        max_tokens=8192,
+        max_input_tokens=32000,
+        typical_speed="fast",
+        cost_efficiency="high",
+        specialties=["code_generation", "refactoring", "fast_generation"],
         rate_limit_rpm=100,
         rate_limit_tpm=100000
     ),
@@ -291,7 +302,7 @@ class SmartContextRouter:
             if estimated_tokens < self.THRESHOLD_FAST:
                 primary = "groq"
             elif estimated_tokens < self.THRESHOLD_BALANCED:
-                primary = "deepseek"
+                primary = "mimo"
             else:
                 primary = "gemini"
         
@@ -299,12 +310,9 @@ class SmartContextRouter:
         elif execution_mode == "BUILD":
             if estimated_tokens < self.THRESHOLD_FAST:
                 # Small tasks: Groq or Codestral
-                if step_type in ["refactoring", "patch"]:
-                    primary = "codestral" if "codestral" in self.available_providers else "groq"
-                else:
-                    primary = "groq"
+                primary = "groq"
             elif estimated_tokens < self.THRESHOLD_BALANCED:
-                primary = "deepseek"
+                primary = "mimo"
             else:
                 primary = "gemini"
         
@@ -320,7 +328,7 @@ class SmartContextRouter:
             if estimated_tokens < self.THRESHOLD_FAST:
                 primary = "groq"
             elif estimated_tokens < self.THRESHOLD_BALANCED:
-                primary = "deepseek"
+                primary = "mimo"
             else:
                 primary = "gemini"
         
@@ -381,9 +389,9 @@ class SmartContextRouter:
         )
         
         # Surgical mode override: Codestral cannot generate valid surgical JSON
-        # Always escalate surgical tasks to DeepSeek (or Gemini as fallback)
+        # Always escalate surgical tasks to Mimo or Groq (or Gemini as fallback)
         if step.context and step.context.get('surgical_mode') and decision.primary_provider == "codestral":
-            for override in ["deepseek", "gemini", "groq"]:
+            for override in ["mimo", "groq", "gemini", "deepseek"]:
                 if override in self.available_providers:
                     decision.primary_provider = override
                     decision.fallback_chain = self._get_fallback_chain(override, execution_mode)
@@ -419,8 +427,8 @@ class SmartContextRouter:
         Returns:
             List of fallback provider names in order
         """
-        # Default cascade for all modes
-        cascade = ["deepseek", "gemini", "codestral"]
+        # Default cascade for all modes (DeepSeek downgraded)
+        cascade = ["mimo", "groq", "gemini", "codestral", "deepseek"]
         
         # Remove primary from cascade
         if primary in cascade:
@@ -430,9 +438,9 @@ class SmartContextRouter:
         primary_profile = self.profiles.get(primary)
         if primary_profile:
             if primary_profile.tier == ProviderTier.FAST:
-                # Fast tier falls back to balanced, then high capacity
-                if "deepseek" not in cascade:
-                    cascade.insert(0, "deepseek")
+                # Fast tier falls back to balanced
+                if "mimo" not in cascade:
+                    cascade.insert(0, "mimo")
             elif primary_profile.tier == ProviderTier.BALANCED:
                 # Balanced falls back to high capacity
                 if "gemini" not in cascade:
@@ -444,15 +452,15 @@ class SmartContextRouter:
     def _get_best_available(self, estimated_tokens: int) -> str:
         """Get best available provider for token count."""
         if estimated_tokens < self.THRESHOLD_FAST:
-            for provider in ["groq", "codestral", "deepseek", "gemini"]:
+            for provider in ["groq", "mimo", "codestral", "gemini", "deepseek"]:
                 if provider in self.available_providers:
                     return provider
         elif estimated_tokens < self.THRESHOLD_BALANCED:
-            for provider in ["deepseek", "gemini", "groq"]:
+            for provider in ["mimo", "groq", "gemini", "deepseek"]:
                 if provider in self.available_providers:
                     return provider
         else:
-            for provider in ["gemini", "deepseek"]:
+            for provider in ["gemini", "mimo", "deepseek"]:
                 if provider in self.available_providers:
                     return provider
         

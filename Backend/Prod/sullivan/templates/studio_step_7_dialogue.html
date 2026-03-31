@@ -1,0 +1,192 @@
+<div id="studio-main-zone" class="p-6 max-w-5xl mx-auto animate-fade-in">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Un dernier mot...</h2>
+                <p class="text-slate-500 text-sm">Avant de finaliser, quelques questions pour affiner le design</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Colonne gauche : Contexte -->
+        <div class="lg:col-span-1 space-y-4">
+            <!-- Résumé analyse -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Résumé de l'analyse
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Zones détectées</span>
+                        <span class="font-medium text-indigo-600">{{ zones_count }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Style principal</span>
+                        <span class="font-medium">{{ layout_type }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Confiance moyenne</span>
+                        <span class="font-medium text-emerald-600">{{ avg_confidence }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Miniature design -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <h3 class="font-semibold text-slate-800 mb-3">Votre design</h3>
+                <div class="aspect-video bg-slate-100 rounded-lg overflow-hidden">
+                    <img src="{{ png_url }}" alt="Design" class="w-full h-full object-cover">
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="bg-indigo-50 rounded-xl border border-indigo-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-indigo-900">Progression</span>
+                    <span class="text-sm text-indigo-600">{{ current_question }}/{{ total_questions }}</span>
+                </div>
+                <div class="w-full bg-indigo-200 rounded-full h-2">
+                    <div class="bg-indigo-600 h-2 rounded-full transition-all" style="width: {{ progress_percent }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne centrale : Chat -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-[600px]">
+                <!-- Messages -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    {% for message in messages %}
+                    <div class="flex {% if message.sender == 'sullivan' %}justify-start{% else %}justify-end{% endif %}">
+                        <div class="max-w-[80%] {% if message.sender == 'sullivan' %}bg-slate-100{% else %}bg-indigo-600 text-white{% endif %} rounded-2xl px-4 py-3">
+                            {% if message.sender == 'sullivan' %}
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">S</span>
+                                <span class="text-xs font-medium text-slate-600">Sullivan</span>
+                            </div>
+                            {% endif %}
+                            <p class="text-sm {% if message.sender == 'sullivan' %}text-slate-800{% endif %}">{{ message.text }}</p>
+                            
+                            {% if message.options %}
+                            <div class="mt-3 space-y-2">
+                                {% for option in message.options %}
+                                <button hx-post="/studio/step/7/answer"
+                                        hx-vals='{"question_id": "{{ message.question_id }}", "answer": "{{ option.value }}"}'
+                                        hx-target="#studio-main-zone"
+                                        class="w-full text-left px-3 py-2 rounded-lg border {% if message.sender == 'sullivan' %}border-slate-300 hover:bg-white bg-slate-50{% else %}border-indigo-400 hover:bg-indigo-700{% endif %} transition-colors text-sm">
+                                    {{ option.label }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <span class="text-xs {% if message.sender == 'sullivan' %}text-slate-400{% else %}text-indigo-200{% endif %} mt-1 block">
+                                {{ message.timestamp }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Indicateur de saisie -->
+                    {% if is_typing %}
+                    <div class="flex justify-start">
+                        <div class="bg-slate-100 rounded-2xl px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">S</span>
+                                <div class="flex gap-1">
+                                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
+                                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Input zone (si mode texte libre) -->
+                {% if allow_free_text %}
+                <div class="border-t border-slate-200 p-4">
+                    <form hx-post="/studio/step/7/message"
+                          hx-target="#studio-main-zone"
+                          class="flex gap-2">
+                        <input type="text" 
+                               name="message" 
+                               placeholder="Votre réponse..."
+                               class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                               autofocus>
+                        <button type="submit" 
+                                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Actions finales -->
+                {% if dialogue_complete %}
+                <div class="border-t border-slate-200 p-4 bg-emerald-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-emerald-900">Dialogue terminé !</p>
+                                <p class="text-sm text-emerald-600">Votre design est prêt à être généré</p>
+                            </div>
+                        </div>
+                        <button hx-get="/studio/step/8/validation"
+                                hx-target="#studio-main-zone"
+                                class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+                            Valider et continuer →
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-6 flex items-center justify-between">
+        <button hx-get="/studio/step/6/analysis"
+                hx-target="#studio-main-zone"
+                class="text-slate-500 hover:text-slate-700 text-sm font-medium inline-flex items-center gap-1 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Retour à l'analyse
+        </button>
+
+        {% if not dialogue_complete %}
+        <button hx-post="/studio/step/7/skip"
+                hx-target="#studio-main-zone"
+                class="text-slate-400 hover:text-slate-600 text-sm">
+            Passer le dialogue →
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Scroll automatique vers le dernier message
+const chatContainer = document.getElementById('chat-messages');
+if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+</script>

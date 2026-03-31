@@ -1,0 +1,98 @@
+```json
+{
+  "version": "1.0.0",
+  "description": "Schéma de métadonnées AETHERFLOW pour les composants rétro-génomiques. Définit deux couches : fonctionnelle (sémantique) et géométrique (structurelle).",
+  
+  "functional_layer": {
+    "data-af-id": {
+      "description": "Identifiant unique du composant dans l'écosystème AETHERFLOW",
+      "type": "string",
+      "format": "uuid-v4",
+      "layer": "functional",
+      "required": true,
+      "svg_example": "<g data-af-id=\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\">...</g>"
+    },
+    
+    "data-af-region": {
+      "description": "Région génomique associée au composant (ex: promoteur, exon, intron)",
+      "type": "string",
+      "allowed_values": ["promoter", "enhancer", "silencer", "exon", "intron", "utr_5", "utr_3", "cds", "intergenic", "telomere", "centromere"],
+      "layer": "functional",
+      "required": true,
+      "svg_example": "<rect data-af-region=\"exon\" ... />"
+    },
+    
+    "data-af-intent": {
+      "description": "Intention fonctionnelle du composant dans le flux de traitement",
+      "type": "string",
+      "allowed_values": ["data_input", "data_transform", "data_output", "control_flow", "visualization", "annotation", "computation", "validation"],
+      "layer": "functional",
+      "required": true,
+      "svg_example": "<path data-af-intent=\"data_transform\" ... />"
+    },
+    
+    "data-af-state": {
+      "description": "État actuel du composant dans le pipeline de traitement",
+      "type": "string",
+      "allowed_values": ["idle", "processing", "completed", "error", "validated", "pending_review", "archived"],
+      "layer": "functional",
+      "required": true,
+      "svg_example": "<circle data-af-state=\"processing\" ... />"
+    },
+    
+    "data-af-interact": {
+      "description": "Capacités d'interaction du composant avec l'utilisateur ou d'autres composants",
+      "type": "array",
+      "allowed_values": ["clickable", "draggable", "hoverable", "selectable", "editable", "linkable", "groupable"],
+      "layer": "functional",
+      "required": false,
+      "svg_example": "<polygon data-af-interact=\"['clickable', 'hoverable']\" ... />"
+    }
+  },
+  
+  "geometric_layer": {
+    "data-af-math-role": {
+      "description": "Rôle mathématique dans les transformations géométriques",
+      "type": "string",
+      "allowed_values": ["transformer", "receiver", "emitter", "modulator", "integrator", "differentiator", "observer"],
+      "layer": "geometric",
+      "required": true,
+      "svg_example": "<g data-af-math-role=\"transformer\" ... />"
+    },
+    
+    "data-af-cell-coords": {
+      "description": "Coordonnées dans la grille cellulaire de référence (système de coordonnées normalisé)",
+      "type": "object",
+      "format": "{\"x\": number, \"y\": number, \"z\": number, \"grid_id\": string}",
+      "layer": "geometric",
+      "required": true,
+      "svg_example": "<rect data-af-cell-coords='{\"x\": 5, \"y\": 3, \"z\": 0, \"grid_id\": \"genome_grid_alpha\"}' ... />"
+    },
+    
+    "data-af-compute": {
+      "description": "Paramètres de calcul pour les opérations géométriques",
+      "type": "object",
+      "format": "{\"op\": string, \"params\": object, \"precision\": number}",
+      "layer": "geometric",
+      "required": false,
+      "svg_example": "<path data-af-compute='{\"op\": \"bezier_interpolation\", \"params\": {\"tension\": 0.5}, \"precision\": 0.001}' ... />"
+    },
+    
+    "data-af-parents": {
+      "description": "Références aux composants parents dans la hiérarchie géométrique",
+      "type": "array",
+      "format": "array of UUID strings",
+      "layer": "geometric",
+      "required": false,
+      "svg_example": "<g data-af-parents=\"['parent-uuid-1', 'parent-uuid-2']\" ... />"
+    }
+  },
+  
+  "validation_rules": {
+    "cross_layer_validation": [
+      {
+        "rule": "data-af-state == 'processing' => data-af-intent != 'data_output'",
+        "description": "Un composant en traitement ne peut pas avoir l'intention de sortie"
+      },
+      {
+        "rule": "data-af-region in ['exon', 'intron'] => data-af-math-

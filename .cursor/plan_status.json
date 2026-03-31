@@ -1,22 +1,20 @@
 {
-  "plan_path": "/Users/francois-jeandazin/AETHERFLOW/Backend/Prod/plans/runpod_serverless_handler.json",
-  "plan_id": "runpod_serverless_handler_spinoza",
+  "plan_path": "/private/tmp/plan_m79_s1.json",
+  "plan_id": "M79_step1",
   "workflow_type": "PROTO",
-  "phase": "validation",
+  "phase": "FAST",
   "batch_index": 1,
   "total_batches": 1,
   "completed_steps": [],
   "current_step_ids": [
-    "step_2",
-    "step_3",
     "step_1"
   ],
-  "total_steps": 3,
-  "status": "completed",
+  "total_steps": 1,
+  "status": "running",
   "started_at": "2025-01-30T14:00:00+00:00",
-  "updated_at": "2026-03-09T12:11:18.360097+00:00",
-  "total_time_ms": 130022.20400000001,
-  "total_cost_usd": 0.0064835399999999994,
+  "updated_at": "2026-03-24T10:12:31.894432+00:00",
+  "total_time_ms": 75228.90599999999,
+  "total_cost_usd": 0.0014677179999999998,
   "error_message": "cannot import name 'apply_plan_outputs' from 'Prod.claude_helper' (/Users/francois-jeandazin/AETHERFLOW/Backend/Prod/claude_helper.py)",
   "error": "'NoneType' object has no attribute 'success'"
 }

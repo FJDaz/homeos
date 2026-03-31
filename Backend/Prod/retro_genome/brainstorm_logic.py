@@ -15,9 +15,15 @@ from loguru import logger
 
 # Import des clients LLM
 from ..models.gemini_client import GeminiClient
-from ..models.deepseek_client import DeepSeekClient
-from ..models.mistral_client import MistralClient
+from ..models.groq_client import GroqClient
+from ..models.codestral_client import CodestralClient
 from .brs_storage import storage
+
+BRS_CHAT_SYSTEM = (
+    "Tu es un assistant IA dans une session de brainstorming HomeOS. "
+    "Tu réponds en français, de manière naturelle et directe. "
+    "Tu ne génères PAS de code sauf si l'utilisateur le demande explicitement."
+)
 
 SULLIVAN_SYSTEM_PROMPT = """
 Tu es Sullivan, arbitre éditorial d'une session de brainstorming multi-modèles HomeOS.
@@ -70,10 +76,10 @@ async def sse_generator(session_id: str, provider: str):
     try:
         if provider == "gemini":
             client = GeminiClient(execution_mode="FAST")
-        elif provider == "deepseek":
-            client = DeepSeekClient()
-        elif provider == "mistral":
-            client = MistralClient()
+        elif provider == "groq":
+            client = GroqClient()
+        elif provider == "codestral":
+            client = CodestralClient()
         else:
             yield f"event: error\ndata: Unknown provider {provider}\n\n"
             return
@@ -204,3 +210,98 @@ async def arbitrate_session(session_id: str):
         yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
     finally:
         await client.close()
+
+
+async def rank_council(session_id: str):
+    """Mission 58 — Classement des 3 réponses COUNCIL par Gemini."""
+    messages = storage.get_messages(session_id)
+    responses = {
+        m['provider']: m['content']
+        for m in messages
+        if m['role'] == 'assistant' and m['provider'] in ('gemini', 'groq', 'codestral')
+    }
+    if not responses:
+        return {"error": "No COUNCIL responses found for this session"}
+
+    sections = "\n\n".join([
+        f"### {p.upper()}\n{txt}" for p, txt in responses.items()
+    ])
+    prompt = (
+        "Tu es un évaluateur neutre. Tu reçois 3 réponses de brainstorming sur le même sujet.\n"
+        "Pour chacune, donne une note de 1 à 5 sur : Originalité, Structure, Pertinence.\n"
+        "Format impératif : tableau Markdown avec colonnes Modèle | Originalité | Structure | Pertinence | Total.\n"
+        "Puis une ligne de synthèse qualifiée par modèle (1 phrase, style factuel, pas de favoritisme).\n\n"
+        f"{sections}"
+    )
+    client = GeminiClient(execution_mode="FAST")
+    try:
+        result = await client.generate(prompt)
+        if not result.success:
+            return {"error": result.error}
+        return {"ranking": result.code}
+    finally:
+        await client.close()
+
+
+async def sse_chat_generator(session_id: str, provider: str, message: str):
+    """Générateur SSE pour le chat individuel (MULTIPLEX)."""
+    logger.info(f"[BRS] Multiplex chat for {provider} in session {session_id}")
+    
+    # 1. Sauvegarder le message utilisateur
+    storage.save_message(session_id, provider, "user", message)
+    
+    # 2. Charger l'historique pour construire un prompt conversationnel
+    history = storage.get_messages(session_id, provider=provider)
+
+    # Construire un prompt conversationnel plat (sans passer context= qui bias vers le code)
+    history_lines = []
+    for m in history[:-1]:  # exclure le message user qu'on vient de sauvegarder
+        role = "Utilisateur" if m['role'] == 'user' else "Assistant"
+        history_lines.append(f"{role}: {m['content']}")
+
+    if history_lines:
+        conversational_prompt = "\n".join(history_lines) + f"\nUtilisateur: {message}\nAssistant:"
+    else:
+        conversational_prompt = message
+
+    client = None
+    try:
+        if provider == "gemini":
+            client = GeminiClient(execution_mode="FAST")
+        elif provider == "groq":
+            client = GroqClient()
+        elif provider == "codestral":
+            client = CodestralClient()
+        else:
+            yield f"event: error\ndata: Unknown provider {provider}\n\n"
+            return
+
+        yield f"event: status\ndata: {json.dumps({'status': 'THINKING', 'provider': provider})}\n\n"
+
+        result = await client.generate(
+            f"{BRS_CHAT_SYSTEM}\n\n{conversational_prompt}",
+            output_constraint="Réponds de manière conversationnelle en français. Ne génère PAS de code sauf si explicitement demandé."
+        )
+        
+        if result.success:
+            full_response = result.code
+            words = full_response.split(' ')
+            for word in words:
+                yield f"event: token\ndata: {json.dumps(word + ' ')}\n\n"
+                await asyncio.sleep(0.01)
+                
+            # 3. Sauvegarder la réponse de l'assistant
+            storage.save_message(session_id, provider, "assistant", full_response)
+            
+            yield f"event: status\ndata: {json.dumps({'status': 'DONE', 'provider': provider})}\n\n"
+            yield "event: done\ndata: {}\n\n"
+        else:
+            logger.error(f"[BRS] LLM Generation error: {result.error}")
+            yield f"event: error\ndata: {result.error}\n\n"
+        
+    except Exception as e:
+        logger.error(f"[BRS] Multiplex SSE Error for {provider}: {e}")
+        yield f"event: error\ndata: {str(e)}\n\n"
+    finally:
+        if client:
+            await client.close()

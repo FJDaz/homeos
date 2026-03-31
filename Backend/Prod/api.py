@@ -32,6 +32,12 @@ from .sullivan.stenciler.api import router as stenciler_router
 # Import retro genome routes (Retro Genome — Mission 32)
 from .retro_genome.routes import router as retro_genome_router
 
+# Import brainstorm routes (War Room — Mission 43)
+from .routes.brainstorm_routes import router as brainstorm_router
+
+# Import FRD routes (Monaco Editor — Mission 45)
+from .routes.frd_routes import router as frd_router
+
 
 app = FastAPI(title="AetherFlow API", version="0.1.0")
 
@@ -91,6 +97,12 @@ app.include_router(agent_router)
 
 # Include retro genome routes (Mission 32)
 app.include_router(retro_genome_router)
+
+# Include brainstorm routes (Mission 43)
+app.include_router(brainstorm_router)
+
+# Include FRD routes (Mission 45)
+app.include_router(frd_router)
 
 # Add CORS middleware
 app.add_middleware(
@@ -670,6 +682,19 @@ async def serve_studio_composants(request: Request):
         "studio_composants.html",
         {"request": request, "components": SULLIVAN_DEFAULT_LIBRARY}
     )
+
+
+@app.get("/monaco")
+async def serve_monaco_editor(request: Request):
+    """Sert la page de l'éditeur Monaco (FRD)."""
+    from fastapi.templating import Jinja2Templates
+    templates_dir = Path(__file__).resolve().parent / "templates"
+    
+    # On utilise les templates du Stenciler si nécessaire, mais ici on vise Frontend/3. STENCILER/static/templates/
+    # fastapi.templating.Jinja2Templates peut pointer vers plusieurs répertoires
+    # Pour Mission 45, on va placer monaco_editor.html dans Backend/Prod/templates pour plus de simplicité avec Jinja2
+    templates = Jinja2Templates(directory=str(templates_dir))
+    return templates.TemplateResponse("monaco_editor.html", {"request": request})
 
 
 @app.get("/components")

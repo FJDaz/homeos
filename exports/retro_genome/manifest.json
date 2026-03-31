@@ -1,0 +1,517 @@
+{
+  "version": "2.0",
+  "source": "AetherFlow Reality View",
+  "extracted_at": ".",
+  "elements": [
+    {
+      "id": "el_0",
+      "name": "HEADER",
+      "type": "HEADER",
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 31,
+      "text": "OS",
+      "style": {
+        "backgroundColor": "rgb(33, 37, 43)",
+        "color": "rgb(255, 255, 255)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_1",
+      "name": "DIV.os-label",
+      "type": "DIV",
+      "x": 8,
+      "y": 8,
+      "width": 1264,
+      "height": 15,
+      "text": "OS",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_2",
+      "name": "DIV.file-explorer-header",
+      "type": "DIV",
+      "x": 0,
+      "y": 31,
+      "width": 199,
+      "height": 42,
+      "text": "Explorateur",
+      "style": {
+        "backgroundColor": "rgb(240, 239, 235)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_3",
+      "name": "DIV.file-explorer-label",
+      "type": "DIV",
+      "x": 16,
+      "y": 43,
+      "width": 167,
+      "height": 17,
+      "text": "Explorateur",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_4",
+      "name": "NAV.file-explorer-navigation",
+      "type": "NAV",
+      "x": 0,
+      "y": 73,
+      "width": 199,
+      "height": 2027,
+      "text": "AETHERFLOW\nexports\ngenome_zones_20260303_01131...",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_5",
+      "name": "DIV.directory-name",
+      "type": "DIV",
+      "x": 0,
+      "y": 73,
+      "width": 199,
+      "height": 35,
+      "text": "AETHERFLOW",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_6",
+      "name": "SECTION.code-editor",
+      "type": "SECTION",
+      "x": 200,
+      "y": 31,
+      "width": 780,
+      "height": 672,
+      "text": "04_kimi_atom_factory.py\n1\n# \"\"\"Step 4 - KIMI Atom",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_7",
+      "name": "DIV.code-editor-tabs",
+      "type": "DIV",
+      "x": 200,
+      "y": 31,
+      "width": 780,
+      "height": 36,
+      "text": "04_kimi_atom_factory.py",
+      "style": {
+        "backgroundColor": "rgb(232, 231, 227)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_8",
+      "name": "DIV.code-editor-tab",
+      "type": "DIV",
+      "x": 200,
+      "y": 31,
+      "width": 175,
+      "height": 35,
+      "text": "04_kimi_atom_factory.py",
+      "style": {
+        "backgroundColor": "rgb(247, 246, 242)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "monaco-editor",
+      "name": "DIV",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 780,
+      "height": 636,
+      "text": "1\n# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_10",
+      "name": "DIV.monaco-editor",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 780,
+      "height": 636,
+      "text": "1\n# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque",
+      "style": {
+        "backgroundColor": "rgb(30, 30, 30)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_11",
+      "name": "DIV.overflow-guard",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 780,
+      "height": 636,
+      "text": "1\n# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_12",
+      "name": "DIV.margin",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 65,
+      "height": 636,
+      "text": "1",
+      "style": {
+        "backgroundColor": "rgb(30, 30, 30)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_15",
+      "name": "DIV.margin-view-overlays",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 65,
+      "height": 636,
+      "text": "1",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_16",
+      "name": "DIV",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 65,
+      "height": 18,
+      "text": "1",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_17",
+      "name": "DIV.current-line",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 65,
+      "height": 18,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_18",
+      "name": "DIV.active-line-number",
+      "type": "DIV",
+      "x": 200,
+      "y": 67,
+      "width": 39,
+      "height": 18,
+      "text": "1",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(198, 198, 198)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_19",
+      "name": "DIV.monaco-scrollable-element",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 715,
+      "height": 636,
+      "text": "# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque co",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_20",
+      "name": "DIV.lines-content",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 1000000,
+      "height": 1000000,
+      "text": "# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque co",
+      "style": {
+        "backgroundColor": "rgb(30, 30, 30)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_22",
+      "name": "DIV",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 621,
+      "height": 18,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_23",
+      "name": "DIV.current-line",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 621,
+      "height": 18,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_27",
+      "name": "DIV.view-lines",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 621,
+      "height": 636,
+      "text": "# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque co",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_28",
+      "name": "DIV.view-line",
+      "type": "DIV",
+      "x": 265,
+      "y": 67,
+      "width": 621,
+      "height": 18,
+      "text": "# \"\"\"Step 4 - KIMI Atom Factory.\\n# Pour chaque co",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_32",
+      "name": "DIV.invisible",
+      "type": "DIV",
+      "x": 265,
+      "y": 691,
+      "width": 607,
+      "height": 12,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_33",
+      "name": "DIV.slider",
+      "type": "DIV",
+      "x": 265,
+      "y": 691,
+      "width": 607,
+      "height": 12,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(121, 121, 121, 0.4)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_34",
+      "name": "DIV.invisible",
+      "type": "DIV",
+      "x": 966,
+      "y": 67,
+      "width": 14,
+      "height": 636,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_35",
+      "name": "DIV.slider",
+      "type": "DIV",
+      "x": 966,
+      "y": 67,
+      "width": 14,
+      "height": 636,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(121, 121, 121, 0.4)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_42",
+      "name": "DIV.minimap",
+      "type": "DIV",
+      "x": 872,
+      "y": 67,
+      "width": 94,
+      "height": 636,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(212, 212, 212)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_49",
+      "name": "DIV.chat-header",
+      "type": "DIV",
+      "x": 981,
+      "y": 31,
+      "width": 299,
+      "height": 42,
+      "text": "Sullivan",
+      "style": {
+        "backgroundColor": "rgb(225, 231, 240)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_50",
+      "name": "DIV.chat-title",
+      "type": "DIV",
+      "x": 997,
+      "y": 43,
+      "width": 267,
+      "height": 17,
+      "text": "Sullivan",
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_51",
+      "name": "DIV.chat-messages",
+      "type": "DIV",
+      "x": 981,
+      "y": 73,
+      "width": 299,
+      "height": 574,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgb(240, 244, 248)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_52",
+      "name": "DIV.chat-input-area",
+      "type": "DIV",
+      "x": 981,
+      "y": 647,
+      "width": 299,
+      "height": 56,
+      "text": "+",
+      "style": {
+        "backgroundColor": "rgb(240, 244, 248)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    },
+    {
+      "id": "el_53",
+      "name": "BUTTON.chat-send-button",
+      "type": "BUTTON",
+      "x": 1236,
+      "y": 660,
+      "width": 28,
+      "height": 31,
+      "text": "+",
+      "style": {
+        "backgroundColor": "rgb(225, 231, 240)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "4px"
+      }
+    },
+    {
+      "id": "el_54",
+      "name": "FOOTER",
+      "type": "FOOTER",
+      "x": 0,
+      "y": 703,
+      "width": 1280,
+      "height": 17,
+      "text": "",
+      "style": {
+        "backgroundColor": "rgb(232, 231, 227)",
+        "color": "rgb(61, 61, 60)",
+        "borderRadius": "0px"
+      }
+    }
+  ]
+}

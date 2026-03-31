@@ -1,0 +1,95 @@
+{
+  "task_id": "m65_homeos_style_alignment",
+  "description": "M65 — Alignement visuel des 3 templates pipeline (intent_viewer, viewer_blueprint, viewer_reality) sur le style HomeOS BRS. Tailwind CDN + figma-* tokens + Geist. Aucun JS existant modifié.",
+  "metadata": {
+    "created_at": "2026-03-19T00:00:00Z",
+    "mission": "65",
+    "actor": "GEMINI",
+    "roadmap_ref": "Frontend/4. COMMUNICATION/ROADMAP.md"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Restyliser intent_viewer.html — remplacer le CSS custom dark (bg-dark #0a0a0b) par Tailwind CDN + tokens figma-* + Geist. Conserver TOUT le JS et tous les IDs/classes fonctionnels.",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 3000,
+      "dependencies": [],
+      "validation_criteria": [
+        "Tailwind CDN présent dans <head>",
+        "Config tailwind.config avec figma-* tokens (tabActive:#8cc63f, sep:#e5e5e5, text:#666666, textDark:#1a1a1a)",
+        "Police Geist via cdn.jsdelivr.net/npm/geist",
+        "Body : font-geist text-figma-text bg-white",
+        "Background radial-gradient(#eeeeee 0.5px, transparent 0.5px) 20px 20px",
+        "Aucun script inline modifié (XHR monkey-patch conservé intégralement)",
+        "Tous les IDs fonctionnels conservés : file-input, upload-btn, start-analysis-btn, manifesto-input, mockup-previews, analysis-content, loading, validate-btn, fidelity-badge, loading-text, add-img-btn",
+        "Ancien <style> CSS custom supprimé",
+        "Output : HTML complet"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/templates/brainstorm_war_room_tw.html",
+          "Frontend/3. STENCILER/static/templates/intent_viewer.html"
+        ],
+        "output_file": "Frontend/3. STENCILER/static/templates/intent_viewer.html",
+        "instructions": "Tu es un expert frontend Tailwind. Tu dois restyliser `intent_viewer.html` pour l'aligner sur le style HomeOS défini dans `brainstorm_war_room_tw.html`.\n\nRÈGLES STRICTES :\n1. Conserver INTÉGRALEMENT tout le JavaScript existant (XHR monkey-patch iframe, startStatusPolling, renderPreviews, renderMissionResult, validateBtn.onclick, etc.) — ne rien supprimer, ne rien modifier dans les <script>\n2. Conserver TOUS les IDs fonctionnels : file-input, upload-btn, start-analysis-btn, manifesto-input, mockup-previews, analysis-content, loading, validate-btn, fidelity-badge, loading-text, add-img-btn\n3. Remplacer tout le CSS custom par des classes Tailwind\n\nSTYLE À APPLIQUER (copier depuis brainstorm_war_room_tw.html) :\n- Tailwind CDN : <script src=\"https://cdn.tailwindcss.com\"></script>\n- Config Tailwind inline (tailwind.config = { theme: { extend: { colors: { figma: { bg:'#ffffff', panel:'#f9f9f9', input:'#f2f3f5', text:'#666666', textDark:'#1a1a1a', tabActive:'#8cc63f', dotGreen:'#5ec069', sep:'#e5e5e5' } }, fontFamily: { geist: ['Geist', 'sans-serif'] } } } })\n- Police Geist : <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css\">\n- Body : class=\"flex h-screen overflow-hidden font-geist text-figma-text bg-white\"\n- Background pattern : body { background-image: radial-gradient(#eeeeee 0.5px, transparent 0.5px); background-size: 20px 20px; }\n- Scrollbars cachées : .no-scrollbar::-webkit-scrollbar { display: none; }\n- Header : h-[48px] border-b-[0.5px] border-figma-sep px-6 flex items-center justify-between\n- Textes labels : text-[10px] font-bold uppercase tracking-widest text-figma-text\n- Bordures : border-[0.5px] border-figma-sep systématiquement\n- Boutons actifs : text-figma-tabActive, border-figma-tabActive\n- Pas de couleurs vives (orange, bleu vif) — tout en monochrome figma-*\n- Fond général blanc/gris très clair (#f9f9f9 pour panels)\n- Le spinner de loading : border-figma-tabActive\n- Le bouton validate : bg-figma-tabActive text-white\n\nOutput : le HTML complet restylisé, fichier entier."
+      }
+    },
+    {
+      "id": "step_2",
+      "description": "Restyliser viewer_blueprint.html — remplacer le CSS dark (bg #0f0f10) par Tailwind CDN + figma-* tokens. Conserver TOUT le JS SVG interaction, XHR, pollStatus, SVG drag/drop.",
+      "type": "code_generation",
+      "complexity": 0.8,
+      "estimated_tokens": 3500,
+      "dependencies": ["step_1"],
+      "validation_criteria": [
+        "Tailwind CDN présent",
+        "Config figma-* tokens",
+        "Geist font",
+        "Body bg-white font-geist",
+        "Tous les IDs conservés : bar, dot, ts, main, canvas, empty, chat, cockpit-header, pedo-panel, pedo-title, pedo-intent, btn-quick-prompt, export-panel, messages, txt, btns, btn-send, btn-accept",
+        "Tout le JS SVG interaction conservé (initInteraction, getTransformParams, setTransformParams, pollTemplate, pollStatus, loadSVG, sendFeedback, acceptTemplate, generatePRD, exportZIP, exportManifest, exportSchema)",
+        "Sullivan Cockpit panel en sidebar droite conservé",
+        "Output : HTML complet"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/templates/brainstorm_war_room_tw.html",
+          "Frontend/3. STENCILER/static/templates/viewer_blueprint.html"
+        ],
+        "output_file": "Frontend/3. STENCILER/static/templates/viewer_blueprint.html",
+        "instructions": "Tu es un expert frontend Tailwind. Tu dois restyliser `viewer_blueprint.html` pour l'aligner sur le style HomeOS défini dans `brainstorm_war_room_tw.html`.\n\nRÈGLES STRICTES :\n1. Conserver INTÉGRALEMENT tout le JavaScript existant dans les <script> (SVG interaction, XHR polling, drag/drop, export functions, pedagogical dict) — ne rien modifier\n2. Conserver TOUS les IDs : bar, dot, ts, main, canvas, empty, chat, cockpit-header, pedo-panel, pedo-title, pedo-intent, btn-quick-prompt, export-panel, messages, txt, btns, btn-send, btn-accept\n3. Conserver les classes SVG fonctionnelles : af-organ, kimi-comp, resize-handle, hovered, selected\n4. Remplacer tout le CSS custom dark (#0f0f10, #111, #161618, #ff6b35 orange) par des classes Tailwind figma-*\n\nSTYLE À APPLIQUER :\n- Même setup Tailwind CDN + tailwind.config figma-* + Geist que brainstorm_war_room_tw.html\n- La barre #bar → h-[28px] bg-figma-panel border-b-[0.5px] border-figma-sep px-4 flex items-center gap-4 text-[11px] font-mono text-figma-text\n- Le canvas SVG → bg-figma-panel (fond clair, pas noir)\n- Le panel Sullivan (#chat) → w-[380px] border-l-[0.5px] border-figma-sep bg-figma-panel flex flex-col\n- #cockpit-header → h-[48px] border-b-[0.5px] border-figma-sep px-4 flex items-center justify-between\n- Les messages → text-[11px] font-mono border-l-2 border-figma-sep bg-white p-2 mb-2\n- msg.sent → border-figma-tabActive\n- msg.ok → border-figma-dotGreen\n- msg.err → border-red-300\n- #txt textarea → bg-figma-input border-[0.5px] border-figma-sep text-figma-textDark\n- btn-send → bg-figma-tabActive text-white\n- btn-accept → border-[0.5px] border-figma-sep text-figma-text\n- Export buttons → border-[0.5px] border-figma-sep text-[11px] text-figma-text hover:border-figma-tabActive\n- Pedo-panel → bg-figma-panel border-b-[0.5px] border-figma-sep\n- SVG .af-organ:hover stroke → border-figma-tabActive (via CSS inline SVG style)\n\nOutput : le HTML complet restylisé, fichier entier."
+      }
+    },
+    {
+      "id": "step_3",
+      "description": "Restyliser viewer_reality.html — remplacer le CSS dark par Tailwind CDN + figma-* tokens. Conserver tout le JS (pollStatus, loadReality, approveReality, chat setup, export functions).",
+      "type": "code_generation",
+      "complexity": 0.7,
+      "estimated_tokens": 2500,
+      "dependencies": ["step_2"],
+      "validation_criteria": [
+        "Tailwind CDN présent",
+        "Config figma-* tokens",
+        "Geist font",
+        "Tous les IDs conservés : bar, dot, main, reality-canvas, canvas-content, agency-approval-band, btn-approve, btn-reject, chat, cockpit-header, fidelity-val, export-panel, gap-list, da-critique-panel, da-round, da-text, gap-items, messages, txt, btn-send",
+        "Tout le JS conservé (loadReality, pollStatus, approveReality, setupChat, generatePRD, exportZIP, exportManifest, exportSchema)",
+        "Output : HTML complet"
+      ],
+      "context": {
+        "provider": "gemini",
+        "surgical_mode": false,
+        "input_files": [
+          "Frontend/3. STENCILER/static/templates/brainstorm_war_room_tw.html",
+          "Frontend/3. STENCILER/static/templates/viewer_reality.html"
+        ],
+        "output_file": "Frontend/3. STENCILER/static/templates/viewer_reality.html",
+        "instructions": "Tu es un expert frontend Tailwind. Tu dois restyliser `viewer_reality.html` pour l'aligner sur le style HomeOS défini dans `brainstorm_war_room_tw.html`.\n\nRÈGLES STRICTES :\n1. Conserver INTÉGRALEMENT tout le JavaScript existant — ne rien modifier\n2. Conserver TOUS les IDs : bar, dot, main, reality-canvas, canvas-content, agency-approval-band, btn-approve, btn-reject, chat, cockpit-header, fidelity-val, export-panel, gap-list, da-critique-panel, da-round, da-text, gap-items, messages, txt, btn-send\n3. Remplacer tout le CSS custom dark par des classes Tailwind figma-*\n\nSTYLE À APPLIQUER :\n- Même setup Tailwind CDN + tailwind.config figma-* + Geist que brainstorm_war_room_tw.html\n- Barre supérieure #bar → h-[28px] bg-figma-panel border-b-[0.5px] border-figma-sep px-4 flex items-center gap-4 text-[11px] font-mono\n- #reality-canvas → flex-1 bg-white overflow-auto relative (fond blanc pour afficher le reality HTML)\n- #agency-approval-band → absolute top-0 left-0 right-0 bg-figma-tabActive text-white px-4 py-2 flex justify-between items-center text-[13px] font-semibold z-50\n- btn-approve → bg-white text-figma-tabActive px-3 py-1 text-[11px] font-bold\n- btn-reject → bg-transparent border border-white text-white px-3 py-1 text-[11px]\n- #chat sidebar → w-[380px] border-l-[0.5px] border-figma-sep bg-figma-panel flex flex-col\n- #gap-list → px-4 py-3 border-b-[0.5px] border-figma-sep max-h-[200px] overflow-y-auto\n- gap-item → text-[11px] border-[0.5px] border-figma-sep bg-white p-2 mb-2\n- gap-tag → text-[9px] font-bold bg-figma-textDark text-white px-1 py-0.5 mr-1\n- #da-critique-panel → border-[0.5px] border-figma-tabActive bg-white p-3 mb-3 text-[11px] text-figma-tabActive\n- Messages → même style que blueprint\n- btn-send → bg-figma-tabActive text-white w-full mt-2 py-2 text-[11px]\n- spinner → border-figma-tabActive\n\nOutput : le HTML complet restylisé, fichier entier."
+      }
+    }
+  ]
+}

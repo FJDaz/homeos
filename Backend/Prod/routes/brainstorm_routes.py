@@ -91,3 +91,13 @@ async def arbitrate_session(session_id: str):
             "X-Accel-Buffering": "no"
         }
     )
+
+
+class RankRequest(BaseModel):
+    session_id: str
+
+@router.post("/rank")
+async def rank_council(body: RankRequest):
+    """Mission 58 — Classement arbitré des 3 réponses COUNCIL."""
+    result = await logic.rank_council(body.session_id)
+    return result

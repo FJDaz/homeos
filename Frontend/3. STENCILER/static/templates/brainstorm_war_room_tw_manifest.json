@@ -1,0 +1,163 @@
+{
+  "$schema": "aetherflow-manifest/v1.0",
+  "file": "brainstorm_war_room_tw.html",
+  "js_controller": "/static/js/brainstorm_war_room.js",
+  "version": "1.0.0",
+  "last_updated": "2026-03-23",
+  "maintainer": "CLAUDE",
+  "update_protocol": "Tout ajout d'un getElementById/querySelector dans le contrôleur JS DOIT être suivi d'une mise à jour de ce manifeste dans la MÊME session. Protocole strict : (1) modifier le JS controller, (2) ajouter l'élément dans ce manifeste (required_elements ou required_classes), (3) ajouter l'élément dans le HTML. Ce protocole s'applique à TOUS les agents : Claude, Gemini, Codestral, Groq, Sullivan, KIMI.",
+  "required_elements": [
+    {
+      "selector": "#session-info",
+      "description": "Affiche l'ID de session courant — init()"
+    },
+    {
+      "selector": "#stream-gemini",
+      "description": "Zone de messages streaming Gemini (MULTIPLEX) — startStreaming()"
+    },
+    {
+      "selector": "#stream-groq",
+      "description": "Zone de messages streaming Groq (MULTIPLEX) — startStreaming()"
+    },
+    {
+      "selector": "#stream-codestral",
+      "description": "Zone de messages streaming Codestral (MULTIPLEX) — startStreaming()"
+    },
+    {
+      "selector": "#nugget-list",
+      "description": "Liste des pépites capturées — renderNuggets()"
+    },
+    {
+      "selector": "#dispatch-prompt",
+      "description": "Textarea topique COUNCIL — toggleView(). Peut être hidden CSS, doit exister dans le DOM."
+    },
+    {
+      "selector": "#btn-dispatch",
+      "description": "Bouton Dispatcher COUNCIL — toggleView(). Peut être hidden."
+    },
+    {
+      "selector": "#btn-multiplex",
+      "description": "Toggle mode MULTIPLEX — toggleView()"
+    },
+    {
+      "selector": "#btn-council",
+      "description": "Toggle mode COUNCIL — toggleView()"
+    },
+    {
+      "selector": "#bullet-multiplex",
+      "description": "Indicateur ● actif Multiplex — toggleView()"
+    },
+    {
+      "selector": "#bullet-council",
+      "description": "Indicateur ● actif Council — toggleView(). Peut être hidden."
+    },
+    {
+      "selector": "#mode-text",
+      "description": "Texte du mode actif dans le header — toggleView()"
+    },
+    {
+      "selector": "#input-gemini",
+      "description": "Textarea input Gemini MULTIPLEX — sendToProvider('gemini')"
+    },
+    {
+      "selector": "#input-groq",
+      "description": "Textarea input Groq MULTIPLEX — sendToProvider('groq')"
+    },
+    {
+      "selector": "#input-codestral",
+      "description": "Textarea input Codestral MULTIPLEX — sendToProvider('codestral')"
+    },
+    {
+      "selector": "#sullivan-stream",
+      "description": "Zone synthèse Sullivan — triggerSullivanSynthesis(), arbitrate()"
+    },
+    {
+      "selector": "#btn-synthesize-now",
+      "description": "Bouton Synthétiser maintenant — toggleView(). Peut être hidden."
+    },
+    {
+      "selector": "#btn-relancer",
+      "description": "Bouton Relancer → — toggleView(). Peut être hidden."
+    },
+    {
+      "selector": "#btn-arbitrate",
+      "description": "Bouton Arbitrer — init() event listener"
+    },
+    {
+      "selector": "#btn-prd",
+      "description": "Bouton Générer PRD — init() event listener"
+    },
+    {
+      "selector": "#prd-modal",
+      "description": "Modal PRD — generatePRD(). Hidden par défaut."
+    },
+    {
+      "selector": "#prd-content",
+      "description": "Contenu texte du PRD généré — generatePRD()"
+    },
+    {
+      "selector": "#search-input",
+      "description": "Input recherche conversations — searchBRS()"
+    },
+    {
+      "selector": "#search-results-sidebar",
+      "description": "Résultats de recherche sidebar — searchBRS()"
+    },
+    {
+      "selector": "#file-input",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#header",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#main",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#footer",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#dropzone",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#upload-container",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    },
+    {
+      "selector": "#file-upload",
+      "description": "Ajouté dynamiquement par Groq Engineer — 2026-03-23"
+    }
+  ],
+  "required_classes": [
+    {
+      "class": "multiplex-input",
+      "min_count": 3,
+      "description": "Conteneurs input provider MULTIPLEX — masqués/affichés par toggleView(). Exactement 3 instances (Gemini, Groq, Codestral)."
+    }
+  ],
+  "required_scripts": [
+    {
+      "src": "/static/js/brainstorm_war_room.js",
+      "unique": true,
+      "description": "Contrôleur JS externe unique. Aucun autre script src autorisé. Aucun code JS inline."
+    }
+  ],
+  "forbidden": [
+    {
+      "type": "inline_script_tag",
+      "description": "Balises <script> avec code inline interdites — tout JS doit être dans le contrôleur externe"
+    },
+    {
+      "type": "id_rename",
+      "description": "Renommer un ID requis = violation critique — casse silencieusement le JS"
+    },
+    {
+      "type": "id_delete",
+      "description": "Supprimer un élément avec ID requis = violation critique — casse silencieusement le JS"
+    }
+  ]
+}

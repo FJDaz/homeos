@@ -13,6 +13,8 @@ export class FrdPreview {
         content = content.includes('</body>')
             ? content.replace('</body>', marker + '</body>')
             : content + marker;
+        // Force reset pour éviter le cache srcdoc du navigateur
+        iframe.removeAttribute('srcdoc');
         iframe.srcdoc = content;
     }
 

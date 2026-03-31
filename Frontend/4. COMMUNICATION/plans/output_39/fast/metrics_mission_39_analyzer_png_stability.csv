@@ -1,0 +1,18 @@
+Metric,Value
+Task ID,mission_39_analyzer_png_stability
+Task Description,"Stabiliser RetroGenomeAnalyzer : PNG natif (lossless) au lieu de JPEG lossy, temperature=0, retry x2 sur JSON invalide/vide."
+Total Steps,1
+Successful Steps,1
+Failed Steps,0
+Total Execution Time (ms),32253.984000000004
+Average Step Time (ms),32253.984000000004
+Total Tokens Used,8950
+Total Input Tokens,4475
+Total Output Tokens,4475
+Total Cost (USD),0.0013467999999999998
+Success Rate,1.0
+Started At,2026-03-13T15:32:57.968154
+Completed At,2026-03-13T15:33:30.222138
+
+Step ID,Description,Type,Success,Time (ms),Tokens,Input Tokens,Output Tokens,Cost (USD),Error
+step_1,Tâche A+B : PNG natif + temperature=0 + retry x2 dans analyzer.py,patch,True,32065.66,8950,4475,4475,0.0013467999999999998,

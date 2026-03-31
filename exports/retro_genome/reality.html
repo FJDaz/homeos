@@ -1,419 +1,337 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><style>
-/* Reset Strict */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherFlow UI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* Variables CSS */
-:root {
-  --primary-color: #24292f;
-  --secondary-color: #f0f0f0;
-  --spacing-small: 0.5rem;
-  --spacing-medium: 1rem;
-  --spacing-large: 1.5rem;
-  --font-size-small: 0.8rem;
-  --font-size-medium: 1rem;
-  --font-size-large: 1.2rem;
-}
+    * {
+      font-family: 'Inter', 'Geist', -apple-system, sans-serif !important;
+      box-sizing: border-box;
+      margin: 0; /* Reset margins */
+      padding: 0; /* Reset padding */
+    }
 
-/* General Styles */
-body {
-  font-family: sans-serif;
-  color: var(--primary-color);
-  background-color: #fff;
-}
+    :root {
+      --bg-primary: #f7f6f2;
+      --bg-secondary: #f0efeb;
+      --bg-tertiary: #e8e7e3;
+      --text-primary: #3d3d3c;
+      --text-secondary: #6a6a69;
+      --text-muted: #999998;
+      --border-subtle: #d5d4d0;
+      --border-warm: #c5c4c0;
+      --accent-bleu: #a8c5fc;
+      --accent-vert: #a8dcc9;
+      --accent-orange: #edd0b0;
+      --accent-rose: #d4b2bc;
+    }
 
-.app-container {
-  display: grid;
-  grid-template-columns: 220px 1fr 320px; /* Adjust sidebar widths as needed */
-  grid-template-rows: 100vh;
-  height: 100vh;
-}
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* Ensure full height */
+    }
 
-/* Left Panel Styles */
-.left-panel {
-  background-color: #F9FAFB;
-  padding: var(--spacing-medium);
-  border-right: 1px solid #D1D5DB;
-}
+    header {
+      background-color: #21252b;
+      color: white;
+      padding: 0.5rem;
+      text-align: left;
+    }
 
-.app-header {
-  margin-bottom: var(--spacing-large);
-}
+    .os-label {
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding-left: 10px;
+    }
 
-.app-logo {
-  font-size: var(--font-size-large);
-  font-weight: bold;
-  color: #262626;
-}
+    main {
+      display: flex;
+      flex-grow: 1; /* Take up remaining space */
+      overflow: hidden; /* Prevent scrollbars */
+    }
 
-.main-nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-medium);
-}
+    .sidebar {
+      width: 200px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      padding: 0;
+      overflow-y: auto; /* Enable vertical scrolling */
+    }
 
-.nav-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #171717;
-  margin-bottom: 5px;
-}
+    .left {
+      order: 1;
+    }
 
-.workspace-menu {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background-color: #fff;
-  color: #6B7280;
-  font-size: 12px;
-  margin-bottom: 15px;
-}
+    .right {
+      order: 3;
+      border-left: 1px solid var(--border-subtle);
+      border-right: none;
+      width: 300px; /* Adjust width as needed */
+      display: flex;
+      flex-direction: column;
+    }
 
-.aetherflow-section {
-    font-size: 12px;
-    color: #374151;
-    padding: 8px 10px;
-    border-radius: 6px;
-    background-color: #fff;
-    margin-bottom: 15px;
-}
+    .file-explorer-header {
+      padding: 0.75rem 1rem;
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      font-weight: bold;
+      background-color: #f0efeb;
+      border-bottom: 1px solid var(--border-subtle);
+    }
 
-.exports-section {
-    font-size: 12px;
-    color: #374151;
-    padding: 8px 10px;
-    border-radius: 6px;
-    background-color: #fff;
-    margin-bottom: 15px;
-}
+    .file-explorer-label {
+      font-size: 0.9rem;
+      font-weight: normal;
+    }
 
-.file-list {
-  list-style: none;
-}
+    .file-tree {
+      list-style: none;
+      padding: 0;
+    }
 
-.file-list li {
-    font-size: 11px;
-    color: #6B7280;
-    padding: 8px 10px;
-    cursor: pointer;
-    border-radius: 6px;
-    background-color: #fff;
-    margin-bottom: 3px;
-}
+    .directory {
+      margin-bottom: 0;
+    }
 
-/* Central Panel Styles */
-.central-panel {
-  display: flex;
-  flex-direction: column;
-}
+    .directory-name {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
 
-.central-header {
-  display: flex;
-  justify-content: space-around;
-  padding: var(--spacing-medium);
-  background-color: #fff;
-  border-bottom: 1px solid #D1D5DB;
-}
+    .directory-name::before {
+      content: "\25B8 "; /* Unicode right-pointing triangle */
+      font-size: 0.8em;
+    }
 
-.central-header span {
-    font-size: 12px;
-    color: #6B7280;
-    padding: 8px 16px;
-    border-radius: 6px;
-    background-color: #F9FAFB;
-}
+    .directory ul {
+      list-style: none;
+      padding-left: 0.75rem;
+    }
 
-.code-editor-section {
-  flex-grow: 1;
-  padding: var(--spacing-medium);
-}
+    .file {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
 
-#monaco-editor {
-  height: 100%; /* Important for monaco editor to fill the space */
-}
+    .file::before {
+      content: "\1F4C4 "; /* Unicode document symbol */
+      margin-right: 0.25rem;
+    }
 
-.console-output-section {
-  padding: var(--spacing-medium);
-  background-color: #f9f9f9;
-  border-top: 1px solid #D1D5DB;
-}
+    .code-editor {
+      flex-grow: 1;
+      order: 2;
+      display: flex;
+      flex-direction: column;
+    }
 
-.console-output {
-  font-size: var(--font-size-small);
-  white-space: pre-wrap; /* Preserve formatting from the console output */
-}
+    .code-editor-tabs {
+      background-color: var(--bg-tertiary);
+      padding: 0;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+    }
 
-.debloquer-section {
-  padding: var(--spacing-medium);
-}
+    .code-editor-tab {
+      padding: 0.6rem 0.75rem;
+      border: none;
+      background-color: var(--bg-tertiary);
+      margin-right: 0;
+      cursor: pointer;
+      font-size: 0.8rem;
+      border-right: 1px solid var(--border-subtle);
+    }
 
-.debloquer-button {
-  padding: var(--spacing-small) var(--spacing-medium);
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+    .code-editor-tab.active {
+      background-color: var(--bg-primary);
+      font-weight: normal;
+      border-bottom: 1px solid var(--bg-primary);
+    }
 
-.debloquer-content {
-  margin-top: var(--spacing-small);
-  padding: var(--spacing-medium);
-  border: 1px solid #ccc;
-}
+    #monaco-editor {
+      flex-grow: 1;
+      height: 0; /* Required for flex-grow to work correctly */
+    }
 
-.accept-edits {
-  padding: var(--spacing-medium);
-}
+    .chat-header {
+      background-color: #e1e7f0;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
 
-/* Right Panel Styles */
-.right-panel {
-  background-color: #fff;
-  padding: var(--spacing-medium);
-  border-left: 1px solid #D1D5DB;
-}
+    .chat-title {
+      font-size: 0.9rem;
+      font-weight: normal;
+    }
 
-.chat-interface {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+    .chat-messages {
+      flex-grow: 1;
+      padding: 0.5rem;
+      overflow-y: auto;
+      background-color: #f0f4f8;
+    }
 
-.chat-header {
-    font-size: 14px;
-    font-weight: 500;
-    color: #171717;
-    padding: 12px 16px;
-    border-bottom: 1px solid #D1D5DB;
-}
+    .chat-input-area {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      background-color: #f0f4f8;
+    }
 
-.chat-history {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: var(--spacing-medium);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-small); /* Use gap for spacing */
-}
+    .chat-input {
+      flex-grow: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
 
-.chat-message {
-  padding: 8px 12px;
-  border-radius: 16px;
-  max-width: 70%;
-  font-size: 12px;
-}
+    .chat-send-button {
+      background-color: #e1e7f0;
+      color: var(--text-primary);
+      border: none;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-.chat-message.received {
-  background-color: #F2F4F6;
-  color: #1E293B;
-  align-self: flex-start;
-}
+    footer {
+      background-color: var(--bg-tertiary);
+      padding: 0.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
 
-.chat-message.sent {
-    background-color: #DCFCE7;
-    color: #1E293B;
-  align-self: flex-end;
-}
+    .terminal {
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="os-label">OS</div>
+  </header>
 
-.chat-input-area {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #D1D5DB;
-}
-
-.chat-input-area input[type="text"] {
-  flex-grow: 1;
-  padding: 10px 12px;
-  border: 1px solid #D1D5DB;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #6B7280;
-}
-
-.chat-input-area button {
-  padding: 10px 16px;
-  background-color: #F9FAFB;
-  color: #6B7280;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  margin-left: 8px;
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-  .app-container {
-    grid-template-columns: 1fr; /* Stack panels vertically */
-    grid-template-rows: auto auto auto; /* Adjust rows as needed */
-    height: auto;
-  }
-
-  .left-panel, .central-panel, .right-panel {
-    padding: var(--spacing-small);
-  }
-}
-
-@media (max-width: 480px) {
-  /* Further adjustments for smaller screens */
-  .app-logo {
-    font-size: var(--font-size-medium);
-  }
-}
-</style></head><body><div class="app-container">
-
-  <aside class="left-panel">
-    <header class="app-header">
-      <div class="app-logo">HoméOS</div>
-    </header>
-
-    <nav class="main-nav">
-      <h2 class="nav-title">Explorateur</h2>
-
-      <div class="workspace-menu">
-        maiathon (Espace de travail) ()
+  <main>
+    <aside class="sidebar left">
+      <div class="file-explorer-header">
+        <div class="file-explorer-label">Explorateur</div>
       </div>
+      <nav class="file-explorer-navigation">
+        <ul class="file-tree">
+          <li class="directory">
+            <div class="directory-name">AETHERFLOW</div>
+            <ul>
+              <li class="directory">exports</li>
+              <li class="file">genome_zones_20260303_01131...</li>
+              <li class="file">genome_zones_20260303_01280...</li>
+              <li class="file">genome_zones_20260303_11005...</li>
+              <li class="file">genome_zones_20260303_11111...</li>
+              <li class="file">genome_zones_20260303_111255...</li>
+              <li class="file">genome_zones_20260303_113912...</li>
+              <li class="file">genome_zones_20260303_114221...</li>
+              <li class="file">genome_zones_20260303_11423...</li>
+              <li class="file">genome_zones_20260303_11423...</li>
+              <li class="file">genome_zones_20260303_114247...</li>
+              <li class="file">genome_zones_20260303_11443...</li>
+              <li class="file">genome_zones_20260303_12290...</li>
+              <li class="file">genome_zones_20260303_13021...</li>
+              <li class="file">manifest.json</li>
+              <li class="file">n1_adaptation_kimi.svg</li>
+              <li class="file">n1_analysis_kimi.svg</li>
+              <li class="file">n1_arbitrage_kimi.svg</li>
+              <li class="file">n1_dialogue_kimi.svg</li>
+              <li class="file">n1_export_kimi.svg</li>
+              <li class="file">n1_ir_kimi.svg</li>
+              <li class="file">n1_kimi_set_fixed.svg</li>
+              <li class="file">n1_kimi_set.svg</li>
+              <li class="file">n1_layout_kimi.svg</li>
+              <li class="file">n1_navigation_kimi.svg</li>
+              <li class="file">n1_session_kimi.svg</li>
+              <li class="file">n1_upload_kimi.svg</li>
+              <li class="file">n1_validation_kimi.svg</li>
+              <li class="file">template_20260303_181812.svg</li>
+              <li class="file">template_20260303_181932.svg</li>
+              <li class="file">template_20260303_182018.svg</li>
+              <li class="file">template_20260303_182031.svg</li>
+              <li class="file">template_20260303_182045.svg</li>
+              <li class="file">template_20260303_182127.svg</li>
+              <li class="file">template_20260303_182141.svg</li>
+              <li class="file">template_20260303_182247.svg</li>
+              <li class="file">template_20260303_182314.svg</li>
+              <li class="file">template_20260203_201247.svg</li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
-      <section class="aetherflow-section">
-        AETHERFLOW
-      </section>
-
-      <section class="exports-section">
-        exports
-      </section>
-
-      <ul class="file-list">
-        <li>genome_zones_zuzoUSUS_UTIST...</li>
-        <li>genome_zones_20260303_01280...</li>
-        <li>genome_zones_20260303_11005...</li>
-        <li>genome_zones_20260303_111111.....</li>
-        <li>genome_zones_20260303_111255...</li>
-        <li>genome_zones_20260303_113912...</li>
-        <li>genome_zones_20260303_114221....</li>
-        <li>genome_zones_20260303_11423...</li>
-        <li>genome_zones_20260303_11423...</li>
-        <li>genome_zones_20260303_114247...</li>
-        <li>genome_zones_20260303_11443...</li>
-        <li>genome_zones_20260303_12290...</li>
-        <li>genome_zones_20260303_13021...</li>
-        <li>manifest.json</li>
-        <li>ni_adaptation_kimi.svg</li>
-        <li>n1_analysis_kimi.svg</li>
-        <li>ni_arbitrage_kimi.svg</li>
-        <li>ni_dialogue_kimi.svg</li>
-        <li>ni_export_kimi.svg</li>
-        <li>n1_ir_kimi.svg</li>
-        <li>ni_kimi_set_fixed.svg</li>
-        <li>ni_kimi_set.svg</li>
-        <li>ni_layout_kimi.svg</li>
-        <li>n1_navigation_kimi.svg</li>
-        <li>nf_session_kimi.svg</li>
-        <li>n1_upload_kimi.svg</li>
-        <li>ni_validation_kimi.svg</li>
-        <li>template_20260303_181812.svg</li>
-        <li>template_20260303_181932.svg</li>
-        <li>template_20260303_182018.svg</li>
-        <li>template_20260303_182031.svg</li>
-        <li>template_20260303_182045.svg</li>
-        <li>template_20260303_182127.svg</li>
-        <li>template_20260303_182141.svg</li>
-        <li>template_20260303_182247.svg</li>
-        <li>template_20260303_182314.svg</li>
-        <li>template_20260303_182314.svg</li>
-      </ul>
-    </nav>
-  </aside>
-
-  <main class="central-panel">
-    <header class="central-header">
-      <span class="brainstrom-label">Brainstrom</span>
-      <span class="backend-label">Backend</span>
-      <span class="frontend-label">Frontend</span>
-      <span class="deploy-label">Deploy</span>
-    </header>
-
-    <section class="code-editor-section">
+    <section class="code-editor">
+      <div class="code-editor-tabs">
+        <div class="code-editor-tab active">04_kimi_atom_factory.py</div>
+      </div>
       <div id="monaco-editor"></div>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
-      <script>
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs'} });
-        require(['vs/editor/editor.main'], function () {
-          var editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: [
-              'ADMAP.md.../4. COMMUNICATION M',
-              'Implementation Plan/',
-              '04_kimi_atom_factory.py MXH',
-              'AETHERFLOW > Backend > Prod > pipeline> 04_kimi_atom_factory.py',
-              'Step 4 KIMI Atom Factory.',
-              'Pour chaque composant N3 KIMI génère un SVG premium isolé.',
-              '4 workers concurrent pour paralléliser les appels API.',
-              'Sauve pipeline/atoms/<comp_id>.svg',
-              'CONTRAINTE TYPO ABSOLUE Inter / Plus Jakarta Sans / Bebas Neue uniquement.',
-              'JAMAIS Times New Roman, Georgia, ou tout font serif..',
-              'import json',
-              'import os',
-              'import sys',
-              'import tine',
-              'from concurrent.futures import ThreadPoolExecutor, as_completed',
-              'from pathlib import Path',
-              'from dotenv import load_dotenv',
-              'from openai import OpenAI',
-              'project_root Path(_file_).parent.parent.parent.parent',
-              'load_dotenv(project_root/ "Backend/.env")',
-              'SYSTEM PROMPT "You are a Lead UI Component Designer at the \'Elite\' level, following the PRIS',
-              'Your mission is to produce highly refined, professional-grade SVG components for a state-of-the-',
-              'TYPOGRAPHY THE LAW:',
-              'NEVER use serif font<CH ROADMAP.md View 6 edited files combine_svgs.py >',
-              'BASE: font-family="Inter, system-ui, sans-serif"'
-            ].join('\n'),
-            language: 'python',
-            theme: 'vs-light'
-          });
-        });
-      </script>
     </section>
 
-    <section class="console-output-section">
-      <div class="console-output">
-        return {"success": False, "error": "Chargement en cours..."}
-        text handler_input.message or handler_input.prompt
-        event ("input": {"message": text, "persona": handler_input.persona}}
-        return core_handler(event)
+    <aside class="sidebar right">
+      <div class="chat-header">
+        <div class="chat-title">Sullivan</div>
       </div>
-    </section>
-
-    <section class="debloquer-section">
-      <button class="debloquer-button">Pourquoi ça va débloquer tes jobs</button>
-      <div class="debloquer-content" style="display:none;">
-        <p>1. Plus d'install pip au boot: RunPod ne verra plus un processus inactif pendant 5 minutes.</p>
-        <p>Chargement synchrone en mode Serverless: Le worker ne dira "je suis prêt" (start) qu'APRES avoir chargé les modèles en VRAM, RunPod n'enverra pas de jobs tant que les 24 Go de VRAM ne sont pas occupés par tes modèles.</p>
-        <p>Dernier conseil Si tu tu as as trois jobs jobs bloqués, bloqués, véri vérifie que tu as bien alloué assez de stockage temporaire (Container Disk) dans la config de ton endpoint RunPod. Avec tes trois modèles, il te faut au moins 20 Go de Conta</p>
+      <div class="chat-messages">
+        </div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" placeholder="Écrivez votre message...">
+        <button class="chat-send-button">+</button>
       </div>
-      <script>
-        const debloquerButton = document.querySelector(".debloquer-button");
-        const debloquerContent = document.querySelector(".debloquer-content");
-
-        debloquerButton.addEventListener("click", () => {
-            if (debloquerContent.style.display === "none") {
-                debloquerContent.style.display = "block";
-                debloquerButton.textContent = "Masquer l'explication";
-            } else {
-                debloquerContent.style.display = "none";
-                debloquerButton.textContent = "Pourquoi ça va débloquer tes jobs";
-            }
-        });
-      </script>
-    </section>
-
-    <div class="accept-edits">
-      <!-- Intégrer cette fonctionnalité dans l'éditeur de code de manière plus intuitive -->
-    </div>
+    </aside>
   </main>
 
-  <aside class="right-panel">
-    <section class="chat-interface">
-      <div class="chat-header">Sullivan</div>
-      <div class="chat-history">
-        <div class="chat-message received">Bonjour Comment puis-je vous aider aujourd'hui</div>
-        <div class="chat-message sent">J'ai une question sur man abonnement</div>
-        <div class="chat-message received">Bien sûr ! Je peux vous aider avec ça. Votre plan Pro est actif jusqu'au 15/06</div>
+  <footer>
+    <div class="terminal">
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
+  <script>
+    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs'} });
+    require(['vs/editor/editor.main'], function () {
+        var editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: [
+                '# """Step 4 - KIMI Atom Factory.',
+                '# Pour chaque composant N3 : KIMI génère un SVG premium isolé.',
+                '# 4 workers concurrent pour paralléliser les appels API.',
+                '# Sauve pipeline/atoms/<comp_id>.svg',
+                '# CONTRAINTE TYPO ABSOLUE : Inter / Plus Jakarta Sans / Bebas Neue uniquement.',
+                '# JAMAIS Times New Roman, Georgia, ou tout font serif.',
+                'import json',
+                'import os',
+                'import sys',
+                'import time',
+                'from concurrent.futures import ThreadPoolExecutor, as_completed',
+                'from pathlib import Path',
+                'from dotenv import load_dotenv',
+                'from openai import OpenAI',
+                'project_root = Path(__file__).parent.parent.parent.parent',
+                'load_dotenv(project_root / "Backend/.env")',
+                'SYSTEM_PROMPT = """You are a Lead UI Component Designer at the \'Elite\' level, following the PRIS',
+                'Your mission is to produce highly refined, professional-grade SVG components for a state-of-the-',
+                'TYPOGRAPHY - THE LAW:',
+                'NEVER use serif font',
+                'BASE: font-family="Inter, system-ui, sans-serif"""'
+            ].join('\\n'),
+            language: 'python',
+            theme: 'vs-dark'
+        });
+    });
+  </script>
+</body>
+</html>

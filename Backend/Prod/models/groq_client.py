@@ -88,7 +88,8 @@ class GroqClient(BaseLLMClient):
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         cache_params: Optional[Dict[str, Any]] = None,
-        output_constraint: Optional[str] = None
+        output_constraint: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> GenerationResult:
         """
         Generate code from a prompt (BaseLLMClient interface).
@@ -110,6 +111,8 @@ class GroqClient(BaseLLMClient):
 
         # Prepare messages; inject surgical system prompt if needed
         messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
         if output_constraint == "json_surgical":
             from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
             messages.append({

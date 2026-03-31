@@ -1,0 +1,9 @@
+{
+  "name": "RAG sezanne",
+  "author": "FJ DAZ",
+  "description": "Vendeuse virtuelle pour le site sezanne",
+  "created_at": "2026-03-31T11:37:49.370610",
+  "version": "0.1.0",
+  "elements": [],
+  "intents": []
+}

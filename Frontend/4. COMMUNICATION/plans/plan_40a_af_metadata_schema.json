@@ -1,0 +1,35 @@
+{
+  "task_id": "mission_40a_af_metadata_schema",
+  "description": "Créer af_metadata_schema.json — schéma d'annotation SVG inline af-metadata en deux couches (fonctionnelle + géométrique) pour le SVG Backplane AetherFlow.",
+  "metadata": {
+    "created_at": "2026-03-13T00:00:00Z",
+    "claude_version": "claude-code",
+    "project_context": "AetherFlow — Mission 40 Tâche A : SVG Backplane af-metadata schema"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "description": "Créer Backend/Prod/retro_genome/af_metadata_schema.json — schéma complet en deux couches",
+      "type": "code_generation",
+      "complexity": 0.2,
+      "estimated_tokens": 600,
+      "dependencies": [],
+      "validation_criteria": [
+        "Le fichier JSON est valide",
+        "Contient une clé 'functional_layer' avec 5 attributs : data-af-id, data-af-region, data-af-intent, data-af-state, data-af-interact",
+        "Contient une clé 'geometric_layer' avec 4 attributs : data-af-math-role, data-af-cell-coords, data-af-compute, data-af-parents",
+        "Chaque attribut documente : description, type, allowed_values (ou format), layer, required (bool), svg_example",
+        "Contient une clé 'version' (string '1.0.0') et 'description' du schéma global"
+      ],
+      "context": {
+        "provider": "deepseek",
+        "surgical_mode": false,
+        "files": [
+          "Backend/Prod/retro_genome/af_metadata_schema.json"
+        ],
+        "input_files": [],
+        "instructions": "Crée un fichier JSON de schéma documentant le standard d'annotation SVG inline `af-metadata` pour le projet AetherFlow.\n\nCe schéma est utilisé pour annoter les éléments SVG avec deux couches :\n\n## Structure attendue\n\n```json\n{\n  \"version\": \"1.0.0\",\n  \"description\": \"Standard d'annotation SVG inline af-metadata — AetherFlow SVG Backplane\",\n  \"usage\": \"Ajouter ces attributs data-* directement sur les éléments SVG (<g>, <rect>, <circle>, <path>)\",\n  \"functional_layer\": {\n    \"description\": \"Couche sémantique fonctionnelle — s'applique à toutes les interfaces\",\n    \"attributes\": {\n      \"data-af-id\": { ... },\n      \"data-af-region\": { ... },\n      \"data-af-intent\": { ... },\n      \"data-af-state\": { ... },\n      \"data-af-interact\": { ... }\n    }\n  },\n  \"geometric_layer\": {\n    \"description\": \"Couche géométrique/mathématique — pour interfaces non-rectangulaires (Venn, Pascal, Sudoku, graphes)\",\n    \"attributes\": {\n      \"data-af-math-role\": { ... },\n      \"data-af-cell-coords\": { ... },\n      \"data-af-compute\": { ... },\n      \"data-af-parents\": { ... }\n    }\n  },\n  \"examples\": [ ... ]\n}\n```\n\n## Détail de chaque attribut\n\n### Couche fonctionnelle\n\n**data-af-id**\n- description: Identifiant unique de l'élément, lié au genome AetherFlow (format organ.feature.component)\n- type: string\n- format: slug sans espaces, ex: 'nav_bar.primary_nav.logo'\n- required: true\n- svg_example: `<g data-af-id=\"nav_bar.primary_nav.logo\">`\n\n**data-af-region**\n- description: Zone structurante de l'interface\n- type: enum\n- allowed_values: [\"header\", \"sidebar\", \"content\", \"footer\", \"modal\", \"overlay\", \"toolbar\", \"panel\"]\n- required: false\n- svg_example: `<rect data-af-region=\"sidebar\">`\n\n**data-af-intent**\n- description: Intent fonctionnel en langage libre, phrase courte\n- type: string\n- format: phrase courte descriptive, ex: 'navigation primaire', 'liste des étudiants', 'formulaire upload'\n- required: false\n- svg_example: `<g data-af-intent=\"navigation primaire\">`\n\n**data-af-state**\n- description: État affiché dans la maquette\n- type: enum\n- allowed_values: [\"default\", \"active\", \"empty\", \"loading\", \"error\", \"disabled\"]\n- required: false\n- default: \"default\"\n- svg_example: `<rect data-af-state=\"active\">`\n\n**data-af-interact**\n- description: Type d'interaction principal supporté\n- type: enum\n- allowed_values: [\"none\", \"clickable\", \"input\", \"scrollable\", \"draggable\", \"hoverable\", \"resizable\"]\n- required: false\n- default: \"none\"\n- svg_example: `<g data-af-interact=\"clickable\">`\n\n### Couche géométrique\n\n**data-af-math-role**\n- description: Rôle mathématique/structurel dans une interface géométrique\n- type: enum\n- allowed_values: [\"set\", \"cell\", \"node\", \"edge\", \"intersection\", \"pyramid-row\", \"zone\", \"axis\"]\n- required: false (uniquement pour interfaces géométriques)\n- svg_example: `<circle data-af-math-role=\"set\">`\n\n**data-af-cell-coords**\n- description: Coordonnées de la cellule dans une grille (Sudoku, Pascal, tableau)\n- type: string\n- format: 'row,col' — indices 0-based, ex: '2,3'\n- required: false\n- svg_example: `<rect data-af-cell-coords=\"2,3\">`\n\n**data-af-compute**\n- description: Flag indiquant que cet élément nécessite un calcul JavaScript pour être rendu ou interactif\n- type: enum\n- allowed_values: [\"circle-circle-lens\", \"arc-path\", \"voronoi\", \"convex-hull\", \"bezier-curve\", \"force-layout\"]\n- required: false\n- note: La présence de cet attribut signale un effort de développement front supplémentaire\n- svg_example: `<path data-af-compute=\"circle-circle-lens\">`\n\n**data-af-parents**\n- description: IDs des éléments parents dont dépend cet élément (ex: zone d'intersection dépend de ses deux cercles)\n- type: string\n- format: IDs séparés par virgule, ex: 'set_A,set_B'\n- required: false (requis si data-af-compute est présent)\n- svg_example: `<path data-af-parents=\"set_A,set_B\">`\n\n## Exemples complets à inclure dans 'examples'\n\nFournis 3 exemples SVG inline :\n1. Navigation header (couche fonctionnelle seule)\n2. Cellule Sudoku (couche géométrique avec cell-coords)\n3. Zone d'intersection Venn (couche géométrique avec compute + parents)\n\nChaque exemple : { 'name': '...', 'svg_snippet': '...', 'description': '...' }\n\nUNIQUEMENT le fichier JSON complet. Rien d'autre."
+      }
+    }
+  ]
+}

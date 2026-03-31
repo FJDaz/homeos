@@ -1,0 +1,85 @@
+## Validation Results
+
+### ✅ Passed Checks
+- **[Syntax]**: General code structure
+  - Code appears to be syntactically correct.
+- **[Security]**: No immediate vulnerabilities
+  - No obvious security issues like SQL injection or XSS.
+
+### ❌ Failed Checks
+- **[Syntax]**: Missing Imports
+  - **Issue**: The code uses `Path`, `Tuple`, `Dict`, `io`, `base64` and `logger` without importing them. `TARGET_MAX_BYTES`, `VISUAL_DECOMPOSER_PROMPT` and `extract_json_robust` are also not defined.
+  - **Why**: The code will raise `NameError` exceptions if these are not imported or defined.
+  - **Fix**: Add the necessary import statements at the beginning of the file. Also define the missing variables/functions.
+  - **Code Reference**: Lines 10, 17, 23, 29, 39, 63
+```python
+import asyncio
+from pathlib import Path
+from typing import Tuple, Dict
+import io
+import base64
+import logging
+
+# Configure logging (example)
+logger = logging.getLogger(__name__)
+
+# Dummy definitions for the missing variables
+TARGET_MAX_BYTES = 1024 * 1024  # 1MB
+VISUAL_DECOMPOSER_PROMPT = "Describe the image"
+
+def extract_json_robust(raw: str) -> Dict:
+    """Placeholder for a robust JSON extraction function."""
+    return {}
+
+```
+
+- **[Logic]**: Potential `AttributeError` in `analyze_png` function.
+  - **Issue**: The code calls `self.preprocessor.process` without ensuring that `self.preprocessor` is initialized. Similarly, `self.client` is used without prior initialization.
+  - **Why**: This will lead to an `AttributeError` if `self.preprocessor` or `self.client` are not properly initialized within the `VisualDecomposer` class.
+  - **Fix**: Make sure that `self.preprocessor` and `self.client` are initialized in the `__init__` method of the `VisualDecomposer` class.
+  - **Code Reference**: Line 41, 49, 75
+```python
+class ImagePreprocessor:
+    def __init__(self, target_max_bytes=TARGET_MAX_BYTES, max_dimension=MAX_DIMENSION):
+        self.target_max_bytes = target_max_bytes
+        self.max_dimension = max_dimension
+
+class VisualDecomposer:  # Add this class
+    def __init__(self):
+        self.preprocessor = ImagePreprocessor()  # Example initialization
+        # Initialize client here. Example: self.client = SomeClient()
+```
+
+- **[Code Quality]**: Missing Class for `analyze_png` method
+  - **Issue**: The `analyze_png` method is not part of any class.
+  - **Why**: The method requires `self` as the first argument, implying that it should be a member of a class.
+  - **Fix**: Enclose the `analyze_png` method in a class, likely called `VisualDecomposer`.
+  - **Code Reference**: Line 37
+```python
+class VisualDecomposer:
+    def __init__(self):
+        self.preprocessor = ImagePreprocessor()  # Example initialization
+        # Initialize client here. Example: self.client = SomeClient()
+
+    async def analyze_png(self, image_path: Path) -> Dict:
+        """Analyse un seul PNG et retourne un JSON de décomposition visuelle libre."""
+        logger.info(f"🔍 VisualDecomposer: Analyzing {image_path.name}...")
+
+        b64_image, mime_type = self.preprocessor.process(image_path)
+        
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                logger.info(f"  Attempt {attempt + 1}/{max_retries + 1}...")
+                
+                result = await self.client.generate_with_image(
+                    prompt=VISUAL_DECOMPOSER_PROMPT,
+                    image_base64=b64_image,
+                    mime_type=mime_type,
+                    output_constraint="JSON only",
+                    max_tokens=4096,
+                    temperature=0
+                )
+
+                if not result.success:
+                    raise ValueError(

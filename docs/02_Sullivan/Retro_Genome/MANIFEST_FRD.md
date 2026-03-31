@@ -18,14 +18,44 @@ Voici une version **abstraite et actualisée** du manifeste Homeos (Aetherflow),
 
 ## 🛠️ Phase 2 — BKD : Forge (Production Pristine)
 
-**UI** :  
-- Sidebar G : Workspace (fichiers locaux/cloud).  
-- Col 1 : Éditeur splittable (VS Code-like).  
-- Col 2 : Roadmap dynamique (ROADMAP.md / ACHIEVED / BACKLOG).  
-- Sidebar D : Majordome (pilotage).  
-- Footer : Terminal + Audit.  
+**UI** :
+- Sidebar G : Workspace (fichiers locaux/cloud).
+- Col 1 : Éditeur splittable (VS Code-like).
+- Col 2 : Roadmap dynamique (ROADMAP.md / ACHIEVED / BACKLOG).
+- Sidebar D : Majordome (pilotage).
+- Footer : Terminal + Audit.
 
 **Workflow** : Architecte → Mission → Exécutant (Sullivan) → CR → Validation/Repair.
+
+**Implémentation BKD — Décision technique (2026-03-23) :**
+L'éditeur BKD = **code-server** (VS Code dans le browser, self-hosted, Docker).
+On n'utilise PAS Monaco seul — Monaco est l'éditeur, pas l'IDE. VS Code complet est la bonne granularité.
+
+Architecture retenue :
+- `code-server` embarqué dans l'UI BKD via `<iframe src="http://localhost:8080">`
+- 1 extension VS Code custom **AetherFlow BKD** qui injecte :
+  - WebviewPanel "Majordome" (sidebar D) — chat Sullivan
+  - WebviewPanel "Roadmap" (col 2) — lecture ROADMAP.md / ACHIEVED / BACKLOG
+- Extensions pré-installées dans l'image Docker : Roo Code, GitLens, Markdown Preview
+- Auth : code-server `--auth none` en local, password en prod
+- Multi-user (élèves) : 1 instance code-server par user (Docker container isolé)
+
+Stack minimale BKD :
+```
+Docker : code-server (codercom/code-server:latest)
+Extension : aetherflow-bkd (TypeScript, VS Code Extension API)
+  → vscode.window.createWebviewPanel() pour Majordome + Roadmap
+  → vscode.workspace.fs pour lire ROADMAP.md
+  → fetch() vers /api/frd/chat pour Sullivan
+Ports : 8080 (code-server), 9998 (AetherFlow backend)
+```
+
+Ce que VS Code fournit nativement (ne pas réimplémenter) :
+- File explorer (Sidebar G)
+- Terminal intégré (Footer)
+- Split editor (Col 1)
+- Git (GitLens)
+- Syntax highlight, IntelliSense, search
 
 ## 🎨 Phase 3 — FRD : Tisseur (Génome Visuel)
 

@@ -1,615 +1,467 @@
 # MISSION CONTROL : AETHERFLOW ROADMAP
 
 > Missions complètes archivées dans [ROADMAP_ACHIEVED.md](./ROADMAP_ACHIEVED.md).
+> Plan MVP détaillé : [PLAN_HOMEOS_MVP.md](../../docs/04_HomeOS/Plans/PLAN_HOMEOS_MVP.md)
 
 ---
 
-## Mission 85 — FastAPI Foundation : squelette server_v3.py + routes BKD
+## Session 2026-03-30 — Récapitulatif missions terminées
 
-**STATUS: ✅ LIVRÉ — Amendment appliqué (Claude)**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI + CLAUDE**
-**MODE: aetherflow -f + CODE DIRECT**
-
-### Contexte
-
-`server_9998_v2.py` = monolithe ~2830 lignes `BaseHTTPRequestHandler`. Exceptions avalées, routing illisible, imports dynamiques cachant les bugs. Migration FastAPI en shadow mode — `server_v3.py` tourne sur port **9999** pendant la transition.
-
-### Bootstrap Gemini
-
-```
-Tu es un expert Python backend. Tu génères server_v3.py dans Frontend/3. STENCILER/.
-Lire server_9998_v2.py pour comprendre la structure existante.
-Lire sullivan_arbitrator.py pour le wiring Arbitrator.
-Lire .env (via _load_env pattern) pour les clés API.
-```
-
-### Livrables attendus
-
-- `server_v3.py` : FastAPI + uvicorn, port 9999
-- Lifespan : `_load_env()`, init `SullivanArbitrator`, init DB Sullivan, init RAG
-- `SullivanArbitrator` = dépendance FastAPI (`Depends`)
-- Routes portées : toutes les `/api/bkd/*` + `/api/sullivan/pulse`
-- Exceptions = `HTTPException` (pas de catch silencieux)
-- Pydantic models pour les body BKD
-
-### Critères de sortie
-
-- [ ] `python3 server_v3.py` → port 9999, pas d'erreur
-- [ ] `POST /api/bkd/chat` → Sullivan répond ✅
-- [ ] `GET /api/bkd/projects` ✅
-- [ ] `GET /api/sullivan/pulse` ✅
-- [ ] `/docs` Swagger accessible ✅
-
-### Correction : MIMO
-
-Si Gemini produit du code cassé : MiMo (`mimo-v2-flash`) patch les erreurs de syntaxe / imports manquants.
-
-### Validation finale : CLAUDE
-
-Claude relit, teste avec curl, valide ou écrit AMENDMENT.
+| Mission | Statut | Notes |
+|---|---|---|
+| M85–M92 | ✅ archivé | FastAPI foundation, FRD, BRS, retro-genome, archetypes |
+| M97 | ✅ LIVRÉ | Wire UX v2 — table bijective + diagnostic géographique |
+| M98 | ✅ LIVRÉ | Wire UX v3 — skeleton mode |
+| M99 | ✅ LIVRÉ | Wire UX v4 — peel-out CSS + pop-in Monaco + route wire-source |
+| M101-bis | ✅ LIVRÉ | Bridge Plugin — conformité design HoméOS (CODE DIRECT Claude) |
+| M100 | ✅ LIVRÉ | Landing Import — hub Figma SVG + rafraîchir/vider |
+| M100-bis | ✅ LIVRÉ | Hub universel — drop multi-format + manifest check + sélection écrans |
+| M102 | ✅ LIVRÉ | Intent Viewer — auto-load + endpoint import-analysis + liens frd-editor |
+| M106 | ✅ LIVRÉ | CI/CD HF Spaces — Dockerfile, start_hf.sh, deploy-hf.yml |
+| M107 | ✅ LIVRÉ | Navigation globale — header pipeline injecté + tabs auto-actifs |
+| M103 | ✅ LIVRÉ | Wire v5 — auto-launch + overlay bijectif bilan/plan |
+| M104 | ✅ LIVRÉ | Stitch Integration — backend.md + intent_map + Monaco drawer |
+| M105 | ✅ LIVRÉ | Aperçu local — rendu 1:1 dans un onglet indépendant |
+| M109A | ✅ LIVRÉ | Font Classifier Ph-A — Vox-ATypI via Panose & Metadata |
+| M109B | ✅ LIVRÉ | Font Classifier Ph-B — Analyse Bézier (Stress/Contraste) |
+| M104/M108 | ✅ LIVRÉ | Stitch Integration — backend.md + intent_map + Monaco drawer |
+| M109A | ✅ LIVRÉ | Font Classifier Ph-A — Vox-ATypI via Panose & Metadata |
+| M109B | ✅ LIVRÉ | Font WebGen Ph-B — Subset Latin + WOFF2 + @font-face CSS |
 
 ---
 
-## Mission 86 — FastAPI FRD : `/api/frd/*` + fix bug 500
-
-**STATUS: ✅ LIVRÉ — Amendment appliqué (Claude)**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI + CLAUDE**
-**MODE: aetherflow -f + CODE DIRECT**
-
-### Contexte
-
-Routes FRD ont un bug 500 silencieux sur `/api/frd/chat` (mode `construct` + fichier nommé). FastAPI exposera la vraie stacktrace et permettra de corriger proprement.
-
-### Bootstrap Gemini
-
-```
-Lire server_v3.py (sortie M85) pour la structure FastAPI existante.
-Lire server_9998_v2.py lignes 1283→1575 (handlers FRD actuels).
-Lire static/templates/frd_editor.html lignes 910→930 (payload envoyé).
-```
-
-### Livrables attendus
-
-- Porter dans `server_v3.py` : `/api/frd/chat`, `/api/frd/wire`, `/api/frd/files`, `/api/frd/file`, `/api/frd/assets`
-- Fichiers statiques et templates HTML (`/static/*`, `/stenciler`, `/frd-editor`)
-- Porter `/api/infer_layout`
-- Corriger le bug mode `construct` (import `load_manifest` ou logique cassée)
-
-### Critères de sortie
-
-- [ ] `POST /api/frd/chat` → 200, Sullivan répond ✅
-- [ ] `POST /api/frd/wire` → patch HTML ✅
-- [ ] `/stenciler` et `/frd-editor` servis ✅
-
-### Correction : MIMO — Validation : CLAUDE
-
----
-
-## Mission 87-A — FastAPI : Genome + Layout + fichiers statiques
-
-**STATUS: ✅ LIVRÉ — Hotfix port 9999 (Claude)**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI + CLAUDE**
-**MODE: aetherflow -f + CODE DIRECT**
-
-### Bootstrap Gemini
-
-```
-Lire server_v3.py (état M86) pour la structure FastAPI existante.
-Lire server_9998_v2.py — cibler uniquement les routes ci-dessous.
-Ne pas toucher aux routes BKD/FRD déjà portées.
-```
-
-### Livrables attendus
-
-Porter dans `server_v3.py` :
-- Fichiers statiques : `/`, `/sw.js`, `/preview`, `/template`, `/brainstorm`, `/brainstorm-tw`, `/stenciler_v3`, `/genome_canvas`, `/intent-viewer`
-- Genome API : `GET/POST /api/genome`, `GET /api/layout`, `POST /api/manifest`, `POST /api/manifest/patch`, `GET /api/lexicon`
-- Organ/Comp : `POST /api/organ-move`, `POST /api/comp-move`, `POST /api/comp-resize`
-- `POST /api/pedagogy/gaps`
-
-### Critères de sortie
-
-- [ ] `GET /` → viewer.html ✅
-- [ ] `GET /api/genome` → JSON génome ✅
-- [ ] `POST /api/manifest` → 200 ✅
-
-### Correction : MIMO — Validation : CLAUDE
-
----
-
-## Mission 87-B — FastAPI : BRS (Brain-Reasoning System)
-
-**STATUS: ✅ LIVRÉ (Gemini)**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI**
-**MODE: aetherflow -f**
-
-### Bootstrap Gemini
-
-```
-Lire server_v3.py (état M87-A).
-Lire server_9998_v2.py — cibler uniquement /api/brs/*.
-```
-
-### Livrables attendus
-
-Porter dans `server_v3.py` :
-- `POST /api/brs/capture`
-- `POST /api/brs/dispatch`
-- `POST /api/brs/rank`
-- `POST /api/brs/generate-prd`
-- `GET/POST /api/brs/buffer-questions`
-
-### Critères de sortie
-
-- [ ] `POST /api/brs/capture` → 200 ✅
-- [ ] `POST /api/brs/dispatch` → réponse LLM ✅
-
-### Correction : MIMO — Validation : CLAUDE
-
----
-
-## Mission 87-C — FastAPI : Retro-Genome (le plus lourd)
-
-**STATUS: ✅ LIVRÉ partiel (Gemini) — routes critiques présentes, validate/reality/generate-prd manquantes**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI**
-**MODE: aetherflow -f**
-
-### Bootstrap Gemini
-
-```
-Lire server_v3.py (état M87-B).
-Lire server_9998_v2.py — cibler uniquement /api/retro-genome/*.
-Attention : uploads multipart (upload, upload-svg), exports ZIP (export-zip).
-```
-
-### Livrables attendus
-
-Porter dans `server_v3.py` :
-- `GET/POST /api/retro-genome/manifest`
-- `POST /api/retro-genome/chat`
-- `POST /api/retro-genome/validate`
-- `POST /api/retro-genome/approve`
-- `POST /api/retro-genome/reality`
-- `POST /api/retro-genome/upload` (multipart)
-- `POST /api/retro-genome/upload-svg`
-- `POST /api/retro-genome/generate-html`
-- `POST /api/retro-genome/generate-prd`
-- `POST /api/retro-genome/export-manifest`
-- `POST /api/retro-genome/export-schema`
-- `POST /api/retro-genome/export-zip`
-
-### Critères de sortie
-
-- [ ] `POST /api/retro-genome/chat` → 200 ✅
-- [ ] `POST /api/retro-genome/upload` → fichier sauvegardé ✅
-- [ ] `POST /api/retro-genome/export-zip` → ZIP téléchargeable ✅
-
-### Correction : MIMO — Validation : CLAUDE
-
----
-
-## Mission 87-D — Bascule port 9998 + archivage
-
-**STATUS: ✅ LIVRÉ (Claude)**
-**DATE: 2026-03-24**
-**ACTOR: CLAUDE**
-**MODE: CODE DIRECT — FJD**
-
-### Livrables attendus
-
-- `server_v3.py` : changer port 9999 → 9998
-- Killer `server_9998_v2.py` (processus)
-- Déplacer `server_9998_v2.py` → `static/_archive/server_9998_v2.py`
-- Mettre à jour `API_CONTRACT.md` avec toutes les nouvelles routes FastAPI
-
-### Critères de sortie
-
-- [ ] `localhost:9998` → server_v3.py répond ✅
-- [ ] `server_9998_v2.py` archivé ✅
-- [ ] `API_CONTRACT.md` à jour ✅
-- [ ] FRD editor + BKD chat fonctionnels sur port 9998 ✅
-
----
-
-## Mission 90 — BKD : route `/api/bkd/files` + explorateur réel dans bkd_frd.html
-
-**STATUS: 🟡 PRÊT**
-**DATE: 2026-03-24**
-**ACTOR: CLAUDE (route backend) + GEMINI (frontend)**
-**MODE: CODE DIRECT — FJD**
-
-### Contexte
-
-`bkd_frd.html` charge les projets via `/api/bkd/projects` mais l'explorateur est hardcodé avec des fichiers fictifs (`Main.ts`, `Components/`, `Styles/`). Il manque une route `/api/bkd/files?project_id=xxx` pour lister les vrais fichiers du répertoire du projet. `GET /api/bkd/file` et `POST /api/bkd/file` existent déjà dans `server_v3.py`.
-
-### Livrable CLAUDE — `server_v3.py`
-
-Ajouter la route :
-```
-GET /api/bkd/files?project_id={id}
-→ Retourne la liste des fichiers du projet (récursif, extensions autorisées BKD_ALLOWED_EXTENSIONS)
-→ Format : { "files": [ { "path": "src/main.py", "name": "main.py", "ext": ".py" }, ... ] }
-→ Exclure BKD_EXCLUDE_DIRS
-→ 404 si project_id inconnu
-```
-
-### Livrable GEMINI — `bkd_frd.html`
-
-Remplacer le chargement hardcodé par un appel réel :
-- Au démarrage : `GET /api/bkd/projects` → prend `projects[0].id` → `GET /api/bkd/files?project_id={id}` → populate l'explorateur avec les vrais fichiers
-- Clic sur un fichier dans l'explorateur : `GET /api/bkd/file?project_id={id}&path={path}` → affiche dans `#editor-content`
-- Bootstrap : lire `static/templates/bkd_frd.html` (état actuel) + `Frontend/1. CONSTITUTION/API_CONTRACT.md`
-
-### Critères de sortie
-
-- [ ] `GET /api/bkd/files?project_id=4c29163f-...` → liste les fichiers d'AetherFlow ✅
-- [ ] Explorateur dans le browser affiche les vrais fichiers du projet ✅
-- [ ] Clic sur un fichier → contenu affiché dans l'éditeur ✅
-
-### Validation : CLAUDE (curl) + FJD (visuel)
-
----
-
-## Mission 75-A — BKD Frontend : bkd_editor.html
-
-**STATUS: 🟡 PRÊT**
-**DATE: 2026-03-24**
-**ACTOR: MIMO (wire audit) + GEMINI (frontend) + CLAUDE (hotfix route)**
-**MODE: aetherflow -vfx (Gemini) + CODE DIRECT (Claude)**
-
-### Contexte
-
-Architecture validée (Décision 2026-03-23) :
-- `code-server` dans un `<iframe>` → éditeur VS Code complet (port 8080)
-- Sidebar droite Sullivan BKD → chat via `POST /api/bkd/chat` (port 9998)
-- Accessible via `GET /bkd` (route à ajouter en hotfix Claude)
-
-### Audit Wire (MiMo — à exécuter en premier)
-
-MiMo analyse le codebase en mode wire avant que Gemini génère le HTML :
-
-```
-Lire server_v3.py lignes 213-235 (pattern de service des templates HTML).
-Lire bkd_service.py lignes 48-65 (SULLIVAN_BKD_SYSTEM — capacités de Sullivan BKD).
-Lire static/templates/frd_editor.html (structure de référence : layout 3 colonnes, chat JS).
-Produire : liste des dépendances JS/CSS à linker, structure DOM recommandée, payload POST /api/bkd/chat exact.
-```
-
-### Bootstrap Gemini
-
-```
-Lire static/templates/frd_editor.html — pattern layout + chat JS vanilla à réutiliser.
-Lire static/css/stenciler.css — SEULE source de vérité design (tokens V1, warm neutrals, Geist 12px).
-Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json — classes atomiques et data attributes.
-Lire Frontend/1. CONSTITUTION/API_CONTRACT.md — section Domaine BKD pour payload exact.
-NE PAS linker viewer.css (incompatible).
-NE PAS générer de Python/backend.
-```
+## CR Mission 107 — Navigation globale cohérente
+
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEURS: GEMINI (bootstrap.js + CSS) + CLAUDE (vérification)**
 
 ### Livrables
 
-**Claude (hotfix)** — `server_v3.py` : ajouter route `GET /bkd` → sert `bkd_editor.html`
+**Frontend (`bootstrap.js`)**
+- Fonction `injectGlobalNav()` — injecte header global au DOMContentLoaded
+- 4 tabs pipeline : [ import ↓ ] [ analyser ◐ ] [ éditer ✎ ] [ déployer ↑ ]
+- Tab actif détecté automatiquement via `window.location.pathname`
+- Theme toggle (☀️/🌙) avec persistance localStorage
+- Bridge status indicator (dot vert "bridge actif")
+- Exposition API : `window.HOMEOS.boot()`, `window.HOMEOS.refreshNav()`
 
-**Gemini** — `static/templates/bkd_editor.html` :
-- Layout 2 colonnes : iframe code-server (flex: 1) + sidebar Sullivan (280px)
-- Header : titre "BKD — La Forge" + indicateur pulse Sullivan
-- Iframe : `src="http://localhost:8080"`, `allow="clipboard-read;clipboard-write"`
-- Sidebar : chat history scrollable + input `Enter` → `POST /api/bkd/chat` → affiche `data.text`
-- Tokens CSS : `var(--bg-primary)`, `var(--sidebar-width)`, `var(--header-height)`, etc.
-- JS vanilla uniquement, pas de framework
+**CSS (`stenciler.css`)**
+- `.global-pipeline-header` — header fixe 48px, z-index 1000
+- `.pipeline-tab` — styles hover/active/disabled
+- `.bridge-status` — indicateur de statut avec dot online/offline
+- `.theme-toggle-btn` — bouton thème minimaliste
+- Couleurs HoméOS : #7aca6a (vert), Geist 12px, fond #f7f6f2
 
-### Critères de sortie
+**Templates mis à jour**
+- `landing.html` — header/sidebar supprimés, navigation globale injectée
+- `intent_viewer.html` — header/sidebar supprimés, navigation globale injectée
+- `frd_editor.html` — navigation Brainstorm/Backend/Frontend supprimée, bootstrap.js ajouté
 
-- [ ] `GET http://localhost:9998/bkd` → `bkd_editor.html` servi ✅
-- [ ] Iframe code-server visible (même si port 8080 vide → about:blank acceptable en test) ✅
-- [ ] Chat Sullivan : `POST /api/bkd/chat` → réponse affichée dans la sidebar ✅
-- [ ] Tokens stenciler.css respectés (pas de couleurs hardcodées) ✅
+### Architecture
+```
+bootstrap.js (injecté sur toutes les pages)
+    └─ injectGlobalNav() → header fixe 48px
+        ├─ pipeline-brand (homéos v3.1.2)
+        ├─ pipeline-tabs (4 tabs pipeline)
+        └─ pipeline-actions (bridge status + theme toggle)
+```
 
-### Correction : MIMO — Validation : CLAUDE + FJD (visuel)
+### Tests effectués
+- ✅ `/landing` — bootstrap.js chargé, header injecté
+- ✅ `/intent-viewer` — bootstrap.js chargé, header injecté
+- ✅ `/frd-editor` — bootstrap.js chargé, navigation supprimée
+- ✅ Tab actif détecté automatiquement selon pathname
+- ✅ Theme toggle fonctionnel avec persistance
 
 ---
 
-## Mission 88 — Refactorisation frd_editor.html V3 modulaire
+## CR Mission 109 Phase B — Web Font Generator
 
-**STATUS: 🟡 PRÊT**
-**DATE: 2026-03-24**
-**ACTOR: CLAUDE**
-**MODE: CODE DIRECT — FJD**
-
-### Contexte
-
-`frd_editor.html` = 1348 lignes monolithiques (CSS inline + HTML + JS). Impossible à déboguer, à auditer par un agent, et en contradiction avec la règle V3 (< 300L par fichier). Toute la logique Sullivan/KIMI/Wire/Monaco/Assets/Preview est emmêlée dans un seul bloc `<script>`.
-
-Objectif : découper sans changer aucune logique. Comportement identique avant/après. Aucune régression.
-
-### Architecture cible
-
-```
-Frontend/3. STENCILER/
-├── static/
-│   ├── css/
-│   │   └── frd_editor.css              (styles extraits du <style> inline)
-│   └── js/
-│       └── frd/
-│           ├── frd_main.js             (init + wiring, ~80L)
-│           ├── FrdEditor.feature.js    (Monaco + locks + template selector, ~250L)
-│           ├── FrdChat.feature.js      (Sullivan chat + mode toggle + audit, ~250L)
-│           ├── FrdKimi.feature.js      (KIMI design workflow, ~120L)
-│           ├── FrdWire.feature.js      (Wire/Codestral diagnostic, ~80L)
-│           ├── FrdAssets.feature.js    (assets + drag/drop + ZIP, ~200L)
-│           └── FrdPreview.feature.js   (live preview + inspect hover, ~150L)
-└── templates/
-    └── frd_editor.html                 (~80L — template pur + imports)
-```
-
-### Règles de découpe
-
-- **Zéro régression logique** — copier/extraire uniquement, pas réécrire
-- **Bypass `__NativeFetch`** — conserver dans `frd_editor.html` en premier `<script>` (avant tout import)
-- **ES6 modules** — chaque feature exporte ses fonctions publiques, `frd_main.js` les importe et les wire aux événements DOM
-- **State partagé** — `_chatMode`, `_chatHistory`, `_htmlHistory`, `_zipMode`, `editorHTML` → exposés via `frd_main.js` ou passés en paramètre
-- **`frd_editor.css`** — extraire tel quel le bloc `<style>` actuel, linker via `<link>`
-- **Aucun changement CSS, HTML, ou logique** — FJD valide visuellement
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEUR: CLAUDE (CODE DIRECT)**
 
 ### Livrables
 
-- [ ] `frd_editor.css` créé ✅
-- [ ] 6 features créées, chacune < 300L ✅
-- [ ] `frd_main.js` orchestre l'init ✅
-- [ ] `frd_editor.html` réduit à ~80L (template + `<link>` + `<script type="module">`) ✅
-- [ ] `GET /frd-editor` → rendu identique visuellement ✅
-- [ ] Sullivan chat répond (mode `construct` et `conseil`) ✅
-- [ ] Wire fonctionne ✅
-- [ ] KIMI flow intact ✅
+**Backend (`font_webgen.py`)**
+- Classe `FontWebGen` — génération webfonts depuis TTF/OTF/WOFF/WOFF2
+- Subset Latin : U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D, U+00AB-00BB
+- Export WOFF2 (Brotli) — économie 60-80% du poids original
+- Génération @font-face CSS standard
+- Détection variable font → `format('woff2-variations')` + `font-weight: 100 900`
+- Alerte licensing pour fontes commerciales connues
 
-### Validation : FJD (visuel) + curl Sullivan
+**Routes (`server_v3.py`)**
+- `POST /api/sullivan/font-upload` → classification + webfont + CSS
+- `GET /api/sullivan/fonts` → liste des fontes dans /static/fonts/
+- `DELETE /api/sullivan/fonts/{slug}` → supprime fonte et répertoire
+
+**Storage**
+- `/static/fonts/{slug}/{slug}-{weight}{style}.woff2`
+- `/exports/fonts/` — uploads temporaires
+
+### Tests effectués
+- ✅ Upload SourceCodePro-Semibold.ttf → classification "lineales/grotesque"
+- ✅ Subset Latin + export WOFF2 (1220 bytes)
+- ✅ @font-face CSS généré correctement
+- ✅ Font chargeable depuis `/static/fonts/...`
+
+### Architecture
+```
+Upload TTF/OTF
+    ↓
+FontClassifier → {vox_atypi, signals, weights}
+    ↓
+FontWebGen → subset → WOFF2 → CSS @font-face
+    ↓
+/static/fonts/{slug}/
+```
+
+### Dépendances ajoutées
+```
+fonttools>=4.43.0
+brotli>=1.0.9
+```
 
 ---
 
-## Mission 89 — Sullivan FRD : simplification UI + Wire→Construct pipeline
+## CR Mission 100-bis — Landing : hub universel d'import
 
-**STATUS: 🟡 PRÊT**
-**DATE: 2026-03-24**
-**ACTOR: GEMINI**
-**MODE: CODE DIRECT — FJD**
-
-### Contexte
-
-L'UI Sullivan FRD a 4 boutons de mode dont 2 (DESIGN, COUNCIL) n'ont jamais fonctionné. Des modifications partielles cassées ont été appliquées et doivent être consolidées. Le mode Wire doit produire un diagnostic + plan d'implémentation, et permettre de transférer ce plan à Construct d'un clic.
-
-### Bootstrap Gemini
-
-```
-Lire static/js/frd/FrdChat.feature.js — état actuel à corriger.
-Lire static/js/frd/FrdWire.feature.js — état actuel à enrichir.
-Lire static/templates/frd_editor.html — état actuel UI.
-Lire Frontend/1. CONSTITUTION/SULLIVAN_INTERACTIONS.md — patterns JS vanilla toggles/panels.
-```
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEURS: GEMINI (landing.html) + CLAUDE (server_v3.py)**
 
 ### Livrables
 
-**`frd_editor.html`** :
-- Garder uniquement 2 boutons : `#toggle-construct` (CONSTRUCT) et `#toggle-wire` (WIRE)
-- Supprimer `#toggle-design` et `#toggle-conseil`
-- Vérifier que `#chat-input`, `#btn-send`, `#chat-history` sont présents et intacts
+**Frontend (`landing.html`)**
+- Zone de drop multi-format : `.svg`, `.zip`, `.tsx`, `.html`, `.css`, `.js`
+- Drag-and-drop avec feedback visuel (survol vert HoméOS)
+- Formulaire de création de manifest.json (nom, auteur, description)
+- Affichage dynamique des imports avec checkboxes de sélection
+- Bouton "continuer vers frd editor" avec compteur de sélection
+- Empty state et upload progress indicator
+- Respect des tokens Stenciler (Geist 12px, #f7f6f2, #7aca6a)
 
-**`FrdChat.feature.js`** :
-- `setMode(mode)` : gérer uniquement `'construct'` et `'wire'`
-- En mode `construct` : activer le bouton CONSTRUCT, désactiver WIRE, placer placeholder correct
-- En mode `wire` : activer le bouton WIRE, désactiver CONSTRUCT, afficher `#wire-panel`
-- Ne PAS masquer `#wire-panel` quand on bascule vers construct (conserver le plan visible)
-- Conserver `triggerSilentAudit()` intact (appelé par FrdEditor)
-- Conserver `updateAuditPanel()` intact
-- Dans `send()` : supprimer les branches `/design` et `/conseil`
-- Dans `send()` : convertir `role: 'model'` → `role: 'assistant'` dans l'historique
+**Backend (`server_v3.py`)**
+- `POST /api/import/upload` — Upload générique multi-format
+- `GET /api/manifest/check` — Vérification existence manifest
+- `GET /api/manifest/get` — Récupération contenu manifest
+- `POST /api/manifest/create` — Création manifest avec métadonnées projet
+- Tracking des imports dans `exports/retro_genome/index.json`
+- Notification counter incrémenté pour le polling
 
-**`FrdWire.feature.js`** :
-- Après affichage du diagnostic dans `#wire-content`, injecter sous ce div un bouton `#wire-apply-btn` : "→ Implémenter le plan"
-- Click sur ce bouton : `this.main.chat.setMode('construct')` + pré-remplir `#chat-input` avec `"Voici le plan Wire — implémente le JS correspondant :\n" + data.diagnostic` + focus sur `#chat-input`
-- Conserver `(window.__NativeFetch || fetch)` sur le fetch wire
+### Tests effectués
+- ✅ Endpoint `/api/manifest/check` → retourne `{"exists": false}` si absent
+- ✅ Endpoint `/api/manifest/create` → crée manifest.json à la racine
+- ✅ Endpoint `/api/import/upload` → sauvegarde fichier + met à jour index.json
+- ✅ Landing page `/landing` → affichage correct, drop zone fonctionnelle
 
-### Critères de sortie
+### Architecture
+```
+manifest.json (racine) ← créé si absent
+    └─ name, author, description, created_at, version, elements[], intents[]
 
-- [ ] Interface : 2 boutons seulement (CONSTRUCT / WIRE), textarea et Envoyer présents ✅
-- [ ] `triggerSilentAudit()` ne lève pas d'erreur JS ✅
-- [ ] Wire affiche diagnostic + plan, panel reste visible en mode Construct ✅
-- [ ] Bouton "→ Implémenter le plan" → bascule Construct + pré-remplit input ✅
-- [ ] Chat Construct répond sans 500 sur 2e requête ✅
-
-### Validation : FJD (visuel) + Cmd+Shift+R
+exports/retro_genome/
+    └─ index.json ← tous les imports (SVG + multi-format)
+    └─ IMPORT_*.{zip,tsx,html,...} ← fichiers uploadés
+```
 
 ---
 
-## Mission 91 — API Generator Engine : retro-genome → FastAPI routes
+## CR Mission 103 — Wire mode v5 : auto-launch + overlay bijection
 
-**STATUS: ✅ LIVRÉ (Claude, 2026-03-25) — archivé dans ROADMAP_ACHIEVED.md**
-**DATE: 2026-03-25**
-**ACTOR: CLAUDE**
-**MODE: aetherflow -f**
-
-### Contexte
-
-Aujourd'hui toutes les routes de `server_v3.py` sont écrites à la main. Or le retro-genome dispose déjà de la chaîne complète :
-
-```
-interface (HTML/SVG/Figma)
-  → manifest_inferer.py      # détecte les entités, intents, régions
-  → archetype_detector.py    # identifie l'archetype (ide_like, chatbot_pro, dashboard…)
-  → functional_archetypes.json  # chaque archetype a suggested_endpoints[]
-```
-
-Il manque le dernier maillon : **`api_generator.py`** — un moteur qui prend un manifest + son archetype et génère le code Python FastAPI correspondant.
-
-**Objectif** : MVP prouvable en 1 run. Un CLI qui, à partir d'un manifest.json, produit un `router_{name}.py` importable dans `server_v3.py`.
-
-### Architecture cible
-
-```
-Backend/Prod/retro_genome/
-└── api_generator.py          # nouveau — moteur de génération
-```
-
-**Entrées** :
-- `manifest.json` (depuis `exports/retro_genome/` ou path CLI)
-- `functional_archetypes.json` (lookup archetype → suggested_endpoints)
-- `af_metadata_schema.json` (types d'entités → paramètres Pydantic)
-
-**Sortie** : fichier Python `router_{project_slug}.py` contenant :
-```python
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
-router = APIRouter(prefix="/api/{slug}", tags=["{slug}"])
-
-# Généré depuis archetype: ide_like
-@router.get("/fs/tree")
-async def get_fs_tree():
-    """[auto] Liste l'arborescence de fichiers — archetype ide_like"""
-    raise HTTPException(status_code=501, detail="Not implemented")
-
-@router.post("/fs/save")
-async def post_fs_save(body: FsSaveRequest):
-    """[auto] Sauvegarde un fichier — archetype ide_like"""
-    raise HTTPException(status_code=501, detail="Not implemented")
-...
-```
-
-### Logique de génération
-
-```python
-def generate(manifest_path: str, output_path: str):
-    manifest = load_json(manifest_path)
-    archetype_id = manifest.get("archetype_id") or detect_archetype(manifest)
-    archetype = lookup_archetype(archetype_id)            # functional_archetypes.json
-    endpoints = archetype["suggested_endpoints"]           # ex: ["GET /api/fs/tree", ...]
-    entities  = extract_entities(manifest)                 # depuis data-af-intent + data-af-id
-
-    routes = []
-    for endpoint in endpoints:
-        method, path = endpoint.split(" ", 1)
-        handler_name = path_to_handler(method, path)      # "GET /api/fs/tree" → "get_fs_tree"
-        body_model   = infer_body_model(method, path, entities)  # POST → Pydantic model
-        routes.append(RouteSpec(method, path, handler_name, body_model))
-
-    write_router_file(routes, archetype, output_path)
-```
-
-### Critères de sortie (preuve obligatoire)
-
-**Test A — pipeline complet sur `bkd_frd.html`** :
-```bash
-# 1. Inférer le manifest depuis bkd_frd.html
-python -m retro_genome.manifest_inferer \
-  --input Frontend/3.\ STENCILER/static/templates/bkd_frd.html \
-  --output /tmp/manifest_bkd.json
-
-# 2. Générer les routes
-python -m retro_genome.api_generator \
-  --manifest /tmp/manifest_bkd.json \
-  --output /tmp/router_bkd.py
-
-# 3. Vérifier le contenu
-cat /tmp/router_bkd.py
-```
-
-**Attendu** : routes générées incluent au minimum les équivalents de :
-- `GET /api/bkd/files` (file explorer → archetype ide_like)
-- `POST /api/bkd/chat` (chat Sullivan → archetype chatbot_pro)
-
-**Test B — importabilité** :
-```bash
-python -c "import ast; ast.parse(open('/tmp/router_bkd.py').read()); print('✅ Syntaxe Python valide')"
-```
-
-**Test C — cohérence avec server_v3.py** :
-Extraire les routes générées, comparer avec les routes existantes dans server_v3.py. Le rapport doit identifier :
-- Routes générées présentes dans server_v3 ✅ (validation)
-- Routes générées absentes → candidats à implémenter 🔵
-- Routes server_v3 non couvertes → hors archetype (normal) ℹ️
-
-### Bootstrap Claude (aetherflow -f)
-
-```
-Lire Backend/Prod/retro_genome/functional_archetypes.json — source des suggested_endpoints.
-Lire Backend/Prod/retro_genome/af_metadata_schema.json — attributs data-af-* pour inférer les Pydantic models.
-Lire Backend/Prod/retro_genome/archetype_detector.py — comprendre comment l'archetype est détecté.
-Lire Backend/Prod/retro_genome/manifest_inferer.py — format du manifest en sortie.
-Lire Frontend/3. STENCILER/server_v3.py lignes 1-50 — pattern FastAPI APIRouter de référence.
-```
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEURS: GEMINI (frontend) + CLAUDE (backend)**
 
 ### Livrables
 
-- [ ] `Backend/Prod/retro_genome/api_generator.py` — moteur CLI fonctionnel ✅
-- [ ] Test A passe → `/tmp/router_bkd.py` généré ✅
-- [ ] Test B passe → syntaxe Python valide ✅
-- [ ] Test C rapport affiché dans le terminal ✅
+**Backend (`wire_analyzer.py`)**
+- Refactorisation de `analyze_template` pour retourner un objet structuré.
+- Nouveaux champs : `intentions[]`, `statuts[]`, `plan[]` pour affichage point par point.
 
-### Validation : CLAUDE (run CLI) + FJD (lecture rapport)
+**Frontend (`FrdWire.feature.js`, `FrdChat.feature.js`)**
+- Auto-trigger : `setMode('wire')` lance immédiatement l'analyse.
+- Overlay V5 : Passage d'un tableau plat à un tableau de bord biface (Bilan ↔ Plan).
+- Bouton global "IMPLÉMENTER LE PLAN" : ferme l'overlay, repasse en mode Construct et injecte le plan dans le chat.
+
+**UI (`frd_editor.html`)**
+- Suppression du bouton "Analyser" (devenu obsolète).
+- Redimensionnement de l'overlay (!max-w-[1000px]) pour le dual-column.
 
 ---
 
-## Mission 92 — Archetypes HoméOS natifs dans functional_archetypes.json
+## CR Mission 104 — Stitch Integration : design.md & backend.md
 
-**STATUS: ✅ LIVRÉ (Claude, 2026-03-25)**
-**DATE: 2026-03-25**
-**ACTOR: CLAUDE**
-**MODE: CODE DIRECT — FJD**
-
-### Contexte
-
-Les 20 archetypes existants sont génériques (ecommerce, weather, quiz…). HoméOS a des interfaces propres que personne d'autre ne construit. Sans archetypes natifs, le moteur API Generator ne peut pas reconnaître les interfaces HoméOS et génère des routes génériques au lieu des routes réelles.
-
-### Archetypes à créer
-
-**`aetherflow_brs`** — War Room Brainstorm multi-LLM
-Référence : `brainstorm_war_room_tw.html`
-Visual triggers : sidebar HoméOS logo, stream columns, sullivan panel, nugget list, dispatch prompt
-Endpoints : dispatch, stream SSE par provider, capture nugget, generate-prd, arbitrate
-
-**`genome_canvas`** — Stenciler SVG canvas
-Référence : `stenciler_v3.html`
-Visual triggers : SVG canvas, atom nodes, sidebar toolbar, genome tree panel, preview strip
-Endpoints : genome CRUD, manifest patch, layout infer, atom move/resize
-
-**`retro_genome_studio`** — Studio d'analyse retro-genome
-Référence : studio.html / viewer.html
-Visual triggers : upload zone, analysis results panel, manifest viewer, PRD export, validate button
-Endpoints : upload, analyze, validate, approve, generate-html, generate-prd, export-zip
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEURS: CLAUDE (backend routes) + GEMINI (landing UI)**
 
 ### Livrables
 
-- [x] `functional_archetypes.json` : 3 archetypes HoméOS ajoutés ✅
-- [x] Test : `python -m Backend.Prod.retro_genome.api_generator --manifest` sur chaque interface → archetype HoméOS détecté ✅
+**Backend (`server_v3.py`, `wire_analyzer.py`)**
+- `backend.md` — Création du fichier "Source of Truth" technique à la racine.
+- `POST /api/manifest/import-stitch` — Parseur Markdown pour `design.md` hérité de Stitch.
+- `GET/PUT /api/manifest/backend` — Gestion du cycle de vie du manifest technique.
+- `WireAnalyzer` — Priorisation du mapping `backend.md` sur le mapping statique pour la bijection.
+
+**Frontend (`landing.html`)**
+- **Badge Stitch** : Détection automatique de `design.md` et affichage du badge "Stitch Compatible".
+- **Bouton Sync** : Lancement de l'import `design.md` → `backend.md` en un clic.
+- **Monaco Drawer** : Remplacement de l'alert manifest par un tiroir latéral avec **Monaco Editor** pour éditer le `backend.md`.
+
+### Architecture
+```
+design.md (In)  ──>  [Import Logic]  ──>  backend.md (Sync)
+                                              │
+                                              └─> [Wire Mode] (Priority Map)
+```
 
 ---
 
-## Mission 75-B — Extension VS Code `aetherflow-bkd`
+## CR Mission 105 — Aperçu local (Real Tab Preview)
+
+**STATUT: ✅ LIVRÉ**
+**DATE: 2026-03-30**
+**ACTEURS: CLAUDE (backend) + GEMINI (UI)**
+
+### Livrables
+
+**Backend (`server_v3.py`)**
+- `POST /api/preview/run` : Sauvegarde l'état actuel de l'éditeur dans un fichier temporaire (`_preview_tmp.html`).
+- `GET /api/preview/show` : Sert le fichier temporaire avec `Cache-Control: no-store` pour garantir la fraîcheur du rendu.
+
+**Frontend (`frd_editor.html`, `FrdEditor.feature.js`)**
+- **Bouton "Aperçu ↗"** : Ajouté à la barre d'outils du FRD Editor.
+- **Logique de Preview** : Synchronisation entre Monaco et l'onglet distant via `runPreviewTab()`.
+
+### Tests effectués
+- ✅ Modification du code dans Monaco -> Clic "Aperçu ↗" -> Nouvel onglet avec les changements exacts.
+- ✅ Vérification de l'indépendance (pas d'iframe parent, JS/CSS natif).
+
+---
+
+## Mission 109 — Sullivan Typography Engine
 
 **STATUS: 🔵 BACKLOG**
-**DATE: 2026-03-23**
-**ACTOR: CLAUDE**
-**MODE: CODE DIRECT — FJD**
+**DÉPENDANCE: M104/M108 ✅**
+**DÉCOUPAGE: 3 phases séquentielles — A ✅ → B ✅ → C (Claude backend + Gemini UI)**
 
-### Livrables
-- WebviewPanel Majordome (chat Sullivan dans VS Code)
-- WebviewPanel Roadmap viewer (ROADMAP.md rendu)
-- Message passing : fichier actif dans VS Code → Sullivan BKD context
+### Vision
+
+Sullivan ne prescrit pas des fontes comme un moteur de templates. Il les **connaît** — leur histoire, leur anatomie, leur contexte culturel. Quand un designer uploade un `.otf` inconnu, Sullivan le positionne dans la classification Vox-ATypI en lisant ses signaux morphologiques (axe de stress, contraste, nature des empattements), puis enrichit la réponse depuis une base de connaissance éditoriale. Il génère ensuite le `@font-face` optimisé web et stocke la fonte dans les assets du projet.
+
+Aucun outil LLM-to-design ne fait ça. Stitch assume Google Fonts. Figma assume le CDN. HoméOS assume la liberté typographique du designer.
 
 ---
 
-## Mission 75-C — Dockerfile code-server
+### Phase A — Classification Vox-ATypI par signaux machine
 
-**STATUS: 🔵 BACKLOG**
-**DATE: 2026-03-23**
-**ACTOR: CLAUDE**
-**MODE: CODE DIRECT — FJD**
+**ACTOR: CLAUDE (CODE DIRECT)**
+**FICHIER: `Backend/Prod/sullivan/font_classifier.py`**
 
-### Livrables
-- Dockerfile basé sur `codercom/code-server:latest`
-- Extensions pré-installées : Roo Code, GitLens, aetherflow-bkd
-- Docker image fonctionnelle en local (`docker run -p 8080:8080`)
+Chaque fonte TrueType/OpenType embarque des tables binaires lisibles sans rendu. La table **panose** (10 octets) encode les signaux morphologiques de la classification Vox-ATypI. Complétée par l'analyse de contours Bézier sur le glyphe `o` (axe de stress, ratio contraste), Sullivan classifie sans IA, sans ambiguïté.
+
+```
+pip install fonttools brotli
+```
+
+#### Mapping panose[1] (style empattement) → Vox-ATypI
+
+| Valeur | Style | Vox-ATypI |
+|---|---|---|
+| 2 | Cove (congé arrondi) | Humanes |
+| 3 | Obtuse Cove | Garaldes |
+| 4–5 | Square Cove | Réales (Transitional) |
+| 6 | Square | Mécanes (Slab) |
+| 7 | Thin / Hairline | Didones |
+| 11–13 | Sans | Linéales |
+| 14 | Flared | Incises |
+
+panose[4] (contraste) affine :
+- 8–9 = contraste élevé → confirme Didone
+- 2–4 = contraste faible + sans → sous-catégorie Grotesque/Géo/Humaniste via analyse `a` et `g`
+
+Calcul axe de stress via contours Bézier sur le glyphe `o` :
+```python
+def _compute_stress_angle(font: TTFont) -> float:
+    """Angle d'inclinaison de l'axe des minima d'épaisseur.
+    ~0° = vertical (Didone), ~10-15° = oblique (Garalde/Humane)"""
+```
+
+Détection variable font :
+```python
+is_variable = 'fvar' in font
+# Si True → weight_range = (axes[0].minValue, axes[0].maxValue)
+```
+
+Schéma retourné par `classify_font()` :
+```json
+{
+  "family_name": "Cormorant",
+  "vox_atypi": "Garaldes",
+  "vox_atypi_sub": "Aldine",
+  "confidence": 0.87,
+  "signals": {
+    "stress_angle_deg": 12.4,
+    "contrast_ratio": 3.1,
+    "serif_style": "cove",
+    "panose_raw": [2, 3, 6, 3, 5, 4, 4, 2, 2, 4]
+  },
+  "is_variable": false,
+  "weights_available": [300, 400, 500, 600, 700],
+  "styles": ["Regular", "Italic"]
+}
+```
+
+---
+
+### Phase B — Web Font Generator (@font-face + WOFF2)
+
+**ACTOR: CLAUDE (CODE DIRECT)**
+**FICHIER: `Backend/Prod/sullivan/font_webgen.py`**
+
+```
+Upload TTF/OTF/WOFF/WOFF2
+    ↓ fonttools: normalisation
+    ↓ Subsetting: Latin Extended (U+0020–U+024F) + ponctuation typo
+    ↓   (économie 60–80% du poids)
+    ↓ Export WOFF2 (Brotli) + WOFF fallback
+    ↓ Storage: /static/fonts/{slug}/{slug}-{weight}{style}.woff2
+    ↓ Génération @font-face CSS
+```
+
+Subset cible (latin professionnel) :
+```
+U+0020-007E, U+00A0-00FF, U+0100-017E
+U+2018, U+2019, U+201C, U+201D  (guillemets typographiques)
+U+2013, U+2014  (tirets)
+U+00AB, U+00BB  (guillemets français)
+```
+
+CSS standard :
+```css
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/static/fonts/cormorant/cormorant-400.woff2') format('woff2'),
+       url('/static/fonts/cormorant/cormorant-400.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D;
+}
+```
+
+CSS variable font :
+```css
+@font-face {
+  font-family: 'Söhne';
+  src: url('/static/fonts/sohne/sohne-variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+```
+
+Alerte licensing (heuristique) :
+```python
+COMMERCIAL_FONTS = {
+    "söhne", "graphik", "canela", "financier", "tiempos",
+    "gt walsheim", "neue haas grotesk", "acumin", "freight"
+}
+# Si match → warning dans la réponse JSON
+```
+
+---
+
+### Phase C — Routes + Sullivan Advisor + UI
+
+**ACTOR: CLAUDE (routes + advisor) + GEMINI (UI landing.html)**
+
+Routes `server_v3.py` :
+```
+POST /api/sullivan/font-upload   → multipart TTF/OTF/WOFF/WOFF2
+                                  → classifier + webgen + advisor
+                                  → { classification, webfont, sullivan_commentary }
+
+GET  /api/sullivan/fonts         → liste fontes dans /static/fonts/
+DELETE /api/sullivan/fonts/{slug} → supprime /static/fonts/{slug}/
+```
+
+`sullivan_font_advisor.py` combine classification machine + `typography_db.json` :
+
+> *"Axe oblique à 12°, contraste modéré (ratio 3.1), empattements à congé. Garalde — famille aldine. Proche de Sabon par la modération du contraste. Pour accompagner : privilégie un Grotesque humaniste (Gill Sans, Aktiv) plutôt qu'un Géométrique — l'un dialogue, l'autre concurrence."*
+
+#### `typography_db.json`
+
+**AUTEUR : FJD (sélection éditoriale des 7 références par catégorie) + CLAUDE (structure + complétion technique)**
+**CHEMIN : `Backend/Prod/sullivan/typography_db.json`**
+
+8 catégories Vox-ATypI, chacune avec :
+- `signals` — critères morphologiques machine (axe, contraste, empattements)
+- `references[]` — 7 fontes (nom, année, designer, google_fonts_id, note courte)
+- `pairings[]` — avec rationale typographique
+- `usages[]` / `anti_usages[]`
+- `cultural_refs[]` — Étapes, Eye, Émigré, monographies de référence
+
+Catégories à documenter :
+`garaldes` · `didones` · `reales` · `lineales_grotesque` · `lineales_geometrique` · `lineales_humaniste` · `mecanes` · `incises`
+
+**Workflow de construction :** Claude génère le squelette JSON complet avec ses propres références → FJD amende/remplace les 7 références par catégorie selon ses choix éditoriaux → version finale commitée.
+
+#### UI landing.html (Gemini)
+
+Section `#font-manager` — indépendante de la zone d'import SVG :
+- Drop zone `.ttf/.otf/.woff/.woff2`
+- Carte résultat par fonte : nom + badge Vox-ATypI + preview live (Aa Bb 0123 rendu avec la fonte) + poids disponibles + warning licensing + commentaire Sullivan + snippet `@font-face` Monaco read-only
+- Badge "variable font" si détecté
+- Bouton "ajouter à stenciler.css" → logge dans `backend.md`
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/landing.html — structure sections existantes (ne pas toucher).
+Lire static/css/stenciler.css — tokens V1.
+Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
+Ajouter UNIQUEMENT la section #font-manager après #import-section.
+Pas d'uppercase. Pas d'emojis. Geist 12px. #8cc63f pour accents.
+```
+
+---
+
+### Fichiers à créer
+
+| Fichier | Auteur | Rôle |
+|---|---|---|
+| `Backend/Prod/sullivan/font_classifier.py` | CLAUDE | Panose + contours → Vox-ATypI |
+| `Backend/Prod/sullivan/font_webgen.py` | CLAUDE | Subset + WOFF2 + @font-face |
+| `Backend/Prod/sullivan/sullivan_font_advisor.py` | CLAUDE | Classifier + DB → commentaire Sullivan |
+| `Backend/Prod/sullivan/typography_db.json` | FJD + CLAUDE | 8 catégories × 7 références |
+| `server_v3.py` + 3 routes | CLAUDE | font-upload, fonts list, delete |
+| `static/templates/landing.html` | GEMINI | Section #font-manager |
+
+Dépendances à ajouter : `fonttools>=4.43.0`, `brotli>=1.0.9`
+
+### Critères de sortie
+
+- [ ] Upload `.otf` Garalde → classification "Garaldes", ratio contraste ~3, axe ~12°
+- [ ] Upload fonte variable → `is_variable: true`, `font-weight: 100 900` dans CSS
+- [ ] `@font-face` généré → chargeable browser depuis `/static/fonts/`
+- [ ] Preview landing → fonte rendue live dans la carte
+- [ ] Commentaire Sullivan → catégorie + proche référence + suggestion pairing
+- [ ] Warning licensing sur fonte connue commerciale
+- [ ] `GET /api/sullivan/fonts` → liste les fontes du projet
+
+---
+
+## Backlog long terme
+
+| Mission | Description | Dépendances |
+|---|---|---|
+| M75-A | BKD Frontend : bkd_editor.html complet | — |
+| M75-B | Extension VS Code `aetherflow-bkd` | M75-A |
+| M75-C | Dockerfile code-server | M75-B |
+| M88 | Refactorisation frd_editor.html V3 modulaire | M103 |
+| M89 | Sullivan FRD : simplification UI + Wire→Construct | M103 |
+| M90 | BKD : route `/api/bkd/files` + explorateur réel | — |
+| M95 | Sullivan → api_generator : déploiement auto archetypes | M92 |

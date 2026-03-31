@@ -1,0 +1,1156 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "classification": "Vox-ATypI",
+    "families_count": 11,
+    "source": "Classification typographique — cours FJD (Antigravity / HoméOS)",
+    "editorial_authority": "FJD — Directeur Artistique. Les 7 références par catégorie sont sa sélection.",
+    "note": "Sullivan, notre agent typographique, porte le nom de Louis Sullivan (architecte, Chicago, 1856–1924), précurseur du modernisme industriel et du Bauhaus — il est cité dans le cours source de cette base. La boucle est intentionnelle.",
+    "last_updated": "2026-03-31"
+  },
+  "vox_atypi": [
+    {
+      "id": "humanes",
+      "label": "Humanes",
+      "aka": "Venetian, Old Face",
+      "epoch": "XVe siècle — Venise, humanisme",
+      "description": "Les plus anciens caractères latins, conçus à Venise au XVe siècle, inspirés des écrits humanistes de l'époque. La traverse oblique du 'e' est leur signature morphologique principale.",
+      "signals": {
+        "stress_angle": "très oblique — 15–25°, héritage direct du calame tenu à la main",
+        "contrast": "faible — ratio ~1.5–2, proche de la monoline",
+        "serifs": "empattements triangulaires à fort congé, inclinés",
+        "e_crossbar": "oblique — signal distinctif absolu de la famille",
+        "x_height": "petite",
+        "panose_clues": "panose[1] = 2 (cove serif)",
+        "distinguishing_detail": "la traverse oblique du 'e' est le test définitif : si elle est oblique, c'est une Humane"
+      },
+      "references": [
+        {
+          "name": "Centaur",
+          "year": 1914,
+          "designer": "Bruce Rogers",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "référence absolue de la famille — pureté humane, inspiré du Jenson vénitien"
+        },
+        {
+          "name": "Adobe Jenson Pro",
+          "year": 1996,
+          "designer": "Robert Slimbach (d'après Nicolas Jenson, 1470)",
+          "google_fonts": null,
+          "license": "commercial (Adobe)",
+          "note": "la source originelle — Jenson est l'inventeur du type romain humaniste"
+        },
+        {
+          "name": "ITC Berkeley Oldstyle",
+          "year": 1983,
+          "designer": "Tony Stan (d'après Goudy)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "humane américaine plus robuste, très lisible au texte"
+        },
+        {
+          "name": "Cloister",
+          "year": 1913,
+          "designer": "Morris Fuller Benton",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "humane classique de référence, usage livresque"
+        },
+        {
+          "name": "IM Fell English",
+          "year": 2007,
+          "designer": "Igino Marini (d'après fontes Fell, XVIIe)",
+          "google_fonts": "IM Fell English",
+          "license": "open source",
+          "note": "humane libre avec irrégularités authentiques du plomb — atmosphère éditoriale forte"
+        },
+        {
+          "name": "Goudy Old Style",
+          "year": 1915,
+          "designer": "Frederic Goudy",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "interprétation américaine chaleureuse de la tradition humane vénitienne"
+        },
+        {
+          "name": "Trivia Serif",
+          "year": 2020,
+          "designer": "Ondrej Jób",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "humane contemporaine de haute qualité, revival modernisé"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Humanistes",
+          "examples": ["Gill Sans", "Frutiger", "Myriad"],
+          "rationale": "partagent l'héritage calligraphique oblique — dialogue naturel entre deux humanismes"
+        }
+      ],
+      "usages": ["édition rare et noble", "poésie", "logotypes identitaires à ancrage historique", "catalogues d'art"],
+      "anti_usages": ["interfaces numériques", "signalétique", "corps de texte dense web"],
+      "cultural_refs": [
+        "Nicolas Jenson — inventeur du type romain à Venise (1470)",
+        "Alde Manuce — fondateur des Éditions Aldines, inventeur de l'italique",
+        "Étapes — numéro sur les types vénitiens"
+      ]
+    },
+    {
+      "id": "garaldes",
+      "label": "Garaldes",
+      "aka": "Aldine, Old Style",
+      "epoch": "XVIe siècle — France, Venise",
+      "description": "Nommées en hommage à Claude Garamond (graveur français) et Alde Manuce (éditeur vénitien). Alde Manuce, lassé des gothiques allemandes, inventa l'italique. François Ier commanda à Garamond un caractère qui finit par lui être éponyme. L'italique devint dès lors une graisse quasi systématique de toute fonte européenne.",
+      "signals": {
+        "stress_angle": "oblique — 10–15°, axe incliné vers l'arrière",
+        "contrast": "modéré — ratio 2.5–4, équilibré entre pleins et déliés",
+        "serifs": "empattements triangulaires, congé arrondi (cove), déliés de jonction assouplis et affinés",
+        "e_crossbar": "horizontale — signal de distinction avec les Humanes",
+        "x_height": "modérée",
+        "panose_clues": "panose[1] = 3 (obtuse cove serif), panose[4] = 4–5",
+        "distinguishing_detail": "le 'e' a sa traverse horizontale, mais l'axe général reste oblique — c'est la transition entre Humane et Réale"
+      },
+      "references": [
+        {
+          "name": "Adobe Garamond Pro",
+          "year": 1989,
+          "designer": "Robert Slimbach (d'après Claude Garamond, 1530)",
+          "google_fonts": "EB Garamond",
+          "license": "commercial (Adobe) / EB Garamond open source",
+          "note": "référence absolue de la famille — proportions aldines exemplaires, rythme vertical serein"
+        },
+        {
+          "name": "Sabon",
+          "year": 1967,
+          "designer": "Jan Tschichold",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "interprétation du XXe siècle — rigueur suisse sur base aldine, excellence livresque"
+        },
+        {
+          "name": "Bembo",
+          "year": 1929,
+          "designer": "Stanley Morison d'après Aldus Manutius (1495)",
+          "google_fonts": null,
+          "license": "commercial (Monotype)",
+          "note": "la garalde originelle — rythme vertical très serein, sobre et souverain"
+        },
+        {
+          "name": "Palatino",
+          "year": 1949,
+          "designer": "Hermann Zapf",
+          "google_fonts": "Palatino",
+          "license": "commercial (Linotype) / URW libre",
+          "note": "plus large, plus humaniste, moins stricte — grande lisibilité corps de texte"
+        },
+        {
+          "name": "Cormorant Garamond",
+          "year": 2015,
+          "designer": "Christian Thalmann",
+          "google_fonts": "Cormorant Garamond",
+          "license": "open source (OFL)",
+          "note": "contraste plus élevé que les Garaldes classiques — registre élégant, mode et éditorial premium"
+        },
+        {
+          "name": "Granjon",
+          "year": 1928,
+          "designer": "George W. Jones (d'après Robert Granjon, XVIe)",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "garalde robuste, très lisible en petit corps, référence presse européenne"
+        },
+        {
+          "name": "Freight Text",
+          "year": 2005,
+          "designer": "Joshua Darden",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "garalde contemporaine à x-height élevée — usage éditorial numérique"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Grotesques humanistes",
+          "examples": ["Gill Sans", "Aktiv Grotesk", "Myriad"],
+          "rationale": "partagent l'axe oblique calligraphique — dialogue naturel et historiquement cohérent"
+        },
+        {
+          "category": "Linéales / Grotesques",
+          "examples": ["Helvetica Neue", "Akzidenz Grotesk"],
+          "rationale": "contraste entre la chaleur humaniste et la neutralité mécanique — classique éditorial"
+        }
+      ],
+      "usages": ["corps de texte éditorial", "livres", "longue lecture web", "identités premium", "logotypes classiques"],
+      "anti_usages": ["interfaces fonctionnelles denses", "signalétique à distance", "affichage numérique basse résolution"],
+      "cultural_refs": [
+        "Robert Bringhurst — The Elements of Typographic Style",
+        "Jan Tschichold — La forme du livre",
+        "Étapes — typographie humaniste",
+        "François Ier et la commande royale à Garamond — 1540"
+      ]
+    },
+    {
+      "id": "reales",
+      "label": "Réales",
+      "aka": "Transitional, Baroque, Classicist",
+      "epoch": "XVIIIe siècle — rationalisme des Lumières",
+      "description": "Période de rationalisation globale inspirée du classicisme. Dürer avait enchâssé l'homme parfait de De Vinci dans un schéma typographique — les Réales en sont l'aboutissement typographique. Axe parfaitement vertical, contrastes très accusés, déliés de jonction étroits.",
+      "signals": {
+        "stress_angle": "vertical — 0–3°, rupture décisive avec la tradition oblique",
+        "contrast": "marqué — ratio 4–7, pleins très épais et déliés très étroits",
+        "serifs": "empattements triangulaires subsistants mais tendant vers l'horizontalité, congé encore présent",
+        "e_crossbar": "horizontale",
+        "x_height": "modérée à élevée",
+        "panose_clues": "panose[1] = 4–5 (square cove serif), panose[4] = 6–7",
+        "distinguishing_detail": "axe vertical + déliés de jonction très étroits + empattements encore à congé = le moment de tension entre baroque et didone"
+      },
+      "references": [
+        {
+          "name": "Baskerville",
+          "year": 1757,
+          "designer": "John Baskerville",
+          "google_fonts": "Libre Baskerville",
+          "license": "commercial (Monotype) / Libre Baskerville open source",
+          "note": "la réale exemplaire — élégance anglaise, axe vertical, excellence livresque"
+        },
+        {
+          "name": "Cochin",
+          "year": 1912,
+          "designer": "Georges Peignot (d'après Charles Nicolas Cochin, XVIIIe)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "réale française à l'élégance prononcée, empattements caractéristiques en biseau"
+        },
+        {
+          "name": "Georgia",
+          "year": 1993,
+          "designer": "Matthew Carter",
+          "google_fonts": "Georgia",
+          "license": "commercial (Microsoft, installée système)",
+          "note": "réale optimisée écran — x-height élevée, bitmap-ready, la meilleure réale gratuite"
+        },
+        {
+          "name": "Times New Roman",
+          "year": 1932,
+          "designer": "Stanley Morison / Victor Lardent",
+          "google_fonts": null,
+          "license": "commercial (Monotype, installée système)",
+          "note": "réale journalistique — économique, neutre, sur-utilisée. À éviter pour branding."
+        },
+        {
+          "name": "Charter",
+          "year": 1987,
+          "designer": "Matthew Carter",
+          "google_fonts": null,
+          "license": "open source (Bitstream Charter)",
+          "note": "para-réale très robuste, excellente aux basses résolutions — usage interface et document"
+        },
+        {
+          "name": "Arnhem",
+          "year": 2002,
+          "designer": "Fred Smeijers",
+          "google_fonts": null,
+          "license": "commercial (OurType)",
+          "note": "réale contemporaine robuste, excellent texte presse — journaux premium"
+        },
+        {
+          "name": "Spectral",
+          "year": 2017,
+          "designer": "Production Type",
+          "google_fonts": "Spectral",
+          "license": "open source (OFL)",
+          "note": "réale Google Fonts de qualité professionnelle — usage impression et écran"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Humanistes",
+          "examples": ["Frutiger", "Myriad", "Gill Sans"],
+          "rationale": "la réale tolère le sans humaniste mieux que le géométrique — deux régimes de raison"
+        }
+      ],
+      "usages": ["presse", "journaux", "corps de texte élégant", "livres académiques", "interfaces éditoriales"],
+      "anti_usages": ["branding (trop neutre ou trop institutionnel)", "petite taille web sans hinting"],
+      "cultural_refs": [
+        "John Baskerville — l'imprimeur qui brûlait son papier pour satiner la surface",
+        "La querelle Anciens/Modernes typographique : Caslon vs Baskerville",
+        "Étapes — le numéro sur la typographie des Lumières"
+      ]
+    },
+    {
+      "id": "didones",
+      "label": "Didones",
+      "aka": "Modern, Classicist, Romantic",
+      "epoch": "Fin XVIIIe — Didot (Paris), Bodoni (Parme)",
+      "description": "Nommées par contraction des noms de François/Firmin Didot (imprimeur, éditeur, inventeur de la métrique typographique) et Giambattista Bodoni (imprimeur parmesan). Grands contrastes entre pleins et déliés, empattements horizontaux purs, axe vertical absolu. Témoins de la rationalisation de la typographie sous l'influence de la modernité naissante.",
+      "signals": {
+        "stress_angle": "0° — axe vertical parfait, rupture définitive avec la tradition calligraphique",
+        "contrast": "élevé à extrême — ratio 6–15, les déliés tendent vers le fil",
+        "serifs": "horizontaux purs, hairline, sans congé (unbracketed) — empattement géométrique parfait",
+        "e_crossbar": "horizontale",
+        "x_height": "variable selon l'usage (texte vs display)",
+        "panose_clues": "panose[1] = 7 (thin serif / hairline), panose[4] = 8–9 (contrast fort)",
+        "distinguishing_detail": "l'empattement horizontal sans congé + axe 0° = le test infaillible. Si on peut tracer une ligne parfaitement horizontale sur l'empattement, c'est une Didone."
+      },
+      "references": [
+        {
+          "name": "Linotype Didot",
+          "year": 1991,
+          "designer": "Adrian Frutiger (d'après Firmin Didot, 1784)",
+          "google_fonts": "GFS Didot",
+          "license": "commercial / GFS Didot open source",
+          "note": "la version française — légèrement plus fine que Bodoni, élégance parisienne"
+        },
+        {
+          "name": "Bodoni",
+          "year": 1798,
+          "designer": "Giambattista Bodoni",
+          "google_fonts": "Libre Bodoni",
+          "license": "commercial (Linotype/Monotype) / Libre Bodoni open source",
+          "note": "le manifeste — contraste maximal, vertical absolu, le théâtre typographique"
+        },
+        {
+          "name": "Playfair Display",
+          "year": 2011,
+          "designer": "Claus Eggers Sørensen",
+          "google_fonts": "Playfair Display",
+          "license": "open source (OFL)",
+          "note": "Didone accessible et moderne — usage display/titrage premium, très répandu éditorial web"
+        },
+        {
+          "name": "Canela",
+          "year": 2017,
+          "designer": "Miguel Reyes (Commercial Type)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "Didone réinterprétée avec infime humanisme — la fonte luxe/mode du moment (Vogue, magazines premium)"
+        },
+        {
+          "name": "Domaine Display",
+          "year": 2014,
+          "designer": "Kris Sowersby (Klim Type Foundry)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "Didone contemporaine néo-zélandaise de haute qualité — rigueur et élégance"
+        },
+        {
+          "name": "Freight Display",
+          "year": 2005,
+          "designer": "Joshua Darden",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "Didone display sobre et contemporaine — usage éditorial premium"
+        },
+        {
+          "name": "Cormorant Display",
+          "year": 2015,
+          "designer": "Christian Thalmann",
+          "google_fonts": "Cormorant",
+          "license": "open source (OFL)",
+          "note": "contraste extrême en version display — proche Didone par le contraste, ancrage Garalde par l'axe"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Grotesques",
+          "examples": ["Helvetica Neue", "Neue Haas Grotesk", "Akzidenz Grotesk"],
+          "rationale": "le classique mode et luxe : neutre fonctionnel face au dramatique Didone — Vogue, Chanel"
+        },
+        {
+          "category": "Linéales / Grotesques humanistes",
+          "examples": ["Gill Sans", "Aktiv Grotesk"],
+          "rationale": "tension entre le théâtral et le serein — moins classique, plus contemporain"
+        }
+      ],
+      "usages": ["titrage éditorial", "identités luxe et mode", "affiches", "couvertures", "titres de presse premium"],
+      "anti_usages": ["corps de texte long (contraste fatigue à lecture prolongée)", "petite taille", "interfaces fonctionnelles"],
+      "cultural_refs": [
+        "Firmin Didot — inventeur de la métrique typographique (le point Didot, 1775)",
+        "Bodoni — Manuale Tipografico (1818), le livre le plus beau jamais composé",
+        "Vogue Paris — le modèle identitaire Didone",
+        "Robin Kinross — Modern Typography"
+      ]
+    },
+    {
+      "id": "mecanes",
+      "label": "Mécanes",
+      "aka": "Slab Serif, Egyptian, Square Serif",
+      "epoch": "XIXe siècle industriel — presse, affiches, conquête de l'Ouest",
+      "description": "Contemporaines de la révolution industrielle, de la production de journaux en grand tirage et, de l'autre côté de l'Atlantique, de la conquête de l'Ouest. Deux sous-familles : classiques (angles courbes, type Clarendon) et modernes (angles droits, type Rockwell). Peu ou pas de contrastes entre pleins et déliés.",
+      "signals": {
+        "stress_angle": "0° ou faible — axe vertical ou quasi-vertical",
+        "contrast": "quasi nul à nul — ratio ~1–1.5, monolinéarité revendiquée",
+        "serifs": "rectangulaires et épais (slab) — classiques avec congé courbe, modernes avec angle droit",
+        "sub_families": {
+          "classiques": "congé courbe aux angles d'empattement (type Clarendon) — plus humanisées",
+          "modernes": "angle droit aux jonctions (type Rockwell) — plus mécaniques et géométriques"
+        },
+        "panose_clues": "panose[1] = 6 (square serif), panose[4] = 2–3 (faible contraste)",
+        "distinguishing_detail": "l'empattement carré épais + absence de contraste = Mécane. La courbe ou le droit de la jonction distingue classique / moderne."
+      },
+      "references": [
+        {
+          "name": "Clarendon",
+          "year": 1845,
+          "designer": "Robert Besley (Fann Street Foundry)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "la Mécane classique archétypale — robustesse victorienne, empattements courbes"
+        },
+        {
+          "name": "Rockwell",
+          "year": 1934,
+          "designer": "Monotype",
+          "google_fonts": null,
+          "license": "commercial (Monotype, installée Office)",
+          "note": "Mécane géométrique moderne — empattements à angle droit, très marqué, usage titrage"
+        },
+        {
+          "name": "Serifa",
+          "year": 1967,
+          "designer": "Adrian Frutiger",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "Mécane moderne Frutiger — refonte du Rockwell avec la rigueur suisse. Empattements carrés à angle droit, quasi-absence de contraste. Souvent citée avec les Didones par erreur — c'est une Mécane moderne."
+        },
+        {
+          "name": "Sentinel",
+          "year": 2009,
+          "designer": "Jonathan Hoefler & Tobias Frere-Jones",
+          "google_fonts": null,
+          "license": "commercial (H&Co)",
+          "note": "Mécane variable contemporaine premium — journaux haut de gamme, grande lisibilité"
+        },
+        {
+          "name": "Zilla Slab",
+          "year": 2017,
+          "designer": "Typotheque (pour Mozilla)",
+          "google_fonts": "Zilla Slab",
+          "license": "open source (OFL)",
+          "note": "Mécane contemporaine sobre et ouverte — usage interface et corpo"
+        },
+        {
+          "name": "Bitter",
+          "year": 2011,
+          "designer": "Sol Matas",
+          "google_fonts": "Bitter",
+          "license": "open source (OFL)",
+          "note": "Mécane optimisée lecture écran — très lisible en corps de texte web"
+        },
+        {
+          "name": "Archer",
+          "year": 2001,
+          "designer": "Jonathan Hoefler & Tobias Frere-Jones",
+          "google_fonts": null,
+          "license": "commercial (H&Co)",
+          "note": "Mécane avec terminaisons sphériques — tonalité douce, usage branding friendly (Martha Stewart, Wells Fargo)"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Géométriques",
+          "examples": ["Futura", "Avenir", "DM Sans"],
+          "rationale": "deux rationalismes industriels — géométrique + slab = cohérence formelle forte"
+        },
+        {
+          "category": "Linéales / Grotesques",
+          "examples": ["Helvetica", "Inter"],
+          "rationale": "neutre fonctionnel + robustesse slab — contraste de densité intéressant"
+        }
+      ],
+      "usages": ["titrage fort", "affiches", "presse quotidienne", "interfaces assertives", "branding corps de métier"],
+      "anti_usages": ["registres luxe ou mode (trop industriel)", "contextes de délicatesse"],
+      "cultural_refs": [
+        "Affiche western américaine — la Mécane est l'identité visuelle de la conquête de l'Ouest",
+        "La presse de grand tirage du XIXe — Clarendon naît pour les journaux",
+        "Étapes — l'histoire des caractères d'affiche"
+      ]
+    },
+    {
+      "id": "lineales",
+      "label": "Linéales",
+      "aka": "Sans-serif, Bâtons, Grotesque / Géométrique / Humaniste",
+      "epoch": "XIXe industriel → Bauhaus (1920s) → présent",
+      "description": "Caractères sans empattements, sans pleins ni déliés. Tschichold au Bauhaus pose les bases de la production typographique épurée contemporaine. Le plus fameux représentant est Adrian Frutiger (Univers, Frutiger/Roissy, OCR-B, Serifa). Éric Gill invente la sous-catégorie des Linéales humanistiques. Trois sous-familles principales : Grotesques (XIXe industriel), Géométriques (Bauhaus), Humanistes (héritage calligraphique dans le sans).",
+      "signals": {
+        "stress_angle": "indéfini ou 0°",
+        "contrast": "nul à faible",
+        "serifs": "aucun",
+        "panose_clues": "panose[1] = 11–13 (various sans styles)",
+        "sub_families": {
+          "grotesque": "terminaisons à angle, monolinéaire, espace lettres serré, 'a' à simple étage, 'g' à simple panse — industriel",
+          "geometrique": "formes primaires : cercle parfait pour le 'o', rationalisme absolu Bauhaus",
+          "humaniste": "traces calligraphiques visibles : 'a' à double étage, 'g' à double boucle ou descendante, variation subtile de graisse, ouverture des contreforts"
+        },
+        "distinguishing_detail": "regarder le 'a' et le 'g' : double étage/double panse = Humaniste. Cercle parfait pour le 'o' = Géométrique. Terminaisons coupées à angle = Grotesque."
+      },
+      "references_grotesque": [
+        {
+          "name": "Univers",
+          "year": 1957,
+          "designer": "Adrian Frutiger",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "le grotesque systématique — famille de 21 graisses/largeurs, révolution de la cohérence"
+        },
+        {
+          "name": "Akzidenz Grotesk",
+          "year": 1896,
+          "designer": "Berthold",
+          "google_fonts": null,
+          "license": "commercial (Berthold)",
+          "note": "le grotesque originel — plus de caractère qu'Helvetica, ancêtre d'Helvetica"
+        },
+        {
+          "name": "Helvetica Neue",
+          "year": 1983,
+          "designer": "D. Stempel AG / Linotype",
+          "google_fonts": null,
+          "license": "commercial (Linotype, installée macOS)",
+          "note": "le grotesque absolu — neutralité revendiquée, sur-utilisé mais référence incontournable"
+        },
+        {
+          "name": "Aktiv Grotesk",
+          "year": 2010,
+          "designer": "Dalton Maag",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "grotesque contemporain très propre, usage interface professionnel"
+        },
+        {
+          "name": "Neue Haas Grotesk",
+          "year": 2010,
+          "designer": "Christian Schwartz (revival)",
+          "google_fonts": null,
+          "license": "commercial (Commercial Type)",
+          "note": "Helvetica comme il aurait dû être — rythme et espacement supérieurs à l'original"
+        },
+        {
+          "name": "Graphik",
+          "year": 2009,
+          "designer": "Christian Schwartz (Commercial Type)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "grotesque contemporain avec personnalité — presse et tech premium"
+        },
+        {
+          "name": "Söhne",
+          "year": 2019,
+          "designer": "Kris Sowersby (Klim Type Foundry)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "revival Grotesk allemand — le grotesque premium du moment, usage tech haut de gamme"
+        }
+      ],
+      "references_geometrique": [
+        {
+          "name": "Futura",
+          "year": 1927,
+          "designer": "Paul Renner",
+          "google_fonts": null,
+          "license": "commercial (Bauer/Neufville)",
+          "note": "le géométrique originel — pureté Bauhaus, cercle parfait, triangle, carré"
+        },
+        {
+          "name": "Avenir",
+          "year": 1988,
+          "designer": "Adrian Frutiger",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "Futura humanisé — plus lisible, moins rigide, l'équilibre géométrique/humain"
+        },
+        {
+          "name": "Circular",
+          "year": 2013,
+          "designer": "Laurenz Brunner (Lineto)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "le géométrique du digital contemporain — Spotify, Airbnb"
+        },
+        {
+          "name": "Montserrat",
+          "year": 2011,
+          "designer": "Julieta Ulanovsky",
+          "google_fonts": "Montserrat",
+          "license": "open source (OFL)",
+          "note": "géométrique accessible — très répandu, risque de banalité"
+        },
+        {
+          "name": "DM Sans",
+          "year": 2019,
+          "designer": "Colophon Foundry",
+          "google_fonts": "DM Sans",
+          "license": "open source (OFL)",
+          "note": "géométrique propre et libre — usage UI correct, bonne alternative à Circular"
+        },
+        {
+          "name": "Plus Jakarta Sans",
+          "year": 2020,
+          "designer": "Tokotype",
+          "google_fonts": "Plus Jakarta Sans",
+          "license": "open source (OFL)",
+          "note": "géométrique avec personnalité, terminaisons légèrement adoucies"
+        },
+        {
+          "name": "Nunito",
+          "year": 2009,
+          "designer": "Vernon Adams",
+          "google_fonts": "Nunito",
+          "license": "open source (OFL)",
+          "note": "géométrique arrondi — tonalité douce, usage UI convivial"
+        }
+      ],
+      "references_humaniste": [
+        {
+          "name": "Frutiger",
+          "year": 1975,
+          "designer": "Adrian Frutiger",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "référence signalétique mondiale — Aéroport Charles de Gaulle (Roissy). Lisibilité maximale à distance."
+        },
+        {
+          "name": "Gill Sans",
+          "year": 1928,
+          "designer": "Eric Gill",
+          "google_fonts": null,
+          "license": "commercial (Monotype)",
+          "note": "le humaniste fondateur — présence du calligraphique assumée, usage BBC/Penguin"
+        },
+        {
+          "name": "Geist",
+          "year": 2023,
+          "designer": "Vercel",
+          "google_fonts": null,
+          "license": "open source (OFL)",
+          "note": "humaniste contemporain pour interfaces — token HoméOS par défaut. 'g' à double panse, contreforts ouverts."
+        },
+        {
+          "name": "Inter",
+          "year": 2017,
+          "designer": "Rasmus Andersson",
+          "google_fonts": "Inter",
+          "license": "open source (OFL)",
+          "note": "grotesque/humaniste optimisé UI — x-height élevée, métriques d'écran parfaites"
+        },
+        {
+          "name": "Myriad Pro",
+          "year": 1992,
+          "designer": "Robert Slimbach / Carol Twombly (Adobe)",
+          "google_fonts": null,
+          "license": "commercial (Adobe)",
+          "note": "humaniste propre — usage Apple longtemps, très lisible corpo"
+        },
+        {
+          "name": "Source Sans 3",
+          "year": 2012,
+          "designer": "Paul D. Hunt (Adobe)",
+          "google_fonts": "Source Sans 3",
+          "license": "open source (OFL)",
+          "note": "humaniste sobre et libre — excellent corpo, usage interface et document"
+        },
+        {
+          "name": "Lato",
+          "year": 2010,
+          "designer": "Łukasz Dziedzic",
+          "google_fonts": "Lato",
+          "license": "open source (OFL)",
+          "note": "humaniste chaud et accessible — très répandu web, légère touche géométrique"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Garaldes",
+          "examples": ["Garamond", "Cormorant", "Sabon"],
+          "rationale": "l'humaniste sans et la garalde partagent l'axe oblique calligraphique — dialogue naturel"
+        },
+        {
+          "category": "Didones",
+          "examples": ["Bodoni", "Canela", "Playfair Display"],
+          "rationale": "tension maximum neutre/dramatique — classique luxe et mode (Grotesque + Didone)"
+        }
+      ],
+      "usages": ["interfaces", "signalétique", "presse fonctionnelle", "branding tech", "corpo neutre"],
+      "anti_usages": ["contextes nobles/historiques (trop neutre)", "usages exigeant une forte personnalité typographique"],
+      "cultural_refs": [
+        "Adrian Frutiger — Caractères, l'œuvre complète",
+        "Jan Tschichold au Bauhaus — fondation de la typographie moderne épurée",
+        "Eric Gill — inversion : humaniser le sans-serif",
+        "Massimo Vignelli — Helvetica comme langue universelle",
+        "OCR-B (Frutiger) — présent sur tous nos formulaires officiels"
+      ]
+    },
+    {
+      "id": "incises",
+      "label": "Incises",
+      "aka": "Glyphic, Lapidary",
+      "epoch": "Antiquité romaine → Renaissance → Révolution / Napoléon",
+      "description": "Tiennent leur nom de leur forme directement inspirée des caractères gravés sur la pierre ou le métal à l'époque romaine antique. Temps de gloire lors de l'Antiquité puis lors des conquêtes napoléoniennes. Caractéristiques : petits empattements triangulaires taillés, terminaisons en biseau, gravure lapidaire. Ne se présentent qu'en haut de casse dans leur forme canonique. Ligatures authentiques.",
+      "signals": {
+        "stress_angle": "variable, souvent vertical",
+        "contrast": "modéré, taille directe",
+        "serifs": "triangulaires taillés — biseau, gravure, pas de congé — l'empattement est une entaille, pas une courbe",
+        "panose_clues": "panose[1] = 14 (flared serif)",
+        "distinguishing_detail": "l'empattement en biseau/triangle taillé, évocation de la gravure lapidaire romaine. Souvent majuscules uniquement dans la forme pure."
+      },
+      "references": [
+        {
+          "name": "Trajan",
+          "year": 1989,
+          "designer": "Carol Twombly (Adobe)",
+          "google_fonts": null,
+          "license": "commercial (Adobe)",
+          "note": "l'incise absolue — colonnes Trajan romaines directement digitalisées. Surexposée cinéma (affiches hollywoodiennes), mais référence absolue."
+        },
+        {
+          "name": "Albertus",
+          "year": 1938,
+          "designer": "Berthold Wolpe",
+          "google_fonts": null,
+          "license": "commercial (Monotype)",
+          "note": "incise au caractère prononcé — signalétique de Londres, identité BBC"
+        },
+        {
+          "name": "Optima",
+          "year": 1958,
+          "designer": "Hermann Zapf",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "incise sans empattement — entre le sans et l'incise, terminaisons fuselées très identifiables. Mémorial Vietnam."
+        },
+        {
+          "name": "Requiem",
+          "year": 1992,
+          "designer": "Jonathan Hoefler",
+          "google_fonts": null,
+          "license": "commercial (H&Co)",
+          "note": "incise contemporaine très raffinée — usage éditorial noble et institutionnel"
+        },
+        {
+          "name": "Perpetua",
+          "year": 1929,
+          "designer": "Eric Gill",
+          "google_fonts": null,
+          "license": "commercial (Monotype)",
+          "note": "incise élégante à usage libro — plus douce que Trajan, très livresque"
+        },
+        {
+          "name": "Cinzel",
+          "year": 2013,
+          "designer": "Natanael Gama",
+          "google_fonts": "Cinzel",
+          "license": "open source (OFL)",
+          "note": "incise libre de qualité correcte — usage titrage solennel, identités institutionnelles"
+        },
+        {
+          "name": "Corinthia",
+          "year": 2020,
+          "designer": "Nicole Fally",
+          "google_fonts": "Corinthia",
+          "license": "open source (OFL)",
+          "note": "incise scripturale — frontière incise/scripte, usage décoratif et cérémoniel"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Garaldes",
+          "examples": ["Garamond", "EB Garamond"],
+          "rationale": "deux héritages humanistes — convergence historique, usage corpo institutionnel noble"
+        }
+      ],
+      "usages": ["identités institutionnelles", "titrage solennel", "luxe", "édition noble", "mémoriaux", "signalétique patrimoniale"],
+      "anti_usages": ["corps de texte long", "interfaces numériques", "communications jeunes/dynamiques"],
+      "cultural_refs": [
+        "Colonne Trajane — Rome, 113 apr. J.-C. : la référence lapidaire originelle",
+        "Ère napoléonienne — retour en grâce de l'Antiquité romaine dans les arts",
+        "Hermann Zapf — Optima et la frontière incise/sans"
+      ]
+    },
+    {
+      "id": "scriptes",
+      "label": "Scriptes",
+      "aka": "Script, Cursive, Anglaise",
+      "epoch": "XVIIIe–XIXe — calligraphie, imprimerie de luxe",
+      "description": "Caractères imitant l'écriture. Deux types distincts : les cursives (écriture liée naturelle, ronde, mouvement du poignet — type BV Rondes) et les anglaises (écriture à plume oblique, inclinaison marquée 30–45°, liaisons élaborées, fort contraste). La genèse des Anglaises est directement liée à l'histoire des Didones : François Didot (père de Firmin, imprimeur et éditeur) produisit des Anglaises qui furent classées non pas avec ses romains Didones mais dans la famille des Scriptes — la plume oblique anglaise est un système calligraphique autonome, pas une variation de la romain.",
+      "signals": {
+        "stress_angle": "très oblique — 30–45° pour les anglaises / variable et expressif pour les cursives",
+        "contrast": "élevé dans les anglaises (plume oblique tenue à 45°) / faible à modéré dans les cursives",
+        "serifs": "entrées et sorties de lettres — liaisons calligraphiques, pas d'empattements au sens sérif",
+        "sub_families": {
+          "cursives": "mouvement naturel du poignet, ronde, formes liées mais sans inclinaison extrême — type BV Rondes, Banco Script",
+          "anglaises": "inclinaison forte (30–45°), contraste élevé plume oblique, liaisons très élaborées — type Kunstler, Shelley, Berthold Script"
+        },
+        "distinguishing_detail": "l'inclinaison forte + le contraste élevé = Anglaise. Ronde et mouvement naturel = Cursive. Les deux ont des liaisons calligraphiques."
+      },
+      "references": [
+        {
+          "name": "BV Rondes",
+          "year": "XIXe (type traditionnel français)",
+          "designer": "tradition calligraphique française",
+          "google_fonts": null,
+          "license": "various",
+          "note": "cursive française ronde — type de référence de la scripte cursive, mouvement naturel du poignet, pas d'inclinaison extrême. Enseigne la distinction fondamentale avec l'Anglaise."
+        },
+        {
+          "name": "Berthold Script",
+          "year": 1977,
+          "designer": "Günter Gerhard Lange (Berthold)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "scripte cursive de référence — usage invitation, papeterie de prestige"
+        },
+        {
+          "name": "Kunstler Script",
+          "year": 1902,
+          "designer": "Hans Bohn (Stempel)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "anglaise classique — très fine, élégante, usage diplômes et cartes de visite formelles. Le modèle de l'anglaise à plume oblique."
+        },
+        {
+          "name": "Shelley Script",
+          "year": 1972,
+          "designer": "Matthew Carter",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "anglaise contemporaine raffinée — Carter au sommet de la scripte formelle"
+        },
+        {
+          "name": "Parisienne",
+          "year": 2012,
+          "designer": "Vernon Adams",
+          "google_fonts": "Parisienne",
+          "license": "open source (OFL)",
+          "note": "scripte libre élégante — usage branding féminin/luxe accessible"
+        },
+        {
+          "name": "Alex Brush",
+          "year": 2012,
+          "designer": "TypeSETit",
+          "google_fonts": "Alex Brush",
+          "license": "open source (OFL)",
+          "note": "anglaise fluide et accessible — bonne scripte libre pour titrage cérémoniel"
+        },
+        {
+          "name": "Great Vibes",
+          "year": 2012,
+          "designer": "TypeSETit",
+          "google_fonts": "Great Vibes",
+          "license": "open source (OFL)",
+          "note": "cursive élégante — très utilisée mariage/événementiel, risque de banalité"
+        },
+        {
+          "name": "Zapf Chancery",
+          "year": 1979,
+          "designer": "Hermann Zapf",
+          "google_fonts": null,
+          "license": "commercial (Adobe/Linotype, installée système)",
+          "note": "italique/scripte de chancellerie — inspirée de la calligraphie humaniste italienne"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Grotesques",
+          "examples": ["Helvetica", "Aktiv"],
+          "rationale": "le contraste extrême écrit/industriel — usage mode et parfumerie"
+        }
+      ],
+      "usages": ["papeterie de prestige", "invitations", "identités cérémoniales", "mariage", "parfumerie", "cosmétiques"],
+      "anti_usages": ["corps de texte (illisible)", "interfaces", "signalétique"],
+      "cultural_refs": [
+        "François Didot (père de Firmin) — produisit des Anglaises classées en Scriptes, pas en Didones. La plume oblique est un système calligraphique autonome, étranger au romain.",
+        "La tradition calligraphique anglaise du XVIIIe — la 'Copperplate' (plaque de cuivre gravée) donne son nom au style : les maîtres calligraphes gravaient leurs modèles sur cuivre, produisant ce que le plomb ne pouvait imiter.",
+        "Genèse des Scriptes fondues : les maîtres écrivains ne commandent pas de caractères — ils investissent au contraire ce que l'imprimerie ne peut reproduire (liaison, inclinaison extrême, gestes). Les Anglaises en plomb arrivent plus tard, au XVIIIe s., quand les fonderies (Didot en France, Wilson en Angleterre) capturent la demande de luxe pour les faire-parts et diplômes. Baskerville n'est pas concerné : il conçoit des Réales transitionnelles, famille opposée.",
+        "La Ronde française — tradition scolaire et commerciale, BV Rondes comme référence canonique",
+        "L'imprimerie de luxe — faire-parts, diplômes, billets de banque"
+      ]
+    },
+    {
+      "id": "manuaires",
+      "label": "Manuaires",
+      "aka": "Manual, Brush Script, Handpainted",
+      "epoch": "XXe siècle — affiche, publicité, titrage expressif",
+      "description": "S'inspirent de l'écriture au pinceau. Plus expressives et moins formelles que les Scriptes, elles s'affranchissent de la plume pour adopter les accidents du pinceau chargé.",
+      "signals": {
+        "stress_angle": "variable, expressif",
+        "contrast": "fort et irrégulier — accident du pinceau",
+        "serifs": "terminaisons au pinceau — épaisses et expressives, ou effilées",
+        "distinguishing_detail": "irrégularités voulues, épaisseurs variables non-calligraphiques, texture du pinceau visible"
+      },
+      "references": [
+        {
+          "name": "Banco",
+          "year": 1951,
+          "designer": "Roger Excoffon",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "manuaire française mythique — identité Air France années 50, expression pinceau épuré"
+        },
+        {
+          "name": "Revue",
+          "year": 1968,
+          "designer": "Colin Brignall (Letraset)",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "manuaire affiche années 60–70 — expression graphique forte, typiquement rétro"
+        },
+        {
+          "name": "Reporter",
+          "year": 1938,
+          "designer": "Carlos Winkow",
+          "google_fonts": null,
+          "license": "commercial (Linotype)",
+          "note": "manuaire expressionniste — pinceau chargé, usage titrage dramatique"
+        },
+        {
+          "name": "Brush Script MT",
+          "year": 1942,
+          "designer": "Robert E. Smith",
+          "google_fonts": null,
+          "license": "commercial (Monotype, installée Office)",
+          "note": "la manuaire la plus connue et la plus mal utilisée — à manier avec précaution"
+        },
+        {
+          "name": "Lobster",
+          "year": 2010,
+          "designer": "Pablo Impallari",
+          "google_fonts": "Lobster",
+          "license": "open source (OFL)",
+          "note": "manuaire contemporaine populaire — ligatures automatiques, sur-utilisée web"
+        },
+        {
+          "name": "Pacifico",
+          "year": 2011,
+          "designer": "Vernon Adams",
+          "google_fonts": "Pacifico",
+          "license": "open source (OFL)",
+          "note": "manuaire décontractée — tonalité surf/lifestyle, très accessible"
+        },
+        {
+          "name": "Permanent Marker",
+          "year": 2011,
+          "designer": "Brian J. Bonislawsky",
+          "google_fonts": "Permanent Marker",
+          "license": "open source (OFL)",
+          "note": "manuaire feutre — usage annotation, décontracté, tonalité handmade authentique"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Linéales / Grotesques",
+          "examples": ["Helvetica", "Univers"],
+          "rationale": "l'expressif et le neutre — usage affiche et communication directe"
+        }
+      ],
+      "usages": ["titrage expressif", "affiches", "branding artisanal", "food & beverage", "communication décontractée"],
+      "anti_usages": ["corpo institutionnel", "corps de texte", "contextes de rigueur"],
+      "cultural_refs": [
+        "Roger Excoffon — maître de la manuaire française (Banco, Mistral, Calypso)",
+        "L'affiche française des années 50 — Cassandre, Excoffon"
+      ]
+    },
+    {
+      "id": "fractures",
+      "label": "Fractures",
+      "aka": "Gothiques, Textura, Fraktur, Carolingienne, Onciale",
+      "epoch": "Moyen Âge — copistes, avant l'imprimerie",
+      "description": "Mieux connues en France sous le nom de Gothiques. Reprennent le dessin de la gothique, de la caroline ou de l'onciale — trois modèles calligraphiques de l'époque des copistes, antérieure à l'invention de l'imprimerie. Les copistes n'ont été réellement supplantés qu'au début du XIXe.",
+      "signals": {
+        "stress_angle": "fort, variable selon le style",
+        "contrast": "fort pour la textura, variable pour les autres",
+        "serifs": "empattements à plat ou en losange — spécifiques à chaque style",
+        "sub_families": {
+          "textura": "Fraktur, gothique serrée — les 'bâtons brisés' de la cathédrale",
+          "caroline": "plus ronde, plus lisible — transition vers les humanistes",
+          "onciale": "majuscules rondes, lettrine — usage liturgique et manuscrit"
+        },
+        "distinguishing_detail": "les formes brisées angulaires (textura) ou les rondes médiévales (caroline/onciale) — immédiatement identifiables"
+      },
+      "references": [
+        {
+          "name": "Clairvaux",
+          "year": 1992,
+          "designer": "Herbert Maring",
+          "google_fonts": null,
+          "license": "commercial",
+          "note": "fracture carolingienne — nommée d'après l'abbaye, usage liturgique et patrimoine"
+        },
+        {
+          "name": "Fette Fraktur",
+          "year": 1850,
+          "designer": "J.G. Schelter & Giesecke",
+          "google_fonts": "Fette Fraktur (via CDN)",
+          "license": "commercial",
+          "note": "Fraktur gras emblématique — bière, métal, identités volontairement historicisantes"
+        },
+        {
+          "name": "UnifrakturMaguntia",
+          "year": 2009,
+          "designer": "j.mach.wust",
+          "google_fonts": "UnifrakturMaguntia",
+          "license": "open source (OFL)",
+          "note": "Fraktur libre de qualité — usage décoratif, titrage historique"
+        },
+        {
+          "name": "MedievalSharp",
+          "year": 2010,
+          "designer": "Dieter Steffmann",
+          "google_fonts": null,
+          "license": "open source",
+          "note": "fracture textura — usage gaming, fantasy, médiéval"
+        },
+        {
+          "name": "Cinzel Decorative",
+          "year": 2013,
+          "designer": "Natanael Gama",
+          "google_fonts": "Cinzel Decorative",
+          "license": "open source (OFL)",
+          "note": "à la frontière Incise/Fracture — majuscules ornementales, usage titrage solennel"
+        },
+        {
+          "name": "Uncial Antiqua",
+          "year": 2010,
+          "designer": "Kimberly Geswein",
+          "google_fonts": "Uncial Antiqua",
+          "license": "open source (OFL)",
+          "note": "onciale accessible — usage décoratif, identités culturelles celtiques/médiévales"
+        },
+        {
+          "name": "IM Fell DW Pica SC",
+          "year": 2007,
+          "designer": "Igino Marini",
+          "google_fonts": "IM Fell DW Pica SC",
+          "license": "open source (OFL)",
+          "note": "petites capitales à l'atmosphère manuscrite ancienne — frontière humane/fracture"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Mécanes",
+          "examples": ["Rockwell", "Clarendon"],
+          "rationale": "tension historicisant/industriel — usage affiches volontairement anachroniques"
+        }
+      ],
+      "usages": ["identités culturelles historiques", "brasseries", "heavy metal", "gaming médiéval", "patrimoine", "usage décoratif fort"],
+      "anti_usages": ["corps de texte (illisible en continu)", "interfaces", "communications grand public"],
+      "cultural_refs": [
+        "Gutenberg — la Bible à 42 lignes (1455) est composée en Textura gothique",
+        "L'Allemagne nazie récupère le Fraktur puis l'abandonne en 1941 (jugé 'non-universel')",
+        "Le métal et le punk récupèrent la Fracture comme signe de rébellion"
+      ]
+    },
+    {
+      "id": "non_latines",
+      "label": "Non-Latines",
+      "aka": "Non-Latin, World Scripts",
+      "epoch": "Toutes époques — systèmes d'écriture non-latins",
+      "description": "Regroupent toutes les polices de caractères non-latins : versions typographiées de l'écriture hébraïque, arabe, japonaise, cyrillique, grecque, devanagari, etc. Chaque système d'écriture a ses propres classifications internes.",
+      "signals": {
+        "stress_angle": "selon le système d'écriture",
+        "contrast": "selon le système d'écriture",
+        "serifs": "selon le système d'écriture",
+        "distinguishing_detail": "l'écriture elle-même n'est pas latine — identification immédiate"
+      },
+      "references": [
+        {
+          "name": "Noto (Google)",
+          "year": 2013,
+          "designer": "Google / Monotype",
+          "google_fonts": "Noto Sans / Noto Serif",
+          "license": "open source (OFL)",
+          "note": "objectif : couvrir tous les scripts Unicode — 'No Tofu'. Référence universelle multi-langues."
+        },
+        {
+          "name": "Source Han Sans (Adobe)",
+          "year": 2014,
+          "designer": "Adobe / Google",
+          "google_fonts": "Noto Sans CJK",
+          "license": "open source (OFL)",
+          "note": "sans-serif CJK (chinois/japonais/coréen) de référence — qualité professionnelle"
+        },
+        {
+          "name": "Scheherazade New",
+          "year": 2021,
+          "designer": "SIL International",
+          "google_fonts": "Scheherazade New",
+          "license": "open source (OFL)",
+          "note": "arabe naskhî de qualité — usage éditorial et interface"
+        },
+        {
+          "name": "Rubik",
+          "year": 2015,
+          "designer": "Philipp Hubert & Sebastian Fischer",
+          "google_fonts": "Rubik",
+          "license": "open source (OFL)",
+          "note": "latine + hébraïque — l'une des rares fontes bidirectionnelles de qualité"
+        },
+        {
+          "name": "Amiri",
+          "year": 2010,
+          "designer": "Khaled Hosny",
+          "google_fonts": "Amiri",
+          "license": "open source (OFL)",
+          "note": "arabe naskh traditionnel — référence éditoriale arabe libre"
+        },
+        {
+          "name": "Hind",
+          "year": 2014,
+          "designer": "Indian Type Foundry",
+          "google_fonts": "Hind",
+          "license": "open source (OFL)",
+          "note": "devanagari + latin — qualité professionnelle pour usage indien bilingue"
+        },
+        {
+          "name": "Raleway Cyrillique",
+          "year": 2016,
+          "designer": "Multiple (extension communautaire)",
+          "google_fonts": "Raleway",
+          "license": "open source (OFL)",
+          "note": "extension cyrillique d'une fonte latine populaire — approche d'internationalisation"
+        }
+      ],
+      "pairings": [
+        {
+          "category": "Latines équivalentes morphologiquement",
+          "examples": ["Noto Sans + Inter", "Source Han + Helvetica"],
+          "rationale": "choisir une latine dont les proportions et le contraste s'apparentent à la non-latine — cohérence inter-script"
+        }
+      ],
+      "usages": ["internationalisation", "applications multilingues", "contenus monde non-latin"],
+      "anti_usages": ["substitution sans expertise — chaque script a ses propres règles typographiques"],
+      "cultural_refs": [
+        "Unicode Consortium — standardisation de tous les scripts du monde",
+        "Noto — 'No more tofu' : plus de rectangles blancs pour les caractères manquants",
+        "La calligraphie arabe — art majeur, Sullivan note que chaque script mérite sa propre expertise"
+      ]
+    }
+  ],
+  "pairing_matrix": {
+    "description": "Matrice simplifiée des mariages typographiques selon la logique Sullivan",
+    "rules": [
+      "Garalde + Humaniste Sans = dialogue naturel (axe oblique partagé)",
+      "Didone + Grotesque = tension classique mode/luxe",
+      "Réale + Humaniste Sans = équilibre classicisme/fonctionnel",
+      "Mécane + Géométrique = rationalisme industriel cohérent",
+      "Incise + Garalde = double héritage humaniste, usage noble",
+      "Scripte/Manuaire = toujours accompagnée d'un sans ou d'une sérifée très sobre"
+    ],
+    "anti_rules": [
+      "Deux Garaldes dans la même composition = redondance",
+      "Didone + Mécane = collision de deux raisonnements contraires",
+      "Scripte + Fracture = surcharge calligraphique",
+      "Géométrique + Didone = deux verticalités qui se neutralisent"
+    ]
+  },
+  "sullivan_voice_guidelines": {
+    "description": "Instructions pour le ton du commentaire Sullivan",
+    "language": "français",
+    "register": "conseiller expert — pas de markdown, pas d'énumération, ton de conversation entre professionnels",
+    "structure": "1) nommer les signaux détectés, 2) catégorie + sous-catégorie, 3) proche référence connue, 4) suggestion de pairing avec rationale",
+    "length": "3–4 phrases maximum",
+    "example": "Axe oblique à 12°, contraste modéré (ratio 3.1), empattements à congé. Garalde — famille aldine. Proche de Sabon par la modération du contraste et la forme des anses. Pour accompagner : un Grotesque humaniste (Gill Sans, Aktiv) plutôt qu'un Géométrique — l'un dialogue, l'autre concurrence.",
+    "forbidden": ["listes à puces dans la réponse finale", "répéter la question", "uppercase", "emojis"]
+  }
+}

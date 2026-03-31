@@ -77,6 +77,153 @@ body {
   z-index: var(--z-root);
 }
 
+/* ========== GLOBAL PIPELINE HEADER (Mission 107) ========== */
+.global-pipeline-header {
+  height: 48px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.pipeline-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 16px;
+}
+
+/* Brand */
+.pipeline-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-homeos {
+  font-size: 16px;
+  font-weight: 700;
+  color: #8cc63f; /* Vert HoméOS */
+  letter-spacing: -0.02em;
+}
+
+.brand-version {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Pipeline Tabs */
+.pipeline-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pipeline-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.pipeline-tab:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.pipeline-tab.active {
+  background: var(--bg-secondary);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.pipeline-tab.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tab-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.tab-label {
+  text-transform: lowercase;
+}
+
+/* Actions */
+.pipeline-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bridge-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-dot.online {
+  background: #8cc63f;
+  box-shadow: 0 0 4px #8cc63f;
+}
+
+.status-dot.offline {
+  background: #d56363;
+}
+
+.status-text {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+}
+
+.theme-toggle-btn {
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  line-height: 1;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-warm);
+}
+
 .stenciler-header h1 {
   font-size: 14px;
   font-weight: 500;
@@ -783,21 +930,7 @@ body {
   font-size: 11px;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-muted);
-}
-
-.status-dot.online {
-  background: #7aca6a;
-  box-shadow: 0 0 4px #7aca6a;
-}
-
-.status-dot.offline {
-  background: #d56363;
-}
+/* status-dot défini dans le bloc Mission 107 ci-dessus */
 
 .status-text {
   color: var(--text-secondary);

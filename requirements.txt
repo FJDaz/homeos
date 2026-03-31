@@ -51,3 +51,7 @@ astunparse>=1.6.3
 
 # Testing
 pytest>=7.0.0
+
+# Sullivan Typography Engine (Mission 109)
+fonttools>=4.43.0
+brotli>=1.0.9
