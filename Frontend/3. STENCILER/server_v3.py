@@ -235,6 +235,23 @@ class KimiResultResponse(BaseModel):
 class WireRequest(BaseModel):
     html: str
 
+# --- MISSION 115 : CURRENT FRD FILE ---
+_CURRENT_FRD_FILE: Optional[str] = None
+
+class CurrentFileRequest(BaseModel):
+    name: str
+
+@app.post("/api/frd/set-current")
+async def set_current_frd_file(req: CurrentFileRequest):
+    global _CURRENT_FRD_FILE
+    _CURRENT_FRD_FILE = req.name
+    logger.info(f"Current FRD file set to: {_CURRENT_FRD_FILE}")
+    return {"status": "ok", "name": _CURRENT_FRD_FILE}
+
+@app.get("/api/frd/current")
+async def get_current_frd_file():
+    return {"name": _CURRENT_FRD_FILE}
+
 # --- GLOBAL STATE (SULLIVAN) ---
 _ARBITRATOR = SullivanArbitrator()
 _PULSE = SullivanPulse()
@@ -667,6 +684,7 @@ async def save_frd_file(req: FRDFileRequest):
     path = STATIC_DIR_PATH / "templates" / req.name
     path.write_text(req.content, encoding='utf-8')
     return {"status": "ok", "name": req.name}
+
 
 # --- ROUTES : FRD FILES LIST ---
 @app.get("/api/frd/files")

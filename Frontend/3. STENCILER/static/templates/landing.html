@@ -631,8 +631,7 @@
                         ${item.archetype_label ? `<div class="text-[9px] text-[#8cc63f] mt-1 font-bold">${item.archetype_label}</div>` : ''}
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <button onclick="viewImport('${item.id}')" class="btn-homeos flex-1 justify-center text-[10px]">voir</button>
-                        <button onclick="analyzeImport('${item.id}')" class="btn-homeos-primary btn-homeos text-white flex-1 justify-center text-[10px]">analyser</button>
+                        <button onclick="openInFRD('${item.name}')" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[11px] font-bold">ouvrir dans frd editor</button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -658,19 +657,39 @@
                 : `${selectedImports.size} écran(s) sélectionné(s) →`;
         }
 
-        function continueToFRDEditor() {
+        async function openInFRD(filename) {
+            try {
+                await fetch('/api/frd/set-current', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: filename })
+                });
+                window.location.href = '/frd-editor';
+            } catch (e) { console.error('FRD Open failed', e); }
+        }
+
+        async function continueToFRDEditor() {
             if (selectedImports.size === 0) return;
-            const ids = Array.from(selectedImports).join(',');
-            window.location.href = `/frd-editor?imports=${ids}`;
+            const ids = Array.from(selectedImports);
+            
+            // Set the first selected import as current for convenience
+            try {
+                const firstId = ids[0];
+                const res = await fetch('/api/retro-genome/imports');
+                const data = await res.json();
+                const item = (data.imports || []).find(i => i.id === firstId);
+                if (item) {
+                    await fetch('/api/frd/set-current', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: item.name })
+                    });
+                }
+            } catch (e) { console.error('Set current failed', e); }
+            
+            window.location.href = `/frd-editor?imports=${ids.join(',')}`;
         }
 
-        function viewImport(id) {
-            window.location.href = `/intent-viewer?import=${id}`;
-        }
-
-        function analyzeImport(id) {
-            window.location.href = `/intent-viewer?import=${id}&analyze=true`;
-        }
 
         async function clearImports() {
             if (!confirm('vider tous les imports ?')) return;

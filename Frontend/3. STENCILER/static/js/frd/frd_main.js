@@ -41,6 +41,21 @@ class FrdMain {
         await this.editor.loadList();
         this.chat.setMode('construct');
         this.setupEventListeners();
+
+        // Mission 115: Auto-load current file if set
+        try {
+            const res = await fetch('/api/frd/current');
+            const data = await res.json();
+            if (data.name) {
+                console.log('[FrdMain] Auto-loading current file:', data.name);
+                await this.editor.loadFile(data.name);
+                const sel = document.getElementById('template-select');
+                if (sel) sel.value = data.name;
+            }
+        } catch (e) {
+            console.warn('[FrdMain] Current file fetch failed', e);
+        }
+
         console.log('[FrdMain] Initialized V3 modular');
     }
 

@@ -316,6 +316,48 @@ Pas d'uppercase. Pas d'emojis. Geist 12px.
 
 ---
 
+## Thème 5 — Pipeline landing → FRD : fluidité de base
+
+### Mission 115 — Bouton "éditer" global + template courant dans FRD
+
+**STATUS: 🔴 HOTFIX**
+**DATE: 2026-03-31**
+**ACTOR: GEMINI (landing.html + frd_editor.html)**
+
+**Contexte :** Deux frictions bloquantes sur le pipeline de base :
+1. La landing affiche des boutons "éditer" par intention — ce découpage par intent n'a pas de sens à ce stade. Il faut un seul bouton "ouvrir dans le FRD editor" par import.
+2. Quand on arrive dans le FRD editor, le template en cours de travail n'est pas retrouvé automatiquement — le `#template-select` est vide ou désynchronisé.
+
+#### Livrable A — landing.html : bouton "éditer" global par import (Gemini)
+
+Remplacer les boutons par-intent par un seul bouton par carte d'import :
+```
+[ ouvrir dans frd editor ]  →  /frd-editor (+ marque le fichier comme courant)
+```
+- Un clic → `POST /api/frd/set-current { name: filename }` puis `window.location = '/frd-editor'`
+- Pas d'édition inline par intent sur la landing
+
+#### Livrable B — server_v3.py : route `set-current` (Claude CODE DIRECT)
+
+```
+POST /api/frd/set-current   { name: str }  →  stocke en mémoire _CURRENT_FRD_FILE
+GET  /api/frd/current       →  { name: str | null }
+```
+
+#### Livrable C — frd_editor.html : auto-charger le fichier courant (Gemini)
+
+Au chargement de `frd_editor.html` :
+```javascript
+// init() → GET /api/frd/current → si name → loadFile(name) + select dans #template-select
+```
+
+**Critères de sortie :**
+- [ ] Clic "ouvrir dans frd editor" sur une carte import → arrive dans FRD avec le bon fichier chargé
+- [ ] `#template-select` pointe sur le fichier courant
+- [ ] Pas de régression sur le chargement manuel depuis `#template-select`
+
+---
+
 ## Backlog long terme
 
 | Mission | Description | Dépendances |
