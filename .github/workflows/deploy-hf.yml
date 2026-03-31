@@ -16,12 +16,29 @@ jobs:
           fetch-depth: 0
           lfs: true
 
+      - name: install huggingface_hub
+        run: pip install huggingface_hub
+
       - name: push to hugging face space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config user.email "ci@homeos"
-          git config user.name "homeos-ci"
-          git remote remove hf-space 2>/dev/null || true
-          git remote add hf-space https://FJDaz:${HF_TOKEN}@huggingface.co/spaces/FJDaz/homeos
-          git push hf-space main --force
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi()
+          api.upload_folder(
+              folder_path=".",
+              repo_id="FJDaz/homeos",
+              repo_type="space",
+              token=os.environ["HF_TOKEN"],
+              ignore_patterns=[
+                  ".git/**", ".github/**",
+                  "**/__pycache__/**", "**/*.pyc",
+                  "**/*.gguf", "**/*.bin",
+                  "node_modules/**",
+              ],
+          )
+          print("Deploy OK")
+          EOF
