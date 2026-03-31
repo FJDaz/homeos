@@ -521,38 +521,67 @@ async def get_imports():
 
 @router.get("/import-analysis-svg")
 async def get_import_analysis_svg(id: str):
-    """Retourne les éléments analysés d'un import SVG au format components[] pour l'intent viewer."""
+    """Alias rétrocompatibilité pour Mission 122."""
+    return await get_import_analysis(id)
+
+@router.get("/import-analysis")
+async def get_import_analysis(id: str):
+    """
+    Route générique d'analyse d'import (Mission 122).
+    Supporte SVG, HTML, PNG, ZIP.
+    """
     p_path = get_active_project_path()
     imports_dir = p_path / "imports"
     index_path = imports_dir / "index.json"
+    
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.json not found")
+        
     index_data = json.loads(index_path.read_text(encoding="utf-8"))
     entry = next((i for i in index_data.get("imports", []) if i["id"] == id), None)
+    
     if not entry:
         raise HTTPException(status_code=404, detail="Import not found")
+    
     rel_path = entry.get("svg_path") or entry.get("file_path")
     if not rel_path:
-        raise HTTPException(status_code=404, detail="Import path not found (svg_path or file_path)")
-    svg_path = imports_dir / rel_path
-    if not svg_path.exists():
-        raise HTTPException(status_code=404, detail="SVG file not found")
-    analysis = parse_figma_svg(svg_path.read_text(encoding="utf-8"))
+        raise HTTPException(status_code=404, detail="Import path not found")
+    
+    import_path = imports_dir / rel_path
+    if not import_path.exists():
+        raise HTTPException(status_code=404, detail="Import file not found")
+
+    # LOGIQUE D'ANALYSE POLYMORPHE
     components = []
-    for i, el in enumerate(analysis.get("elements", [])):
+    archetype_result = None
+    
+    # Cas 1 : SVG (Parsing Figma)
+    if import_path.suffix.lower() == ".svg":
+        analysis = parse_figma_svg(import_path.read_text(encoding="utf-8"))
+        for i, el in enumerate(analysis.get("elements", [])):
+            components.append({
+                "id": el.get("id", f"elem_{i}"),
+                "name": (el.get("text_content") or el.get("description") or f"élément {i}")[:40],
+                "type": el.get("visual_hint", "unknown"),
+                "inferred_intent": el.get("apparent_role", "à définir"),
+            })
+        archetype_result = detector.detect(analysis)
+    # Cas 2 : Image ou HTML (Analyse brute simplifiée)
+    else:
         components.append({
-            "id": el.get("id", f"elem_{i}"),
-            "name": (el.get("text_content") or el.get("description") or f"élément {i}")[:40],
-            "type": el.get("visual_hint", "unknown"),
-            "inferred_intent": el.get("apparent_role", "à définir"),
+            "id": "root",
+            "name": entry["name"],
+            "type": "container",
+            "inferred_intent": f"implémenter le template {entry.get('type', 'générique')}"
         })
-    archetype_result = detector.detect(analysis)
+
     return {
         "analysis": {
             "components": components,
             "archetype": archetype_result,
             "import_name": entry["name"],
             "timestamp": entry["timestamp"],
+            "type": entry.get("type", "unknown")
         }
     }
 
@@ -624,6 +653,7 @@ async def generate_from_import(req: ImportGenRequest):
                 raise Exception(f"Import entry {req.import_id} has no path field (svg_path or file_path)")
                 
             import_path = imports_dir / rel_path
+            logger.info(f"[Mission 122] Raw suffix: '{import_path.suffix}', Normalized: '{import_path.suffix.lower()}'")
             is_zip = import_path.suffix.lower() == ".zip"
             
             if is_zip:
@@ -645,12 +675,19 @@ async def generate_from_import(req: ImportGenRequest):
                     # On prend le plus probable (index.html ou le premier à la racine)
                     main_html = next((f for f in html_files if 'index.html' in f.lower()), html_files[0])
                     svg_content = z.read(main_html).decode('utf-8', errors='replace')
+                    html_code = await get_svg_converter().convert(svg_content, entry["name"])
             else:
-                # FORMAT SVG CLASSIQUE
-                svg_content = import_path.read_text(encoding="utf-8")
-            
-            # Conversion via le LLM (Protocol SVG AI v1.0)
-            html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                # DETECTION IMAGE (Mission 122 — Vision)
+                IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
+                if import_path.suffix.lower() in IMAGE_EXTS:
+                    import base64
+                    img_b64 = base64.b64encode(import_path.read_bytes()).decode()
+                    mime = "image/png" if import_path.suffix.lower() == ".png" else "image/jpeg"
+                    html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"])
+                else:
+                    # FORMAT SVG CLASSIQUE
+                    svg_content = import_path.read_text(encoding="utf-8")
+                    html_code = await get_svg_converter().convert(svg_content, entry["name"])
             
             # Sauvegarde dans static/templates du Stenciler
             stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")

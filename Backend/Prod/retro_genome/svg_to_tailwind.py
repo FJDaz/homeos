@@ -104,10 +104,79 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
         )
 
         if not result.success:
+            logger.warning("[SvgToTailwind] Gemini failed, trying Mimo fallback...")
+            try:
+                from Backend.Prod.models.mimo_client import MimoClient
+                mimo = MimoClient()
+                result = await mimo.generate(prompt=prompt, max_tokens=16000, temperature=0.1)
+            except Exception as e:
+                logger.error(f"[SvgToTailwind] Mimo fallback also failed: {e}")
+
+        if not result.success:
             logger.error(f"[SvgToTailwind] LLM Error: {result.error}")
             raise RuntimeError(f"Conversion failed: {result.error}")
 
         # Nettoyage du bloc de code si le LLM a mis des backticks malgré tout
+        code = result.code
+        if "```html" in code:
+            code = code.split("```html")[1].split("```")[0]
+        elif "```" in code:
+            code = code.split("```")[1].split("```")[0]
+            
+        return code.strip()
+
+    async def convert_image(self, image_base64: str, mime_type: str, import_name: str) -> str:
+        """
+        Traduit une capture d'écran PNG/JPG en HTML sémantique Tailwind via Vision.
+        """
+        logger.info(f"[SvgToTailwind] Converting image '{import_name}'...")
+
+        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision.
+MISSION : Analyse cette capture d'écran et convertis-la en HTML sémantique avec Tailwind CSS.
+
+NOM DE L'IMPORT : {import_name}
+
+TOKENS DE DESIGN HOMÉOS (OBLIGATOIRE) :
+- Background principal : `#f7f6f2`
+- Texte principal : `#3d3d3c`
+- Couleur d'accent (boutons, liens actifs) : `#8cc63f`
+- Typographie : Geist Sans (via Google Fonts ou CDN)
+- Style : Minimaliste, précis, lowercase pour les labels secondaires.
+
+CONTRAINTES TECHNIQUES :
+- Utilise UNIQUEMENT Tailwind CSS (via CDN).
+- INTERDIT : largeurs fixes en px. Utilise Flexbox et Grid (w-full, flex-1, grid-cols-...).
+- Sémantique : Utilise <header>, <main>, <nav>, <footer>, <section>.
+- Évite le lorem ipsum : lis les textes réels sur l'image et utilise-les.
+- Résultat attendu : Un document HTML5 complet et autonome (<!DOCTYPE html>).
+
+Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
+"""
+
+        result = await self.client.generate_with_image(
+            prompt=prompt,
+            image_base64=image_base64,
+            mime_type=mime_type,
+            max_tokens=16000,
+            temperature=0.1
+        )
+
+        if not result.success:
+            logger.warning("[SvgToTailwind] Gemini Vision failed, trying Mimo fallback...")
+            try:
+                from Backend.Prod.models.mimo_client import MimoClient
+                mimo = MimoClient()
+                result = await mimo.generate_with_image(
+                    prompt=prompt, image_base64=image_base64, 
+                    mime_type=mime_type, max_tokens=16000, temperature=0.1
+                )
+            except Exception as e:
+                logger.error(f"[SvgToTailwind] Mimo fallback vision failed: {e}")
+
+        if not result.success:
+            logger.error(f"[SvgToTailwind] LLM Vision Error: {result.error}")
+            raise RuntimeError(f"Vision conversion failed: {result.error}")
+
         code = result.code
         if "```html" in code:
             code = code.split("```html")[1].split("```")[0]

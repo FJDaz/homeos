@@ -17,7 +17,7 @@ const FrdIntent = {
         
         try {
             // 1. Récupérer l'analyse backend (Claude)
-            const res = await fetch(`/api/retro-genome/import-analysis-svg?id=${id}`);
+            const res = await fetch(`/api/retro-genome/import-analysis?id=${id}`);
             const data = await res.json();
             this.analysis = data.analysis;
 
@@ -51,6 +51,9 @@ const FrdIntent = {
         if (!this.importId) return;
         console.log("🚀 FrdIntent: triggering specialized SVG-to-Tailwind generation for", this.importId);
         
+        // Mission 123: Preload bar
+        document.querySelector('.global-pipeline-header')?.classList.add('is-loading');
+
         const chat = window.frdApp && window.frdApp.chat;
         if (chat) {
             chat.appendBubble("déclenchement de la forge tailwind (protocole svg ai v1.0)...", 'sullivan');
@@ -78,6 +81,7 @@ const FrdIntent = {
 
                     if (job.status === 'done') {
                         clearInterval(poll);
+                        document.querySelector('.global-pipeline-header')?.classList.remove('is-loading');
                         if (chat) chat.appendBubble(`forge terminée ! chargement du template : ${job.template_name}`, 'sullivan');
                         
                         // Charger le nouveau fichier dans l'éditeur
@@ -88,15 +92,18 @@ const FrdIntent = {
                         if (closeBtn) closeBtn.click();
                     } else if (job.status === 'failed') {
                         clearInterval(poll);
+                        document.querySelector('.global-pipeline-header')?.classList.remove('is-loading');
                         if (chat) chat.appendBubble(`échec de la forge : ${job.error}`, 'sullivan');
                     }
                 } catch (e) {
                     clearInterval(poll);
+                    document.querySelector('.global-pipeline-header')?.classList.remove('is-loading');
                     console.error("Polling failed", e);
                 }
             }, 2000);
 
         } catch (err) {
+            document.querySelector('.global-pipeline-header')?.classList.remove('is-loading');
             console.error("❌ FrdIntent: generation failed", err);
             if (chat) chat.appendBubble("désolé, la forge a rencontré un obstacle technique.", 'sullivan');
         }

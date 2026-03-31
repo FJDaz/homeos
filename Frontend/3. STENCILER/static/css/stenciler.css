@@ -89,7 +89,10 @@ body {
   z-index: 1000;
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
+
+/* Preload bar — dans frd_editor.css (stenciler.css non chargé dans frd_editor) */
 
 .pipeline-header-inner {
   display: flex;

@@ -6,6 +6,65 @@
 
 ---
 
+## Mission 124 — Fallback Mimo après quota Gemini épuisé
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — mimo_client.py + svg_to_tailwind.py)**
+
+- `generate_with_image()` ajouté à `MimoClient` (format OpenAI multimodal vision, base64 inline)
+- `svg_to_tailwind.py` : fallback Mimo après Gemini 429 — `convert()` (text/SVG) + `convert_image()` (vision PNG)
+- `MIMO_KEY` depuis `.env` via `settings.mimo_api_key` (déjà configuré)
+- Si Mimo échoue aussi → exception levée avec message clair
+
+---
+
+## Mission 123 — Patienteur génération : preload bar header
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: GEMINI (stenciler.css) + CLAUDE (FrdIntent.feature.js)**
+
+- `stenciler.css` : `.global-pipeline-header::after` + `.is-loading` + `@keyframes homeos-preload` (sweep vert 2.5s)
+- `FrdIntent.feature.js` : `classList.add('is-loading')` au démarrage `generateTailwind()` → `remove` sur done/failed/error (4 points de sortie couverts)
+
+---
+
+## Mission 122 — Pipeline import unifié : tous formats → FRD editor
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — routes.py + svg_to_tailwind.py + FrdIntent.feature.js)**
+
+- `convert_image(b64, mime, name)` ajouté dans `svg_to_tailwind.py` (Gemini vision PNG/JPG → HTML+Tailwind)
+- `GET /api/retro-genome/import-analysis` route générique (SVG, HTML DOM, ZIP, PNG post-gen) — même schéma `{ components }` que SVG
+- `GET /api/retro-genome/import-analysis-svg` conservée en alias rétrocompat (appelle `import-analysis` en interne)
+- `FrdIntent.init()` → route `/import-analysis` générique + gestion cas vides (PNG auto-trigger, React message, défaut message)
+- Cas PNG image dans `run_conversion()` : détection par extension → `convert_image()`
+
+---
+
+## Mission 116 — Fix pipeline intent_viewer → FRD editor
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — intent_viewer.html uniquement)**
+
+- `let latestImport = null` ajouté au niveau module dans `intent_viewer.html`
+- `fetchIntents()` renseigne `latestImport = imports[0]`
+- `openTemplateInFRD()` réécrit : utilise `latestImport` pour appeler `POST /api/frd/set-current` → redirect `/frd-editor`
+- Pas de fetch `/api/frd/current` (null sur navigation directe) — fix du bug de navigation depuis tab global
+
+---
+
+## Mission 121 — Hotfix pipeline import : HTML 500 + generate-from-import cassé + bégaie
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
+
+- Bug A : `_NEW_IMPORTS_COUNT = 0` ajouté au module level dans `server_v3.py` (NameError corrigé)
+- Bug B : `entry.get("svg_path") or entry.get("file_path")` dans `routes.py` (KeyError sur imports HTML)
+- Bug C : fichier HTML sauvegardé dans `imports_dir / today_str /` (cohérence chemin index.json)
+- Bug D : `Path(safe_name).stem + ext` (double extension `code.html.html` corrigée)
+
+---
+
 ## Mission 109C — Font Advisor + UI Landing (Sullivan Typography Engine)
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-03-31**

@@ -122,6 +122,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+        let latestImport = null;
         let currentIntents = [];
 
         async function init() {
@@ -137,8 +138,9 @@
                     document.getElementById('empty-state').classList.remove('hidden');
                     return;
                 }
-                const latestId = imports[0].id;
-                const res = await fetch(`/api/retro-genome/import-analysis-svg?id=${encodeURIComponent(latestId)}`);
+                latestImport = imports[0];
+                const latestId = latestImport.id;
+                const res = await fetch(`/api/retro-genome/import-analysis?id=${encodeURIComponent(latestId)}`);
                 const data = await res.json();
                 if (data.analysis && data.analysis.components.length > 0) {
                     currentIntents = data.analysis.components;
@@ -198,20 +200,21 @@
         }
 
         async function openTemplateInFRD() {
-            try {
-                const res = await fetch('/api/frd/current');
-                const ctx = await res.json();
-                const templateName = ctx.html_template || ctx.name;
-                
-                if (templateName) {
+            if (latestImport) {
+                try {
                     await fetch('/api/frd/set-current', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'template', name: templateName, id: null, html_template: templateName })
+                        body: JSON.stringify({
+                            type: 'import',
+                            id: latestImport.id,
+                            name: latestImport.name,
+                            html_template: null
+                        })
                     });
+                } catch (e) {
+                    console.warn('set-current failed, redirecting anyway', e);
                 }
-            } catch (e) {
-                console.error('FRD current fetch failed', e);
             }
             window.location.href = '/frd-editor';
         }

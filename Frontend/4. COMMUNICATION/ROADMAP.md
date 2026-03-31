@@ -6,48 +6,15 @@
 
 ## Thème 0 — Hotfixes
 
-### Mission 121 — Hotfix pipeline import : HTML 500 + generate-from-import cassé + bégaie
+> M121 ✅, M116 ✅, M122 ✅ — archivées dans ROADMAP_ACHIEVED.md (2026-04-01)
 
-**STATUS: 🔴 HOTFIX**
-**DATE: 2026-03-31**
-**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
+### Mission 123 — Patienteur génération : preload bar header
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
-**Contexte :** Diagnostic complet par logs serveur. Quatre bugs bloquants dans le pipeline upload → generate.
+---
 
-#### Bug A — `_NEW_IMPORTS_COUNT` non initialisé (server_v3.py)
-
-**Symptôme :** `POST /api/import/upload` → 500 `NameError: name '_NEW_IMPORTS_COUNT' is not defined`
-**Cause :** La variable est utilisée à L1180 (`global _NEW_IMPORTS_COUNT; _NEW_IMPORTS_COUNT += 1`) mais jamais déclarée au niveau module dans server_v3.py.
-**Fix :** Ajouter `_NEW_IMPORTS_COUNT = 0` dans le bloc des variables globales du module (chercher `_NEW_IMPORTS_COUNT` pour trouver le bon endroit).
-
-#### Bug B — `entry["svg_path"]` absent pour les imports HTML (routes.py)
-
-**Symptôme :** `generate-from-import` → "Import not found" pour tout import non-SVG.
-**Cause :** L618 : `import_path = imports_dir / entry["svg_path"]` — les entrées HTML créées par `/api/import/upload` ont `file_path` au lieu de `svg_path`. Le champ manquant lève un `KeyError` (capturé comme "Import not found" dans le catch global).
-**Fix :** Remplacer par `entry.get("svg_path") or entry.get("file_path")`. Si ni l'un ni l'autre → `raise Exception("Import entry has no path field")`.
-
-#### Bug C — Mismatch chemin dans index.json pour imports HTML (server_v3.py)
-
-**Symptôme :** Même quand le Bug B est corrigé, le fichier HTML est introuvable à la génération.
-**Cause :** Le fichier est sauvegardé à plat (`imports/IMPORT_code.html_225911.html`) mais `file_path` dans index.json vaut `"2026-03-31/IMPORT_code.html_225911.html"` (avec sous-dossier daté). Les deux ne correspondent pas.
-**Fix :** Aligner la sauvegarde sur le même pattern que le SVG — sauvegarder dans `imports_dir / today_str / stored_filename` et construire le chemin relatif cohérent. Créer `today_dir.mkdir(parents=True, exist_ok=True)` avant l'écriture.
-
-#### Bug D — Double extension dans le nom d'import HTML (server_v3.py)
-
-**Symptôme :** Import affiché comme `code.html.html` dans la landing.
-**Cause :** L1163 : `"name": safe_name + ext` où `safe_name` contient déjà l'extension (ex: `code.html`) et `ext = ".html"` est rajouté.
-**Fix :** `"name": Path(safe_name).stem + ext` pour extraire uniquement le stem avant de recoller l'extension.
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/server_v3.py` — Bugs A, C, D
-- `Backend/Prod/retro_genome/routes.py` — Bug B
-
-**Critères de sortie :**
-- [ ] `POST /api/import/upload` avec un fichier HTML → 200 (plus de NameError)
-- [ ] Entrée dans index.json : `name` sans double extension, `file_path` cohérent avec l'emplacement réel du fichier
-- [ ] `POST /api/retro-genome/generate-from-import` avec l'id d'un import HTML → job lancé (plus de "Import not found")
-- [ ] `POST /api/retro-genome/generate-from-import` avec l'id d'un import SVG → comportement inchangé (pas de régression)
-- [ ] Pas de modification des routes SVG (`/upload-svg`) ni de la logique de conversion LLM
+### Mission 124 — Fallback Mimo après quota Gemini épuisé
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
 
@@ -404,97 +371,8 @@ Au chargement de `frd_editor.html` :
 
 ---
 
-### Mission 116 — Fix pipeline landing/intent_viewer → FRD editor
-
-**STATUS: 🔴 HOTFIX**
-**DATE: 2026-03-31**
-**ACTOR: CLAUDE (CODE DIRECT)**
-
-**Diagnostic :** M115 a créé une confusion entre deux concepts distincts :
-- **Import de référence** (`retro_genome`) = fichier SVG analysé, stocké dans `projects/homéos-default/imports/`
-- **Template éditable** = fichier `.html` dans `static/templates/`, chargeable par `loadFile()`
-
-`set-current` stocke le nom SVG, mais `loadFile()` cherche exclusivement un `.html` dans `static/templates/` → 404 systématique. De plus, `intent_viewer` redirige sans appeler `set-current`, et passe un `intent_id` (ex: `element_0`) qui n'est pas un fichier physique.
-
-**3 fractures à corriger :**
-
-**A — server_v3.py : enrichir `set-current` / `get-current`**
-
-Changer le contrat : `_CURRENT_FRD_CONTEXT` stocke un objet, pas juste un nom :
-```python
-_CURRENT_FRD_CONTEXT = {"type": None, "id": None, "name": None, "html_template": None}
-```
-
-`POST /api/frd/set-current` accepte :
-```json
-{ "type": "import", "id": "...", "name": "...", "html_template": null }
-```
-ou
-```json
-{ "type": "template", "name": "frd_editor.html" }
-```
-
-`GET /api/frd/current` retourne ce contexte complet.
-
-**B — frd_main.js : lire le contexte et agir selon le type**
-
-Remplacer le bloc d'auto-load actuel (lignes 45-57) :
-```javascript
-const res = await fetch('/api/frd/current');
-const ctx = await res.json();
-if (ctx.type === 'template' && ctx.name) {
-    // flux normal HTML
-    await this.editor.loadFile(ctx.name);
-    const sel = document.getElementById('template-select');
-    if (sel) sel.value = ctx.name;
-} else if (ctx.type === 'import' && ctx.id) {
-    // SVG import : afficher le nom dans un badge "contexte d'import"
-    // NE PAS appeler loadFile — ce n'est pas un template HTML
-    const badge = document.getElementById('frd-import-context');
-    if (badge) { badge.textContent = ctx.name; badge.classList.remove('hidden'); }
-}
-```
-
-**C — intent_viewer.html : appeler `set-current` avant redirection**
-
-Remplacer la redirection directe (ligne ~170) par :
-```javascript
-async function openInFRD(templateName) {
-    await fetch('/api/frd/set-current', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'template', name: templateName, id: null, html_template: templateName })
-    });
-    window.location.href = '/frd-editor';
-}
-```
-Le `templateName` à passer = le fichier HTML en cours d'édition dans le projet (à récupérer depuis `GET /api/frd/current` ou depuis le manifest).
-
-**D — landing.html : `openInFRD(item)` passe le type correct**
-
-```javascript
-async function openInFRD(item) {
-    await fetch('/api/frd/set-current', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'import', id: item.id, name: item.name, html_template: null })
-    });
-    window.location.href = '/frd-editor';
-}
-```
-Mettre à jour l'appel dans `renderImports` : `onclick="openInFRD(${JSON.stringify(item).replace(/"/g, '&quot;')})"` ou passer directement l'id et name séparément.
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/server_v3.py` (A)
-- `static/js/frd/frd_main.js` (B)
-- `static/templates/intent_viewer.html` (C)
-- `static/templates/landing.html` (D)
-
-**Critères de sortie :**
-- [ ] Clic "ouvrir dans frd editor" sur import SVG → FRD editor s'ouvre, badge "import de référence : [nom]" visible, pas d'erreur 404
-- [ ] Clic "ouvrir dans frd editor" sur template HTML → FRD editor charge le fichier HTML dans Monaco + preview
-- [ ] Intent viewer → FRD editor → dernier template du projet chargé automatiquement
-- [ ] `GET /api/frd/current` retourne `{ type, id, name, html_template }` (pas de régression M115)
+### Mission 116 — Fix pipeline intent_viewer → FRD editor
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
 
@@ -720,6 +598,11 @@ Les imports Figma apparaissent dans la liste avec un badge `figma` distinct des 
 - [ ] Plugin Figma → bouton "Envoyer à HoméOS" → import visible dans la landing
 - [ ] Import Figma → "ouvrir dans frd editor" → template HTML généré et chargé
 - [ ] Pas de régression sur les imports SVG existants
+
+---
+
+### Mission 122 — Pipeline import unifié : tous formats → FRD editor
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
 

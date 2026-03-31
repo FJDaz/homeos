@@ -126,6 +126,79 @@ class MimoClient(BaseLLMClient):
             error=last_error, provider=self.name
         )
 
+    async def generate_with_image(
+        self,
+        prompt: str,
+        image_base64: str,
+        mime_type: str = "image/png",
+        max_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        output_constraint: Optional[str] = None,
+    ) -> GenerationResult:
+        """Vision multimodal via OpenAI-compatible content array."""
+        start_time = time.time()
+        
+        messages = [{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mime_type};base64,{image_base64}"}
+                },
+                {"type": "text", "text": prompt}
+            ]
+        }]
+        
+        request_data = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens or settings.max_tokens,
+            "temperature": temperature or settings.temperature
+        }
+
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = await self.client.post(self.api_url, json=request_data)
+                response.raise_for_status()
+                
+                result_data = response.json()
+                content = result_data["choices"][0]["message"]["content"]
+                usage = result_data.get("usage", {})
+                
+                input_tokens = usage.get("prompt_tokens", 0)
+                output_tokens = usage.get("completion_tokens", 0)
+                total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
+                
+                cost = (input_tokens * settings.mimo_input_cost_per_1k / 1000) + \
+                       (output_tokens * settings.mimo_output_cost_per_1k / 1000)
+                
+                execution_time_ms = (time.time() - start_time) * 1000
+                
+                logger.info(f"MiMo Vision prompt tokens: {input_tokens}, completion: {output_tokens}, cost: ${cost:.6f}")
+                
+                return GenerationResult(
+                    success=True,
+                    code=content,
+                    tokens_used=total_tokens,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    cost_usd=cost,
+                    execution_time_ms=execution_time_ms,
+                    provider=self.name
+                )
+            except Exception as e:
+                last_error = str(e)
+                logger.warning(f"[MiMo Vision] Attempt {attempt+1} failed: {e}")
+                if attempt < self.max_retries:
+                    await asyncio.sleep(1)
+
+        return GenerationResult(
+            success=False, code="", tokens_used=0, input_tokens=0, output_tokens=0,
+            cost_usd=0.0, execution_time_ms=(time.time()-start_time)*1000,
+            error=last_error, provider=self.name
+        )
+
 if __name__ == "__main__":
     # Small test block
     async def test():

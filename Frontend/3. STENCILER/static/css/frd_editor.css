@@ -11,6 +11,29 @@
     border-bottom: 1px solid #e5e5e5;
     display: flex;
     align-items: center;
+    overflow: hidden;
+}
+
+/* Preload bar — génération en cours (Mission 123) */
+.global-pipeline-header::after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: #8cc63f;
+    transition: none;
+    z-index: 1001;
+}
+.global-pipeline-header.is-loading::after {
+    animation: homeos-preload 2.5s ease-in-out infinite;
+}
+@keyframes homeos-preload {
+    0%   { left: 0%;   width: 0%; }
+    30%  { left: 0%;   width: 60%; }
+    70%  { left: 40%;  width: 60%; }
+    100% { left: 100%; width: 0%; }
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────────────── */
