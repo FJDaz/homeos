@@ -1234,6 +1234,11 @@ async def preview_show():
     content = p_path.read_text(encoding='utf-8')
     return HTMLResponse(content=content, headers={"Cache-Control": "no-store"})
 
+@app.get("/")
+async def get_root():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/landing")
+
 @app.get("/landing")
 async def get_landing():
     path = STATIC_DIR_PATH / "templates/landing.html"
