@@ -27,9 +27,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # --- CONFIGURATION & PATHS ---
-CWD = Path(__file__).parent.resolve()
-ROOT_DIR = CWD.parent.parent
-BACKEND_PROD = ROOT_DIR / "Backend/Prod"
+PROJECTS_DIR = ROOT_DIR / "projects"
+PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 PROJECTS_DB_PATH = ROOT_DIR / "db/projects.db"
 
 # --- LOGGING ---
@@ -46,6 +45,8 @@ def _load_env():
                 os.environ.setdefault(k.strip(), v.strip())
         logger.info("Environment variables loaded from .env")
 
+_load_env()
+
 # --- SULLIVAN IMPORTS ---
 import sys
 for p in [str(ROOT_DIR), str(BACKEND_PROD)]:
@@ -56,8 +57,8 @@ from bkd_service import (
     SULLIVAN_BKD_SYSTEM, MANIFEST_FRD, SULLIVAN_RAG,
     exec_query_knowledge_base, route_request_bkd,
     resolve_bkd_project_root, bkd_safe_path, bkd_build_tree,
-    BKD_DB_PATH, bkd_db_con,
-    BKD_ALLOWED_EXTENSIONS, BKD_EXCLUDE_DIRS,
+    BKD_DB_PATH, bkd_db_con, PROJECTS_DIR,
+    get_active_project_id, set_active_project_id, get_active_project_path,
 )
 
 from sullivan_arbitrator import SullivanArbitrator, SullivanPulse
@@ -85,9 +86,8 @@ from wire_analyzer import WireAnalyzer
 
 from Backend.Prod.retro_genome.routes import router as retro_genome_router
 
-# --- CONSTANTS ---
-RETRO_DIR = ROOT_DIR / "exports" / "retro_genome"
-PIPELINE_DIR = ROOT_DIR / "exports" / "pipeline"
+# --- LEGACY CONSTANTS (Scoped if possible) ---
+# Note: We keep these for non-scoped core files
 GENOME_FILE = ROOT_DIR / "Frontend/2. GENOME/genome_enriched.json"
 LAYOUT_FILE = ROOT_DIR / "Frontend/2. GENOME/layout.json"
 
@@ -104,14 +104,74 @@ def init_db():
                 last_opened TEXT DEFAULT (datetime('now'))
             )
         """)
+        
+        # Ensure default project exists
+        existing = conn.execute("SELECT id FROM projects WHERE id='homéos-default'").fetchone()
+        if not existing:
+            default_path = PROJECTS_DIR / "homéos-default"
+            default_path.mkdir(parents=True, exist_ok=True)
+            (default_path / "imports").mkdir(exist_ok=True)
+            (default_path / "exports").mkdir(exist_ok=True)
+            (default_path / "assets").mkdir(exist_ok=True)
+            conn.execute("INSERT INTO projects (id, name, path) VALUES (?,?,?)",
+                         ("homéos-default", "homéos default", str(default_path)))
+            logger.info("Created Default Project: homéos-default")
+
+            # Migration douce : copier manifest + imports existants s'ils existent à la racine
+            old_manifest = ROOT_DIR / "exports" / "manifest.json"
+            new_manifest = default_path / "manifest.json"
+            if old_manifest.exists() and not new_manifest.exists():
+                import shutil
+                shutil.copy2(str(old_manifest), str(new_manifest))
+                logger.info(f"Migration douce : manifest.json copié vers {new_manifest}")
+
+            old_imports = ROOT_DIR / "exports" / "retro_genome"
+            new_imports = default_path / "imports"
+            if old_imports.exists():
+                for f in old_imports.iterdir():
+                    dest = new_imports / f.name
+                    if not dest.exists():
+                        shutil.copy2(str(f), str(dest))
+                logger.info(f"Migration douce : imports copiés vers {new_imports}")
+            
     logger.info(f"Projects database initialized at {PROJECTS_DB_PATH}")
 
-# --- PYDANTIC MODELS ---
-class ProjectBase(BaseModel):
-    name: str = Field(..., json_schema_extra={"example": "Mon Projet"})
-    path: str = Field(..., json_schema_extra={"example": "/Users/name/projects/my-app"})
+def get_active_project_id():
+    from bkd_service import get_active_project_id
+    return get_active_project_id()
 
-class ProjectResponse(BaseModel):
+def get_active_project_path():
+    from bkd_service import get_active_project_path
+    return get_active_project_path()
+
+# --- PROJECT PATH HELPERS (Mission 111) ---
+def get_project_manifest_path():
+    return get_active_project_path() / "manifest.json"
+
+def get_project_imports_dir():
+    d = get_active_project_path() / "imports"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+def get_project_exports_dir():
+    d = get_active_project_path() / "exports"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+def get_project_pipeline_dir():
+    d = get_project_exports_dir() / "pipeline"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+# --- PYDANTIC MODELS ---
+class ProjectCreateRequest(BaseModel):
+    name: str
+    id: Optional[str] = None
+
+class ProjectActivateRequest(BaseModel):
+    id: str
+
+class ProjectInfo(BaseModel):
     id: str
     name: str
     path: str
@@ -342,33 +402,58 @@ async def sullivan_delete_font(slug: str):
         return {"status": "ok", "deleted": slug}
     raise HTTPException(status_code=404, detail=f"Font '{slug}' not found")
 
-# --- ROUTES : BKD PROJECTS ---
-@app.get("/api/bkd/projects", response_model=Dict[str, List[ProjectResponse]])
-async def list_projects():
-    with get_db_conn() as conn:
-        rows = conn.execute('SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC').fetchall()
-    
-    projects = [
-        ProjectResponse(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4])
-        for r in rows
-    ]
-    return {"projects": projects}
+# --- ROUTES : PROJECTS (Mission 111) ---
 
-@app.post("/api/bkd/projects")
-async def register_project(project: ProjectBase):
-    path_obj = Path(project.path)
-    if not path_obj.exists() or not path_obj.is_dir():
-        raise HTTPException(status_code=400, detail="Project path does not exist or is not a directory")
+@app.get("/api/projects/active", response_model=ProjectInfo)
+async def get_active_project_route():
+    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+        row = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects WHERE id=?", 
+                           (get_active_project_id(),)).fetchone()
+        if not row: raise HTTPException(status_code=404, detail="Active project not found")
+        return ProjectInfo(id=row[0], name=row[1], path=row[2], created_at=row[3], last_opened=row[4])
+
+@app.post("/api/projects/activate")
+async def activate_project(req: ProjectActivateRequest):
+    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+        exists = conn.execute("SELECT id FROM projects WHERE id=?", (req.id,)).fetchone()
+        if not exists: raise HTTPException(status_code=404, detail="Project not found")
+        conn.execute("UPDATE projects SET last_opened=datetime('now') WHERE id=?", (req.id,))
     
-    with get_db_conn() as conn:
-        existing = conn.execute('SELECT id FROM projects WHERE path=?', (str(path_obj),)).fetchone()
-        if existing:
-            conn.execute("UPDATE projects SET last_opened=datetime('now') WHERE id=?", (existing[0],))
-            return {"id": existing[0], "created": False}
-        
-        project_id = str(uuid.uuid4())
-        conn.execute('INSERT INTO projects (id, name, path) VALUES (?,?,?)', (project_id, project.name, str(path_obj)))
-        return {"id": project_id, "created": True}
+    set_active_project_id(req.id)
+    logger.info(f"Project activated: {get_active_project_id()}")
+    return {"status": "ok", "active_id": get_active_project_id()}
+
+@app.get("/api/projects", response_model=List[ProjectInfo])
+async def list_all_projects_route():
+    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+        rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+        return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4]) for r in rows]
+
+@app.post("/api/projects/create")
+async def create_project_route(req: ProjectCreateRequest):
+    pid = req.id or str(uuid.uuid4())[:8] # Small IDs for slugs
+    p_path = PROJECTS_DIR / pid
+    p_path.mkdir(parents=True, exist_ok=True)
+    
+    # Init subfolders
+    (p_path / "imports").mkdir(exist_ok=True)
+    (p_path / "exports").mkdir(exist_ok=True)
+    (p_path / "assets").mkdir(exist_ok=True)
+    
+    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+        try:
+            conn.execute("INSERT INTO projects (id, name, path) VALUES (?,?,?)", 
+                         (pid, req.name, str(p_path)))
+        except sqlite3.IntegrityError:
+            raise HTTPException(status_code=400, detail="Project ID already exists")
+            
+    return {"status": "ok", "id": pid}
+
+@app.get("/api/bkd/projects", response_model=Dict[str, List[ProjectInfo]])
+async def list_bkd_projects():
+    # Legacy link for BKD
+    projects = await list_all_projects_route()
+    return {"projects": projects}
 
 @app.get("/api/bkd/files")
 async def list_bkd_files(project_id: str = Query(...)):
@@ -472,24 +557,24 @@ def save_layout(data):
     LAYOUT_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
 
 def _load_overrides():
-    f = PIPELINE_DIR / "template_overrides.json"
+    f = get_project_pipeline_dir() / "template_overrides.json"
     if f.exists():
         try: return json.loads(f.read_text(encoding="utf-8"))
         except: return {}
     return {}
 
-def _save_overrides(data):
-    PIPELINE_DIR.mkdir(parents=True, exist_ok=True)
-    (PIPELINE_DIR / "template_overrides.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
+def save_template_overrides(data: Dict[str, Any]):
+    p_dir = get_project_pipeline_dir()
+    (p_dir / "template_overrides.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 def _write_retro_status(step, message):
-    RETRO_DIR.mkdir(parents=True, exist_ok=True)
-    (RETRO_DIR / "upload_status.json").write_text(json.dumps({"step": step, "message": message, "ts": datetime.now().isoformat()}))
+    get_project_imports_dir().mkdir(parents=True, exist_ok=True)
+    (get_project_imports_dir() / "upload_status.json").write_text(json.dumps({"step": step, "message": message, "ts": datetime.now().isoformat()}))
 
 @app.get("/api/retro-genome/status")
 async def retro_genome_status():
-    status_file = RETRO_DIR / "upload_status.json"
-    analysis_file = RETRO_DIR / "last_analysis.json"
+    status_file = get_project_imports_dir() / "upload_status.json"
+    analysis_file = get_project_imports_dir() / "last_analysis.json"
     
     # Base status from upload_status.json if active
     res = {"step": "idle", "message": ""}
@@ -953,18 +1038,18 @@ async def retro_approve():
 @app.post("/api/retro-genome/export-zip")
 async def retro_export_zip():
     from Backend.Prod.retro_genome.exporter_vanilla import export_as_zip
-    html_path = RETRO_DIR / "reality.html"
+    html_path = get_project_exports_dir() / "reality.html"
     if not html_path.exists(): raise HTTPException(status_code=404, detail="reality.html not found")
-    zip_path = await asyncio.to_thread(export_as_zip, "AetherFlow_Reality", html_path.read_text(encoding='utf-8'), RETRO_DIR)
+    zip_path = await asyncio.to_thread(export_as_zip, "AetherFlow_Reality", html_path.read_text(encoding='utf-8'), get_project_exports_dir())
     return {"status": "ok", "zip_path": str(zip_path)}
 
 @app.post("/api/retro-genome/export-manifest")
 async def retro_export_manifest():
     from Backend.Prod.retro_genome.manifest_inferer import ManifestInferer
-    html_path = RETRO_DIR / "reality.html"
+    html_path = get_project_exports_dir() / "reality.html"
     if not html_path.exists(): raise HTTPException(status_code=404, detail="reality.html not found")
     manifest = await asyncio.to_thread(asyncio.run, ManifestInferer.infer_from_html(html_path))
-    out = RETRO_DIR / "manifest.json"
+    out = get_project_manifest_path()
     ManifestInferer.save_manifest(manifest, out)
     return {"status": "ok", "manifest_path": str(out)}
 
@@ -1018,8 +1103,8 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
     Supports: ZIP (Stitch), TSX/TS (React), HTML/CSS/JS files.
     """
     from datetime import datetime
-    
-    exports_dir = ROOT_DIR / "exports" / "retro_genome"
+
+    exports_dir = get_project_imports_dir()
     exports_dir.mkdir(parents=True, exist_ok=True)
     
     # Save file
@@ -1079,8 +1164,8 @@ async def manifest_check():
 
 @app.get("/api/manifest/backend")
 async def manifest_backend_get():
-    """Get the current backend.md content."""
-    b_path = ROOT_DIR / 'backend.md'
+    """Get backend.md content."""
+    b_path = get_active_project_path() / 'backend.md'
     if not b_path.exists():
         return {"content": "# HoméOS Backend Manifest\n\n*Not initialized*"}
     return {"content": b_path.read_text(encoding='utf-8')}
@@ -1088,7 +1173,7 @@ async def manifest_backend_get():
 @app.put("/api/manifest/backend")
 async def manifest_backend_put(data: Dict[str, str]):
     """Update backend.md content."""
-    b_path = ROOT_DIR / 'backend.md'
+    b_path = get_active_project_path() / 'backend.md'
     content = data.get('content', '')
     b_path.write_text(content, encoding='utf-8')
     return {"ok": True}
@@ -1096,10 +1181,10 @@ async def manifest_backend_put(data: Dict[str, str]):
 @app.post("/api/manifest/import-stitch")
 async def manifest_import_stitch():
     """Parse design.md and sync with backend.md."""
-    d_path = ROOT_DIR / 'design.md'
-    b_path = ROOT_DIR / 'backend.md'
+    d_path = get_active_project_path() / 'design.md'
+    b_path = get_active_project_path() / 'backend.md'
     if not d_path.exists():
-        raise HTTPException(status_code=404, detail="design.md not found")
+        raise HTTPException(status_code=404, detail="design.md not found in project")
     
     design_content = d_path.read_text(encoding='utf-8')
     
@@ -1142,9 +1227,9 @@ async def manifest_import_stitch():
 @app.get("/api/manifest/get")
 async def manifest_get():
     """Get the current manifest.json content."""
-    m_path = ROOT_DIR / 'manifest.json'
+    m_path = get_project_manifest_path()
     if not m_path.exists():
-        raise HTTPException(status_code=404, detail="manifest.json not found")
+        raise HTTPException(status_code=404, detail="manifest.json not found in project")
     with open(m_path, 'r', encoding='utf-8') as f:
         manifest = json.load(f)
     return manifest
@@ -1152,9 +1237,9 @@ async def manifest_get():
 @app.post("/api/manifest/create")
 async def manifest_create(data: Dict[str, Any]):
     """Create a new manifest.json with project metadata."""
-    m_path = ROOT_DIR / 'manifest.json'
+    m_path = get_project_manifest_path()
     if m_path.exists():
-        return {"ok": False, "error": "manifest.json already exists"}
+        return {"ok": False, "error": "manifest.json already exists in project"}
     
     name = data.get('name', 'unnamed-project')
     author = data.get('author', 'unknown')
@@ -1178,7 +1263,7 @@ async def manifest_create(data: Dict[str, Any]):
 
 @app.post("/api/manifest/patch")
 async def manifest_patch(patch: Dict[str, Any]):
-    m_path = ROOT_DIR / 'manifest.json'
+    m_path = get_project_manifest_path()
     if not m_path.exists(): raise HTTPException(status_code=404)
     with open(m_path, 'r', encoding='utf-8') as f: manifest = json.load(f)
     if 'elements' in patch:
