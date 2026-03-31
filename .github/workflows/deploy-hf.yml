@@ -32,7 +32,7 @@ jobs:
               folder_path=".",
               repo_id="FJDaz/homeos",
               repo_type="space",
-              token=os.environ["HF_TOKEN"],
+              token=os.environ["HF_TOKEN"].strip(),
               ignore_patterns=[
                   ".git/**", ".github/**",
                   "**/__pycache__/**", "**/*.pyc",
