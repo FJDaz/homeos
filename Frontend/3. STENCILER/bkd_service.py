@@ -125,11 +125,11 @@ def exec_query_knowledge_base(query: str) -> str:
 
 # --- BKD Projects DB ---
 BKD_DB_PATH = ROOT_DIR / "db" / "projects.db"
-BKD_ALLOWED_EXTENSIONS = {".py", ".js", ".ts", ".html", ".css", ".md", ".json", ".txt", ".yaml", ".yml", ".toml", ".sh", ".env.example"}
-BKD_EXCLUDE_DIRS = {"__pycache__", ".git", "node_modules", ".venv", "venv", "dist", "build", ".mypy_cache"}
+PROJECTS_DIR = ROOT_DIR / "projects"
+PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 
-
-def init_bkd_db():
+def bkd_db_con():
+    import sqlite3
     BKD_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(str(BKD_DB_PATH))
     con.execute("""
@@ -142,15 +142,28 @@ def init_bkd_db():
         )
     """)
     con.commit()
+    return con
+
+# Global State for Active Project
+_ACTIVE_PROJECT_ID = "homéos-default"
+
+def get_active_project_id():
+    return _ACTIVE_PROJECT_ID
+
+def set_active_project_id(pid: str):
+    global _ACTIVE_PROJECT_ID
+    _ACTIVE_PROJECT_ID = pid
+
+def get_active_project_path() -> Path:
+    id = get_active_project_id()
+    con = bkd_db_con()
+    row = con.execute("SELECT path FROM projects WHERE id=?", (id,)).fetchone()
     con.close()
-
-
-init_bkd_db()
-
-
-def bkd_db_con():
-    return sqlite3.connect(str(BKD_DB_PATH), check_same_thread=False)
-
+    if row: return Path(row[0])
+    # Fallback/Auto-init default
+    p = PROJECTS_DIR / id
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
 def resolve_bkd_project_root(project_id: str):
     con = bkd_db_con()
