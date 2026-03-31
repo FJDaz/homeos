@@ -22,5 +22,6 @@ jobs:
         run: |
           git config user.email "ci@homeos"
           git config user.name "homeos-ci"
+          git remote remove hf-space 2>/dev/null || true
           git remote add hf-space https://FJDaz:${HF_TOKEN}@huggingface.co/spaces/FJDaz/homeos
           git push hf-space main --force
