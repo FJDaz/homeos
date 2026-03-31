@@ -137,14 +137,25 @@ export class FrdEditor {
             if (!res.ok) return;
             const data = await res.json();
             const sel = document.getElementById('template-select');
+            if (!sel) return;
             sel.innerHTML = '';
+            if (!data.files || data.files.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = ""; opt.textContent = "— aucun template —";
+                sel.appendChild(opt);
+                return;
+            }
             data.files.forEach(f => {
                 const opt = document.createElement('option');
                 opt.value = f;
                 opt.textContent = f.replace('.html', '').replace(/_/g, ' ');
                 sel.appendChild(opt);
             });
-        } catch (e) { console.warn('Template list unavailable', e); }
+        } catch (e) { 
+            console.warn('Template list unavailable', e);
+            const sel = document.getElementById('template-select');
+            if (sel) sel.innerHTML = '<option value="">— erreur de chargement —</option>';
+        }
     }
 
     async loadFile(filename) {

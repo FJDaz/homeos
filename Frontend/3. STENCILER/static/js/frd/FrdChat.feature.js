@@ -9,16 +9,39 @@ export class FrdChat {
         this.main.state._chatMode = mode;
         const cBtn = document.getElementById('toggle-construct');
         const wiBtn = document.getElementById('toggle-wire');
+        const modeLabel = document.getElementById('current-mode-label');
 
         if (mode === 'construct') {
-            this.main.wire.cleanup(); // Nettoyage Mission 98
-            if (cBtn) { cBtn.classList.add('bg-slate-800', 'text-white'); cBtn.classList.remove('text-gray-400'); }
-            if (wiBtn) { wiBtn.classList.remove('bg-slate-300', 'text-slate-900'); wiBtn.classList.add('text-gray-400'); }
+            this.main.wire.cleanup();
+            if (cBtn) { 
+                cBtn.classList.add('bg-figma-tabActive', 'text-white'); 
+                cBtn.classList.remove('text-gray-400'); 
+            }
+            if (wiBtn) { 
+                wiBtn.classList.remove('bg-figma-tabActive', 'text-white'); 
+                wiBtn.classList.add('text-gray-400'); 
+            }
+            if (modeLabel) {
+                modeLabel.innerText = "designing world";
+                modeLabel.classList.remove('text-blue-500');
+                modeLabel.classList.add('text-[#8cc63f]');
+            }
             document.getElementById('chat-input').placeholder = "Instruction Sullivan (ex: 'Change la couleur en bleu')";
         } else if (mode === 'wire') {
-            if (wiBtn) { wiBtn.classList.add('bg-slate-300', 'text-slate-900'); wiBtn.classList.remove('text-gray-400'); }
-            if (cBtn) { cBtn.classList.remove('bg-slate-800', 'text-white'); cBtn.classList.add('text-gray-400'); }
-            document.getElementById('chat-input').placeholder = "Mode WIRE — Diagnostic automatique en cours...";
+            if (wiBtn) { 
+                wiBtn.classList.add('bg-figma-tabActive', 'text-white'); 
+                wiBtn.classList.remove('text-gray-400'); 
+            }
+            if (cBtn) { 
+                cBtn.classList.remove('bg-figma-tabActive', 'text-white'); 
+                cBtn.classList.add('text-gray-400'); 
+            }
+            if (modeLabel) {
+                modeLabel.innerText = "wiring world";
+                modeLabel.classList.remove('text-[#8cc63f]');
+                modeLabel.classList.add('text-blue-500');
+            }
+            document.getElementById('chat-input').placeholder = "Mode WIRE — Diagnostic de la bijection en cours...";
             document.getElementById('wire-panel')?.classList.remove('hidden');
             this.main.wire.run(); 
         }

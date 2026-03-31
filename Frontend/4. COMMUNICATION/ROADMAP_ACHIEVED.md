@@ -5001,3 +5001,61 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - `.github/workflows/deploy-hf.yml` : push main → git push hf-space main --force
 - `README.md` : metadata YAML HF Spaces (sdk: docker, app_port: 7860)
 - Compte HF : FJDaz | Repo GitHub : https://github.com/FJDaz/homeos
+
+## Session 2026-03-30/31 — Missions livrées
+**DATE: 2026-03-30 → hotfix 2026-03-31**
+
+| Mission | Notes |
+|---|---|
+| M97 | Wire UX v2 — table bijective + diagnostic géographique |
+| M98 | Wire UX v3 — skeleton mode |
+| M99 | Wire UX v4 — peel-out CSS + pop-in Monaco + route wire-source |
+| M100 | Landing Import — hub Figma SVG + rafraîchir/vider |
+| M100-bis | Hub universel — drop multi-format + manifest check + sélection écrans |
+| M101-bis | Bridge Plugin — conformité design HoméOS |
+| M102 | Intent Viewer — auto-load + endpoint import-analysis + liens frd-editor |
+| M103 | Wire v5 — auto-launch + overlay bijectif bilan/plan |
+| M104 | Stitch Integration — backend.md + intent_map + Monaco drawer |
+| M105 | Aperçu local — rendu 1:1 dans un onglet indépendant |
+| M106 | CI/CD HF Spaces — Dockerfile, start_hf.sh, deploy-hf.yml |
+| M107 | Navigation globale — bootstrap.js auto-contenu, tabs HoméOS |
+| M109A | Font Classifier — Vox-ATypI via Panose + Bézier stress/contraste |
+| M109B | Font WebGen — Subset Latin + WOFF2 + @font-face CSS |
+
+## CR Mission 107 — Navigation globale cohérente
+**DATE: 2026-03-30 → hotfix 2026-03-31 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- `bootstrap.js` auto-contenu : CSS embarqué, 4 tabs (brainstorm/backend/frontend/deploy), brand homéOS
+- Tab actif via pathname, `window.HOMEOS.refreshNav()` exposé
+- `frd_editor.css` : `.global-pipeline-header { position: fixed }` pour layout `h-screen`
+- Hotfix Claude : version Gemini initiale sans CSS → rendu texte brut + emojis non conformes
+
+## CR Mission 109A — Font Classifier
+**DATE: 2026-03-31 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- `font_classifier.py` : Panose → SERIF_TO_VOX (ids lowercase conformes typography_db.json)
+- Analyse Bézier contours `o` : outer+inner → stress_angle_deg, contrast_ratio
+- sub_family Linéales séparé de vox_atypi (grotesque/geometrique/humaniste)
+- Fallback post.italicAngle + heuristique panose[1]
+
+## CR Mission 109B — Font WebGen
+**DATE: 2026-03-31 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- `font_webgen.py` : subset Latin + WOFF2 + @font-face CSS
+- Fix Subsetter API : `populate(glyphs=...)` (pas `.glyphs =`)
+- Fix WOFF2 flavor : `font.flavor = "woff2"` avant save
+- Routes `server_v3.py` : POST /api/sullivan/font-upload, GET /api/sullivan/fonts, DELETE /api/sullivan/fonts/{slug}
+
+## CR Mission 100-bis — Landing : hub universel d'import
+**DATE: 2026-03-30 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- Drop multi-format SVG/ZIP/TSX/HTML/CSS/JS, manifest creation, sélection écrans
+- Routes : POST /api/import/upload, GET+POST /api/manifest/check|create|get
+
+## CR Mission 103 — Wire mode v5
+**DATE: 2026-03-30 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ**
+- Auto-trigger wire mode, overlay biface Bilan↔Plan, bouton IMPLÉMENTER LE PLAN
+
+## CR Mission 104 — Stitch Integration
+**DATE: 2026-03-30 | ACTOR: CLAUDE + GEMINI | STATUS: ✅ LIVRÉ**
+- backend.md Source of Truth, import design.md→backend.md, Monaco drawer landing
+
+## CR Mission 105 — Aperçu local
+**DATE: 2026-03-30 | ACTOR: CLAUDE + GEMINI | STATUS: ✅ LIVRÉ**
+- POST /api/preview/run + GET /api/preview/show, bouton Aperçu ↗ dans FRD editor

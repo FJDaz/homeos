@@ -1178,7 +1178,7 @@ async def manifest_create(data: Dict[str, Any]):
 
 @app.post("/api/manifest/patch")
 async def manifest_patch(patch: Dict[str, Any]):
-    m_path = ROOT_DIR / 'exports' / 'manifest.json'
+    m_path = ROOT_DIR / 'manifest.json'
     if not m_path.exists(): raise HTTPException(status_code=404)
     with open(m_path, 'r', encoding='utf-8') as f: manifest = json.load(f)
     if 'elements' in patch:

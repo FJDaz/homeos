@@ -1,385 +1,37 @@
 # MISSION CONTROL : AETHERFLOW ROADMAP
 
 > Missions complètes archivées dans [ROADMAP_ACHIEVED.md](./ROADMAP_ACHIEVED.md).
-> Plan MVP détaillé : [PLAN_HOMEOS_MVP.md](../../docs/04_HomeOS/Plans/PLAN_HOMEOS_MVP.md)
 
 ---
 
-## Session 2026-03-30 — Récapitulatif missions terminées
+## Thème 0 — Hotfixes
 
-| Mission | Statut | Notes |
-|---|---|---|
-| M85–M92 | ✅ archivé | FastAPI foundation, FRD, BRS, retro-genome, archetypes |
-| M97 | ✅ LIVRÉ | Wire UX v2 — table bijective + diagnostic géographique |
-| M98 | ✅ LIVRÉ | Wire UX v3 — skeleton mode |
-| M99 | ✅ LIVRÉ | Wire UX v4 — peel-out CSS + pop-in Monaco + route wire-source |
-| M101-bis | ✅ LIVRÉ | Bridge Plugin — conformité design HoméOS (CODE DIRECT Claude) |
-| M100 | ✅ LIVRÉ | Landing Import — hub Figma SVG + rafraîchir/vider |
-| M100-bis | ✅ LIVRÉ | Hub universel — drop multi-format + manifest check + sélection écrans |
-| M102 | ✅ LIVRÉ | Intent Viewer — auto-load + endpoint import-analysis + liens frd-editor |
-| M106 | ✅ LIVRÉ | CI/CD HF Spaces — Dockerfile, start_hf.sh, deploy-hf.yml |
-| M107 | ✅ LIVRÉ | Navigation globale — header pipeline injecté + tabs auto-actifs |
-| M103 | ✅ LIVRÉ | Wire v5 — auto-launch + overlay bijectif bilan/plan |
-| M104 | ✅ LIVRÉ | Stitch Integration — backend.md + intent_map + Monaco drawer |
-| M105 | ✅ LIVRÉ | Aperçu local — rendu 1:1 dans un onglet indépendant |
-| M109A | ✅ LIVRÉ | Font Classifier Ph-A — Vox-ATypI via Panose & Metadata |
-| M109B | ✅ LIVRÉ | Font Classifier Ph-B — Analyse Bézier (Stress/Contraste) |
-| M104/M108 | ✅ LIVRÉ | Stitch Integration — backend.md + intent_map + Monaco drawer |
-| M109A | ✅ LIVRÉ | Font Classifier Ph-A — Vox-ATypI via Panose & Metadata |
-| M109B | ✅ LIVRÉ | Font WebGen Ph-B — Subset Latin + WOFF2 + @font-face CSS |
+### Mission 110 — Templates FRD : liste vide après manifest minimal
+
+**STATUS: 🔴 HOTFIX**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT)**
+
+**Symptôme :** après création d'un manifest minimal depuis la landing, le sélecteur de templates dans frd_editor est vide.
+
+**Diagnostic à mener :** vérifier l'endpoint qui alimente `#template-select` dans frd_editor — probablement un scan de répertoire conditionné à l'existence d'un manifest valide, ou un chemin qui change selon le projet actif.
+
+**Critères de sortie :**
+- [ ] Templates listés correctement après manifest minimal
+- [ ] Pas de régression sur le flux normal (manifest complet)
 
 ---
 
-## CR Mission 107 — Navigation globale cohérente
+## Thème 1 — Sullivan Typography Engine (suite)
 
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEURS: GEMINI (bootstrap.js + CSS) + CLAUDE (vérification)**
-
-### Livrables
-
-**Frontend (`bootstrap.js`)**
-- Fonction `injectGlobalNav()` — injecte header global au DOMContentLoaded
-- 4 tabs pipeline : [ import ↓ ] [ analyser ◐ ] [ éditer ✎ ] [ déployer ↑ ]
-- Tab actif détecté automatiquement via `window.location.pathname`
-- Theme toggle (☀️/🌙) avec persistance localStorage
-- Bridge status indicator (dot vert "bridge actif")
-- Exposition API : `window.HOMEOS.boot()`, `window.HOMEOS.refreshNav()`
-
-**CSS (`stenciler.css`)**
-- `.global-pipeline-header` — header fixe 48px, z-index 1000
-- `.pipeline-tab` — styles hover/active/disabled
-- `.bridge-status` — indicateur de statut avec dot online/offline
-- `.theme-toggle-btn` — bouton thème minimaliste
-- Couleurs HoméOS : #7aca6a (vert), Geist 12px, fond #f7f6f2
-
-**Templates mis à jour**
-- `landing.html` — header/sidebar supprimés, navigation globale injectée
-- `intent_viewer.html` — header/sidebar supprimés, navigation globale injectée
-- `frd_editor.html` — navigation Brainstorm/Backend/Frontend supprimée, bootstrap.js ajouté
-
-### Architecture
-```
-bootstrap.js (injecté sur toutes les pages)
-    └─ injectGlobalNav() → header fixe 48px
-        ├─ pipeline-brand (homéos v3.1.2)
-        ├─ pipeline-tabs (4 tabs pipeline)
-        └─ pipeline-actions (bridge status + theme toggle)
-```
-
-### Tests effectués
-- ✅ `/landing` — bootstrap.js chargé, header injecté
-- ✅ `/intent-viewer` — bootstrap.js chargé, header injecté
-- ✅ `/frd-editor` — bootstrap.js chargé, navigation supprimée
-- ✅ Tab actif détecté automatiquement selon pathname
-- ✅ Theme toggle fonctionnel avec persistance
-
----
-
-## CR Mission 109 Phase B — Web Font Generator
-
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEUR: CLAUDE (CODE DIRECT)**
-
-### Livrables
-
-**Backend (`font_webgen.py`)**
-- Classe `FontWebGen` — génération webfonts depuis TTF/OTF/WOFF/WOFF2
-- Subset Latin : U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D, U+00AB-00BB
-- Export WOFF2 (Brotli) — économie 60-80% du poids original
-- Génération @font-face CSS standard
-- Détection variable font → `format('woff2-variations')` + `font-weight: 100 900`
-- Alerte licensing pour fontes commerciales connues
-
-**Routes (`server_v3.py`)**
-- `POST /api/sullivan/font-upload` → classification + webfont + CSS
-- `GET /api/sullivan/fonts` → liste des fontes dans /static/fonts/
-- `DELETE /api/sullivan/fonts/{slug}` → supprime fonte et répertoire
-
-**Storage**
-- `/static/fonts/{slug}/{slug}-{weight}{style}.woff2`
-- `/exports/fonts/` — uploads temporaires
-
-### Tests effectués
-- ✅ Upload SourceCodePro-Semibold.ttf → classification "lineales/grotesque"
-- ✅ Subset Latin + export WOFF2 (1220 bytes)
-- ✅ @font-face CSS généré correctement
-- ✅ Font chargeable depuis `/static/fonts/...`
-
-### Architecture
-```
-Upload TTF/OTF
-    ↓
-FontClassifier → {vox_atypi, signals, weights}
-    ↓
-FontWebGen → subset → WOFF2 → CSS @font-face
-    ↓
-/static/fonts/{slug}/
-```
-
-### Dépendances ajoutées
-```
-fonttools>=4.43.0
-brotli>=1.0.9
-```
-
----
-
-## CR Mission 100-bis — Landing : hub universel d'import
-
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEURS: GEMINI (landing.html) + CLAUDE (server_v3.py)**
-
-### Livrables
-
-**Frontend (`landing.html`)**
-- Zone de drop multi-format : `.svg`, `.zip`, `.tsx`, `.html`, `.css`, `.js`
-- Drag-and-drop avec feedback visuel (survol vert HoméOS)
-- Formulaire de création de manifest.json (nom, auteur, description)
-- Affichage dynamique des imports avec checkboxes de sélection
-- Bouton "continuer vers frd editor" avec compteur de sélection
-- Empty state et upload progress indicator
-- Respect des tokens Stenciler (Geist 12px, #f7f6f2, #7aca6a)
-
-**Backend (`server_v3.py`)**
-- `POST /api/import/upload` — Upload générique multi-format
-- `GET /api/manifest/check` — Vérification existence manifest
-- `GET /api/manifest/get` — Récupération contenu manifest
-- `POST /api/manifest/create` — Création manifest avec métadonnées projet
-- Tracking des imports dans `exports/retro_genome/index.json`
-- Notification counter incrémenté pour le polling
-
-### Tests effectués
-- ✅ Endpoint `/api/manifest/check` → retourne `{"exists": false}` si absent
-- ✅ Endpoint `/api/manifest/create` → crée manifest.json à la racine
-- ✅ Endpoint `/api/import/upload` → sauvegarde fichier + met à jour index.json
-- ✅ Landing page `/landing` → affichage correct, drop zone fonctionnelle
-
-### Architecture
-```
-manifest.json (racine) ← créé si absent
-    └─ name, author, description, created_at, version, elements[], intents[]
-
-exports/retro_genome/
-    └─ index.json ← tous les imports (SVG + multi-format)
-    └─ IMPORT_*.{zip,tsx,html,...} ← fichiers uploadés
-```
-
----
-
-## CR Mission 103 — Wire mode v5 : auto-launch + overlay bijection
-
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEURS: GEMINI (frontend) + CLAUDE (backend)**
-
-### Livrables
-
-**Backend (`wire_analyzer.py`)**
-- Refactorisation de `analyze_template` pour retourner un objet structuré.
-- Nouveaux champs : `intentions[]`, `statuts[]`, `plan[]` pour affichage point par point.
-
-**Frontend (`FrdWire.feature.js`, `FrdChat.feature.js`)**
-- Auto-trigger : `setMode('wire')` lance immédiatement l'analyse.
-- Overlay V5 : Passage d'un tableau plat à un tableau de bord biface (Bilan ↔ Plan).
-- Bouton global "IMPLÉMENTER LE PLAN" : ferme l'overlay, repasse en mode Construct et injecte le plan dans le chat.
-
-**UI (`frd_editor.html`)**
-- Suppression du bouton "Analyser" (devenu obsolète).
-- Redimensionnement de l'overlay (!max-w-[1000px]) pour le dual-column.
-
----
-
-## CR Mission 104 — Stitch Integration : design.md & backend.md
-
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEURS: CLAUDE (backend routes) + GEMINI (landing UI)**
-
-### Livrables
-
-**Backend (`server_v3.py`, `wire_analyzer.py`)**
-- `backend.md` — Création du fichier "Source of Truth" technique à la racine.
-- `POST /api/manifest/import-stitch` — Parseur Markdown pour `design.md` hérité de Stitch.
-- `GET/PUT /api/manifest/backend` — Gestion du cycle de vie du manifest technique.
-- `WireAnalyzer` — Priorisation du mapping `backend.md` sur le mapping statique pour la bijection.
-
-**Frontend (`landing.html`)**
-- **Badge Stitch** : Détection automatique de `design.md` et affichage du badge "Stitch Compatible".
-- **Bouton Sync** : Lancement de l'import `design.md` → `backend.md` en un clic.
-- **Monaco Drawer** : Remplacement de l'alert manifest par un tiroir latéral avec **Monaco Editor** pour éditer le `backend.md`.
-
-### Architecture
-```
-design.md (In)  ──>  [Import Logic]  ──>  backend.md (Sync)
-                                              │
-                                              └─> [Wire Mode] (Priority Map)
-```
-
----
-
-## CR Mission 105 — Aperçu local (Real Tab Preview)
-
-**STATUT: ✅ LIVRÉ**
-**DATE: 2026-03-30**
-**ACTEURS: CLAUDE (backend) + GEMINI (UI)**
-
-### Livrables
-
-**Backend (`server_v3.py`)**
-- `POST /api/preview/run` : Sauvegarde l'état actuel de l'éditeur dans un fichier temporaire (`_preview_tmp.html`).
-- `GET /api/preview/show` : Sert le fichier temporaire avec `Cache-Control: no-store` pour garantir la fraîcheur du rendu.
-
-**Frontend (`frd_editor.html`, `FrdEditor.feature.js`)**
-- **Bouton "Aperçu ↗"** : Ajouté à la barre d'outils du FRD Editor.
-- **Logique de Preview** : Synchronisation entre Monaco et l'onglet distant via `runPreviewTab()`.
-
-### Tests effectués
-- ✅ Modification du code dans Monaco -> Clic "Aperçu ↗" -> Nouvel onglet avec les changements exacts.
-- ✅ Vérification de l'indépendance (pas d'iframe parent, JS/CSS natif).
-
----
-
-## Mission 109 — Sullivan Typography Engine
+### Mission 109C — Font Advisor + UI Landing
 
 **STATUS: 🔵 BACKLOG**
-**DÉPENDANCE: M104/M108 ✅**
-**DÉCOUPAGE: 3 phases séquentielles — A ✅ → B ✅ → C (Claude backend + Gemini UI)**
-
-### Vision
-
-Sullivan ne prescrit pas des fontes comme un moteur de templates. Il les **connaît** — leur histoire, leur anatomie, leur contexte culturel. Quand un designer uploade un `.otf` inconnu, Sullivan le positionne dans la classification Vox-ATypI en lisant ses signaux morphologiques (axe de stress, contraste, nature des empattements), puis enrichit la réponse depuis une base de connaissance éditoriale. Il génère ensuite le `@font-face` optimisé web et stocke la fonte dans les assets du projet.
-
-Aucun outil LLM-to-design ne fait ça. Stitch assume Google Fonts. Figma assume le CDN. HoméOS assume la liberté typographique du designer.
-
----
-
-### Phase A — Classification Vox-ATypI par signaux machine
-
-**ACTOR: CLAUDE (CODE DIRECT)**
-**FICHIER: `Backend/Prod/sullivan/font_classifier.py`**
-
-Chaque fonte TrueType/OpenType embarque des tables binaires lisibles sans rendu. La table **panose** (10 octets) encode les signaux morphologiques de la classification Vox-ATypI. Complétée par l'analyse de contours Bézier sur le glyphe `o` (axe de stress, ratio contraste), Sullivan classifie sans IA, sans ambiguïté.
-
-```
-pip install fonttools brotli
-```
-
-#### Mapping panose[1] (style empattement) → Vox-ATypI
-
-| Valeur | Style | Vox-ATypI |
-|---|---|---|
-| 2 | Cove (congé arrondi) | Humanes |
-| 3 | Obtuse Cove | Garaldes |
-| 4–5 | Square Cove | Réales (Transitional) |
-| 6 | Square | Mécanes (Slab) |
-| 7 | Thin / Hairline | Didones |
-| 11–13 | Sans | Linéales |
-| 14 | Flared | Incises |
-
-panose[4] (contraste) affine :
-- 8–9 = contraste élevé → confirme Didone
-- 2–4 = contraste faible + sans → sous-catégorie Grotesque/Géo/Humaniste via analyse `a` et `g`
-
-Calcul axe de stress via contours Bézier sur le glyphe `o` :
-```python
-def _compute_stress_angle(font: TTFont) -> float:
-    """Angle d'inclinaison de l'axe des minima d'épaisseur.
-    ~0° = vertical (Didone), ~10-15° = oblique (Garalde/Humane)"""
-```
-
-Détection variable font :
-```python
-is_variable = 'fvar' in font
-# Si True → weight_range = (axes[0].minValue, axes[0].maxValue)
-```
-
-Schéma retourné par `classify_font()` :
-```json
-{
-  "family_name": "Cormorant",
-  "vox_atypi": "Garaldes",
-  "vox_atypi_sub": "Aldine",
-  "confidence": 0.87,
-  "signals": {
-    "stress_angle_deg": 12.4,
-    "contrast_ratio": 3.1,
-    "serif_style": "cove",
-    "panose_raw": [2, 3, 6, 3, 5, 4, 4, 2, 2, 4]
-  },
-  "is_variable": false,
-  "weights_available": [300, 400, 500, 600, 700],
-  "styles": ["Regular", "Italic"]
-}
-```
-
----
-
-### Phase B — Web Font Generator (@font-face + WOFF2)
-
-**ACTOR: CLAUDE (CODE DIRECT)**
-**FICHIER: `Backend/Prod/sullivan/font_webgen.py`**
-
-```
-Upload TTF/OTF/WOFF/WOFF2
-    ↓ fonttools: normalisation
-    ↓ Subsetting: Latin Extended (U+0020–U+024F) + ponctuation typo
-    ↓   (économie 60–80% du poids)
-    ↓ Export WOFF2 (Brotli) + WOFF fallback
-    ↓ Storage: /static/fonts/{slug}/{slug}-{weight}{style}.woff2
-    ↓ Génération @font-face CSS
-```
-
-Subset cible (latin professionnel) :
-```
-U+0020-007E, U+00A0-00FF, U+0100-017E
-U+2018, U+2019, U+201C, U+201D  (guillemets typographiques)
-U+2013, U+2014  (tirets)
-U+00AB, U+00BB  (guillemets français)
-```
-
-CSS standard :
-```css
-@font-face {
-  font-family: 'Cormorant';
-  src: url('/static/fonts/cormorant/cormorant-400.woff2') format('woff2'),
-       url('/static/fonts/cormorant/cormorant-400.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D;
-}
-```
-
-CSS variable font :
-```css
-@font-face {
-  font-family: 'Söhne';
-  src: url('/static/fonts/sohne/sohne-variable.woff2') format('woff2-variations');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-```
-
-Alerte licensing (heuristique) :
-```python
-COMMERCIAL_FONTS = {
-    "söhne", "graphik", "canela", "financier", "tiempos",
-    "gt walsheim", "neue haas grotesk", "acumin", "freight"
-}
-# Si match → warning dans la réponse JSON
-```
-
----
-
-### Phase C — Routes + Sullivan Advisor + UI
-
 **ACTOR: CLAUDE (routes + advisor) + GEMINI (UI landing.html)**
+**DÉPENDANCE: M109A ✅ M109B ✅**
 
-Routes `server_v3.py` :
+#### Routes `server_v3.py` (Claude)
+
 ```
 POST /api/sullivan/font-upload   → multipart TTF/OTF/WOFF/WOFF2
                                   → classifier + webgen + advisor
@@ -389,68 +41,247 @@ GET  /api/sullivan/fonts         → liste fontes dans /static/fonts/
 DELETE /api/sullivan/fonts/{slug} → supprime /static/fonts/{slug}/
 ```
 
-`sullivan_font_advisor.py` combine classification machine + `typography_db.json` :
+#### `sullivan_font_advisor.py` (Claude)
 
-> *"Axe oblique à 12°, contraste modéré (ratio 3.1), empattements à congé. Garalde — famille aldine. Proche de Sabon par la modération du contraste. Pour accompagner : privilégie un Grotesque humaniste (Gill Sans, Aktiv) plutôt qu'un Géométrique — l'un dialogue, l'autre concurrence."*
+Combine `FontClassifier` + `typography_db.json` → commentaire Sullivan :
 
-#### `typography_db.json`
+> *"Axe oblique à 12°, contraste modéré (ratio 3.1), empattements à congé. Garalde — famille aldine. Proche de Sabon par la modération du contraste. Pour accompagner : privilégie un Grotesque humaniste plutôt qu'un Géométrique — l'un dialogue, l'autre concurrence."*
 
-**AUTEUR : FJD (sélection éditoriale des 7 références par catégorie) + CLAUDE (structure + complétion technique)**
-**CHEMIN : `Backend/Prod/sullivan/typography_db.json`**
+#### UI `landing.html` — section `#font-manager` (Gemini)
 
-8 catégories Vox-ATypI, chacune avec :
-- `signals` — critères morphologiques machine (axe, contraste, empattements)
-- `references[]` — 7 fontes (nom, année, designer, google_fonts_id, note courte)
-- `pairings[]` — avec rationale typographique
-- `usages[]` / `anti_usages[]`
-- `cultural_refs[]` — Étapes, Eye, Émigré, monographies de référence
-
-Catégories à documenter :
-`garaldes` · `didones` · `reales` · `lineales_grotesque` · `lineales_geometrique` · `lineales_humaniste` · `mecanes` · `incises`
-
-**Workflow de construction :** Claude génère le squelette JSON complet avec ses propres références → FJD amende/remplace les 7 références par catégorie selon ses choix éditoriaux → version finale commitée.
-
-#### UI landing.html (Gemini)
-
-Section `#font-manager` — indépendante de la zone d'import SVG :
 - Drop zone `.ttf/.otf/.woff/.woff2`
-- Carte résultat par fonte : nom + badge Vox-ATypI + preview live (Aa Bb 0123 rendu avec la fonte) + poids disponibles + warning licensing + commentaire Sullivan + snippet `@font-face` Monaco read-only
+- Carte par fonte : badge Vox-ATypI + preview live + poids + warning licensing + commentaire Sullivan + snippet `@font-face` Monaco read-only
 - Badge "variable font" si détecté
-- Bouton "ajouter à stenciler.css" → logge dans `backend.md`
+- Bouton "ajouter à stenciler.css"
 
 **Bootstrap Gemini :**
 ```
-Lire static/templates/landing.html — structure sections existantes (ne pas toucher).
+Lire static/templates/landing.html — ne pas toucher les sections existantes.
 Lire static/css/stenciler.css — tokens V1.
 Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
 Ajouter UNIQUEMENT la section #font-manager après #import-section.
 Pas d'uppercase. Pas d'emojis. Geist 12px. #8cc63f pour accents.
 ```
 
+**Critères de sortie :**
+- [ ] Upload `.otf` Garalde → classification "garaldes", axe ~12°, contraste ~3
+- [ ] Upload variable font → `is_variable: true`, `font-weight: 100 900`
+- [ ] Preview landing → fonte rendue live dans la carte
+- [ ] Commentaire Sullivan → catégorie + référence proche + suggestion pairing
+- [ ] Warning licensing sur fonte commerciale connue
+
 ---
 
-### Fichiers à créer
+## Thème 2 — Architecture User / Project
 
-| Fichier | Auteur | Rôle |
-|---|---|---|
-| `Backend/Prod/sullivan/font_classifier.py` | CLAUDE | Panose + contours → Vox-ATypI |
-| `Backend/Prod/sullivan/font_webgen.py` | CLAUDE | Subset + WOFF2 + @font-face |
-| `Backend/Prod/sullivan/sullivan_font_advisor.py` | CLAUDE | Classifier + DB → commentaire Sullivan |
-| `Backend/Prod/sullivan/typography_db.json` | FJD + CLAUDE | 8 catégories × 7 références |
-| `server_v3.py` + 3 routes | CLAUDE | font-upload, fonts list, delete |
-| `static/templates/landing.html` | GEMINI | Section #font-manager |
+### Mission 111 — Multi-project scoping
 
-Dépendances à ajouter : `fonttools>=4.43.0`, `brotli>=1.0.9`
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (backend) + GEMINI (UI)**
 
-### Critères de sortie
+**Contexte :** HoméOS est actuellement mono-projet global. En cours pédagogique, chaque étudiant travaille sur un projet distinct. Sans scoping, les imports, manifests et templates se mélangent.
 
-- [ ] Upload `.otf` Garalde → classification "Garaldes", ratio contraste ~3, axe ~12°
-- [ ] Upload fonte variable → `is_variable: true`, `font-weight: 100 900` dans CSS
-- [ ] `@font-face` généré → chargeable browser depuis `/static/fonts/`
-- [ ] Preview landing → fonte rendue live dans la carte
-- [ ] Commentaire Sullivan → catégorie + proche référence + suggestion pairing
-- [ ] Warning licensing sur fonte connue commerciale
-- [ ] `GET /api/sullivan/fonts` → liste les fontes du projet
+#### Modèle de données
+
+```python
+# Table projects (SQLite ou JSON simple)
+{
+  "id": "uuid",
+  "name": "Projet Clea",
+  "user_id": "fjd",          # table users existante
+  "created_at": "iso8601",
+  "manifest_path": "exports/projects/{id}/manifest.json",
+  "imports_dir": "exports/projects/{id}/imports/",
+  "active": true             # un seul actif à la fois par user
+}
+```
+
+#### Routes backend (Claude)
+
+```
+GET    /api/projects              → liste projets de l'user courant
+POST   /api/projects              → créer projet { name }
+POST   /api/projects/{id}/activate → set active, désactive les autres
+DELETE /api/projects/{id}         → supprime projet + fichiers
+GET    /api/projects/active       → projet actif courant
+```
+
+#### Scoping du pipeline
+
+Tous les endpoints existants reçoivent le `project_id` depuis la session :
+- `POST /api/import/upload` → sauvegarde dans `imports_dir` du projet actif
+- `GET /api/manifest/get` → lit depuis `manifest_path` du projet actif
+- `POST /api/preview/run` → preview isolée par projet
+- Wire mode, intent analysis → scopés au projet actif
+
+#### UI (Gemini)
+
+- Landing : sélecteur de projet en tête de page + bouton "nouveau projet"
+- Header global (bootstrap.js) : nom du projet actif affiché à droite des tabs
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/landing.html.
+Lire static/js/bootstrap.js — ajouter projet actif dans .hn-brand ou pipeline-actions.
+Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
+NE PAS modifier le drop zone ni les sections existantes.
+```
+
+**Critères de sortie :**
+- [ ] Deux projets distincts avec imports, manifests et previews isolés
+- [ ] Switching de projet → pipeline complet rebascule sans collision
+- [ ] Projet actif visible dans le header global
+- [ ] Nouveau projet → landing vierge (pas d'imports résiduels)
+
+---
+
+## Thème 3 — UX Cléa
+
+**REF:** `docs/06_Design_Assets/ergonomic_study_clea_ux.md`
+**REF:** `docs/06_Design_Assets/CORPUS_UX_CLEA.md`
+
+### Mission 112 — Sullivan Welcome Screen
+
+**STATUS: 🔵 BACKLOG**
+**ACTOR: CLAUDE (endpoint) + GEMINI (landing.html)**
+**DÉPENDANCE: M111 (scoping projet)**
+
+Remplacer l'austère liste d'imports par un accueil sémantique Sullivan. *Effet de Halo* (Cléa UX P1).
+
+#### Route backend (Claude)
+
+```
+GET /api/project/summary
+→ {
+    "project_name": "Projet Clea",
+    "imports_count": 3,
+    "last_intent": "formulaire de contact",
+    "manifest_status": "ok" | "missing" | "minimal",
+    "message": "3 écrans importés. Dernière intention : formulaire de contact."
+  }
+```
+
+#### UI (Gemini)
+
+- Zone `#sullivan-welcome` en tête de landing : nom projet + message Sullivan contextuel
+- Remplacement badge polling par nudge discret orienté action
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/landing.html.
+Lire static/css/stenciler.css.
+Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
+Ajouter UNIQUEMENT #sullivan-welcome avant #import-section.
+Pas d'uppercase. Pas d'emojis. Geist 12px.
+```
+
+**Critères de sortie :**
+- [ ] Message Sullivan contextuel au chargement de la landing
+- [ ] Mis à jour quand le projet change (M111)
+- [ ] Pas de régression sur la drop zone
+
+---
+
+### Mission 113 — Sullivan Tips + Smart Nudges
+
+**STATUS: 🔵 BACKLOG**
+**ACTOR: CLAUDE (nudge engine) + GEMINI (UI)**
+**DÉPENDANCE: M109A (typography_db.json)**
+
+Utiliser les temps morts pour valoriser. *Intent Context Loading + Smart Nudges* (Cléa UX P3+P4).
+
+#### Route backend (Claude)
+
+```
+GET /api/sullivan/tip
+→ { "tip": "Les Garaldes portent un axe oblique hérité de la plume...", "source": "garaldes" }
+```
+
+Tips tirés de `typography_db.json` : `cultural_refs[]` + `pairings[]` de chaque catégorie (~50 tips disponibles).
+
+Nudges Wire : pendant l'analyse, si route orpheline détectée → nudge non-bloquant.
+
+#### UI (Gemini)
+
+- Loading overlay Intent Viewer : tip Sullivan affiché pendant l'analyse SVG
+- FRD header : nudge discret (toast 3s, non-bloquant) sur routes orphelines
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/intent_viewer.html — ajouter tip dans le loading state existant.
+Lire static/css/frd_editor.css — ajouter toast style non-bloquant.
+Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
+```
+
+**Critères de sortie :**
+- [ ] Tip typographique affiché pendant chaque analyse Intent Viewer
+- [ ] Tips variés (pas toujours le même) — rotation aléatoire
+- [ ] Nudge route orpheline : toast discret, disparaît seul après 3s
+- [ ] Pas de régression sur les loaders existants
+
+---
+
+## Thème 4 — FRD Canvas v2 : features Stenciler portées
+
+### Mission 114 — FRD Canvas v2 : snap grid + zoom + resize
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (FrdWire.feature.js) + GEMINI (UI controls)**
+**DÉPENDANCE: M112 + M113 (réfection UX Cléa accomplie)**
+
+**Contexte :** Le Stenciler V3 a développé un moteur canvas SVG solide sur plusieurs missions (8C→14B). Ces features sont portables dans le FRD editor car FrdWire.feature.js est déjà en SVG natif. L'objectif n'est pas de copier le Stenciler mais d'enrichir le wire mode avec les interactions qui font sens pour un éditeur HTML/template.
+
+**Features retenues (validées dans Stenciler)**
+
+| Feature | Source Stenciler | État source | Travail de portage |
+|---|---|---|---|
+| Snap grid 8px | `_snap()` + `GRID.js` | ✅ solide | Minimal — greffer sur drag FrdWire |
+| Zoom / panning | `_setupZoomControls()` + space+drag | ✅ solide | Copier-coller méthodes, adapter viewBox |
+| Resize handles (rect) | `_showHandles()` | ✅ solide | Portable, uniquement `<rect>` |
+| Drag nodes SVG | `_setupDragHandlers()` | ✅ solide | FrdWire a déjà du drag — unifier |
+| Delete node | `_setupDeleteHandlers()` | ✅ trivial | Compléter raccourci clavier |
+
+**Features exclues (trop couplées au genome Stenciler)**
+- Drill-down Corps/Organe/Cellule — sémantique incompatible avec FRD (HTML templates, pas genome)
+- Apply color broadcast — à concevoir différemment dans un contexte CSS/Tailwind
+- Fond gradué — chantier UI complet, pas une feature de portage
+
+**Livrables backend (Claude — CODE DIRECT)**
+
+`FrdWire.feature.js` :
+- Intégrer `GRID.js` (import ou copie inline des constantes)
+- `_snap(v)` — arrondi 8px, activable via toggle
+- `_setupZoom()` — boutons +/−/reset, viewBox scaling sur `#preview-iframe` SVG overlay
+- `_setupPan()` — Space+drag sur le canvas wire
+- `_setupResizeHandles()` — 4 coins sur `<rect>` sélectionnée, Shift = aspect ratio lock
+- Unifier drag existant avec snap
+
+**Livrables UI (Gemini — frd_editor.html + frd_editor.css)**
+
+Barre de contrôles canvas (intégrée dans le header FRD existant) :
+- Bouton grid toggle (icône grille, actif = vert HoméOS)
+- Bouton snap toggle
+- Affichage zoom % (ex: "100%")
+- Boutons +/− zoom
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/frd_editor.html — header existant avec Inspect/Lock/Save.
+Lire static/css/frd_editor.css — ne pas casser les styles existants.
+Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
+Ajouter UNIQUEMENT les contrôles canvas dans le header FRD (après btn-lock, avant template-select).
+Pas d'uppercase. Pas d'emojis. Geist 12px.
+```
+
+**Critères de sortie :**
+- [ ] Drag wire node → snap automatique sur grille 8px
+- [ ] Space+drag → pan du canvas wire
+- [ ] Boutons +/− → zoom viewBox du SVG wire
+- [ ] Clic `<rect>` → handles sur 4 coins, redimensionnement
+- [ ] Grid toggle → grille SVG visible/cachée
+- [ ] Pas de régression sur wire mode existant (M97→M103)
 
 ---
 

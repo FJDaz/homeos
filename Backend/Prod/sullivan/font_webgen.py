@@ -193,15 +193,24 @@ class FontWebGen:
         if family_name.lower() in COMMERCIAL_FONTS:
             licensing_warning = f"{family_name} est une fonte commerciale. Vérifiez votre licence avant usage web."
 
-        return {
+        # Données de métadonnées pour persistence (Mission 109-C)
+        meta = {
             "slug": slug,
             "font_family": family_name,
+            "classification": classification,
             "css": "\n\n".join(css_rules),
             "files": files_generated,
             "total_size": total_size,
             "licensing_warning": licensing_warning,
-            "font_dir": str(font_dir)
+            "created_at": datetime.now().isoformat() if "datetime" in globals() else None
         }
+
+        # Sauvegarde persistante
+        meta_path = font_dir / "metadata.json"
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2, ensure_ascii=False)
+
+        return meta
 
     def _slugify(self, text: str) -> str:
         """Normalise un nom de fonte pour usage filesystem/URL."""
@@ -299,34 +308,38 @@ class FontWebGen:
                 continue
 
             slug = font_dir.name
+            meta_path = font_dir / "metadata.json"
+            
+            if meta_path.exists():
+                try:
+                    with open(meta_path, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                        fonts.append(meta)
+                        continue
+                except Exception:
+                    pass
+
+            # Fallback if no metadata (Legacy/Manual folders)
             files = list(font_dir.glob("*.woff2")) + list(font_dir.glob("*.woff"))
-
             if files:
-                # Déduire family name depuis slug
                 family = slug.replace('-', ' ').title()
-
-                # Vérifier si variable
                 is_variable = any("variable" in f.name for f in files)
-
-                # Poids disponibles
                 weights = set()
                 for f in files:
                     match = re.search(r'-(\d{3})', f.stem)
-                    if match:
-                        weights.add(int(match.group(1)))
-                    elif "variable" in f.name:
-                        weights.add("variable")
+                    if match: weights.add(int(match.group(1)))
+                    elif "variable" in f.name: weights.add("variable")
 
                 fonts.append({
                     "slug": slug,
-                    "family": family,
+                    "font_family": family,
                     "is_variable": is_variable,
                     "weights": sorted(list(weights)) if not any(isinstance(w, str) for w in weights) else ["variable"],
                     "files": [str(f.relative_to(self.output_dir)) for f in files],
                     "total_size": sum(f.stat().st_size for f in files)
                 })
 
-        return sorted(fonts, key=lambda x: x["family"])
+        return sorted(fonts, key=lambda x: x.get("font_family", x.get("family", "")))
 
     def delete_font(self, slug: str) -> bool:
         """Supprime une fonte et son répertoire."""
