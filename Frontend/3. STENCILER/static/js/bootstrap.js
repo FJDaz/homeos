@@ -176,4 +176,8 @@
         document.body.style.paddingTop = '';
         injectNav();
     };
+
+    window.HOMEOS.boot = function () {
+        // no-op — nav is injected automatically on DOMContentLoaded
+    };
 })();

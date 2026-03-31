@@ -138,7 +138,7 @@
                     return;
                 }
                 const latestId = imports[0].id;
-                const res = await fetch(`/api/retro-genome/import-analysis?id=${encodeURIComponent(latestId)}`);
+                const res = await fetch(`/api/retro-genome/import-analysis-svg?id=${encodeURIComponent(latestId)}`);
                 const data = await res.json();
                 if (data.analysis && data.analysis.components.length > 0) {
                     currentIntents = data.analysis.components;

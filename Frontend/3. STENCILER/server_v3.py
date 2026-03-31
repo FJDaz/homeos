@@ -27,6 +27,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # --- CONFIGURATION & PATHS ---
+CWD = Path(__file__).parent.resolve()
+ROOT_DIR = CWD.parent.parent
+BACKEND_PROD = ROOT_DIR / "Backend/Prod"
 PROJECTS_DIR = ROOT_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 PROJECTS_DB_PATH = ROOT_DIR / "db/projects.db"

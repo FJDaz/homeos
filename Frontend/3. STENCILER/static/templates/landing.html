@@ -336,7 +336,7 @@
         const projectManager = new ProjectManager();
         
         async function init() {
-            if (window.HOMEOS) window.HOMEOS.boot();
+            if (window.HOMEOS && window.HOMEOS.boot) window.HOMEOS.boot();
             await projectManager.init();
             await checkManifest();
             await fetchImports();
@@ -577,9 +577,11 @@
         async function fetchImports() {
             try {
                 const res = await fetch('/api/retro-genome/imports');
+                console.log('[fetchImports] status:', res.status);
                 const data = await res.json();
+                console.log('[fetchImports] data:', JSON.stringify(data).slice(0, 200));
                 renderImports(data.imports || []);
-            } catch (e) { console.error("failed to fetch imports"); }
+            } catch (e) { console.error('[fetchImports] error:', e); }
         }
 
         async function fetchNotifications() {
