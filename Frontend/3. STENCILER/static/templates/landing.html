@@ -631,7 +631,7 @@
                         ${item.archetype_label ? `<div class="text-[9px] text-[#8cc63f] mt-1 font-bold">${item.archetype_label}</div>` : ''}
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <button onclick="openInFRD('${item.name}')" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[11px] font-bold">ouvrir dans frd editor</button>
+                        <button onclick="openInFRD(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[11px] font-bold">ouvrir dans frd editor</button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -657,12 +657,12 @@
                 : `${selectedImports.size} écran(s) sélectionné(s) →`;
         }
 
-        async function openInFRD(filename) {
+        async function openInFRD(item) {
             try {
                 await fetch('/api/frd/set-current', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: filename })
+                    body: JSON.stringify({ type: 'import', id: item.id, name: item.name, html_template: null })
                 });
                 window.location.href = '/frd-editor';
             } catch (e) { console.error('FRD Open failed', e); }
@@ -682,7 +682,8 @@
                     await fetch('/api/frd/set-current', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: item.name })
+                        // Fix M116 : envoyer le contrat complet avec type: 'import'
+                        body: JSON.stringify({ type: 'import', id: item.id, name: item.name, html_template: null })
                     });
                 }
             } catch (e) { console.error('Set current failed', e); }

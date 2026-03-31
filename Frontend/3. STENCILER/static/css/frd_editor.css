@@ -312,3 +312,46 @@
     animation: wire-peel-in 0.4s ease-out forwards;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ── Mission 117 : Intent Panel (Fusion) ────────────────────────────────── */
+#intent-panel.active {
+    display: flex !important;
+    transform: translateX(0);
+}
+
+.intent-row:hover {
+    background: #fdfdfb;
+}
+
+.intent-cell {
+    padding: 10px 4px;
+    vertical-align: top;
+    color: #6a6a69;
+    line-height: 1.4;
+}
+
+.intent-cell-id {
+    font-family: 'Geist Mono', monospace;
+    color: #8cc63f;
+    font-weight: bold;
+}
+
+.intent-cell-type {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999998;
+}
+
+.btn-intent-action {
+    padding: 4px;
+    border-radius: 4px;
+    color: #999998;
+    transition: all 0.2s;
+}
+
+.btn-intent-action:hover {
+    color: #3d3d3c;
+    background: #e8e7e3;
+}

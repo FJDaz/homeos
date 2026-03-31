@@ -12,6 +12,9 @@ import base64
 import json
 import re
 import io
+import logging
+import asyncio
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -23,6 +26,7 @@ from loguru import logger
 
 from .svg_parser import parse_figma_svg
 from .archetype_detector import ArchetypeDetector
+from .svg_to_tailwind import SvgToTailwindConverter
 
 # Mission 111: Project Scoping
 try:
@@ -38,6 +42,17 @@ detector = ArchetypeDetector()
 
 # Mission 101: Global tracker for new imports
 _NEW_IMPORTS_COUNT = 0
+
+# Mission 118: Generation job status tracker
+_SVG_JOBS = {}
+_SVG_CONVERTER = None  # Lazy init — instancié à la première requête
+
+def get_svg_converter():
+    """Retourne le convertisseur SVG, instancié au premier appel."""
+    global _SVG_CONVERTER
+    if _SVG_CONVERTER is None:
+        _SVG_CONVERTER = SvgToTailwindConverter()
+    return _SVG_CONVERTER
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────
 
@@ -516,7 +531,10 @@ async def get_import_analysis_svg(id: str):
     entry = next((i for i in index_data.get("imports", []) if i["id"] == id), None)
     if not entry:
         raise HTTPException(status_code=404, detail="Import not found")
-    svg_path = imports_dir / entry["svg_path"]
+    rel_path = entry.get("svg_path") or entry.get("file_path")
+    if not rel_path:
+        raise HTTPException(status_code=404, detail="Import path not found (svg_path or file_path)")
+    svg_path = imports_dir / rel_path
     if not svg_path.exists():
         raise HTTPException(status_code=404, detail="SVG file not found")
     analysis = parse_figma_svg(svg_path.read_text(encoding="utf-8"))
@@ -556,9 +574,111 @@ async def clear_imports():
     index_path.write_text(json.dumps({"imports": []}, ensure_ascii=False), encoding="utf-8")
     return {"status": "ok"}
 
-@router.post("/notifications/clear")
+@router.get("/notifications/clear")
 async def clear_notifications():
     """Mission 101: Reset le compteur après lecture."""
     global _NEW_IMPORTS_COUNT
     _NEW_IMPORTS_COUNT = 0
     return {"status": "ok"}
+
+# --- MISSION 118 / 120 : FORGE UNIVERSELLE ---
+
+class ImportGenRequest(BaseModel):
+    import_id: str
+
+@router.post("/generate-from-svg")  # Alias compatibilité M118
+@router.post("/generate-from-import")
+async def generate_from_import(req: ImportGenRequest):
+    """Déclenche la conversion asynchrone de l'import (SVG ou ZIP) en Tailwind."""
+    job_id = f"job_{datetime.now().strftime('%H%M%S')}"
+    _SVG_JOBS[job_id] = {"status": "running", "template_name": None, "error": None}
+    
+    # Task asynchrone pour ne pas bloquer l'HTTP
+    async def run_conversion():
+        try:
+            p_path = get_active_project_path()
+            imports_dir = p_path / "imports"
+            index_path = imports_dir / "index.json"
+            
+            if not index_path.exists(): 
+                raise Exception("index.json missing")
+                
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+            
+            # Matching robuste : normalisation unicode pour gérer NFC/NFD (macOS)
+            import unicodedata
+            req_id_nfc = unicodedata.normalize('NFC', req.import_id)
+            entry = next(
+                (i for i in index_data.get("imports", []) 
+                 if unicodedata.normalize('NFC', i["id"]) == req_id_nfc),
+                None
+            )
+            
+            if not entry: 
+                raise Exception("Import not found")
+            
+            # Détection du format par extension
+            # Support SVG or HTML/Generic file_path (Mission 121)
+            rel_path = entry.get("svg_path") or entry.get("file_path")
+            if not rel_path:
+                raise Exception(f"Import entry {req.import_id} has no path field (svg_path or file_path)")
+                
+            import_path = imports_dir / rel_path
+            is_zip = import_path.suffix.lower() == ".zip"
+            
+            if is_zip:
+                # ROUTER ZIP (Mission 118-B)
+                logger.info(f"[Mission 118-B] Routing ZIP archive: {import_path.name}")
+                with zipfile.ZipFile(import_path, 'r') as z:
+                    file_list = z.namelist()
+                    
+                    # Détection React vs HTML simple
+                    is_react = any(f.endswith(('.tsx', '.jsx')) for f in file_list)
+                    if is_react:
+                        raise Exception("Format React/.zip détecté. Nécessite la Mission 119 (react_to_tailwind).")
+                    
+                    # Recherche du HTML principal
+                    html_files = [f for f in file_list if f.endswith(('.html', '.htm')) and not f.startswith('__MACOSX')]
+                    if not html_files:
+                        raise Exception("Aucun fichier HTML trouvé dans l'archive ZIP.")
+                    
+                    # On prend le plus probable (index.html ou le premier à la racine)
+                    main_html = next((f for f in html_files if 'index.html' in f.lower()), html_files[0])
+                    svg_content = z.read(main_html).decode('utf-8', errors='replace')
+            else:
+                # FORMAT SVG CLASSIQUE
+                svg_content = import_path.read_text(encoding="utf-8")
+            
+            # Conversion via le LLM (Protocol SVG AI v1.0)
+            html_code = await get_svg_converter().convert(svg_content, entry["name"])
+            
+            # Sauvegarde dans static/templates du Stenciler
+            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
+            stenciler_templates.mkdir(parents=True, exist_ok=True)
+
+            safe_name = entry["name"].lower().replace(" ", "_").split(".")[0]
+            template_name = f"reality_{safe_name}.html"
+            output_path = stenciler_templates / template_name
+            
+            output_path.write_text(html_code, encoding="utf-8")
+            
+            # Suivi des jobs de génération (M118 / M119 / M120)
+            _SVG_JOBS[job_id] = {"status": "done", "template_name": template_name, "error": None}
+            logger.info(f"[Mission 118] Generation complete: {template_name}")
+            
+        except Exception as e:
+            logger.error(f"[Mission 118] Generation failed for {job_id}: {e}")
+            _SVG_JOBS[job_id] = {"status": "failed", "error": str(e), "template_name": None}
+
+    # Lancement du background task
+    asyncio.create_task(run_conversion())
+    
+    return {"status": "started", "job_id": job_id}
+
+@router.get("/svg-job/{job_id}")
+async def get_svg_job(job_id: str):
+    """Polling pour connaître l'état de la génération."""
+    job = _SVG_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job mapping not found")
+    return job

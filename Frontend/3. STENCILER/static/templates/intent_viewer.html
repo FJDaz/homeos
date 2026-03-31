@@ -168,7 +168,7 @@
                     </td>
                     <td class="homeos-td text-right flex items-center justify-end gap-2">
                         <button class="btn-homeos" onclick="annotate('${item.id}', '${item.name}', '${item.inferred_intent}')">annoter</button>
-                        <button class="btn-homeos btn-homeos-primary text-white" onclick="window.location.href='/frd-editor?intent_id=${item.id}'">éditer</button>
+                        <button class="btn-homeos btn-homeos-primary text-white" onclick="openTemplateInFRD()">éditer</button>
                     </td>
                 `;
                 list.appendChild(tr);
@@ -194,7 +194,26 @@
                 }
             } catch (e) { content.innerHTML = '<div class="text-red-500">erreur réseau</div>'; }
             
-            document.getElementById('drawer-editor-btn').onclick = () => window.location.href=`/frd-editor?intent_id=${id}`;
+            document.getElementById('drawer-editor-btn').onclick = () => openTemplateInFRD();
+        }
+
+        async function openTemplateInFRD() {
+            try {
+                const res = await fetch('/api/frd/current');
+                const ctx = await res.json();
+                const templateName = ctx.html_template || ctx.name;
+                
+                if (templateName) {
+                    await fetch('/api/frd/set-current', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'template', name: templateName, id: null, html_template: templateName })
+                    });
+                }
+            } catch (e) {
+                console.error('FRD current fetch failed', e);
+            }
+            window.location.href = '/frd-editor';
         }
 
         function openDrawer(title) {

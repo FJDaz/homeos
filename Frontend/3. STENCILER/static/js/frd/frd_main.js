@@ -5,6 +5,7 @@ import { FrdKimi } from './FrdKimi.feature.js';
 import { FrdWire } from './FrdWire.feature.js';
 import { FrdAssets } from './FrdAssets.feature.js';
 import { FrdPreview } from './FrdPreview.feature.js';
+import { default as FrdIntent } from './FrdIntent.feature.js?v=20260331';
 
 class FrdMain {
     constructor() {
@@ -42,18 +43,32 @@ class FrdMain {
         this.chat.setMode('construct');
         this.setupEventListeners();
 
-        // Mission 115: Auto-load current file if set
+        // Mission 116: Auto-load based on context type
         try {
             const res = await fetch('/api/frd/current');
-            const data = await res.json();
-            if (data.name) {
-                console.log('[FrdMain] Auto-loading current file:', data.name);
-                await this.editor.loadFile(data.name);
+            const ctx = await res.json();
+            if (ctx.type === 'template' && ctx.name) {
+                console.log('[FrdMain] Auto-loading template:', ctx.name);
+                await this.editor.loadFile(ctx.name);
                 const sel = document.getElementById('template-select');
-                if (sel) sel.value = data.name;
+                if (sel) sel.value = ctx.name;
+            } else if (ctx.type === 'import' && ctx.name) {
+                console.log('[FrdMain] Context is import:', ctx.name);
+                const badge = document.getElementById('frd-import-context');
+                if (badge) {
+                    badge.textContent = `import de référence : ${ctx.name}`;
+                    badge.classList.remove('hidden');
+                }
+                // Mission 117 : Charger l'analyse
+                FrdIntent.init(ctx.id);
+            } else if (!ctx.type && ctx.name) {
+                // Fallback de transition si le backend n'a pas encore le nouveau contrat
+                await this.editor.loadFile(ctx.name);
+                const sel = document.getElementById('template-select');
+                if (sel) sel.value = ctx.name;
             }
         } catch (e) {
-            console.warn('[FrdMain] Current file fetch failed', e);
+            console.warn('[FrdMain] Current context fetch failed', e);
         }
 
         console.log('[FrdMain] Initialized V3 modular');
@@ -64,6 +79,12 @@ class FrdMain {
         const monacoPane = document.getElementById('monaco-pane');
         const monacoResizeHandle = document.getElementById('monaco-resize-handle');
         
+        document.getElementById('btn-close-intent').onclick = () => {
+            const panel = document.getElementById('intent-panel');
+            panel.classList.remove('active');
+            setTimeout(() => panel.classList.add('hidden'), 300);
+        };
+
         document.getElementById('btn-toggle-monaco').onclick = (e) => {
             this.state.isCollapsed = !this.state.isCollapsed;
             monacoPane.style.transition = 'height 200ms ease';

@@ -6,6 +6,51 @@
 
 ## Thème 0 — Hotfixes
 
+### Mission 121 — Hotfix pipeline import : HTML 500 + generate-from-import cassé + bégaie
+
+**STATUS: 🔴 HOTFIX**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
+
+**Contexte :** Diagnostic complet par logs serveur. Quatre bugs bloquants dans le pipeline upload → generate.
+
+#### Bug A — `_NEW_IMPORTS_COUNT` non initialisé (server_v3.py)
+
+**Symptôme :** `POST /api/import/upload` → 500 `NameError: name '_NEW_IMPORTS_COUNT' is not defined`
+**Cause :** La variable est utilisée à L1180 (`global _NEW_IMPORTS_COUNT; _NEW_IMPORTS_COUNT += 1`) mais jamais déclarée au niveau module dans server_v3.py.
+**Fix :** Ajouter `_NEW_IMPORTS_COUNT = 0` dans le bloc des variables globales du module (chercher `_NEW_IMPORTS_COUNT` pour trouver le bon endroit).
+
+#### Bug B — `entry["svg_path"]` absent pour les imports HTML (routes.py)
+
+**Symptôme :** `generate-from-import` → "Import not found" pour tout import non-SVG.
+**Cause :** L618 : `import_path = imports_dir / entry["svg_path"]` — les entrées HTML créées par `/api/import/upload` ont `file_path` au lieu de `svg_path`. Le champ manquant lève un `KeyError` (capturé comme "Import not found" dans le catch global).
+**Fix :** Remplacer par `entry.get("svg_path") or entry.get("file_path")`. Si ni l'un ni l'autre → `raise Exception("Import entry has no path field")`.
+
+#### Bug C — Mismatch chemin dans index.json pour imports HTML (server_v3.py)
+
+**Symptôme :** Même quand le Bug B est corrigé, le fichier HTML est introuvable à la génération.
+**Cause :** Le fichier est sauvegardé à plat (`imports/IMPORT_code.html_225911.html`) mais `file_path` dans index.json vaut `"2026-03-31/IMPORT_code.html_225911.html"` (avec sous-dossier daté). Les deux ne correspondent pas.
+**Fix :** Aligner la sauvegarde sur le même pattern que le SVG — sauvegarder dans `imports_dir / today_str / stored_filename` et construire le chemin relatif cohérent. Créer `today_dir.mkdir(parents=True, exist_ok=True)` avant l'écriture.
+
+#### Bug D — Double extension dans le nom d'import HTML (server_v3.py)
+
+**Symptôme :** Import affiché comme `code.html.html` dans la landing.
+**Cause :** L1163 : `"name": safe_name + ext` où `safe_name` contient déjà l'extension (ex: `code.html`) et `ext = ".html"` est rajouté.
+**Fix :** `"name": Path(safe_name).stem + ext` pour extraire uniquement le stem avant de recoller l'extension.
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/server_v3.py` — Bugs A, C, D
+- `Backend/Prod/retro_genome/routes.py` — Bug B
+
+**Critères de sortie :**
+- [ ] `POST /api/import/upload` avec un fichier HTML → 200 (plus de NameError)
+- [ ] Entrée dans index.json : `name` sans double extension, `file_path` cohérent avec l'emplacement réel du fichier
+- [ ] `POST /api/retro-genome/generate-from-import` avec l'id d'un import HTML → job lancé (plus de "Import not found")
+- [ ] `POST /api/retro-genome/generate-from-import` avec l'id d'un import SVG → comportement inchangé (pas de régression)
+- [ ] Pas de modification des routes SVG (`/upload-svg`) ni de la logique de conversion LLM
+
+---
+
 ### Mission 110 — Templates FRD : liste vide après manifest minimal
 
 **STATUS: 🔴 HOTFIX**
@@ -162,6 +207,7 @@ NE PAS ajouter ?p= dans les URLs.
 **Critères de sortie :**
 - [ ] Deux projets distincts → imports et manifests isolés sans collision
 - [ ] Switching projet depuis la landing → pipeline rebascule
+
 - [ ] Nom du projet actif visible dans le header global
 - [ ] Nouveau projet → landing vierge (aucun import résiduel du projet précédent)
 
@@ -355,6 +401,401 @@ Au chargement de `frd_editor.html` :
 - [ ] Clic "ouvrir dans frd editor" sur une carte import → arrive dans FRD avec le bon fichier chargé
 - [ ] `#template-select` pointe sur le fichier courant
 - [ ] Pas de régression sur le chargement manuel depuis `#template-select`
+
+---
+
+### Mission 116 — Fix pipeline landing/intent_viewer → FRD editor
+
+**STATUS: 🔴 HOTFIX**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT)**
+
+**Diagnostic :** M115 a créé une confusion entre deux concepts distincts :
+- **Import de référence** (`retro_genome`) = fichier SVG analysé, stocké dans `projects/homéos-default/imports/`
+- **Template éditable** = fichier `.html` dans `static/templates/`, chargeable par `loadFile()`
+
+`set-current` stocke le nom SVG, mais `loadFile()` cherche exclusivement un `.html` dans `static/templates/` → 404 systématique. De plus, `intent_viewer` redirige sans appeler `set-current`, et passe un `intent_id` (ex: `element_0`) qui n'est pas un fichier physique.
+
+**3 fractures à corriger :**
+
+**A — server_v3.py : enrichir `set-current` / `get-current`**
+
+Changer le contrat : `_CURRENT_FRD_CONTEXT` stocke un objet, pas juste un nom :
+```python
+_CURRENT_FRD_CONTEXT = {"type": None, "id": None, "name": None, "html_template": None}
+```
+
+`POST /api/frd/set-current` accepte :
+```json
+{ "type": "import", "id": "...", "name": "...", "html_template": null }
+```
+ou
+```json
+{ "type": "template", "name": "frd_editor.html" }
+```
+
+`GET /api/frd/current` retourne ce contexte complet.
+
+**B — frd_main.js : lire le contexte et agir selon le type**
+
+Remplacer le bloc d'auto-load actuel (lignes 45-57) :
+```javascript
+const res = await fetch('/api/frd/current');
+const ctx = await res.json();
+if (ctx.type === 'template' && ctx.name) {
+    // flux normal HTML
+    await this.editor.loadFile(ctx.name);
+    const sel = document.getElementById('template-select');
+    if (sel) sel.value = ctx.name;
+} else if (ctx.type === 'import' && ctx.id) {
+    // SVG import : afficher le nom dans un badge "contexte d'import"
+    // NE PAS appeler loadFile — ce n'est pas un template HTML
+    const badge = document.getElementById('frd-import-context');
+    if (badge) { badge.textContent = ctx.name; badge.classList.remove('hidden'); }
+}
+```
+
+**C — intent_viewer.html : appeler `set-current` avant redirection**
+
+Remplacer la redirection directe (ligne ~170) par :
+```javascript
+async function openInFRD(templateName) {
+    await fetch('/api/frd/set-current', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'template', name: templateName, id: null, html_template: templateName })
+    });
+    window.location.href = '/frd-editor';
+}
+```
+Le `templateName` à passer = le fichier HTML en cours d'édition dans le projet (à récupérer depuis `GET /api/frd/current` ou depuis le manifest).
+
+**D — landing.html : `openInFRD(item)` passe le type correct**
+
+```javascript
+async function openInFRD(item) {
+    await fetch('/api/frd/set-current', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'import', id: item.id, name: item.name, html_template: null })
+    });
+    window.location.href = '/frd-editor';
+}
+```
+Mettre à jour l'appel dans `renderImports` : `onclick="openInFRD(${JSON.stringify(item).replace(/"/g, '&quot;')})"` ou passer directement l'id et name séparément.
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/server_v3.py` (A)
+- `static/js/frd/frd_main.js` (B)
+- `static/templates/intent_viewer.html` (C)
+- `static/templates/landing.html` (D)
+
+**Critères de sortie :**
+- [ ] Clic "ouvrir dans frd editor" sur import SVG → FRD editor s'ouvre, badge "import de référence : [nom]" visible, pas d'erreur 404
+- [ ] Clic "ouvrir dans frd editor" sur template HTML → FRD editor charge le fichier HTML dans Monaco + preview
+- [ ] Intent viewer → FRD editor → dernier template du projet chargé automatiquement
+- [ ] `GET /api/frd/current` retourne `{ type, id, name, html_template }` (pas de régression M115)
+
+---
+
+### Mission 117 — Fusion Intent → FRD : Analyse Intégrée
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-31**
+**ACTOR: GEMINI (frontend) + CLAUDE (backend updates)**
+**DÉPENDANCE: M116 (pipeline landing → FRD corrigé)**
+
+**Contexte :** L'écran séparé `intent_viewer.html` crée une rupture dans le flux créatif. L'objectif est de fusionner ses fonctionnalités dans l'Éditeur FRD. Lorsqu'un utilisateur ouvre un **Import de référence**, il ne doit pas être envoyé vers un visualiseur passif, mais vers l'Éditeur qui se configure en mode "Analyse".
+
+#### Livrable A — frd_editor.html : Panneau d'Analyse (Gemini)
+
+- Ajout d'un panneau latéral `#intent-panel` (drawer à gauche ou à droite, stylisé HoméOS).
+- Intégration du tableau interactif des intentions (Intention / Archetype / Target / Action).
+- Badge de statut de l'analyse (Validé / À réviser).
+
+#### Livrable B — FrdIntent.feature.js : Module d'Analyse (Gemini)
+
+- Nouveau module portable encapsulant la logique de `intent_viewer.html` :
+  - `fetchIntents(importId)` → récupère `index.json` + `analysis.json` via `/api/retro-genome/import-analysis-svg`.
+  - `renderIntents()` → peuple le tableau dans `#intent-panel`.
+  - `annotateIntent(id, annotation)` → persiste les modifications via `/api/retro-genome/validate`.
+
+#### Livrable C — frd_main.js : Orchestration (Gemini)
+
+- Au chargement (`init`) : si `ctx.type === 'import'`, activer automatiquement le module `intent` et ouvrir le panneau.
+- **Sullivan Autostart** : Sullivan détecte l'import et propose proactivement : *"bonjour. je vois votre import figma. voici les intentions détectées. voulez-vous que je génère la structure tailwind correspondante ?"*
+
+#### Livrable D — server_v3.py : Helper de génération (Claude CODE DIRECT)
+
+- Endpoint `POST /api/frd/generate-initial` :
+  - Prend `import_id` en entrée.
+  - Exécute `HtmlGenerator.generate()` (Mission 35) pour produire le premier jet `reality.html`.
+  - Sauvegarde le fichier dans `static/templates/` et bascule le contexte courant sur ce nouveau template.
+
+**Critères de sortie :**
+- [x] Landing -> Ouvrir import SVG -> Arrive dans FRD -> Panneau d'analyse ouvert automatiquement.
+- [x] Mockup SVG visible dans le canvas de droite (Mode Référence).
+- [x] Sullivan propose la génération Tailwind dans le chat.
+- [x] Validation des intentions persiste entre les sessions.
+- [x] Pas de régression sur l'édition de templates HTML existants.
+
+**COMPTE RENDU (CR) DE MISSION :**
+- Fusion réussie : L'Intent Viewer est maintenant un élément natif de l'Éditeur FRD sous forme de slider animé.
+- Introduction du **Protocole SVG AI**, une couche cruciale de dé-obfuscation pour traiter les exports vectoriels d'Adobe Illustrator sans surcharger le contexte LLM.
+- **Sullivan** est proactif : branché au bouton de génération dans le panneau d'analyse, il déclenche directement `/api/retro-genome/generate-html` et bascule l'éditeur en code (`.html`) dès que la réponse est prête.
+- Le cycle Architecte -> Intégrateur -> DA est préservé, mais l'expérience UI est unifiée.
+
+---
+
+### Mission 118 — Pont SVG Illustrator → Tailwind Direct
+
+**STATUS: ⚠️ PARTIEL — M118-B requis**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
+**DÉPENDANCE: M117 (panneau d'analyse FRD)**
+
+**Contexte :** Le pipeline de génération existant (`/api/retro-genome/generate-html`) est conçu pour des PNGs uploadés via Retro Genome, pas pour des SVG Illustrator. Il nécessite Playwright, un cycle QA en plusieurs passes, et sauvegarde dans `/exports/retro_genome/` (hors de `static/templates/`). L'objectif de cette mission est de créer un **pont direct** SVG→Tailwind, plus simple et adapté au workflow landing → FRD Editor.
+
+#### Livrable A — Nouveau module `svg_to_tailwind.py` (Claude)
+
+Fichier : `Backend/Prod/retro_genome/svg_to_tailwind.py`
+
+```python
+async def convert(svg_content: str, import_name: str) -> str:
+    """
+    Protocole SVG AI (v1.0) + appel LLM direct.
+    1. Filtrage du bruit : strip <font>, <glyph>, <image> base64
+    2. Décodage .stX : mapper les classes CSS vers les tokens HoméOS
+    3. Extraction des <text> et <rect>/<path> structurants (viewBox zones)
+    4. Prompt LLM : "Traduis cette structure SVG annotée en HTML sémantique Tailwind"
+    5. Retourne le HTML complet
+    """
+```
+
+Contraintes du prompt LLM :
+- Stack : HTML5 + Tailwind CDN
+- Tokens HoméOS : `#f7f6f2` bg, `#3d3d3c` texte, `#8cc63f` accent
+- Pas de largeurs fixes en px, Flexbox/Grid obligatoire
+- Résultat : document HTML complet autonome (`<!DOCTYPE html>`)
+
+#### Livrable B — Nouvelle route dans `routes.py` (Claude)
+
+```python
+POST /api/retro-genome/generate-from-svg
+Body: { "import_id": str }
+
+→ Lit le SVG via index.json + svg_path
+→ Appelle svg_to_tailwind.convert()
+→ Sauvegarde le résultat dans static/templates/{safe_name}.html
+→ Retourne { "template_name": str, "status": "ok" }
+```
+
+**Important :** Le fichier généré doit être sauvegardé dans `static/templates/` (pas dans `/exports/`) pour être lisible par `GET /api/frd/file?name=...`.
+
+#### Livrable C — Feedback temps réel : SSE ou polling (Claude)
+
+La génération dure plusieurs secondes (appel LLM long). Implémenter l'une des deux options :
+- **Option A (préférée)** : L'endpoint retourne immédiatement un `job_id`, puis `GET /api/retro-genome/svg-job/{job_id}` retourne `{ status: "pending"|"done", template_name? }`.
+- **Option B (simple)** : L'endpoint est synchrone mais retourne immédiatement `{ status: "started" }` et le frontend poll `/api/frd/current` jusqu'à ce que `html_template` soit renseigné.
+
+#### Ce que GEMINI fera ensuite (M119)
+
+Une fois la route opérationnelle, connecter `FrdIntent.generateTailwind()` sur `/api/retro-genome/generate-from-svg` et ajouter l'indicateur de chargement dans Sullivan Chat.
+
+**Fichiers à créer/modifier :**
+- `Backend/Prod/retro_genome/svg_to_tailwind.py` **[NEW]**
+- `Backend/Prod/retro_genome/routes.py` — ajout route `generate-from-svg` **[MODIFY]**
+
+**Critères de sortie :**
+- [ ] `POST /api/retro-genome/generate-from-svg` avec `import_id` valide → retourne `{ template_name: "...", status: "ok" }`
+- [ ] Le fichier `.html` généré est présent dans `static/templates/`
+- [ ] `GET /api/frd/file?name={template_name}` → 200 avec le contenu HTML Tailwind
+- [ ] Le HTML généré contient des tokens HoméOS (couleurs, Geist, lowercase)
+- [ ] Pas de modification de la route `/generate-html` existante
+
+---
+
+### Mission 118-B — Routeur de formats d'import + prompts adaptatifs
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT — `svg_to_tailwind.py` + `routes.py`)**
+**DÉPENDANCE: M118 (module `svg_to_tailwind.py` existant)**
+
+**Contexte :** Le pipeline actuel est aveugle au format source. Il traite tous les SVG de la même façon et dit au LLM "lis les `<text>`" même quand il n'y en a pas (SVG vectorisé). Résultat : lorem ipsum systématique sur les exports Illustrator.
+
+**5 formats à router, 5 stratégies distinctes :**
+
+| Format | Signal de détection | Stratégie |
+|---|---|---|
+| **Illustrator SVG vectorisé** | `<text>=0` + classes `.stX` | Inférence structurelle par couleurs |
+| **Figma SVG** | `<text>` présents + `id="node-/frame-"` | Lecture directe texte + hiérarchie |
+| **HTML/CSS ZIP** | `.zip` + `.html` dedans, pas de `.tsx` | Extraction HTML principal + inline CSS |
+| **React/ZIP** | `.zip` + `.tsx/.jsx` dedans | M119 (transpilation JSX→HTML) |
+| **PNG/JPG** | extension image | Pipeline Playwright existant (hors scope) |
+
+#### Livrable A — `detect_import_format(content, filename)` dans `svg_to_tailwind.py`
+
+```python
+def detect_svg_type(svg_content: str) -> str:
+    has_text  = bool(re.search(r'<text', svg_content))
+    has_stx   = bool(re.search(r'\.(st\d+)', svg_content))
+    has_figma = bool(re.search(r'id="node-|id="frame-', svg_content))
+    if not has_text and has_stx: return "illustrator_vectorized"
+    if has_figma:                return "figma"
+    if has_text:                 return "structured_svg"
+    return "unknown"
+```
+
+#### Livrable B — Prompt adaptatif selon le type dans `convert()`
+
+**illustrator_vectorized** : extraire palette couleurs + rects + viewBox → décrire la structure au LLM sans lui envoyer le SVG brut :
+```python
+color_freq = Counter(re.findall(r'fill="(#[0-9a-fA-F]{3,6}|white)"', svg_content))
+rects = re.findall(r'<rect[^/]*/>', svg_content)
+viewbox = re.search(r'viewBox="([^"]+)"', svg_content)
+# Prompt : "Ce SVG est vectorisé. Palette : ... Rects : ... Interface de type [nom_fichier]. Génère le HTML."
+```
+
+**figma / structured_svg** : prompt actuel (déjà bon, il y a du `<text>` à lire).
+
+#### Livrable C — Route `generate-from-svg` dans `routes.py` : router ZIP
+
+Actuellement la route ne gère que les SVG depuis `index.json`. Ajouter :
+- Si `entry["name"]` se termine en `.zip` → extraire l'archive en mémoire → détecter React vs HTML/CSS → appeler le bon convertisseur
+
+**Fichiers :**
+- `Backend/Prod/retro_genome/svg_to_tailwind.py` — A + B
+- `Backend/Prod/retro_genome/routes.py` — C
+
+**Critères de sortie :**
+- [ ] SVG Illustrator vectorisé → layout reconnaissable (palette HoméOS, pas de lorem ipsum)
+- [ ] SVG Figma → comportement inchangé (textes lus directement)
+- [ ] ZIP HTML/CSS → HTML principal extrait et servi comme template
+- [ ] ZIP React → message clair "format React détecté, M119 requis" (pas de crash)
+
+---
+
+### Mission 120 — Rebranchement Plugin Figma → FRD Editor
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (backend) + GEMINI (frontend)**
+**DÉPENDANCE: M38 (plugin Figma existant), M116 (pipeline set-current)**
+
+**Contexte :** Le plugin Figma (M38) est le chemin le plus précis pour la conversion design → HTML. Il envoie la structure Figma native (frames nommés, textes, composants) directement à l'API locale. Il était branché sur l'ancien viewer (`/api/retro-genome/reality`). Il faut le rebrancher sur le nouveau pipeline FRD Editor.
+
+**Localisation du plugin :** chercher dans le repo un dossier `figma-plugin/` ou `plugin/` contenant `manifest.json`, `code.js`, `ui.html`.
+
+#### Livrable A — server_v3.py : nouvelle route Figma (Claude)
+
+```
+POST /api/figma/import
+Body: { frames: [...], project_name: str }
+→ Stocke les données Figma dans projects/{active}/imports/figma_{timestamp}.json
+→ Déclenche generate-from-svg (adapté Figma) ou appelle directement HtmlGenerator
+→ Retourne { import_id, status: "started", job_id }
+```
+
+#### Livrable B — Plugin Figma code.js : changer la cible (Claude)
+
+Remplacer l'endpoint cible :
+```javascript
+// Avant (M38)
+fetch('http://localhost:9998/api/retro-genome/reality', ...)
+// Après (M120)
+fetch('http://localhost:9998/api/figma/import', ...)
+```
+
+#### Livrable C — landing.html : afficher les imports Figma (Gemini)
+
+Les imports Figma apparaissent dans la liste avec un badge `figma` distinct des SVG.
+
+**Fichiers :**
+- `Frontend/3. STENCILER/server_v3.py` — route `/api/figma/import`
+- Plugin Figma `code.js` — changer URL cible
+- `static/templates/landing.html` — badge figma (Gemini)
+
+**Critères de sortie :**
+- [ ] Plugin Figma → bouton "Envoyer à HoméOS" → import visible dans la landing
+- [ ] Import Figma → "ouvrir dans frd editor" → template HTML généré et chargé
+- [ ] Pas de régression sur les imports SVG existants
+
+---
+
+### Mission 119 — Pont React/ZIP → Tailwind Direct
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
+**DÉPENDANCE: M118 (pont SVG→Tailwind opérationnel, module `svg_to_tailwind.py` comme modèle)**
+
+**Contexte :** Une codebase React/Next.js (`.zip`) contient une richesse sémantique exploitable : composants nommés, props typées, hiérarchie de pages. L'objectif est de convertir ce bundle en un template HTML + Tailwind vanilla exploitable dans le FRD Editor. Ce n'est pas une transpilation — c'est une **traduction d'intention** : on garde la hiérarchie et le design system, on efface le framework.
+
+#### Livrable A — Nouveau module `react_to_tailwind.py` (Claude)
+
+Fichier : `Backend/Prod/retro_genome/react_to_tailwind.py`
+
+Algorithme :
+```
+1. Dé-zipper le bundle en mémoire (zipfile)
+2. Identifier les fichiers de "surface" prioritaires :
+   - App.tsx / App.jsx / page.tsx (Next.js)
+   - Index entry points
+   - Les composants référencés dans App (1 niveau)
+3. Extraction & nettoyage JSX :
+   - Retirer les imports React, hooks, useState, useEffect
+   - Retirer les annotations TypeScript (:string, <T>, interface...)
+   - Garder l'arbre JSX et les classes Tailwind existantes
+4. Prompt LLM :
+   "Convertis ce JSX nettoyé en HTML5 sémantique vanilla.
+    Garde les classes Tailwind telles quelles.
+    Transforme les composants en leur équivalent HTML.
+    Résultat : document HTML complet autonome."
+5. Sauvegarder dans static/templates/{safe_name}.html
+```
+
+Contraintes :
+- Si le ZIP contient déjà des classes Tailwind → les conserver (pas de réécriture)
+- Si le ZIP utilise CSS Modules / styled-components → extraire les styles en `<style>` inline
+- Taille max par appel LLM : tronquer à 6000 tokens si nécessaire (prendre App + 2 composants max)
+
+#### Livrable B — Nouvelle route dans `routes.py` (Claude)
+
+```python
+POST /api/retro-genome/generate-from-zip
+Body: { "import_id": str }
+
+→ Lit le ZIP depuis index.json + file_path (créé par /api/import/upload)
+→ Appelle react_to_tailwind.convert()
+→ Sauvegarde dans static/templates/{safe_name}.html
+→ Retourne { "template_name": str, "status": "ok" }
+```
+
+#### Livrable C — Feedback (même pattern que M118)
+
+Réutiliser le mécanisme de polling/job_id développé en M118. Pas de duplication — extraire en helper partagé si besoin.
+
+#### Ce que GEMINI fera ensuite (M120)
+
+Connecter `FrdIntent.generateTailwind()` pour détecter le type de l'import (`svg` vs `zip`/`jsx`) et appeler la bonne route. Unifier l'indicateur de chargement Sullivan.
+
+**Fichiers à créer/modifier :**
+- `Backend/Prod/retro_genome/react_to_tailwind.py` **[NEW]**
+- `Backend/Prod/retro_genome/routes.py` — ajout route `generate-from-zip` **[MODIFY]**
+
+**Note d'architecture :** Les deux modules M118 (`svg_to_tailwind.py`) et M119 (`react_to_tailwind.py`) partagent le même pattern :
+```
+Source brute → Extraction sémantique → LLM → static/templates/ → FRD Editor
+```
+À terme ils pourraient être unifiés dans un `converter_factory.py`.
+
+**Critères de sortie :**
+- [ ] `POST /api/retro-genome/generate-from-zip` avec `import_id` d'un ZIP React → retourne `{ template_name, status }`
+- [ ] Le fichier `.html` généré est dans `static/templates/` et chargeable par `GET /api/frd/file?name=...`
+- [ ] Les classes Tailwind du React source sont **préservées** (pas réécrites)
+- [ ] Les imports React / TypeScript sont **absents** du HTML généré
+- [ ] Fonctionne sur un ZIP Next.js standard (App Router ou Pages Router)
 
 ---
 

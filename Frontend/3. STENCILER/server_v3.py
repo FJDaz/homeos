@@ -2,6 +2,7 @@
 """
 AetherFlow Server V3 - FastAPI Foundation
 Mission 85: BKD Routes & Sullivan Pulse
+Mission 118: Forge Tailwind AI (Updated 2026-03-31)
 """
 
 import os
@@ -235,22 +236,15 @@ class KimiResultResponse(BaseModel):
 class WireRequest(BaseModel):
     html: str
 
-# --- MISSION 115 : CURRENT FRD FILE ---
-_CURRENT_FRD_FILE: Optional[str] = None
+# --- MISSION 116 : CURRENT FRD CONTEXT ---
+_CURRENT_FRD_CONTEXT = {"type": None, "id": None, "name": None, "html_template": None}
+_NEW_IMPORTS_COUNT = 0
 
 class CurrentFileRequest(BaseModel):
-    name: str
-
-@app.post("/api/frd/set-current")
-async def set_current_frd_file(req: CurrentFileRequest):
-    global _CURRENT_FRD_FILE
-    _CURRENT_FRD_FILE = req.name
-    logger.info(f"Current FRD file set to: {_CURRENT_FRD_FILE}")
-    return {"status": "ok", "name": _CURRENT_FRD_FILE}
-
-@app.get("/api/frd/current")
-async def get_current_frd_file():
-    return {"name": _CURRENT_FRD_FILE}
+    type: str
+    id: Optional[str] = None
+    name: Optional[str] = None
+    html_template: Optional[str] = None
 
 # --- GLOBAL STATE (SULLIVAN) ---
 _ARBITRATOR = SullivanArbitrator()
@@ -314,6 +308,23 @@ app.add_middleware(
 )
 
 app.include_router(retro_genome_router, prefix="/api")
+
+# --- MISSION 116 : CURRENT FRD CONTEXT ROUTES ---
+@app.post("/api/frd/set-current")
+async def set_current_frd_context(req: CurrentFileRequest):
+    global _CURRENT_FRD_CONTEXT
+    _CURRENT_FRD_CONTEXT = {
+        "type": req.type,
+        "id": req.id,
+        "name": req.name,
+        "html_template": req.html_template
+    }
+    logger.info(f"Current FRD context set: {_CURRENT_FRD_CONTEXT}")
+    return {"status": "ok", "context": _CURRENT_FRD_CONTEXT}
+
+@app.get("/api/frd/current")
+async def get_current_frd_context():
+    return _CURRENT_FRD_CONTEXT
 
 # Exception handler global — ajoute CORS sur les 500 non catchés
 @app.exception_handler(Exception)
@@ -1093,7 +1104,7 @@ async def get_wire_source(endpoint: str = Query(...)):
         handler_source = "# Handler non trouvé pour cet endpoint"
         lines_range = [0, 0]
 
-        # Chercher le handler dans server_v3.py
+        # Chercher le handler dans# server_v3.py — Force reload M118
         for node in ast.walk(tree):
             if isinstance(node, ast.AsyncFunctionDef) or isinstance(node, ast.FunctionDef):
                 for decorator in node.decorator_list:
@@ -1129,14 +1140,16 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
     exports_dir.mkdir(parents=True, exist_ok=True)
     
     # Save file
-    safe_name = (filename or file.filename or "upload").replace(" ", "_").replace("/", "_")[:40]
+    safe_name = (filename or file.filename or "upload").replace(" ", "_").replace("/", "_")[:128]
     timestamp_str = datetime.now().strftime('%H%M%S')
     today_str = datetime.now().strftime('%Y-%m-%d')
     
     ext = Path(file.filename).suffix.lower() if file.filename else ''
     stored_filename = f"IMPORT_{safe_name}_{timestamp_str}{ext}"
     
-    file_path = exports_dir / stored_filename
+    today_dir = exports_dir / today_str
+    today_dir.mkdir(parents=True, exist_ok=True)
+    file_path = today_dir / stored_filename
     content = await file.read()
     file_path.write_bytes(content)
     
@@ -1150,7 +1163,7 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
         
         new_entry = {
             "id": f"{today_str}_{timestamp_str}_{safe_name}",
-            "name": safe_name + ext,
+            "name": Path(safe_name).stem + ext,
             "timestamp": datetime.now().isoformat(),
             "file_path": f"{today_str}/{stored_filename}",
             "date": today_str,

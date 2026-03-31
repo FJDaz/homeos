@@ -105,6 +105,7 @@
         <div class="flex items-center gap-6">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">frd editor</span>
+                <span id="frd-import-context" class="hidden px-2 py-0.5 bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0] text-[9px] font-bold tracking-widest rounded"></span>
             </div>
             <!-- Mode Switcher -->
             <div class="flex bg-white border border-figma-sep rounded-md p-0.5 shadow-sm">
@@ -163,6 +164,40 @@
 
     <!-- Main Workspace -->
     <div id="workspace-container" class="flex-1 flex overflow-hidden">
+        
+        <!-- Mission 117 : Intent Panel (Fusion Intent Viewer) -->
+        <div id="intent-panel" class="hidden w-[380px] border-r border-figma-sep flex flex-col bg-[#f7f6f2] shadow-sm transform transition-transform duration-300 -translate-x-full">
+            <div class="h-[48px] flex items-center justify-between px-4 border-b border-figma-sep bg-[#f0efeb]">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#8cc63f]"></span>
+                    <span class="text-[11px] font-bold tracking-widest text-[#3d3d3c] uppercase">registre des intentions</span>
+                </div>
+                <button id="btn-close-intent" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 no-scrollbar">
+                <table class="w-full border-collapse text-[11px]">
+                    <thead>
+                        <tr class="border-b border-figma-sep">
+                            <th class="text-left py-2 font-bold text-gray-400 uppercase tracking-tighter">id</th>
+                            <th class="text-left py-2 font-bold text-gray-400 uppercase tracking-tighter">type</th>
+                            <th class="text-left py-2 font-bold text-gray-400 uppercase tracking-tighter">intention</th>
+                            <th class="text-right py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="intent-list" class="divide-y divide-gray-100">
+                        <!-- Peuplé par FrdIntent.feature.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-4 border-t border-figma-sep bg-[#f0efeb]">
+                <button id="btn-generate-tailwind" class="w-full py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold uppercase tracking-widest rounded-md shadow-sm hover:opacity-90 transition-all">
+                    générer le template tailwind
+                </button>
+            </div>
+        </div>
+
         <div id="main-col" class="flex-1 flex flex-col overflow-hidden">
             <div id="preview-pane" class="flex-1 bg-gray-200 relative overflow-hidden">
                 <div id="drop-overlay">
@@ -341,7 +376,7 @@
     </div>
 
     <!-- JS Logic Modular -->
-    <script type="module" src="/static/js/frd/frd_main.js?v=20260325"></script>
+    <script type="module" src="/static/js/frd/frd_main.js?v=20260331"></script>
 
     <script>
         // --- Vanilla JS Inline ---
