@@ -79,6 +79,23 @@
                 cursor: default;
                 pointer-events: none;
             }
+            #homeos-global-nav .hn-actions {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                margin-left: auto;
+            }
+            #homeos-global-nav .hn-project {
+                font-size: 10px;
+                text-transform: lowercase;
+                font-weight: 700;
+                color: #8cc63f;
+                background: #fff;
+                padding: 2px 8px;
+                border-radius: 12px;
+                border: 1px solid #e5e5e5;
+                letter-spacing: 0.05em;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -114,6 +131,27 @@
             tabs.appendChild(a);
         });
         nav.appendChild(tabs);
+
+        const actions = document.createElement('div');
+        actions.className = 'hn-actions';
+        
+        const projectLabel = document.createElement('div');
+        projectLabel.id = 'hn-active-project';
+        projectLabel.className = 'hn-project';
+        projectLabel.textContent = 'chargement...';
+        actions.appendChild(projectLabel);
+        
+        nav.appendChild(actions);
+
+        // Fetch active project
+        fetch('/api/projects/active')
+            .then(r => r.json())
+            .then(data => {
+                projectLabel.textContent = data.name || 'sans projet';
+            })
+            .catch(() => {
+                projectLabel.textContent = 'erreur projet';
+            });
 
         document.body.insertBefore(nav, document.body.firstChild);
         document.body.style.paddingTop = '48px';

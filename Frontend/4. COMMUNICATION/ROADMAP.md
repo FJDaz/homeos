@@ -26,113 +26,144 @@
 
 ### Mission 109C — Font Advisor + UI Landing
 
-**STATUS: 🔵 BACKLOG**
-**ACTOR: CLAUDE (routes + advisor) + GEMINI (UI landing.html)**
-**DÉPENDANCE: M109A ✅ M109B ✅**
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-31**
 
-#### Routes `server_v3.py` (Claude)
-
-```
-POST /api/sullivan/font-upload   → multipart TTF/OTF/WOFF/WOFF2
-                                  → classifier + webgen + advisor
-                                  → { classification, webfont, sullivan_commentary }
-
-GET  /api/sullivan/fonts         → liste fontes dans /static/fonts/
-DELETE /api/sullivan/fonts/{slug} → supprime /static/fonts/{slug}/
-```
-
-#### `sullivan_font_advisor.py` (Claude)
-
-Combine `FontClassifier` + `typography_db.json` → commentaire Sullivan :
-
-> *"Axe oblique à 12°, contraste modéré (ratio 3.1), empattements à congé. Garalde — famille aldine. Proche de Sabon par la modération du contraste. Pour accompagner : privilégie un Grotesque humaniste plutôt qu'un Géométrique — l'un dialogue, l'autre concurrence."*
-
-#### UI `landing.html` — section `#font-manager` (Gemini)
-
-- Drop zone `.ttf/.otf/.woff/.woff2`
-- Carte par fonte : badge Vox-ATypI + preview live + poids + warning licensing + commentaire Sullivan + snippet `@font-face` Monaco read-only
-- Badge "variable font" si détecté
-- Bouton "ajouter à stenciler.css"
-
-**Bootstrap Gemini :**
-```
-Lire static/templates/landing.html — ne pas toucher les sections existantes.
-Lire static/css/stenciler.css — tokens V1.
-Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
-Ajouter UNIQUEMENT la section #font-manager après #import-section.
-Pas d'uppercase. Pas d'emojis. Geist 12px. #8cc63f pour accents.
-```
-
-**Critères de sortie :**
-- [ ] Upload `.otf` Garalde → classification "garaldes", axe ~12°, contraste ~3
-- [ ] Upload variable font → `is_variable: true`, `font-weight: 100 900`
-- [ ] Preview landing → fonte rendue live dans la carte
-- [ ] Commentaire Sullivan → catégorie + référence proche + suggestion pairing
-- [ ] Warning licensing sur fonte commerciale connue
+> Archivée dans ROADMAP_ACHIEVED.md
 
 ---
 
 ## Thème 2 — Architecture User / Project
 
-### Mission 111 — Multi-project scoping
+**Contexte :** HoméOS est actuellement mono-projet global. En cours pédagogique, chaque étudiant travaille sur un projet distinct. Sans scoping, imports, manifests et templates se mélangent.
+
+**Stratégie de découpage :** deux passes pour limiter le risque de régression. M111-A = backend pur (sans toucher les URLs). M111-B = UI sur base stable.
+
+**Structure cible :**
+```
+ROOT_DIR/
+  projects/
+    {uuid}/
+      manifest.json
+      imports/
+      exports/
+      metadata.json     ← { id, name, created_at }
+  static/fonts/         ← global (partagé entre projets)
+```
+
+---
+
+### Mission 111-A — Multi-project : backend isolation
 
 **STATUS: 🔵 BACKLOG**
 **DATE: 2026-03-31**
-**ACTOR: CLAUDE (backend) + GEMINI (UI)**
+**ACTOR: CLAUDE (CODE DIRECT)**
 
-**Contexte :** HoméOS est actuellement mono-projet global. En cours pédagogique, chaque étudiant travaille sur un projet distinct. Sans scoping, les imports, manifests et templates se mélangent.
+**Périmètre strict :** `server_v3.py` uniquement. Pas de changement d'URL. Le `project_id` transite par **session FastAPI** (cookie côté serveur), pas en query param.
 
 #### Modèle de données
 
 ```python
-# Table projects (SQLite ou JSON simple)
+# projects/{uuid}/metadata.json
 {
-  "id": "uuid",
-  "name": "Projet Clea",
-  "user_id": "fjd",          # table users existante
-  "created_at": "iso8601",
-  "manifest_path": "exports/projects/{id}/manifest.json",
-  "imports_dir": "exports/projects/{id}/imports/",
-  "active": true             # un seul actif à la fois par user
+  "id": "uuid4",
+  "name": "Projet Cléa",
+  "created_at": "2026-03-31T14:00:00",
 }
+# Session FastAPI : request.session["active_project_id"] = uuid
 ```
 
-#### Routes backend (Claude)
+#### Helper de résolution de chemin
+
+```python
+def get_project_dir(project_id: str) -> Path:
+    return ROOT_DIR / "projects" / project_id
+
+def get_manifest_path(project_id: str) -> Path:
+    return get_project_dir(project_id) / "manifest.json"
+
+def get_imports_dir(project_id: str) -> Path:
+    return get_project_dir(project_id) / "imports"
+```
+
+#### Migration douce au démarrage
+
+```python
+# lifespan() : si ROOT_DIR/exports/manifest.json existe → créer projet "default"
+# et y copier manifest + imports/ (sans supprimer les originaux)
+# → session["active_project_id"] = "default"
+```
+
+#### Routes à ajouter
 
 ```
-GET    /api/projects              → liste projets de l'user courant
-POST   /api/projects              → créer projet { name }
-POST   /api/projects/{id}/activate → set active, désactive les autres
-DELETE /api/projects/{id}         → supprime projet + fichiers
-GET    /api/projects/active       → projet actif courant
+GET    /api/projects              → liste { id, name, created_at }[]
+POST   /api/projects              → { name } → créer dossier + metadata.json
+POST   /api/projects/{id}/activate → session["active_project_id"] = id
+DELETE /api/projects/{id}         → supprime dossier (sécurité : pas le projet actif)
+GET    /api/projects/active       → { id, name } du projet en session
 ```
 
-#### Scoping du pipeline
+#### Endpoints existants à scoper (session-based, sans changer leur signature)
 
-Tous les endpoints existants reçoivent le `project_id` depuis la session :
-- `POST /api/import/upload` → sauvegarde dans `imports_dir` du projet actif
-- `GET /api/manifest/get` → lit depuis `manifest_path` du projet actif
-- `POST /api/preview/run` → preview isolée par projet
-- Wire mode, intent analysis → scopés au projet actif
+```
+GET  /api/manifest/get            → lit get_manifest_path(session[active_project_id])
+POST /api/manifest/save           → écrit idem
+POST /api/import/upload           → sauvegarde dans get_imports_dir(session[...])
+GET  /api/retro-genome/imports    → liste depuis get_imports_dir(session[...])
+POST /api/preview/run             → isolée par projet (sous-dossier exports/)
+```
 
-#### UI (Gemini)
+**Ne pas toucher :**
+- URLs existantes (aucun `?p=` en query param)
+- `frd/files` (templates FRD = globaux, pas scopés au projet)
+- `static/fonts/` (global)
+- `bkd_service.py` (hors périmètre M111-A)
+- Toute logique JS frontend
 
-- Landing : sélecteur de projet en tête de page + bouton "nouveau projet"
-- Header global (bootstrap.js) : nom du projet actif affiché à droite des tabs
+**Critères de sortie :**
+- [ ] `POST /api/projects` → crée `projects/{uuid}/` + `metadata.json` + `imports/`
+- [ ] `POST /api/projects/{id}/activate` → session mise à jour
+- [ ] `GET /api/manifest/get` → lit dans le bon dossier projet
+- [ ] Migration douce : si manifest racine existe → projet "default" créé au boot
+- [ ] Test manuel : deux sessions browser → projets distincts, pas de collision
+
+---
+
+### Mission 111-B — Multi-project : UI landing + header
+
+**STATUS: 🔵 BACKLOG**
+**DÉPENDANCE: M111-A ✅**
+**ACTOR: GEMINI (landing.html + bootstrap.js)**
+
+#### UI landing.html
+
+- Section `#project-switcher` en tête (avant `#import-section`) :
+  - Liste des projets (`GET /api/projects`) → cartes cliquables
+  - Bouton "nouveau projet" → prompt nom → `POST /api/projects` + activate
+  - Projet actif surligné (bordure `#8cc63f`)
+- Import scoping : `handleFiles` passe le projet actif (via état JS, pas URL)
+
+#### UI bootstrap.js / header global
+
+- Afficher le nom du projet actif à droite des tabs (petit texte 11px, couleur `#8cc63f`)
+- Fetch `GET /api/projects/active` au chargement
 
 **Bootstrap Gemini :**
 ```
-Lire static/templates/landing.html.
-Lire static/js/bootstrap.js — ajouter projet actif dans .hn-brand ou pipeline-actions.
+Lire static/templates/landing.html — NE PAS toucher drop zone ni import-section.
+Lire static/js/bootstrap.js — ajouter nom projet actif dans .pipeline-actions (droite).
+Lire static/css/stenciler.css — tokens V1.
 Lire Frontend/1. CONSTITUTION/LEXICON_DESIGN.json.
-NE PAS modifier le drop zone ni les sections existantes.
+Pas d'uppercase. Pas d'emojis. Geist 12px. #8cc63f accents.
+NE PAS ajouter ?p= dans les URLs.
 ```
 
 **Critères de sortie :**
-- [ ] Deux projets distincts avec imports, manifests et previews isolés
-- [ ] Switching de projet → pipeline complet rebascule sans collision
-- [ ] Projet actif visible dans le header global
-- [ ] Nouveau projet → landing vierge (pas d'imports résiduels)
+- [ ] Deux projets distincts → imports et manifests isolés sans collision
+- [ ] Switching projet depuis la landing → pipeline rebascule
+- [ ] Nom du projet actif visible dans le header global
+- [ ] Nouveau projet → landing vierge (aucun import résiduel du projet précédent)
 
 ---
 

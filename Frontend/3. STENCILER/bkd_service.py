@@ -128,7 +128,7 @@ BKD_DB_PATH = ROOT_DIR / "db" / "projects.db"
 PROJECTS_DIR = ROOT_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 
-def bkd_db_con():
+def init_bkd_db():
     import sqlite3
     BKD_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(str(BKD_DB_PATH))
@@ -141,8 +141,21 @@ def bkd_db_con():
             last_opened TEXT DEFAULT (datetime('now'))
         )
     """)
+    default_path = str(PROJECTS_DIR / "homéos-default")
+    (PROJECTS_DIR / "homéos-default").mkdir(parents=True, exist_ok=True)
+    con.execute("INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
+                ("homéos-default", "homéos default", default_path))
     con.commit()
-    return con
+    con.close()
+
+
+init_bkd_db()
+
+
+def bkd_db_con():
+    import sqlite3
+    return sqlite3.connect(str(BKD_DB_PATH), check_same_thread=False)
+
 
 # Global State for Active Project
 _ACTIVE_PROJECT_ID = "homéos-default"

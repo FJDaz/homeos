@@ -6,6 +6,18 @@
 
 ---
 
+## Mission 109C — Font Advisor + UI Landing (Sullivan Typography Engine)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-31**
+**ACTOR: CLAUDE (routes + advisor) + GEMINI (UI landing.html)**
+
+- `POST /api/sullivan/font-upload` → classifier + webgen + advisor → `{ classification, webfont, sullivan_commentary }`
+- `GET /api/sullivan/fonts` + `DELETE /api/sullivan/fonts/{slug}`
+- `sullivan_font_advisor.py` : combine FontClassifier + typography_db.json → commentaire Sullivan (catégorie Vox-ATypI + référence proche + suggestion pairing)
+- `landing.html` section `#font-manager` : drop zone, carte par fonte (badge Vox-ATypI, preview live, @font-face snippet Monaco, warning licensing, badge variable font)
+
+---
+
 ## Mission 107 — Navigation globale cohérente (bootstrap.js)
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-03-30**

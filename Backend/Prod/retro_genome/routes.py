@@ -24,6 +24,13 @@ from loguru import logger
 from .svg_parser import parse_figma_svg
 from .archetype_detector import ArchetypeDetector
 
+# Mission 111: Project Scoping
+try:
+    from bkd_service import get_active_project_path
+except ImportError:
+    # Fallback for standalone tests if needed
+    def get_active_project_path(): return Path(__file__).parent.parent.parent.parent / "projects" / "homéos-default"
+
 router = APIRouter(prefix="/retro-genome", tags=["Retro Genome"])
 
 # Singleton
@@ -214,22 +221,23 @@ async def retro_genome_upload_svg(data: SVGUpload):
     """
     Ingress SVG (Mission 41).
     Parse le SVG Figma structuré et détecte l'archétype sans passer par la vision.
-    Sauvegarde le SVG brut dans exports/retro_genome/ pour inspection.
+    Sauvegarde le SVG brut dans {project}/imports/ pour inspection.
     """
     # Sauvegarde SVG brut pour inspection visuelle dans un dossier daté
-    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    p_path = get_active_project_path()
+    base_imports_dir = p_path / "imports"
     today_str = datetime.now().strftime('%Y-%m-%d')
-    exports_dir = base_exports_dir / today_str
-    exports_dir.mkdir(parents=True, exist_ok=True)
+    imports_dir = base_imports_dir / today_str
+    imports_dir.mkdir(parents=True, exist_ok=True)
     
     safe_name = (data.name or "frame").replace(" ", "_").replace("/", "_")[:40]
     timestamp_str = datetime.now().strftime('%H%M%S')
     filename = f"SVG_{safe_name}_{timestamp_str}.svg"
-    svg_path = exports_dir / filename
+    svg_path = imports_dir / filename
     svg_path.write_text(data.svg, encoding="utf-8")
     
-    # Update index.json
-    index_path = base_exports_dir / "index.json"
+    # Update index.json (Scoped to Project)
+    index_path = base_imports_dir / "index.json"
     try:
         if index_path.exists():
             index_data = json.loads(index_path.read_text(encoding="utf-8"))
@@ -305,8 +313,11 @@ async def retro_genome_upload(
     primary_image = images[0]
     logger.info(f"[RetroGenome] Upload received: {len(images)} images. Primary: {primary_image.filename}")
 
-    # Exports directory
-    exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
+    # Project directories
+    p_path = get_active_project_path()
+    imports_dir = p_path / "imports"
+    exports_dir = p_path / "exports"
+    imports_dir.mkdir(parents=True, exist_ok=True)
     exports_dir.mkdir(parents=True, exist_ok=True)
     
     # Save as upload_latest.png for reference
@@ -486,25 +497,26 @@ async def get_notifications():
 
 @router.get("/imports")
 async def get_imports():
-    """Mission 101 bis: Retourne la liste des imports depuis index.json."""
-    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
-    index_path = base_exports_dir / "index.json"
+    """Mission 101 bis: Retourne la liste des imports depuis index.json du projet actif."""
+    p_path = get_active_project_path()
+    index_path = p_path / "imports" / "index.json"
     if index_path.exists():
         return JSONResponse(content=json.loads(index_path.read_text(encoding="utf-8")))
     return {"imports": []}
 
-@router.get("/import-analysis")
-async def get_import_analysis(id: str):
+@router.get("/import-analysis-svg")
+async def get_import_analysis_svg(id: str):
     """Retourne les éléments analysés d'un import SVG au format components[] pour l'intent viewer."""
-    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
-    index_path = base_exports_dir / "index.json"
+    p_path = get_active_project_path()
+    imports_dir = p_path / "imports"
+    index_path = imports_dir / "index.json"
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.json not found")
     index_data = json.loads(index_path.read_text(encoding="utf-8"))
     entry = next((i for i in index_data.get("imports", []) if i["id"] == id), None)
     if not entry:
         raise HTTPException(status_code=404, detail="Import not found")
-    svg_path = base_exports_dir / entry["svg_path"]
+    svg_path = imports_dir / entry["svg_path"]
     if not svg_path.exists():
         raise HTTPException(status_code=404, detail="SVG file not found")
     analysis = parse_figma_svg(svg_path.read_text(encoding="utf-8"))
@@ -529,8 +541,9 @@ async def get_import_analysis(id: str):
 @router.get("/import-content")
 async def get_import_content(path: str):
     """Lit le contenu d'un SVG importé via son path relatif."""
-    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
-    target_path = base_exports_dir / path
+    p_path = get_active_project_path()
+    imports_dir = p_path / "imports"
+    target_path = imports_dir / path
     if target_path.exists() and target_path.suffix == ".svg":
         return {"svg": target_path.read_text(encoding="utf-8")}
     raise HTTPException(status_code=404, detail="SVG not found")
@@ -538,8 +551,8 @@ async def get_import_content(path: str):
 @router.post("/imports/clear")
 async def clear_imports():
     """Vide la liste des imports (index.json → liste vide). Les SVG restent sur disque."""
-    base_exports_dir = Path(__file__).parent.parent.parent.parent / "exports" / "retro_genome"
-    index_path = base_exports_dir / "index.json"
+    p_path = get_active_project_path()
+    index_path = p_path / "imports" / "index.json"
     index_path.write_text(json.dumps({"imports": []}, ensure_ascii=False), encoding="utf-8")
     return {"status": "ok"}
 
