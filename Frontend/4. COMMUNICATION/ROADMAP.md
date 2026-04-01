@@ -157,93 +157,22 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ---
 
-### Mission 130 — Étiquette "edit code" + Monaco inline sync
+### Mission 130 — Mode Inspect In-Preview & Monaco Popover
 
 **STATUS: 🔵 BACKLOG**
 **DATE: 2026-04-01**
-**ACTOR: CLAUDE (WsCanvas.js + WsMonaco.js) + GEMINI (workspace.html drawer)**
-**DÉPENDANCE: M129 ✅ (toolbar select + screens remplis)**
+**ACTOR: CLAUDE + GEMINI**
+**DÉPENDANCE: M130-A/M130-B ✅ (Mise en place de l'aperçu)**
 
-**Contexte :** Avec l'outil `select` actif, sélectionner un screen sur le canvas doit ouvrir un accès direct au code HTML éditable. L'étiquette "edit code" apparaît sur le cadre, le click ouvre Monaco en drawer latéral avec sync bidirectionnelle hover/select entre l'iframe et l'éditeur.
+**Contexte :** Le tiroir latéral de code massif est abandonné au profit d'une expérience d'édition ultra-ciblée. Une fois entré dans le **Mode Aperçu (Plein Écran)** d'un screeen, le `Mode Inspect` (tel qu'il a été implémenté historiquement dans le FRD Editor via `FrdPreview.feature.js`) s'active **par défaut**. Au clic sur un élément dans l'aperçu, un éditeur Monaco flottant ("popover" ou bulle) apparaît au flanc immédiat de l'élément cliqué. Il ne contient **que** le code HTML (extrait) correspondant au composant inspecté.
 
-#### Livrable A — Étiquette "edit code" sur screen sélectionné (Claude — WsCanvas.js)
+**Livrables :**
+1. **Activation Inspecteur (In-Preview) :** Au déclenchement du Preview, injection de la logique `Inspect Mode` avec highlight visuel au survol des éléments de l'iframe.
+2. **Popover Monaco Contextuel :** Cible sélectionnée → apparition d'un conteneur flottant à proximité directe (via Popper.js ou calcul de bounding client rect).
+3. **Édition d'Extrait (Grafting) :** Ce Monaco ne parse que l'outerHTML du nœud cible. À la sauvegarde (`Cmd+S` ou bouton check), l'extrait modifié remplace proprement le nœud dans le DOM distant (Server-side ou via postMessage direct) et le composant se met à jour localement.
+4. **Cohérence Ergonomique :** Design de la bulle Monaco discret et raccord au design système HoméOS.
 
-Quand `activeMode === 'select'` et screen cliqué :
-- Afficher un overlay `<foreignObject class="ws-edit-badge">` positionné haut-gauche du cadre :
-  ```
-  [ </> edit code ]   ← 80×24px, fond blanc, border 1px #e5e5e5, border-radius 6px, Geist 11px
-  ```
-- Clic sur le badge → émet `ws:open-monaco` avec `{ screenId, templateName, fileUrl }`
-- Badge disparaît si screen désélectionné ou outil changé
-
-#### Livrable B — Drawer Monaco latéral (Gemini — workspace.html + workspace.css)
-
-Drawer droit `#ws-monaco-drawer` (40% largeur, hauteur 100%, z-index Z5) :
-- Fermé par défaut (`transform: translateX(100%)`)
-- Ouvert sur `ws:open-monaco` → slide-in 200ms
-- Header : nom du screen + bouton ✕ ferme le drawer
-- Body : `<div id="ws-monaco-container">` (Monaco s'y monte)
-
-#### Livrable C — WsMonaco.js (Claude)
-
-```javascript
-// static/js/workspace/WsMonaco.js
-export class WsMonaco {
-    open(screenId, fileUrl)
-    // → fetch fileUrl → charger dans Monaco (html, mode)
-    // → écoute window.addEventListener('message') depuis iframe
-
-    _onIframeHover(selector)
-    // → trouver la ligne dans le source HTML correspondant au selector
-    // → Monaco decorations : fond #fffbcc sur la plage de lignes
-
-    _onIframeSelect(selector)
-    // → Monaco revealLineInCenter() + setPosition() sur la ligne
-
-    save()
-    // → Cmd+S → POST /api/frd/save { name, content } → postMessage iframe 'reload'
-}
-```
-
-#### Livrable D — Script injecté dans les iframes (Claude)
-
-Chaque iframe de screen reçoit un script injecté au chargement (`iframe.onload`) :
-```javascript
-// Injecté dans l'iframe
-document.addEventListener('mouseover', e => {
-    window.parent.postMessage({ type: 'ws-hover', selector: getCssPath(e.target) }, '*');
-});
-document.addEventListener('click', e => {
-    window.parent.postMessage({ type: 'ws-select', selector: getCssPath(e.target) }, '*');
-});
-// getCssPath : génère un sélecteur CSS unique (tagname + nth-child)
-```
-
-**Fichiers à créer :**
-- `static/js/workspace/WsMonaco.js`
-
-**Fichiers à modifier :**
-- `static/js/workspace/WsCanvas.js` — Livrable A (badge) + Livrable D (inject script)
-- `static/templates/workspace.html` — Livrable B (drawer Monaco) (Gemini)
-- `static/css/workspace.css` — drawer styles (Gemini)
-
-**Bootstrap Gemini :**
-```
-Lire static/templates/workspace.html (M129 livré).
-Lire static/css/workspace.css.
-Lire docs/06_Design_Assets/assets/sullivan_editor_base_accurate/DESIGN.md.
-Ajouter UNIQUEMENT #ws-monaco-drawer : drawer droite 40%, slide-in/out, header + #ws-monaco-container.
-Border-radius 20px header. Source Sans 3. NE PAS toucher le reste.
-```
-
-**Critères de sortie :**
-- [ ] Outil `select` + clic screen → badge `[ </> edit code ]` visible haut-gauche du cadre
-- [ ] Clic badge → drawer Monaco slide-in avec le HTML du screen chargé
-- [ ] Hover élément dans l'iframe → ligne highlight Monaco (fond jaune pâle)
-- [ ] Clic élément dans l'iframe → curseur Monaco positionné sur la ligne
-- [ ] Cmd+S dans Monaco → save + iframe reload
-- [ ] Badge disparaît si désélection ou changement d'outil
-- [ ] Pas de régression M129
+---
 
 ---
 
