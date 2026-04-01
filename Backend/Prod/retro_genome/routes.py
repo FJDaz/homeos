@@ -513,11 +513,37 @@ async def get_notifications():
 @router.get("/imports")
 async def get_imports():
     """Mission 101 bis: Retourne la liste des imports depuis index.json du projet actif."""
+    import shutil
+    from pathlib import Path as _Path
     p_path = get_active_project_path()
     index_path = p_path / "imports" / "index.json"
-    if index_path.exists():
-        return JSONResponse(content=json.loads(index_path.read_text(encoding="utf-8")))
-    return {"imports": []}
+    if not index_path.exists():
+        return {"imports": []}
+
+    data = json.loads(index_path.read_text(encoding="utf-8"))
+    updated = False
+
+    # Stenciler static/templates dir (pour servir via /api/frd/file)
+    stenciler_root = _Path(__file__).parent.parent.parent.parent / "Frontend" / "3. STENCILER" / "static" / "templates"
+
+    for entry in data.get("imports", []):
+        if entry.get("type") == "html" and not entry.get("html_template"):
+            file_path = entry.get("file_path") or entry.get("svg_path")
+            if file_path:
+                src = p_path / "imports" / file_path
+                if src.exists():
+                    tpl_name = f"import_backfill_{entry['id']}.html"
+                    dst = stenciler_root / tpl_name
+                    if not dst.exists():
+                        shutil.copy2(str(src), str(dst))
+                    entry["html_template"] = tpl_name
+                    entry["elements_count"] = 0
+                    updated = True
+
+    if updated:
+        index_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    return JSONResponse(content=data)
 
 @router.get("/import-analysis-svg")
 async def get_import_analysis_svg(id: str):

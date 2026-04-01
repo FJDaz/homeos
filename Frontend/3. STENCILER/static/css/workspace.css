@@ -1,0 +1,221 @@
+/* WORKSPACE DESIGN SYSTEM (Mission 127 V2) */
+
+:root {
+    --homeos-green: #A3CD54;
+    --homeos-dark: #1a1a1a;
+    --homeos-gray: #f5f5f5;
+    --homeos-border: #e5e5e5;
+}
+
+/* Base Styles */
+body {
+    background-color: #fff;
+    cursor: default;
+}
+
+/* Background Grid (Dot Grid) */
+.bg-dot-grid {
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Glass-morphism Panels */
+.glass-card {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.rounded-custom {
+    border-radius: 20px;
+}
+
+/* Layout Utilities */
+.btn-action {
+    transition: all 0.2s ease;
+}
+.btn-action:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Imports (Left Panel) */
+#ws-import-list {
+    scrollbar-width: thin;
+}
+
+.import-card-workspace {
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+.import-card-workspace:hover {
+    border-color: var(--homeos-green);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(163, 205, 84, 0.1);
+}
+.import-card-workspace:active {
+    cursor: grabbing;
+}
+
+/* Screen Shell (Z2) - In SVG */
+.ws-screen-shell {
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.12));
+}
+.ws-screen-shell.active {
+    filter: drop-shadow(0 15px 45px rgba(0,0,0,0.2));
+}
+
+.ws-screen-header {
+    cursor: grab;
+    fill: #fff;
+    stroke: #f0f0f0;
+    stroke-width: 1px;
+}
+.ws-screen-header:active {
+    cursor: grabbing;
+}
+
+.ws-screen-title {
+    fill: #1a1a1a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ws-btn-close {
+    cursor: pointer;
+    fill: #f5f5f5;
+    transition: fill 0.2s ease;
+}
+.ws-btn-close:hover {
+    fill: #ff5f56;
+}
+
+/* Assistant Sullivan (Bottom) */
+.ws-mode-btn.active {
+    background-color: var(--homeos-green) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(163, 205, 84, 0.3);
+}
+
+#ws-chat-input::placeholder {
+    color: #cbd5e1;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+/* Vertical Text for Badges */
+.vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+/* Collapsable Panels (Mission 129/130-C) */
+#panel-screens, #panel-audit {
+    display: flex;
+    flex-direction: column;
+    transition: 
+        opacity 0.25s ease, 
+        transform 0.25s ease, 
+        max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 800px;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+}
+
+#panel-screens.collapsed, #panel-audit.collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-5px) translateX(-5px);
+}
+
+#badge-screens, #badge-audit {
+    transition: 
+        opacity 0.3s ease, 
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+        max-height 0.3s ease,
+        margin 0.3s ease;
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 50px; /* Approximate badge height */
+}
+
+.badge-hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+    transform: translateX(-15px) !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+}
+
+#badge-screens:hover, #badge-audit:hover {
+    padding-left: 1.5rem;
+}
+
+/* Toolbar Active State */
+.ws-tool-btn.active-tool {
+    background-color: #f8fafc;
+    color: var(--homeos-green);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* PREVIEW MODE (Mission 130-A) */
+body.preview-mode #ws-left-panels {
+    display: none !important;
+}
+
+body.preview-mode #ws-preview-overlay {
+    display: flex !important;
+}
+
+body.preview-mode #ws-preview-exit {
+    display: block !important;
+}
+
+body.preview-mode #ws-frd-btn-wrapper {
+    display: none !important;
+}
+
+body.preview-mode .bg-dot-grid {
+    background-image: none;
+}
+
+#ws-preview-overlay {
+    transition: all 0.3s ease;
+    padding: 0 !important; /* Brute immersion */
+}
+
+#ws-preview-frame-container {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff;
+}
+
+/* SVG Canvas Interaction */
+#ws-canvas {
+    touch-action: none;
+    user-select: none;
+    outline: none;
+}

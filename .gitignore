@@ -85,8 +85,17 @@ rag_index/
 *.temp
 
 # Modèles LLM locaux (trop lourds pour git)
-*.gguf
-*.bin
-*.pt
-*.safetensors
-*.gguf
+
+# AETHERFLOW — Artefacts de session Stenciler (générés dynamiquement, non versionnés)
+Frontend/3. STENCILER/static/templates/import_*.html
+Frontend/3. STENCILER/static/templates/reality_*.html
+Frontend/3. STENCILER/static/templates/import_backfill_*.html
+
+# Dossiers de travail temporaires
+tmp/
+free-claude-code/
+projects/
+
+# Venvs supplémentaires
+.venv_veille/
+

@@ -18,6 +18,11 @@ class SvgToTailwindConverter:
 
     def __init__(self):
         self._client = None
+        self._default_tokens = {
+            "colors": {"primary": "#8cc63f", "neutral": "#f7f6f2", "text": "#3d3d3c"},
+            "typography": {"body": "Geist Sans"},
+            "shape": {"border_radius": "6px"}
+        }
 
     @property
     def client(self):
@@ -27,6 +32,17 @@ class SvgToTailwindConverter:
             # On utilise le mode BUILD pour une meilleure qualité de génération
             self._client = GeminiClient(execution_mode="BUILD")
         return self._client
+
+    def _load_project_tokens(self) -> dict:
+        """Charge les tokens du projet actif s'ils existent."""
+        try:
+            from bkd_service import get_active_project_path
+            token_path = get_active_project_path() / "exports" / "design_tokens.json"
+            if token_path.exists():
+                return json.loads(token_path.read_text())
+        except Exception as e:
+            logger.warning(f"[SvgToTailwind] Failed to load project tokens: {e}")
+        return self._default_tokens
 
     def _strip_noise(self, svg_content: str) -> str:
         """1. Filtrage du bruit : strip <font>, <glyph>, <image> base64."""
@@ -70,8 +86,11 @@ class SvgToTailwindConverter:
         color_freq = Counter(colors).most_common(5)
         color_hint = ", ".join([f"{c} ({count}x)" for c, count in color_freq])
 
-        # 4. Prompt LLM
-        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow.
+        # 4. Chargement des tokens dynamiques (Mission 128)
+        tokens = self._load_project_tokens()
+
+        # 5. Prompt LLM
+        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en conversion Design-to-Code.
 MISSION : Traduis cette structure SVG (export Illustrator/Figma) en HTML sémantique avec Tailwind CSS.
 
 NOM DE L'IMPORT : {import_name}
@@ -79,12 +98,13 @@ NOM DE L'IMPORT : {import_name}
 STRUCTURE SVG (FILTRÉE) :
 {clean_svg[:50000]} 
 
-TOKENS DE DESIGN HOMÉOS (OBLIGATOIRE) :
-- Background principal : `#f7f6f2`
-- Texte principal : `#3d3d3c`
-- Couleur d'accent (boutons, liens actifs) : `#8cc63f`
-- Typographie : Geist Sans (via Google Fonts ou CDN)
-- Style : Minimaliste, précis, lowercase pour les labels secondaires.
+TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
+- Background principal : `{tokens['colors']['neutral']}`
+- Texte principal : `{tokens['colors']['text']}`
+- Couleur d'accent (boutons, liens actifs) : `{tokens['colors']['primary']}`
+- Typographie : {tokens['typography']['body']} (via Google Fonts ou CDN)
+- Border-radius : {tokens['shape'].get('border_radius', '6px')}
+- Style : Fidèle au design system spécifié ci-dessus.
 
 CONTRAINTES TECHNIQUES :
 - Utilise UNIQUEMENT Tailwind CSS (via CDN).
@@ -131,17 +151,21 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
         """
         logger.info(f"[SvgToTailwind] Converting image '{import_name}'...")
 
-        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision.
+        # Chargement des tokens dynamiques (Mission 128)
+        tokens = self._load_project_tokens()
+
+        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision-to-Code.
 MISSION : Analyse cette capture d'écran et convertis-la en HTML sémantique avec Tailwind CSS.
 
 NOM DE L'IMPORT : {import_name}
 
-TOKENS DE DESIGN HOMÉOS (OBLIGATOIRE) :
-- Background principal : `#f7f6f2`
-- Texte principal : `#3d3d3c`
-- Couleur d'accent (boutons, liens actifs) : `#8cc63f`
-- Typographie : Geist Sans (via Google Fonts ou CDN)
-- Style : Minimaliste, précis, lowercase pour les labels secondaires.
+TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
+- Background principal : `{tokens['colors']['neutral']}`
+- Texte principal : `{tokens['colors']['text']}`
+- Couleur d'accent (boutons, liens actifs) : `{tokens['colors']['primary']}`
+- Typographie : {tokens['typography']['body']} (via Google Fonts ou CDN)
+- Border-radius : {tokens['shape'].get('border_radius', '6px')}
+- Style : Fidèle au design system spécifié ci-dessus.
 
 CONTRAINTES TECHNIQUES :
 - Utilise UNIQUEMENT Tailwind CSS (via CDN).

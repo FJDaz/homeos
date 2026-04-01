@@ -6,6 +6,26 @@
 
 ---
 
+## Mission 126 — Cascade LLM : gemini-3.1-flash-lite en queue BUILD
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — gemini_client.py)**
+
+- `gemini-3.1-flash-lite` ajouté en fin des 3 cascades (FAST, BUILD, DEFAULT)
+- Mimo reste dernier recours dans `svg_to_tailwind.py` (après épuisement total Gemini)
+
+---
+
+## Mission 125 — DELETE /api/imports/{id}
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
+
+- `DELETE /api/imports/{import_id}` : retire de index.json + supprime fichier sur disque
+- 404 si id inconnu
+
+---
+
 ## Mission 124 — Fallback Mimo après quota Gemini épuisé
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**
@@ -5127,6 +5147,48 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 **DATE: 2026-03-30 | ACTOR: CLAUDE + GEMINI | STATUS: ✅ LIVRÉ**
 - backend.md Source of Truth, import design.md→backend.md, Monaco drawer landing
 
-## CR Mission 105 — Aperçu local
-**DATE: 2026-03-30 | ACTOR: CLAUDE + GEMINI | STATUS: ✅ LIVRÉ**
-- POST /api/preview/run + GET /api/preview/show, bouton Aperçu ↗ dans FRD editor
+
+## CR Mission 127 — Workspace V1 (Shell + Canvas Engine)
+**DATE: 2026-04-01 | ACTOR: GEMINI (HTML/CSS) + CLAUDE (JS) | STATUS: ✅ LIVRÉ**
+- Shell `workspace.html` + `workspace.css` fidèle à `screen.png` Stitch
+- Canvas SVG infini : zoom molette centré curseur, pan space+drag
+- `WsCanvas.js` : `addScreen()` (iframe + drag), `removeScreen()` (DELETE API)
+- `WsChat.js` : toggle CONSTRUCT/WIRE, upload `+` → `POST /api/import/upload` → `addScreen()`
+- Route `GET /workspace` dans `server_v3.py`
+- Landing : bouton "ouvrir dans workspace" via `POST /api/frd/set-current`
+
+## CR Mission 129 — Workspace Features Layer 2
+**DATE: 2026-04-01 | ACTOR: GEMINI + CLAUDE | STATUS: ✅ LIVRÉ (partiels M130-B/C)**
+- Panel Screens flottant gauche : liste + collapse → badge, re-clic → rouvre
+- Panel Audit UX : collapse → badge "AUDIT UX", transition
+- Toolbar verticale droite : 4 outils (select, drag, image, frame), état actif #A3CD54
+- Screens affichent le contenu HTML réel via `iframe src=/api/frd/file?name=`
+- Fix conflit scroll/zoom : `handleWheel` guard `e.target.closest()`
+
+## CR Mission 130-A — Header Minimal + Mode Aperçu Plein Écran
+**DATE: 2026-04-01 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ**
+- Retrait des boutons Aperçu/Save du header global
+- `#ws-preview-overlay` : inset 0, z-index 35, sans border ni shadow
+- `enterPreviewMode()` + `exitPreviewMode()` dans `ws_main.js`
+- Classe `body.preview-mode` : masque panels et bouton FRD editor
+- Sullivan et toolbar maintenus au-dessus (z-index supérieur)
+
+## CR Mission 130-B — Boutons Aperçu & Save par Screen
+**DATE: 2026-04-01 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ**
+- Bouton "Aperçu" (texte + icône 4 flèches) dans le bandeau de chaque screen (y=50, hors zone drag)
+- Bouton "SAVE" pilule verte HoméOS dans le bandeau (y=52)
+- `enterPreviewMode(screenId)` : iframe brute plein écran, zéro padding/shadow
+- `POST /api/frd/save` avec feedback visuel opacité
+- `e.stopPropagation()` sur mousedown et click pour éviter le drag conflict
+- Fix critique : rétablissement de `fo.appendChild(iframe)` supprimé par inadvertance
+
+## CR Mission 130-C — Fix Robuste Panneaux Latéraux
+**DATE: 2026-04-01 | ACTOR: CLAUDE | STATUS: ✅ LIVRÉ**
+- `togglePanel()` simplifié : `classList.toggle('collapsed')` uniquement, CSS gère tout
+- Transition `max-height` (0→800px) + opacity pour les panneaux
+- Transition `max-height` (0→50px) + opacity pour les badges
+- Wrappers stables `#section-screens` et `#section-audit` pour isoler les flux de layout
+- Délai 50ms sur apparition du badge pour permettre au panneau de libérer l'espace d'abord
+- Headers panels cliquables sur toute leur surface (`onclick` sur la div entière)
+- Libellés badges repassés à l'horizontale (suppression de `vertical-text`)
+

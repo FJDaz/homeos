@@ -24,6 +24,7 @@ class GeminiClient(BaseLLMClient):
         "gemini-2.5-flash",              # GA — primary
         "gemini-3.1-pro",                # Preview — raisonnement/code complexe
         "gemini-2.5-pro",                # GA — capable
+        "gemini-3.1-flash-lite",         # Preview — ultra-fast queue
     ]
 
     # Cascade par défaut (priorité vitesse)

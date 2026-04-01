@@ -84,7 +84,17 @@
                         <div class="text-[11px] text-[#8cc63f] font-bold tracking-widest">phase_100-bis</div>
                         <div id="stitch-badge" class="hidden px-2 py-0.5 bg-slate-900 text-white text-[9px] font-bold rounded uppercase tracking-tighter">Stitch Compatible</div>
                     </div>
-                    <h2 class="text-3xl font-medium tracking-tight mb-4">hub d’import universel</h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-3xl font-medium tracking-tight">hub d’import universel</h2>
+                        <div id="design-status" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full shadow-sm opacity-0 transition-opacity">
+                            <div id="design-color-dot" class="w-2 h-2 rounded-full bg-zinc-300"></div>
+                            <span id="design-label" class="text-[9px] font-bold uppercase tracking-widest text-zinc-400">design standard</span>
+                            <button onclick="document.getElementById('design-input').click()" class="ml-2 p-1 hover:bg-zinc-50 rounded" title="uploader DESIGN.md">
+                                <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                            <input type="file" id="design-input" class="hidden" accept=".md" onchange="uploadDesignMd(event)">
+                        </div>
+                    </div>
                     <p class="text-zinc-500 max-w-xl leading-relaxed">
                         importez vos maquettes depuis n'importe quelle source : figma, illustrator, stitch, ou react. homéos centralise et transforme.
                     </p>
@@ -337,12 +347,60 @@
         
         async function init() {
             if (window.HOMEOS && window.HOMEOS.boot) window.HOMEOS.boot();
-            await projectManager.init();
+            await fetchProjects();
             await checkManifest();
             await fetchImports();
-            await fetchNotifications();
-            setInterval(fetchImports, 10000);
+            await checkDesignStatus();
             setupDropZone();
+            setInterval(fetchNotifications, 5000);
+        }
+
+        // --- MISSION 128 : DESIGN SYSTEM BRIDGE ---
+        async function uploadDesignMd(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/project/import-design-md', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    console.log('Design tokens updated:', data.tokens);
+                    updateDesignUI(data.tokens);
+                }
+            } catch (e) {
+                console.error('Design upload failed', e);
+                alert('Erreur lors de l\'import du design system.');
+            }
+        }
+
+        async function checkDesignStatus() {
+            try {
+                const res = await fetch('/api/project/design-tokens');
+                const tokens = await res.json();
+                updateDesignUI(tokens);
+            } catch (e) {
+                console.error('Failed to check design status', e);
+            }
+        }
+
+        function updateDesignUI(tokens) {
+            const status = document.getElementById('design-status');
+            const dot = document.getElementById('design-color-dot');
+            const label = document.getElementById('design-label');
+
+            if (tokens && tokens.source === 'homeos_design_md') {
+                dot.style.backgroundColor = tokens.colors.primary;
+                label.innerText = 'design actif : ' + (tokens.typography.body || 'custom');
+                status.classList.remove('opacity-0');
+            } else {
+                status.classList.add('opacity-0');
+            }
         }
 
         // --- MANIFEST CHECK ---
@@ -632,6 +690,7 @@
                     </div>
                     <div class="flex gap-2 mt-2">
                         <button onclick="openInFRD(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[11px] font-bold">ouvrir dans frd editor</button>
+                        <button onclick="openInWorkspace(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos bg-zinc-800 text-white w-full justify-center text-[11px] font-bold border-none hover:bg-black">workspace</button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -666,6 +725,17 @@
                 });
                 window.location.href = '/frd-editor';
             } catch (e) { console.error('FRD Open failed', e); }
+        }
+
+        async function openInWorkspace(item) {
+            try {
+                await fetch('/api/frd/set-current', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'import', id: item.id, name: item.name, html_template: null })
+                });
+                window.location.href = '/workspace';
+            } catch (e) { console.error('Workspace Open failed', e); }
         }
 
         async function continueToFRDEditor() {

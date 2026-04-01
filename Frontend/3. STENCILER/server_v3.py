@@ -53,7 +53,7 @@ _load_env()
 
 # --- SULLIVAN IMPORTS ---
 import sys
-for p in [str(ROOT_DIR), str(BACKEND_PROD)]:
+for p in [str(ROOT_DIR), str(BACKEND_PROD), str(CWD)]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -276,6 +276,50 @@ Layout types : flex, stack, grid, free. h = nombre|"auto"|"full", w = nombre|"fu
 Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans explication.
 Format : { "organ_id": { "role": "...", "zone": "...", "w": ..., "h": ..., "layout": "..." }, ... }"""
 
+def parse_design_md(content: str) -> dict:
+    """Mission 128: Parse DESIGN.md according to HoméOS format."""
+    tokens = {
+        "colors": {"primary": "#8cc63f", "neutral": "#ffffff", "text": "#3d3d3c"},
+        "typography": {"body": "Geist Sans", "headline_weight": "600"},
+        "shape": {"border_radius": "6px"},
+        "source": "default",
+        "imported_at": datetime.now().isoformat()
+    }
+    
+    # 1. Palette de Couleurs
+    palette_match = re.search(r'### Palette de Couleurs([\s\S]*?)(?:###|$)', content)
+    if palette_match:
+        sect = palette_match.group(1)
+        # Primary
+        p_hex = re.search(r'\*\*Primary[^*]*\*\*.*?(#[0-9a-fA-F]{3,6})', sect, re.I)
+        if p_hex: tokens["colors"]["primary"] = p_hex.group(1)
+        # Backgrounds (souvent textuel, ex: "Blanc pur" -> fallback #fff)
+        if "blanc" in sect.lower(): tokens["colors"]["neutral"] = "#ffffff"
+        if "gris ultra-léger" in sect.lower(): tokens["colors"]["neutral"] = "#f9fafb"
+        # Texts
+        t_hex = re.search(r'\*\*Texts[^*]*\*\*.*?(#[0-9a-fA-F]{3,6})', sect, re.I)
+        if t_hex: tokens["colors"]["text"] = t_hex.group(1)
+        elif "gris anthracite" in sect.lower(): tokens["colors"]["text"] = "#1a1a1a"
+
+    # 2. Typographie
+    typo_match = re.search(r'### Typographie([\s\S]*?)(?:###|$)', content)
+    if typo_match:
+        sect = typo_match.group(1)
+        font_match = re.search(r'Police de caractères\*\*.*?`([^`]+)`', sect)
+        if font_match: tokens["typography"]["body"] = font_match.group(1)
+        if "Semi-bold" in sect: tokens["typography"]["headline_weight"] = "600"
+        elif "Bold" in sect: tokens["typography"]["headline_weight"] = "700"
+
+    # 3. Formes & Structure
+    shape_match = re.search(r'### Formes & Structure([\s\S]*?)(?:###|$)', content)
+    if shape_match:
+        sect = shape_match.group(1)
+        br_match = re.search(r'Border Radius\*\*.*?`([^`]+)`', sect)
+        if br_match: tokens["shape"]["border_radius"] = br_match.group(1)
+
+    tokens["source"] = "homeos_design_md"
+    return tokens
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -360,6 +404,13 @@ async def get_frd_editor():
     from fastapi.responses import FileResponse
     return FileResponse(path)
 
+@app.get("/workspace")
+async def get_workspace_editor():
+    """Mission 127: Unified Workspace Canvas"""
+    path = STATIC_DIR_PATH / "templates/workspace.html"
+    from fastapi.responses import FileResponse
+    return FileResponse(path)
+
 # --- UTILS (BKD) ---
 ALLOWED_EXTENSIONS = {'.py', '.js', '.ts', '.html', '.css', '.md', '.json', '.txt', '.yaml', '.yml', '.toml', '.sh', '.env.example'}
 EXCLUDE_DIRS = {'__pycache__', '.git', 'node_modules', '.venv', 'venv', 'dist', 'build', '.mypy_cache'}
@@ -432,6 +483,35 @@ async def sullivan_delete_font(slug: str):
     if success:
         return {"status": "ok", "deleted": slug}
     raise HTTPException(status_code=404, detail=f"Font '{slug}' not found")
+
+# --- MISSION 128 : DESIGN SYSTEM BRIDGE ---
+@app.post("/api/project/import-design-md")
+async def import_design_md(file: UploadFile = File(...)):
+    """Parse et importe un DESIGN.md pour le projet actif."""
+    content = (await file.read()).decode("utf-8")
+    tokens = parse_design_md(content)
+    
+    # Sauvegarde locale au projet
+    token_path = get_project_exports_dir() / "design_tokens.json"
+    token_path.write_text(json.dumps(tokens, indent=2), encoding="utf-8")
+    
+    logger.info(f"Design tokens imported for project {get_active_project_id()}")
+    return {"status": "ok", "tokens": tokens}
+
+@app.get("/api/project/design-tokens")
+async def get_design_tokens():
+    """Retourne les tokens du projet actif ou les defaults."""
+    token_path = get_project_exports_dir() / "design_tokens.json"
+    if token_path.exists():
+        return json.loads(token_path.read_text())
+    
+    # Defaults HoméOS
+    return {
+        "colors": {"primary": "#8cc63f", "neutral": "#ffffff", "text": "#3d3d3c"},
+        "typography": {"body": "Geist Sans", "headline_weight": "600"},
+        "shape": {"border_radius": "6px"},
+        "source": "homeos_default"
+    }
 
 # --- ROUTES : PROJECTS (Mission 111) ---
 
@@ -671,12 +751,15 @@ def load_custom_injection():
 
 # --- ROUTES : FRD FILES ---
 @app.get("/api/frd/file")
-async def get_frd_file(name: str = Query(...)):
+async def get_frd_file(name: str = Query(...), raw: int = Query(0)):
     if '/' in name or '..' in name:
         raise HTTPException(status_code=400, detail="Invalid filename")
     path = STATIC_DIR_PATH / "templates" / name
     if not path.exists():
         raise HTTPException(status_code=404, detail="File not found")
+    if raw:
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=path.read_text(encoding='utf-8'))
     return {"content": path.read_text(encoding='utf-8'), "name": name}
 
 @app.post("/api/frd/file")
@@ -1161,6 +1244,16 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
         else:
             index_data = {"imports": []}
         
+        # Pour les HTML uploadés : copier directement dans templates/ et setter html_template
+        html_template_name = None
+        if ext == '.html':
+            templates_dir = STATIC_DIR_PATH / "templates"
+            templates_dir.mkdir(parents=True, exist_ok=True)
+            tpl_filename = f"import_{today_str}_{timestamp_str}_{safe_name}.html"
+            tpl_path = templates_dir / tpl_filename
+            tpl_path.write_bytes(content)
+            html_template_name = tpl_filename
+
         new_entry = {
             "id": f"{today_str}_{timestamp_str}_{safe_name}",
             "name": Path(safe_name).stem + ext,
@@ -1169,20 +1262,81 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
             "date": today_str,
             "type": ext.lstrip('.') if ext else 'unknown',
             "archetype_id": "multi_format_import",
-            "archetype_label": "import multi-format"
+            "archetype_label": "import multi-format",
+            "html_template": html_template_name,
+            "elements_count": 0
         }
         index_data["imports"].insert(0, new_entry)
         index_data["imports"] = index_data["imports"][:50]
         index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception as e:
         logger.error(f"[Import] Failed to update index.json: {e}")
-    
+
     logger.info(f"[Import] File saved: {file_path}")
-    
+
     global _NEW_IMPORTS_COUNT
     _NEW_IMPORTS_COUNT += 1
+
+    return {"status": "ok", "import": new_entry}
+
+@app.delete("/api/imports/{import_id}")
+async def import_delete(import_id: str):
+    """
+    Mission 125: Suppression d'un import.
+    Supprime l'entrée de index.json et les fichiers sur disque.
+    """
+    import unicodedata
+
+    exports_dir = get_project_imports_dir()
+    index_path = exports_dir / "index.json"
     
-    return {"status": "ok", "file_saved": str(file_path)}
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="Index not found")
+        
+    try:
+        index_data = json.loads(index_path.read_text(encoding="utf-8"))
+        imports = index_data.get("imports", [])
+        
+        # Support NFC normalization for IDs
+        req_id_nfc = unicodedata.normalize('NFC', import_id)
+        
+        target_index = -1
+        target_entry = None
+        
+        for i, entry in enumerate(imports):
+            if unicodedata.normalize('NFC', entry.get("id", "")) == req_id_nfc:
+                target_index = i
+                target_entry = entry
+                break
+        
+        if target_index == -1:
+            raise HTTPException(status_code=404, detail=f"Import {import_id} not found")
+            
+        # Suppression des fichiers physiques
+        paths_to_check = [target_entry.get("svg_path"), target_entry.get("file_path")]
+        for rel_p in paths_to_check:
+            if rel_p:
+                abs_p = exports_dir / rel_p
+                if abs_p.exists():
+                    try:
+                        abs_p.unlink()
+                        logger.info(f"[Import] Deleted physical file: {abs_p}")
+                    except Exception as e:
+                        logger.warning(f"[Import] Failed to unlink {abs_p}: {e}")
+        
+        # Retrait de l'index
+        imports.pop(target_index)
+        index_data["imports"] = imports
+        index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        
+        logger.info(f"[Import] Successfully deleted import entry: {import_id}")
+        return {"status": "deleted", "id": import_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Import] Deletion crash: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/manifest/check")
 async def manifest_check():

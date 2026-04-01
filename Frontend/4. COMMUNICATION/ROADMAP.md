@@ -6,10 +6,244 @@
 
 ## Thème 0 — Hotfixes
 
-> M121 ✅, M116 ✅, M122 ✅ — archivées dans ROADMAP_ACHIEVED.md (2026-04-01)
+> M121 ✅, M116 ✅, M122 ✅, M123 ✅, M124 ✅, M125 ✅, M126 ✅, M127 ✅ — archivées dans ROADMAP_ACHIEVED.md (2026-04-01)
 
-### Mission 123 — Patienteur génération : preload bar header
+### Mission 125 — DELETE /api/imports/{id}
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+
+---
+
+### Mission 126 — Cascade LLM : gemini-3.1-flash-lite en queue
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+
+---
+
+## Thème 6 — Refonte FRD : Canvas Workspace Unifié
+
+### Mission 128 — Bridge DESIGN.md → tokens projet dynamiques
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + svg_to_tailwind.py) + GEMINI (landing.html)**
+**DÉPENDANCE: aucune (indépendant de M127)**
+
+**Contexte :** HoméOS a son propre format `DESIGN.md` (défini dans `docs/06_Design_Assets/assets/sullivan_editor_base_accurate/DESIGN.md`). Ce fichier documente le design system d'un projet (palette, typo, formes). En l'uploadant dans HoméOS, tous les appels LLM suivants (génération SVG→HTML, vision PNG) utilisent les tokens du projet au lieu des tokens HoméOS par défaut. Ce bridge positionne HoméOS en **continuité de Stitch** : même design system, même vocabulaire.
+
+#### Format DESIGN.md HoméOS (référence : sullivan_editor_base_accurate/DESIGN.md)
+
+Sections parsées :
+
+```markdown
+### Palette de Couleurs
+- **Primary (...)** : `#A3CD54`   → colors.primary
+- **Backgrounds** : blanc pur     → colors.neutral (fallback #ffffff)
+- **Texts** : gris anthracite     → colors.text (fallback #1a1a1a)
+
+### Typographie
+- **Police de caractères** : `Source Sans 3`  → typography.body
+- **Display/Headlines** : Semi-bold           → typography.headline_weight
+
+### Formes & Structure (Shape)
+- **Border Radius** : `20px`       → shape.border_radius
+```
+
+Parser : regex `\*\*[^*]+\*\*\s*:\s*` + extraction hex `#[0-9a-fA-F]{3,6}` + backtick values.
+
+#### Livrable A — Routes backend (server_v3.py) — Claude
+
+```
+POST /api/project/import-design-md
+Body: multipart (file)
+
+→ Parse le DESIGN.md selon le format HoméOS
+→ Produit exports/design_tokens.json :
+  {
+    "colors": { "primary": "#A3CD54", "neutral": "#ffffff", "text": "#1a1a1a" },
+    "typography": { "body": "Source Sans 3", "headline_weight": "600" },
+    "shape": { "border_radius": "20px" },
+    "source": "homeos_design_md",
+    "imported_at": "2026-04-01T..."
+  }
+→ Retourne { "status": "ok", "tokens": {...} }
+
+GET /api/project/design-tokens
+→ Retourne design_tokens.json si présent
+→ Sinon retourne defaults HoméOS :
+  { "colors": { "primary": "#8cc63f", "neutral": "#f7f6f2", "text": "#3d3d3c" },
+    "typography": { "body": "Geist" }, "shape": { "border_radius": "6px" } }
+```
+
+#### Livrable B — Injection tokens dans les prompts LLM (svg_to_tailwind.py) — Claude
+
+Ajouter `load_project_tokens()` (lit `design_tokens.json` ou retourne defaults) et l'appeler dans `convert()` + `convert_image()` :
+
+```python
+async def load_project_tokens() -> dict:
+    path = ROOT_DIR / "exports" / "design_tokens.json"
+    if path.exists():
+        return json.loads(path.read_text())
+    return DEFAULT_TOKENS  # HoméOS defaults
+
+# Dans les prompts, remplacer les valeurs hardcodées :
+t = await load_project_tokens()
+f"- Accent / Primary : `{t['colors']['primary']}`"
+f"- Background : `{t['colors']['neutral']}`"
+f"- Texte : `{t['colors']['text']}`"
+f"- Typographie : {t['typography']['body']}"
+f"- Border-radius : {t['shape']['border_radius']}"
+```
+
+#### Livrable C — Upload depuis la landing (Gemini)
+
+Bouton discret "design system" dans le header landing :
+- Clic → `<input type="file" accept=".md">` → `POST /api/project/import-design-md`
+- Au chargement : `GET /api/project/design-tokens` → si `source == "homeos_design_md"` → pastille couleur `primary` + label "design actif"
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/landing.html — header existant.
+Ajouter UNIQUEMENT : bouton "design system" discret (texte 11px, ghost) dans le header.
+Au clic → file input .md → POST /api/project/import-design-md.
+Au chargement → GET /api/project/design-tokens → si source présent → pastille ronde couleur primary (16px).
+Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
+```
+
+**Fichiers :**
+- `Frontend/3. STENCILER/server_v3.py` — Livrable A
+- `Backend/Prod/retro_genome/svg_to_tailwind.py` — Livrable B
+- `static/templates/landing.html` — Livrable C (Gemini)
+
+**Critères de sortie :**
+- [ ] Upload `DESIGN.md` HoméOS → `design_tokens.json` créé avec primary + neutral + typo parsés
+- [ ] `GET /api/project/design-tokens` → tokens parsés ou defaults HoméOS
+- [ ] Génération SVG/PNG suivante → prompt LLM utilise les tokens du projet (pas hardcodés)
+- [ ] Landing : pastille seed color visible si design importé
+- [ ] Pas de régression si aucun DESIGN.md (defaults HoméOS inchangés)
+
+---
+
+### Mission 127 — Workspace V1 (Shell + Canvas Engine)
+
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+**DATE: 2026-04-01 | ACTOR: GEMINI + CLAUDE**
+
+---
+
+### Mission 129 — Workspace : features layer 2
+
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+**DATE: 2026-04-01 | ACTOR: GEMINI + CLAUDE**
+
+---
+
+### Mission 130-A — Header Minimal + Mode Aperçu Plein Écran
+
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+**DATE: 2026-04-01 | ACTOR: CLAUDE**
+
+---
+
+### Mission 130-B — Boutons Aperçu & Save par Screen
+
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+**DATE: 2026-04-01 | ACTOR: CLAUDE**
+
+---
+
+### Mission 130-C — Fix Robuste Panneaux Latéraux
+
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+**DATE: 2026-04-01 | ACTOR: CLAUDE**
+
+---
+
+### Mission 130 — Étiquette "edit code" + Monaco inline sync
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (WsCanvas.js + WsMonaco.js) + GEMINI (workspace.html drawer)**
+**DÉPENDANCE: M129 ✅ (toolbar select + screens remplis)**
+
+**Contexte :** Avec l'outil `select` actif, sélectionner un screen sur le canvas doit ouvrir un accès direct au code HTML éditable. L'étiquette "edit code" apparaît sur le cadre, le click ouvre Monaco en drawer latéral avec sync bidirectionnelle hover/select entre l'iframe et l'éditeur.
+
+#### Livrable A — Étiquette "edit code" sur screen sélectionné (Claude — WsCanvas.js)
+
+Quand `activeMode === 'select'` et screen cliqué :
+- Afficher un overlay `<foreignObject class="ws-edit-badge">` positionné haut-gauche du cadre :
+  ```
+  [ </> edit code ]   ← 80×24px, fond blanc, border 1px #e5e5e5, border-radius 6px, Geist 11px
+  ```
+- Clic sur le badge → émet `ws:open-monaco` avec `{ screenId, templateName, fileUrl }`
+- Badge disparaît si screen désélectionné ou outil changé
+
+#### Livrable B — Drawer Monaco latéral (Gemini — workspace.html + workspace.css)
+
+Drawer droit `#ws-monaco-drawer` (40% largeur, hauteur 100%, z-index Z5) :
+- Fermé par défaut (`transform: translateX(100%)`)
+- Ouvert sur `ws:open-monaco` → slide-in 200ms
+- Header : nom du screen + bouton ✕ ferme le drawer
+- Body : `<div id="ws-monaco-container">` (Monaco s'y monte)
+
+#### Livrable C — WsMonaco.js (Claude)
+
+```javascript
+// static/js/workspace/WsMonaco.js
+export class WsMonaco {
+    open(screenId, fileUrl)
+    // → fetch fileUrl → charger dans Monaco (html, mode)
+    // → écoute window.addEventListener('message') depuis iframe
+
+    _onIframeHover(selector)
+    // → trouver la ligne dans le source HTML correspondant au selector
+    // → Monaco decorations : fond #fffbcc sur la plage de lignes
+
+    _onIframeSelect(selector)
+    // → Monaco revealLineInCenter() + setPosition() sur la ligne
+
+    save()
+    // → Cmd+S → POST /api/frd/save { name, content } → postMessage iframe 'reload'
+}
+```
+
+#### Livrable D — Script injecté dans les iframes (Claude)
+
+Chaque iframe de screen reçoit un script injecté au chargement (`iframe.onload`) :
+```javascript
+// Injecté dans l'iframe
+document.addEventListener('mouseover', e => {
+    window.parent.postMessage({ type: 'ws-hover', selector: getCssPath(e.target) }, '*');
+});
+document.addEventListener('click', e => {
+    window.parent.postMessage({ type: 'ws-select', selector: getCssPath(e.target) }, '*');
+});
+// getCssPath : génère un sélecteur CSS unique (tagname + nth-child)
+```
+
+**Fichiers à créer :**
+- `static/js/workspace/WsMonaco.js`
+
+**Fichiers à modifier :**
+- `static/js/workspace/WsCanvas.js` — Livrable A (badge) + Livrable D (inject script)
+- `static/templates/workspace.html` — Livrable B (drawer Monaco) (Gemini)
+- `static/css/workspace.css` — drawer styles (Gemini)
+
+**Bootstrap Gemini :**
+```
+Lire static/templates/workspace.html (M129 livré).
+Lire static/css/workspace.css.
+Lire docs/06_Design_Assets/assets/sullivan_editor_base_accurate/DESIGN.md.
+Ajouter UNIQUEMENT #ws-monaco-drawer : drawer droite 40%, slide-in/out, header + #ws-monaco-container.
+Border-radius 20px header. Source Sans 3. NE PAS toucher le reste.
+```
+
+**Critères de sortie :**
+- [ ] Outil `select` + clic screen → badge `[ </> edit code ]` visible haut-gauche du cadre
+- [ ] Clic badge → drawer Monaco slide-in avec le HTML du screen chargé
+- [ ] Hover élément dans l'iframe → ligne highlight Monaco (fond jaune pâle)
+- [ ] Clic élément dans l'iframe → curseur Monaco positionné sur la ligne
+- [ ] Cmd+S dans Monaco → save + iframe reload
+- [ ] Badge disparaît si désélection ou changement d'outil
+- [ ] Pas de régression M129
 
 ---
 
