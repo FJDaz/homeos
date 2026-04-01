@@ -247,6 +247,69 @@ Border-radius 20px header. Source Sans 3. NE PAS toucher le reste.
 
 ---
 
+### Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: GEMINI + CLAUDE**
+**DÉPENDANCE: M130 🔵**
+
+**Contexte :** Les outils de la barre d'outils ne doivent être accessibles et opérables qu'**une fois en mode aperçu**. Toute notion d'aperçu global dans la toolbar doit définitivement disparaître car cela créerait des conflits avec le mode Aperçu par écran nouvellement implémenté (130-A/B).
+
+**Livrables :**
+1. **Verrouillage de la Toolbar :** Rendre la barre d'outils droite invisible ou désactivée sur le canvas principal, pour ne l'activer que lorsque `enterPreviewMode` a été déclenché.
+2. **Nettoyage UI :** Suppression radicale de toute icône ou bouton "Aperçu" redondant dans la toolbar ou le header principal.
+
+---
+
+### Mission 132 — Outils de Manipulation (Drag, Déplacer, Cadre, Place Image)
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE**
+**DÉPENDANCE: M131 🔵**
+
+**Contexte :** Donner vie aux outils présents dans la toolbar pour manipuler le DOM du screen actuellement en mode aperçu.
+
+**Livrables :**
+1. **Flèche de sélection :** Sélection d'éléments spécifiques dans le screen (DOM) et autorisation du "drag" de ces éléments de manière ciblée.
+2. **Outil Déplacer (Hand) :** Permet de "pan" directement dans la vue si l'écran dépasse.
+3. **Outil Cadre :** Tracé d'un block DIV ou conteneur HTML structurant directement via clic-glissé.
+4. **Outil Place Image :** Input file ouvrant et insertion d'une balise `<img src="...">` avec l'asset à l'endroit cliqué.
+
+---
+
+### Mission 133 — Undo & Mode "Couleur TSL" local homéOS
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE**
+**DÉPENDANCE: M132 🔵**
+
+**Contexte :** Implémenter l'annulation des actions lors de l'édition ainsi que la colorisation sémantique cohérente avec HoméOS.
+
+**Livrables :**
+1. **Pile d'historique (Undo) :** Mémoriser les modifications DOM (positions, ajout cadre, source images) pour rollback (Cmd Z).
+2. **Outil Color Apply (TSL) :** Interface pour appliquer des couleurs TSL (Teinte, Saturation, Luminosité). Ce color picker devra se baser rigoureusement sur les palettes / échelles stipulées dans `design.md` HoméOS.
+
+---
+
+### Mission 134 — Arsenal Typo (System Fonts & Webfont Generator)
+
+**STATUS: 🔵 BACKLOG**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE + GEMINI**
+**DÉPENDANCE: M133 🔵**
+
+**Contexte :** Gérer l'ajout de cadres de texte et la sélection de la typographie de manière ultra-locale, avec génération finale des fonts au moment du `save`.
+
+**Livrables :**
+1. **Outil Texte :** Création de zones de texte directement dans l'aperçu.
+2. **Sélecteur de System Fonts :** Interface lisant et proposant la sélection directe des polices installées sur la machine de l'utilisateur (via Local Font Access API).
+3. **Hook de Sauvegarde (Webfont Generator) :** Lors du `save` du screen, extraire les polices système choisies et déclencher l'API Backend `Webfont Generator` (via `font_webgen.py` de la M109B) pour packager, subsetter et générer les `@font-face` CSS finaux.
+
+---
+
 ### Mission 124 — Fallback Mimo après quota Gemini épuisé
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
