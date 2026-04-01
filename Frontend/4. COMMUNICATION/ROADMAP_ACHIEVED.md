@@ -6,6 +6,53 @@
 
 ---
 
+## Mission 142 — Sullivan Actions : édition directe du screen actif
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py + WsCanvas.js)**
+
+- `WsChat.js` : capture du HTML de l'iframe active (preview prioritaire, puis shell SVG) via `fetch(iframe.src)` si pas de `srcdoc`
+- `server_v3.py` : prompt conditionnel — si `screen_html` présent, demande JSON `{explanation, html}` à Gemini ; parsing robuste avec fallback texte
+- `WsCanvas.js` : `updateActiveScreenHtml(html)` — priorité preview iframe, fallback shell SVG ; `mousedown` stopPropagation sur forge button
+- Forge button fix : `mousedown` + `stopPropagation` ajouté (canvas interceptait le clic)
+- Sullivan agit directement sur le rendu en mode aperçu
+
+---
+
+## Mission 140 — Boutons Aperçu & Save dans le header de chaque screen canvas
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: GEMINI (WsCanvas.js)**
+
+- `previewFo` et `saveFo` repositionnés à `y=8`, `height=24` dans la bande header (0–40px)
+- `previewFo` : `x=SW-260`, `width=110` | `saveFo` : `x=SW-140`, `width=55`
+- `mousedown` avec `stopPropagation` sur les deux → drag non bloqué sur le reste du header
+- `console.log` debug supprimés
+
+---
+
+## Session 2026-04-01 — Hotfixes Canvas Workspace (hors mission)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT)**
+
+- **Upload HTML → canvas direct** : `POST /api/import/upload` retourne `{"import": entry}` + copie dans `static/templates/` + `html_template` setté. Wiring `ws-direct-upload` dans `ws_main.js` (plus d'inline `onchange`).
+- **Backfill html_template** : `GET /api/retro-genome/imports` backfille à la volée les imports HTML anciens sans `html_template` (copy→templates + màj index.json).
+- **ZIP React avec dist/** : `run_conversion()` détecte `dist/index.html` → extrait le dist, crée un wrapper iframe HTML, sette `html_template` directement — zéro LLM.
+- **Drag fix** : détection zone header par position Y (`worldY <= 40`) au lieu de `closest('.ws-screen-header')` (transparent, non hit-testable).
+- **Close btn** : suppression directe sans `confirm()`, `pointer-events:all` explicite.
+- **foreignObject iframe** : `pointer-events:none` sur le conteneur fo → drag vivant après forge.
+- **Sullivan feedback forge** : 4 messages progressifs pendant polling (`forgeScreen` → `window.wsChat.appendBubble`).
+- **TIMEOUT 60→180s** : `.env` + `Backend/.env`.
+- **`/api/frd/file?raw=1`** : route retourne `HTMLResponse` au lieu de JSON → iframe affiche le HTML rendu.
+- **Double init ws_main.js** : suppression du double `<script>` dans workspace.html.
+- **Dimensions adaptatives** : 1200×800 pour HTML direct, 400×632 pour SVG/forgé.
+- **ws_main.js TypeError** : guards `if (el)` sur btn-zoom-in/out/reset.
+- **ws-chat-history** : zone messages ajoutée dans workspace.html + null-safe dans `appendBubble`.
+- **beautifulsoup4 + lxml** installés (`--break-system-packages`).
+
+---
+
 ## Mission 126 — Cascade LLM : gemini-3.1-flash-lite en queue BUILD
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**

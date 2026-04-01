@@ -56,7 +56,6 @@ class WsCanvas {
 
     setMode(mode) {
         this.activeMode = mode;
-        console.log("🛠 WsCanvas: Mode switched to", mode);
         
         // Update UI
         document.querySelectorAll('.ws-tool-btn').forEach(btn => {
@@ -135,8 +134,6 @@ class WsCanvas {
 
                 const worldY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
                 
-                console.log(`🖱 [WsCanvas] worldY: ${worldY.toFixed(1)} (tx:${tx}, ty:${ty})`);
-
                 if (worldY >= 0 && worldY <= 40) {
                     this.selectedScreen = shell;
                     this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - tx;
@@ -313,9 +310,29 @@ class WsCanvas {
         title.setAttribute('class', 'ws-screen-title');
         title.textContent = (item.name || 'Sans titre').toLowerCase();
 
+        // Mission 119: Origin Badge
+        if (item.origin) {
+            const badgeFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+            // Position after title (rough estimate)
+            const titleWidth = (item.name || 'Sans titre').length * 7; 
+            badgeFo.setAttribute('x', String(25 + titleWidth));
+            badgeFo.setAttribute('y', '12');
+            badgeFo.setAttribute('width', '300');
+            badgeFo.setAttribute('height', '20');
+            
+            const badgeDiv = document.createElement('div');
+            if (item.origin === 'generated') {
+                badgeDiv.innerHTML = `<span style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">Tailwind généré — peut différer du rendu exact</span>`;
+            } else if (item.origin === 'compiled') {
+                badgeDiv.innerHTML = `<span style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">build compilé</span>`;
+            }
+            badgeFo.appendChild(badgeDiv);
+            g.appendChild(badgeFo);
+        }
+
         // Close btn (✕)
         const closeBtn = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        closeBtn.setAttribute('cx', String(SW - 25));
+        closeBtn.setAttribute('cx', String(SW - 20));
         closeBtn.setAttribute('cy', '20');
         closeBtn.setAttribute('r', '8');
         closeBtn.setAttribute('class', 'ws-btn-close');
@@ -347,57 +364,52 @@ class WsCanvas {
 
         fo.appendChild(iframe);
 
-        // Preview btn (Mission 130-B — Moved down to y=50 to avoid drag conflict)
+        // Preview btn (Mission 140 — Fixed in header y=8)
         const previewFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        previewFo.setAttribute('x', String(SW - 180));
-        previewFo.setAttribute('y', '50');
-        previewFo.setAttribute('width', '100');
-        previewFo.setAttribute('height', '30');
+        previewFo.setAttribute('x', String(SW - 260));
+        previewFo.setAttribute('y', '8');
+        previewFo.setAttribute('width', '110');
+        previewFo.setAttribute('height', '24');
         previewFo.setAttribute('pointer-events', 'all');
         const previewDiv = document.createElement('div');
         previewDiv.className = "flex items-center space-x-2 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors";
-        previewDiv.style.cssText = 'height:100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));';
+        previewDiv.style.cssText = 'height:100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));';
         previewDiv.innerHTML = `
             <span style="font-size:10px; font-weight:500; background:rgba(255,255,255,0.8); padding:2px 4px; border-radius:4px;">Aperçu</span>
-            <svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+            <svg fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path>
             </svg>
         `;
         previewDiv.addEventListener('mousedown', (e) => {
-            console.log("🖱 [WsCanvas] Mousedown on Preview button");
             e.stopPropagation();
         });
         previewDiv.addEventListener('click', (e) => {
-            console.log("🖱 [WsCanvas] Click on Preview button");
             e.stopPropagation();
             this.selectScreen(g);
             if (window.enterPreviewMode) window.enterPreviewMode(id);
         });
         previewFo.appendChild(previewDiv);
 
-        // Save btn (Mission 130-B — Moved down to y=52 to avoid drag conflict)
+        // Save btn (Mission 140 — Fixed in header y=8)
         const saveFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        saveFo.setAttribute('x', String(SW - 90));
-        saveFo.setAttribute('y', '52');
-        saveFo.setAttribute('width', '60');
-        saveFo.setAttribute('height', '26');
+        saveFo.setAttribute('x', String(SW - 140));
+        saveFo.setAttribute('y', '8');
+        saveFo.setAttribute('width', '55');
+        saveFo.setAttribute('height', '24');
         saveFo.setAttribute('pointer-events', 'all');
         const saveBtn = document.createElement('button');
-        saveBtn.className = "bg-homeos-green text-white px-3 py-1 rounded-custom font-semibold text-[10px] uppercase tracking-wider shadow-md hover:opacity-90 transition-all";
+        saveBtn.className = "bg-homeos-green text-white px-2 py-0.5 rounded-custom font-semibold text-[9px] uppercase tracking-wider shadow-sm hover:opacity-90 transition-all";
         saveBtn.style.cssText = "width:100%; height:100%; line-height:1;";
         saveBtn.innerText = "SAVE";
         saveBtn.addEventListener('mousedown', (e) => {
-            console.log("🖱 [WsCanvas] Mousedown on Save button");
             e.stopPropagation();
         });
         saveBtn.addEventListener('click', async (e) => {
-            console.log("🖱 [WsCanvas] Click on Save button");
             e.stopPropagation();
             saveBtn.style.opacity = '0.5';
             try {
                 const iframeEl = g.querySelector('iframe');
                 const srcUrl = iframeEl ? iframeEl.src : null;
-                console.log("💾 [WsCanvas] Saving screen contents for", item.html_template);
                 await fetch('/api/frd/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -407,7 +419,6 @@ class WsCanvas {
                         screenId: item.id 
                     })
                 });
-                console.log("✅ [WsCanvas] Saved successfully");
             } catch (err) {
                 console.error("❌ [WsCanvas] Save failed", err);
             }
@@ -454,6 +465,7 @@ class WsCanvas {
             forgeOverlay.appendChild(wrap);
 
             // Listener direct sur le bouton HTML — contourne la frontière SVG/HTML
+            forgeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
             forgeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.forgeScreen(item.id, g, forgeOverlay);
@@ -464,6 +476,20 @@ class WsCanvas {
 
         this.content.appendChild(g);
         this.selectScreen(g);
+    }
+
+    updateActiveScreenHtml(html) {
+        // Priorité 1 : iframe preview fullscreen
+        const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (previewIframe) {
+            previewIframe.srcdoc = html;
+            return;
+        }
+        // Priorité 2 : shell actif dans le canvas
+        if (!this.activeScreenId) return;
+        const shell = document.getElementById(this.activeScreenId);
+        const iframe = shell?.querySelector('iframe');
+        if (iframe) iframe.srcdoc = html;
     }
 
     async forgeScreen(importId, shell, overlay) {

@@ -159,9 +159,9 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ### Mission 130 — Mode Inspect In-Preview & Monaco Popover
 
-**STATUS: 🔵 BACKLOG**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**
-**ACTOR: CLAUDE + GEMINI**
+**ACTOR: GEMINI**
 **DÉPENDANCE: M130-A/M130-B ✅ (Mise en place de l'aperçu)**
 
 **Contexte :** Le tiroir latéral de code massif est abandonné au profit d'une expérience d'édition ultra-ciblée. Une fois entré dans le **Mode Aperçu (Plein Écran)** d'un screeen, le `Mode Inspect` (tel qu'il a été implémenté historiquement dans le FRD Editor via `FrdPreview.feature.js`) s'active **par défaut**. Au clic sur un élément dans l'aperçu, un éditeur Monaco flottant ("popover" ou bulle) apparaît au flanc immédiat de l'élément cliqué. Il ne contient **que** le code HTML (extrait) correspondant au composant inspecté.
@@ -178,10 +178,10 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ### Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
 
-**STATUS: 🔵 BACKLOG**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**
-**ACTOR: GEMINI + CLAUDE**
-**DÉPENDANCE: M130 🔵**
+**ACTOR: GEMINI**
+**DÉPENDANCE: M130 ✅**
 
 **Contexte :** Les outils de la barre d'outils ne doivent être accessibles et opérables qu'**une fois en mode aperçu**. Toute notion d'aperçu global dans la toolbar doit définitivement disparaître car cela créerait des conflits avec le mode Aperçu par écran nouvellement implémenté (130-A/B).
 
@@ -191,12 +191,183 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ---
 
+### Mission 140 — Boutons Aperçu & Save dans le header de chaque screen canvas
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — WsCanvas.js)**
+
+---
+
+### Mission 141 — Suppression d'imports depuis le panel Screens
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: CLAUDE (CODE DIRECT — ws_main.js + server_v3.py)**
+
+---
+
+### Mission 143 — Sullivan UI Compact : 2 bulles visibles
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (workspace.html + workspace.css)**
+**DÉPENDANCE: aucune**
+
+**Contexte :** Le panel Sullivan occupe trop de hauteur dans l'UI workspace. L'historique des échanges n'a pas besoin d'être entièrement visible — seules les **2 dernières bulles** doivent rester accessibles. Le reste est masqué (pas supprimé).
+
+#### Livrable — workspace.html + workspace.css
+
+1. **`#ws-chat-history`** : passer de `max-h-48` à une hauteur fixe n'affichant que 2 bulles.
+   - Chaque bulle fait ~60-70px en moyenne. Hauteur cible : `max-h-32` (128px) ou `max-h-[140px]`.
+   - `overflow-y: hidden` (pas de scroll — les bulles plus anciennes disparaissent visuellement).
+
+2. **WsChat.js** : après chaque `appendBubble()`, ne conserver que les **2 derniers enfants** dans `historyEl` :
+   ```javascript
+   // À la fin de appendBubble(), après le scroll
+   while (this.historyEl.children.length > 2) {
+       this.historyEl.removeChild(this.historyEl.firstChild);
+   }
+   ```
+
+3. **Hauteur globale du panel Sullivan** : réduire le padding vertical et le min-height du composant `#ws-chat-mount` pour que l'ensemble (historique + input) prenne moins de 160px.
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/static/js/workspace/WsChat.js` — trim des bulles après append
+- `Frontend/3. STENCILER/static/templates/workspace.html` — classes hauteur `#ws-chat-history`
+- `Frontend/3. STENCILER/static/css/workspace.css` — hauteur `#ws-chat-mount` si nécessaire
+
+**Critères de sortie :**
+- [ ] Seules les 2 dernières bulles sont visibles dans le panel
+- [ ] Le panel Sullivan (historique + input) tient dans ≤ 160px de hauteur
+- [ ] L'input reste toujours accessible et fonctionnel
+- [ ] Pas de régression sur l'envoi de messages ni l'affichage des réponses
+
+---
+
+### Mission 142 — Sullivan Actions : édition directe du screen actif
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py + WsCanvas.js)**
+**DÉPENDANCE: Sullivan chat opérationnel (M142-pre ✅)**
+
+**Contexte :** Sullivan répond en texte mais n'agit pas sur les écrans. L'utilisateur doit pouvoir dire "rends le blur moins fort" ou "ajoute un bouton CTA en bas" et voir le changement appliqué directement dans l'iframe du screen actif. Sullivan doit avoir accès au HTML courant, générer une version modifiée, et le canvas l'applique.
+
+#### Pipeline cible
+
+```
+1. Utilisateur envoie un message dans WsChat
+2. WsChat lit le srcdoc de l'iframe du screen actif (wsCanvas.activeScreenId)
+3. POST /api/sullivan/chat { message, mode, screen_html }
+4. Serveur : construit un prompt "Voici le HTML courant. Modifie-le selon l'instruction.
+            Retourne JSON { explanation, html }"
+5. LLM génère { explanation: "...", html: "<!DOCTYPE html>..." }
+6. Réponse : Sullivan affiche explanation dans le chat
+7. Si html présent : wsCanvas.updateScreenHtml(html) → remplace srcdoc de l'iframe active
+```
+
+#### Livrable A — WsChat.js (envoi du contexte screen)
+
+Dans `sendMessage()`, avant le fetch, lire le HTML du screen actif :
+
+```javascript
+// Récupérer le HTML du screen actif
+let screen_html = null;
+if (window.wsCanvas && window.wsCanvas.activeScreenId) {
+    const shell = document.getElementById(window.wsCanvas.activeScreenId);
+    const iframe = shell?.querySelector('iframe');
+    if (iframe) screen_html = iframe.srcdoc || null;
+}
+// Inclure dans le body
+body: JSON.stringify({ message: msg, mode: this.currentMode, screen_html })
+```
+
+Après réception, si `data.html` présent :
+
+```javascript
+if (data.html && window.wsCanvas) {
+    window.wsCanvas.updateScreenHtml(data.html);
+}
+```
+
+#### Livrable B — server_v3.py (prompt avec contexte HTML)
+
+Modifier `SullivanChatRequest` :
+```python
+class SullivanChatRequest(BaseModel):
+    message: str
+    mode: str = "construct"
+    screen_html: Optional[str] = None
+```
+
+Construire le prompt conditionnel :
+```python
+if req.screen_html:
+    prompt = f"""Tu es Sullivan, assistant UI/UX expert.
+
+L'utilisateur travaille sur un screen dont voici le HTML complet :
+<screen_html>
+{req.screen_html[:8000]}
+</screen_html>
+
+Instruction de l'utilisateur : {req.message}
+
+Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans backticks) :
+{{
+  "explanation": "explication courte de ce que tu as modifié (1-3 phrases)",
+  "html": "le HTML complet modifié (document entier)"
+}}
+
+Si l'instruction ne nécessite pas de modification HTML (question, conseil), retourne html: null."""
+else:
+    # prompt texte seul (mode sans screen)
+    prompt = f"{system_prompt}\n\nMessage : {req.message}"
+```
+
+Parser la réponse :
+```python
+result = await client.generate(prompt=prompt)
+try:
+    parsed = json.loads(result.code)
+    return {"explanation": parsed.get("explanation", ""), "html": parsed.get("html")}
+except Exception:
+    return {"explanation": result.code, "html": None}
+```
+
+#### Livrable C — WsCanvas.js (méthode updateScreenHtml)
+
+Ajouter `updateScreenHtml(html)` :
+```javascript
+updateScreenHtml(html) {
+    if (!this.activeScreenId) return;
+    const shell = document.getElementById(this.activeScreenId);
+    const iframe = shell?.querySelector('iframe');
+    if (!iframe) return;
+    iframe.srcdoc = html;
+}
+```
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/static/js/workspace/WsChat.js` — envoi `screen_html` + application `data.html`
+- `Frontend/3. STENCILER/server_v3.py` — prompt conditionnel + parsing JSON
+- `Frontend/3. STENCILER/static/js/workspace/WsCanvas.js` — méthode `updateScreenHtml()`
+
+**Critères de sortie :**
+- [ ] Sullivan reçoit le HTML du screen actif dans sa requête
+- [ ] "Rends le blur moins fort" → Sullivan modifie le CSS et le screen se met à jour sans reload
+- [ ] Sans screen actif → Sullivan répond en mode conseil texte (pas d'erreur)
+- [ ] Si LLM retourne texte brut (pas de JSON) → fallback : afficher le texte, ne pas planter
+- [ ] Le HTML limité à 8000 chars pour ne pas saturer le contexte LLM
+
+---
+
 ### Mission 132 — Outils de Manipulation (Drag, Déplacer, Cadre, Place Image)
 
-**STATUS: 🔵 BACKLOG**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**
-**ACTOR: CLAUDE**
-**DÉPENDANCE: M131 🔵**
+**ACTOR: GEMINI**
+**DÉPENDANCE: M131 ✅**
 
 **Contexte :** Donner vie aux outils présents dans la toolbar pour manipuler le DOM du screen actuellement en mode aperçu.
 
@@ -208,14 +379,25 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ---
 
-### Mission 133 — Undo & Mode "Couleur TSL" local homéOS
+### Mission 132-B — Outil Place Image (suite M132)
 
-**STATUS: 🔵 BACKLOG**
+**STATUS: 🟡 EN COURS**
 **DATE: 2026-04-01**
-**ACTOR: CLAUDE**
-**DÉPENDANCE: M132 🔵**
+**ACTOR: GEMINI (workspace.html) + CLAUDE (WsCanvas.js)**
+**DÉPENDANCE: M132 ✅**
 
-**Contexte :** Implémenter l'annulation des actions lors de l'édition ainsi que la colorisation sémantique cohérente avec HoméOS.
+**Contexte :** Gemini a ajouté `<input type="file" id="ws-internal-image-loader" class="hidden" accept="image/*">` dans workspace.html. Il reste à câbler le wiring JS dans WsCanvas.js : clic outil "place-img" → ouvre le file picker → upload → insertion `<img>` à l'endroit cliqué dans le screen actif.
+
+---
+
+### Mission 133 — Undo & Color Picker Libre
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: GEMINI**
+**DÉPENDANCE: M132 ✅**
+
+**Contexte :** Implémenter l'annulation des actions lors de l'édition ainsi que la colorisation sémantique (Teinte, Saturation, Lumière libre sans restriction).
 
 **Livrables :**
 1. **Pile d'historique (Undo) :** Mémoriser les modifications DOM (positions, ajout cadre, source images) pour rollback (Cmd Z).
@@ -225,10 +407,10 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 
 ### Mission 134 — Arsenal Typo (System Fonts & Webfont Generator)
 
-**STATUS: 🔵 BACKLOG**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01**
-**ACTOR: CLAUDE + GEMINI**
-**DÉPENDANCE: M133 🔵**
+**ACTOR: GEMINI**
+**DÉPENDANCE: M133 ✅**
 
 **Contexte :** Gérer l'ajout de cadres de texte et la sélection de la typographie de manière ultra-locale, avec génération finale des fonts au moment du `save`.
 
@@ -834,12 +1016,16 @@ Les imports Figma apparaissent dans la liste avec un badge `figma` distinct des 
 
 ### Mission 119 — Pont React/ZIP → Tailwind Direct
 
-**STATUS: 🔵 BACKLOG**
-**DATE: 2026-03-31**
-**ACTOR: CLAUDE (CODE DIRECT — backend uniquement)**
-**DÉPENDANCE: M118 (pont SVG→Tailwind opérationnel, module `svg_to_tailwind.py` comme modèle)**
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01**
+**ACTOR: GEMINI (react_to_tailwind.py) + CLAUDE (routes.py)**
+**DÉPENDANCE: aucune — M118 déjà livré, pattern `svg_to_tailwind.py` disponible**
 
-**Contexte :** Une codebase React/Next.js (`.zip`) contient une richesse sémantique exploitable : composants nommés, props typées, hiérarchie de pages. L'objectif est de convertir ce bundle en un template HTML + Tailwind vanilla exploitable dans le FRD Editor. Ce n'est pas une transpilation — c'est une **traduction d'intention** : on garde la hiérarchie et le design system, on efface le framework.
+**Contexte :** Actuellement, un ZIP React uploadé est servi tel quel depuis `dist/` (wrapper HTML autour du build compilé, non éditable). Cette mission ajoute un chemin parallèle : **transpilation LLM du code source TSX → HTML5 + Tailwind vanilla**, directement exploitable dans le FRD Editor comme n'importe quel template.
+
+Le fichier `dist/index.html` est du React compilé : opaque, non éditable. Le code source `App.tsx` contient l'intention — composants nommés, hiérarchie sémantique, classes Tailwind réelles. C'est ce source qu'on traduit.
+
+Ce n'est pas une transpilation — c'est une **traduction d'intention** : on garde la hiérarchie et le design system, on efface le framework.
 
 #### Livrable A — Nouveau module `react_to_tailwind.py` (Claude)
 
@@ -899,23 +1085,63 @@ Source brute → Extraction sémantique → LLM → static/templates/ → FRD Ed
 ```
 À terme ils pourraient être unifiés dans un `converter_factory.py`.
 
+#### Livrable D — Intégration dans `run_conversion()` (routes.py)
+
+Le chemin actuel (`dist/index.html` détecté → wrapper HTML direct) reste intact comme fallback rapide.
+Ajouter une branche : si le ZIP contient `src/App.tsx` ou `src/app/page.tsx` → appeler `react_to_tailwind.convert()` au lieu du wrapper.
+
+```python
+# Dans run_conversion() — après dézippage en mémoire
+if has_source_tsx(zip_namelist):
+    html = react_to_tailwind.convert(zip_bytes, zip_name)
+    # → sauvegarde + job done
+elif has_dist(zip_namelist):
+    # chemin actuel — wrapper dist/
+    ...
+```
+
 **Critères de sortie :**
-- [ ] `POST /api/retro-genome/generate-from-zip` avec `import_id` d'un ZIP React → retourne `{ template_name, status }`
+- [ ] `POST /api/retro-genome/generate-from-zip` avec `import_id` d'un ZIP React contenant `src/` → retourne `{ template_name, status }`
 - [ ] Le fichier `.html` généré est dans `static/templates/` et chargeable par `GET /api/frd/file?name=...`
 - [ ] Les classes Tailwind du React source sont **préservées** (pas réécrites)
 - [ ] Les imports React / TypeScript sont **absents** du HTML généré
 - [ ] Fonctionne sur un ZIP Next.js standard (App Router ou Pages Router)
+- [ ] ZIP sans source (dist-only) → fallback wrapper silencieux, pas d'erreur
+- [ ] Sullivan affiche un message de progression pendant la conversion LLM (pattern M118)
 
 ---
 
-## Backlog long terme
+## Features prioritaires
 
-| Mission | Description | Dépendances |
-|---|---|---|
-| M75-A | BKD Frontend : bkd_editor.html complet | — |
-| M75-B | Extension VS Code `aetherflow-bkd` | M75-A |
-| M75-C | Dockerfile code-server | M75-B |
-| M88 | Refactorisation frd_editor.html V3 modulaire | M103 |
-| M89 | Sullivan FRD : simplification UI + Wire→Construct | M103 |
-| M90 | BKD : route `/api/bkd/files` + explorateur réel | — |
-| M95 | Sullivan → api_generator : déploiement auto archetypes | M92 |
+### Mission 135 — Système d'Authentification & Base User
+**STATUS: 🔵 BACKLOG**
+- [ ] Création de la table `users` (SQLite/PostgreSQL) : `id`, `email`, `password_hash`, `created_at`.
+- [ ] Backend logic : Inscription (`/api/auth/register`) et Connexion (`/api/auth/login`) avec JWT ou session sécurisée.
+- [ ] Frontend : Pages `register.html` et `login.html` (Design HoméOS, simple, épuré).
+- [ ] Middleware : Protection des routes API nécessitant une authentification.
+
+### Mission 136 — Gestion Multi-tenancy : User ID x Project ID
+**STATUS: 🔵 BACKLOG**
+- [ ] Relation Many-to-Many ou One-to-Many entre `users` et `projects`.
+- [ ] Mise à jour du scoper de chemin : `projects/{user_id}/{project_uuid}/`.
+- [ ] Migration des projets existants vers l'utilisateur "admin" ou "default" par défaut.
+- [ ] UI : Dashboard utilisateur listant uniquement *ses* projets.
+
+### Mission 137 — Système BYOK (Bring Your Own Key)
+**STATUS: 🔵 BACKLOG**
+- [ ] Backend : Stockage chiffré des clés API (Gemini, DeepSeek, OpenAI) dans le profil utilisateur.
+- [ ] Logic : Le `GeminiClient` et les autres adaptateurs vérifient d'abord la clé utilisateur avant d'utiliser la clé système (quota management).
+- [ ] UI : Panneau "Paramètres" → "Clés API" avec indicateur de validité.
+
+### Mission 138 — Bouton Upload Universel & Pipeline Assets
+**STATUS: 🔵 BACKLOG**
+- [ ] Bouton "+" ou "Upload" flottant dans le Workspace.
+- [ ] Support Drag & Drop universel (SVG, PNG, JPG, DESIGN.md).
+- [ ] Pipeline automatique : détection du type de fichier et routage vers la bonne mission (M118, M128, etc.).
+
+### Mission 139 — Révision du mode Wired (FrdWire v2)
+**STATUS: 🔵 BACKLOG**
+- [ ] Multi-sélection d'éléments (clic-glissé ou Shift+clic).
+- [ ] Raccourcis clavier complets (Duplicate Cmd+D, Group Cmd+G, Alignement).
+- [ ] Feedback visuel enrichi : lignes de rappel (Smart Guides) lors du drag.
+- [ ] Synchronisation temps-réel bidirectionnelle : modification Code → mise à jour Wire instantanée.

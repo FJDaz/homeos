@@ -26,6 +26,8 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from bs4 import BeautifulSoup
+import lxml
 
 # --- CONFIGURATION & PATHS ---
 CWD = Path(__file__).parent.resolve()
@@ -474,6 +476,28 @@ async def sullivan_list_fonts():
     fonts = webgen.list_fonts()
     return {"fonts": fonts}
 
+@app.get("/api/sullivan/system-fonts")
+async def sullivan_system_fonts():
+    """Liste les familles de fontes installées sur le poste (macOS : scan des dossiers fonts)."""
+    import re
+    families = set()
+    font_dirs = [
+        Path("/System/Library/Fonts"),
+        Path("/Library/Fonts"),
+        Path.home() / "Library/Fonts",
+    ]
+    ext = {'.ttf', '.otf', '.ttc', '.woff', '.woff2'}
+    for d in font_dirs:
+        if not d.exists():
+            continue
+        for f in d.rglob('*'):
+            if f.suffix.lower() in ext:
+                # Nettoyer le nom : retirer suffixes Bold/Italic/Regular etc.
+                name = re.sub(r'[-_ ]?(Bold|Italic|Regular|Light|Medium|Black|Thin|Heavy|Semibold|Condensed|Expanded|Narrow|Wide).*$', '', f.stem, flags=re.IGNORECASE).strip()
+                if name:
+                    families.add(name)
+    return {"families": sorted(families)}
+
 @app.delete("/api/sullivan/fonts/{slug}")
 async def sullivan_delete_font(slug: str):
     """Supprime une fonte et son répertoire."""
@@ -483,6 +507,91 @@ async def sullivan_delete_font(slug: str):
     if success:
         return {"status": "ok", "deleted": slug}
     raise HTTPException(status_code=404, detail=f"Font '{slug}' not found")
+
+
+class SullivanChatRequest(BaseModel):
+    message: str
+    mode: str = "construct"
+    screen_html: Optional[str] = None
+
+
+@app.post("/api/sullivan/chat")
+async def sullivan_chat(req: SullivanChatRequest):
+    """
+    Chat Sullivan — répond à un message utilisateur selon le mode courant.
+    Mission 142 : Support de l'édition directe du screen actif.
+    """
+    try:
+        from Backend.Prod.retro_genome.routes import _get_gemini_client
+        client = _get_gemini_client()
+    except Exception as e:
+        logger.error(f"GeminiClient init failed: {e}")
+        raise HTTPException(status_code=500, detail="LLM unavailable")
+
+    mode_context = {
+        "construct": "Tu es Sullivan, un assistant de design UI/UX et AetherFlow Architect. Aide l'utilisateur à concevoir et forger ses écrans.",
+        "inspect": "Tu es Sullivan, inspecteur UI/UX. Analyse le design courant pour identifier des problèmes ergonomiques ou d'accessibilité.",
+        "preview": "Tu es Sullivan, critique design. Commente le rendu final de l'interface.",
+    }
+    
+    base_system = mode_context.get(req.mode, mode_context["construct"])
+    
+    # Enrichissement du contexte avec le HTML de l'écran actif
+    context_html_block = ""
+    if req.screen_html:
+        context_html_block = f"""
+VOICI LE CODE SOURCE HTML DE L'ÉCRAN ACTUELLEMENT SÉLECTIONNÉ :
+---
+{req.screen_html}
+---
+Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
+1. Analyse son intention.
+2. Modifie le code source HTML ci-dessus pour appliquer le changement.
+3. Retourne TOUT le document HTML5 mis à jour dans le champ "html" du JSON de réponse.
+4. Explique ce que tu as fait dans le champ "explanation".
+"""
+
+    system_prompt = f"""{base_system}
+{context_html_block}
+
+RÈGLES DE RÉPONSE :
+Tu dois impérativement répondre au format JSON suivant :
+{{
+  "explanation": "Ton explication textuelle habituelle ici.",
+  "html": "<!DOCTYPE html>... (le code HTML5 complet si modification demandée, sinon null)"
+}}
+Ne fournis aucune prose avant ou après le JSON.
+"""
+
+    try:
+        result = await client.generate(
+            prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}"
+        )
+        
+        if not result.success:
+            return {"explanation": "Désolé, je rencontre une difficulté technique.", "html": None}
+            
+        # Parsing du JSON robuste
+        import json, re
+        raw_text = result.code
+        # Nettoyage markdown si présent
+        raw_text = re.sub(r'^```json\s*', '', raw_text.strip())
+        raw_text = re.sub(r'\s*```$', '', raw_text.strip())
+        
+        try:
+            data = json.loads(raw_text)
+            return {
+                "explanation": data.get("explanation", "Traitement terminé."),
+                "html": data.get("html")
+            }
+        except Exception as pe:
+            logger.error(f"Failed to parse Sullivan JSON: {pe}")
+            return {"explanation": raw_text, "html": None}
+
+    except Exception as e:
+        logger.error(f"Sullivan chat failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # --- MISSION 128 : DESIGN SYSTEM BRIDGE ---
 @app.post("/api/project/import-design-md")
@@ -1496,6 +1605,56 @@ async def preview_run(body: Dict[str, str]):
     p_path = STATIC_DIR_PATH / "templates/_preview_tmp.html"
     p_path.write_text(html, encoding='utf-8')
     return {"ok": True, "url": "/api/preview/show"}
+
+class GraftRequest(BaseModel):
+    filename: str
+    selector: str
+    html_content: str
+
+@app.post("/api/workspace/graft")
+async def workspace_graft(payload: GraftRequest):
+    """
+    Graft a new HTML snippet into an existing template file based on a CSS selector.
+    """
+    try:
+        # Resolve project path
+        project_path = get_active_project_path()
+        file_path = project_path / payload.filename
+        
+        if not file_path.exists():
+            # Fallback to static/templates if not in project
+            file_path = STATIC_DIR_PATH / "templates" / payload.filename
+            
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"File not found: {payload.filename}")
+            
+        # Read content
+        content = file_path.read_text(encoding='utf-8')
+        
+        # Parse with BS4
+        soup = BeautifulSoup(content, 'lxml' if 'lxml' in sys.modules else 'html.parser')
+        
+        # Find element
+        target = soup.select_one(payload.selector)
+        if not target:
+            # Try a fuzzy match if selector fails (selector might be slightly different due to nth-child)
+            # Logic: If selector is simple (like #id or .class), we might find it.
+            # For now, strict match or error.
+            raise HTTPException(status_code=400, detail=f"Target element not found in {payload.filename} for selector: {payload.selector}")
+            
+        # Replace element
+        new_tag = BeautifulSoup(payload.html_content, 'html.parser')
+        target.replace_with(new_tag)
+        
+        # Save back
+        file_path.write_text(str(soup), encoding='utf-8')
+        
+        logger.info(f"✅ [Workspace] Grafted snippet into {payload.filename} via {payload.selector}")
+        return {"status": "success", "file": payload.filename}
+        
+    except Exception as e:
+        logger.error(f"❌ [Workspace] Grafting failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/preview/show")
 async def preview_show():

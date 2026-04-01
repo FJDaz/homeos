@@ -116,14 +116,35 @@ body {
 
 #ws-chat-input::placeholder {
     color: #cbd5e1;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 400;
+}
+
+#ws-chat-history {
+    scrollbar-width: thin; /* Restore scrollbar for long messages */
+}
+#ws-chat-history::-webkit-scrollbar {
+    display: block;
+    width: 4px;
+}
+#ws-chat-history::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
 }
 
 /* Vertical Text for Badges */
 .vertical-text {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
+}
+
+/* TOOLBAR DROITE : CANVAS TOOLS (Mission 131 - Exclusive to Preview) */
+nav[data-purpose="floating-toolbar"] {
+    display: none !important;
+}
+
+body.preview-mode nav[data-purpose="floating-toolbar"] {
+    display: flex !important;
 }
 
 /* Collapsable Panels (Mission 129/130-C) */
@@ -185,22 +206,14 @@ body {
 
 /* Pulsing Focus Animation (Mission 130) */
 .pulsing {
+    stroke-width: 2px;
     animation: pulse-focus 2s infinite ease-in-out;
 }
 
 @keyframes pulse-focus {
-    0% {
-        stroke: #A3CD54;
-        stroke-opacity: 1;
-    }
-    50% {
-        stroke: #8fb846; /* Slightly darker/more saturated green */
-        stroke-opacity: 0.7;
-    }
-    100% {
-        stroke: #A3CD54;
-        stroke-opacity: 1;
-    }
+    0% { stroke: #A3CD54; stroke-opacity: 1; }
+    50% { stroke: #8fb846; stroke-opacity: 0.7; }
+    100% { stroke: #A3CD54; stroke-opacity: 1; }
 }
 
 /* PREVIEW MODE (Mission 130-A) */
@@ -226,7 +239,7 @@ body.preview-mode .bg-dot-grid {
 
 #ws-preview-overlay {
     transition: all 0.3s ease;
-    padding: 0 !important; /* Brute immersion */
+    padding: 0 !important;
 }
 
 #ws-preview-frame-container {
@@ -243,4 +256,79 @@ body.preview-mode .bg-dot-grid {
     touch-action: none;
     user-select: none;
     outline: none;
+}
+
+/* MONACO, COLOR & TYPO POPOVERS (Mission 130/133/134) */
+#ws-popover-container.show, #ws-color-container.show, #ws-typo-container.show {
+    pointer-events: auto !important;
+}
+
+#ws-popover-container.show #ws-monaco-popover, 
+#ws-color-container.show #ws-color-popover,
+#ws-typo-container.show #ws-typo-popover {
+    transform: scale(1);
+    opacity: 1;
+}
+
+#ws-popover-container.hidden, #ws-color-container.hidden, #ws-typo-container.hidden {
+    display: none !important;
+}
+
+.inspect-hover {
+    outline: 2px dashed rgba(163, 205, 84, 0.4) !important;
+    outline-offset: -2px;
+    cursor: pointer !important;
+}
+
+.organ-selected {
+    outline: 2px solid #A3CD54 !important;
+    outline-offset: -2px;
+    background: rgba(163, 205, 84, 0.05);
+}
+
+/* Custom Range Sliders */
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #f1f5f9;
+    height: 4px;
+    border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    background: #A3CD54;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-top: -4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#ws-popover-editor {
+    transition: height 0.2s ease, width 0.2s ease;
+}
+
+.glass-card-popover {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Edit Code Button - Mission 132 Design */
+#ws-in-preview-edit-btn {
+    background: #ffffff !important;
+    color: #64748b !important; /* text-slate-500 */
+    border: 1px solid #e2e8f0 !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+    transition: all 0.2s ease !important;
+    display: flex;
+    align-items: center;
+}
+
+#ws-in-preview-edit-btn:hover {
+    background: #f8fafc !important;
+    color: #A3CD54 !important;
+    border-color: #A3CD54 !important;
 }

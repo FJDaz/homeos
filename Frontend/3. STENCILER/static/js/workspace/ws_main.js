@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chat = new WsChat('ws-chat-mount');
     window.wsChat = chat;
 
+    // 2b. Initialiser l'Inspecteur (Mission 130)
+    const inspect = new WsInspect(window);
+    window.wsInspect = inspect;
+
     // 3. Charger le contexte courant (depuis landing.html)
     await loadCurrentContext();
 
@@ -22,11 +26,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (uploadInput) uploadInput.addEventListener('change', (e) => chat.handleDirectUpload(e));
 
     // 5. Setup UI buttons (Right Toolbar)
-    const zIn = document.getElementById('btn-zoom-in');
-    const zOut = document.getElementById('btn-zoom-out');
+    document.querySelectorAll('.ws-tool-btn').forEach(btn => {
+        btn.onclick = () => {
+            const mode = btn.getAttribute('data-mode');
+            
+            // UI Visual state
+            document.querySelectorAll('.ws-tool-btn').forEach(b => b.classList.remove('active-tool'));
+            btn.classList.add('active-tool');
+
+            // Notify Inspect engine
+            if (window.wsInspect) {
+                window.wsInspect.setMode(mode);
+                // Also notify Iframe if it exists
+                const iframe = document.querySelector('#ws-preview-frame-container iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'inspect-tool-change', mode: mode }, '*');
+                }
+            }
+        };
+    });
+
+    // 6. Global Shortcuts (Mission 133 - Undo)
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+            e.preventDefault();
+            console.log("🚀 ws_main: Undo Shortcut Detected (Cmd+Z)");
+            if (window.wsInspect) window.wsInspect.undo();
+        }
+    });
+
     const zReset = document.getElementById('btn-reset-view');
-    if (zIn) zIn.onclick = () => canvas.setZoom(canvas.scale * 1.2);
-    if (zOut) zOut.onclick = () => canvas.setZoom(canvas.scale / 1.2);
     if (zReset) zReset.onclick = () => canvas.resetView();
 
     console.log("✅ ws_main: workspace ready");
@@ -67,17 +96,39 @@ async function fetchWorkspaceImports() {
             el.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-zinc-400 flex items-center justify-center">${ext}</div>
-                    <button class="opacity-0 group-hover:opacity-100 p-1 hover:bg-homeos-green hover:text-white rounded text-homeos-green transition-all" title="Ajouter au canvas">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </button>
+                    <div class="flex gap-1">
+                        <button class="ws-del-import-btn opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500 hover:text-white rounded text-red-400 transition-all" title="Supprimer l'import">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                        <button class="ws-add-to-canvas-btn opacity-0 group-hover:opacity-100 p-1 hover:bg-homeos-green hover:text-white rounded text-homeos-green transition-all" title="Ajouter au canvas">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="truncate text-[11px] font-semibold text-slate-700">${item.name}</div>
                 <div class="text-[9px] text-slate-400 font-medium">${new Date(item.timestamp).toLocaleString()}</div>
             `;
             
-            el.querySelector('button').onclick = (e) => {
+            el.querySelector('.ws-add-to-canvas-btn').onclick = (e) => {
                 e.stopPropagation();
                 window.wsCanvas.addScreen(item);
+            };
+
+            el.querySelector('.ws-del-import-btn').onclick = async (e) => {
+                e.stopPropagation();
+                // Suppression immédiate — Mission 141
+                try {
+                    const res = await fetch(`/api/imports/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        el.remove();
+                        const shell = document.getElementById(`shell-${item.id}`);
+                        if (shell) shell.remove();
+                    } else {
+                        console.error("❌ Failed to delete import", res.status);
+                    }
+                } catch (err) {
+                    console.error("❌ Error deleting import", err);
+                }
             };
 
             list.appendChild(el);
@@ -150,6 +201,12 @@ function enterPreviewMode(shellId) {
     else iframe.src = iframeSource.src;
 
     container.appendChild(iframe);
+    
+    // Mission 130 : Injecter l'inspecteur
+    if (window.wsInspect) {
+        window.wsInspect.injectTracker(iframe);
+    }
+
     document.body.classList.add('preview-mode');
     console.log("🎬 [ws_main] Fullscreen Preview SUCCESS for:", id);
 }

@@ -27,6 +27,7 @@ from loguru import logger
 from .svg_parser import parse_figma_svg
 from .archetype_detector import ArchetypeDetector
 from .svg_to_tailwind import SvgToTailwindConverter
+from .react_to_tailwind import ReactToTailwindConverter
 
 # Mission 111: Project Scoping
 try:
@@ -43,16 +44,20 @@ detector = ArchetypeDetector()
 # Mission 101: Global tracker for new imports
 _NEW_IMPORTS_COUNT = 0
 
-# Mission 118: Generation job status tracker
+# Mission 118/119: Generation job status tracker
 _SVG_JOBS = {}
-_SVG_CONVERTER = None  # Lazy init — instancié à la première requête
+_SVG_CONVERTER = None
+_REACT_CONVERTER = None
 
 def get_svg_converter():
-    """Retourne le convertisseur SVG, instancié au premier appel."""
     global _SVG_CONVERTER
-    if _SVG_CONVERTER is None:
-        _SVG_CONVERTER = SvgToTailwindConverter()
+    if _SVG_CONVERTER is None: _SVG_CONVERTER = SvgToTailwindConverter()
     return _SVG_CONVERTER
+
+def get_react_converter():
+    global _REACT_CONVERTER
+    if _REACT_CONVERTER is None: _REACT_CONVERTER = ReactToTailwindConverter()
+    return _REACT_CONVERTER
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────
 
@@ -682,26 +687,66 @@ async def generate_from_import(req: ImportGenRequest):
             logger.info(f"[Mission 122] Raw suffix: '{import_path.suffix}', Normalized: '{import_path.suffix.lower()}'")
             is_zip = import_path.suffix.lower() == ".zip"
             
+            origin = "generated"  # Default for LLM paths
+
             if is_zip:
-                # ROUTER ZIP (Mission 118-B)
-                logger.info(f"[Mission 118-B] Routing ZIP archive: {import_path.name}")
+                logger.info(f"[ZIP] Routing ZIP archive: {import_path.name}")
+                stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
                 with zipfile.ZipFile(import_path, 'r') as z:
                     file_list = z.namelist()
                     
-                    # Détection React vs HTML simple
-                    is_react = any(f.endswith(('.tsx', '.jsx')) for f in file_list)
-                    if is_react:
-                        raise Exception("Format React/.zip détecté. Nécessite la Mission 119 (react_to_tailwind).")
+                    # MISSION 119: PRIORITÉ REACT SOURCE (TSX/JSX)
+                    react_files = [f for f in file_list if f.endswith(('.tsx', '.jsx')) and not f.startswith('__MACOSX')]
                     
-                    # Recherche du HTML principal
-                    html_files = [f for f in file_list if f.endswith(('.html', '.htm')) and not f.startswith('__MACOSX')]
-                    if not html_files:
-                        raise Exception("Aucun fichier HTML trouvé dans l'archive ZIP.")
-                    
-                    # On prend le plus probable (index.html ou le premier à la racine)
-                    main_html = next((f for f in html_files if 'index.html' in f.lower()), html_files[0])
-                    svg_content = z.read(main_html).decode('utf-8', errors='replace')
-                    html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                    if react_files:
+                        logger.info(f"[ZIP/M119] React source detected ({len(react_files)} files). Translating via LLM...")
+                        html_code = await get_react_converter().convert(import_path, entry["name"])
+                        origin = "generated"
+                    else:
+                        # Cas 1 : dist/index.html présent → extraire le dist et servir directement
+                        dist_html = next((f for f in file_list if f.endswith('dist/index.html') and not f.startswith('__MACOSX')), None)
+                        if dist_html:
+                            safe_base = entry["name"].lower().replace(" ", "_").split(".")[0]
+                            dist_dir = stenciler_templates / f"zip_dist_{safe_base}"
+                            dist_dir.mkdir(parents=True, exist_ok=True)
+                            dist_prefix = dist_html.replace('index.html', '')
+                            for member in file_list:
+                                if member.startswith(dist_prefix) and not member.startswith('__MACOSX') and not member.endswith('/'):
+                                    rel = member[len(dist_prefix):]
+                                    dest = dist_dir / rel
+                                    dest.parent.mkdir(parents=True, exist_ok=True)
+                                    dest.write_bytes(z.read(member))
+                            
+                            wrapper_name = f"zip_dist_{safe_base}.html"
+                            wrapper_path = stenciler_templates / wrapper_name
+                            wrapper_path.write_text(
+                                f'<!DOCTYPE html><html><head><meta charset="UTF-8">'
+                                f'<style>html,body,iframe{{margin:0;padding:0;width:100%;height:100%;border:none;}}</style></head>'
+                                f'<body><iframe src="/static/templates/zip_dist_{safe_base}/index.html" style="width:100%;height:100%;border:none;"></iframe></body></html>',
+                                encoding='utf-8'
+                            )
+                            # Mettre à jour l'index directement (court-circuit du flux LLM)
+                            idx = json.loads(index_path.read_text(encoding='utf-8'))
+                            for e2 in idx.get('imports', []):
+                                if e2['id'] == req.import_id:
+                                    e2['html_template'] = wrapper_name
+                                    e2['elements_count'] = 0
+                                    e2['origin'] = "compiled"
+                                    break
+                            index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
+                            _SVG_JOBS[job_id] = {"status": "done", "template_name": wrapper_name, "error": None}
+                            logger.info(f"[ZIP] dist/ extrait → {wrapper_name}")
+                            return
+
+                        # Cas 2 : HTML simple dans le ZIP (pas de dist/, pas de React)
+                        html_files = [f for f in file_list if f.endswith(('.html', '.htm')) and not f.startswith('__MACOSX')]
+                        if not html_files:
+                            raise Exception("Aucun code source React (.tsx, .jsx), aucun dist/ nor HTML trouvé.")
+
+                        main_html = next((f for f in html_files if 'index.html' in f.lower()), html_files[0])
+                        svg_content = z.read(main_html).decode('utf-8', errors='replace')
+                        html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                        origin = "generated"
             else:
                 # DETECTION IMAGE (Mission 122 — Vision)
                 IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
@@ -714,6 +759,27 @@ async def generate_from_import(req: ImportGenRequest):
                     # FORMAT SVG CLASSIQUE
                     svg_content = import_path.read_text(encoding="utf-8")
                     html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                origin = "generated"
+            
+            # Sauvegarde dans static/templates du Stenciler
+            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
+            stenciler_templates.mkdir(parents=True, exist_ok=True)
+
+            safe_name = entry["name"].lower().replace(" ", "_").split(".")[0]
+            template_name = f"reality_{safe_name}.html"
+            output_path = stenciler_templates / template_name
+            
+            output_path.write_text(html_code, encoding="utf-8")
+            
+            # Mise à jour de l'index avec l'origine (generated)
+            idx = json.loads(index_path.read_text(encoding='utf-8'))
+            for e2 in idx.get('imports', []):
+                if e2['id'] == req.import_id:
+                    e2['html_template'] = template_name
+                    e2['elements_count'] = 0
+                    e2['origin'] = origin
+                    break
+            index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
             
             # Sauvegarde dans static/templates du Stenciler
             stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")

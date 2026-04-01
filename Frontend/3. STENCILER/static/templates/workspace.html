@@ -142,16 +142,14 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/></svg>
                 </button>
 
-                <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
-
-                <!-- PREVIEW MODE (Eye) -->
-                <button id="ws-btn-preview" class="p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" title="Mode Aperçu (P)" onclick="window.enterPreviewMode()">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <!-- COLORS (Dropper) -->
+                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="colors" title="Couleurs (C)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
                 </button>
 
-                <!-- SAVE ACTION (Check) -->
-                <button id="ws-btn-save" class="p-3 rounded-xl bg-slate-50 text-homeos-green hover:bg-homeos-green hover:text-white transition-all shadow-sm" title="Sauvegarder (S)" onclick="window.saveProject()">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <!-- TEXT (Type) -->
+                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="text" title="Typographie (T)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
                 </button>
 
                 <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
@@ -169,11 +167,11 @@
         <!-- ASSISTANT SULLIVAN (CENTRAL BOTTOM) -->
         <div class="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6 z-40" data-purpose="chat-interface">
             <div class="glass-card rounded-custom overflow-hidden shadow-2xl border border-slate-100">
-                <!-- Header -->
-                <div class="px-6 py-4 border-b border-slate-50 flex items-center space-x-2 bg-white">
-                    <div class="w-2 h-2 rounded-full bg-homeos-green"></div>
-                    <span class="text-sm font-semibold text-slate-800">Sullivan</span>
-                    <span class="text-[9px] uppercase font-bold text-[#A3CD54] tracking-tighter ml-2">Ai Arbitrator v3</span>
+                <!-- Header (Mission 143 Compact) -->
+                <div class="px-4 py-2 border-b border-slate-50 flex items-center space-x-2 bg-white">
+                    <div class="w-1.5 h-1.5 rounded-full bg-homeos-green"></div>
+                    <span class="text-[11px] font-semibold text-slate-800 uppercase tracking-wider">Sullivan</span>
+                    <span class="text-[8px] uppercase font-bold text-[#A3CD54] tracking-tighter ml-2">v3</span>
                 </div>
                 
                 <!-- Typography Drawer (Mission 129) -->
@@ -190,18 +188,18 @@
                     </div>
                 </div>
 
-                <!-- Messages area -->
-                <div id="ws-chat-history" class="hidden flex flex-col gap-2 px-6 py-3 max-h-48 overflow-y-auto text-[12px]"></div>
+                <!-- Messages area (Mission 143: max 2 bulles, ~96px) -->
+                <div id="ws-chat-history" class="hidden flex flex-col gap-1 px-4 py-2 max-h-24 overflow-y-auto text-[11px]"></div>
 
-                <!-- Input area -->
-                <div class="p-6 bg-[#fcfcfc]">
-                    <textarea id="ws-chat-input" class="w-full bg-transparent border-none focus:ring-0 text-slate-600 text-lg placeholder-slate-300 resize-none h-20" placeholder="Comment puis-je vous aider ?"></textarea>
+                <!-- Input area (Mission 143: compact heights) -->
+                <div class="p-3 bg-[#fcfcfc]">
+                    <textarea id="ws-chat-input" class="w-full bg-transparent border-none focus:ring-0 text-slate-600 text-sm placeholder-slate-300 resize-none h-12" placeholder="Un coup de main ?"></textarea>
                     
-                    <div class="flex items-center justify-between mt-4">
-                        <div class="flex items-center space-x-3">
+                    <div class="flex items-center justify-between mt-2">
+                        <div class="flex items-center space-x-2">
                             <!-- Direct Upload -->
-                            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all" title="Uploader un fichier">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                             </button>
                             <input type="file" id="ws-direct-upload" class="hidden" multiple accept=".svg,.zip,.tsx,.ts,.html,.css,.js,.png,.jpg,.jpeg">
 
@@ -222,8 +220,8 @@
                         </div>
                         
                         <!-- Submit Button -->
-                        <button id="btn-ws-send" class="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-homeos-green hover:border-homeos-green hover:shadow-md transition-all">
-                            <svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
+                        <button id="btn-ws-send" class="w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-homeos-green hover:border-homeos-green hover:shadow-md transition-all">
+                            <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -239,10 +237,101 @@
 
     </main>
 
+    <!-- MONACO POPOVER (Mission 130 — Inspect) -->
+    <div id="ws-popover-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
+        <div id="ws-monaco-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md scale-95 opacity-0 transition-all duration-300">
+            <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 cursor-move" id="ws-popover-header">
+                <div class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-homeos-green animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Snippets Engine</span>
+                    <span id="ws-popover-tag" class="text-[9px] font-mono text-slate-300 bg-slate-100 px-1 rounded lowercase">div</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="ws-popover-save" class="px-3 py-1 bg-homeos-green text-white text-[10px] font-bold rounded-md hover:opacity-90 transition-all uppercase tracking-widest">Graft</button>
+                    <button id="ws-popover-close" class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="ws-popover-editor" class="w-[450px] h-[300px] resize overflow-hidden"></div>
+        </div>
+    </div>
+
+    <!-- COLOR PICKER TSL (Mission 133) -->
+    <div id="ws-color-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
+        <div id="ws-color-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-64 scale-95 opacity-0 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Color TSL</span>
+                <div class="flex items-center space-x-2">
+                    <div id="ws-color-preview" class="w-4 h-4 rounded-full border border-slate-200"></div>
+                    <button id="ws-color-close" class="text-slate-300 hover:text-slate-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex flex-col space-y-1">
+                    <label class="text-[9px] uppercase font-bold text-slate-400">Teinte (H)</label>
+                    <input type="range" id="ws-tsl-h" min="0" max="360" value="163" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                </div>
+                <div class="flex flex-col space-y-1">
+                    <label class="text-[9px] uppercase font-bold text-slate-400">Saturation (S)</label>
+                    <input type="range" id="ws-tsl-s" min="0" max="100" value="50" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                </div>
+                <div class="flex flex-col space-y-1">
+                    <label class="text-[9px] uppercase font-bold text-slate-400">Luminosité (L)</label>
+                    <input type="range" id="ws-tsl-l" min="0" max="100" value="50" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                </div>
+            </div>
+            <button id="ws-color-apply" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer</button>
+        </div>
+    </div>
+
     <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <script src="/static/js/workspace/WsCanvas.js"></script>
     <script src="/static/js/workspace/WsChat.js"></script>
     <script src="/static/js/workspace/ws_font_manager.js"></script>
-    <script src="/static/js/workspace/ws_main.js"></script>
+    <script src="/static/js/workspace/WsInspect.js"></script>
+    <!-- TYPO INSPECTOR (Mission 134) -->
+    <div id="ws-typo-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
+        <div id="ws-typo-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-72 scale-95 opacity-0 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Arsenal Typo</span>
+                <button id="ws-typo-close" class="text-slate-300 hover:text-slate-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col space-y-1">
+                    <label class="text-[9px] uppercase font-bold text-slate-400">Police Système</label>
+                    <select id="ws-typo-font" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2 focus:ring-homeos-green focus:border-homeos-green font-sans">
+                        <option value="Source Sans 3">Source Sans 3 (Default)</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-400">Taille (px)</label>
+                        <input type="number" id="ws-typo-size" value="16" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2">
+                    </div>
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-400">Graisse</label>
+                        <select id="ws-typo-weight" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2">
+                            <option value="400">Regular</option>
+                            <option value="500">Medium</option>
+                            <option value="600">SemiBold</option>
+                            <option value="700">Bold</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="ws-typo-apply" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer & Générer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN INPUTS (Mission 132-B) -->
+    <input type="file" id="ws-internal-image-loader" class="hidden" accept="image/*">
+
+    <script type="module" src="/static/js/workspace/ws_main.js"></script>
 </body>
 </html>

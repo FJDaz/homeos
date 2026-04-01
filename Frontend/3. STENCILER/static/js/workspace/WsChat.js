@@ -138,6 +138,7 @@ class WsChat {
         this.historyEl.appendChild(b);
         this.historyEl.classList.remove('hidden');
         this.historyEl.scrollTop = this.historyEl.scrollHeight;
+
         return b;
     }
 
@@ -148,14 +149,38 @@ class WsChat {
         this.appendBubble(msg, 'user');
         this.inputEl.value = '';
         
-        // --- SULLIVAN API ---
+        // --- SULLIVAN API (Mission 142: Screen Context) ---
+        let screen_html = null;
+        const _getIframeHtml = async (iframe) => {
+            if (!iframe) return null;
+            if (iframe.srcdoc) return iframe.srcdoc;
+            if (iframe.src) {
+                try { return await (await fetch(iframe.src)).text(); } catch(_) {}
+            }
+            return null;
+        };
+        // Priorité 1 : mode aperçu (preview iframe)
+        const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (previewIframe) {
+            screen_html = await _getIframeHtml(previewIframe);
+        }
+        // Priorité 2 : screen actif dans le canvas
+        if (!screen_html && window.wsCanvas?.activeScreenId) {
+            const shell = document.getElementById(window.wsCanvas.activeScreenId);
+            screen_html = await _getIframeHtml(shell?.querySelector('iframe'));
+        }
+
         const pending = this._appendTransient("Je traite votre demande en mode " + this.currentMode + "...");
         
         try {
             const res = await fetch('/api/sullivan/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, mode: this.currentMode })
+                body: JSON.stringify({ 
+                    message: msg, 
+                    mode: this.currentMode,
+                    screen_html: screen_html 
+                })
             });
             const data = await res.json();
             
@@ -164,6 +189,11 @@ class WsChat {
 
             if (data.explanation) {
                 this.appendBubble(data.explanation, 'sullivan');
+            }
+
+            // Mission 142: Apply HTML modification if returned
+            if (data.html && window.wsCanvas) {
+                window.wsCanvas.updateActiveScreenHtml(data.html);
             }
         } catch (e) {
             console.error("WsChat: send failed", e);
