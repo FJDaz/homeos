@@ -1510,7 +1510,7 @@ async def preview_show():
 @app.get("/")
 async def get_root():
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/landing")
+    return RedirectResponse(url="/workspace")
 
 @app.get("/landing")
 async def get_landing():

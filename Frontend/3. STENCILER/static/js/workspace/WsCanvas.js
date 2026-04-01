@@ -121,15 +121,26 @@ class WsCanvas {
 
             if (this.activeMode === 'select') {
                 const rect = this.svg.getBoundingClientRect();
-                const vals = (shell.getAttribute('transform') || 'matrix(1 0 0 1 0 0)')
-                    .match(/matrix\(([^)]+)\)/)?.[1].trim().split(/[\s,]+/).map(Number) || [1,0,0,1,0,0];
-                // Detect header zone by Y position (top 40px in world coords)
-                const worldY = (e.clientY - rect.top - this.viewY) / this.scale - vals[5];
+                
+                // --- Robust Transform Parsing ---
+                const transformStr = shell.getAttribute('transform') || '';
+                let tx = 0, ty = 0;
+                if (transformStr.includes('matrix')) {
+                    const vals = transformStr.match(/matrix\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
+                    if (vals && vals.length >= 6) { tx = vals[4]; ty = vals[5]; }
+                } else if (transformStr.includes('translate')) {
+                    const vals = transformStr.match(/translate\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
+                    if (vals) { tx = vals[0]; ty = vals[1] || 0; }
+                }
+
+                const worldY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
+                
+                console.log(`🖱 [WsCanvas] worldY: ${worldY.toFixed(1)} (tx:${tx}, ty:${ty})`);
+
                 if (worldY >= 0 && worldY <= 40) {
                     this.selectedScreen = shell;
-                    this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - vals[4];
-                    this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - vals[5];
-                    this.content.appendChild(shell); // Bring to front
+                    this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - tx;
+                    this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
                 }
             }
         } else {
@@ -182,9 +193,16 @@ class WsCanvas {
     selectScreen(shell) {
         this.deselectAll();
         shell.classList.add('active');
+        
+        // Z-Index: Bring to front (screens layer)
+        this.content.appendChild(shell);
+
         const bg = shell.querySelector('.ws-screen-bg');
-        if (bg) bg.setAttribute('stroke', '#A3CD54');
-        if (bg) bg.setAttribute('stroke-width', '2');
+        if (bg) {
+            bg.setAttribute('stroke', '#A3CD54');
+            bg.setAttribute('stroke-width', '3');
+            bg.classList.add('pulsing');
+        }
         this.activeScreenId = shell.getAttribute('id');
         
         // Update Audit UX panel (mockup trigger)
@@ -210,8 +228,11 @@ class WsCanvas {
         document.querySelectorAll('.ws-screen-shell').forEach(s => {
             s.classList.remove('active');
             const bg = s.querySelector('.ws-screen-bg');
-            if (bg) bg.setAttribute('stroke', '#f0f0f0');
-            if (bg) bg.setAttribute('stroke-width', '1');
+            if (bg) {
+                bg.setAttribute('stroke', '#f0f0f0');
+                bg.setAttribute('stroke-width', '1');
+                bg.classList.remove('pulsing');
+            }
         });
         this.activeScreenId = null;
     }
