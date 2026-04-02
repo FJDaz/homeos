@@ -173,37 +173,169 @@ Après `addScreen()`, appeler `GET /api/frd/manifest?import_id=...` :
 
 ---
 
-### Mission 147 — Wire : tableau de mapping Z-index + fond blur
+### Mission 147 — Wire : overlay Z-index + fond blur + validation
 
 **STATUS: 🔵 EN COURS**
 **DATE: 2026-04-02**
-**ACTOR: GEMINI (workspace.html) + CLAUDE (server_v3.py)**
-**DÉPENDANCE: M146 (détection manifeste)**
 
-**Contexte :** En mode Wire (aperçu d'un screen avec manifeste), afficher un **tableau de mapping en Z-index max** par-dessus l'iframe, avec fond blur — exactement comme le screen `FRD-editor_Stich_Wire.html`. Ce tableau liste les composants du manifeste (nom, rôle, z-index) et permet de valider ou rejeter le wire.
+---
 
-#### Livrable A — Overlay Wire (GEMINI — workspace.html)
+#### MISSION GEMINI — Livrable A : overlay `#ws-wire-overlay` dans workspace.html
 
-Panel `#ws-wire-overlay` positionné en `z-index: max` sur `#ws-preview-frame-container` :
-- Fond `backdrop-filter: blur(8px)` + `rgba(255,255,255,0.85)`
-- Tableau : colonnes `Composant | Rôle | Z-index | Statut`
-- Bouton "Valider le Wire" → `POST /api/frd/validate-wire`
-- Bouton "Retour Cadrage" → ferme l'overlay + badge "cadrage requis"
+**ACTOR: GEMINI**
+**MODE: CODE DIRECT**
+**FILE: `Frontend/3. STENCILER/static/templates/workspace.html`**
 
-#### Livrable B — Route validation (server_v3.py)
-
+**Bootstrap Gemini :**
 ```
-POST /api/frd/validate-wire
-Body: { import_id, manifest }
-→ Sauvegarde manifeste validé dans projects/{active}/manifests/
-→ Retourne { status: "ok" }
+Tu es un agent frontend expert Tailwind CSS. Tu modifies un seul fichier HTML.
+Ne touche à aucun autre fichier. N'invente pas de routes API.
+Écris le rapport dans ce fichier quand tu as terminé.
 ```
+
+**input_files:** `LEXICON_DESIGN.json`, `SULLIVAN_INTERACTIONS.md`
+
+**Contexte DOM existant :**
+```html
+<!-- PREVIEW OVERLAY — z-[35] -->
+<div id="ws-preview-overlay" class="hidden absolute inset-0 bg-white z-[35] flex items-center justify-center overflow-auto">
+    <div id="ws-preview-frame-container" class="relative">
+        <!-- iframe injectée ici par enterPreviewMode() -->
+    </div>
+</div>
+```
+
+**Ce que tu dois ajouter :**
+
+Insérer `#ws-wire-overlay` comme **frère direct** de `#ws-preview-frame-container`, à l'intérieur de `#ws-preview-overlay`. Il doit se positionner en `absolute inset-0 z-[50]` par-dessus l'iframe. Par défaut `hidden`.
+
+Structure attendue :
+```html
+<div id="ws-wire-overlay" class="hidden absolute inset-0 z-[50] flex flex-col">
+  <!-- Fond blur -->
+  <div class="absolute inset-0 backdrop-blur-sm bg-white/80"></div>
+  <!-- Contenu -->
+  <div class="relative z-10 flex flex-col h-full p-8 gap-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-widest">wire — mapping composants</h2>
+      <span id="ws-wire-import-label" class="text-xs text-slate-400"></span>
+    </div>
+    <!-- Tableau -->
+    <div class="flex-1 overflow-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+      <table class="w-full text-xs text-slate-600">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-4 py-3 text-left font-medium">Composant</th>
+            <th class="px-4 py-3 text-left font-medium">Rôle</th>
+            <th class="px-4 py-3 text-left font-medium">Z-index</th>
+            <th class="px-4 py-3 text-left font-medium">Statut</th>
+          </tr>
+        </thead>
+        <tbody id="ws-wire-table-body" class="divide-y divide-slate-100">
+          <!-- Rows injectées par wsWire.show(manifest) -->
+        </tbody>
+      </table>
+    </div>
+    <!-- Actions -->
+    <div class="flex items-center gap-3 justify-end">
+      <button id="ws-wire-btn-cadrage" class="px-4 py-2 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+        retour cadrage
+      </button>
+      <button id="ws-wire-btn-validate" class="px-4 py-2 text-xs font-medium text-white bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+        valider le wire
+      </button>
+    </div>
+  </div>
+</div>
+```
+
+Règles :
+- Pas de majuscules dans les labels (convention HoméOS)
+- Pas d'emojis
+- Tailwind uniquement — aucun style inline
+- Ne pas modifier `#ws-preview-overlay` ni `#ws-preview-frame-container`
 
 **Critères de sortie :**
-- [ ] En mode aperçu Wire, overlay visible avec tableau des composants du manifeste
-- [ ] "Valider le Wire" → sauvegarde + overlay disparaît
-- [ ] "Retour Cadrage" → ferme overlay proprement
-- [ ] Fond blur sans casser la preview iframe en dessous
+- [ ] `#ws-wire-overlay` présent dans le DOM, `hidden` par défaut
+- [ ] `#ws-wire-table-body` vide (rempli par JS)
+- [ ] `#ws-wire-btn-validate` et `#ws-wire-btn-cadrage` présents avec leurs ids exacts
+- [ ] Aucune autre modification du fichier
+
+---
+
+#### Livrable B — Logic JS + Route Python (CLAUDE — CODE DIRECT)
+
+**À faire après Gemini :**
+
+**1. ws_main.js — `enterPreviewMode()` : détecter manifeste et afficher overlay**
+
+Après injection de l'iframe dans `#ws-preview-frame-container`, appeler :
+```javascript
+// Détection manifeste
+const importId = shell.dataset.importId || shellId;
+fetch(`/api/frd/manifest?import_id=${encodeURIComponent(importId)}`)
+    .then(r => r.json())
+    .then(data => { if (data.exists) window.wsWire?.show(data.manifest, importId); });
+```
+
+**2. ws_main.js — objet `wsWire`** (à ajouter en bas du fichier, exposer sur `window`) :
+```javascript
+window.wsWire = {
+    _importId: null,
+    show(manifest, importId) {
+        this._importId = importId;
+        const overlay = document.getElementById('ws-wire-overlay');
+        const label = document.getElementById('ws-wire-import-label');
+        const tbody = document.getElementById('ws-wire-table-body');
+        if (!overlay || !tbody) return;
+        if (label) label.textContent = importId;
+        const components = manifest.components || manifest.screens || [];
+        tbody.innerHTML = components.map(c => `
+            <tr>
+                <td class="px-4 py-3 font-mono">${c.name || c.id || '—'}</td>
+                <td class="px-4 py-3">${c.role || '—'}</td>
+                <td class="px-4 py-3">${c.z_index ?? '—'}</td>
+                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700">en attente</span></td>
+            </tr>`).join('');
+        overlay.classList.remove('hidden');
+        document.getElementById('ws-wire-btn-validate')?.addEventListener('click', () => this.validate(), { once: true });
+        document.getElementById('ws-wire-btn-cadrage')?.addEventListener('click', () => this.hide(), { once: true });
+    },
+    hide() {
+        document.getElementById('ws-wire-overlay')?.classList.add('hidden');
+    },
+    async validate() {
+        const res = await fetch('/api/frd/validate-wire', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ import_id: this._importId })
+        });
+        if ((await res.json()).status === 'ok') this.hide();
+    }
+};
+```
+
+**3. server_v3.py — Route `POST /api/frd/validate-wire`**
+```python
+@app.post("/api/frd/validate-wire")
+async def validate_wire(req: Request):
+    body = await req.json()
+    import_id = body.get("import_id", "")
+    active = _get_active_project()
+    manifests_dir = Path(f"projects/{active}/manifests")
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    path = manifests_dir / f"manifest_{import_id}.json"
+    data = {"validated": True, "import_id": import_id}
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
+    return {"status": "ok"}
+```
+
+**Critères de sortie globaux :**
+- [ ] Ouvrir un screen sans manifeste → overlay absent
+- [ ] Ouvrir un screen avec manifeste → overlay visible avec tableau des composants
+- [ ] "Valider le Wire" → POST + overlay disparaît
+- [ ] "Retour Cadrage" → overlay disparaît proprement
+- [ ] `backdrop-blur` visible sans casser la preview iframe
 
 ---
 
