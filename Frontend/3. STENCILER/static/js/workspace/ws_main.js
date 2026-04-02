@@ -86,8 +86,7 @@ async function fetchWorkspaceImports() {
 
         // Screens système figés (BRS + Workspace actuel)
         const systemScreens = [
-            { id: '_sys_workspace', name: 'Workspace', url: window.location.href, icon: '⬡' },
-            { id: '_sys_cadrage', name: 'Cadrage', url: '/cadrage', icon: '◈' },
+            { id: '_sys_cadrage', name: 'Cadrage', tpl: 'cadrage_war_room_tw.html', icon: '◈' },
         ];
         systemScreens.forEach(s => {
             const el = document.createElement('div');
@@ -99,13 +98,11 @@ async function fetchWorkspaceImports() {
                 </div>`;
             el.style.cursor = 'pointer';
             el.onclick = () => {
-                const item = { id: s.id, name: s.name, type: 'system', html_template: null, _sysUrl: s.url };
-                if (s.id === '_sys_workspace') {
-                    // Ajouter un iframe de l'URL courante comme screen
-                    window.wsCanvas?.addScreen({ ...item, html_template: null, _srcdoc: null, _src: s.url });
-                } else {
-                    window.open(s.url, '_blank');
-                }
+                // Charger comme screen canvas — Sullivan peut l'éditer
+                window.wsCanvas?.addScreen({
+                    id: s.id, name: s.name, type: 'html',
+                    html_template: s.tpl, elements_count: 0
+                });
             };
             list.appendChild(el);
         });
