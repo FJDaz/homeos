@@ -225,6 +225,19 @@ function enterPreviewMode(shellId) {
 
     container.appendChild(iframe);
     
+    // Mission 147 : Wire Overlay
+    if (shell.dataset.hasManifest === "true" && window.wsWire) {
+        try {
+            const manifest = JSON.parse(shell.dataset.manifest);
+            const title = shell.querySelector('.ws-screen-title')?.textContent || 'Sans titre';
+            window.wsWire.show(manifest, title);
+        } catch(e) {
+            console.error("M147: Manifest parsing failed", e);
+        }
+    } else if (window.wsWire) {
+        window.wsWire.hide();
+    }
+
     // Mission 130 : Injecter l'inspecteur
     if (window.wsInspect) {
         window.wsInspect.injectTracker(iframe);
@@ -254,6 +267,51 @@ function saveProject() {
         }, 1500);
     }, 800);
 }
+
+// --- wsWire : Wire Overlay Controller (M147) ---
+window.wsWire = {
+    _importId: null,
+    show(manifest, importId) {
+        this._importId = importId;
+        const overlay = document.getElementById('ws-wire-overlay');
+        const label = document.getElementById('ws-wire-import-label');
+        const tbody = document.getElementById('ws-wire-table-body');
+        if (!overlay) return;
+        if (label) label.textContent = importId || '';
+        const components = manifest?.components || manifest?.screens || [];
+        if (tbody) {
+            tbody.innerHTML = components.length
+                ? components.map(c => `<tr>
+                    <td class="px-4 py-3 font-mono text-slate-700">${c.name || c.id || '—'}</td>
+                    <td class="px-4 py-3 text-slate-500">${c.role || '—'}</td>
+                    <td class="px-4 py-3 text-slate-400">${c.z_index ?? '—'}</td>
+                    <td class="px-4 py-3"><span style="background:#fff7ed;color:#c2410c;border:1px solid #ffedd5;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;">en attente</span></td>
+                  </tr>`).join('')
+                : `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400 text-xs">aucun composant dans le manifeste</td></tr>`;
+        }
+        overlay.classList.remove('hidden');
+        const btnValidate = document.getElementById('ws-wire-btn-validate');
+        const btnCadrage = document.getElementById('ws-wire-btn-cadrage');
+        if (btnValidate) { btnValidate.onclick = () => this.validate(); }
+        if (btnCadrage) { btnCadrage.onclick = () => this.hide(); }
+    },
+    hide() {
+        document.getElementById('ws-wire-overlay')?.classList.add('hidden');
+    },
+    async validate() {
+        const btn = document.getElementById('ws-wire-btn-validate');
+        if (btn) { btn.textContent = '...'; btn.disabled = true; }
+        try {
+            const res = await fetch('/api/frd/validate-wire', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ import_id: this._importId })
+            });
+            if ((await res.json()).status === 'ok') this.hide();
+        } finally {
+            if (btn) { btn.textContent = 'valider le wire'; btn.disabled = false; }
+        }
+    }
+};
 
 // Global exposure
 window.fetchWorkspaceImports = fetchWorkspaceImports;

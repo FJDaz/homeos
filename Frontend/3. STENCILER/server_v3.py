@@ -144,10 +144,6 @@ def init_db():
             
     logger.info(f"Projects database initialized at {PROJECTS_DB_PATH}")
 
-def get_active_project_id():
-    from bkd_service import get_active_project_id
-    return get_active_project_id()
-
 def get_active_project_path():
     from bkd_service import get_active_project_path
     return get_active_project_path()
@@ -373,6 +369,47 @@ async def set_current_frd_context(req: CurrentFileRequest):
 @app.get("/api/frd/current")
 async def get_current_frd_context():
     return _CURRENT_FRD_CONTEXT
+
+@app.get("/api/frd/manifest")
+async def get_frd_manifest(import_id: str = Query(...)):
+    """
+    Détection de manifeste pour le routage intelligent (Mission 146).
+    Recherche manifest_{import_id}.json dans le dossier manifests du projet actif.
+    """
+    manifest_dir = get_active_project_path() / "manifests"
+    manifest_path = manifest_dir / f"manifest_{import_id}.json"
+    
+    if manifest_path.exists():
+        try:
+            content = json.loads(manifest_path.read_text(encoding='utf-8'))
+            return {"exists": True, "manifest": content}
+        except Exception as e:
+            logger.error(f"Erreur lecture manifeste {import_id} : {e}")
+            return {"exists": False, "error": f"Format invalide : {e}"}
+    
+    return {"exists": False}
+
+@app.post("/api/frd/validate-wire")
+async def validate_wire(request: Request):
+    body = await request.json()
+    import_id = body.get("import_id", "")
+    manifest_dir = get_active_project_path() / "manifests"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    path = manifest_dir / f"manifest_{import_id}.json"
+    existing = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
+    existing["validated"] = True
+    path.write_text(json.dumps(existing, ensure_ascii=False, indent=2))
+    return {"status": "ok"}
+
+@app.get("/api/frd/current")
+async def get_frd_current():
+    """Retourne l'import/template actuellement chargé dans l'éditeur."""
+    from bkd_service import get_active_project_id
+    p_path = PROJECTS_DIR / get_active_project_id()
+    f = p_path / "current_frd.json"
+    if f.exists():
+        return json.loads(f.read_text(encoding='utf-8'))
+    return {"status": "none"}
 
 # Exception handler global — ajoute CORS sur les 500 non catchés
 @app.exception_handler(Exception)

@@ -440,11 +440,8 @@ class WsCanvas {
             saveBtn.innerText = '...'; saveBtn.style.opacity = '0.6';
             try {
                 const iframeEl = g.querySelector('iframe');
-                let html = iframeEl?.srcdoc || '';
-                if (!html && iframeEl?.src) {
-                    const r = await fetch(iframeEl.src);
-                    html = await r.text();
-                }
+                // Serialize live DOM — srcdoc/fetch give original file, not modified content
+                const html = iframeEl?.contentDocument?.documentElement?.outerHTML || iframeEl?.srcdoc || '';
                 const name = item.html_template || (item.name + '.html');
                 await fetch('/api/frd/file', {
                     method: 'POST',
