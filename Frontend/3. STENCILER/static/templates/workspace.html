@@ -50,11 +50,17 @@
             <div id="ws-active-project-badge" class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded uppercase tracking-tighter">Projet Actif</div>
         </div>
         
-        <!-- Preview exit button (Visible only in preview mode) -->
-        <div id="ws-preview-exit" class="hidden">
-            <button onclick="window.exitPreviewMode()" class="px-6 py-2 border border-slate-200 rounded-custom text-[11px] font-bold text-slate-500 uppercase hover:text-homeos-green transition-all">
-                Quitter l'aperçu
+        <div class="flex items-center space-x-3">
+            <!-- Save active screen -->
+            <button id="ws-btn-save" onclick="window.wsCanvas?.saveActiveScreen(this)" class="px-4 py-1.5 border border-slate-200 rounded-custom text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-homeos-green hover:border-homeos-green transition-all">
+                save
             </button>
+            <!-- Preview exit button (Visible only in preview mode) -->
+            <div id="ws-preview-exit" class="hidden">
+                <button onclick="window.exitPreviewMode()" class="px-6 py-2 border border-slate-200 rounded-custom text-[11px] font-bold text-slate-500 uppercase hover:text-homeos-green transition-all">
+                    Quitter l'aperçu
+                </button>
+            </div>
         </div>
     </header>
 
@@ -70,6 +76,45 @@
         <div id="ws-preview-overlay" class="hidden absolute inset-0 bg-white z-[35] flex items-center justify-center overflow-auto">
             <div id="ws-preview-frame-container" class="relative">
                 <!-- Actual preview content will be injected here -->
+            </div>
+            
+            <!-- WIRE OVERLAY (Mission 147) -->
+            <div id="ws-wire-overlay" class="hidden absolute inset-0 z-[50] flex flex-col">
+              <!-- Fond blur -->
+              <div class="absolute inset-0 backdrop-blur-sm bg-white/80"></div>
+              <!-- Contenu -->
+              <div class="relative z-10 flex flex-col h-full p-8 gap-6 max-w-5xl mx-auto w-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between">
+                  <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-widest">wire — mapping composants</h2>
+                  <span id="ws-wire-import-label" class="text-xs text-slate-400 font-mono tracking-tighter"></span>
+                </div>
+                <!-- Tableau -->
+                <div class="flex-1 overflow-auto rounded-lg border border-slate-200 bg-white shadow-sm scrollbar-hide">
+                  <table class="w-full text-xs text-slate-600">
+                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-20">
+                      <tr>
+                        <th class="px-4 py-3 text-left font-medium">Composant</th>
+                        <th class="px-4 py-3 text-left font-medium">Rôle</th>
+                        <th class="px-4 py-3 text-left font-medium">Z-index</th>
+                        <th class="px-4 py-3 text-left font-medium">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ws-wire-table-body" class="divide-y divide-slate-100">
+                      <!-- Rows injectées par WsWire.show() -->
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Actions -->
+                <div class="flex items-center gap-3 justify-end">
+                  <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all">
+                    retour cadrage
+                  </button>
+                  <button id="ws-wire-btn-validate" class="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white bg-slate-900 rounded-custom hover:bg-black shadow-lg shadow-slate-200 transition-all">
+                    valider le wire
+                  </button>
+                </div>
+              </div>
             </div>
         </div>
 
@@ -125,8 +170,8 @@
         </div>
 
         <!-- TOOLBAR DROITE : CANVAS TOOLS (Mission 129) -->
-        <nav class="absolute top-1/2 right-8 -translate-y-1/2 flex flex-col z-40" data-purpose="floating-toolbar" style="max-height: calc(100vh - 120px); overflow-y: auto;">
-            <div class="glass-card rounded-custom p-2 flex flex-col space-y-2 shadow-xl border border-slate-100 items-center">
+        <nav class="absolute top-1/2 right-8 -translate-y-1/2 flex flex-col z-40 pointer-events-none" data-purpose="floating-toolbar" style="max-height: calc(100vh - 120px); overflow-y: auto;">
+            <div class="glass-card rounded-custom p-2 flex flex-col space-y-2 shadow-xl border border-slate-100 items-center pointer-events-auto">
                 
                 <!-- SELECT (Arrow) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green active-tool shadow-inner-soft transition-all" data-mode="select" title="Sélectionner (V)">
@@ -300,6 +345,7 @@
     <script src="/static/js/workspace/WsChat.js"></script>
     <script src="/static/js/workspace/ws_font_manager.js"></script>
     <script src="/static/js/workspace/WsInspect.js"></script>
+    <script src="/static/js/workspace/WsWire.js"></script>
     <!-- TYPO INSPECTOR (Mission 134) -->
     <div id="ws-typo-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
         <div id="ws-typo-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-72 scale-95 opacity-0 transition-all duration-300">
