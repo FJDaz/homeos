@@ -6,6 +6,30 @@
 
 ---
 
+## Mission 148 — Bridge @font-face : fontes système → iframes screens
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsInspect.js)**
+
+- Route `POST /api/sullivan/generate-webfont` — scan filesystem + TTF→WOFF2 via fonttools, cache idempotent
+- Route `GET /api/sullivan/system-fonts` — 600+ fontes macOS indexées
+- `applyTypo()` : inject `@font-face` dans `iframe.contentDocument`, apply via `currentSelector` (scope graft Monaco)
+- Override Tailwind utilities via règle CSS `selector, selector * { font-family !important }` injectée dans l'iframe
+- `lastSelectedEl` + `selector` dans `inspect-organ-selected` pour persistance de sélection
+
+---
+
+## Mission 146 — Détection manifeste → routage Wire ou Cadrage
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (server_v3.py)**
+
+- Route `GET /api/frd/manifest?import_id={id}` — détecte `projects/{active}/manifests/manifest_{id}.json`
+- Réponse `{ exists: true, manifest: {...} }` ou `{ exists: false }`
+- Correction ordre instanciation FastAPI (NameError résolu)
+
+---
+
 ## Mission 144 — Export projet + @font-face dans les screens
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**

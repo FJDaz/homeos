@@ -24,10 +24,10 @@
 
 ### Mission 148 — Bridge @font-face : fontes système → iframes screens
 
-**STATUS: 🟠 PRÊTE**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**
 **ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsInspect.js)**
-**DÉPENDANCE: aucune**
+**RÉSULTAT :** Infrastructure de génération dynamique WOFF2 opérationnelle (`/api/sullivan/generate-webfont`). Cache d'indexation système macOS implémenté pour supprimer la latence de scan. Bridge @font-face via `postMessage` validé (réversion frontend effectuée par l'utilisateur pour affinement).
 
 **Contexte :** `applyTypo()` dans WsInspect applique `font-family: TrajanPro` dans l'iframe preview, mais la fonte n'est pas chargée dans le contexte de l'iframe. Le résultat : fallback silencieux sur la fonte système par défaut. Il faut injecter un `@font-face` dans l'iframe **au moment de l'application**, en générant la webfont à la volée depuis le fichier système Mac.
 
@@ -116,10 +116,10 @@ if (e.data.type === 'inject-font-css') {
 
 ### Mission 145 — Renommage UI : BRS → Cadrage + tabs renommés
 
-**STATUS: 🟠 PRÊTE**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**
-**ACTOR: GEMINI (workspace.html + tout HTML qui mentionne BRS)**
-**DÉPENDANCE: aucune**
+**ACTOR: CLAUDE (CODE DIRECT — bootstrap.js + workspace.html)**
+**RÉSULTAT :** Unification du Header Global (`bootstrap.js`). Renommage complet BRS -> **Cadrage**. Pipeline passé à 4 onglets : *Cadrage*, *Backend*, *Frontend* (vers Workspace), *Déploiement*.
 
 **Contexte :** Le module BRS (Brainstorm) se rebaptise **Cadrage**. Les 4 tabs du pipeline reçoivent des noms définitifs.
 
@@ -142,10 +142,10 @@ Remplacer toutes les occurrences de `BRS`, `Brainstorm`, `brs` dans les template
 
 ### Mission 146 — Détection manifeste → routage Wire ou Cadrage
 
-**STATUS: 🟠 PRÊTE**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + routes.py)**
-**DÉPENDANCE: M145 (Cadrage renommé)**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
+**RÉSULTAT :** API `GET /api/frd/manifest?import_id={id}` implémentée. Détection automatique des manifestes dans `projects/{active}/manifests/`. Prêt pour le routage intelligent Mission 147.
 
 **Contexte :** Quand l'utilisateur ajoute un screen au canvas, HoméOS doit détecter si un manifeste de wireframe existe déjà pour cet import. Si oui → lancer le Wire directement. Sinon → proposer le Cadrage.
 
@@ -175,7 +175,7 @@ Après `addScreen()`, appeler `GET /api/frd/manifest?import_id=...` :
 
 ### Mission 147 — Wire : tableau de mapping Z-index + fond blur
 
-**STATUS: 🟠 PRÊTE**
+**STATUS: 🔵 EN COURS**
 **DATE: 2026-04-02**
 **ACTOR: GEMINI (workspace.html) + CLAUDE (server_v3.py)**
 **DÉPENDANCE: M146 (détection manifeste)**
