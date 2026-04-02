@@ -339,6 +339,111 @@ async def validate_wire(req: Request):
 
 ---
 
+### Mission 152 — Sullivan context complet : tous les screens canvas + DESIGN.md
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py)**
+**DÉPENDANCE: aucune**
+
+**Contexte :**
+Sullivan ne voit qu'un seul écran (l'actif) et ignore le `DESIGN.md` du projet. Résultat : il ne peut pas comparer deux screens, appliquer un design system, ni connaître les tokens visuels définis. Il faut lui passer systématiquement :
+1. Tous les screens présents sur le canvas (HTML résumé ou complet)
+2. Le `DESIGN.md` du projet actif s'il existe
+
+**Livrable A — WsChat.js : collecter tous les screens canvas**
+
+Dans `sendMessage()`, après avoir capturé `screen_html` (screen actif), collecter les autres screens :
+
+```javascript
+// Collecter tous les screens canvas (sauf actif)
+const canvas_screens = [];
+if (window.wsCanvas) {
+    const shells = document.querySelectorAll('.ws-screen-shell');
+    for (const shell of shells) {
+        const id = shell.getAttribute('id');
+        if (id === window.wsCanvas.activeScreenId) continue; // déjà dans screen_html
+        const title = shell.querySelector('.ws-screen-title')?.textContent || id;
+        const iframe = shell.querySelector('iframe');
+        let html = null;
+        try {
+            if (iframe?.srcdoc) html = iframe.srcdoc;
+            else if (iframe?.src) html = await (await fetch(iframe.src)).text();
+        } catch(_) {}
+        if (html) canvas_screens.push({ id, title, html });
+    }
+}
+```
+
+Ajouter `canvas_screens` au body de la requête :
+```javascript
+body: JSON.stringify({ message, mode, screen_html, canvas_screens })
+```
+
+**Livrable B — server_v3.py : SullivanChatRequest + scan DESIGN.md**
+
+Étendre le modèle :
+```python
+class SullivanChatRequest(BaseModel):
+    message: str
+    mode: str = "construct"
+    screen_html: Optional[str] = None
+    canvas_screens: Optional[list] = None  # [{ id, title, html }]
+```
+
+Scan DESIGN.md dans `sullivan_chat()` :
+```python
+# DESIGN.md du projet actif
+design_md_block = ""
+try:
+    design_path = get_active_project_path() / "DESIGN.md"
+    if not design_path.exists():
+        # Chercher dans templates/ aussi
+        design_path = STATIC_DIR_PATH / "templates" / "DESIGN.md"
+    if design_path.exists():
+        design_md_block = f"""
+DESIGN SYSTEM DU PROJET (DESIGN.md) :
+---
+{design_path.read_text(encoding='utf-8')[:4000]}
+---
+"""
+except Exception:
+    pass
+```
+
+Construire le bloc autres screens :
+```python
+other_screens_block = ""
+if req.canvas_screens:
+    parts = []
+    for s in req.canvas_screens[:3]:  # max 3 screens supplémentaires
+        parts.append(f"=== SCREEN : {s.get('title','?')} (id: {s.get('id','?')}) ===\n{s.get('html','')[:6000]}")
+    other_screens_block = "\n\nAUTRES SCREENS PRÉSENTS SUR LE CANVAS :\n" + "\n\n".join(parts)
+```
+
+Injecter dans le `system_prompt` :
+```python
+system_prompt = f"""{base_system}
+{design_md_block}
+{context_html_block}
+{other_screens_block}
+...
+```
+
+**Règles :**
+- DESIGN.md : limité à 4000 chars (tokens précieux)
+- Autres screens : 6000 chars chacun, max 3 screens
+- Si pas de DESIGN.md → bloc vide, pas d'erreur
+- `canvas_screens` est optionnel — compat descendante
+
+**Critères de sortie :**
+- [ ] Sullivan répond à "vois-tu les autres screens sur le canvas ?" → oui, les liste par titre
+- [ ] Sullivan répond à "quels sont les tokens du design system ?" → cite le DESIGN.md si dispo
+- [ ] Aucune régression sur les screens sans contexte supplémentaire
+- [ ] Temps de réponse < 60s même avec 2 screens + DESIGN.md
+
+---
+
 ### Mission 150 — Retour Cadrage : session pré-alimentée par le manifeste Wire
 
 **STATUS: 🟠 PRÊTE**
