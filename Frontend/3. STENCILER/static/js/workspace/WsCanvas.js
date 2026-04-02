@@ -373,8 +373,6 @@ class WsCanvas {
             if (data.exists) {
                 g.dataset.manifest = JSON.stringify(data.manifest);
                 g.dataset.hasManifest = "true";
-                // Auto-enter preview (Mission 146 Livrable B)
-                setTimeout(() => { if (window.enterPreviewMode) window.enterPreviewMode(id); }, 1500);
             } else {
                 g.dataset.hasManifest = "false";
                 // Badge Cadrage Requis (Yellow/Warm)
