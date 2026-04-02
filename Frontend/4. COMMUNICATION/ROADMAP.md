@@ -18,6 +18,195 @@
 
 ---
 
+## Thème 7 — Drill : Manifeste → Wire → Cadrage
+
+> Objectif : à partir d'un import (SVG, HTML, image), HoméOS détecte si un manifeste existe, lance le mode Wire directement si oui, sinon ouvre le Cadrage (ex-BRS). Le Wire doit fonctionner en mode aperçu, validable en un clic.
+
+### Mission 148 — Bridge @font-face : fontes système → iframes screens
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsInspect.js)**
+**DÉPENDANCE: aucune**
+
+**Contexte :** `applyTypo()` dans WsInspect applique `font-family: TrajanPro` dans l'iframe preview, mais la fonte n'est pas chargée dans le contexte de l'iframe. Le résultat : fallback silencieux sur la fonte système par défaut. Il faut injecter un `@font-face` dans l'iframe **au moment de l'application**, en générant la webfont à la volée depuis le fichier système Mac.
+
+**Pipeline cible :**
+```
+1. applyTypo() → POST /api/sullivan/generate-webfont { font_name: "Trajan Pro" }
+2. server_v3.py → trouve le fichier .ttf/.otf dans /System/Library/Fonts + ~/Library/Fonts
+3. FontWebGen.generate() → produit le .woff2 dans /static/fonts/ + retourne le @font-face CSS
+4. Réponse → { css: "@font-face { font-family: 'Trajan Pro'; src: url(...) }" }
+5. applyTypo() → postMessage({ type: 'inject-font-css', css }) à l'iframe
+6. injectTracker() dans l'iframe → listener inject-font-css → ajoute <style> dans <head>
+7. Puis postMessage inspect-apply-typo → la fonte est maintenant disponible
+```
+
+#### Livrable A — Route POST /api/sullivan/generate-webfont (server_v3.py)
+
+```python
+POST /api/sullivan/generate-webfont
+Body: { "font_name": str }
+
+1. Cherche le fichier dans /System/Library/Fonts, /Library/Fonts, ~/Library/Fonts
+   (match insensible à la casse sur le stem du fichier)
+2. Si trouvé → FontWebGen().generate(path, classification)
+3. Retourne { css: "@font-face {...}", slug: str, status: "ok" }
+4. Si déjà généré (slug existe) → retourne directement sans regénérer
+```
+
+#### Livrable B — applyTypo() dans WsInspect.js
+
+```javascript
+async applyTypo() {
+    const font = this.fontSelect.value;
+    const size = this.sizeInput.value;
+    const weight = this.weightSelect.value;
+    const iframe = document.querySelector('#ws-preview-frame-container iframe');
+    if (!iframe) return;
+
+    // 1. Générer la webfont côté serveur
+    const res = await fetch('/api/sullivan/generate-webfont', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ font_name: font })
+    });
+    const data = await res.json();
+
+    // 2. Injecter le @font-face dans l'iframe
+    if (data.css) {
+        iframe.contentWindow.postMessage({ type: 'inject-font-css', css: data.css }, '*');
+    }
+
+    // 3. Appliquer la typo sur l'élément sélectionné
+    iframe.contentWindow.postMessage({ type: 'inspect-apply-typo', font, size, weight }, '*');
+}
+```
+
+#### Livrable C — Listener inject-font-css dans injectTracker() (WsInspect.js)
+
+Dans le bloc `window.addEventListener('message', ...)` de `injectTracker()` :
+```javascript
+if (e.data.type === 'inject-font-css') {
+    let style = document.getElementById('ws-injected-fonts');
+    if (!style) { style = document.createElement('style'); style.id = 'ws-injected-fonts'; document.head.appendChild(style); }
+    style.textContent += e.data.css + '\n';
+}
+```
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/server_v3.py` — route POST `/api/sullivan/generate-webfont`
+- `Frontend/3. STENCILER/static/js/workspace/WsInspect.js` — `applyTypo()` async + listener `inject-font-css`
+
+**Critères de sortie :**
+- [ ] Sélectionner "Trajan Pro" dans le panel typo → appliquer → la fonte s'affiche correctement dans l'iframe
+- [ ] Fonte déjà générée → pas de re-génération (idempotent)
+- [ ] Fonte introuvable sur le système → fallback silencieux (pas d'erreur UI)
+- [ ] `@font-face` injecté persiste entre plusieurs applications typo (accumulation dans `#ws-injected-fonts`)
+
+---
+
+### Mission 144 — Export projet + @font-face dans les screens
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsFontManager.js)**
+
+---
+
+### Mission 145 — Renommage UI : BRS → Cadrage + tabs renommés
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (workspace.html + tout HTML qui mentionne BRS)**
+**DÉPENDANCE: aucune**
+
+**Contexte :** Le module BRS (Brainstorm) se rebaptise **Cadrage**. Les 4 tabs du pipeline reçoivent des noms définitifs.
+
+**Tableau de référence :**
+
+| Tab | Nom | Longueur | Alt |
+|-----|-----|----------|-----|
+| 1 | Cadrage | 7 car. | L'Intention (Humain) |
+| 2 | Backend | 7 car. | La Logique (Machine) |
+| 3 | Frontend | 8 car. | Le Visuel (Interface) |
+| 4 | Déploiement | 11 car. | La Sortie |
+
+Remplacer toutes les occurrences de `BRS`, `Brainstorm`, `brs` dans les templates HTML et labels UI par `Cadrage`.
+
+**Critères de sortie :**
+- [ ] Aucune occurrence visible de "BRS" ou "Brainstorm" dans l'UI
+- [ ] Les 4 tabs affichent les bons noms avec leur alt disponible en tooltip
+
+---
+
+### Mission 146 — Détection manifeste → routage Wire ou Cadrage
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + routes.py)**
+**DÉPENDANCE: M145 (Cadrage renommé)**
+
+**Contexte :** Quand l'utilisateur ajoute un screen au canvas, HoméOS doit détecter si un manifeste de wireframe existe déjà pour cet import. Si oui → lancer le Wire directement. Sinon → proposer le Cadrage.
+
+Un **manifeste** = fichier `manifest_{import_id}.json` dans `projects/{active}/manifests/` contenant au minimum `{ screens: [...], components: [...] }`. Il peut être généré manuellement ou via Cadrage.
+
+#### Livrable A — Route de détection (server_v3.py)
+
+```
+GET /api/frd/manifest?import_id={id}
+→ Cherche projects/{active}/manifests/manifest_{id}.json
+→ Si trouvé : { exists: true, manifest: {...} }
+→ Sinon : { exists: false }
+```
+
+#### Livrable B — WsCanvas.js : post-addScreen()
+
+Après `addScreen()`, appeler `GET /api/frd/manifest?import_id=...` :
+- `exists: true` → appeler `enterPreviewMode(shellId)` automatiquement (Wire direct)
+- `exists: false` → afficher badge "cadrage requis" sur le screen (pas de blocage)
+
+**Critères de sortie :**
+- [ ] Import avec manifeste → aperçu Wire lancé automatiquement
+- [ ] Import sans manifeste → screen normal avec badge "cadrage requis"
+- [ ] Route `/api/frd/manifest` retourne correctement exists true/false
+
+---
+
+### Mission 147 — Wire : tableau de mapping Z-index + fond blur
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (workspace.html) + CLAUDE (server_v3.py)**
+**DÉPENDANCE: M146 (détection manifeste)**
+
+**Contexte :** En mode Wire (aperçu d'un screen avec manifeste), afficher un **tableau de mapping en Z-index max** par-dessus l'iframe, avec fond blur — exactement comme le screen `FRD-editor_Stich_Wire.html`. Ce tableau liste les composants du manifeste (nom, rôle, z-index) et permet de valider ou rejeter le wire.
+
+#### Livrable A — Overlay Wire (GEMINI — workspace.html)
+
+Panel `#ws-wire-overlay` positionné en `z-index: max` sur `#ws-preview-frame-container` :
+- Fond `backdrop-filter: blur(8px)` + `rgba(255,255,255,0.85)`
+- Tableau : colonnes `Composant | Rôle | Z-index | Statut`
+- Bouton "Valider le Wire" → `POST /api/frd/validate-wire`
+- Bouton "Retour Cadrage" → ferme l'overlay + badge "cadrage requis"
+
+#### Livrable B — Route validation (server_v3.py)
+
+```
+POST /api/frd/validate-wire
+Body: { import_id, manifest }
+→ Sauvegarde manifeste validé dans projects/{active}/manifests/
+→ Retourne { status: "ok" }
+```
+
+**Critères de sortie :**
+- [ ] En mode aperçu Wire, overlay visible avec tableau des composants du manifeste
+- [ ] "Valider le Wire" → sauvegarde + overlay disparaît
+- [ ] "Retour Cadrage" → ferme overlay proprement
+- [ ] Fond blur sans casser la preview iframe en dessous
+
+---
+
 ## Thème 6 — Refonte FRD : Canvas Workspace Unifié
 
 ### Mission 128 — Bridge DESIGN.md → tokens projet dynamiques

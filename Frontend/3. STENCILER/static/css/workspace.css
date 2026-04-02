@@ -62,7 +62,7 @@ body {
     border-radius: 12px;
     padding: 12px;
     margin-bottom: 12px;
-    cursor: grab;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 .import-card-workspace:hover {

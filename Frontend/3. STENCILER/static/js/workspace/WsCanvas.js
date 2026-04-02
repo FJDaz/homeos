@@ -147,21 +147,18 @@ class WsCanvas {
     }
 
     handleDoubleClick(e) {
+        console.log("🖱️ [WsCanvas] Double-click detected on:", e.target);
         const shell = e.target.closest('.ws-screen-shell');
         if (shell) {
-            // Drill down zoom
-            const rect = this.svg.getBoundingClientRect();
-            const vals = (shell.getAttribute('transform') || 'matrix(1 0 0 1 0 0)')
-                .match(/matrix\(([^)]+)\)/)?.[1].trim().split(/[\s,]+/).map(Number) || [1,0,0,1,0,0];
-            
-            const targetX = vals[4];
-            const targetY = vals[5];
-            
-            // Aim for 1.5 scale
-            this.scale = 1.2;
-            this.viewX = rect.width/2 - (targetX + 200) * this.scale;
-            this.viewY = rect.height/2 - (targetY + 300) * this.scale;
-            this.updateTransform();
+            console.log("🖱️ [WsCanvas] Shell found for double-click:", shell.getAttribute('id'));
+            e.preventDefault();
+            e.stopPropagation();
+            // Entrer dans l'écran (Mission 143-bis)
+            this.selectScreen(shell);
+            const shellId = shell.getAttribute('id');
+            if (window.enterPreviewMode) window.enterPreviewMode(shellId);
+        } else {
+            console.log("🖱️ [WsCanvas] No shell found in double-click path.");
         }
     }
 
@@ -358,6 +355,11 @@ class WsCanvas {
         iframe.style.background = '#fff';
         iframe.style.pointerEvents = 'none'; // Avoid iframe stealing mouse events for drag
         
+        // Font injection (Mission 144)
+        iframe.addEventListener('load', () => {
+            if (window.wsFontManager) window.wsFontManager.injectStyles();
+        });
+        
         if (item.html_template) {
             iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
         }
@@ -426,11 +428,35 @@ class WsCanvas {
         });
         saveFo.appendChild(saveBtn);
 
+        // Download btn (Mission 144)
+        const downloadFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+        downloadFo.setAttribute('x', String(SW - 75));
+        downloadFo.setAttribute('y', '8');
+        downloadFo.setAttribute('width', '24');
+        downloadFo.setAttribute('height', '24');
+        downloadFo.setAttribute('pointer-events', 'all');
+        const dlBtn = document.createElement('button');
+        dlBtn.className = "flex items-center justify-center text-slate-400 hover:text-homeos-green transition-colors";
+        dlBtn.style.cssText = "width:100%; height:100%; background:none; border:none; cursor:pointer;";
+        dlBtn.innerHTML = `
+            <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        `;
+        dlBtn.title = "Exporter en ZIP (HTML + Fontes)";
+        dlBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        dlBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.location.href = `/api/frd/export-zip?import_id=${encodeURIComponent(item.id)}`;
+        });
+        downloadFo.appendChild(dlBtn);
+
         g.appendChild(bg);
         g.appendChild(header);
         g.appendChild(title);
         g.appendChild(previewFo);
         g.appendChild(saveFo);
+        g.appendChild(downloadFo);
         g.appendChild(closeBtn);
         g.appendChild(fo);
 

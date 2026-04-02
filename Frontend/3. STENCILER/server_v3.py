@@ -16,6 +16,8 @@ import logging
 import subprocess
 import shutil
 import urllib.request
+import zipfile
+import io
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -84,7 +86,7 @@ try:
     from Backend.Prod.retro_genome.analyzer import RetroGenomeAnalyzer
     from Backend.Prod.retro_genome.intent_mapper import IntentMapper
     from Backend.Prod.retro_genome.html_generator import HtmlGenerator
-    from Backend.Prod.retro_genome import brainstorm_logic as brs_logic
+    from Backend.Prod.retro_genome import brainstorm_logic as cadrage_logic
 except ImportError as e:
     logger.warning(f"Legacy modules missing: {e}. Some routes will fail.")
 
@@ -468,9 +470,24 @@ async def sullivan_font_upload(file: UploadFile = File(...)):
             temp_path.unlink()
         raise HTTPException(status_code=500, detail=str(e))
 
+# --- CACHE DES FONTES SYSTÈME (Optimisation M148) ---
+_FONT_PATH_CACHE = {}
+
+def _warm_up_font_cache():
+    """Scanne les dossiers système une seule fois au démarrage."""
+    font_dirs = [Path("/System/Library/Fonts"), Path("/Library/Fonts"), Path.home() / "Library/Fonts"]
+    ext = {'.ttf', '.otf', '.ttc'}
+    for d in font_dirs:
+        if not d.exists(): continue
+        for f in d.rglob('*'):
+            if f.suffix.lower() in ext:
+                _FONT_PATH_CACHE[f.stem.lower()] = f
+
+_warm_up_font_cache()
+
 @app.get("/api/sullivan/fonts")
 async def sullivan_list_fonts():
-    """Liste toutes les fontes dans /static/fonts/."""
+    """Liste les fontes uploadées dans /static/fonts/."""
     from Backend.Prod.sullivan.font_webgen import FontWebGen
     webgen = FontWebGen()
     fonts = webgen.list_fonts()
@@ -478,25 +495,71 @@ async def sullivan_list_fonts():
 
 @app.get("/api/sullivan/system-fonts")
 async def sullivan_system_fonts():
-    """Liste les familles de fontes installées sur le poste (macOS : scan des dossiers fonts)."""
-    import re
-    families = set()
-    font_dirs = [
-        Path("/System/Library/Fonts"),
-        Path("/Library/Fonts"),
-        Path.home() / "Library/Fonts",
-    ]
-    ext = {'.ttf', '.otf', '.ttc', '.woff', '.woff2'}
-    for d in font_dirs:
-        if not d.exists():
-            continue
-        for f in d.rglob('*'):
-            if f.suffix.lower() in ext:
-                # Nettoyer le nom : retirer suffixes Bold/Italic/Regular etc.
-                name = re.sub(r'[-_ ]?(Bold|Italic|Regular|Light|Medium|Black|Thin|Heavy|Semibold|Condensed|Expanded|Narrow|Wide).*$', '', f.stem, flags=re.IGNORECASE).strip()
-                if name:
-                    families.add(name)
-    return {"families": sorted(families)}
+    """Liste les familles de fontes installées sur le poste via le cache."""
+    return {"families": sorted(_FONT_PATH_CACHE.keys())}
+
+@app.post("/api/sullivan/generate-webfont")
+async def sullivan_generate_webfont(body: Dict[str, Any]):
+    """Génère une webfont depuis les fontes système Mac à la volée (Mission 148)."""
+    font_name = body.get('font_name')
+    if not font_name:
+        raise HTTPException(status_code=400, detail="font_name is required")
+    
+    from Backend.Prod.sullivan.font_webgen import FontWebGen
+    webgen = FontWebGen()
+    
+    # 1. Vérifier si déjà généré (basé sur le slug)
+    slug = re.sub(r'[^\w\s-]', '', font_name.lower())
+    slug = re.sub(r'[\s_]+', '-', slug).strip('-')
+    meta_path = Path(webgen.output_dir) / slug / "metadata.json"
+    
+    if meta_path.exists():
+        try:
+            with open(meta_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            pass
+
+    # 2. Chercher le fichier via le cache optimisé
+    found_path = _FONT_PATH_CACHE.get(font_name.lower())
+    
+    # Recherche partielle si exact échoue dans le cache
+    if not found_path:
+        for name, path in _FONT_PATH_CACHE.items():
+            if font_name.lower() in name:
+                found_path = path
+                break
+
+    if not found_path:
+        return {"status": "not_found", "message": f"Source pour '{font_name}' introuvable."}
+
+    # 3. Générer via FontWebGen, avec fallback conversion directe si subsetting échoue
+    def _convert_font(path, name, out_dir):
+        from fontTools.ttLib import TTFont as _TTFont
+        _slug = re.sub(r'[^\w\s-]', '', name.lower())
+        _slug = re.sub(r'[\s_]+', '-', _slug).strip('-')
+        font_out = out_dir / _slug
+        font_out.mkdir(parents=True, exist_ok=True)
+        woff2_path = font_out / f"{_slug}.woff2"
+        font = _TTFont(str(path))
+        font.flavor = "woff2"
+        font.save(str(woff2_path))
+        css = f"@font-face {{ font-family: '{name}'; src: url('/static/fonts/{_slug}/{_slug}.woff2') format('woff2'); font-display: swap; }}"
+        return {"status": "ok", "css": css, "slug": _slug}
+
+    try:
+        result = await asyncio.to_thread(webgen.generate, str(found_path), {"family_name": font_name})
+        result["status"] = "ok"
+        return result
+    except Exception as e:
+        logger.warning(f"FontWebGen failed ({e}), falling back to direct conversion")
+        try:
+            out_dir = Path(webgen.output_dir)
+            result = await asyncio.to_thread(_convert_font, found_path, font_name, out_dir)
+            return result
+        except Exception as e2:
+            logger.error(f"Direct font conversion failed: {e2}")
+            return {"status": "error", "message": str(e2)}
 
 @app.delete("/api/sullivan/fonts/{slug}")
 async def sullivan_delete_font(slug: str):
@@ -555,38 +618,43 @@ Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
 {context_html_block}
 
 RÈGLES DE RÉPONSE :
-Tu dois impérativement répondre au format JSON suivant :
-{{
-  "explanation": "Ton explication textuelle habituelle ici.",
-  "html": "<!DOCTYPE html>... (le code HTML5 complet si modification demandée, sinon null)"
-}}
-Ne fournis aucune prose avant ou après le JSON.
+Réponds avec ce format exact (deux blocs séparés par des délimiteurs) :
+
+---EXPLANATION---
+Ton explication courte ici (1-3 phrases).
+---HTML---
+<!DOCTYPE html>... (le HTML complet modifié, ou le mot NULL si aucune modification)
+---END---
+
+Pas de prose, pas de markdown, pas de JSON.
 """
 
     try:
         result = await client.generate(
             prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}"
         )
-        
+
         if not result.success:
             return {"explanation": "Désolé, je rencontre une difficulté technique.", "html": None}
-            
-        # Parsing du JSON robuste
-        import json, re
-        raw_text = result.code
-        # Nettoyage markdown si présent
-        raw_text = re.sub(r'^```json\s*', '', raw_text.strip())
-        raw_text = re.sub(r'\s*```$', '', raw_text.strip())
-        
-        try:
-            data = json.loads(raw_text)
-            return {
-                "explanation": data.get("explanation", "Traitement terminé."),
-                "html": data.get("html")
-            }
-        except Exception as pe:
-            logger.error(f"Failed to parse Sullivan JSON: {pe}")
-            return {"explanation": raw_text, "html": None}
+
+        raw_text = result.code.strip()
+
+        # Parsing par délimiteurs
+        explanation = None
+        html = None
+        if "---EXPLANATION---" in raw_text and "---HTML---" in raw_text:
+            try:
+                exp_part = raw_text.split("---EXPLANATION---")[1].split("---HTML---")[0].strip()
+                html_part = raw_text.split("---HTML---")[1].split("---END---")[0].strip()
+                explanation = exp_part
+                html = None if html_part.upper() == "NULL" or not html_part.startswith("<") else html_part
+            except Exception:
+                explanation = raw_text
+        else:
+            # Fallback : texte brut, pas de HTML
+            explanation = raw_text
+
+        return {"explanation": explanation or "Traitement terminé.", "html": html}
 
     except Exception as e:
         logger.error(f"Sullivan chat failed: {e}")
@@ -859,6 +927,65 @@ def load_custom_injection():
     return ""
 
 # --- ROUTES : FRD FILES ---
+@app.get("/api/frd/export-zip")
+async def export_zip(import_id: str):
+    """
+    Export a screen as a ZIP containing HTML + fonts.
+    Mission 144
+    """
+    try:
+        p_path = get_active_project_path()
+        imports_dir = p_path / "imports"
+        index_path = imports_dir / "index.json"
+        
+        if not index_path.exists():
+            raise HTTPException(status_code=404, detail="index.json not found")
+            
+        index_data = json.loads(index_path.read_text(encoding="utf-8"))
+        entry = next((i for i in index_data.get("imports", []) if i["id"] == import_id), None)
+        
+        if not entry:
+            raise HTTPException(status_code=404, detail=f"Import {import_id} not found")
+            
+        html_template = entry.get("html_template")
+        if not html_template:
+            raise HTTPException(status_code=400, detail="Import has no forged template yet.")
+            
+        # 1. Read HTML
+        templates_dir = STATIC_DIR_PATH / "templates"
+        html_path = templates_dir / html_template
+        if not html_path.exists():
+             raise HTTPException(status_code=404, detail=f"Template {html_template} not found")
+        
+        # 2. Prepare ZIP in memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            # Write HTML as index.html for portability
+            zip_file.writestr("index.html", html_path.read_text(encoding="utf-8"))
+            
+            # Write Fonts from /static/fonts/
+            fonts_dir = STATIC_DIR_PATH / "fonts"
+            if fonts_dir.exists():
+                for font_file in fonts_dir.rglob("*"):
+                    if font_file.is_file():
+                        # We want the fonts to be in a /fonts folder in the ZIP
+                        arcname = f"fonts/{font_file.relative_to(fonts_dir)}"
+                        zip_file.write(font_file, arcname=arcname)
+                        
+        zip_buffer.seek(0)
+        # Clean filename for attachment
+        safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', entry["name"].split('.')[0])
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename=export_{safe_name}.zip"}
+        )
+        
+    except Exception as e:
+        logger.error(f"ZIP Export failed: {e}")
+        if isinstance(e, HTTPException): raise e
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/frd/file")
 async def get_frd_file(name: str = Query(...), raw: int = Query(0)):
     if '/' in name or '..' in name:
@@ -1224,34 +1351,51 @@ async def retro_chat(body: Dict[str, Any]):
     res = await asyncio.to_thread(_ARBITRATOR.dispatch, config, [{"role":"user", "content":body.get('message','') or 'Analyze'}])
     return {"explanation": res.get("text", "")}
 
-# --- ROUTES : BRS (BRAINSTORM) ---
-@app.get("/api/brs/chat/{provider}")
-async def brs_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...)):
-    async def event_generator():
-        async for chunk in brs_logic.sse_chat_generator(session_id, provider, message):
+# --- ROUTES : CADRAGE (EX-BRS) ---
+@app.get("/api/cadrage/chat/{provider}")
+async def cadrage_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...)):
+    """SSE endpoint for multi-model chat in Cadrage."""
+    from fastapi.responses import StreamingResponse
+    try:
+        async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message):
             yield chunk
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    except Exception as e:
+        logger.error(f"Cadrage Chat SSE Error: {e}")
 
-@app.post("/api/brs/capture")
-async def brs_capture(body: Dict[str, Any]):
+@app.post("/api/cadrage/capture")
+async def cadrage_capture(body: Dict[str, Any]):
     try:
-        return await asyncio.to_thread(brs_logic.handle_capture, body)
+        return await asyncio.to_thread(cadrage_logic.handle_capture, body)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/brs/generate-prd")
-async def brs_generate_prd(body: Dict[str, Any]):
+@app.post("/api/cadrage/generate-prd")
+async def cadrage_generate_prd(body: Dict[str, Any]):
     try:
-        return await asyncio.to_thread(brs_logic.generate_prd, body)
+        return await asyncio.to_thread(cadrage_logic.generate_prd, body)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/brs/rank")
-async def brs_rank(body: Dict[str, Any]):
+@app.post("/api/cadrage/rank")
+async def cadrage_rank(body: Dict[str, Any]):
     try:
-        return await asyncio.to_thread(brs_logic.handle_rank, body)
+        return await asyncio.to_thread(cadrage_logic.handle_rank, body)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/cadrage")
+async def get_cadrage():
+    path = STATIC_DIR_PATH / "templates/cadrage_war_room_tw.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
+
+@app.get("/cadrage-alt")
+async def get_cadrage_alt():
+    path = STATIC_DIR_PATH / "templates/cadrage_alt.html"
+    if not path.exists(): raise HTTPException(status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=path.read_text(encoding='utf-8'))
 
 # --- ROUTES : RETRO-GENOME ENHANCED ---
 @app.post("/api/retro-genome/approve")

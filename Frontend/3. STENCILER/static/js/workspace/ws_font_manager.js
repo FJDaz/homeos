@@ -64,14 +64,35 @@ class WsFontManager {
     }
 
     injectStyles() {
+        const cssContent = this.fonts.map(f => f.css).filter(Boolean).join('\n\n');
+        
+        // 1. Inject in main document
         let styleTag = document.getElementById('ws-sullivan-font-styles');
         if (!styleTag) {
             styleTag = document.createElement('style');
             styleTag.id = 'ws-sullivan-font-styles';
             document.head.appendChild(styleTag);
         }
-        const cssBlocks = this.fonts.map(f => f.css).filter(Boolean);
-        styleTag.innerHTML = cssBlocks.join('\n\n');
+        styleTag.innerHTML = cssContent;
+
+        // 2. Inject in all iframes (Mission 144)
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!doc || !doc.head) return;
+                
+                let iframeStyle = doc.getElementById('ws-sullivan-font-styles-iframe');
+                if (!iframeStyle) {
+                    iframeStyle = doc.createElement('style');
+                    iframeStyle.id = 'ws-sullivan-font-styles-iframe';
+                    doc.head.appendChild(iframeStyle);
+                }
+                iframeStyle.innerHTML = cssContent;
+            } catch (e) {
+                // Same-origin screens are fine, others will be ignored
+            }
+        });
     }
 
     render() {

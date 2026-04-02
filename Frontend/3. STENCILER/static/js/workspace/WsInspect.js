@@ -115,6 +115,7 @@ class WsInspect {
                 (function() {
                     let lastHover = null;
                     let selectedEl = null;
+                    let lastSelectedEl = null;
                     let activeMode = 'select';
                     let isDragging = false;
                     let isDrawing = false;
@@ -166,12 +167,13 @@ class WsInspect {
                             document.body.innerHTML = e.data.snapshot;
                             scanAtomicOrgans(); document.body.appendChild(editBtn);
                         }
-                        if (e.data.type === 'inspect-apply-color') { if (selectedEl) selectedEl.style.backgroundColor = e.data.color; }
+                        if (e.data.type === 'inspect-apply-color') { const _ct = selectedEl || lastSelectedEl; if (_ct) _ct.style.backgroundColor = e.data.color; }
                         if (e.data.type === 'inspect-apply-typo') {
-                            if (selectedEl) {
-                                selectedEl.style.fontFamily = e.data.font;
-                                selectedEl.style.fontSize = e.data.size + 'px';
-                                selectedEl.style.fontWeight = e.data.weight;
+                            const target = selectedEl || lastSelectedEl;
+                            if (target) {
+                                target.style.fontFamily = e.data.font;
+                                target.style.fontSize = e.data.size + 'px';
+                                target.style.fontWeight = e.data.weight;
                             }
                         }
                         if (e.data.type === 'inspect-ready-to-place-image') {
@@ -209,7 +211,7 @@ class WsInspect {
                             const organ = e.target.closest('[data-atomic-organ]');
                             if (organ) {
                                 if (selectedEl) selectedEl.classList.remove('organ-selected');
-                                selectedEl = organ; selectedEl.classList.add('organ-selected');
+                                selectedEl = organ; lastSelectedEl = organ; selectedEl.classList.add('organ-selected');
                                 const rect = selectedEl.getBoundingClientRect();
                                 
                                 // Show "Edit Code" only in Select mode
@@ -230,7 +232,7 @@ class WsInspect {
                                 } else { initialTransformX = initialTransformY = 0; }
                                 
                                 // Parent notification (Mode selectivity handled in parent)
-                                window.parent.postMessage({ type: 'inspect-organ-selected', tagName: selectedEl.tagName.toLowerCase(), rect: rect }, '*');
+                                window.parent.postMessage({ type: 'inspect-organ-selected', tagName: selectedEl.tagName.toLowerCase(), selector: getSelector(selectedEl), rect: rect }, '*');
                             } else if (activeMode === 'text') {
                                 // Nouveau texte si clic sur vide en mode T
                                 takeSnapshot();
@@ -390,11 +392,68 @@ class WsInspect {
 
     hideTypo() { this.typoPopover.classList.remove('show'); setTimeout(() => this.typoPopover.classList.add('hidden'), 300); }
 
-    applyTypo() {
-        const font = this.fontSelect.value;
+    async applyTypo() {
+        let font = this.fontSelect.value;
         const size = this.sizeInput.value;
         const weight = this.weightSelect.value;
         const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (!iframe) return;
+
+        const originalText = this.typoApply?.innerText;
+        if (this.typoApply) { this.typoApply.innerText = '...'; this.typoApply.disabled = true; }
+
+        // 1. Générer la webfont côté serveur
+        try {
+            const res = await fetch('/api/sullivan/generate-webfont', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ font_name: font })
+            });
+            const data = await res.json();
+
+            // 2. Injecter @font-face directement dans iframe.contentDocument (pas via trackerScript)
+            if (data.css && iframe.contentDocument) {
+                let styleEl = iframe.contentDocument.getElementById('ws-injected-fonts');
+                if (!styleEl) {
+                    styleEl = iframe.contentDocument.createElement('style');
+                    styleEl.id = 'ws-injected-fonts';
+                    (iframe.contentDocument.head || iframe.contentDocument.body).appendChild(styleEl);
+                }
+                styleEl.textContent += data.css + '\n';
+                // Utiliser le nom de famille déclaré dans le @font-face
+                if (data.css) {
+                    const match = data.css.match(/font-family:\s*['"]?([^'";]+)['"]?/);
+                    if (match) font = match[1].trim();
+                }
+            }
+        } catch (err) {
+            console.warn('M148: webfont bridge failed, applying system font directly', err);
+        } finally {
+            if (this.typoApply) { this.typoApply.innerText = originalText; this.typoApply.disabled = false; }
+        }
+
+        // 3. Appliquer la typo via currentSelector (scope graft) — même pattern que saveGraft
+        console.log('[applyTypo] selector:', this.currentSelector, '| font:', font, '| iframe.contentDocument:', !!iframe.contentDocument);
+        if (this.currentSelector && iframe.contentDocument) {
+            const target = iframe.contentDocument.querySelector(this.currentSelector);
+            console.log('[applyTypo] target found:', !!target, target);
+            if (target) {
+                target.style.setProperty('font-family', font, 'important');
+                target.style.setProperty('font-size', size + 'px', 'important');
+                target.style.setProperty('font-weight', weight, 'important');
+                // Override Tailwind utility classes on descendants
+                let overrideEl = iframe.contentDocument.getElementById('ws-typo-override');
+                if (!overrideEl) {
+                    overrideEl = iframe.contentDocument.createElement('style');
+                    overrideEl.id = 'ws-typo-override';
+                    (iframe.contentDocument.head || iframe.contentDocument.body).appendChild(overrideEl);
+                }
+                const esc = this.currentSelector.replace(/"/g, '\\"');
+                overrideEl.textContent = `${esc}, ${esc} * { font-family: ${font} !important; font-size: ${size}px !important; font-weight: ${weight} !important; }`;
+                return;
+            }
+        }
+        // Fallback postMessage si currentSelector absent
         iframe.contentWindow.postMessage({ type: 'inspect-apply-typo', font, size, weight }, '*');
     }
 
@@ -446,7 +505,8 @@ class WsInspect {
 // Global Listener
 window.addEventListener('message', (e) => {
     if (e.data.type === 'inspect-snapshot') window.wsInspect?.snapshot(e.data.html);
-    if (e.data.type === 'inspect-organ-selected') { 
+    if (e.data.type === 'inspect-organ-selected') {
+        if (window.wsInspect && e.data.selector) window.wsInspect.currentSelector = e.data.selector;
         window.wsInspect?.showColor(e.data);
         window.wsInspect?.showTypo(e.data);
     }

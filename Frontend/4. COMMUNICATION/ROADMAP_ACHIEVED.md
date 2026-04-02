@@ -6,6 +6,17 @@
 
 ---
 
+## Mission 144 — Export projet + @font-face dans les screens
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsCanvas.js + WsFontManager.js)**
+
+- Route `GET /api/frd/export-zip?import_id=` — ZIP HTML + fontes en attachment
+- Bouton "↓" dans le header de chaque screen (WsCanvas.js)
+- `WsFontManager.injectStyles()` — injection `@font-face` dans les iframes screens
+
+---
+
 ## Mission 142 — Sullivan Actions : édition directe du screen actif
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**

@@ -11,10 +11,10 @@
 
     // ── Tabs ────────────────────────────────────────────────────────────────
     const TABS = [
-        { id: 'brainstorm', label: 'brainstorm', path: '/landing' },
-        { id: 'backend',    label: 'backend',    path: '/intent-viewer' },
-        { id: 'frontend',   label: 'frontend',   path: '/frd-editor' },
-        { id: 'deploy',     label: 'deploy',     path: '/deploy', disabled: true },
+        { id: 'cadrage',    label: 'Cadrage',    title: "L'Intention (Humain)", path: '/landing' },
+        { id: 'backend',    label: 'Backend',    title: "La Logique (Machine)", path: '/intent-viewer' },
+        { id: 'frontend',   label: 'Frontend',   title: "Le Visuel (Workspace)", path: '/workspace' },
+        { id: 'deploy',     label: 'Déploiement', title: "La Sortie", path: '/deploy', disabled: true },
     ];
 
     // ── État global ─────────────────────────────────────────────────────────
@@ -103,7 +103,13 @@
     // ── Détection tab actif ─────────────────────────────────────────────────
     function isActive(path) {
         const p = window.location.pathname.replace(/\/$/, '');
-        return p === path.replace(/\/$/, '');
+        const target = path.replace(/\/$/, '');
+        if (p === target) return true;
+        // Aliases pour Cadrage
+        if (target === '/landing' && (p === '/stenciler' || p === '')) return true;
+        // Aliases pour Frontend
+        if (target === '/workspace' && p === '/frd-editor') return true;
+        return false;
     }
 
     // ── Injection du header ─────────────────────────────────────────────────
@@ -128,6 +134,7 @@
                 (isActive(t.path) ? ' hn-active' : '') +
                 (t.disabled ? ' hn-disabled' : '');
             a.textContent = t.label;
+            if (t.title) a.title = t.title;
             tabs.appendChild(a);
         });
         nav.appendChild(tabs);

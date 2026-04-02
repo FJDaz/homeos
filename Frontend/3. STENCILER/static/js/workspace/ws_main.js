@@ -109,6 +109,29 @@ async function fetchWorkspaceImports() {
                 <div class="text-[9px] text-slate-400 font-medium">${new Date(item.timestamp).toLocaleString()}</div>
             `;
             
+            el.style.cursor = 'pointer';
+            
+            // Clic simple -> ajoute au canvas
+            el.onclick = (e) => {
+                e.stopPropagation();
+                window.wsCanvas.addScreen(item);
+            };
+            
+            // Double clic -> ajoute au canvas ET entre en aperçu (ou entre juste en aperçu si déjà présent)
+            el.ondblclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // Vérifier si le shell existe déjà sur le canvas
+                let shell = document.getElementById(`shell-${item.id}`);
+                if (!shell) {
+                    shell = window.wsCanvas.addScreen(item);
+                }
+                // Petit délai pour laisser le DOM SVG se mettre à jour
+                setTimeout(() => {
+                    if (window.enterPreviewMode) window.enterPreviewMode(`shell-${item.id}`);
+                }, 100);
+            };
+
             el.querySelector('.ws-add-to-canvas-btn').onclick = (e) => {
                 e.stopPropagation();
                 window.wsCanvas.addScreen(item);
