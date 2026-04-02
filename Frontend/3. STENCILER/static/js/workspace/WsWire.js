@@ -10,24 +10,42 @@ class WsWire {
         this.btnCadrage = document.getElementById('ws-wire-btn-cadrage');
         this.btnValidate = document.getElementById('ws-wire-btn-validate');
 
+        this._manifest = null;
         this.init();
     }
 
     init() {
         if (this.btnCadrage) {
-            this.btnCadrage.onclick = () => {
-                // Retour au "Cadrage" (Masque l'overlay et pourrait changer de tab)
+            this.btnCadrage.onclick = () => this._openCadrage();
+        }
+        if (this.btnValidate) {
+            this.btnValidate.onclick = () => {
                 this.hide();
                 if (window.exitPreviewMode) window.exitPreviewMode();
             };
         }
-        if (this.btnValidate) {
-            this.btnValidate.onclick = () => {
-                console.log("✅ [WsWire] Wire validated by user");
-                this.hide();
-                // On pourrait ici notifier le backend ou changer l'état du screen sur le canvas
-            };
+    }
+
+    _openCadrage() {
+        // Construire le contexte à partir du manifeste courant
+        const params = new URLSearchParams();
+        if (this._importId) params.set('import_id', this._importId);
+        if (this._manifest) {
+            const archetype = this._manifest.archetype?.label || '';
+            const components = (this._manifest.components || [])
+                .slice(0, 10)
+                .map(c => `${c.name} (${c.role || '?'})`)
+                .join(', ');
+            const ctx = [
+                archetype ? `Archétype détecté : ${archetype}.` : '',
+                components ? `Composants : ${components}.` : '',
+                `Import : ${this._importId || '?'}.`
+            ].filter(Boolean).join(' ');
+            params.set('context', ctx);
         }
+        this.hide();
+        if (window.exitPreviewMode) window.exitPreviewMode();
+        window.open(`/cadrage?${params.toString()}`, '_blank');
     }
 
     /**
@@ -40,6 +58,7 @@ class WsWire {
         console.log("🎬 [WsWire] Displaying mapping overlay for:", importName);
         if (!this.overlay || !this.tbody) return;
 
+        this._manifest = manifest;
         this.importLabel.innerText = importName;
         this.tbody.innerHTML = '';
 

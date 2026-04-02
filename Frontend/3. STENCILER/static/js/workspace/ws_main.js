@@ -83,8 +83,35 @@ async function fetchWorkspaceImports() {
         const imports = data.imports || [];
         
         list.innerHTML = '';
+
+        // Screens système figés (BRS + Workspace actuel)
+        const systemScreens = [
+            { id: '_sys_workspace', name: 'Workspace', url: window.location.href, icon: '⬡' },
+            { id: '_sys_cadrage', name: 'Cadrage', url: '/cadrage', icon: '◈' },
+        ];
+        systemScreens.forEach(s => {
+            const el = document.createElement('div');
+            el.className = 'import-card-workspace flex flex-col gap-1 group border-b border-slate-100 pb-2 mb-1';
+            el.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span style="font-size:14px;line-height:1;">${s.icon}</span>
+                    <span class="text-[10px] font-bold text-slate-500 truncate">${s.name}</span>
+                </div>`;
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                const item = { id: s.id, name: s.name, type: 'system', html_template: null, _sysUrl: s.url };
+                if (s.id === '_sys_workspace') {
+                    // Ajouter un iframe de l'URL courante comme screen
+                    window.wsCanvas?.addScreen({ ...item, html_template: null, _srcdoc: null, _src: s.url });
+                } else {
+                    window.open(s.url, '_blank');
+                }
+            };
+            list.appendChild(el);
+        });
+
         if (imports.length === 0) {
-            list.innerHTML = '<div class="text-[10px] text-zinc-400 italic">aucun import disponible</div>';
+            list.innerHTML += '<div class="text-[10px] text-zinc-400 italic mt-2">aucun import disponible</div>';
             return;
         }
 
