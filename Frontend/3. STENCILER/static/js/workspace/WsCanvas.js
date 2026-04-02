@@ -64,8 +64,7 @@ class WsCanvas {
         });
 
         // Update cursor
-        if (mode === 'drag') this.svg.style.cursor = 'grab';
-        else this.svg.style.cursor = 'default';
+        this._notifyToolbar(mode);
     }
 
     updateTransform() {
@@ -136,13 +135,14 @@ class WsCanvas {
                 
                 if (worldY >= 0 && worldY <= 40) {
                     this.selectedScreen = shell;
+                    this.selectedScreen.classList.add('ws-dragging');
                     this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - tx;
                     this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
                 }
             }
         } else {
-            // Clicked on background: deselect
-            this.deselectAll();
+            // Clicked on background: deselect only if click is inside the SVG canvas
+            if (this.svg.contains(e.target)) this.deselectAll();
         }
     }
 
@@ -180,55 +180,34 @@ class WsCanvas {
 
     handleMouseUp() {
         this.isPanning = false;
-        this.selectedScreen = null;
-        if (this.activeMode === 'drag') this.svg.style.cursor = 'grab';
+        if (this.selectedScreen) {
+            this.selectedScreen.classList.remove('ws-dragging');
+            this.selectedScreen = null;
+        }
+        this._notifyToolbar(this.activeMode);
     }
 
     selectScreen(shell) {
         this.deselectAll();
-        shell.classList.add('active');
+        shell.classList.remove('ws-hover');
+        shell.classList.add('ws-selected');
         
         // Z-Index: Bring to front (screens layer)
         this.content.appendChild(shell);
 
-        const bg = shell.querySelector('.ws-screen-bg');
-        if (bg) {
-            bg.setAttribute('stroke', '#A3CD54');
-            bg.setAttribute('stroke-width', '3');
-            bg.classList.add('pulsing');
-        }
         this.activeScreenId = shell.getAttribute('id');
         
-        // Update Audit UX panel (mockup trigger)
-        const auditContent = document.getElementById('ws-audit-content');
-        if (auditContent) {
-            const title = shell.querySelector('.ws-screen-title').textContent;
-            auditContent.innerHTML = `
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="text-[10px] font-bold text-homeos-green uppercase">Screen active</span>
-                    <span class="text-[11px] text-slate-800 font-bold">${title}</span>
-                </div>
-                <div class="space-y-3">
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg">
-                        <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Intent detection</div>
-                        <div class="text-[11px] text-slate-600">Interface d'édition détectée. Structure sémantique valide.</div>
-                    </div>
-                </div>
-            `;
-        }
+        // Update Audit UX panel
+        this._updateAuditPanel(shell);
+        this._notifyToolbar('select', shell);
     }
 
     deselectAll() {
         document.querySelectorAll('.ws-screen-shell').forEach(s => {
-            s.classList.remove('active');
-            const bg = s.querySelector('.ws-screen-bg');
-            if (bg) {
-                bg.setAttribute('stroke', '#f0f0f0');
-                bg.setAttribute('stroke-width', '1');
-                bg.classList.remove('pulsing');
-            }
+            s.classList.remove('ws-selected', 'ws-hover', 'ws-dragging');
         });
         this.activeScreenId = null;
+        this._notifyToolbar(this.activeMode);
     }
 
     getActiveScreenHtml() {
@@ -258,6 +237,47 @@ class WsCanvas {
         this.updateTransform();
     }
 
+    // --- PRIVATE HELPERS (Mission 149) ---
+
+    _updateAuditPanel(shell) {
+        const auditContent = document.getElementById('ws-audit-content');
+        if (!auditContent) return;
+
+        const title = shell.querySelector('.ws-screen-title').textContent;
+        auditContent.innerHTML = `
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-[10px] font-bold text-homeos-green uppercase">Screen active</span>
+                <span class="text-[11px] text-slate-800 font-bold">${title}</span>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg">
+                    <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Intent detection</div>
+                    <div class="text-[11px] text-slate-600">Interface d'édition détectée. Structure sémantique valide.</div>
+                </div>
+            </div>
+        `;
+    }
+
+    _notifyToolbar(state, shell = null) {
+        // 1. Update SVG Cursor
+        const cursorMap = { 
+            'select': 'default', 
+            'drag': 'grab', 
+            'frame': 'crosshair', 
+            'place-img': 'copy' 
+        };
+        
+        let cursor = cursorMap[state] || 'default';
+        if (state === 'drag' && this.isPanning) cursor = 'grabbing';
+        if (state === 'select' && this.selectedScreen) cursor = 'grabbing';
+        
+        this.svg.style.cursor = cursor;
+
+        // 2. Dispatch event for global UI (optional)
+        const event = new CustomEvent('ws-canvas-state', { detail: { state, shellId: shell?.id } });
+        window.dispatchEvent(event);
+    }
+
     async addScreen(item) {
         const id = `shell-${item.id}`;
         if (document.getElementById(id)) {
@@ -269,6 +289,12 @@ class WsCanvas {
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute('id', id);
         g.setAttribute('class', 'ws-screen-shell');
+
+        // Hover events (Mission 149)
+        g.addEventListener('mouseenter', () => {
+            if (!g.classList.contains('ws-selected')) g.classList.add('ws-hover');
+        });
+        g.addEventListener('mouseleave', () => g.classList.remove('ws-hover'));
         
         // Dimensions : desktop (HTML direct uploadé) vs mobile (SVG/forged)
         const isHtml = item.type === 'html' || (item.html_template && item.elements_count === 0);
