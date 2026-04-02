@@ -430,8 +430,7 @@ class WsCanvas {
         saveFo.setAttribute('height', '24');
         saveFo.setAttribute('pointer-events', 'all');
         const saveBtn = document.createElement('button');
-        saveBtn.className = "bg-homeos-green text-white px-2 py-0.5 rounded-custom font-semibold text-[9px] uppercase tracking-wider shadow-sm hover:opacity-90 transition-all";
-        saveBtn.style.cssText = "width:100%; height:100%; line-height:1;";
+        saveBtn.style.cssText = "width:100%; height:100%; line-height:1; background:#8cc63f; color:#fff; border:none; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;";
         saveBtn.innerText = "SAVE";
         saveBtn.addEventListener('mousedown', (e) => {
             e.stopPropagation();
