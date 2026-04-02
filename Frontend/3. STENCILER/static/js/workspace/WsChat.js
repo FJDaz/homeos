@@ -203,6 +203,7 @@ class WsChat {
             }
 
             // Mission 142: Apply HTML modification if returned
+            console.log('[WsChat] response html len:', data.html?.length, '| activeScreenId:', window.wsCanvas?.activeScreenId);
             if (data.html && window.wsCanvas) {
                 window.wsCanvas.updateActiveScreenHtml(data.html);
             }

@@ -639,12 +639,10 @@ async def sullivan_chat(req: SullivanChatRequest):
     # Enrichissement du contexte avec le HTML de l'écran actif
     context_html_block = ""
     if req.screen_html:
-        # Tronquer à 12000 chars pour ne pas dépasser le contexte
-        html_ctx = req.screen_html[:12000] + ("\n<!-- ... tronqué ... -->" if len(req.screen_html) > 12000 else "")
         context_html_block = f"""
 VOICI LE CODE SOURCE HTML DE L'ÉCRAN ACTUELLEMENT SÉLECTIONNÉ :
 ---
-{html_ctx}
+{req.screen_html}
 ---
 Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
 1. Analyse son intention.
@@ -671,7 +669,7 @@ Pas de prose, pas de markdown, pas de JSON.
     try:
         result = await client.generate(
             prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}",
-            max_tokens=8192
+            max_tokens=16384
         )
 
         if not result.success:
