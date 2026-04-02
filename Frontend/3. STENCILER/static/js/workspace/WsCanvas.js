@@ -338,6 +338,36 @@ class WsCanvas {
             e.stopPropagation();
             g.remove();
         });
+        g.appendChild(closeBtn);
+
+        // Mission 146/147: Manifest detection
+        try {
+            const res = await fetch(`/api/frd/manifest?import_id=${item.id}`);
+            const data = await res.json();
+            if (data.exists) {
+                g.dataset.manifest = JSON.stringify(data.manifest);
+                g.dataset.hasManifest = "true";
+                // Auto-enter preview (Mission 146 Livrable B)
+                setTimeout(() => { if (window.enterPreviewMode) window.enterPreviewMode(id); }, 1500);
+            } else {
+                g.dataset.hasManifest = "false";
+                // Badge Cadrage Requis (Yellow/Warm)
+                const badgeFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+                badgeFo.setAttribute('x', '20');
+                badgeFo.setAttribute('y', String(SH - 35));
+                badgeFo.setAttribute('width', '180');
+                badgeFo.setAttribute('height', '30');
+                const badgeDiv = document.createElement('div');
+                badgeDiv.innerHTML = `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; display:flex; align-items:center; gap:6px; width:fit-content;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:#f97316;"></span>
+                    cadrage requis
+                </span>`;
+                badgeFo.appendChild(badgeDiv);
+                g.appendChild(badgeFo);
+            }
+        } catch (err) {
+            console.warn("M146: Manifest check failed", err);
+        }
 
         // iFrame Container
         const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
@@ -408,23 +438,26 @@ class WsCanvas {
         });
         saveBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            saveBtn.style.opacity = '0.5';
+            saveBtn.innerText = '...'; saveBtn.style.opacity = '0.6';
             try {
                 const iframeEl = g.querySelector('iframe');
-                const srcUrl = iframeEl ? iframeEl.src : null;
-                await fetch('/api/frd/save', {
+                let html = iframeEl?.srcdoc || '';
+                if (!html && iframeEl?.src) {
+                    const r = await fetch(iframeEl.src);
+                    html = await r.text();
+                }
+                const name = item.html_template || (item.name + '.html');
+                await fetch('/api/frd/file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: item.html_template || item.name, 
-                        url: srcUrl,
-                        screenId: item.id 
-                    })
+                    body: JSON.stringify({ name, content: html, force: true })
                 });
+                saveBtn.innerText = '✓';
+                setTimeout(() => { saveBtn.innerText = 'SAVE'; saveBtn.style.opacity = '1'; }, 1500);
             } catch (err) {
                 console.error("❌ [WsCanvas] Save failed", err);
+                saveBtn.innerText = 'ERR'; saveBtn.style.opacity = '1';
             }
-            saveBtn.style.opacity = '1';
         });
         saveFo.appendChild(saveBtn);
 
