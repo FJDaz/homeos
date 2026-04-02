@@ -534,17 +534,15 @@ class WsCanvas {
     }
 
     updateActiveScreenHtml(html) {
+        // Toujours sync le canvas iframe pour que Save lise le contenu modifié
+        if (this.activeScreenId) {
+            const shell = document.getElementById(this.activeScreenId);
+            const canvasIframe = shell?.querySelector('iframe');
+            if (canvasIframe) canvasIframe.srcdoc = html;
+        }
         // Priorité 1 : iframe preview fullscreen
         const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
-        if (previewIframe) {
-            previewIframe.srcdoc = html;
-            return;
-        }
-        // Priorité 2 : shell actif dans le canvas
-        if (!this.activeScreenId) return;
-        const shell = document.getElementById(this.activeScreenId);
-        const iframe = shell?.querySelector('iframe');
-        if (iframe) iframe.srcdoc = html;
+        if (previewIframe) { previewIframe.srcdoc = html; return; }
     }
 
     async forgeScreen(importId, shell, overlay) {

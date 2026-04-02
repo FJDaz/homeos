@@ -27,6 +27,17 @@ class WsChat {
                 btn.classList.add('active', 'bg-homeos-green', 'text-white');
                 this.currentMode = btn.dataset.mode;
                 console.log("🚀 WsChat: mode switched to", this.currentMode);
+
+                // Mission 147: Wire mode → enter preview + show overlay
+                if (this.currentMode === 'wire') {
+                    const activeId = window.wsCanvas?.activeScreenId;
+                    if (!activeId) { alert('Sélectionnez un screen sur le canvas d\'abord.'); return; }
+                    if (window.enterPreviewMode) window.enterPreviewMode(activeId);
+                    // Show wire overlay even without manifest
+                    const shell = document.getElementById(activeId);
+                    const manifest = shell?.dataset?.manifest ? JSON.parse(shell.dataset.manifest) : { screens: [], components: [] };
+                    window.wsWire?.show(manifest, shell?.querySelector('.ws-screen-title')?.textContent || activeId);
+                }
             };
         });
 
