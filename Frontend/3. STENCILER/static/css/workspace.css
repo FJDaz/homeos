@@ -140,7 +140,7 @@ body {
 
 /* TOOLBAR DROITE : CANVAS TOOLS (Mission 131 - Exclusive to Preview) */
 nav[data-purpose="floating-toolbar"] {
-    display: none !important;
+    display: flex !important;
 }
 
 body.preview-mode nav[data-purpose="floating-toolbar"] {
