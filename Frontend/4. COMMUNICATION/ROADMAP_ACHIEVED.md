@@ -6,6 +6,32 @@
 
 ---
 
+## Mission 151 — Auto-génération manifeste à l'import HTML
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (server_v3.py)**
+
+- Bloc M151 injecté dans `import_upload()` après écriture du template HTML
+- `ManifestInferer` (Playwright DOM) → `ArchetypeDetector` → `manifest_{import_id}.json`
+- Champs : `archetype`, `components[]` (name, role, z_index, x, y, w, h, text)
+- Try/except : upload ne bloque jamais si Playwright échoue
+- Idempotent : ne régénère pas si manifest existant
+
+---
+
+## Mission 149 — Canvas N0 : États de sélection + toolbar opérationnelle
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
+**ACTOR: GEMINI (WsCanvas.js + workspace.css)**
+
+- États CSS : `.ws-hover`, `.ws-selected`, `.ws-dragging` — suppression `.pulsing`
+- `_notifyToolbar()` + `ws-canvas-state` custom event
+- Hover sur shell → mouseenter/mouseleave
+- Drag → `.ws-dragging` ajouté/retiré au mouseup
+- Sélection persistante : clic hors SVG ne déselectionne plus
+
+---
+
 ## Mission 148 — Bridge @font-face : fontes système → iframes screens
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**

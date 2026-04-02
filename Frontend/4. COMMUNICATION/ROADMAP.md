@@ -339,9 +339,124 @@ async def validate_wire(req: Request):
 
 ---
 
-### Mission 151 — Auto-génération manifeste à l'import HTML
+### Mission 150 — Retour Cadrage : session pré-alimentée par le manifeste Wire
 
 **STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + cadrage_war_room_tw.html)**
+**DÉPENDANCE: M151 (manifeste généré), M147 (WsWire._openCadrage)**
+
+**Contexte :**
+`WsWire._openCadrage()` ouvre `/cadrage?import_id=...&context=...` avec archétype + composants dans l'URL. `cadrage_war_room_tw.html` lit `?context=` et pré-remplit l'input (déjà implémenté). Mais la session Cadrage démarre vide — les LLM (Gemini, Groq, Codestral) ne reçoivent pas ce contexte. Il faut que le premier message envoyé intègre le contexte Wire comme brief initial.
+
+**Pipeline cible :**
+```
+Wire overlay → "Retour Cadrage"
+  → /cadrage?import_id=X&context=Y&archetype=Z
+  → cadrage_war_room_tw.html se charge
+  → sessionId généré
+  → Contexte Wire injecté comme buffer_answers dans dispatch_brainstorm()
+  → Premier SSE : les LLM reçoivent le contexte + produisent un brief
+```
+
+**Livrable A — Route POST /api/cadrage/init-context (server_v3.py)**
+
+Nouvelle route pour initialiser une session avec contexte Wire :
+```python
+@app.post("/api/cadrage/init-context")
+async def cadrage_init_context(body: Dict[str, Any]):
+    session_id = body.get("session_id")
+    import_id = body.get("import_id", "")
+    context = body.get("context", "")
+    archetype = body.get("archetype", "")
+    components = body.get("components", [])
+
+    # Récupérer le manifeste complet si dispo
+    manifest_data = {}
+    try:
+        manifest_dir = get_active_project_path() / "manifests"
+        path = manifest_dir / f"manifest_{import_id}.json"
+        if path.exists():
+            manifest_data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+
+    # Construire le buffer_answers pour brainstorm_logic
+    buffer_answers = {}
+    if archetype:
+        buffer_answers["archetype_détecté"] = archetype
+    if components:
+        buffer_answers["composants_mappés"] = ", ".join(
+            f"{c.get('name','?')} ({c.get('role','?')})" for c in components[:15]
+        )
+    if import_id:
+        buffer_answers["import_id"] = import_id
+    if context:
+        buffer_answers["contexte_wire"] = context
+
+    # Prompt d'ouverture
+    prompt = f"""Un screen a été analysé via le mode Wire d'HoméOS.
+Archétype détecté : {archetype or 'non spécifié'}.
+L'utilisateur souhaite affiner l'intention derrière ce screen et définir ce qu'il doit faire.
+Aide-le à cadrer le projet à partir de ce contexte."""
+
+    await cadrage_logic.dispatch_brainstorm(session_id, prompt, buffer_answers)
+    return {"status": "ok", "session_id": session_id}
+```
+
+**Livrable B — cadrage_war_room_tw.html : appel init-context au démarrage**
+
+Après la génération du `sessionId`, si `?import_id` est présent dans l'URL, appeler `/api/cadrage/init-context` avant le premier message utilisateur :
+
+```javascript
+// Après : const sessionId = "CAD-" + ...
+if (_wireImportId) {
+    const _components = []; // reconstruit depuis ?context= si possible
+    fetch('/api/cadrage/init-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            session_id: sessionId,
+            import_id: _wireImportId,
+            context: _wireContext || '',
+            archetype: _params.get('archetype') || '',
+            components: []
+        })
+    }).then(() => {
+        // Afficher un badge de confirmation
+        const badge = document.getElementById('ws-wire-context-badge');
+        if (badge) badge.classList.remove('hidden');
+    });
+}
+```
+
+Ajouter dans le HTML, visible quand contexte Wire détecté :
+```html
+<div id="ws-wire-context-badge" class="hidden text-[10px] font-semibold text-homeos-green border border-homeos-green/30 bg-homeos-green/5 px-3 py-1.5 rounded-lg">
+    contexte wire chargé — session pré-alimentée
+</div>
+```
+
+**Livrable C — WsWire._openCadrage() : passer archetype dans l'URL**
+
+Dans `WsWire.js`, enrichir les params :
+```javascript
+const archetype = this._manifest?.archetype?.label || '';
+params.set('archetype', archetype);
+```
+
+**Critères de sortie :**
+- [ ] Retour Cadrage → badge "contexte wire chargé" visible dans la War Room
+- [ ] Premier message envoyé → les LLM reçoivent archétype + composants dans leur prompt
+- [ ] Session sans Wire (`/cadrage` direct) → comportement inchangé
+- [ ] `dispatch_brainstorm` appelé une seule fois par session
+
+---
+
+### Mission 151 — Auto-génération manifeste à l'import HTML
+
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-02**
 **DATE: 2026-04-02**
 **ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
 **DÉPENDANCE: M146 (route manifest), ManifestInferer + ArchetypeDetector existants**
