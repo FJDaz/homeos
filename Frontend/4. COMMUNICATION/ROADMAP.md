@@ -339,6 +339,84 @@ async def validate_wire(req: Request):
 
 ---
 
+### Mission 151 — Auto-génération manifeste à l'import HTML
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
+**DÉPENDANCE: M146 (route manifest), ManifestInferer + ArchetypeDetector existants**
+
+**Contexte :**
+Quand un HTML est importé via `POST /api/import/upload`, le manifeste Wire n'est jamais généré. `ManifestInferer` (Playwright DOM scraping) et `ArchetypeDetector` (scoring heuristique) existent dans `Backend/Prod/retro_genome/` mais ne sont jamais appelés dans ce pipeline. Résultat : `GET /api/frd/manifest?import_id=...` retourne toujours `{ exists: false }`.
+
+**Point d'injection dans server_v3.py :**
+Ligne ~1544 — après `tpl_path.write_bytes(content)` dans `import_upload()`, si `ext == '.html'`.
+
+**Ce qu'il faut ajouter (après l'écriture du template) :**
+
+```python
+# Auto-génération manifeste Wire (M151)
+try:
+    from Backend.Prod.retro_genome.manifest_inferer import ManifestInferer
+    from Backend.Prod.retro_genome.archetype_detector import ArchetypeDetector
+    import asyncio as _asyncio
+
+    import_id = f"{today_str}_{timestamp_str}_{safe_name}"
+    manifests_dir = get_active_project_path() / "manifests"
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifests_dir / f"manifest_{import_id}.json"
+
+    # 1. DOM scraping via Playwright (async → run in thread via asyncio)
+    raw = _asyncio.run(ManifestInferer.infer_from_html(tpl_path))
+
+    # 2. Archetype detection
+    detector = ArchetypeDetector()
+    archetype = detector.detect(raw)
+
+    # 3. Transformer elements → components pour Wire overlay
+    components = []
+    for el in raw.get("elements", [])[:30]:  # limite 30 pour le Wire
+        components.append({
+            "id": el.get("id", ""),
+            "name": el.get("name", ""),
+            "role": el.get("structural_role") or el.get("visual_hint") or el.get("type", ""),
+            "z_index": el.get("y", 0),  # y position comme proxy z-index visuel
+            "x": el.get("x", 0),
+            "y": el.get("y", 0),
+            "w": el.get("width", 0),
+            "h": el.get("height", 0),
+            "text": el.get("text_content", "")[:40],
+        })
+
+    manifest_data = {
+        "version": "1.0",
+        "import_id": import_id,
+        "archetype": archetype,
+        "components": components,
+        "screens": [],
+        "generated_at": datetime.now().isoformat(),
+    }
+    manifest_path.write_text(json.dumps(manifest_data, indent=2, ensure_ascii=False))
+    logger.info(f"[M151] Manifest generated: {manifest_path}")
+except Exception as _e:
+    logger.warning(f"[M151] Manifest generation skipped: {_e}")
+```
+
+**Règles d'implémentation :**
+- Toujours dans un `try/except` — une erreur Playwright ne doit jamais bloquer l'upload
+- `asyncio.run()` fonctionne ici car on est dans une route FastAPI async (thread séparé si besoin via `asyncio.to_thread`)
+- Si Playwright n'est pas installé → `logger.warning` + skip silencieux
+- Pas de régénération si `manifest_path.exists()` déjà (idempotent)
+
+**Critères de sortie :**
+- [ ] Importer un HTML → `projects/{active}/manifests/manifest_{id}.json` créé automatiquement
+- [ ] `GET /api/frd/manifest?import_id={id}` retourne `{ exists: true, manifest: {...} }`
+- [ ] Overlay Wire affiche les composants détectés (colonnes Composant / Rôle / Z-index)
+- [ ] Echec Playwright → upload réussit quand même, pas de manifeste généré
+- [ ] Manifeste déjà existant → non écrasé
+
+---
+
 ### Mission 149 — Canvas N0 : États de sélection + toolbar opérationnelle
 
 **STATUS: 🟠 PRÊTE**
