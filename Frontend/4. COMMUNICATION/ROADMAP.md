@@ -339,6 +339,166 @@ async def validate_wire(req: Request):
 
 ---
 
+### Mission 149 — Canvas N0 : États de sélection + toolbar opérationnelle
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-02**
+**ACTOR: CLAUDE (CODE DIRECT — WsCanvas.js + workspace.css)**
+**DÉPENDANCE: aucune**
+
+**Contexte :**
+La toolbar flottante est visible sur le canvas (N0) mais les outils ne produisent aucun feedback visuel distinct. Il n'y a pas de distinction entre :
+- `focus-select` — screen sélectionné pour édition (clic dans header)
+- `focus-drag` — screen en cours de déplacement (mousedown + move)
+- `hover` — survol d'un screen
+
+De plus, `selectScreen()` utilise `.pulsing` (animation verte) comme seul signal visuel — trop subtil, pas scalable. Le canvas a besoin d'un vrai système d'états CSS cohérent pour que la toolbar puisse réagir (ex: afficher les bons outils selon le contexte).
+
+**État actuel du code :**
+- `WsCanvas.js:selectScreen()` — ajoute `.active` + `.pulsing` sur le `<rect>` bg, stroke `#A3CD54`
+- `WsCanvas.js:deselectAll()` — retire `.active` + `.pulsing`, reset stroke `#f0f0f0`
+- `WsCanvas.js:handleMouseDown()` — drag conditionné à `activeMode === 'select'` + `worldY <= 40` (header)
+- `workspace.css` — `.ws-screen-shell.active` = seul drop-shadow, `.pulsing` = animation stroke
+
+**Ce qu'il faut implémenter :**
+
+#### Livrable A — Système d'états CSS (workspace.css)
+
+Trois états distincts sur `.ws-screen-shell` :
+
+```css
+/* HOVER — survol */
+.ws-screen-shell.ws-hover .ws-screen-bg {
+    stroke: #d0d0d0;
+    stroke-width: 2px;
+}
+
+/* SELECTED — sélectionné (clic simple, mode select) */
+.ws-screen-shell.ws-selected .ws-screen-bg {
+    stroke: #A3CD54;
+    stroke-width: 2.5px;
+    filter: drop-shadow(0 0 0 3px rgba(163,205,84,0.25));
+}
+/* Handle de déplacement visible uniquement sur ws-selected */
+.ws-screen-shell.ws-selected .ws-screen-header {
+    fill: rgba(163,205,84,0.06);
+}
+
+/* DRAGGING — en cours de déplacement */
+.ws-screen-shell.ws-dragging .ws-screen-bg {
+    stroke: #94a3b8;
+    stroke-width: 2px;
+    opacity: 0.85;
+}
+.ws-screen-shell.ws-dragging {
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,0.25));
+}
+```
+
+Supprimer `.pulsing` et l'animation `pulse-focus` (remplacés).
+
+#### Livrable B — WsCanvas.js : gestion des états
+
+**Hover** — ajouter mouseenter/mouseleave sur chaque shell `g` à la création :
+```javascript
+g.addEventListener('mouseenter', () => {
+    if (!g.classList.contains('ws-selected')) g.classList.add('ws-hover');
+});
+g.addEventListener('mouseleave', () => g.classList.remove('ws-hover'));
+```
+
+**selectScreen()** — remplacer `.active` + `.pulsing` par `.ws-selected` :
+```javascript
+selectScreen(shell) {
+    this.deselectAll();
+    shell.classList.remove('ws-hover');
+    shell.classList.add('ws-selected');
+    this.content.appendChild(shell); // bring to front
+    this.activeScreenId = shell.getAttribute('id');
+    this._updateAuditPanel(shell);
+    this._notifyToolbar('select', shell);
+}
+```
+
+**deselectAll()** — nettoyer les trois états :
+```javascript
+deselectAll() {
+    document.querySelectorAll('.ws-screen-shell').forEach(s => {
+        s.classList.remove('ws-selected', 'ws-hover', 'ws-dragging');
+    });
+    this.activeScreenId = null;
+    this._notifyToolbar(null, null);
+}
+```
+
+**Drag** — ajouter/retirer `.ws-dragging` :
+```javascript
+// Dans handleMouseDown — début drag :
+shell.classList.add('ws-dragging');
+
+// Dans handleMouseUp — fin drag :
+if (this.selectedScreen) {
+    this.selectedScreen.classList.remove('ws-dragging');
+    this.selectedScreen = null;
+}
+```
+
+**`_notifyToolbar(state, shell)`** — dispatcher les états vers la toolbar :
+```javascript
+_notifyToolbar(state, shell) {
+    // Met à jour le cursor du SVG
+    const cursorMap = { select: 'default', drag: 'grab', frame: 'crosshair', 'place-img': 'copy' };
+    this.svg.style.cursor = cursorMap[this.activeMode] || 'default';
+    // Émet un event custom pour que la toolbar puisse réagir
+    document.dispatchEvent(new CustomEvent('ws-canvas-state', {
+        detail: { state, screenId: shell?.getAttribute('id') || null, mode: this.activeMode }
+    }));
+}
+```
+
+**setMode()** — mettre à jour le cursor SVG immédiatement + badge actif toolbar :
+```javascript
+setMode(mode) {
+    this.activeMode = mode;
+    const cursorMap = { select: 'default', drag: 'grab', frame: 'crosshair', 'place-img': 'copy' };
+    this.svg.style.cursor = cursorMap[mode] || 'default';
+    document.querySelectorAll('.ws-tool-btn').forEach(btn => {
+        btn.classList.toggle('active-tool', btn.dataset.mode === mode);
+    });
+    this._notifyToolbar(null, null);
+}
+```
+
+#### Livrable C — Toolbar : réaction à `ws-canvas-state`
+
+Dans `ws_main.js`, écouter l'event et afficher un label de contexte dans la toolbar :
+```javascript
+document.addEventListener('ws-canvas-state', (e) => {
+    const { state, screenId, mode } = e.detail;
+    const label = document.getElementById('ws-toolbar-context-label');
+    if (!label) return;
+    label.textContent = screenId
+        ? `${mode} — ${screenId.replace('shell-', '').slice(0, 20)}`
+        : mode || '';
+});
+```
+
+Ajouter dans `workspace.html`, sous la toolbar card existante :
+```html
+<span id="ws-toolbar-context-label" style="font-size:8px; color:#94a3b8; text-align:center; max-width:40px; word-break:break-all; line-height:1.2; padding: 0 4px;"></span>
+```
+
+**Critères de sortie :**
+- [ ] Hover sur screen → stroke gris doux, pas de sélection
+- [ ] Clic sur screen → `.ws-selected` visible (stroke vert, header teinté)
+- [ ] Drag → `.ws-dragging` visible (shadow forte, opacité réduite), retiré au mouseup
+- [ ] `.pulsing` et `pulse-focus` supprimés
+- [ ] Label contexte dans la toolbar : `select — nom-screen`
+- [ ] `ws-canvas-state` dispatchable et écouté
+- [ ] Sélection persistante : cliquer dans le canvas vide → deselect, clic sur screen → select
+
+---
+
 ## Thème 6 — Refonte FRD : Canvas Workspace Unifié
 
 ### Mission 128 — Bridge DESIGN.md → tokens projet dynamiques
