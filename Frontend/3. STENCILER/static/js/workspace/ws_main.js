@@ -86,14 +86,16 @@ async function fetchWorkspaceImports() {
 
         // Screens système figés (BRS + Workspace actuel)
         const systemScreens = [
-            { id: '_sys_cadrage', name: 'Cadrage', tpl: 'cadrage_war_room_tw.html', icon: '◈' },
+            { id: '_sys_cadrage',  name: 'Cadrage',   tpl: 'cadrage_war_room_tw.html' },
+            { id: '_sys_war_room', name: 'War Room',  tpl: 'brainstorm_war_room.html' },
         ];
+        list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">système</div>');
         systemScreens.forEach(s => {
             const el = document.createElement('div');
             el.className = 'import-card-workspace flex flex-col gap-1 group border-b border-slate-100 pb-2 mb-1';
             el.innerHTML = `
                 <div class="flex items-center gap-2">
-                    <span style="font-size:14px;line-height:1;">${s.icon}</span>
+                    <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-zinc-400 flex items-center justify-center">SYS</div>
                     <span class="text-[10px] font-bold text-slate-500 truncate">${s.name}</span>
                 </div>`;
             el.style.cursor = 'pointer';
@@ -107,8 +109,9 @@ async function fetchWorkspaceImports() {
             list.appendChild(el);
         });
 
+        list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:6px 0 2px;">imports</div>');
         if (imports.length === 0) {
-            list.innerHTML += '<div class="text-[10px] text-zinc-400 italic mt-2">aucun import disponible</div>';
+            list.insertAdjacentHTML('beforeend', '<div class="text-[10px] text-zinc-400 italic">aucun import disponible</div>');
             return;
         }
 
