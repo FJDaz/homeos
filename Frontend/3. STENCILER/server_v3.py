@@ -639,10 +639,12 @@ async def sullivan_chat(req: SullivanChatRequest):
     # Enrichissement du contexte avec le HTML de l'écran actif
     context_html_block = ""
     if req.screen_html:
+        # Tronquer à 12000 chars pour ne pas dépasser le contexte
+        html_ctx = req.screen_html[:12000] + ("\n<!-- ... tronqué ... -->" if len(req.screen_html) > 12000 else "")
         context_html_block = f"""
 VOICI LE CODE SOURCE HTML DE L'ÉCRAN ACTUELLEMENT SÉLECTIONNÉ :
 ---
-{req.screen_html}
+{html_ctx}
 ---
 Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
 1. Analyse son intention.
@@ -668,7 +670,8 @@ Pas de prose, pas de markdown, pas de JSON.
 
     try:
         result = await client.generate(
-            prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}"
+            prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}",
+            max_tokens=8192
         )
 
         if not result.success:
@@ -1543,6 +1546,66 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
             tpl_path = templates_dir / tpl_filename
             tpl_path.write_bytes(content)
             html_template_name = tpl_filename
+
+            # Mission 151: Auto-generated Wire Manifest (Static DOM parsing)
+            try:
+                from Backend.Prod.retro_genome.archetype_detector import ArchetypeDetector
+                
+                # Inférence statique (No browser)
+                soup = BeautifulSoup(content, 'lxml') or BeautifulSoup(content, 'html.parser')
+                
+                # Extraction des éléments structurants
+                elements = []
+                items = soup.find_all(['section', 'nav', 'header', 'footer', 'div', 'button', 'h1', 'h2', 'h3', 'p', 'input'])
+                
+                for idx, el in enumerate(items[:35]): # Limite 35
+                    el_id = el.get('id') or el.get('data-id') or f"el_{idx}"
+                    text = el.get_text(strip=True)[:50]
+                    role = el.get('data-role') or (el.get('data-af-region') if el.has_attr('data-af-region') else el.name)
+                    
+                    elements.append({
+                        "id": el_id,
+                        "name": el.name.upper(),
+                        "role": role,
+                        "text": text,
+                        "visual_hint": el.get('class', [""])[0] if el.get('class') else ""
+                    })
+
+                # Archetype Detection
+                detector = ArchetypeDetector()
+                archetype = detector.detect({"elements": elements})
+                
+                # Mapping Components (WsWire.js compatible)
+                components = []
+                for idx, el in enumerate(elements):
+                    components.append({
+                        "id": el["id"],
+                        "name": el["name"],
+                        "role": el["role"],
+                        "z_index": idx + 1,
+                        "text": el["text"]
+                    })
+                
+                final_manifest = {
+                    "import_id": f"{today_str}_{timestamp_str}_{safe_name}",
+                    "archetype": archetype,
+                    "components": components,
+                    "screens": [{"id": "main", "name": "Main Screen", "components": components}],
+                    "generated_at": datetime.now().isoformat(),
+                    "source": "M151 Static Inference"
+                }
+
+                # Sauvegarde project-specific
+                from bkd_service import get_active_project_path
+                prj_path = get_active_project_path()
+                if prj_path:
+                    m_dir = prj_path / "manifests"
+                    m_dir.mkdir(parents=True, exist_ok=True)
+                    m_file = m_dir / f"manifest_{today_str}_{timestamp_str}_{safe_name}.json"
+                    m_file.write_text(json.dumps(final_manifest, indent=2, ensure_ascii=False))
+                    logger.info(f"✅ M151: Manifest generated statically for {tpl_filename}")
+            except Exception as e:
+                logger.error(f"❌ M151: Static inference failed: {e}")
 
         new_entry = {
             "id": f"{today_str}_{timestamp_str}_{safe_name}",
