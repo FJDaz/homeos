@@ -76,10 +76,35 @@ body {
 
 /* Screen Shell (Z2) - In SVG */
 .ws-screen-shell {
-    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.12));
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.08));
+    transition: filter 0.3s ease;
 }
-.ws-screen-shell.active {
-    filter: drop-shadow(0 15px 45px rgba(0,0,0,0.2));
+
+/* HOVER — survol */
+.ws-screen-shell.ws-hover .ws-screen-bg {
+    stroke: #d0d0d0;
+    stroke-width: 2px;
+}
+
+/* SELECTED — sélectionné (clic simple, mode select) */
+.ws-screen-shell.ws-selected .ws-screen-bg {
+    stroke: var(--homeos-green);
+    stroke-width: 2.5px;
+    filter: drop-shadow(0 0 0 3px rgba(163,205,84,0.25));
+}
+/* Handle de déplacement visible uniquement sur ws-selected */
+.ws-screen-shell.ws-selected .ws-screen-header {
+    fill: rgba(163,205,84,0.06);
+}
+
+/* DRAGGING — en cours de déplacement (soulèvement) */
+.ws-screen-shell.ws-dragging {
+    filter: drop-shadow(0 25px 50px rgba(0,0,0,0.25));
+    opacity: 0.85;
+}
+.ws-screen-shell.ws-dragging .ws-screen-bg {
+    stroke: #94a3b8;
+    stroke-width: 2px;
 }
 
 .ws-screen-header {
@@ -204,16 +229,9 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     color: #A3CD54 !important;
 }
 
-/* Pulsing Focus Animation (Mission 130) */
-.pulsing {
-    stroke-width: 2px;
-    animation: pulse-focus 2s infinite ease-in-out;
-}
-
-@keyframes pulse-focus {
-    0% { stroke: #A3CD54; stroke-opacity: 1; }
-    50% { stroke: #8fb846; stroke-opacity: 0.7; }
-    100% { stroke: #A3CD54; stroke-opacity: 1; }
+/* States managed by WsCanvas.js */
+.ws-screen-shell :not(.ws-selected) .ws-screen-bg {
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
 }
 
 /* PREVIEW MODE (Mission 130-A) */

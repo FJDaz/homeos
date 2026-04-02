@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css">
+    <!-- Bootstrap.js — Navigation globale (Mission 107) -->
+    <script src="/static/js/bootstrap.js"></script>
 
     <script>
         tailwind.config = {
@@ -71,19 +73,9 @@
     <!-- Main -->
     <div class="flex-1 flex flex-col min-w-0 bg-white">
 
-        <!-- Header principal — identique bkd_frd (h-[48px], px-8, text-[12px]) -->
-        <header class="h-[48px] border-b border-figma-sep flex items-center justify-between px-8 bg-white flex-shrink-0">
-            <nav class="flex items-center gap-8 h-full">
-                <a href="#" class="text-[12px] font-semibold text-figma-tabActive border-b-2 border-figma-tabActive h-full flex items-center">Brainstorm</a>
-                <a href="/bkd-editor" class="text-[12px] text-gray-400 hover:text-black transition-colors">Backend</a>
-                <a href="/frd-editor" class="text-[12px] text-gray-400 hover:text-black transition-colors">Frontend</a>
-                <a href="#" class="text-[12px] text-gray-400 hover:text-black transition-colors">Deploy</a>
-            </nav>
-            <!-- Nudge -->
-            <div class="flex items-center gap-2">
-                <span class="pulse-dot w-1.5 h-1.5 rounded-full bg-figma-dotGreen"></span>
-                <span id="nudge-label" class="text-[11px] text-gray-400">3 modèles actifs</span>
-            </div>
+        <!-- Header local (Cadrage Alt) -->
+        <header class="h-[48px] border-b border-figma-sep flex items-center px-8 bg-[#f7f6f2] flex-shrink-0">
+            <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Cadrage Alternative View</span>
         </header>
 
         <!-- Sous-tabs LLM — niveau inférieur, text-[11px] -->
@@ -165,7 +157,7 @@
     </div>
 
     <script>
-        const sessionId = "BRS-" + Math.random().toString(36).substr(2, 9);
+        const sessionId = "CAD-" + Math.random().toString(36).substr(2, 9);
         document.getElementById('session-info').innerText = "ID: " + sessionId;
 
         const streams = {
@@ -253,7 +245,7 @@
 
         async function captureNugget(text, provider) {
             try {
-                const res = await fetch('/api/brs/capture', {
+                const res = await fetch('/api/cadrage/capture', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId, text, provider })
                 });
@@ -278,7 +270,7 @@
         }
 
         function startStreaming(provider, message) {
-            const url = `/api/brs/chat/${provider}?session_id=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
+            const url = `/api/cadrage/chat/${provider}?session_id=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
             const es = new EventSource(url);
             let card = null;
             es.addEventListener('token', (e) => {
@@ -342,7 +334,7 @@
             if (!projectName) return;
             btnPrd.innerText = "Génération…";
             try {
-                const res = await fetch('/api/brs/generate-prd', {
+                const res = await fetch('/api/cadrage/generate-prd', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId, project_name: projectName })
                 });

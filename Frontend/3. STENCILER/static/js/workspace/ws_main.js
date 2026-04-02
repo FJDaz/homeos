@@ -213,9 +213,9 @@ function togglePanel(id) {
     }
 }
 
-// --- PREVIEW MODE (Mission 130-B) ---
-function enterPreviewMode(shellId) {
-    console.log("🔍 [ws_main] enterPreviewMode called with:", shellId);
+// --- PREVIEW MODE (Mission 130-B / 150) ---
+function enterPreviewMode(shellId, mode = 'construct') {
+    console.log(`🔍 [ws_main] enterPreviewMode called [${mode}] for:`, shellId);
     const id = shellId || window.wsCanvas.activeScreenId;
     
     if (!id) {
@@ -224,25 +224,24 @@ function enterPreviewMode(shellId) {
         return;
     }
 
-    console.log("🔍 [ws_main] Target ID:", id);
+    const overlay = document.getElementById('ws-preview-overlay');
     const shell = document.getElementById(id);
-    if (!shell) {
-        console.error("❌ [ws_main] Shell element not found in DOM:", id);
-        return;
+    if (!shell || !overlay) return;
+
+    // Orchestration Z-Index (Mission 150)
+    if (mode === 'wire') {
+        overlay.classList.remove('z-[35]', 'bg-transparent');
+        overlay.classList.add('z-[100]', 'bg-white/10', 'backdrop-blur-sm');
+    } else {
+        overlay.classList.remove('z-[100]', 'bg-white/10', 'backdrop-blur-sm');
+        overlay.classList.add('z-[35]', 'bg-transparent');
     }
 
     const iframeSource = shell.querySelector('iframe');
-    if (!iframeSource) {
-        console.error("❌ [ws_main] No <iframe> found inside shell:", id);
-        return;
-    }
+    if (!iframeSource) return;
 
-    console.log("🔍 [ws_main] iframe source found:", iframeSource.src || "srcdoc");
     const container = document.getElementById('ws-preview-frame-container');
-    if (!container) {
-        console.error("❌ [ws_main] #ws-preview-frame-container not found!");
-        return;
-    }
+    if (!container) return;
 
     container.innerHTML = ''; 
     const iframe = document.createElement('iframe');
@@ -252,10 +251,10 @@ function enterPreviewMode(shellId) {
 
     container.appendChild(iframe);
     
-    // Mission 147 : Wire Overlay
-    if (shell.dataset.hasManifest === "true" && window.wsWire) {
+    // Mission 147 / 150 : Wire Overlay Orchestration
+    if (mode === 'wire' && window.wsWire) {
         try {
-            const manifest = JSON.parse(shell.dataset.manifest);
+            const manifest = JSON.parse(shell.dataset.manifest || '{}');
             const title = shell.querySelector('.ws-screen-title')?.textContent || 'Sans titre';
             window.wsWire.show(manifest, title);
         } catch(e) {
@@ -271,7 +270,7 @@ function enterPreviewMode(shellId) {
     }
 
     document.body.classList.add('preview-mode');
-    console.log("🎬 [ws_main] Fullscreen Preview SUCCESS for:", id);
+    console.log(`🎬 [ws_main] Preview Mode Success [${mode}] for:`, id);
 }
 
 function exitPreviewMode() {

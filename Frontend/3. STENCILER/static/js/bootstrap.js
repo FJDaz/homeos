@@ -11,8 +11,8 @@
 
     // ── Tabs ────────────────────────────────────────────────────────────────
     const TABS = [
-        { id: 'cadrage',    label: 'Cadrage',    title: "L'Intention (Humain)", path: '/landing' },
-        { id: 'backend',    label: 'Backend',    title: "La Logique (Machine)", path: '/intent-viewer' },
+        { id: 'cadrage',    label: 'Cadrage',    title: "L'Intention (Humain)", path: '/cadrage' },
+        { id: 'backend',    label: 'Backend',    title: "La Logique (Machine)", path: '/bkd-frd' },
         { id: 'frontend',   label: 'Frontend',   title: "Le Visuel (Workspace)", path: '/workspace' },
         { id: 'deploy',     label: 'Déploiement', title: "La Sortie", path: '/deploy', disabled: true },
     ];
@@ -106,7 +106,9 @@
         const target = path.replace(/\/$/, '');
         if (p === target) return true;
         // Aliases pour Cadrage
-        if (target === '/landing' && (p === '/stenciler' || p === '')) return true;
+        if (target === '/cadrage' && (p === '/landing' || p === '/stenciler' || p === '')) return true;
+        // Aliases pour Backend
+        if (target === '/bkd-frd' && p === '/intent-viewer') return true;
         // Aliases pour Frontend
         if (target === '/workspace' && p === '/frd-editor') return true;
         return false;

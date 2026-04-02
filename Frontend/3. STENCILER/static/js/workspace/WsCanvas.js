@@ -373,6 +373,7 @@ class WsCanvas {
             if (data.exists) {
                 g.dataset.manifest = JSON.stringify(data.manifest);
                 g.dataset.hasManifest = "true";
+                wireFo.style.display = 'block';
             } else {
                 g.dataset.hasManifest = "false";
                 // Badge Cadrage Requis (Yellow/Warm)
@@ -422,29 +423,47 @@ class WsCanvas {
 
         // Preview btn (Mission 140 — Fixed in header y=8)
         const previewFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        previewFo.setAttribute('x', String(SW - 260));
+        previewFo.setAttribute('x', String(SW - 240));
         previewFo.setAttribute('y', '8');
-        previewFo.setAttribute('width', '110');
+        previewFo.setAttribute('width', '90');
         previewFo.setAttribute('height', '24');
         previewFo.setAttribute('pointer-events', 'all');
         const previewDiv = document.createElement('div');
         previewDiv.className = "flex items-center space-x-2 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors";
-        previewDiv.style.cssText = 'height:100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));';
+        previewDiv.style.cssText = 'height:100%;';
         previewDiv.innerHTML = `
-            <span style="font-size:10px; font-weight:500; background:rgba(255,255,255,0.8); padding:2px 4px; border-radius:4px;">Aperçu</span>
-            <svg fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path>
-            </svg>
+            <span style="font-size:10px; font-weight:600; background:rgba(0,0,0,0.03); padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.02em;">Aperçu</span>
         `;
-        previewDiv.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-        });
+        previewDiv.addEventListener('mousedown', (e) => e.stopPropagation());
         previewDiv.addEventListener('click', (e) => {
             e.stopPropagation();
             this.selectScreen(g);
-            if (window.enterPreviewMode) window.enterPreviewMode(id);
+            if (window.enterPreviewMode) window.enterPreviewMode(id, 'construct');
         });
         previewFo.appendChild(previewDiv);
+
+        // Wire btn (Mission 150)
+        const wireFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+        wireFo.setAttribute('x', String(SW - 340));
+        wireFo.setAttribute('y', '8');
+        wireFo.setAttribute('width', '90');
+        wireFo.setAttribute('height', '24');
+        wireFo.setAttribute('pointer-events', 'all');
+        wireFo.style.display = 'none'; // Will show if manifest exists
+
+        const wireDiv = document.createElement('div');
+        wireDiv.className = "flex items-center space-x-2 text-homeos-green cursor-pointer hover:opacity-80 transition-opacity";
+        wireDiv.style.cssText = 'height:100%;';
+        wireDiv.innerHTML = `
+            <span style="font-size:10px; font-weight:800; border:1px solid #A3CD54; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em;">Wire</span>
+        `;
+        wireDiv.addEventListener('mousedown', (e) => e.stopPropagation());
+        wireDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.selectScreen(g);
+            if (window.enterPreviewMode) window.enterPreviewMode(id, 'wire');
+        });
+        wireFo.appendChild(wireDiv);
 
         // Save btn (Mission 140 — Fixed in header y=8)
         const saveFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
@@ -508,6 +527,7 @@ class WsCanvas {
         g.appendChild(header);
         g.appendChild(title);
         g.appendChild(previewFo);
+        g.appendChild(wireFo);
         g.appendChild(saveFo);
         g.appendChild(downloadFo);
         g.appendChild(closeBtn);
