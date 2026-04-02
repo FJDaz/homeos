@@ -86,8 +86,9 @@ async function fetchWorkspaceImports() {
 
         // Screens système figés (BRS + Workspace actuel)
         const systemScreens = [
-            { id: '_sys_cadrage',  name: 'Cadrage',   tpl: 'cadrage_war_room_tw.html' },
-            { id: '_sys_war_room', name: 'War Room',  tpl: 'brainstorm_war_room.html' },
+            { id: '_sys_cadrage',    name: 'Cadrage',        tpl: 'cadrage_war_room_tw.html' },
+            { id: '_sys_war_room',   name: 'War Room',       tpl: 'brainstorm_war_room.html' },
+            { id: '_sys_cadrage_alt',name: 'Cadrage Alt',    tpl: 'cadrage_alt.html' },
         ];
         list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">système</div>');
         systemScreens.forEach(s => {
