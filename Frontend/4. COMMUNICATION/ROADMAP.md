@@ -339,6 +339,119 @@ async def validate_wire(req: Request):
 
 ---
 
+### Mission 154 — Sullivan : focus élément sélectionné dans le prompt
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-03**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py)**
+
+**Contexte :**
+Quand l'utilisateur sélectionne un organe en mode aperçu (inspect), `WsInspect.currentSelector` et le HTML de l'organe sont disponibles côté parent. Sullivan reçoit le screen entier mais ne sait pas sur quel élément l'utilisateur a le focus. Il répond donc sur l'ensemble du screen alors qu'on lui parle d'un composant précis.
+
+**Livrable A — WsChat.js : capturer l'élément sélectionné**
+
+Dans `sendMessage()`, après la capture de `screen_html`, ajouter :
+```javascript
+// Élément sélectionné en mode inspect (Mission 154)
+let selected_element = null;
+if (window.wsInspect?.currentSelector) {
+    const iframe = document.querySelector('#ws-preview-frame-container iframe');
+    const el = iframe?.contentDocument?.querySelector(window.wsInspect.currentSelector);
+    if (el) selected_element = {
+        selector: window.wsInspect.currentSelector,
+        tag: el.tagName.toLowerCase(),
+        html: el.outerHTML.slice(0, 3000)
+    };
+}
+```
+Ajouter `selected_element` au body de la requête.
+
+**Livrable B — server_v3.py : SullivanChatRequest + bloc élément**
+
+```python
+class SullivanChatRequest(BaseModel):
+    message: str
+    mode: str = "construct"
+    screen_html: Optional[str] = None
+    canvas_screens: Optional[list] = None
+    selected_element: Optional[dict] = None  # { selector, tag, html }
+```
+
+Dans `sullivan_chat()`, injecter avant `context_html_block` :
+```python
+selected_block = ""
+if req.selected_element:
+    selected_block = f"""
+ÉLÉMENT ACTUELLEMENT SÉLECTIONNÉ PAR L'UTILISATEUR (selector: {req.selected_element.get('selector','?')}) :
+---
+{req.selected_element.get('html','')}
+---
+L'utilisateur parle probablement de cet élément spécifiquement. Si tu modifies le screen, cible en priorité cet élément et ses descendants directs.
+"""
+```
+
+**Critères de sortie :**
+- [ ] Sélectionner un `<section>` → demander "rends ce composant plus aéré" → Sullivan modifie ce composant, pas le body
+- [ ] Sans sélection → comportement inchangé (selected_block vide)
+
+---
+
+### Mission 153 — Undo Sullivan : rebrancher la stack d'historique
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-03**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + workspace.html)**
+
+**Contexte :**
+`WsInspect` a déjà une `historyStack` complète (`snapshot()` + `undo()`), alimentée par `inspect-snapshot` postMessage depuis l'iframe. Mais Sullivan écrit directement via `updateActiveScreenHtml()` sans pousser de snapshot. Résultat : Cmd+Z ne peut pas défaire une action Sullivan.
+
+**Livrable A — WsCanvas.js : snapshot avant updateActiveScreenHtml**
+
+```javascript
+updateActiveScreenHtml(html) {
+    // Snapshot pour undo avant modification
+    if (window.wsInspect) {
+        const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
+        const canvasIframe = this.activeScreenId
+            ? document.getElementById(this.activeScreenId)?.querySelector('iframe')
+            : null;
+        const currentHtml = previewIframe?.srcdoc
+            || previewIframe?.contentDocument?.documentElement?.outerHTML
+            || canvasIframe?.srcdoc || '';
+        if (currentHtml) window.wsInspect.snapshot(currentHtml);
+    }
+    // ... reste inchangé
+}
+```
+
+**Livrable B — workspace.html : bouton Undo dans le header**
+
+À côté du bouton SAVE existant :
+```html
+<button onclick="window.wsInspect?.undo()" 
+    class="px-3 py-1.5 border border-slate-200 rounded-custom text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-slate-800 hover:border-slate-400 transition-all"
+    title="Défaire la dernière action Sullivan (Ctrl+Z)">
+    undo
+</button>
+```
+
+Et écouter Ctrl+Z globalement dans `ws_main.js` :
+```javascript
+window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        window.wsInspect?.undo();
+    }
+});
+```
+
+**Critères de sortie :**
+- [ ] Sullivan modifie un screen → Cmd+Z → screen revient à l'état précédent
+- [ ] Bouton "undo" visible dans le header workspace
+- [ ] Stack max 10 snapshots (déjà configuré dans WsInspect)
+
+---
+
 ### Mission 152 — Sullivan context complet : tous les screens canvas + DESIGN.md
 
 **STATUS: 🟠 PRÊTE**
