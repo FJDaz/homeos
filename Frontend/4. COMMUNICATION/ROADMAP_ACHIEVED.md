@@ -5409,3 +5409,42 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - Création de WsAudit.js, WsForge.js, WsPreview.js, WsScreenShell.js.
 - Fix HCI (Boucle infinie) : document.write statique sans scripts dans WsPreview.
 - Persistance Sullivan : fallback sur _lastSullivanHtml dans WsChat.
+
+---
+
+## Mission 117 — Fusion Intent → FRD : Analyse Intégrée
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-03-31 | ACTOR: GEMINI (frontend) + CLAUDE (backend updates)**
+- Analyse intégrée dans l'éditeur FRD.
+- Branchement des intentions sur les composants détectés.
+
+## Mission 119 — Pont React/ZIP → Tailwind Direct
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01 | ACTOR: GEMINI (react_to_tailwind.py) + CLAUDE (routes.py)**
+- Conversion directe de composants React/ZIP vers Tailwind.
+- Support du pattern `svg_to_tailwind.py`.
+
+## Mission 127 — Workspace V1 (Shell + Canvas Engine)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01 | ACTOR: GEMINI**
+- Moteur de canvas SVG de base.
+- Système de shell pour les écrans.
+
+## Mission 129 — Workspace : features layer 2
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01 | ACTOR: GEMINI**
+- Améliorations UX du canvas.
+- Layer 2 des fonctionnalités de manipulation.
+
+## Mission 130 — Mode Aperçu, Panneaux & Monaco Popover
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01 | ACTOR: GEMINI**
+- Mission 130-A : Header Minimal + Mode Aperçu Plein Écran.
+- Mission 130-B : Boutons Aperçu & Save par Screen.
+- Mission 130-C : Fix Robuste Panneaux Latéraux.
+- Mission 130 : Mode Inspect In-Preview & Monaco Popover.
+
+## Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-01 | ACTOR: GEMINI**
+- Nettoyage des outils et focus sur le mode aperçu.
