@@ -688,10 +688,11 @@ L'utilisateur parle probablement de cet élément spécifiquement. Si tu modifie
         for s in req.canvas_screens[:3]:  # Max 3 screens supplémentaires
             parts.append(f"=== ÉCRAN : {s.get('title','?')} (id: {s.get('id','?')}) ===\n{s.get('html','')[:6000]}")
         if parts:
+            parts_joined = "\n\n".join(parts)
             other_screens_block = f"""
 AUTRES ÉCRANS PRÉSENTS SUR LE CANVAS (LECTURE SEULE - RÉFÉRENCE) :
 ---
-{"\n\n".join(parts)}
+{parts_joined}
 ---
 Ces écrans sont fournis pour comparaison et contexte. Tu ne peux pas les modifier directement, mais tu dois t'en inspirer pour la cohérence.
 """
