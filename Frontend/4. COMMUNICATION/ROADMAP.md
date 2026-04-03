@@ -13,165 +13,40 @@
 
 ---
 
+
 ### Mission 126 — Cascade LLM : gemini-3.1-flash-lite en queue
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ## Thème 7 — Drill : Manifeste → Wire → Cadrage
 
 > Objectif : à partir d'un import (SVG, HTML, image), HoméOS détecte si un manifeste existe, lance le mode Wire directement si oui, sinon ouvre le Cadrage (ex-BRS). Le Wire doit fonctionner en mode aperçu, validable en un clic.
 
 ### Mission 148 — Bridge @font-face : fontes système → iframes screens
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsInspect.js)**
-**RÉSULTAT :** Infrastructure de génération dynamique WOFF2 opérationnelle (`/api/sullivan/generate-webfont`). Cache d'indexation système macOS implémenté pour supprimer la latence de scan. Bridge @font-face via `postMessage` validé (réversion frontend effectuée par l'utilisateur pour affinement).
-
-**Contexte :** `applyTypo()` dans WsInspect applique `font-family: TrajanPro` dans l'iframe preview, mais la fonte n'est pas chargée dans le contexte de l'iframe. Le résultat : fallback silencieux sur la fonte système par défaut. Il faut injecter un `@font-face` dans l'iframe **au moment de l'application**, en générant la webfont à la volée depuis le fichier système Mac.
-
-**Pipeline cible :**
-```
-1. applyTypo() → POST /api/sullivan/generate-webfont { font_name: "Trajan Pro" }
-2. server_v3.py → trouve le fichier .ttf/.otf dans /System/Library/Fonts + ~/Library/Fonts
-3. FontWebGen.generate() → produit le .woff2 dans /static/fonts/ + retourne le @font-face CSS
-4. Réponse → { css: "@font-face { font-family: 'Trajan Pro'; src: url(...) }" }
-5. applyTypo() → postMessage({ type: 'inject-font-css', css }) à l'iframe
-6. injectTracker() dans l'iframe → listener inject-font-css → ajoute <style> dans <head>
-7. Puis postMessage inspect-apply-typo → la fonte est maintenant disponible
-```
-
-#### Livrable A — Route POST /api/sullivan/generate-webfont (server_v3.py)
-
-```python
-POST /api/sullivan/generate-webfont
-Body: { "font_name": str }
-
-1. Cherche le fichier dans /System/Library/Fonts, /Library/Fonts, ~/Library/Fonts
-   (match insensible à la casse sur le stem du fichier)
-2. Si trouvé → FontWebGen().generate(path, classification)
-3. Retourne { css: "@font-face {...}", slug: str, status: "ok" }
-4. Si déjà généré (slug existe) → retourne directement sans regénérer
-```
-
-#### Livrable B — applyTypo() dans WsInspect.js
-
-```javascript
-async applyTypo() {
-    const font = this.fontSelect.value;
-    const size = this.sizeInput.value;
-    const weight = this.weightSelect.value;
-    const iframe = document.querySelector('#ws-preview-frame-container iframe');
-    if (!iframe) return;
-
-    // 1. Générer la webfont côté serveur
-    const res = await fetch('/api/sullivan/generate-webfont', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ font_name: font })
-    });
-    const data = await res.json();
-
-    // 2. Injecter le @font-face dans l'iframe
-    if (data.css) {
-        iframe.contentWindow.postMessage({ type: 'inject-font-css', css: data.css }, '*');
-    }
-
-    // 3. Appliquer la typo sur l'élément sélectionné
-    iframe.contentWindow.postMessage({ type: 'inspect-apply-typo', font, size, weight }, '*');
-}
-```
-
-#### Livrable C — Listener inject-font-css dans injectTracker() (WsInspect.js)
-
-Dans le bloc `window.addEventListener('message', ...)` de `injectTracker()` :
-```javascript
-if (e.data.type === 'inject-font-css') {
-    let style = document.getElementById('ws-injected-fonts');
-    if (!style) { style = document.createElement('style'); style.id = 'ws-injected-fonts'; document.head.appendChild(style); }
-    style.textContent += e.data.css + '\n';
-}
-```
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/server_v3.py` — route POST `/api/sullivan/generate-webfont`
-- `Frontend/3. STENCILER/static/js/workspace/WsInspect.js` — `applyTypo()` async + listener `inject-font-css`
-
-**Critères de sortie :**
-- [ ] Sélectionner "Trajan Pro" dans le panel typo → appliquer → la fonte s'affiche correctement dans l'iframe
-- [ ] Fonte déjà générée → pas de re-génération (idempotent)
-- [ ] Fonte introuvable sur le système → fallback silencieux (pas d'erreur UI)
-- [ ] `@font-face` injecté persiste entre plusieurs applications typo (accumulation dans `#ws-injected-fonts`)
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 144 — Export projet + @font-face dans les screens
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — server_v3.py + WsFontManager.js)**
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 145 — Renommage UI : BRS → Cadrage + tabs renommés
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — bootstrap.js + workspace.html)**
-**RÉSULTAT :** Unification du Header Global (`bootstrap.js`). Renommage complet BRS -> **Cadrage**. Pipeline passé à 4 onglets : *Cadrage*, *Backend*, *Frontend* (vers Workspace), *Déploiement*.
-
-**Contexte :** Le module BRS (Brainstorm) se rebaptise **Cadrage**. Les 4 tabs du pipeline reçoivent des noms définitifs.
-
-**Tableau de référence :**
-
-| Tab | Nom | Longueur | Alt |
-|-----|-----|----------|-----|
-| 1 | Cadrage | 7 car. | L'Intention (Humain) |
-| 2 | Backend | 7 car. | La Logique (Machine) |
-| 3 | Frontend | 8 car. | Le Visuel (Interface) |
-| 4 | Déploiement | 11 car. | La Sortie |
-
-Remplacer toutes les occurrences de `BRS`, `Brainstorm`, `brs` dans les templates HTML et labels UI par `Cadrage`.
-
-**Critères de sortie :**
-- [ ] Aucune occurrence visible de "BRS" ou "Brainstorm" dans l'UI
-- [ ] Les 4 tabs affichent les bons noms avec leur alt disponible en tooltip
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 146 — Détection manifeste → routage Wire ou Cadrage
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
-**RÉSULTAT :** API `GET /api/frd/manifest?import_id={id}` implémentée. Détection automatique des manifestes dans `projects/{active}/manifests/`. Prêt pour le routage intelligent Mission 147.
-
-**Contexte :** Quand l'utilisateur ajoute un screen au canvas, HoméOS doit détecter si un manifeste de wireframe existe déjà pour cet import. Si oui → lancer le Wire directement. Sinon → proposer le Cadrage.
-
-Un **manifeste** = fichier `manifest_{import_id}.json` dans `projects/{active}/manifests/` contenant au minimum `{ screens: [...], components: [...] }`. Il peut être généré manuellement ou via Cadrage.
-
-#### Livrable A — Route de détection (server_v3.py)
-
-```
-GET /api/frd/manifest?import_id={id}
-→ Cherche projects/{active}/manifests/manifest_{id}.json
-→ Si trouvé : { exists: true, manifest: {...} }
-→ Sinon : { exists: false }
-```
-
-#### Livrable B — WsCanvas.js : post-addScreen()
-
-Après `addScreen()`, appeler `GET /api/frd/manifest?import_id=...` :
-- `exists: true` → appeler `enterPreviewMode(shellId)` automatiquement (Wire direct)
-- `exists: false` → afficher badge "cadrage requis" sur le screen (pas de blocage)
-
-**Critères de sortie :**
-- [ ] Import avec manifeste → aperçu Wire lancé automatiquement
-- [ ] Import sans manifeste → screen normal avec badge "cadrage requis"
-- [ ] Route `/api/frd/manifest` retourne correctement exists true/false
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 147 — Wire : overlay Z-index + fond blur + validation
 
@@ -333,74 +208,125 @@ async def validate_wire(req: Request):
 **Critères de sortie globaux :**
 - [ ] Ouvrir un screen sans manifeste → overlay absent
 - [ ] Ouvrir un screen avec manifeste → overlay visible avec tableau des composants
-- [ ] "Valider le Wire" → POST + overlay disparaît
-- [ ] "Retour Cadrage" → overlay disparaît proprement
-- [ ] `backdrop-blur` visible sans casser la preview iframe
+- [ ] "Valider le Wire"### Mission 156 — Refactor WsCanvas : découpe hexagonale en 5 modules
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+
+---
+anHtml` (déjà en place)
+
+**Critères de sortie :**
+- [ ] WsCanvas.js < 200L
+- [ ] Sullivan apply fonctionne (doc.write, pas de boucle infinie, changements visibles)
+- [ ] Sélection screen / drag / zoom non régressés
+- [ ] forge polling toujours fonctionnel
+
+---
+
+### Mission 157 — Nettoyage ROADMAP.md : collapse des missions archivées
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-03**
+**ACTOR: CLAUDE (CODE DIRECT — ROADMAP.md)**
+
+**Contexte :**
+ROADMAP.md fait 1787 lignes. De nombreuses missions ✅ LIVRÉ y occupent encore des blocs complets (50–150L chacune) alors qu'elles sont déjà archivées dans `ROADMAP_ACHIEVED.md`. Cela noie les missions actives et ralentit la lecture.
+
+**Objectif :**
+Réduire toute mission ayant **STATUS: ✅ LIVRÉ** ET une entrée dans `ROADMAP_ACHIEVED.md` à une ligne de référence unique. Conserver intact tout ce qui est `🔵 EN COURS`, `🟠 PRÊTE`, ou `🔵 BACKLOG`.
+
+**Règle de collapse :**
+Remplacer le bloc complet de chaque mission archivée par :
+```
+### Mission NNN — [titre]
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
+```
+Suivi d'un `---` séparateur.
+
+**Missions à vérifier et collapser si archivées :**
+Parcourir dans l'ordre du fichier. Pour chaque `### Mission NNN` avec `STATUS: ✅ LIVRÉ` :
+1. Vérifier qu'une entrée `Mission NNN` existe dans `ROADMAP_ACHIEVED.md`
+2. Si oui → remplacer le bloc par la ligne de référence ci-dessus
+3. Si non → laisser intact (ne pas archiver à la volée, signaler en fin de rapport)
+
+**Périmètre :**
+- Fichier à modifier : `/Users/francois-jeandazin/AETHERFLOW/Frontend/4. COMMUNICATION/ROADMAP.md`
+- Fichier à lire (source de vérité archive) : `/Users/francois-jeandazin/AETHERFLOW/Frontend/4. COMMUNICATION/ROADMAP_ACHIEVED.md`
+- Ne pas modifier `ROADMAP_ACHIEVED.md`
+- Ne pas toucher aux sections Thème, aux titres de thème, ni aux missions non-✅
+
+**Critères de sortie :**
+- [ ] ROADMAP.md < 600 lignes
+- [ ] Toutes les missions ✅ LIVRÉ archivées sont collapées à 1 ligne + séparateur
+- [ ] Missions EN COURS / PRÊTE / BACKLOG inchangées
+- [ ] Rapport : liste des missions collapées + éventuelles missions ✅ non archivées signalées
+
+---
+
+### Mission 155 — Bouton Stop Sullivan : annulation de requête en cours
+
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-03**
+**ACTOR: CLAUDE (CODE DIRECT — WsChat.js)**
+
+**Contexte :**
+Quand Sullivan met trop de temps (erreur réseau, timeout LLM, régénération infinie), l'utilisateur n'a aucun moyen d'annuler. La bulle "en cours..." reste bloquée indéfiniment. Il faut un bouton Stop visible pendant le traitement, qui annule le fetch via `AbortController` et nettoie l'UI.
+
+**Livrable — WsChat.js**
+
+1. Ajouter un `AbortController` dans `sendMessage()` :
+```javascript
+this._abortController = new AbortController();
+const res = await fetch('/api/sullivan/chat', {
+    ...
+    signal: this._abortController.signal
+});
+```
+
+2. Afficher un bouton Stop dans la bulle transitoire (remplace le texte simple) :
+```javascript
+_appendTransient(text) {
+    const b = this.appendBubble(`${text} <button id="ws-stop-btn" onclick="window.wsChat?.stopSullivan()" style="margin-left:8px;padding:1px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:9px;cursor:pointer;background:#fff;color:#64748b;">stop</button>`, 'sullivan');
+    ...
+}
+```
+
+3. Méthode `stopSullivan()` :
+```javascript
+stopSullivan() {
+    this._abortController?.abort();
+}
+```
+
+4. Dans le `catch`, distinguer abort vs vraie erreur :
+```javascript
+} catch (e) {
+    if (pending) pending.remove();
+    if (e.name !== 'AbortError') {
+        this.appendBubble("Désolé, une erreur technique est survenue.", 'sullivan');
+    }
+    // AbortError → silence, l'utilisateur a annulé volontairement
+}
+```
+
+**Critères de sortie :**
+- [ ] Pendant le traitement Sullivan : bouton "stop" visible dans la bulle d'attente
+- [ ] Clic stop → fetch annulé, bulle retirée, pas de message d'erreur
+- [ ] Erreur réseau réelle → message d'erreur affiché normalement
+- [ ] Un seul AbortController actif à la fois (nouveau message → ancien annulé silencieusement)
 
 ---
 
 ### Mission 154 — Sullivan : focus élément sélectionné dans le prompt
-
-**STATUS: 🟠 PRÊTE**
-**DATE: 2026-04-03**
-**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py)**
-
-**Contexte :**
-Quand l'utilisateur sélectionne un organe en mode aperçu (inspect), `WsInspect.currentSelector` et le HTML de l'organe sont disponibles côté parent. Sullivan reçoit le screen entier mais ne sait pas sur quel élément l'utilisateur a le focus. Il répond donc sur l'ensemble du screen alors qu'on lui parle d'un composant précis.
-
-**Livrable A — WsChat.js : capturer l'élément sélectionné**
-
-Dans `sendMessage()`, après la capture de `screen_html`, ajouter :
-```javascript
-// Élément sélectionné en mode inspect (Mission 154)
-let selected_element = null;
-if (window.wsInspect?.currentSelector) {
-    const iframe = document.querySelector('#ws-preview-frame-container iframe');
-    const el = iframe?.contentDocument?.querySelector(window.wsInspect.currentSelector);
-    if (el) selected_element = {
-        selector: window.wsInspect.currentSelector,
-        tag: el.tagName.toLowerCase(),
-        html: el.outerHTML.slice(0, 3000)
-    };
-}
-```
-Ajouter `selected_element` au body de la requête.
-
-**Livrable B — server_v3.py : SullivanChatRequest + bloc élément**
-
-```python
-class SullivanChatRequest(BaseModel):
-    message: str
-    mode: str = "construct"
-    screen_html: Optional[str] = None
-    canvas_screens: Optional[list] = None
-    selected_element: Optional[dict] = None  # { selector, tag, html }
-```
-
-Dans `sullivan_chat()`, injecter avant `context_html_block` :
-```python
-selected_block = ""
-if req.selected_element:
-    selected_block = f"""
-ÉLÉMENT ACTUELLEMENT SÉLECTIONNÉ PAR L'UTILISATEUR (selector: {req.selected_element.get('selector','?')}) :
----
-{req.selected_element.get('html','')}
----
-L'utilisateur parle probablement de cet élément spécifiquement. Si tu modifies le screen, cible en priorité cet élément et ses descendants directs.
-"""
-```
-
-**Critères de sortie :**
-- [ ] Sélectionner un `<section>` → demander "rends ce composant plus aéré" → Sullivan modifie ce composant, pas le body
-- [ ] Sans sélection → comportement inchangé (selected_block vide)
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 153 — Undo Sullivan : rebrancher la stack d'historique
 
-**STATUS: 🟠 PRÊTE**
+**STATUS: 🔵 EN COURS — GEMINI**
 **DATE: 2026-04-03**
-**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + workspace.html)**
+**ACTOR: GEMINI**
 
 **Contexte :**
 `WsInspect` a déjà une `historyStack` complète (`snapshot()` + `undo()`), alimentée par `inspect-snapshot` postMessage depuis l'iframe. Mais Sullivan écrit directement via `updateActiveScreenHtml()` sans pousser de snapshot. Résultat : Cmd+Z ne peut pas défaire une action Sullivan.
@@ -453,109 +379,10 @@ window.addEventListener('keydown', (e) => {
 ---
 
 ### Mission 152 — Sullivan context complet : tous les screens canvas + DESIGN.md
-
-**STATUS: 🟠 PRÊTE**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py)**
-**DÉPENDANCE: aucune**
-
-**Contexte :**
-Sullivan ne voit qu'un seul écran (l'actif) et ignore le `DESIGN.md` du projet. Résultat : il ne peut pas comparer deux screens, appliquer un design system, ni connaître les tokens visuels définis. Il faut lui passer systématiquement :
-1. Tous les screens présents sur le canvas (HTML résumé ou complet)
-2. Le `DESIGN.md` du projet actif s'il existe
-
-**Livrable A — WsChat.js : collecter tous les screens canvas**
-
-Dans `sendMessage()`, après avoir capturé `screen_html` (screen actif), collecter les autres screens :
-
-```javascript
-// Collecter tous les screens canvas (sauf actif)
-const canvas_screens = [];
-if (window.wsCanvas) {
-    const shells = document.querySelectorAll('.ws-screen-shell');
-    for (const shell of shells) {
-        const id = shell.getAttribute('id');
-        if (id === window.wsCanvas.activeScreenId) continue; // déjà dans screen_html
-        const title = shell.querySelector('.ws-screen-title')?.textContent || id;
-        const iframe = shell.querySelector('iframe');
-        let html = null;
-        try {
-            if (iframe?.srcdoc) html = iframe.srcdoc;
-            else if (iframe?.src) html = await (await fetch(iframe.src)).text();
-        } catch(_) {}
-        if (html) canvas_screens.push({ id, title, html });
-    }
-}
-```
-
-Ajouter `canvas_screens` au body de la requête :
-```javascript
-body: JSON.stringify({ message, mode, screen_html, canvas_screens })
-```
-
-**Livrable B — server_v3.py : SullivanChatRequest + scan DESIGN.md**
-
-Étendre le modèle :
-```python
-class SullivanChatRequest(BaseModel):
-    message: str
-    mode: str = "construct"
-    screen_html: Optional[str] = None
-    canvas_screens: Optional[list] = None  # [{ id, title, html }]
-```
-
-Scan DESIGN.md dans `sullivan_chat()` :
-```python
-# DESIGN.md du projet actif
-design_md_block = ""
-try:
-    design_path = get_active_project_path() / "DESIGN.md"
-    if not design_path.exists():
-        # Chercher dans templates/ aussi
-        design_path = STATIC_DIR_PATH / "templates" / "DESIGN.md"
-    if design_path.exists():
-        design_md_block = f"""
-DESIGN SYSTEM DU PROJET (DESIGN.md) :
----
-{design_path.read_text(encoding='utf-8')[:4000]}
----
-"""
-except Exception:
-    pass
-```
-
-Construire le bloc autres screens :
-```python
-other_screens_block = ""
-if req.canvas_screens:
-    parts = []
-    for s in req.canvas_screens[:3]:  # max 3 screens supplémentaires
-        parts.append(f"=== SCREEN : {s.get('title','?')} (id: {s.get('id','?')}) ===\n{s.get('html','')[:6000]}")
-    other_screens_block = "\n\nAUTRES SCREENS PRÉSENTS SUR LE CANVAS :\n" + "\n\n".join(parts)
-```
-
-Injecter dans le `system_prompt` :
-```python
-system_prompt = f"""{base_system}
-{design_md_block}
-{context_html_block}
-{other_screens_block}
-...
-```
-
-**Règles :**
-- DESIGN.md : limité à 4000 chars (tokens précieux)
-- Autres screens : 6000 chars chacun, max 3 screens
-- Si pas de DESIGN.md → bloc vide, pas d'erreur
-- `canvas_screens` est optionnel — compat descendante
-
-**Critères de sortie :**
-- [ ] Sullivan répond à "vois-tu les autres screens sur le canvas ?" → oui, les liste par titre
-- [ ] Sullivan répond à "quels sont les tokens du design system ?" → cite le DESIGN.md si dispo
-- [ ] Aucune régression sur les screens sans contexte supplémentaire
-- [ ] Temps de réponse < 60s même avec 2 screens + DESIGN.md
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 150 — Retour Cadrage : session pré-alimentée par le manifeste Wire
 
@@ -672,83 +499,10 @@ params.set('archetype', archetype);
 ---
 
 ### Mission 151 — Auto-génération manifeste à l'import HTML
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — server_v3.py)**
-**DÉPENDANCE: M146 (route manifest), ManifestInferer + ArchetypeDetector existants**
-
-**Contexte :**
-Quand un HTML est importé via `POST /api/import/upload`, le manifeste Wire n'est jamais généré. `ManifestInferer` (Playwright DOM scraping) et `ArchetypeDetector` (scoring heuristique) existent dans `Backend/Prod/retro_genome/` mais ne sont jamais appelés dans ce pipeline. Résultat : `GET /api/frd/manifest?import_id=...` retourne toujours `{ exists: false }`.
-
-**Point d'injection dans server_v3.py :**
-Ligne ~1544 — après `tpl_path.write_bytes(content)` dans `import_upload()`, si `ext == '.html'`.
-
-**Ce qu'il faut ajouter (après l'écriture du template) :**
-
-```python
-# Auto-génération manifeste Wire (M151)
-try:
-    from Backend.Prod.retro_genome.manifest_inferer import ManifestInferer
-    from Backend.Prod.retro_genome.archetype_detector import ArchetypeDetector
-    import asyncio as _asyncio
-
-    import_id = f"{today_str}_{timestamp_str}_{safe_name}"
-    manifests_dir = get_active_project_path() / "manifests"
-    manifests_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path = manifests_dir / f"manifest_{import_id}.json"
-
-    # 1. DOM scraping via Playwright (async → run in thread via asyncio)
-    raw = _asyncio.run(ManifestInferer.infer_from_html(tpl_path))
-
-    # 2. Archetype detection
-    detector = ArchetypeDetector()
-    archetype = detector.detect(raw)
-
-    # 3. Transformer elements → components pour Wire overlay
-    components = []
-    for el in raw.get("elements", [])[:30]:  # limite 30 pour le Wire
-        components.append({
-            "id": el.get("id", ""),
-            "name": el.get("name", ""),
-            "role": el.get("structural_role") or el.get("visual_hint") or el.get("type", ""),
-            "z_index": el.get("y", 0),  # y position comme proxy z-index visuel
-            "x": el.get("x", 0),
-            "y": el.get("y", 0),
-            "w": el.get("width", 0),
-            "h": el.get("height", 0),
-            "text": el.get("text_content", "")[:40],
-        })
-
-    manifest_data = {
-        "version": "1.0",
-        "import_id": import_id,
-        "archetype": archetype,
-        "components": components,
-        "screens": [],
-        "generated_at": datetime.now().isoformat(),
-    }
-    manifest_path.write_text(json.dumps(manifest_data, indent=2, ensure_ascii=False))
-    logger.info(f"[M151] Manifest generated: {manifest_path}")
-except Exception as _e:
-    logger.warning(f"[M151] Manifest generation skipped: {_e}")
-```
-
-**Règles d'implémentation :**
-- Toujours dans un `try/except` — une erreur Playwright ne doit jamais bloquer l'upload
-- `asyncio.run()` fonctionne ici car on est dans une route FastAPI async (thread séparé si besoin via `asyncio.to_thread`)
-- Si Playwright n'est pas installé → `logger.warning` + skip silencieux
-- Pas de régénération si `manifest_path.exists()` déjà (idempotent)
-
-**Critères de sortie :**
-- [ ] Importer un HTML → `projects/{active}/manifests/manifest_{id}.json` créé automatiquement
-- [ ] `GET /api/frd/manifest?import_id={id}` retourne `{ exists: true, manifest: {...} }`
-- [ ] Overlay Wire affiche les composants détectés (colonnes Composant / Rôle / Z-index)
-- [ ] Echec Playwright → upload réussit quand même, pas de manifeste généré
-- [ ] Manifeste déjà existant → non écrasé
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 149 — Canvas N0 : États de sélection + toolbar opérationnelle
 
@@ -1015,261 +769,78 @@ Lire static/css/stenciler.css — tokens V1. Pas d'uppercase. Geist 12px.
 ---
 
 ### Mission 127 — Workspace V1 (Shell + Canvas Engine)
-
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
-**DATE: 2026-04-01 | ACTOR: GEMINI + CLAUDE**
 
 ---
+
 
 ### Mission 129 — Workspace : features layer 2
-
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
-**DATE: 2026-04-01 | ACTOR: GEMINI + CLAUDE**
 
 ---
+
 
 ### Mission 130-A — Header Minimal + Mode Aperçu Plein Écran
-
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
-**DATE: 2026-04-01 | ACTOR: CLAUDE**
 
 ---
+
 
 ### Mission 130-B — Boutons Aperçu & Save par Screen
-
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
-**DATE: 2026-04-01 | ACTOR: CLAUDE**
 
 ---
+
 
 ### Mission 130-C — Fix Robuste Panneaux Latéraux
-
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
-**DATE: 2026-04-01 | ACTOR: CLAUDE**
 
 ---
+
 
 ### Mission 130 — Mode Inspect In-Preview & Monaco Popover
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI**
-**DÉPENDANCE: M130-A/M130-B ✅ (Mise en place de l'aperçu)**
-
-**Contexte :** Le tiroir latéral de code massif est abandonné au profit d'une expérience d'édition ultra-ciblée. Une fois entré dans le **Mode Aperçu (Plein Écran)** d'un screeen, le `Mode Inspect` (tel qu'il a été implémenté historiquement dans le FRD Editor via `FrdPreview.feature.js`) s'active **par défaut**. Au clic sur un élément dans l'aperçu, un éditeur Monaco flottant ("popover" ou bulle) apparaît au flanc immédiat de l'élément cliqué. Il ne contient **que** le code HTML (extrait) correspondant au composant inspecté.
-
-**Livrables :**
-1. **Activation Inspecteur (In-Preview) :** Au déclenchement du Preview, injection de la logique `Inspect Mode` avec highlight visuel au survol des éléments de l'iframe.
-2. **Popover Monaco Contextuel :** Cible sélectionnée → apparition d'un conteneur flottant à proximité directe (via Popper.js ou calcul de bounding client rect).
-3. **Édition d'Extrait (Grafting) :** Ce Monaco ne parse que l'outerHTML du nœud cible. À la sauvegarde (`Cmd+S` ou bouton check), l'extrait modifié remplace proprement le nœud dans le DOM distant (Server-side ou via postMessage direct) et le composant se met à jour localement.
-4. **Cohérence Ergonomique :** Design de la bulle Monaco discret et raccord au design système HoméOS.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ---
 
 ### Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI**
-**DÉPENDANCE: M130 ✅**
-
-**Contexte :** Les outils de la barre d'outils ne doivent être accessibles et opérables qu'**une fois en mode aperçu**. Toute notion d'aperçu global dans la toolbar doit définitivement disparaître car cela créerait des conflits avec le mode Aperçu par écran nouvellement implémenté (130-A/B).
-
-**Livrables :**
-1. **Verrouillage de la Toolbar :** Rendre la barre d'outils droite invisible ou désactivée sur le canvas principal, pour ne l'activer que lorsque `enterPreviewMode` a été déclenché.
-2. **Nettoyage UI :** Suppression radicale de toute icône ou bouton "Aperçu" redondant dans la toolbar ou le header principal.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 140 — Boutons Aperçu & Save dans le header de chaque screen canvas
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: CLAUDE (CODE DIRECT — WsCanvas.js)**
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 141 — Suppression d'imports depuis le panel Screens
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: CLAUDE (CODE DIRECT — ws_main.js + server_v3.py)**
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 143 — Sullivan UI Compact : 2 bulles visibles
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: GEMINI (workspace.html + workspace.css)**
-**DÉPENDANCE: aucune**
-
-**Contexte :** Le panel Sullivan occupe trop de hauteur dans l'UI workspace. L'historique des échanges n'a pas besoin d'être entièrement visible — seules les **2 dernières bulles** doivent rester accessibles. Le reste est masqué (pas supprimé).
-
-#### Livrable — workspace.html + workspace.css
-
-1. **`#ws-chat-history`** : passer de `max-h-48` à une hauteur fixe n'affichant que 2 bulles.
-   - Chaque bulle fait ~60-70px en moyenne. Hauteur cible : `max-h-32` (128px) ou `max-h-[140px]`.
-   - `overflow-y: hidden` (pas de scroll — les bulles plus anciennes disparaissent visuellement).
-
-2. **WsChat.js** : après chaque `appendBubble()`, ne conserver que les **2 derniers enfants** dans `historyEl` :
-   ```javascript
-   // À la fin de appendBubble(), après le scroll
-   while (this.historyEl.children.length > 2) {
-       this.historyEl.removeChild(this.historyEl.firstChild);
-   }
-   ```
-
-3. **Hauteur globale du panel Sullivan** : réduire le padding vertical et le min-height du composant `#ws-chat-mount` pour que l'ensemble (historique + input) prenne moins de 160px.
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/static/js/workspace/WsChat.js` — trim des bulles après append
-- `Frontend/3. STENCILER/static/templates/workspace.html` — classes hauteur `#ws-chat-history`
-- `Frontend/3. STENCILER/static/css/workspace.css` — hauteur `#ws-chat-mount` si nécessaire
-
-**Critères de sortie :**
-- [ ] Seules les 2 dernières bulles sont visibles dans le panel
-- [ ] Le panel Sullivan (historique + input) tient dans ≤ 160px de hauteur
-- [ ] L'input reste toujours accessible et fonctionnel
-- [ ] Pas de régression sur l'envoi de messages ni l'affichage des réponses
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 142 — Sullivan Actions : édition directe du screen actif
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-02**
-**ACTOR: CLAUDE (CODE DIRECT — WsChat.js + server_v3.py + WsCanvas.js)**
-**DÉPENDANCE: Sullivan chat opérationnel (M142-pre ✅)**
-
-**Contexte :** Sullivan répond en texte mais n'agit pas sur les écrans. L'utilisateur doit pouvoir dire "rends le blur moins fort" ou "ajoute un bouton CTA en bas" et voir le changement appliqué directement dans l'iframe du screen actif. Sullivan doit avoir accès au HTML courant, générer une version modifiée, et le canvas l'applique.
-
-#### Pipeline cible
-
-```
-1. Utilisateur envoie un message dans WsChat
-2. WsChat lit le srcdoc de l'iframe du screen actif (wsCanvas.activeScreenId)
-3. POST /api/sullivan/chat { message, mode, screen_html }
-4. Serveur : construit un prompt "Voici le HTML courant. Modifie-le selon l'instruction.
-            Retourne JSON { explanation, html }"
-5. LLM génère { explanation: "...", html: "<!DOCTYPE html>..." }
-6. Réponse : Sullivan affiche explanation dans le chat
-7. Si html présent : wsCanvas.updateScreenHtml(html) → remplace srcdoc de l'iframe active
-```
-
-#### Livrable A — WsChat.js (envoi du contexte screen)
-
-Dans `sendMessage()`, avant le fetch, lire le HTML du screen actif :
-
-```javascript
-// Récupérer le HTML du screen actif
-let screen_html = null;
-if (window.wsCanvas && window.wsCanvas.activeScreenId) {
-    const shell = document.getElementById(window.wsCanvas.activeScreenId);
-    const iframe = shell?.querySelector('iframe');
-    if (iframe) screen_html = iframe.srcdoc || null;
-}
-// Inclure dans le body
-body: JSON.stringify({ message: msg, mode: this.currentMode, screen_html })
-```
-
-Après réception, si `data.html` présent :
-
-```javascript
-if (data.html && window.wsCanvas) {
-    window.wsCanvas.updateScreenHtml(data.html);
-}
-```
-
-#### Livrable B — server_v3.py (prompt avec contexte HTML)
-
-Modifier `SullivanChatRequest` :
-```python
-class SullivanChatRequest(BaseModel):
-    message: str
-    mode: str = "construct"
-    screen_html: Optional[str] = None
-```
-
-Construire le prompt conditionnel :
-```python
-if req.screen_html:
-    prompt = f"""Tu es Sullivan, assistant UI/UX expert.
-
-L'utilisateur travaille sur un screen dont voici le HTML complet :
-<screen_html>
-{req.screen_html[:8000]}
-</screen_html>
-
-Instruction de l'utilisateur : {req.message}
-
-Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans backticks) :
-{{
-  "explanation": "explication courte de ce que tu as modifié (1-3 phrases)",
-  "html": "le HTML complet modifié (document entier)"
-}}
-
-Si l'instruction ne nécessite pas de modification HTML (question, conseil), retourne html: null."""
-else:
-    # prompt texte seul (mode sans screen)
-    prompt = f"{system_prompt}\n\nMessage : {req.message}"
-```
-
-Parser la réponse :
-```python
-result = await client.generate(prompt=prompt)
-try:
-    parsed = json.loads(result.code)
-    return {"explanation": parsed.get("explanation", ""), "html": parsed.get("html")}
-except Exception:
-    return {"explanation": result.code, "html": None}
-```
-
-#### Livrable C — WsCanvas.js (méthode updateScreenHtml)
-
-Ajouter `updateScreenHtml(html)` :
-```javascript
-updateScreenHtml(html) {
-    if (!this.activeScreenId) return;
-    const shell = document.getElementById(this.activeScreenId);
-    const iframe = shell?.querySelector('iframe');
-    if (!iframe) return;
-    iframe.srcdoc = html;
-}
-```
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/static/js/workspace/WsChat.js` — envoi `screen_html` + application `data.html`
-- `Frontend/3. STENCILER/server_v3.py` — prompt conditionnel + parsing JSON
-- `Frontend/3. STENCILER/static/js/workspace/WsCanvas.js` — méthode `updateScreenHtml()`
-
-**Critères de sortie :**
-- [ ] Sullivan reçoit le HTML du screen actif dans sa requête
-- [ ] "Rends le blur moins fort" → Sullivan modifie le CSS et le screen se met à jour sans reload
-- [ ] Sans screen actif → Sullivan répond en mode conseil texte (pas d'erreur)
-- [ ] Si LLM retourne texte brut (pas de JSON) → fallback : afficher le texte, ne pas planter
-- [ ] Le HTML limité à 8000 chars pour ne pas saturer le contexte LLM
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 132 — Outils de Manipulation (Drag, Déplacer, Cadre, Place Image)
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI**
-**DÉPENDANCE: M131 ✅**
-
-**Contexte :** Donner vie aux outils présents dans la toolbar pour manipuler le DOM du screen actuellement en mode aperçu.
-
-**Livrables :**
-1. **Flèche de sélection :** Sélection d'éléments spécifiques dans le screen (DOM) et autorisation du "drag" de ces éléments de manière ciblée.
-2. **Outil Déplacer (Hand) :** Permet de "pan" directement dans la vue si l'écran dépasse.
-3. **Outil Cadre :** Tracé d'un block DIV ou conteneur HTML structurant directement via clic-glissé.
-4. **Outil Place Image :** Input file ouvrant et insertion d'une balise `<img src="...">` avec l'asset à l'endroit cliqué.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 132-B — Outil Place Image (suite M132)
 
@@ -1283,40 +854,22 @@ updateScreenHtml(html) {
 ---
 
 ### Mission 133 — Undo & Color Picker Libre
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI**
-**DÉPENDANCE: M132 ✅**
-
-**Contexte :** Implémenter l'annulation des actions lors de l'édition ainsi que la colorisation sémantique (Teinte, Saturation, Lumière libre sans restriction).
-
-**Livrables :**
-1. **Pile d'historique (Undo) :** Mémoriser les modifications DOM (positions, ajout cadre, source images) pour rollback (Cmd Z).
-2. **Outil Color Apply (TSL) :** Interface pour appliquer des couleurs TSL (Teinte, Saturation, Luminosité). Ce color picker devra se baser rigoureusement sur les palettes / échelles stipulées dans `design.md` HoméOS.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 134 — Arsenal Typo (System Fonts & Webfont Generator)
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI**
-**DÉPENDANCE: M133 ✅**
-
-**Contexte :** Gérer l'ajout de cadres de texte et la sélection de la typographie de manière ultra-locale, avec génération finale des fonts au moment du `save`.
-
-**Livrables :**
-1. **Outil Texte :** Création de zones de texte directement dans l'aperçu.
-2. **Sélecteur de System Fonts :** Interface lisant et proposant la sélection directe des polices installées sur la machine de l'utilisateur (via Local Font Access API).
-3. **Hook de Sauvegarde (Webfont Generator) :** Lors du `save` du screen, extraire les polices système choisies et déclencher l'API Backend `Webfont Generator` (via `font_webgen.py` de la M109B) pour packager, subsetter et générer les `@font-face` CSS finaux.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 124 — Fallback Mimo après quota Gemini épuisé
 **STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 110 — Templates FRD : liste vide après manifest minimal
 
@@ -1337,13 +890,10 @@ updateScreenHtml(html) {
 ## Thème 1 — Sullivan Typography Engine (suite)
 
 ### Mission 109C — Font Advisor + UI Landing
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-03-31**
-
-> Archivée dans ROADMAP_ACHIEVED.md
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ## Thème 2 — Architecture User / Project
 
@@ -1676,54 +1226,12 @@ Au chargement de `frd_editor.html` :
 
 ---
 
+
 ### Mission 117 — Fusion Intent → FRD : Analyse Intégrée
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-03-31**
-**ACTOR: GEMINI (frontend) + CLAUDE (backend updates)**
-**DÉPENDANCE: M116 (pipeline landing → FRD corrigé)**
-
-**Contexte :** L'écran séparé `intent_viewer.html` crée une rupture dans le flux créatif. L'objectif est de fusionner ses fonctionnalités dans l'Éditeur FRD. Lorsqu'un utilisateur ouvre un **Import de référence**, il ne doit pas être envoyé vers un visualiseur passif, mais vers l'Éditeur qui se configure en mode "Analyse".
-
-#### Livrable A — frd_editor.html : Panneau d'Analyse (Gemini)
-
-- Ajout d'un panneau latéral `#intent-panel` (drawer à gauche ou à droite, stylisé HoméOS).
-- Intégration du tableau interactif des intentions (Intention / Archetype / Target / Action).
-- Badge de statut de l'analyse (Validé / À réviser).
-
-#### Livrable B — FrdIntent.feature.js : Module d'Analyse (Gemini)
-
-- Nouveau module portable encapsulant la logique de `intent_viewer.html` :
-  - `fetchIntents(importId)` → récupère `index.json` + `analysis.json` via `/api/retro-genome/import-analysis-svg`.
-  - `renderIntents()` → peuple le tableau dans `#intent-panel`.
-  - `annotateIntent(id, annotation)` → persiste les modifications via `/api/retro-genome/validate`.
-
-#### Livrable C — frd_main.js : Orchestration (Gemini)
-
-- Au chargement (`init`) : si `ctx.type === 'import'`, activer automatiquement le module `intent` et ouvrir le panneau.
-- **Sullivan Autostart** : Sullivan détecte l'import et propose proactivement : *"bonjour. je vois votre import figma. voici les intentions détectées. voulez-vous que je génère la structure tailwind correspondante ?"*
-
-#### Livrable D — server_v3.py : Helper de génération (Claude CODE DIRECT)
-
-- Endpoint `POST /api/frd/generate-initial` :
-  - Prend `import_id` en entrée.
-  - Exécute `HtmlGenerator.generate()` (Mission 35) pour produire le premier jet `reality.html`.
-  - Sauvegarde le fichier dans `static/templates/` et bascule le contexte courant sur ce nouveau template.
-
-**Critères de sortie :**
-- [x] Landing -> Ouvrir import SVG -> Arrive dans FRD -> Panneau d'analyse ouvert automatiquement.
-- [x] Mockup SVG visible dans le canvas de droite (Mode Référence).
-- [x] Sullivan propose la génération Tailwind dans le chat.
-- [x] Validation des intentions persiste entre les sessions.
-- [x] Pas de régression sur l'édition de templates HTML existants.
-
-**COMPTE RENDU (CR) DE MISSION :**
-- Fusion réussie : L'Intent Viewer est maintenant un élément natif de l'Éditeur FRD sous forme de slider animé.
-- Introduction du **Protocole SVG AI**, une couche cruciale de dé-obfuscation pour traiter les exports vectoriels d'Adobe Illustrator sans surcharger le contexte LLM.
-- **Sullivan** est proactif : branché au bouton de génération dans le panneau d'analyse, il déclenche directement `/api/retro-genome/generate-html` et bascule l'éditeur en code (`.html`) dès que la réponse est prête.
-- Le cycle Architecte -> Intégrateur -> DA est préservé, mais l'expérience UI est unifiée.
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ### Mission 118 — Pont SVG Illustrator → Tailwind Direct
 
@@ -1906,102 +1414,12 @@ Les imports Figma apparaissent dans la liste avec un badge `figma` distinct des 
 
 ---
 
+
 ### Mission 119 — Pont React/ZIP → Tailwind Direct
-
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-01**
-**ACTOR: GEMINI (react_to_tailwind.py) + CLAUDE (routes.py)**
-**DÉPENDANCE: aucune — M118 déjà livré, pattern `svg_to_tailwind.py` disponible**
-
-**Contexte :** Actuellement, un ZIP React uploadé est servi tel quel depuis `dist/` (wrapper HTML autour du build compilé, non éditable). Cette mission ajoute un chemin parallèle : **transpilation LLM du code source TSX → HTML5 + Tailwind vanilla**, directement exploitable dans le FRD Editor comme n'importe quel template.
-
-Le fichier `dist/index.html` est du React compilé : opaque, non éditable. Le code source `App.tsx` contient l'intention — composants nommés, hiérarchie sémantique, classes Tailwind réelles. C'est ce source qu'on traduit.
-
-Ce n'est pas une transpilation — c'est une **traduction d'intention** : on garde la hiérarchie et le design system, on efface le framework.
-
-#### Livrable A — Nouveau module `react_to_tailwind.py` (Claude)
-
-Fichier : `Backend/Prod/retro_genome/react_to_tailwind.py`
-
-Algorithme :
-```
-1. Dé-zipper le bundle en mémoire (zipfile)
-2. Identifier les fichiers de "surface" prioritaires :
-   - App.tsx / App.jsx / page.tsx (Next.js)
-   - Index entry points
-   - Les composants référencés dans App (1 niveau)
-3. Extraction & nettoyage JSX :
-   - Retirer les imports React, hooks, useState, useEffect
-   - Retirer les annotations TypeScript (:string, <T>, interface...)
-   - Garder l'arbre JSX et les classes Tailwind existantes
-4. Prompt LLM :
-   "Convertis ce JSX nettoyé en HTML5 sémantique vanilla.
-    Garde les classes Tailwind telles quelles.
-    Transforme les composants en leur équivalent HTML.
-    Résultat : document HTML complet autonome."
-5. Sauvegarder dans static/templates/{safe_name}.html
-```
-
-Contraintes :
-- Si le ZIP contient déjà des classes Tailwind → les conserver (pas de réécriture)
-- Si le ZIP utilise CSS Modules / styled-components → extraire les styles en `<style>` inline
-- Taille max par appel LLM : tronquer à 6000 tokens si nécessaire (prendre App + 2 composants max)
-
-#### Livrable B — Nouvelle route dans `routes.py` (Claude)
-
-```python
-POST /api/retro-genome/generate-from-zip
-Body: { "import_id": str }
-
-→ Lit le ZIP depuis index.json + file_path (créé par /api/import/upload)
-→ Appelle react_to_tailwind.convert()
-→ Sauvegarde dans static/templates/{safe_name}.html
-→ Retourne { "template_name": str, "status": "ok" }
-```
-
-#### Livrable C — Feedback (même pattern que M118)
-
-Réutiliser le mécanisme de polling/job_id développé en M118. Pas de duplication — extraire en helper partagé si besoin.
-
-#### Ce que GEMINI fera ensuite (M120)
-
-Connecter `FrdIntent.generateTailwind()` pour détecter le type de l'import (`svg` vs `zip`/`jsx`) et appeler la bonne route. Unifier l'indicateur de chargement Sullivan.
-
-**Fichiers à créer/modifier :**
-- `Backend/Prod/retro_genome/react_to_tailwind.py` **[NEW]**
-- `Backend/Prod/retro_genome/routes.py` — ajout route `generate-from-zip` **[MODIFY]**
-
-**Note d'architecture :** Les deux modules M118 (`svg_to_tailwind.py`) et M119 (`react_to_tailwind.py`) partagent le même pattern :
-```
-Source brute → Extraction sémantique → LLM → static/templates/ → FRD Editor
-```
-À terme ils pourraient être unifiés dans un `converter_factory.py`.
-
-#### Livrable D — Intégration dans `run_conversion()` (routes.py)
-
-Le chemin actuel (`dist/index.html` détecté → wrapper HTML direct) reste intact comme fallback rapide.
-Ajouter une branche : si le ZIP contient `src/App.tsx` ou `src/app/page.tsx` → appeler `react_to_tailwind.convert()` au lieu du wrapper.
-
-```python
-# Dans run_conversion() — après dézippage en mémoire
-if has_source_tsx(zip_namelist):
-    html = react_to_tailwind.convert(zip_bytes, zip_name)
-    # → sauvegarde + job done
-elif has_dist(zip_namelist):
-    # chemin actuel — wrapper dist/
-    ...
-```
-
-**Critères de sortie :**
-- [ ] `POST /api/retro-genome/generate-from-zip` avec `import_id` d'un ZIP React contenant `src/` → retourne `{ template_name, status }`
-- [ ] Le fichier `.html` généré est dans `static/templates/` et chargeable par `GET /api/frd/file?name=...`
-- [ ] Les classes Tailwind du React source sont **préservées** (pas réécrites)
-- [ ] Les imports React / TypeScript sont **absents** du HTML généré
-- [ ] Fonctionne sur un ZIP Next.js standard (App Router ou Pages Router)
-- [ ] ZIP sans source (dist-only) → fallback wrapper silencieux, pas d'erreur
-- [ ] Sullivan affiche un message de progression pendant la conversion LLM (pattern M118)
+**STATUS: ✅ LIVRÉ** — archivée dans ROADMAP_ACHIEVED.md
 
 ---
+
 
 ## Features prioritaires
 

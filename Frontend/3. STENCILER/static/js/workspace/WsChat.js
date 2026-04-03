@@ -160,37 +160,77 @@ class WsChat {
         this.appendBubble(msg, 'user');
         this.inputEl.value = '';
         
-        // --- SULLIVAN API (Mission 142: Screen Context) ---
+        // --- SULLIVAN API (Mission 142 + 152: Full Canvas Context) ---
         let screen_html = null;
+        const canvas_screens = [];
+
         const _getIframeHtml = async (iframe) => {
             if (!iframe) return null;
+            if (iframe._lastSullivanHtml) return iframe._lastSullivanHtml; // Sullivan a déjà édité
             if (iframe.srcdoc) return iframe.srcdoc;
             if (iframe.src) {
                 try { return await (await fetch(iframe.src)).text(); } catch(_) {}
             }
             return null;
         };
-        // Priorité 1 : mode aperçu (preview iframe)
+
+        // 1. Écran Actif (Priorité 1: preview, Priorité 2: canvas)
         const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
         if (previewIframe) {
             screen_html = await _getIframeHtml(previewIframe);
         }
-        // Priorité 2 : screen actif dans le canvas
         if (!screen_html && window.wsCanvas?.activeScreenId) {
             const shell = document.getElementById(window.wsCanvas.activeScreenId);
             screen_html = await _getIframeHtml(shell?.querySelector('iframe'));
         }
 
+        // 2. Autres Écrans du Canvas (Mission 152)
+        const shells = document.querySelectorAll('.ws-screen-shell');
+        for (const shell of shells) {
+            const id = shell.getAttribute('id');
+            if (id === window.wsCanvas?.activeScreenId) continue; // Déjà dans screen_html
+            
+            const title = shell.querySelector('.ws-screen-title')?.textContent || id;
+            const iframe = shell.querySelector('iframe');
+            const html = await _getIframeHtml(iframe);
+            if (html) canvas_screens.push({ id, title, html });
+        }
+
+        // 3. Élément sélectionné (M154) — focus précis sur l'organe courant
+        let selected_element = null;
+        if (window.wsInspect?.currentSelector) {
+            const selector = window.wsInspect.currentSelector;
+            const previewDoc = document.querySelector('#ws-preview-frame-container iframe')?.contentDocument;
+            const canvasDoc = window.wsCanvas?.activeScreenId
+                ? document.getElementById(window.wsCanvas.activeScreenId)?.querySelector('iframe')?.contentDocument
+                : null;
+            const doc = previewDoc || canvasDoc;
+            if (doc) {
+                try {
+                    const el = doc.querySelector(selector);
+                    if (el) {
+                        selected_element = {
+                            selector,
+                            tag: el.tagName.toLowerCase(),
+                            html: el.outerHTML.slice(0, 2000)
+                        };
+                    }
+                } catch(_) {}
+            }
+        }
+
         const pending = this._appendTransient("Je traite votre demande en mode " + this.currentMode + "...");
-        
+
         try {
             const res = await fetch('/api/sullivan/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: msg, 
+                body: JSON.stringify({
+                    message: msg,
                     mode: this.currentMode,
-                    screen_html: screen_html 
+                    screen_html: screen_html,
+                    canvas_screens: canvas_screens,
+                    selected_element: selected_element
                 })
             });
             const data = await res.json();
@@ -204,8 +244,8 @@ class WsChat {
 
             // Mission 142: Apply HTML modification if returned
             console.log('[WsChat] response html len:', data.html?.length, '| activeScreenId:', window.wsCanvas?.activeScreenId);
-            if (data.html && window.wsCanvas) {
-                window.wsCanvas.updateActiveScreenHtml(data.html);
+            if (data.html && window.wsPreview) {
+                window.wsPreview.updateActiveScreenHtml(data.html);
             }
         } catch (e) {
             console.error("WsChat: send failed", e);

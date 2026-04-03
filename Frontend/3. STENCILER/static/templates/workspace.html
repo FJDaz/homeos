@@ -51,6 +51,10 @@
         </div>
         
         <div class="flex items-center space-x-3">
+            <!-- Undo last action (Sullivan / Inspect) -->
+            <button onclick="window.wsInspect?.undo()" class="px-3 py-1.5 border border-slate-200 rounded-custom text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-homeos-green hover:border-homeos-green transition-all" title="Défaire la dernière action Sullivan (Ctrl+Z)">
+                undo
+            </button>
             <!-- Save active screen -->
             <button id="ws-btn-save" onclick="window.wsCanvas?.saveActiveScreen(this)" class="px-4 py-1.5 border border-slate-200 rounded-custom text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-homeos-green hover:border-homeos-green transition-all">
                 save
@@ -341,6 +345,11 @@
 
     <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <!-- Architecture Hexagonale Workspace (Mission 156) -->
+    <script src="/static/js/workspace/WsAudit.js"></script>
+    <script src="/static/js/workspace/WsForge.js"></script>
+    <script src="/static/js/workspace/WsPreview.js"></script>
+    <script src="/static/js/workspace/WsScreenShell.js"></script>
     <script src="/static/js/workspace/WsCanvas.js"></script>
     <script src="/static/js/workspace/WsChat.js"></script>
     <script src="/static/js/workspace/ws_font_manager.js"></script>

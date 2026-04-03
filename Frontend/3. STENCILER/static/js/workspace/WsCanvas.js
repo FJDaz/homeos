@@ -1,3 +1,6 @@
+/**
+ * WsCanvas.js — State Machine & Interaction Engine (Mission 156 Hexagonal)
+ */
 class WsCanvas {
     constructor(svgId, wrapperId) {
         this.svg = document.getElementById(svgId);
@@ -18,7 +21,7 @@ class WsCanvas {
         
         // Draggable screens
         this.selectedScreen = null;
-        this.activeScreenId = null; // ID for highlighting
+        this.activeScreenId = null; 
         this.offsetDragX = 0;
         this.offsetDragY = 0;
 
@@ -26,45 +29,30 @@ class WsCanvas {
     }
 
     init() {
-        // --- ZOOM (Wheel) ---
         this.wrapper.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
-
-        // --- MOUSE EVENTS ---
         this.wrapper.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.wrapper.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
         window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         window.addEventListener('mouseup', () => this.handleMouseUp());
 
-        // --- KEYBOARD SHORTCUTS ---
         window.addEventListener('keydown', (e) => { 
             if (e.code === 'Space') this.isSpacePressed = true; 
-            if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
-            
+            if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) return;
             const modeMap = { 'KeyV': 'select', 'KeyH': 'drag', 'KeyI': 'place-img', 'KeyF': 'frame' };
             if (modeMap[e.code]) this.setMode(modeMap[e.code]);
             if (e.code === 'Digit0') this.resetView();
         });
         window.addEventListener('keyup', (e) => { if (e.code === 'Space') this.isSpacePressed = false; });
 
-        // --- TOOLBAR BUTTONS ---
-        document.querySelectorAll('.ws-tool-btn').forEach(btn => {
-            btn.onclick = () => this.setMode(btn.dataset.mode);
-        });
-
         this.updateTransform();
     }
 
     setMode(mode) {
         this.activeMode = mode;
-        
-        // Update UI
         document.querySelectorAll('.ws-tool-btn').forEach(btn => {
-            if (btn.dataset.mode === mode) btn.classList.add('active-tool');
-            else btn.classList.remove('active-tool');
+            btn.classList.toggle('active-tool', btn.dataset.mode === mode);
         });
-
-        // Update cursor
-        this._notifyToolbar(mode);
+        window.wsAudit?.notifyToolbar(null, mode, this.svg);
     }
 
     updateTransform() {
@@ -74,35 +62,21 @@ class WsCanvas {
     }
 
     handleWheel(e) {
-        // Guard: si on scrolle dans un panneau UI (panels, chat, toolbar…), ne pas zoomer
-        if (e.target.closest('#ws-left-panels, #ws-chat-history, .glass-card')) {
-            return; // Laisser le scroll natif se faire normalement
-        }
-
+        if (e.target.closest('#ws-left-panels, #ws-chat-history, .glass-card')) return;
         e.preventDefault();
-        const zoomFactor = 1.1;
         const oldScale = this.scale;
-        
-        if (e.deltaY < 0) this.scale *= zoomFactor;
-        else this.scale /= zoomFactor;
-        
-        this.scale = Math.min(Math.max(0.05, this.scale), 8);
-
+        this.scale = Math.min(Math.max(0.05, (e.deltaY < 0 ? this.scale * 1.1 : this.scale / 1.1)), 8);
         const rect = this.svg.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
-
         const worldX = (mouseX - this.viewX) / oldScale;
         const worldY = (mouseY - this.viewY) / oldScale;
-
         this.viewX = mouseX - worldX * this.scale;
         this.viewY = mouseY - worldY * this.scale;
-
         this.updateTransform();
     }
 
     handleMouseDown(e) {
-        // PAN case (Space or specific Tool)
         if (this.isSpacePressed || e.button === 1 || this.activeMode === 'drag') {
             this.isPanning = true;
             this.startX = e.clientX - this.viewX;
@@ -111,28 +85,18 @@ class WsCanvas {
             return;
         }
 
-        // SELECT case
         const shell = e.target.closest('.ws-screen-shell');
-
         if (shell) {
             this.selectScreen(shell);
-
             if (this.activeMode === 'select') {
                 const rect = this.svg.getBoundingClientRect();
-                
-                // --- Robust Transform Parsing ---
                 const transformStr = shell.getAttribute('transform') || '';
                 let tx = 0, ty = 0;
                 if (transformStr.includes('matrix')) {
                     const vals = transformStr.match(/matrix\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
                     if (vals && vals.length >= 6) { tx = vals[4]; ty = vals[5]; }
-                } else if (transformStr.includes('translate')) {
-                    const vals = transformStr.match(/translate\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
-                    if (vals) { tx = vals[0]; ty = vals[1] || 0; }
                 }
-
                 const worldY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
-                
                 if (worldY >= 0 && worldY <= 40) {
                     this.selectedScreen = shell;
                     this.selectedScreen.classList.add('ws-dragging');
@@ -140,25 +104,17 @@ class WsCanvas {
                     this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
                 }
             }
-        } else {
-            // Clicked on background: deselect only if click is inside the SVG canvas
-            if (this.svg.contains(e.target)) this.deselectAll();
+        } else if (this.svg.contains(e.target)) {
+            this.deselectAll();
         }
     }
 
     handleDoubleClick(e) {
-        console.log("🖱️ [WsCanvas] Double-click detected on:", e.target);
         const shell = e.target.closest('.ws-screen-shell');
         if (shell) {
-            console.log("🖱️ [WsCanvas] Shell found for double-click:", shell.getAttribute('id'));
-            e.preventDefault();
-            e.stopPropagation();
-            // Entrer dans l'écran (Mission 143-bis)
+            e.preventDefault(); e.stopPropagation();
             this.selectScreen(shell);
-            const shellId = shell.getAttribute('id');
-            if (window.enterPreviewMode) window.enterPreviewMode(shellId);
-        } else {
-            console.log("🖱️ [WsCanvas] No shell found in double-click path.");
+            window.wsPreview?.enterPreviewMode(shell.id, 'construct');
         }
     }
 
@@ -169,7 +125,6 @@ class WsCanvas {
             this.updateTransform();
             return;
         }
-
         if (this.selectedScreen) {
             const rect = this.svg.getBoundingClientRect();
             const x = (e.clientX - rect.left - this.viewX) / this.scale - this.offsetDragX;
@@ -184,22 +139,16 @@ class WsCanvas {
             this.selectedScreen.classList.remove('ws-dragging');
             this.selectedScreen = null;
         }
-        this._notifyToolbar(this.activeMode);
+        window.wsAudit?.notifyToolbar(null, this.activeMode, this.svg);
     }
 
     selectScreen(shell) {
         this.deselectAll();
-        shell.classList.remove('ws-hover');
         shell.classList.add('ws-selected');
-        
-        // Z-Index: Bring to front (screens layer)
-        this.content.appendChild(shell);
-
-        this.activeScreenId = shell.getAttribute('id');
-        
-        // Update Audit UX panel
-        this._updateAuditPanel(shell);
-        this._notifyToolbar('select', shell);
+        this.content.appendChild(shell); // Bring to front
+        this.activeScreenId = shell.id;
+        window.wsAudit?.updatePanel(shell);
+        window.wsAudit?.notifyToolbar('select', this.activeMode, this.svg, shell.id);
     }
 
     deselectAll() {
@@ -207,17 +156,14 @@ class WsCanvas {
             s.classList.remove('ws-selected', 'ws-hover', 'ws-dragging');
         });
         this.activeScreenId = null;
-        this._notifyToolbar(this.activeMode);
+        window.wsAudit?.notifyToolbar(null, this.activeMode, this.svg);
     }
 
     getActiveScreenHtml() {
         if (!this.activeScreenId) return null;
         const shell = document.getElementById(this.activeScreenId);
-        if (!shell) return null;
-        
-        const iframe = shell.querySelector('iframe');
+        const iframe = shell?.querySelector('iframe');
         if (!iframe) return null;
-        
         return {
             src: iframe.src,
             srcdoc: iframe.srcdoc,
@@ -226,9 +172,7 @@ class WsCanvas {
     }
 
     resetView() {
-        this.scale = 1.0;
-        this.viewX = 0;
-        this.viewY = 0;
+        this.scale = 1.0; this.viewX = 0; this.viewY = 0;
         this.updateTransform();
     }
 
@@ -237,411 +181,18 @@ class WsCanvas {
         this.updateTransform();
     }
 
-    // --- PRIVATE HELPERS (Mission 149) ---
-
-    _updateAuditPanel(shell) {
-        const auditContent = document.getElementById('ws-audit-content');
-        if (!auditContent) return;
-
-        const title = shell.querySelector('.ws-screen-title').textContent;
-        auditContent.innerHTML = `
-            <div class="flex items-center gap-2 mb-4">
-                <span class="text-[10px] font-bold text-homeos-green uppercase">Screen active</span>
-                <span class="text-[11px] text-slate-800 font-bold">${title}</span>
-            </div>
-            <div class="space-y-3">
-                <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg">
-                    <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Intent detection</div>
-                    <div class="text-[11px] text-slate-600">Interface d'édition détectée. Structure sémantique valide.</div>
-                </div>
-            </div>
-        `;
-    }
-
-    _notifyToolbar(state, shell = null) {
-        // 1. Update SVG Cursor
-        const cursorMap = { 
-            'select': 'default', 
-            'drag': 'grab', 
-            'frame': 'crosshair', 
-            'place-img': 'copy' 
-        };
-        
-        let cursor = cursorMap[state] || 'default';
-        if (state === 'drag' && this.isPanning) cursor = 'grabbing';
-        if (state === 'select' && this.selectedScreen) cursor = 'grabbing';
-        
-        this.svg.style.cursor = cursor;
-
-        // 2. Dispatch event for global UI (optional)
-        const event = new CustomEvent('ws-canvas-state', { detail: { state, shellId: shell?.id } });
-        window.dispatchEvent(event);
-    }
-
     async addScreen(item) {
-        const id = `shell-${item.id}`;
-        if (document.getElementById(id)) {
-            const existing = document.getElementById(id);
-            this.selectScreen(existing);
+        if (document.getElementById(`shell-${item.id}`)) {
+            this.selectScreen(document.getElementById(`shell-${item.id}`));
             return;
         }
-
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute('id', id);
-        g.setAttribute('class', 'ws-screen-shell');
-
-        // Hover events (Mission 149)
-        g.addEventListener('mouseenter', () => {
-            if (!g.classList.contains('ws-selected')) g.classList.add('ws-hover');
-        });
-        g.addEventListener('mouseleave', () => g.classList.remove('ws-hover'));
-        
-        // Dimensions : desktop (HTML direct uploadé) vs mobile (SVG/forged)
-        const isHtml = item.type === 'html' || (item.html_template && item.elements_count === 0);
-        const SW = isHtml ? 1200 : 400;
-        const SH = isHtml ? 800 : 632;
-
-        // Positioning
-        const rect = this.svg.getBoundingClientRect();
-        const centerX = (rect.width/2 - SW/2 - this.viewX) / this.scale;
-        const centerY = (rect.height/2 - SH/2 - this.viewY) / this.scale;
-        g.setAttribute('transform', `matrix(1 0 0 1 ${centerX} ${centerY})`);
-
-        // Main Shell Background
-        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        bg.setAttribute('width', String(SW));
-        bg.setAttribute('height', String(SH));
-        bg.setAttribute('rx', '20');
-        bg.setAttribute('fill', '#fff');
-        bg.setAttribute('stroke', '#f0f0f0');
-        bg.setAttribute('stroke-width', '1');
-        bg.setAttribute('class', 'ws-screen-bg');
-        
-        // Header
-        const header = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        header.setAttribute('width', String(SW));
-        header.setAttribute('height', '40');
-        header.setAttribute('rx', '20');
-        header.setAttribute('class', 'ws-screen-header');
-        header.setAttribute('fill', 'transparent');
-        header.setAttribute('pointer-events', 'all');
-        
-        // Title
-        const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        title.setAttribute('x', '20');
-        title.setAttribute('y', '25');
-        title.setAttribute('class', 'ws-screen-title');
-        title.textContent = (item.name || 'Sans titre').toLowerCase();
-
-        // Mission 119: Origin Badge
-        if (item.origin) {
-            const badgeFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-            // Position after title (rough estimate)
-            const titleWidth = (item.name || 'Sans titre').length * 7; 
-            badgeFo.setAttribute('x', String(25 + titleWidth));
-            badgeFo.setAttribute('y', '12');
-            badgeFo.setAttribute('width', '300');
-            badgeFo.setAttribute('height', '20');
-            
-            const badgeDiv = document.createElement('div');
-            if (item.origin === 'generated') {
-                badgeDiv.innerHTML = `<span style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">Tailwind généré — peut différer du rendu exact</span>`;
-            } else if (item.origin === 'compiled') {
-                badgeDiv.innerHTML = `<span style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">build compilé</span>`;
-            }
-            badgeFo.appendChild(badgeDiv);
-            g.appendChild(badgeFo);
-        }
-
-        // Close btn (✕)
-        const closeBtn = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        closeBtn.setAttribute('cx', String(SW - 20));
-        closeBtn.setAttribute('cy', '20');
-        closeBtn.setAttribute('r', '8');
-        closeBtn.setAttribute('class', 'ws-btn-close');
-        closeBtn.setAttribute('pointer-events', 'all');
-        closeBtn.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            g.remove();
-        });
-        g.appendChild(closeBtn);
-
-        // Mission 146/147: Manifest detection
-        try {
-            const res = await fetch(`/api/frd/manifest?import_id=${item.id}`);
-            const data = await res.json();
-            if (data.exists) {
-                g.dataset.manifest = JSON.stringify(data.manifest);
-                g.dataset.hasManifest = "true";
-                wireFo.style.display = 'block';
-            } else {
-                g.dataset.hasManifest = "false";
-                // Badge Cadrage Requis (Yellow/Warm)
-                const badgeFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-                badgeFo.setAttribute('x', '20');
-                badgeFo.setAttribute('y', String(SH - 35));
-                badgeFo.setAttribute('width', '180');
-                badgeFo.setAttribute('height', '30');
-                const badgeDiv = document.createElement('div');
-                badgeDiv.innerHTML = `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; display:flex; align-items:center; gap:6px; width:fit-content;">
-                    <span style="width:6px; height:6px; border-radius:50%; background:#f97316;"></span>
-                    cadrage requis
-                </span>`;
-                badgeFo.appendChild(badgeDiv);
-                g.appendChild(badgeFo);
-            }
-        } catch (err) {
-            console.warn("M146: Manifest check failed", err);
-        }
-
-        // iFrame Container
-        const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        fo.setAttribute('x', '0');
-        fo.setAttribute('y', '40');
-        fo.setAttribute('width', String(SW));
-        fo.setAttribute('height', String(SH - 40));
-        fo.setAttribute('pointer-events', 'none');
-        
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.borderRadius = '0 0 20px 20px';
-        iframe.style.background = '#fff';
-        iframe.style.pointerEvents = 'none'; // Avoid iframe stealing mouse events for drag
-        
-        // Font injection (Mission 144)
-        iframe.addEventListener('load', () => {
-            if (window.wsFontManager) window.wsFontManager.injectStyles();
-        });
-        
-        if (item.html_template) {
-            iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
-        }
-
-        fo.appendChild(iframe);
-
-        // Preview btn (Mission 140 — Fixed in header y=8)
-        const previewFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        previewFo.setAttribute('x', String(SW - 240));
-        previewFo.setAttribute('y', '8');
-        previewFo.setAttribute('width', '90');
-        previewFo.setAttribute('height', '24');
-        previewFo.setAttribute('pointer-events', 'all');
-        const previewDiv = document.createElement('div');
-        previewDiv.className = "flex items-center space-x-2 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors";
-        previewDiv.style.cssText = 'height:100%;';
-        previewDiv.innerHTML = `
-            <span style="font-size:10px; font-weight:600; background:rgba(0,0,0,0.03); padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.02em;">Aperçu</span>
-        `;
-        previewDiv.addEventListener('mousedown', (e) => e.stopPropagation());
-        previewDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
+        if (window.WsScreenShell) {
+            const g = await window.WsScreenShell.build(item, this);
+            this.content.appendChild(g);
             this.selectScreen(g);
-            if (window.enterPreviewMode) window.enterPreviewMode(id, 'construct');
-        });
-        previewFo.appendChild(previewDiv);
-
-        // Wire btn (Mission 150)
-        const wireFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        wireFo.setAttribute('x', String(SW - 340));
-        wireFo.setAttribute('y', '8');
-        wireFo.setAttribute('width', '90');
-        wireFo.setAttribute('height', '24');
-        wireFo.setAttribute('pointer-events', 'all');
-        wireFo.style.display = 'none'; // Will show if manifest exists
-
-        const wireDiv = document.createElement('div');
-        wireDiv.className = "flex items-center space-x-2 text-homeos-green cursor-pointer hover:opacity-80 transition-opacity";
-        wireDiv.style.cssText = 'height:100%;';
-        wireDiv.innerHTML = `
-            <span style="font-size:10px; font-weight:800; border:1px solid #A3CD54; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em;">Wire</span>
-        `;
-        wireDiv.addEventListener('mousedown', (e) => e.stopPropagation());
-        wireDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.selectScreen(g);
-            if (window.enterPreviewMode) window.enterPreviewMode(id, 'wire');
-        });
-        wireFo.appendChild(wireDiv);
-
-        // Save btn (Mission 140 — Fixed in header y=8)
-        const saveFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        saveFo.setAttribute('x', String(SW - 140));
-        saveFo.setAttribute('y', '8');
-        saveFo.setAttribute('width', '55');
-        saveFo.setAttribute('height', '24');
-        saveFo.setAttribute('pointer-events', 'all');
-        const saveBtn = document.createElement('button');
-        saveBtn.style.cssText = "width:100%; height:100%; line-height:1; background:#8cc63f; color:#fff; border:none; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;";
-        saveBtn.innerText = "SAVE";
-        saveBtn.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-        });
-        saveBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            saveBtn.innerText = '...'; saveBtn.style.opacity = '0.6';
-            try {
-                const iframeEl = g.querySelector('iframe');
-                // Serialize live DOM — srcdoc/fetch give original file, not modified content
-                const html = iframeEl?.contentDocument?.documentElement?.outerHTML || iframeEl?.srcdoc || '';
-                const name = item.html_template || (item.name + '.html');
-                await fetch('/api/frd/file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, content: html, force: true })
-                });
-                saveBtn.innerText = '✓';
-                setTimeout(() => { saveBtn.innerText = 'SAVE'; saveBtn.style.opacity = '1'; }, 1500);
-            } catch (err) {
-                console.error("❌ [WsCanvas] Save failed", err);
-                saveBtn.innerText = 'ERR'; saveBtn.style.opacity = '1';
-            }
-        });
-        saveFo.appendChild(saveBtn);
-
-        // Download btn (Mission 144)
-        const downloadFo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        downloadFo.setAttribute('x', String(SW - 75));
-        downloadFo.setAttribute('y', '8');
-        downloadFo.setAttribute('width', '24');
-        downloadFo.setAttribute('height', '24');
-        downloadFo.setAttribute('pointer-events', 'all');
-        const dlBtn = document.createElement('button');
-        dlBtn.className = "flex items-center justify-center text-slate-400 hover:text-homeos-green transition-colors";
-        dlBtn.style.cssText = "width:100%; height:100%; background:none; border:none; cursor:pointer;";
-        dlBtn.innerHTML = `
-            <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-        `;
-        dlBtn.title = "Exporter en ZIP (HTML + Fontes)";
-        dlBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-        dlBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.location.href = `/api/frd/export-zip?import_id=${encodeURIComponent(item.id)}`;
-        });
-        downloadFo.appendChild(dlBtn);
-
-        g.appendChild(bg);
-        g.appendChild(header);
-        g.appendChild(title);
-        g.appendChild(previewFo);
-        g.appendChild(wireFo);
-        g.appendChild(saveFo);
-        g.appendChild(downloadFo);
-        g.appendChild(closeBtn);
-        g.appendChild(fo);
-
-        // Overlay forge — DOM createElement (innerHTML sur foreignObject = non fiable)
-        if (!item.html_template) {
-            const forgeOverlay = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-            forgeOverlay.setAttribute('x', '100');
-            forgeOverlay.setAttribute('y', '260');
-            forgeOverlay.setAttribute('width', '200');
-            forgeOverlay.setAttribute('height', '80');
-            forgeOverlay.setAttribute('class', 'ws-forge-overlay');
-
-            const wrap = document.createElement('div');
-            wrap.style.cssText = 'text-align:center;font-family:"Source Sans 3",sans-serif;';
-
-            const nameLabel = document.createElement('div');
-            nameLabel.style.cssText = 'font-size:10px;color:#94a3b8;margin-bottom:10px;';
-            nameLabel.textContent = (item.name || '').toLowerCase();
-
-            const forgeBtn = document.createElement('button');
-            forgeBtn.id = `forge-btn-${item.id}`;
-            forgeBtn.style.cssText = 'background:#A3CD54;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-size:11px;cursor:pointer;text-transform:lowercase;';
-            forgeBtn.textContent = 'forger le rendu';
-
-            const statusEl = document.createElement('div');
-            statusEl.id = `forge-status-${item.id}`;
-            statusEl.style.cssText = 'font-size:9px;color:#94a3b8;margin-top:6px;';
-
-            wrap.appendChild(nameLabel);
-            wrap.appendChild(forgeBtn);
-            wrap.appendChild(statusEl);
-            forgeOverlay.appendChild(wrap);
-
-            // Listener direct sur le bouton HTML — contourne la frontière SVG/HTML
-            forgeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            forgeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.forgeScreen(item.id, g, forgeOverlay);
-            });
-
-            g.appendChild(forgeOverlay);
-        }
-
-        this.content.appendChild(g);
-        this.selectScreen(g);
-    }
-
-    updateActiveScreenHtml(html) {
-        // Toujours sync le canvas iframe pour que Save lise le contenu modifié
-        if (this.activeScreenId) {
-            const shell = document.getElementById(this.activeScreenId);
-            const canvasIframe = shell?.querySelector('iframe');
-            if (canvasIframe) canvasIframe.srcdoc = html;
-        }
-        // Priorité 1 : iframe preview fullscreen
-        const previewIframe = document.querySelector('#ws-preview-frame-container iframe');
-        if (previewIframe) { previewIframe.srcdoc = html; return; }
-    }
-
-    async forgeScreen(importId, shell, overlay) {
-        const btn = overlay.querySelector(`#forge-btn-${importId}`);
-        const statusEl = overlay.querySelector(`#forge-status-${importId}`);
-        if (btn) { btn.disabled = true; btn.textContent = 'forge en cours...'; }
-        if (statusEl) statusEl.textContent = 'analyse sémantique...';
-
-        const chat = window.wsChat;
-        const say = (msg) => { if (chat) chat.appendBubble(msg, 'sullivan'); };
-
-        say('forge démarrée — analyse sémantique en cours...');
-
-        try {
-            const res = await fetch('/api/retro-genome/generate-from-import', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ import_id: importId })
-            });
-            if (!res.ok) throw new Error(`${res.status}`);
-            const { job_id: jobId } = await res.json();
-
-            say('génération tailwind en cours...');
-            let pollCount = 0;
-            const MESSAGES = ['structuration du layout...', 'composants en cours...', 'presque terminé...'];
-
-            const poll = setInterval(async () => {
-                try {
-                    const jr = await fetch(`/api/retro-genome/svg-job/${jobId}`);
-                    const job = await jr.json();
-                    if (job.status === 'done') {
-                        clearInterval(poll);
-                        overlay.remove();
-                        const iframe = shell.querySelector('iframe');
-                        if (iframe) iframe.src = `/api/frd/file?name=${encodeURIComponent(job.template_name)}&raw=1`;
-                        say('✓ rendu forgé et chargé.');
-                        if (statusEl) statusEl.textContent = '';
-                    } else if (job.status === 'failed') {
-                        clearInterval(poll);
-                        if (statusEl) statusEl.textContent = `échec : ${job.error}`;
-                        if (btn) { btn.disabled = false; btn.textContent = 'réessayer'; }
-                        say(`forge échouée : ${job.error}`);
-                    } else {
-                        pollCount++;
-                        const msg = MESSAGES[Math.min(pollCount - 1, MESSAGES.length - 1)];
-                        if (statusEl) statusEl.textContent = msg;
-                        if (pollCount <= MESSAGES.length) say(msg);
-                    }
-                } catch(_) { clearInterval(poll); }
-            }, 4000);
-
-        } catch(err) {
-            if (btn) { btn.disabled = false; btn.textContent = 'réessayer'; }
-            if (statusEl) statusEl.textContent = `erreur : ${err.message}`;
-            say(`erreur forge : ${err.message}`);
+            return g;
         }
     }
 }
+
+window.WsCanvas = WsCanvas;

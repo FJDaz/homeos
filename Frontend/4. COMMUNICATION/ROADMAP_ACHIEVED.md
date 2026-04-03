@@ -5300,3 +5300,112 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 - Headers panels cliquables sur toute leur surface (`onclick` sur la div entière)
 - Libellés badges repassés à l'horizontale (suppression de `vertical-text`)
 
+
+## CR Mission 144 — Export projet + @font-face dans les screens
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Route `GET /api/frd/export-zip?import_id=` : génère ZIP avec HTML + fontes WOFF2 injectées
+- Bouton téléchargement (↓) dans le bandeau de chaque screen canvas
+- WsFontManager.js : injection des `@font-face` dans les iframes à l'ouverture
+
+## CR Mission 145 — Renommage UI : BRS → Cadrage + tabs renommés
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Renommage complet BRS → Cadrage dans bootstrap.js + workspace.html
+- Pipeline 4 onglets : Cadrage / Backend / Frontend / Déploiement
+- Aucune occurrence "BRS" ou "Brainstorm" visible dans l'UI
+
+## CR Mission 146 — Détection manifeste → routage Wire ou Cadrage
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Route `GET /api/frd/manifest?import_id=` : détecte `projects/{active}/manifests/manifest_{id}.json`
+- Retourne `{ exists: true, manifest: {...} }` ou `{ exists: false }`
+- WsCanvas.js : badge "cadrage requis" si pas de manifeste, bouton Wire si manifeste présent
+
+## CR Mission 148 — Bridge @font-face : fontes système → iframes screens
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Route `POST /api/sullivan/generate-webfont { font_name }` : scan macOS Fonts + génère WOFF2
+- Cache d'indexation système pour supprimer latence de scan
+- applyTypo() : `setProperty('font-family', font, 'important')` via currentSelector (scope graft)
+- Injection `@font-face` directe dans `iframe.contentDocument` (pas via postMessage)
+- Override Tailwind descendants via `<style id="ws-typo-override">` avec `selector, selector * { !important }`
+
+## CR Mission 151 — Auto-génération manifeste à l'import HTML
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- `import_upload()` : appel ManifestInferer + ArchetypeDetector après écriture HTML
+- Génère `projects/{active}/manifests/manifest_{id}.json` avec `components[]` + `archetype`
+- Try/except silencieux : un échec Playwright ne bloque jamais l'upload
+- Wire overlay lit `manifest.components` (pas `manifest.screens`)
+
+## CR Mission 152 — Sullivan context complet : tous les screens canvas + DESIGN.md
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- WsChat.js : collecte `canvas_screens[]` depuis tous les `.ws-screen-shell` sauf l'actif
+- server_v3.py : `max_tokens=16384` (fix blank screen War Room 23KB)
+- Injection DESIGN.md (scan `get_active_project_path()/DESIGN.md`, 4000 chars max)
+- Sullivan reçoit : screen actif (complet) + autres screens (6000 chars chacun, max 3) + DESIGN.md
+
+## CR Mission 154 — Sullivan : focus élément sélectionné dans le prompt
+**DATE: 2026-04-03 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- WsChat.js : capture `wsInspect.currentSelector` → lit `el.outerHTML` depuis `iframe.contentDocument`
+- Envoie `selected_element: { selector, tag, html }` dans la requête `/api/sullivan/chat`
+- server_v3.py : `SullivanChatRequest.selected_element` + bloc `selected_block` injecté avant `context_html_block`
+- Sans sélection → `selected_block` vide, comportement inchangé
+
+## CR Mission 130 — Mode Inspect In-Preview & Monaco Popover
+**DATE: 2026-04-01 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Injection inspecteur dans l'iframe preview (highlight survol, clic → sélection)
+- Popover Monaco flottant au flanc de l'élément cliqué (bounding client rect)
+- Grafting : outerHTML modifié → remplacement propre du nœud DOM
+- Design bulle Monaco aligné HoméOS
+
+## CR Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
+**DATE: 2026-04-01 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Toolbar droite activée uniquement en mode aperçu (`enterPreviewMode`)
+- Suppression des boutons "Aperçu" redondants dans header principal
+
+## CR Mission 140 — Boutons Aperçu & Save dans le header de chaque screen canvas
+**DATE: 2026-04-01 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Bouton "Aperçu" + bouton "SAVE" dans le bandeau SVG de chaque screen
+- `enterPreviewMode(screenId)` depuis le bouton + `e.stopPropagation()` anti-drag
+- `POST /api/frd/save` avec feedback visuel opacité
+
+## CR Mission 141 — Suppression d'imports depuis le panel Screens
+**DATE: 2026-04-01 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- Bouton ✕ sur chaque import card (ws-main.js)
+- `DELETE /api/imports/{id}` en backend (server_v3.py)
+- Suppression immédiate du card + du shell canvas correspondant
+
+## CR Mission 143 — Sullivan UI Compact : 2 bulles visibles
+**DATE: 2026-04-02 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- `#ws-chat-history` : max-h réduit, overflow hidden — 2 bulles max visibles
+- WsChat.js : trim des bulles > 2 après chaque appendBubble()
+- Panel Sullivan ≤ 160px de hauteur totale
+
+## CR Mission 142 — Sullivan Actions : édition directe du screen actif
+**DATE: 2026-04-02 | ACTOR: CLAUDE (CODE DIRECT) | STATUS: ✅ LIVRÉ**
+- WsChat.js : capture screen_html (iframe srcdoc ou fetch src) → envoi à Sullivan
+- `POST /api/sullivan/chat` : Gemini reçoit HTML + génère version modifiée
+- Parsing `---EXPLANATION--- / ---HTML--- / ---END---` dans la réponse
+- WsCanvas.updateActiveScreenHtml() : applique HTML retourné sur l'iframe active
+
+## CR Mission 132 — Outils de Manipulation (Drag, Déplacer, Cadre, Place Image)
+**DATE: 2026-04-01 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Flèche de sélection : Drag d'éléments DOM dans l'iframe preview.
+- Outil Hand : Panning dans la vue.
+- Outil Cadre : Insertion de `<div>` par clic-glissé.
+- Outil Place Image : Insertion d'images via file picker.
+
+## CR Mission 133 — Undo & Color Picker Libre
+**DATE: 2026-04-01 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Pile d'historique (Undo) : Cmd+Z pour annuler les modifications DOM.
+- Outil Color Apply : Color picker TSL sémantique basé sur DESIGN.md.
+
+## CR Mission 134 — Arsenal Typo (System Fonts & Webfont Generator)
+**DATE: 2026-04-01 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Outil Texte : Création de zones de texte dans l'aperçu.
+- Sélecteur System Fonts : Accès aux polices locales (Font Access API).
+- Hook Sauvegarde : Génération automatique de @font-face via Backend.
+
+## CR Mission 156 — Refactor WsCanvas : découpe hexagonale en 5 modules
+**DATE: 2026-04-03 | ACTOR: GEMINI | STATUS: ✅ LIVRÉ**
+- Découpe de WsCanvas.js (683L → 198L).
+- Création de WsAudit.js, WsForge.js, WsPreview.js, WsScreenShell.js.
+- Fix HCI (Boucle infinie) : document.write statique sans scripts dans WsPreview.
+- Persistance Sullivan : fallback sur _lastSullivanHtml dans WsChat.

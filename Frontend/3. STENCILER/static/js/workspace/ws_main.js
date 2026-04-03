@@ -1,9 +1,13 @@
 /* ws_main.js — AetherFlow Workspace Orchestrator (Mission 127 V2) */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("🚀 ws_main: starting workspace design V2...");
+    console.log("🚀 ws_main: starting workspace design V2 (Hexagonal Architecture)...");
 
-    // 1. Initialiser le Canvas
+    // 1. Initialiser l'Architecture Hexagonale (Mission 156)
+    window.wsAudit = new WsAudit();
+    window.wsForge = new WsForge();
+    window.wsPreview = new WsPreview();
+    
     const canvas = new WsCanvas('ws-canvas', 'canvas-wrapper');
     window.wsCanvas = canvas;
 
@@ -29,19 +33,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.ws-tool-btn').forEach(btn => {
         btn.onclick = () => {
             const mode = btn.getAttribute('data-mode');
+            window.wsCanvas?.setMode(mode);
             
-            // UI Visual state
-            document.querySelectorAll('.ws-tool-btn').forEach(b => b.classList.remove('active-tool'));
-            btn.classList.add('active-tool');
-
-            // Notify Inspect engine
-            if (window.wsInspect) {
-                window.wsInspect.setMode(mode);
-                // Also notify Iframe if it exists
-                const iframe = document.querySelector('#ws-preview-frame-container iframe');
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'inspect-tool-change', mode: mode }, '*');
-                }
+            // Éventuel postMessage si l'iframe préview existe
+            const iframe = document.querySelector('#ws-preview-frame-container iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'inspect-tool-change', mode: mode }, '*');
             }
         };
     });
@@ -58,8 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const zReset = document.getElementById('btn-reset-view');
     if (zReset) zReset.onclick = () => canvas.resetView();
 
-    console.log("✅ ws_main: workspace ready");
+    console.log("✅ ws_main: workspace ready (hexagonal architecture active)");
 });
+
+// --- EXPOSITIONS GLOBALES (Bridging avec WsPreview) ---
+window.enterPreviewMode = (shellId, mode) => window.wsPreview?.enterPreviewMode(shellId, mode);
+window.exitPreviewMode = () => window.wsPreview?.exitPreviewMode();
+
 
 async function loadCurrentContext() {
     try {

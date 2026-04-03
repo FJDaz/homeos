@@ -613,13 +613,15 @@ class SullivanChatRequest(BaseModel):
     message: str
     mode: str = "construct"
     screen_html: Optional[str] = None
+    canvas_screens: Optional[list] = None  # [{ id, title, html }]
+    selected_element: Optional[dict] = None  # { selector, tag, html } — M154
 
 
 @app.post("/api/sullivan/chat")
 async def sullivan_chat(req: SullivanChatRequest):
     """
     Chat Sullivan — répond à un message utilisateur selon le mode courant.
-    Mission 142 : Support de l'édition directe du screen actif.
+    Mission 142 + 152 : Support multi-screens et Design System (DESIGN.md).
     """
     try:
         from Backend.Prod.retro_genome.routes import _get_gemini_client
@@ -635,24 +637,70 @@ async def sullivan_chat(req: SullivanChatRequest):
     }
     
     base_system = mode_context.get(req.mode, mode_context["construct"])
-    
-    # Enrichissement du contexte avec le HTML de l'écran actif
+
+    # --- MISSION 152 : DESIGN SYSTEM (DESIGN.md) ---
+    design_md_block = ""
+    try:
+        design_path = get_active_project_path() / "DESIGN.md"
+        if not design_path.exists():
+            design_path = STATIC_DIR_PATH / "templates" / "DESIGN.md"
+        if design_path.exists():
+            design_md_block = f"""
+DESIGN SYSTEM DU PROJET (RÉFÉRENCE) :
+---
+{design_path.read_text(encoding='utf-8')[:4000]}
+---
+Utilise ces tokens et ces règles pour garantir la cohérence visuelle si l'utilisateur demande une modification.
+"""
+    except Exception: pass
+
+    # --- MISSION 142 : ÉCRAN ACTIF (MODIFIABLE) ---
     context_html_block = ""
     if req.screen_html:
         context_html_block = f"""
-VOICI LE CODE SOURCE HTML DE L'ÉCRAN ACTUELLEMENT SÉLECTIONNÉ :
+CODE SOURCE HTML DE L'ÉCRAN ACTIF (MODIFIABLE) :
 ---
 {req.screen_html}
 ---
 Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
 1. Analyse son intention.
 2. Modifie le code source HTML ci-dessus pour appliquer le changement.
-3. Retourne TOUT le document HTML5 mis à jour dans le champ "html" du JSON de réponse.
-4. Explique ce que tu as fait dans le champ "explanation".
+3. Retourne TOUT le document HTML5 mis à jour dans le champ "---HTML---" de ta réponse.
+4. Explique ce que tu as fait dans le bloc "---EXPLANATION---".
+"""
+
+    # --- MISSION 154 : ÉLÉMENT SÉLECTIONNÉ (FOCUS) ---
+    selected_block = ""
+    if req.selected_element:
+        sel = req.selected_element
+        selected_block = f"""
+ÉLÉMENT ACTUELLEMENT SÉLECTIONNÉ PAR L'UTILISATEUR (selector: {sel.get('selector','?')}) :
+---
+{sel.get('html','')[:2000]}
+---
+L'utilisateur parle probablement de cet élément spécifiquement. Si tu modifies le screen, cible en priorité cet élément et ses descendants directs.
+"""
+
+    # --- MISSION 152 : AUTRES ÉCRANS DU CANVAS (LECTURE SEULE) ---
+    other_screens_block = ""
+    if req.canvas_screens:
+        parts = []
+        for s in req.canvas_screens[:3]:  # Max 3 screens supplémentaires
+            parts.append(f"=== ÉCRAN : {s.get('title','?')} (id: {s.get('id','?')}) ===\n{s.get('html','')[:6000]}")
+        if parts:
+            other_screens_block = f"""
+AUTRES ÉCRANS PRÉSENTS SUR LE CANVAS (LECTURE SEULE - RÉFÉRENCE) :
+---
+{"\n\n".join(parts)}
+---
+Ces écrans sont fournis pour comparaison et contexte. Tu ne peux pas les modifier directement, mais tu dois t'en inspirer pour la cohérence.
 """
 
     system_prompt = f"""{base_system}
+{design_md_block}
+{selected_block}
 {context_html_block}
+{other_screens_block}
 
 RÈGLES DE RÉPONSE :
 Réponds avec ce format exact (deux blocs séparés par des délimiteurs) :
@@ -660,7 +708,7 @@ Réponds avec ce format exact (deux blocs séparés par des délimiteurs) :
 ---EXPLANATION---
 Ton explication courte ici (1-3 phrases).
 ---HTML---
-<!DOCTYPE html>... (le HTML complet modifié, ou le mot NULL si aucune modification)
+<!DOCTYPE html>... (le HTML complet de l'ÉCRAN ACTIF uniquement, ou le mot NULL si aucune modification)
 ---END---
 
 Pas de prose, pas de markdown, pas de JSON.
