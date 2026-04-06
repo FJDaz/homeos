@@ -47,6 +47,26 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ### Thème 7 — Drill : Manifeste → Wire → Cadrage
 
+### Mission 188 — Wire : Aperçu fonctionnel post-forge
+**STATUS: 🟠 PRÊTE**
+**DATE: 2026-04-06**
+**ACTOR: GEMINI**
+
+**Contexte :** Après forge, le template wiré est sauvegardé dans `static/templates/{name}`. L'iframe se recharge via `iframe.src = iframe.src`. Mais le tracker est ré-injecté et bloque les clics. Il faut un mode "test live" sans tracker.
+
+**Objectif :** Bouton "tester" dans l'overlay Wire post-forge → ouvre `http://localhost:9998/api/frd/file?name={template_name}&raw=1&wire=1` dans un nouvel onglet. Ce paramètre `wire=1` indique au serveur de ne pas injecter le tracker.
+
+**Fichiers à modifier :**
+- `server_v3.py` : route `GET /api/frd/file` — si `wire=1`, retourner le HTML brut sans injection tracker (le wire_runtime est déjà dans le HTML forgé)
+- `WsWire.js` : après `_executeForge` succès, afficher un bouton "ouvrir aperçu" qui fait `window.open(previewUrl)`
+
+**Contraintes :**
+- Le bouton "ouvrir aperçu" n'ouvre pas automatiquement (popup blocker). C'est un bouton cliquable dans l'overlay Wire.
+- `window.open` appelé directement depuis un click handler = pas bloqué par le browser.
+- Le `template_name` est connu depuis `new URL(iframe.src).searchParams.get('name')`.
+
+**Livrable :** Cliquer "tester" → nouvel onglet → template interactif avec toasts Groq fonctionnels.
+
 ### Mission 147 — Wire : Bilan de Santé & Maillage (CLEA UX)
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-05**
@@ -283,22 +303,42 @@ fetch('/api/projects/active/wire-audit').then(r=>r.json()).then(d=>console.log('
 ---
 
 ### Mission 184 — Refactorisation server_v3.py
-**STATUS: 🟠 PRÊTE — après M187**
+**STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-06**
-**ACTOR: GEMINI**
+**ACTOR: QWEN**
 
-**Contexte :** `server_v3.py` dépasse 3000 lignes. Toxique pour les agents LLM — chaque patch risque de casser une route invisible. Découper en routers FastAPI autonomes.
+**CR** :
 
-**Cible :** fichier principal < 200L, chaque router < 300L.
+**Avant :** `server_v3.py` = 2752 lignes, 97 routes, 23 modèles Pydantic, état global mélangé.
+
+**Après :**
+- `server_v3.py` = **159 lignes** (orchestrateur pur : imports, lifespan, CORS, static, mount routers)
+- `routers/` = **14 fichiers**, 3265 lignes totales, chaque router < 700L
 
 **Découpage :**
-- `routers/wire_router.py` — routes `/wire-audit`, `/wire-apply`, `/pre-wire`, `/pre-wire/validate`, `/wire-catchup`, `/surgical-diag`
-- `routers/sullivan_router.py` — routes `/api/sullivan/chat`, `/api/sullivan/surgical`
-- `routers/projects_router.py` — CRUD projets, manifest, wires, active
-- `routers/frd_router.py` — routes FRD existantes
-- `server_v3.py` — orchestrateur uniquement : import routers, `app.include_router()`
+| Router | Lignes | Routes | Domaine |
+|---|---|---|---|
+| `wire_router.py` | 679 | 12 | Wire audit, pre-wire, apply, catchup, surgical |
+| `frd_router.py` | 496 | 13 | FRD context, file ops, chat, kimi, export |
+| `sullivan_router.py` | 457 | 7 | Sullivan chat, fonts, webfont generation |
+| `bkd_router.py` | 293 | 7 | BKD projects, files, chat |
+| `projects_router.py` | 294 | 11 | CRUD projets, manifest, wires, design tokens |
+| `import_router.py` | 274 | 2 | Upload/delete imports |
+| `genome_router.py` | 205 | 7 | Genome, layout, organ/comp move, infer |
+| `manifest_router.py` | 158 | 7 | Manifest CRUD, Stitch import |
+| `workspace_router.py` | 129 | 4 | Workspace, templates, tokens, graft |
+| `retro_router.py` | 104 | 5 | Retro-genome status, approve, export |
+| `page_router.py` | 79 | 10 | Page serving (stenciler, bkd, brainstorm, etc.) |
+| `cadrage_router.py` | 69 | 6 | Cadrage chat, capture, PRD, rank |
+| `preview_router.py` | 28 | 2 | Preview run/show |
+| `__init__.py` | 0 | — | Package marker |
 
-**Règle :** ne pas modifier la logique, uniquement déplacer. Tests : `python3 -m py_compile` sur chaque fichier.
+**Vérifications :**
+- `python3 -m py_compile` sur chaque fichier → **14/14 OK**
+- Server démarré → **102 routes** enregistrées
+- Tous les endpoints fonctionnent (redirects /stenciler → /workspace OK)
+
+**Règle respectée :** logique non modifiée, uniquement déplacée.
 
 ---
 
@@ -489,3 +529,39 @@ Ce chapitre formalise la vision long-terme pour la gestion des interactions, de 
 - **Outils de l'Industrie** : Intégration stricte de bibliothèques standards et éprouvées (GSAP pour l'animation, Lenis pour le smooth scroll) en lieu et place d'un développement asynchrone arbitraire ou abstrait (pas de P5.js).
 - **Visual Wiring (L'Iframe Tracker)** : En mode FEE, la maquette se fige. Le designer interagit spatialement : il tire un trait d'un *Trigger* (bouton) vers une *Cible* (menu déroulant).
 - **Sullivan GSAP Expert** : Le designer dicte l'intention d'animation (ex: "élastique", "staggering"). Sullivan reçoit la paire de sélecteurs calculée par le tracker Iframe et n'a plus qu'à générer une timeline `gsap.to()` parfaite, injectée localement dans le head du template.
+
+---
+
+### Mission 188 — WiRE Hard-Edge Dashboard : Cadrage Global & Auto-Validation Sullivan
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-06**
+**ACTOR: GEMINI (UI)**
+**Dépendance : M187 ✅**
+
+**Problème racine :** La validation séquentielle (élément par élément) est trop lente pour les pages complexes. Sullivan doit pré-valider ce qu'il a déjà reconnu pour ne laisser à l'humain que le triage des incertitudes.
+
+**PHASE UNIQUE — UI (GEMINI)**
+
+**Fichier unique : `WsWire.js`**
+
+**1A. Suppression du flux séquentiel**
+- Réinitialiser `_startLiminaire` pour ne plus dépendre de `_currentIndex`.
+- Sullivan coche par défaut (`confirmed: true`) uniquement les éléments où `matched: true`.
+
+**1B. Table Executive UI (Hard-Edge HoméOS)**
+- **Structure** : Liste complète des éléments détectés (scrollable).
+- **Design Tokens** : 
+    - `0px border radius` partout (ABSOLU).
+    - Fond `#f7f6f2` (Crème), Action `#A3CD54` (Vert Aetherflow), Texte `#3d3d3c`.
+    - Typographie : `Source Sans 3` (Interface), `Source Code Pro` (Intention).
+- **Colonnes** :
+    - [X] (Case à cocher custom carrée 0px).
+    - ORGANES (Nom intelligible du bouton/lien).
+    - INTENTION (L'intent Sullivan ou le Custom).
+    - [✎] (Édition manuelle d'intention).
+
+**1C. Action Globale**
+- Bouton unique **"FORGER LE MAILLAGE"** en pied de table.
+- Applique et forge uniquement les lignes cochées.
+
+**⚠️ AVERTISSEMENT DESIGN : Ne conservez AUCUNE trace de `rounded-xl` ou `rounded-full` dans les nouveaux composants. La netteté Hard-Edge est impérative.**

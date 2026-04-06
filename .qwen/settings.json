@@ -13,7 +13,10 @@
       "Bash(pkill *)",
       "Bash(nohup *)",
       "Bash(cat *)",
-      "Bash(ls *)"
+      "Bash(ls *)",
+      "Bash(touch *)",
+      "Bash(do *)",
+      "Bash(done)"
     ]
   },
   "$version": 3

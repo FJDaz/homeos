@@ -80,6 +80,8 @@ class WsChatMain extends WsChatBase {
             if (!iframe) return null;
             if (iframe._lastSullivanHtml) return iframe._lastSullivanHtml;
             if (iframe.srcdoc) return iframe.srcdoc;
+            const cdHtml = iframe.contentDocument?.documentElement?.outerHTML;
+            if (cdHtml && cdHtml.length > 100) return cdHtml;
             if (iframe.src) {
                 try { return await (await fetch(iframe.src)).text(); } catch(_) {}
             }

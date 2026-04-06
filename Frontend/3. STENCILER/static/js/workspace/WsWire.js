@@ -150,10 +150,10 @@ class WsWire {
         const container = this.overlay.querySelector('.relative.z-10');
         const mainArea = container.querySelector('.flex.gap-6');
         mainArea.innerHTML = `
-            <div class="flex-1 flex flex-col items-center justify-center p-12 bg-[#f7f6f2] rounded-2xl border border-[#e5e5e5] h-[600px] animate-in fade-in duration-500">
+            <div class="flex-1 flex flex-col items-center justify-center p-12 bg-[#f7f6f2] border border-[#e5e5e5] h-[600px] animate-in fade-in duration-500" style="border-radius: 0px;">
                 <div class="space-y-6 text-center">
                     <div class="flex items-center justify-center">
-                        <div class="w-12 h-12 border-4 border-[#8cc63f]/20 border-t-[#8cc63f] rounded-full animate-spin"></div>
+                        <div class="w-12 h-12 border-4 border-[#8cc63f]/20 border-t-[#8cc63f] animate-spin" style="border-radius: 0px;"></div>
                     </div>
                     <div class="space-y-1">
                         <h3 class="text-[#3d3d3c] font-bold text-sm tracking-widest uppercase italic">Diagnostic WiRE</h3>
@@ -201,9 +201,9 @@ class WsWire {
     _startLiminaire(projectId, elements) {
         this._projectId = projectId;
         this._infillingElements = elements;
-        this._currentIndex = 0;
+        // Sullivan pré-coche ce qu'il a déjà reconnu dans le manifeste
         this._validations = elements.map(el => ({ 
-            ...el, confirmed: !el.matched, custom_intent: null 
+            ...el, confirmed: el.matched === true, custom_intent: null 
         }));
 
         this._renderLiminaireUI();
@@ -213,153 +213,182 @@ class WsWire {
         const container = this.overlay.querySelector('.relative.z-10');
         const mainArea = container.querySelector('.flex.gap-6');
         
+        let previousScrollTop = 0;
+        const currentTable = mainArea.querySelector('#liminaire-table');
+        if (currentTable) {
+            previousScrollTop = currentTable.scrollTop;
+        }
+        
+        const checkedCount = this._validations.filter(v => v.confirmed).length;
+        const totalCount = this._validations.length;
+
         const html = `
-            <div class="flex-1 flex flex-col bg-[#f7f6f2] rounded-2xl border border-[#e5e5e5] h-[600px] overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-                <div class="px-8 py-6 border-b border-[#e5e5e5] flex items-center justify-between bg-white/50">
+            <div class="flex-1 flex flex-col bg-[#f7f6f2] h-[600px] overflow-hidden border border-[#e5e5e5] animate-in slide-in-from-bottom-4 duration-500" style="border-radius: 0px;">
+                <!-- Header HoméOS (Hard-Edge) -->
+                <div class="px-8 py-6 border-b border-[#e5e5e5] flex items-center justify-between bg-white">
                     <div class="space-y-1">
-                        <h3 class="text-[#3d3d3c] font-bold text-xs tracking-widest uppercase">Cadrage Séquentiel</h3>
-                        <p class="text-[#3d3d3c]/50 text-[9px] tracking-widest uppercase">Validation des intentions du manifeste</p>
+                        <h3 class="text-[#3d3d3c] font-bold text-xs tracking-widest uppercase italic" style="font-family: 'Source Sans 3', sans-serif;">Cadrage Global</h3>
+                        <p class="text-[#3d3d3c]/50 text-[9px] tracking-widest uppercase">${checkedCount} / ${totalCount} Organes Validés par Sullivan</p>
                     </div>
-                    <div class="flex gap-1.5">
-                        ${this._infillingElements.map((_, i) => `
-                            <div class="w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === this._currentIndex ? 'bg-[#8cc63f]' : (i < this._currentIndex ? 'bg-[#8cc63f]/30' : 'bg-[#e5e5e5]')}"></div>
-                        `).join('')}
-                    </div>
+                    <button onclick="window.wsWire._openCadrage()" class="px-4 py-2 border border-[#e5e5e5] text-[#3d3d3c]/50 hover:text-[#3d3d3c] hover:bg-slate-50 text-[9px] font-bold uppercase tracking-widest transition-colors" style="border-radius: 0px;">
+                        Cadrage LLM
+                    </button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-8 space-y-2 scrollbar-hide" id="liminaire-table">
-                    ${this._infillingElements.map((el, i) => this._renderRow(el, i)).join('')}
+                <!-- Table Executive -->
+                <div class="flex-1 overflow-y-auto scrollbar-hide" id="liminaire-table">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-[#f7f6f2] z-20">
+                            <tr class="border-b border-[#e5e5e5]">
+                                <th class="p-4 text-[9px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest w-12 text-center">✓</th>
+                                <th class="p-4 text-[9px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest">Organe</th>
+                                <th class="p-4 text-[9px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest">Intention</th>
+                                <th class="p-4 text-[9px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest text-right">Custom</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${this._infillingElements.map((el, i) => this._renderRow(el, i)).join('')}
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="p-6 border-t border-[#e5e5e5] bg-white/30 flex items-center justify-between">
-                    <p class="text-[10px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest">sullivan attend votre arbitrage</p>
-                    <div class="flex gap-3">
-                        <button id="lim-btn-prev" class="px-6 py-2.5 text-[10px] font-bold text-[#3d3d3c]/50 hover:text-[#3d3d3c] disabled:opacity-0 transition-all uppercase tracking-widest" ${this._currentIndex === 0 ? 'disabled' : ''}>précédent</button>
-                        ${this._currentIndex === this._infillingElements.length - 1 
-                            ? `<button id="lim-btn-finish" class="px-8 py-2.5 bg-[#3d3d3c] text-white text-[10px] font-bold rounded-full hover:bg-black shadow-sm transition-all uppercase tracking-widest">forger le maillage</button>`
-                            : `<button id="lim-btn-next" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[10px] font-bold rounded-full hover:opacity-90 shadow-lg shadow-[#8cc63f]/10 transition-all uppercase tracking-widest">étape suivante</button>`
-                        }
-                    </div>
+                <!-- Footer Action Global -->
+                <div class="p-6 bg-white flex items-center justify-between border-t border-[#e5e5e5]">
+                    <p class="text-[9px] font-bold text-[#3d3d3c]/30 uppercase tracking-widest">raccourcis : [↵ forger] [esp toggle]</p>
+                    <button id="lim-btn-global-forge" class="px-10 py-3 bg-[#A3CD54] text-[#1A1A1A] text-[10px] font-bold hover:bg-[#8cc63f] transition-all uppercase tracking-widest shadow-lg shadow-[#A3CD54]/20" style="border-radius: 0px;">
+                        Forger le maillage
+                    </button>
                 </div>
             </div>
         `;
 
         mainArea.innerHTML = html;
         this._setupLiminaireHandlers(mainArea);
-        this._highlightInIframe(this._infillingElements[this._currentIndex]);
         
-        // Scroll to active row
-        const activeRow = mainArea.querySelector(`[data-index="${this._currentIndex}"]`);
-        if (activeRow) activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // MISSION 186 : Sync Nudges
-        this._syncNudgesToIframe(this._validations.map((v, i) => ({
+        const newTable = mainArea.querySelector('#liminaire-table');
+        if (newTable && previousScrollTop > 0) {
+            newTable.scrollTop = previousScrollTop;
+        }
+        
+        // Sync Nudges Initial (Tous les validés en dot vert)
+        this._syncNudgesToIframe(this._validations.map(v => ({
             ...v,
-            status: i === this._currentIndex ? 'pending' : (v.confirmed ? 'ok' : 'none')
+            status: v.confirmed ? 'ok' : 'none'
         })));
     }
 
     _renderRow(el, i) {
-        const isActive = i === this._currentIndex;
-        const isDone = i < this._currentIndex;
         const val = this._validations[i];
-        
-        // Extraction de l'ID pour affichage (intelligibilité Mission 187)
         const displayId = el.selector.replace('#', '');
-
+        
         return `
-            <div data-index="${i}" class="group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-500 ${isActive ? 'bg-white border-[#8cc63f] shadow-md z-10 scale-[1.02]' : 'bg-transparent border-transparent opacity-40'}">
-                <div class="w-8 h-8 flex items-center justify-center rounded-lg ${isDone ? 'bg-[#8cc63f]/10 text-[#8cc63f]' : 'bg-slate-100 text-slate-400'} font-mono text-[10px] font-bold">
-                    ${isDone ? '✓' : i + 1}
-                </div>
-                
-                <div class="flex-1 min-w-0 space-y-0.5">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-bold text-[#3d3d3c] font-mono truncate">#${displayId}</span>
-                        <span class="px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[8px] font-bold rounded uppercase tracking-tighter">${el.tag}</span>
+            <tr data-index="${i}" class="group hover:bg-white transition-colors cursor-pointer ${val.confirmed ? 'bg-white/40' : ''}">
+                <td class="p-4 text-center">
+                    <div class="lim-checkbox w-5 h-5 border-2 transition-all flex items-center justify-center mx-auto ${val.confirmed ? 'bg-[#A3CD54] border-[#A3CD54]' : 'border-[#e5e5e5] bg-white'}" style="border-radius: 0px;">
+                        ${val.confirmed ? '<svg class="w-3 h-3 text-[#1A1A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
                     </div>
-                    <div class="text-[10px] text-[#3d3d3c]/50 italic truncate">"${el.text || 'sans texte'}"</div>
-                </div>
-
-                ${isActive ? `
-                    <div class="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-300">
-                        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                            <button class="lim-opt-yes px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-md transition-all ${val.confirmed && !val.custom_intent ? 'bg-[#8cc63f] text-white' : 'hover:bg-white text-slate-400'}">oui</button>
-                            <button class="lim-opt-no px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-md transition-all ${!val.confirmed ? 'bg-slate-800 text-white' : 'hover:bg-white text-slate-400'}">non</button>
-                            <button class="lim-opt-edit px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-md transition-all ${val.custom_intent ? 'bg-amber-500 text-white' : 'hover:bg-white text-slate-400'}">autre</button>
+                </td>
+                <td class="p-4">
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-[#3d3d3c] font-mono">#${displayId}</span>
+                            <span class="px-1 py-0.5 bg-slate-100 text-slate-400 text-[8px] font-bold uppercase tracking-tighter" style="border-radius: 0px;">${el.tag}</span>
                         </div>
+                        <div class="text-[9px] text-[#3d3d3c]/40 italic truncate max-w-[150px]">"${el.text || 'sans texte'}"</div>
                     </div>
-                ` : `
-                    <div class="text-[10px] font-mono text-[#8cc63f] font-bold">${val.confirmed ? (val.custom_intent || val.inferred_intent) : ''}</div>
-                `}
-
-                <!-- Barre de Preload Mission 187 -->
-                <div class="lim-preload-bar absolute bottom-0 left-0 h-0.5 bg-[#8cc63f] transition-all duration-1000 ease-out" style="width: 0%"></div>
-            </div>
-
-            ${isActive && val.custom_intent !== null && val.custom_intent !== undefined ? `
-                <div class="px-12 py-2 animate-in grow duration-300">
-                    <input type="text" class="lim-custom-input w-full p-2 bg-white border border-amber-200 rounded-lg text-[10px] font-mono focus:ring-amber-500" placeholder="Saisir l'intention (ex: open_cart)..." value="${val.custom_intent || ''}">
-                </div>
-            ` : ''}
+                </td>
+                <td class="p-4">
+                    <code class="text-[10px] text-[#3d3d3c] font-mono ${val.confirmed ? 'text-[#8cc63f]' : 'opacity-50'}">
+                        ${val.custom_intent || val.inferred_intent}
+                    </code>
+                </td>
+                <td class="p-4 text-right">
+                    <button class="lim-row-edit p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-100" style="border-radius: 0px;">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                    ${val.isEditing ? `
+                        <div class="absolute inset-x-0 bottom-0 bg-white border-t border-amber-200 p-2 animate-in slide-in-from-bottom-2 duration-200 z-10 box-shadow">
+                            <input type="text" class="lim-inline-input w-full p-2 text-[10px] font-mono border border-amber-200 focus:outline-none focus:ring-1 focus:ring-[#A3CD54]" style="border-radius: 0px;" value="${val.custom_intent || val.inferred_intent}" autofocus>
+                        </div>
+                    ` : ''}
+                </td>
+            </tr>
         `;
     }
 
     _setupLiminaireHandlers(area) {
-        const row = area.querySelector(`[data-index="${this._currentIndex}"]`);
-        if (!row) return;
+        const rows = area.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const idx = parseInt(row.dataset.index);
+            const val = this._validations[idx];
 
-        const val = this._validations[this._currentIndex];
-        
-        const triggerPreload = (callback) => {
-            const bar = row.querySelector('.lim-preload-bar');
-            bar.style.width = '100%';
-            // Animation proportionnelle au "temps de construction"
-            setTimeout(callback, 1200); 
-        };
-
-        const nextStep = () => {
-            if (this._currentIndex < this._infillingElements.length - 1) {
-                this._currentIndex++;
+            // Toggle Checkbox via clic sur ligne (sauf si on clique sur l'édit)
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('.lim-row-edit') || e.target.closest('.lim-inline-input')) return;
+                val.confirmed = !val.confirmed;
                 this._renderLiminaireUI();
-            } else {
-                this._submitLiminaire(); // Dernier élément validé → forge automatique
-            }
-        };
-
-        row.querySelector('.lim-opt-yes')?.addEventListener('click', () => {
-            val.confirmed = true;
-            val.custom_intent = null;
-            triggerPreload(nextStep);
-        });
-
-        row.querySelector('.lim-opt-no')?.addEventListener('click', () => {
-            val.confirmed = false;
-            nextStep();
-        });
-
-        row.querySelector('.lim-opt-edit')?.addEventListener('click', () => {
-            val.confirmed = true;
-            val.custom_intent = "";
-            this._renderLiminaireUI();
-        });
-
-        const input = area.querySelector('.lim-custom-input');
-        if (input) {
-            input.addEventListener('change', (e) => {
-                val.custom_intent = e.target.value.toLowerCase().replace(/\s/g, '_');
             });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') triggerPreload(nextStep);
+
+            // Bouton Edit
+            row.querySelector('.lim-row-edit')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                val.isEditing = true;
+                this._renderLiminaireUI();
+            });
+
+            // Input direct
+            const input = row.querySelector('.lim-inline-input');
+            if (input) {
+                input.focus();
+                input.addEventListener('input', (e) => {
+                    val.custom_intent = e.target.value;
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        val.isEditing = false;
+                        val.confirmed = true;
+                        this._renderLiminaireUI();
+                    }
+                    if (e.key === 'Escape') {
+                        val.isEditing = false;
+                        this._renderLiminaireUI();
+                    }
+                });
+                input.addEventListener('click', (e) => e.stopPropagation());
+            }
+        });
+
+        // Bouton Forge Global
+        const forgeBtn = area.querySelector('#lim-btn-global-forge');
+        if (forgeBtn) {
+            forgeBtn.addEventListener('click', () => {
+                this._submitLiminaire();
             });
         }
 
-        area.querySelector('#lim-btn-next')?.addEventListener('click', nextStep);
-        area.querySelector('#lim-btn-prev')?.addEventListener('click', () => {
-            this._currentIndex--;
-            this._renderLiminaireUI();
-        });
-        area.querySelector('#lim-btn-finish')?.addEventListener('click', () => this._submitLiminaire());
+        // Scroll Roulette (Horizontal via Wheel) on liminaire-table
+        const table = area.querySelector('#liminaire-table');
+        if (table) {
+            table.addEventListener('wheel', (e) => {
+                if (e.deltaY !== 0) {
+                    table.scrollTop += e.deltaY; // Vertical par défaut
+                    // Si le contenu dépasse en largeur, on pourrait mapper deltaY -> scrollLeft
+                    // Mais ici on assure juste que le scroll interne est prioritaire
+                    e.stopPropagation();
+                }
+            }, { passive: false });
+        }
+
+        // Raccourcis clavier
+        const handleKeys = (e) => {
+            if (this.overlay.classList.contains('hidden')) return;
+            if (e.key === 'Enter' && !e.shiftKey) {
+                this._submitLiminaire();
+            }
+        };
+        window.removeEventListener('keydown', this._keyHandler);
+        this._keyHandler = handleKeys;
+        window.addEventListener('keydown', this._keyHandler);
     }
 
     async _submitLiminaire() {
@@ -419,12 +448,10 @@ class WsWire {
             if (data.status === 'success') {
                 const shell = document.getElementById(window.wsCanvas.activeScreenId);
                 const iframe = shell?.querySelector('iframe');
+                
                 if (iframe) {
-                    iframe.onload = () => {
-                        iframe.onload = null;
-                        this.hide();
-                    };
-                    // Injecter base href pour que les paths relatifs du template fonctionnent en srcdoc
+                    // Update iframe logic first
+                    iframe.onload = () => { iframe.onload = null; };
                     const originalSrc = iframe.src || '';
                     const baseUrl = originalSrc ? originalSrc.substring(0, originalSrc.lastIndexOf('/') + 1) : window.location.origin + '/';
                     let forgedHtml = data.html;
@@ -432,6 +459,33 @@ class WsWire {
                         forgedHtml = forgedHtml.replace('<head>', `<head><base href="${baseUrl}" target="_self">`);
                     }
                     iframe.srcdoc = forgedHtml;
+
+                    // Écran de succès post-forge (Hard-Edge)
+                    const screen = window.wsCanvas.getActiveScreenHtml();
+                    const fileName = screen?.src?.split('name=')[1]?.split('&')[0] || 'template.html';
+                    const testUrl = `/api/frd/file?name=${fileName}&raw=1`;
+
+                    mainArea.innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center p-12 bg-[#f7f6f2] border border-[#e5e5e5] h-[600px] animate-in slide-in-from-bottom-4 duration-500" style="border-radius: 0px;">
+                            <div class="space-y-8 text-center max-w-sm">
+                                <div class="w-16 h-16 bg-[#A3CD54]/20 border-2 border-[#A3CD54] mx-auto flex items-center justify-center text-[#A3CD54]" style="border-radius: 0px;">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="space-y-2">
+                                    <h3 class="text-[#3d3d3c] font-bold text-sm tracking-widest uppercase italic">Maillage Forgeré</h3>
+                                    <p class="text-[#3d3d3c]/50 text-[10px] tracking-widest uppercase leading-relaxed">Les intentions ont été tissées dans le code source déterministe.</p>
+                                </div>
+                                <div class="flex flex-col gap-3 pt-4">
+                                    <button onclick="window.open('${testUrl}', '_blank')" class="w-full px-6 py-3 bg-[#A3CD54] text-[#1A1A1A] text-[10px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] transition-all shadow-sm" style="border-radius: 0px;">
+                                        Tester la Page
+                                    </button>
+                                    <button onclick="window.wsWire.hide()" class="w-full px-6 py-3 border border-[#e5e5e5] text-[#3d3d3c]/50 hover:text-[#3d3d3c] hover:bg-white text-[10px] font-bold uppercase tracking-widest transition-all" style="border-radius: 0px;">
+                                        Fermer l'interface
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     this.hide();
                 }

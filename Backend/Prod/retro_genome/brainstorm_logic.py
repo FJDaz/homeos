@@ -7,6 +7,7 @@ Utilisée par brainstorm_routes.py (FastAPI) et server_9998_v2.py (Legacy).
 
 import asyncio
 import json
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -285,10 +286,11 @@ async def sse_chat_generator(session_id: str, provider: str, message: str):
         
         if result.success:
             full_response = result.code
-            words = full_response.split(' ')
-            for word in words:
-                yield f"event: token\ndata: {json.dumps(word + ' ')}\n\n"
-                await asyncio.sleep(0.01)
+            # Simulation de streaming par mots pour l'effet visuel
+            tokens = re.findall(r'\S+|\s+', full_response)
+            for token in tokens:
+                yield f"event: token\ndata: {json.dumps(token)}\n\n"
+                await asyncio.sleep(0.02)
                 
             # 3. Sauvegarder la réponse de l'assistant
             storage.save_message(session_id, provider, "assistant", full_response)
