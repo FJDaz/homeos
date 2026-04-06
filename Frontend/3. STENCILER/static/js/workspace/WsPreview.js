@@ -46,18 +46,16 @@ class WsPreview {
                 // Les scripts app réinitialisent le state serveur et écrasent Sullivan.
                 // Les scripts CDN (https://) sont préservés pour que Tailwind/Alpine restent actifs.
                 const htmlStatic = html.replace(
-                    /<script(?![^>]*src\s*=\s*["']https?:\/\/)[^>]*>[\s\S]*?<\/script>/gi, ''
+                    /<script(?![^>]*src\s*=\s*["'](https?:\/\/|\/api\/))[^>]*>[\s\S]*?<\/script>/gi, ''
                 );
                 
-                previewIframe.contentDocument.open();
-                previewIframe.contentDocument.write(htmlStatic);
-                previewIframe.contentDocument.close();
+                previewIframe.srcdoc = htmlStatic;
 
-                // Re-injecter le tracker d'inspection après doc.write
+                // Re-injecter le tracker d'inspection après la mise à jour
                 if (window.wsInspect) window.wsInspect.injectTracker(previewIframe);
 
             } catch(err) {
-                console.warn("WsPreview: document.write failed, falling back to srcdoc", err);
+                console.warn("WsPreview: srcdoc update failed", err);
                 previewIframe.srcdoc = html;
             }
         }

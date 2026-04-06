@@ -99,6 +99,13 @@ class WsScreenShell {
         fo.appendChild(iframe);
         g.appendChild(fo);
 
+        // 10. Resize Handle (Mission 114)
+        const resizeHandle = this._createElement('rect', {
+            'x': String(SW - 12), 'y': String(SH - 12), 'width': '12', 'height': '12',
+            'class': 'ws-resize-handle', 'pointer-events': 'all'
+        });
+        g.appendChild(resizeHandle);
+
         // 8. Tool Buttons (Aperçu, Wire, Save, Download)
         this._addToolButtons(g, item, SW);
 
@@ -125,7 +132,9 @@ class WsScreenShell {
 
     static _addToolButtons(g, item, SW) {
         // Wire
-        const wireFo = this._createForeignObject(String(SW - 340), '8', '90', '24', { 'pointer-events': 'all' });
+        const wireFo = this._createForeignObject(String(SW - 340), '8', '90', '24', { 
+            'pointer-events': 'all', 'data-right-offset': '340', 'class': 'ws-shell-tool'
+        });
         wireFo.style.display = g.dataset.hasManifest === "true" ? 'block' : 'none';
         const wireDiv = document.createElement('div');
         wireDiv.style.cssText = 'height:100%;';
@@ -137,7 +146,9 @@ class WsScreenShell {
         g.appendChild(wireFo);
 
         // Aperçu
-        const previewFo = this._createForeignObject(String(SW - 240), '8', '90', '24', { 'pointer-events': 'all' });
+        const previewFo = this._createForeignObject(String(SW - 240), '8', '90', '24', { 
+            'pointer-events': 'all', 'data-right-offset': '240', 'class': 'ws-shell-tool'
+        });
         const previewDiv = document.createElement('div');
         previewDiv.className = "flex items-center space-x-2 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors";
         previewDiv.style.cssText = 'height:100%;';
@@ -148,7 +159,9 @@ class WsScreenShell {
         g.appendChild(previewFo);
 
         // Save
-        const saveFo = this._createForeignObject(String(SW - 140), '8', '55', '24', { 'pointer-events': 'all' });
+        const saveFo = this._createForeignObject(String(SW - 140), '8', '55', '24', { 
+            'pointer-events': 'all', 'data-right-offset': '140', 'class': 'ws-shell-tool'
+        });
         const saveBtn = document.createElement('button');
         saveBtn.style.cssText = "width:100%; height:100%; line-height:1; background:#8cc63f; color:#fff; border:none; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;";
         saveBtn.innerText = "SAVE";
@@ -169,7 +182,9 @@ class WsScreenShell {
         g.appendChild(saveFo);
 
         // Download
-        const downloadFo = this._createForeignObject(String(SW - 75), '8', '24', '24', { 'pointer-events': 'all' });
+        const downloadFo = this._createForeignObject(String(SW - 75), '8', '24', '24', { 
+            'pointer-events': 'all', 'data-right-offset': '75', 'class': 'ws-shell-tool'
+        });
         const dlBtn = document.createElement('button');
         dlBtn.className = "flex items-center justify-center text-slate-400 hover:text-homeos-green transition-colors";
         dlBtn.style.cssText = "width:100%; height:100%; background:none; border:none; cursor:pointer;";

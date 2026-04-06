@@ -21,6 +21,10 @@ class WsInspect {
         this.popover = document.getElementById('ws-popover-container');
         this.colorPopover = document.getElementById('ws-color-container');
         this.typoPopover = document.getElementById('ws-typo-container');
+        this.effectsPopover = document.getElementById('ws-effects-container');
+        
+        // Design Tokens Store (Mission 159)
+        this.designTokens = null;
         
         // Controls
         this.saveBtn = document.getElementById('ws-popover-save');
@@ -40,6 +44,13 @@ class WsInspect {
         this.sizeInput = document.getElementById('ws-typo-size');
         this.weightSelect = document.getElementById('ws-typo-weight');
 
+        this.effectsClose = document.getElementById('ws-effects-close');
+        this.effectsApply = document.getElementById('ws-effects-apply');
+        this.shadowSelect = document.getElementById('ws-effects-shadow');
+        this.radiusSlider = document.getElementById('ws-effects-radius');
+        this.borderSelect = document.getElementById('ws-effects-border');
+        this.radiusVal = document.getElementById('ws-val-radius');
+
         this.setupListeners();
         // Local Font Access nécessite un geste utilisateur — chargé au premier clic
         if (this.fontSelect) {
@@ -52,7 +63,8 @@ class WsInspect {
         this.hide();
         this.hideColor();
         this.hideTypo();
-        if (mode !== 'select' && mode !== 'text' && mode !== 'colors') this.clearSelection();
+        this.hideEffects();
+        if (mode !== 'select' && mode !== 'text' && mode !== 'colors' && mode !== 'effects') this.clearSelection();
     }
 
     async loadLocalFonts() {
@@ -93,12 +105,28 @@ class WsInspect {
         if (this.typoClose) this.typoClose.onclick = () => this.hideTypo();
         if (this.typoApply) this.typoApply.onclick = () => this.applyTypo();
 
+        if (this.effectsClose) this.effectsClose.onclick = () => this.hideEffects();
+        if (this.effectsApply) this.effectsApply.onclick = () => this.applyEffects();
+        if (this.radiusSlider) {
+            this.radiusSlider.oninput = () => {
+                if (this.radiusVal) this.radiusVal.innerText = this.radiusSlider.value + 'px';
+            };
+        }
+
         [this.sliderH, this.sliderS, this.sliderL].forEach(s => {
             if (s) s.oninput = () => this.updateColorPreview();
         });
 
+        window.addEventListener('mousedown', (e) => this.handleOutsideClick(e));
+
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { this.hide(); this.hideColor(); this.hideTypo(); this.clearSelection(); }
+            if (e.key === 'Escape') { 
+                this.hide(); 
+                this.hideColor(); 
+                this.hideTypo(); 
+                this.hideEffects(); 
+                this.clearSelection(); 
+            }
         });
 
         window.addEventListener('message', (e) => {
@@ -109,228 +137,38 @@ class WsInspect {
         });
     }
 
-    injectTracker(iframe) {
-        iframe.onload = () => {
-            const trackerScript = `
-                (function() {
-                    let lastHover = null;
-                    let selectedEl = null;
-                    let lastSelectedEl = null;
-                    let activeMode = 'select';
-                    let isDragging = false;
-                    let isDrawing = false;
-                    let startX, startY;
-                    let initialTransformX = 0, initialTransformY = 0;
-                    let ghostFrame = null;
+    handleOutsideClick(e) {
+        // Liste des popovers à surveiller
+        const containers = [this.popover, this.colorPopover, this.typoPopover, this.effectsPopover];
+        
+        containers.forEach(container => {
+            if (container && !container.classList.contains('hidden')) {
+                // On vérifie si le clic est en dehors du popover intérieur (toujours le premier enfant)
+                const inner = container.querySelector('.glass-card') || container.children[0];
+                if (inner && !inner.contains(e.target)) {
+                    // Fermer le popover correspondant
+                    if (container === this.popover) this.hide();
+                    if (container === this.colorPopover) this.hideColor();
+                    if (container === this.typoPopover) this.hideTypo();
+                    if (container === this.effectsPopover) this.hideEffects();
+                }
+            }
+        });
+    }
 
-                    function scanAtomicOrgans() {
-                        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT, null, false);
-                        let node;
-                        while(node = walker.nextNode()) {
-                            const comment = node.nodeValue.trim();
-                            if (comment.length > 5 && !comment.includes('-->')) {
-                                let nextEl = node.nextElementSibling;
-                                while (nextEl && ['SCRIPT', 'STYLE'].includes(nextEl.tagName)) nextEl = nextEl.nextElementSibling;
-                                if (nextEl) nextEl.setAttribute('data-atomic-organ', comment);
-                            }
-                        }
-                    }
-                    scanAtomicOrgans();
-
-                    const editBtn = document.createElement('button');
-                    editBtn.id = 'ws-in-preview-edit-btn';
-                    editBtn.innerHTML = '<svg style="width:12px;height:12px;margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg> Edit code';
-                    editBtn.style.cssText = 'position: fixed; display: none; z-index: 999999; background: #fff; color: #64748b; border: 1px solid #e2e8f0; padding: 6px 12px; font-size: 11px; font-family: "Source Sans 3", sans-serif; font-weight: 600; border-radius: 6px; cursor: pointer; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: translateY(-100%); transition: opacity 0.2s;';
-                    document.body.appendChild(editBtn);
-
-                    // Fix: Stop propagation to prevent body.onmousedown from hiding the button before the click
-                    editBtn.onmousedown = (e) => {
-                        e.stopPropagation();
-                        if (selectedEl) {
-                            const rect = selectedEl.getBoundingClientRect();
-                            sendClickMessage(selectedEl, rect);
-                        }
-                    };
-
-                    window.addEventListener('message', (e) => {
-                        if (e.data.type === 'inspect-tool-change') {
-                            activeMode = e.data.mode;
-                            document.body.style.cursor = 
-                                (activeMode === 'text') ? 'text' :
-                                (activeMode === 'frame') ? 'crosshair' :
-                                (activeMode === 'drag') ? 'grab' :
-                                (activeMode === 'colors') ? 'copy' :
-                                (activeMode === 'place-img') ? 'copy' : 'default';
-                        }
-                        if (e.data.type === 'inspect-clear-selection') clearSelection();
-                        if (e.data.type === 'inspect-undo') {
-                            document.body.innerHTML = e.data.snapshot;
-                            scanAtomicOrgans(); document.body.appendChild(editBtn);
-                        }
-                        if (e.data.type === 'inspect-apply-color') { const _ct = selectedEl || lastSelectedEl; if (_ct) _ct.style.backgroundColor = e.data.color; }
-                        if (e.data.type === 'inspect-apply-typo') {
-                            const target = selectedEl || lastSelectedEl;
-                            if (target) {
-                                target.style.fontFamily = e.data.font;
-                                target.style.fontSize = e.data.size + 'px';
-                                target.style.fontWeight = e.data.weight;
-                            }
-                        }
-                        if (e.data.type === 'inspect-ready-to-place-image') {
-                            takeSnapshot();
-                            const img = document.createElement('img');
-                            img.src = e.data.src; img.style.position = 'absolute';
-                            img.style.left = (window.lastClickX || 100) + 'px'; img.style.top = (window.lastClickY || 100) + 'px';
-                            img.style.maxWidth = '200px'; document.body.appendChild(img);
-                        }
-                        if (e.data.type === 'inspect-update-dom') {
-                             takeSnapshot();
-                             const target = document.querySelector(e.data.selector);
-                             if (target) target.outerHTML = e.data.html;
-                        }
-                    });
-
-                    function takeSnapshot() { window.parent.postMessage({ type: 'inspect-snapshot', html: document.body.innerHTML }, '*'); }
-
-                    function clearSelection() {
-                        if (selectedEl) selectedEl.classList.remove('organ-selected');
-                        selectedEl = null; editBtn.style.display = 'none';
-                        window.parent.postMessage({ type: 'inspect-selection-cleared' }, '*');
-                    }
-
-                    document.body.onmouseover = (e) => {
-                        if (activeMode !== 'select') return;
-                        const organ = e.target.closest('[data-atomic-organ]');
-                        if (lastHover && lastHover !== selectedEl) lastHover.classList.remove('inspect-hover');
-                        if (organ) { organ.classList.add('inspect-hover'); lastHover = organ; } else lastHover = null;
-                    };
-
-                    document.body.onmousedown = (e) => {
-                        // All tools behavior
-                        if (activeMode === 'select' || activeMode === 'text' || activeMode === 'colors') {
-                            const organ = e.target.closest('[data-atomic-organ]');
-                            if (organ) {
-                                if (selectedEl) selectedEl.classList.remove('organ-selected');
-                                selectedEl = organ; lastSelectedEl = organ; selectedEl.classList.add('organ-selected');
-                                const rect = selectedEl.getBoundingClientRect();
-                                
-                                // Show "Edit Code" only in Select mode
-                                if (activeMode === 'select') {
-                                    editBtn.style.display = 'flex';
-                                    editBtn.style.top = rect.top + 'px';
-                                    editBtn.style.left = (rect.left + rect.width - 100) + 'px';
-                                } else {
-                                    editBtn.style.display = 'none';
-                                }
-                                
-                                isDragging = (activeMode === 'drag' || activeMode === 'select');
-                                startX = e.clientX; startY = e.clientY;
-                                const transform = getComputedStyle(selectedEl).transform;
-                                if (transform !== 'none') {
-                                    const matrix = transform.match(/matrix\\(([^)]+)\\)/)[1].split(', ');
-                                    initialTransformX = parseFloat(matrix[4] || 0); initialTransformY = parseFloat(matrix[5] || 0);
-                                } else { initialTransformX = initialTransformY = 0; }
-                                
-                                // Parent notification (Mode selectivity handled in parent)
-                                window.parent.postMessage({ type: 'inspect-organ-selected', tagName: selectedEl.tagName.toLowerCase(), selector: getSelector(selectedEl), rect: rect }, '*');
-                            } else if (activeMode === 'text') {
-                                // Nouveau texte si clic sur vide en mode T
-                                takeSnapshot();
-                                const span = document.createElement('span');
-                                span.innerText = 'Nouveau texte';
-                                span.contentEditable = 'true';
-                                span.style.position = 'absolute';
-                                span.style.left = e.clientX + 'px'; span.style.top = e.clientY + 'px';
-                                span.style.fontFamily = getComputedStyle(document.body).fontFamily;
-                                span.setAttribute('data-atomic-organ', 'Text Element');
-                                document.body.appendChild(span);
-                                span.focus();
-                            } else { clearSelection(); }
-                        }
-
-                        if (activeMode === 'frame') {
-                            takeSnapshot(); isDrawing = true;
-                            drawStartX = e.clientX; drawStartY = e.clientY;
-                            ghostFrame = document.createElement('div');
-                            ghostFrame.style.cssText = 'position: fixed; border: 2px dashed #A3CD54; background: rgba(163, 205, 84, 0.1); pointer-events: none; z-index: 9999;';
-                            ghostFrame.style.left = drawStartX + 'px'; ghostFrame.style.top = drawStartY + 'px';
-                            document.body.appendChild(ghostFrame);
-                        }
-
-                        if (activeMode === 'place-img') {
-                            window.lastClickX = e.clientX; window.lastClickY = e.clientY;
-                            window.parent.postMessage({ type: 'inspect-request-image-file' }, '*');
-                        }
-                    };
-
-                    document.body.onmousemove = (e) => {
-                        if (isDragging && selectedEl) {
-                            if (document.body.style.cursor !== 'grabbing') document.body.style.cursor = 'grabbing';
-                            const dx = e.clientX - startX; const dy = e.clientY - startY;
-                            selectedEl.style.transform = \`translate(\${initialTransformX + dx}px, \${initialTransformY + dy}px)\`;
-                            const rect = selectedEl.getBoundingClientRect();
-                            if (editBtn.style.display !== 'none') {
-                                editBtn.style.top = rect.top + 'px'; editBtn.style.left = (rect.left + rect.width - 100) + 'px';
-                            }
-                        }
-                        if (isDrawing && ghostFrame) {
-                            const dx = e.clientX - drawStartX; const dy = e.clientY - drawStartY;
-                            ghostFrame.style.width = Math.abs(dx) + 'px'; ghostFrame.style.height = Math.abs(dy) + 'px';
-                            ghostFrame.style.left = (dx < 0 ? e.clientX : drawStartX) + 'px'; ghostFrame.style.top = (dy < 0 ? e.clientY : drawStartY) + 'px';
-                        }
-                    };
-
-                    document.body.onmouseup = () => {
-                        if (isDragging) {
-                            takeSnapshot();
-                            if (activeMode === 'select' || activeMode === 'drag') document.body.style.cursor = 'grab';
-                        }
-                        isDragging = false;
-                        if (isDrawing && ghostFrame) {
-                            const newDiv = document.createElement('div');
-                            newDiv.style.cssText = ghostFrame.style.cssText.replace('dashed', 'solid').replace('fixed', 'absolute');
-                            newDiv.style.pointerEvents = 'auto'; newDiv.setAttribute('data-atomic-organ', 'New Frame');
-                            document.body.appendChild(newDiv);
-                            document.body.removeChild(ghostFrame); ghostFrame = null; isDrawing = false;
-                            takeSnapshot();
-                        }
-                    };
-
-                    function sendClickMessage(el, rect) {
-                        window.parent.postMessage({
-                            type: 'inspect-click', selector: getSelector(el), tagName: el.tagName.toLowerCase(),
-                            organName: el.getAttribute('data-atomic-organ'), html: el.outerHTML,
-                            rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
-                        }, '*');
-                    }
-
-                    function getSelector(el) {
-                        if (el.id) return '#' + el.id;
-                        let path = []; while (el && el.parentElement) {
-                            let siblingIndex = 1; let sibling = el.previousElementSibling;
-                            while (sibling) { if (sibling.tagName === el.tagName) siblingIndex++; sibling = sibling.previousElementSibling; }
-                            path.unshift(el.tagName.toLowerCase() + ':nth-of-type(' + siblingIndex + ')'); el = el.parentElement;
-                        }
-                        return path.join(' > ');
-                    }
-
-                    const style = document.createElement('style');
-                    style.innerHTML = \`
-                        .inspect-hover { outline: 2px dashed rgba(163, 205, 84, 0.4) !important; outline-offset: -2px; }
-                        .organ-selected { outline: 3px solid #A3CD54 !important; outline-offset: -3px; }
-                        [contenteditable="true"]:focus { outline: none !important; }
-                    \`;
-                    document.head.appendChild(style);
-                })();
-            `;
+    async injectTracker(iframe) {
+        iframe.onload = async () => {
             try {
+                // Fetch le code statique depuis le Host pour éviter les bugs CORS (srcdoc)
+                const res = await fetch('/static/js/workspace/tracker/ws_iframe_core.js');
+                const trackerContent = await res.text();
+                
                 const scriptEl = iframe.contentDocument.createElement('script');
-                scriptEl.textContent = trackerScript;
+                scriptEl.textContent = trackerContent;
                 iframe.contentDocument.body.appendChild(scriptEl);
             } catch (err) { console.error("WsInspect: Injection failed", err); }
         };
     }
-
     snapshot(html) {
         this.historyStack.push(html);
         if (this.historyStack.length > this.maxHistory) this.historyStack.shift();
@@ -354,6 +192,25 @@ class WsInspect {
         this.popover.style.left = `${x}px`; this.popover.style.top = `${y}px`;
         this.popover.classList.add('show'); this.popover.classList.remove('hidden');
         if (!this.editor) this.initMonaco(data.html); else this.editor.setValue(data.html);
+    }
+
+    /**
+     * Ouvre l'éditeur Monaco pour un sélecteur donné en cherchant l'élément dans la preview.
+     */
+    openCodeEditor(selector) {
+        const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (!iframe || !iframe.contentDocument) return;
+        
+        const el = iframe.contentDocument.querySelector(selector);
+        if (!el) { console.warn("WsInspect: element not found for code editor", selector); return; }
+        
+        const data = {
+            selector: selector,
+            rect: el.getBoundingClientRect(),
+            tagName: el.tagName.toLowerCase(),
+            html: el.outerHTML
+        };
+        this.show(data);
     }
 
     hide() { this.isActive = false; this.popover.classList.remove('show'); setTimeout(() => { if (!this.isActive) this.popover.classList.add('hidden'); }, 300); }
@@ -391,6 +248,61 @@ class WsInspect {
     }
 
     hideTypo() { this.typoPopover.classList.remove('show'); setTimeout(() => this.typoPopover.classList.add('hidden'), 300); }
+
+    showEffects(data) {
+        if (this.activeMode !== 'effects') return;
+        if (this.isActive) this.hide();
+        const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        const iframeRect = iframe.getBoundingClientRect();
+        const x = iframeRect.left + data.rect.left + data.rect.width + 15;
+        const y = iframeRect.top + data.rect.top;
+        this.effectsPopover.style.left = `${x}px`; this.effectsPopover.style.top = `${y}px`;
+        this.effectsPopover.classList.add('show'); this.effectsPopover.classList.remove('hidden');
+    }
+
+    hideEffects() { if (this.effectsPopover) this.effectsPopover.classList.remove('show'); setTimeout(() => { if (this.effectsPopover) this.effectsPopover.classList.add('hidden'); }, 300); }
+
+    applyEffects() {
+        const shadow = this.shadowSelect.value;
+        const radius = this.radiusSlider.value + 'px';
+        const border = this.borderSelect.value;
+        const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'inspect-apply-effects', shadow, radius, border }, '*');
+        }
+    }
+
+    applyDesignTokens(tokens) {
+        this.designTokens = tokens;
+        console.log('💎 [M159] Design Tokens Applied:', tokens);
+        
+        // 1. Filtrage des polices
+        if (tokens.fonts && this.fontSelect) {
+            // Garder uniquement les polices autorisées
+            Array.from(this.fontSelect.options).forEach(opt => {
+                const isAllowed = tokens.fonts.includes(opt.value) || opt.value === 'Source Sans 3';
+                opt.style.display = isAllowed ? 'block' : 'none';
+                if (!isAllowed) opt.disabled = true;
+            });
+        }
+
+        // 2. Inféodation de l'UI (Désactiver les outils interdits)
+        if (tokens.colors && tokens.colors.allowCustomColors === false) {
+            const colorBtn = document.querySelector('.ws-tool-btn[data-mode="colors"]');
+            if (colorBtn) { colorBtn.style.opacity = '0.3'; colorBtn.title = '(Désactivé par le Design System)'; }
+        }
+
+        if (tokens.effects) {
+            const effectsBtn = document.querySelector('.ws-tool-btn[data-mode="effects"]');
+            if (!tokens.effects.allowShadows && !tokens.effects.allowBorders && !tokens.effects.allowRadius) {
+                if (effectsBtn) { effectsBtn.style.opacity = '0.3'; effectsBtn.style.pointerEvents = 'none'; }
+            }
+            // Masquage granulaire dans le popover
+            if (this.shadowSelect && !tokens.effects.allowShadows) this.shadowSelect.parentElement.style.display = 'none';
+            if (this.radiusSlider && !tokens.effects.allowRadius) this.radiusSlider.parentElement.style.display = 'none';
+            if (this.borderSelect && !tokens.effects.allowBorders) this.borderSelect.parentElement.style.display = 'none';
+        }
+    }
 
     async applyTypo() {
         let font = this.fontSelect.value;
@@ -509,8 +421,13 @@ window.addEventListener('message', (e) => {
         if (window.wsInspect && e.data.selector) window.wsInspect.currentSelector = e.data.selector;
         window.wsInspect?.showColor(e.data);
         window.wsInspect?.showTypo(e.data);
+        window.wsInspect?.showEffects(e.data);
     }
-    if (e.data.type === 'inspect-selection-cleared') { window.wsInspect?.hideColor(); window.wsInspect?.hideTypo(); }
+    if (e.data.type === 'inspect-selection-cleared') { 
+        window.wsInspect?.hideColor(); 
+        window.wsInspect?.hideTypo(); 
+        window.wsInspect?.hideEffects();
+    }
     if (e.data.type === 'inspect-request-image-file') document.getElementById('ws-internal-image-loader').click();
 });
 

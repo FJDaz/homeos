@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS — Entrée</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        homeos: {
+                            green: '#A3CD54',
+                            dark: '#1A1A1A',
+                            slate: '#64748B',
+                            light: '#F8FAFC',
+                            cream: '#F7F6F2',
+                            text: '#3D3D3C'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Source Sans 3"', 'sans-serif'],
+                        mono: ['"Source Code Pro"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #F7F6F2;
+            color: #3D3D3C;
+            font-family: 'Source Sans 3', sans-serif;
+            letter-spacing: -0.01em;
+            /* Sentence Case implies we don't force lowercase globally anymore */
+        }
+        .hard-edge { border-radius: 0px !important; }
+        
+        .v-nudge {
+            width: 4px;
+            height: 32px;
+            background-color: #A3CD54;
+        }
+
+        /* Surface Nesting Logic (The Rational Playroom) */
+        .card-surface {
+            background-color: #FFFFFF;
+            /* No lines rule: No border. Contrast via tonal shift from #F7F6F2 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02); /* Very subtle depth elevation */
+        }
+
+        .btn-choice {
+            background-color: #F8FAFC;
+            transition: all 0.15s ease;
+            letter-spacing: -0.02em;
+        }
+        .btn-choice:hover {
+            background-color: #F1F5F9;
+        }
+        .btn-choice.active {
+            background-color: #A3CD54;
+            color: #1A1A1A;
+        }
+        
+        /* Ghost Border for accessibility */
+        .ghost-border {
+            outline: 1px solid rgba(172, 173, 173, 0.15);
+        }
+
+        .input-field {
+            background-color: #F8FAFC;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            background-color: #FFFFFF;
+            border-bottom-color: #A3CD54;
+            outline: none;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(to bottom, #A3CD54, #8BB346);
+            color: #1A1A1A;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-sm w-full flex flex-col items-start translate-y-[-10%]">
+        <!-- Visual Anchor (Mission 167 : Vertical Nudge) -->
+        <div class="v-nudge mb-12"></div>
+        
+        <h1 class="text-2xl font-bold tracking-tight mb-2">HoméOS</h1>
+        <p class="text-[12px] text-slate-500 mb-16 font-mono tracking-tight">The Rational Playroom / Vers une ingénierie du design conscient.</p>
+
+        <div class="w-full card-surface hard-edge p-10 ghost-border">
+            <div class="mb-10">
+                <label class="block text-[11px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-6">Cadre d'usage</label>
+                <div class="grid grid-cols-1 gap-px bg-slate-100"> <!-- Grid cell separation via background -->
+                    <button id="choice-formation" onclick="selectContext('formation')" class="btn-choice hard-edge w-full py-5 px-6 text-left flex items-center justify-between group bg-white hover:bg-slate-50">
+                        <div class="flex flex-col">
+                            <span class="text-[14px] font-bold">Cadre de formation</span>
+                            <span class="text-[11px] text-slate-400">Étudiants DNAMDE & Ateliers</span>
+                        </div>
+                    </button>
+                    <button id="choice-pro" onclick="selectContext('pro')" class="btn-choice hard-edge w-full py-5 px-6 text-left flex items-center justify-between group bg-white hover:bg-slate-50">
+                        <div class="flex flex-col">
+                            <span class="text-[14px] font-bold">Projet professionnel</span>
+                            <span class="text-[11px] text-slate-400">Études privées & Déploiement</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="login-fields" class="hidden space-y-6">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 tracking-tight mb-2">Identifiant de session</label>
+                    <input type="text" id="user-id" class="input-field hard-edge w-full px-4 py-3 text-[13px] tracking-tight" placeholder="Exant: dnamde-2026-jean">
+                </div>
+                <button onclick="enterLab()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.15em] hover:opacity-90 transition-opacity">
+                    Entrer dans le labo →
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-20 flex items-center gap-4">
+            <div class="w-2 h-2 bg-homeos-green"></div>
+            <div class="text-[10px] text-slate-300 font-mono tracking-tighter uppercase">
+                Aetherflow / Build 2.0.0-Renaissance
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentContext = null;
+
+        function selectContext(ctx) {
+            currentContext = ctx;
+            document.querySelectorAll('.btn-choice').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`choice-${ctx}`).classList.add('active');
+            
+            const fields = document.getElementById('login-fields');
+            fields.classList.remove('hidden');
+            
+            // Subtle transition
+            fields.style.opacity = '0';
+            setTimeout(() => fields.style.opacity = '1', 50);
+            fields.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        }
+
+        async function enterLab() {
+            const userId = document.getElementById('user-id').value.trim();
+            if (!userId) return;
+
+            localStorage.setItem('homeos_user_id', userId);
+            localStorage.setItem('homeos_context', currentContext);
+
+            console.log(`[AUTH] Logical identity confirmed: ${userId} context: ${currentContext}`);
+            window.location.href = '/workspace';
+        }
+    </script>
+</body>
+</html>

@@ -25,6 +25,12 @@ class WsCanvas {
         this.offsetDragX = 0;
         this.offsetDragY = 0;
 
+        // Resize (Mission 114)
+        this.isResizing = false;
+        this.initialWidth = 0;
+        this.initialHeight = 0;
+        this.SNAP_SIZE = 8;
+
         this.init();
     }
 
@@ -38,7 +44,11 @@ class WsCanvas {
         window.addEventListener('keydown', (e) => { 
             if (e.code === 'Space') this.isSpacePressed = true; 
             if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) return;
-            const modeMap = { 'KeyV': 'select', 'KeyH': 'drag', 'KeyI': 'place-img', 'KeyF': 'frame' };
+            const modeMap = { 
+                'KeyV': 'select', 'KeyH': 'drag', 'KeyI': 'place-img', 
+                'KeyF': 'frame', 'KeyC': 'colors', 'KeyT': 'text', 
+                'KeyE': 'effects', 'KeyD': 'front-dev'
+            };
             if (modeMap[e.code]) this.setMode(modeMap[e.code]);
             if (e.code === 'Digit0') this.resetView();
         });
@@ -88,8 +98,22 @@ class WsCanvas {
         const shell = e.target.closest('.ws-screen-shell');
         if (shell) {
             this.selectScreen(shell);
+            const rect = this.svg.getBoundingClientRect();
+            
+            // Détection Resize (Mission 114)
+            if (e.target.classList.contains('ws-resize-handle')) {
+                this.isResizing = true;
+                this.selectedScreen = shell;
+                this.selectedScreen.classList.add('ws-resizing');
+                const bg = shell.querySelector('.ws-screen-bg');
+                this.initialWidth = parseFloat(bg.getAttribute('width'));
+                this.initialHeight = parseFloat(bg.getAttribute('height'));
+                this.startX = e.clientX;
+                this.startY = e.clientY;
+                return;
+            }
+
             if (this.activeMode === 'select') {
-                const rect = this.svg.getBoundingClientRect();
                 const transformStr = shell.getAttribute('transform') || '';
                 let tx = 0, ty = 0;
                 if (transformStr.includes('matrix')) {
@@ -125,21 +149,79 @@ class WsCanvas {
             this.updateTransform();
             return;
         }
-        if (this.selectedScreen) {
+        if (this.isResizing && this.selectedScreen) {
+            const dx = (e.clientX - this.startX) / this.scale;
+            const dy = (e.clientY - this.startY) / this.scale;
+            
+            // Snap Grid (Mission 114)
+            const newW = Math.max(200, Math.round((this.initialWidth + dx) / this.SNAP_SIZE) * this.SNAP_SIZE);
+            const newH = Math.max(150, Math.round((this.initialHeight + dy) / this.SNAP_SIZE) * this.SNAP_SIZE);
+            
+            this.updateShellDimensions(this.selectedScreen, newW, newH);
+            return;
+        }
+
+        if (this.selectedScreen && !this.isResizing) {
             const rect = this.svg.getBoundingClientRect();
-            const x = (e.clientX - rect.left - this.viewX) / this.scale - this.offsetDragX;
-            const y = (e.clientY - rect.top - this.viewY) / this.scale - this.offsetDragY;
+            let x = (e.clientX - rect.left - this.viewX) / this.scale - this.offsetDragX;
+            let y = (e.clientY - rect.top - this.viewY) / this.scale - this.offsetDragY;
+            
+            // Snap Grid (Mission 114)
+            x = Math.round(x / this.SNAP_SIZE) * this.SNAP_SIZE;
+            y = Math.round(y / this.SNAP_SIZE) * this.SNAP_SIZE;
+            
             this.selectedScreen.setAttribute('transform', `matrix(1 0 0 1 ${x} ${y})`);
         }
     }
 
     handleMouseUp() {
         this.isPanning = false;
+        this.isResizing = false;
+        this.svg.style.cursor = 'grab';
         if (this.selectedScreen) {
-            this.selectedScreen.classList.remove('ws-dragging');
+            this.selectedScreen.classList.remove('ws-dragging', 'ws-resizing');
             this.selectedScreen = null;
         }
         window.wsAudit?.notifyToolbar(null, this.activeMode, this.svg);
+    }
+
+    updateShellDimensions(shell, w, h) {
+        // Fond
+        const bg = shell.querySelector('.ws-screen-bg');
+        bg.setAttribute('width', w);
+        bg.setAttribute('height', h);
+        
+        // Header
+        const header = shell.querySelector('.ws-screen-header');
+        if (header) header.setAttribute('width', w);
+        
+        // Iframe ForeignObject
+        const fos = shell.querySelectorAll('foreignObject');
+        fos.forEach(fo => {
+            if (!fo.classList.contains('ws-forge-overlay')) {
+                fo.setAttribute('width', w);
+                fo.setAttribute('height', h - 40);
+            }
+        });
+
+        // Close Button & tools (repositionnement)
+        const closeBtn = shell.querySelector('.ws-btn-close');
+        if (closeBtn) closeBtn.setAttribute('cx', w - 20);
+        
+        const resizeHandle = shell.querySelector('.ws-resize-handle');
+        if (resizeHandle) {
+            resizeHandle.setAttribute('x', w - 12);
+            resizeHandle.setAttribute('y', h - 12);
+        }
+
+        // Tool buttons repositioning (Aperçu, Wire, Save, Download)
+        const toolButtons = shell.querySelectorAll('.ws-shell-tool');
+        toolButtons.forEach(fo => {
+           const offset = parseFloat(fo.getAttribute('data-right-offset'));
+           if (!isNaN(offset)) {
+               fo.setAttribute('x', w - offset);
+           }
+        });
     }
 
     selectScreen(shell) {
@@ -164,9 +246,12 @@ class WsCanvas {
         const shell = document.getElementById(this.activeScreenId);
         const iframe = shell?.querySelector('iframe');
         if (!iframe) return null;
+        const srcdoc = iframe.srcdoc
+            || iframe.contentDocument?.documentElement?.outerHTML
+            || '';
         return {
             src: iframe.src,
-            srcdoc: iframe.srcdoc,
+            srcdoc,
             name: shell.querySelector('.ws-screen-title')?.textContent || 'Untitled'
         };
     }

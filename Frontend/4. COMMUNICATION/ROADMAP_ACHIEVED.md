@@ -6,6 +6,148 @@
 
 ---
 
+## Mission 187 — Wire Pipeline End-to-End : Forge + Runtime Groq
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-06**
+**ACTOR: Claude (CODE DIRECT — FJD)**
+
+### Ce qui marche
+- `ensure_ids()` : injecte des IDs lisibles (`btn-envoyer`, `lnk-homeos`…) sur tout élément interactif au moment du pre-wire
+- `id` propagé dans `final_elements` (corrigé : champ manquant dans la fusion Sullivan)
+- `POST /api/projects/{project_id}/wire-apply` : patch BeautifulSoup déterministe — 20 éléments maillés sur `cadrage_alt.html` ✅
+- Wire runtime injecté dans le HTML forgé : écoute les clics sur `[data-wire]`, POST `/api/wire-execute`, affiche toast
+- `/api/wire-execute` : appelle Groq (`llama-3.3-70b-versatile`), retourne réponse en JSON
+- Fix `StreamingResponse` sur `/api/cadrage/chat/{provider}` (était un async_generator non wrappé → 500)
+- `getActiveScreenHtml()` : fallback `contentDocument.outerHTML` pour iframes chargées via `src=`
+- `wire-apply` sauvegarde dans `static/templates/{template_name}` (fichier d'origine) + backup `.bak`
+- Script console forge-direct : bypass du liminaire pour test rapide
+
+### Résultat validé FJD
+> "Gloria ! Ah, 'pouet' ! Eh bien, bonjour à toi aussi !" — Groq répond au premier message via le template wiré ✅
+
+### Bugs corrigés ce sprint
+- Loop liminaire sur dernier élément → `_submitLiminaire()` auto sur last element
+- CSS pseudo-sélecteurs → `ensure_ids()` appelé en tête de `/pre-wire`
+- `screen_html manquant` à la forge → fallback `contentDocument.outerHTML` dans `_submitLiminaire`
+- `modified_elements: ['body']` → id propagé dans final_elements + `enriched_html` retourné par pre-wire
+
+---
+
+## Mission 185 — Pré-Wiring : Manifest émergent du template
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-06**
+**ACTOR: GEMINI (2 phases)**
+
+- `POST /api/projects/{project_id}/pre-wire` : BeautifulSoup extrait les éléments interactifs, Sullivan infère les intents, calcule la bijection (`total` / `incomplete` / `null`)
+- `POST /api/projects/{project_id}/pre-wire/validate` : écrit `manifest.json` avec les organes validés par le designer
+- `WsWire.js` : `btnApplyPlan` appelle `/pre-wire` avant tout. Si `bijection === 'total'` → forge directe. Sinon → `_startLiminaire()`
+- `_renderLiminaireUI()` : stepper organe par organe dans l'overlay Wire — tag, texte, intent inféré, oui / éditer / textarea custom
+- `_highlightInIframe()` : postMessage `highlight-intent` vers l'iframe pour visualiser l'élément courant
+- `_submitLiminaire()` : POST `/pre-wire/validate` → manifest écrit → forge déclenchée
+- Fallback `contentDocument.outerHTML` appliqué partout où `screen.srcdoc` peut être vide (iframe chargée via `src=`)
+
+---
+
+## Mission 161 — Sullivan GSAP Bridge
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: QWEN**
+
+- Mode `front-dev` dans Sullivan : prompt GSAP Expert avec wires injectés en contexte
+- Parsing délimiteur `---LOGIC---` → `logic_js` extrait de la réponse LLM
+- `logic.js` écrit dans `projects/{uuid}/logic.js` après chaque réponse Sullivan
+- Route `GET /api/projects/active/logic.js` → sert le fichier JS au browser (fallback vide si absent)
+- Sullivan injecte `<script type="module" src="/api/projects/active/logic.js">` dans le HTML retourné
+
+---
+
+## Mission 165 — DESIGN.md par projet
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: QWEN**
+
+- `GET /api/workspace/tokens` lit `projects/{uuid}/design_tokens.json` si présent, sinon defaults HoméOS
+- Prompt Sullivan (`server_v3.py:653`) : `design_path = get_active_project_path() / "DESIGN.md"` avec fallback template global
+- `parse_design_md()` : parser colors, fonts, shape, effects → `design_tokens.json` projet
+- `POST /api/projects/{uuid}/design-md` → upload + parse → écrit tokens projet
+
+---
+
+## Mission 163 — Frontend : Switcher Projet UI
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: GEMINI**
+
+- `bootstrap.js` : `injectSwitcher()` → `#homeos-project-switcher` injecté dans le nav global
+- CSS : drawer fixe, `opacity + translateY` transition, `.active` toggle
+- Badge `.hn-project` clickable → ouvre/ferme le switcher
+- Branché sur `GET /api/projects`, `POST /api/projects/create`, `PUT /api/projects/activate`
+
+---
+
+## Mission 160 — Mode FEE : Visual Wiring (Trigger → Target)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: GEMINI**
+
+- `WsWire.js` (232L) — gestion overlay wireframe + tracé de liens visuels
+- Sélection en 2 temps : Trigger → Target via `_triggerData` + `_saveWire()`
+- Draft line SVG animée pendant le tracé (`ws-wire-canvas`, `ws-wire-lines`, `ws-wire-draft`)
+- Persistance via `POST /api/projects/{id}/wires` (livré en M162)
+- Intégration workspace : `ws-wire-overlay`, `ws-wire-table-body`, event type select
+
+---
+
+## Mission 162 — Backend : CRUD Projet dynamique
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: QWEN**
+
+- `GET /api/projects` · `POST /api/projects/create` · `PUT /api/projects/activate` · `DELETE /api/projects/{id}`
+- `GET /api/projects/active` · `GET|PUT /api/projects/{id}/manifest`
+- DB SQLite (`projects.db`) — isolation complète par projet
+- `get_active_project_id()` / `set_active_project_id()` dynamiques via `bkd_service`
+- Structure `projects/{uuid}/imports/ exports/ manifests/` opérationnelle
+- Bonus M160 : `POST /api/projects/{id}/wires` livré en avance
+
+---
+
+## Mission 164 — Sullivan Apply : Fix document.write → srcdoc
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: GEMINI (CODE DIRECT)**
+
+- `WsPreview.js:52` : `contentDocument.open/write/close` remplacé par `previewIframe.srcdoc = htmlStatic`
+- `_lastSullivanHtml` setté avant le srcdoc — lecture future préservée
+- Sullivan Apply opérationnel : shadow-xl + border-radius visibles dans le preview
+
+---
+
+## Mission 159 — Design System Intendant (DESIGN.md)
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: GEMINI**
+
+- Route `GET /api/workspace/tokens` dans `server_v3.py` — retourne tokens projet actif
+- `ws_main.js` : fetch tokens au DOMContentLoaded → `inspect.applyDesignTokens(tokens)`
+- `WsInspect.applyDesignTokens()` : filtrage fonts (`fontSelect` options disabled), désactivation outils interdits (`allowCustomColors === false` → btn opacity 0.3), gestion `tokens.effects`
+- UI restrictive opérationnelle : les outils non autorisés par le DESIGN.md sont visuellement neutralisés sans être supprimés
+
+---
+
+## Mission 158 — Mirror Core : Extraction chirurgicale du tracker
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-03**
+**ACTOR: GEMINI**
+
+- `static/js/workspace/tracker/ws_iframe_core.js` créé — IIFE autonome, guard `window.__aetherTrackerLoaded`
+- Tracker extrait de `WsInspect.js` (était inline string ~200L dans `injectTracker`)
+- `WsInspect.injectTracker()` → async, `fetch('/static/js/workspace/tracker/ws_iframe_core.js')` + `createElement('script')` + `textContent`
+- Tous les `postMessage` types préservés : `inspect-click`, `inspect-tool-change`, `inspect-undo`, `inspect-ready-to-place-image`
+- Injection via `textContent` (pas `src=`) → compatible srcdoc + cross-origin localhost
+
+---
+
 ## Mission 151 — Auto-génération manifeste à l'import HTML
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-02**

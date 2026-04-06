@@ -1691,3 +1691,24 @@ body {
   background: var(--border-warm);
   border-radius: 2px;
 }
+
+/* Mission 114 : Canvas v2 UX */
+.ws-resize-handle {
+    cursor: nwse-resize;
+    fill: #e5e7eb;
+    stroke: #d1d5db;
+    stroke-width: 1;
+    transition: all 0.2s ease;
+}
+.ws-resize-handle:hover {
+    fill: #A3CD54;
+    stroke: #8cc63f;
+}
+.ws-resizing .ws-screen-bg {
+    stroke: #A3CD54;
+    stroke-width: 2 !important;
+    stroke-dasharray: 4;
+}
+.ws-dragging .ws-screen-bg {
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}

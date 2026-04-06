@@ -11,13 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const canvas = new WsCanvas('ws-canvas', 'canvas-wrapper');
     window.wsCanvas = canvas;
 
-    // 2. Initialiser le Chat Sullivan
-    const chat = new WsChat('ws-chat-mount');
+    // 2. Initialiser le Chat Sullivan (Main + Surgical)
+    const chat = new WsChatMain('ws-chat-mount');
     window.wsChat = chat;
+    window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover');
+    window.wsWire = new WsWire();
 
     // 2b. Initialiser l'Inspecteur (Mission 130)
     const inspect = new WsInspect(window);
     window.wsInspect = inspect;
+
+    // 2c. Charger les Design Tokens (Mission 159)
+    try {
+        const tokenRes = await fetch('/api/workspace/tokens');
+        const tokens = await tokenRes.json();
+        inspect.applyDesignTokens(tokens);
+    } catch (err) {
+        console.error("❌ ws_main: failed to load design tokens", err);
+    }
 
     // 3. Charger le contexte courant (depuis landing.html)
     await loadCurrentContext();
@@ -39,6 +50,59 @@ document.addEventListener('DOMContentLoaded', async () => {
             const iframe = document.querySelector('#ws-preview-frame-container iframe');
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage({ type: 'inspect-tool-change', mode: mode }, '*');
+            }
+        };
+    });
+
+    // 5b. Setup Mode buttons (Sullivan Panel - Mission 160)
+    document.querySelectorAll('.ws-mode-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            console.log('diag: mode click', e.target);
+            const activeMode = btn.getAttribute('data-mode');
+            // UI Toggle (3 states)
+            document.querySelectorAll('.ws-mode-btn').forEach(b => {
+                const isActive = b === btn;
+                b.classList.toggle('active', isActive);
+                
+                // Mission 147: Reset default classes that might conflict with .active CSS
+                if (!isActive) {
+                    b.classList.add('text-slate-400');
+                    b.classList.remove('bg-white', 'shadow-sm', 'text-slate-600');
+                } else if (activeMode !== 'audit') {
+                    // Default active style for non-audit modes (construct, front-dev)
+                    b.classList.add('bg-white', 'text-slate-600', 'shadow-sm');
+                }
+            });
+            
+            document.body.classList.remove('mode-audit', 'mode-front-dev', 'mode-construct');
+            
+            if (activeMode === 'audit') document.body.classList.add('mode-audit');
+            if (activeMode === 'front-dev') document.body.classList.add('mode-front-dev');
+            if (activeMode === 'construct') document.body.classList.add('mode-construct');
+            
+            document.body.style.cursor = 
+                (activeMode === 'text') ? 'text' :
+                (activeMode === 'frame') ? 'crosshair' :
+                (activeMode === 'drag') ? 'grab' :
+                (activeMode === 'audit') ? 'crosshair' :
+                (activeMode === 'front-dev') ? 'alias' :
+                (activeMode === 'colors') ? 'copy' :
+                (activeMode === 'place-img') ? 'copy' : 'default';
+            
+            window.wsCanvas?.setMode(activeMode);
+            if (activeMode === 'audit' && window.wsWire) {
+                const activeId = window.wsCanvas?.activeScreenId;
+                const shell = activeId ? document.getElementById(activeId) : null;
+                const manifest = shell ? JSON.parse(shell.dataset.manifest || '{}') : {};
+                const title = shell?.querySelector('.ws-screen-title')?.textContent || 'Import';
+                window.wsWire.show(manifest, title);
+            } else if (window.wsWire) {
+                window.wsWire.hide();
+            }
+            
+            const iframe = document.querySelector('#ws-preview-frame-container iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'inspect-tool-change', mode: activeMode }, '*');
             }
         };
     });
@@ -88,8 +152,6 @@ async function fetchWorkspaceImports() {
 
         // Screens système figés (BRS + Workspace actuel)
         const systemScreens = [
-            { id: '_sys_cadrage',    name: 'Cadrage',        tpl: 'cadrage_war_room_tw.html' },
-            { id: '_sys_war_room',   name: 'War Room',       tpl: 'brainstorm_war_room.html' },
             { id: '_sys_cadrage_alt',name: 'Cadrage Alt',    tpl: 'cadrage_alt.html' },
         ];
         list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">système</div>');
@@ -111,6 +173,34 @@ async function fetchWorkspaceImports() {
             };
             list.appendChild(el);
         });
+
+        // Templates "DÉPARTS" (Mission 110 Hotfix)
+        try {
+            const tplRes = await fetch('/api/workspace/templates');
+            const tplData = await tplRes.json();
+            const tpls = tplData.templates || [];
+            
+            if (tpls.length > 0) {
+                list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">départs</div>');
+                tpls.forEach(t => {
+                    const el = document.createElement('div');
+                    el.className = 'import-card-workspace flex flex-col gap-1 group border-b border-slate-100 pb-2 mb-1';
+                    el.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-homeos-green flex items-center justify-center">TPL</div>
+                            <span class="text-[10px] font-bold text-slate-500 truncate">${t.name}</span>
+                        </div>`;
+                    el.style.cursor = 'pointer';
+                    el.onclick = () => {
+                        window.wsCanvas?.addScreen({
+                            id: 'tpl-' + t.name, name: t.name, type: 'html',
+                            html_template: t.tpl, elements_count: 0
+                        });
+                    };
+                    list.appendChild(el);
+                });
+            }
+        } catch(err) { console.error("❌ Mission 110: templates load failed", err); }
 
         list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:6px 0 2px;">imports</div>');
         if (imports.length === 0) {
@@ -232,7 +322,7 @@ function enterPreviewMode(shellId, mode = 'construct') {
     if (!shell || !overlay) return;
 
     // Orchestration Z-Index (Mission 150)
-    if (mode === 'wire') {
+    if (mode === 'audit') {
         overlay.classList.remove('z-[35]', 'bg-transparent');
         overlay.classList.add('z-[100]', 'bg-white/10', 'backdrop-blur-sm');
     } else {
@@ -254,8 +344,8 @@ function enterPreviewMode(shellId, mode = 'construct') {
 
     container.appendChild(iframe);
     
-    // Mission 147 / 150 : Wire Overlay Orchestration
-    if (mode === 'wire' && window.wsWire) {
+    // Mission 147 / 150 : Audit Overlay Orchestration
+    if (mode === 'audit' && window.wsWire) {
         try {
             const manifest = JSON.parse(shell.dataset.manifest || '{}');
             const title = shell.querySelector('.ws-screen-title')?.textContent || 'Sans titre';

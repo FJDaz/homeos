@@ -219,6 +219,9 @@ class WsChat {
             }
         }
 
+        // 4. Wires (M161)
+        const wires = window.wsWire?.getWires() || [];
+        
         const pending = this._appendTransient("Je traite votre demande en mode " + this.currentMode + "...");
 
         try {
@@ -230,7 +233,8 @@ class WsChat {
                     mode: this.currentMode,
                     screen_html: screen_html,
                     canvas_screens: canvas_screens,
-                    selected_element: selected_element
+                    selected_element: selected_element,
+                    wires: wires
                 })
             });
             const data = await res.json();

@@ -19,6 +19,7 @@ import urllib.request
 import zipfile
 import io
 from pathlib import Path
+from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from contextlib import asynccontextmanager
@@ -167,25 +168,114 @@ def get_project_pipeline_dir():
     d.mkdir(parents=True, exist_ok=True)
     return d
 
-# --- PYDANTIC MODELS ---
-class ProjectCreateRequest(BaseModel):
-    name: str
-    id: Optional[str] = None
+def get_manifest_context(project_id: str):
+    """Mission 181: Protocole Sullivan : Manifeste-Driven Identity."""
+    try:
+        if project_id == "active":
+            project_id = get_active_project_id()
+        manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+        if not manifest_path.exists():
+            return "ALERTE : manifeste absent. anatomie non déclarée. rejoignez le mode CADRAGE pour initialiser cet organe."
+        
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+            
+        return f"""
+MANIFESTE DU PROJET (SOURCE DE VÉRITÉ) :
+---
+ARCHETYPE : {manifest.get('archetype', 'non défini')}
+ANATOMIE : {', '.join(manifest.get('anatomy', []))}
+DESIGN TOKENS : {json.dumps(manifest.get('design_tokens', {}))}
+WIRES (CÂBLAGE) : {len(manifest.get('wires', []))} actifs
+---
+"""
+    except Exception as e:
+        logger.error(f"Failed to load manifest context: {e}")
+        return "ALERTE : Échec du chargement du manifeste."
 
-class ProjectActivateRequest(BaseModel):
-    id: str
+# --- PYDANTIC MODELS ---
+# --- MISSION 187 : ID ENGINE ---
+import re, unicodedata
+
+def slugify(text: str, max_len: int = 30) -> str:
+    # Mission 187: Priorité à l'intelligibilité
+    text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode()
+    text = re.sub(r'[^\w\s-]', '', text).strip().lower()
+    text = re.sub(r'[\s_]+', '-', text)
+    return text[:max_len].rstrip('-')
+
+TAG_PREFIXES = {
+    'button': 'btn', 'a': 'lnk', 'input': 'inp', 'form': 'frm',
+    'select': 'sel', 'summary': 'tog', 'textarea': 'inp',
+    'header': 'hdr', 'footer': 'ftr', 'nav': 'nav', 'section': 'sec'
+}
+
+def ensure_ids(html: str) -> str:
+    """Mission 187: Injecte ou renomme les IDs pour qu'ils soient exploitables."""
+    soup = BeautifulSoup(html, 'html.parser')
+    counters = {}
+    
+    # Sélecteurs interactifs et structurants
+    targets = soup.find_all(['button', 'a', 'input', 'form', 'select', 'summary', 'textarea', 'header', 'footer', 'nav', 'section', 'h1', 'h2', 'h3'])
+    
+    for el in targets:
+        current_id = el.get('id', '')
+        # Si l'ID est générique ou absent, on le remplace/génère
+        is_generic = not current_id or re.match(r'^(el|div|section|block|id|tmp|gen)-\d+$', current_id) or len(current_id) < 3
+        
+        if is_generic:
+            prefix = TAG_PREFIXES.get(el.name, 'el')
+            # Extraire du texte, placeholder ou aria-label
+            raw_text = el.get_text(strip=True)[:40] or el.get('placeholder', '') or el.get('aria-label', '') or el.get('name', '')
+            
+            if raw_text:
+                slug = slugify(raw_text)
+                new_id = f"{prefix}-{slug}" if slug else f"{prefix}-{counters.get(prefix, 0)+1}"
+            else:
+                counters[prefix] = counters.get(prefix, 0) + 1
+                new_id = f"{prefix}-{counters[prefix]}"
+            
+            # Gestion des doublons
+            base_id = new_id
+            c = 1
+            while soup.find(id=new_id):
+                new_id = f"{base_id}-{c}"
+                c += 1
+            
+            el['id'] = new_id
+            logger.info(f"Ensured ID: {current_id} -> {new_id}")
+            
+    return str(soup)
 
 class ProjectInfo(BaseModel):
     id: str
     name: str
     path: str
-    created_at: str
-    last_opened: str
+    created_at: Optional[str] = None
+    last_opened: Optional[str] = None
+    active: bool = False
+
+class ProjectActivateRequest(BaseModel):
+    id: str
+
+class ProjectCreateRequest(BaseModel):
+    name: str
+    id: Optional[str] = None
+
+class ProjectManifest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    archetype: Optional[str] = None
+    design_tokens: Optional[Dict] = None
+    screens: Optional[List] = None
+    wires: Optional[List] = None
+    pending_intents: Optional[List] = None
 
 class BKDFileListItem(BaseModel):
-    path: str
     name: str
-    ext: str
+    path: str
+    size: Optional[int] = None
+    modified: Optional[str] = None
 
 class BKDFileListingResponse(BaseModel):
     files: List[BKDFileListItem]
@@ -427,10 +517,16 @@ STATIC_DIR_PATH = CWD / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR_PATH)), name="static")
 
 @app.get("/stenciler")
-async def get_stenciler():
-    path = STATIC_DIR_PATH / "templates/stenciler.html"
-    from fastapi.responses import FileResponse
-    return FileResponse(path)
+async def get_stenciler_redirect():
+    """Mission 168: Redirect ancien /stenciler → /workspace (architecture hexagonale M156)."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/workspace", status_code=301)
+
+@app.get("/stenciler_v3")
+async def get_stenciler_v3_redirect():
+    """Mission 168: Redirect ancien /stenciler_v3 → /workspace."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/workspace", status_code=301)
 
 @app.get("/bkd")
 async def get_bkd_editor():
@@ -611,10 +707,12 @@ async def sullivan_delete_font(slug: str):
 
 class SullivanChatRequest(BaseModel):
     message: str
+    project_id: Optional[str] = "active"
     mode: str = "construct"
     screen_html: Optional[str] = None
     canvas_screens: Optional[list] = None  # [{ id, title, html }]
     selected_element: Optional[dict] = None  # { selector, tag, html } — M154
+    wires: Optional[List[Dict]] = None  # [{ trigger, target, event }] — M161
 
 
 @app.post("/api/sullivan/chat")
@@ -634,9 +732,20 @@ async def sullivan_chat(req: SullivanChatRequest):
         "construct": "Tu es Sullivan, un assistant de design UI/UX et AetherFlow Architect. Aide l'utilisateur à concevoir et forger ses écrans.",
         "inspect": "Tu es Sullivan, inspecteur UI/UX. Analyse le design courant pour identifier des problèmes ergonomiques ou d'accessibilité.",
         "preview": "Tu es Sullivan, critique design. Commente le rendu final de l'interface.",
+        "front-dev": "Tu es Sullivan, Front-End Engineer & Expert GSAP. Ton rôle est de transformer les intentions de design et les connexions (Wires) en animations fluides et professionnelles utilisant la bibliothèque GSAP.",
     }
     
     base_system = mode_context.get(req.mode, mode_context["construct"])
+    
+    # --- MISSION 181 : PROTOCOLE SULLIVAN (MANIFESTE) ---
+    project_id = req.project_id or "active"
+    manifest_context = get_manifest_context(project_id)
+    
+    base_system += f"\n\n{manifest_context}"
+    
+    if "CADRAGE" in manifest_context:
+        # Fallback : Inviter au cadrage si manifest absent
+        base_system += "\nTu ne peux pas effectuer de modifications majeures. Invite poliment l'utilisateur à initialiser son projet via le mode CADRAGE."
 
     # --- MISSION 152 : DESIGN SYSTEM (DESIGN.md) ---
     design_md_block = ""
@@ -651,6 +760,25 @@ DESIGN SYSTEM DU PROJET (RÉFÉRENCE) :
 {design_path.read_text(encoding='utf-8')[:4000]}
 ---
 Utilise ces tokens et ces règles pour garantir la cohérence visuelle si l'utilisateur demande une modification.
+"""
+    except Exception: pass
+
+    # --- MISSION 181 : MANIFEST PROJET (IDENTITÉ & ORGANES) ---
+    manifest_block = ""
+    try:
+        manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+        if manifest_path.exists():
+            manifest_data = json.loads(manifest_path.read_text(encoding='utf-8'))
+            manifest_block = f"""
+MANIFEST DU PROJET (SOURCE DE VÉRITÉ) :
+---
+Nom : {manifest_data.get('name', '?')}
+Description : {manifest_data.get('description', '?')}
+Archétype : {manifest_data.get('archetype', '?')}
+Règles design : {json.dumps(manifest_data.get('design_tokens', {}), ensure_ascii=False)}
+Organes déclarés : {json.dumps([o for s in manifest_data.get('screens', []) for c in s.get('corps', []) for o in c.get('organes', [])], ensure_ascii=False)[:2000]}
+---
+Respecte strictement ces règles de design. Chaque organe déclaré doit avoir un équivalent dans le HTML.
 """
     except Exception: pass
 
@@ -681,15 +809,14 @@ Si l'utilisateur demande une modification visuelle, une correction ou un ajout :
 L'utilisateur parle probablement de cet élément spécifiquement. Si tu modifies le screen, cible en priorité cet élément et ses descendants directs.
 """
 
-    # --- MISSION 152 : AUTRES ÉCRANS DU CANVAS (LECTURE SEULE) ---
+    # --- MISSION 142 : AUTRES ÉCRANS ---
     other_screens_block = ""
     if req.canvas_screens:
         parts = []
-        for s in req.canvas_screens[:3]:  # Max 3 screens supplémentaires
-            parts.append(f"=== ÉCRAN : {s.get('title','?')} (id: {s.get('id','?')}) ===\n{s.get('html','')[:6000]}")
-        if parts:
-            parts_joined = "\n\n".join(parts)
-            other_screens_block = f"""
+        for s in req.canvas_screens:
+            parts.append(f"SCREEN [{s.get('id','?')}] TITLE: {s.get('title','Sans Titre')}\nHTML:\n{s.get('html','')[:1000]}")
+        parts_joined = "\n\n---\n\n".join(parts)
+        other_screens_block = f"""
 AUTRES ÉCRANS PRÉSENTS SUR LE CANVAS (LECTURE SEULE - RÉFÉRENCE) :
 ---
 {parts_joined}
@@ -697,19 +824,43 @@ AUTRES ÉCRANS PRÉSENTS SUR LE CANVAS (LECTURE SEULE - RÉFÉRENCE) :
 Ces écrans sont fournis pour comparaison et contexte. Tu ne peux pas les modifier directement, mais tu dois t'en inspirer pour la cohérence.
 """
 
-    system_prompt = f"""{base_system}
+    # --- MISSION 161 : WIRES & GSAP ---
+    wires_block = ""
+    if req.wires:
+        wires_json = json.dumps(req.wires, indent=2)
+        wires_block = f"""
+CONNEXIONS VISUELLES (WIRES) DÉTECTÉES :
+---
+{wires_json}
+---
+Utilise ces paires Trigger/Target pour générer des animations GSAP intelligentes.
+Par exemple, si Trigger='button' et Target='menu', anime le menu lors de l'interaction sur le bouton.
+"""
+
+    system_prompt = f"""
+{base_system}
+
+{manifest_block}
+
 {design_md_block}
+
 {selected_block}
+
 {context_html_block}
+
 {other_screens_block}
 
+{wires_block}
+
 RÈGLES DE RÉPONSE :
-Réponds avec ce format exact (deux blocs séparés par des délimiteurs) :
+Réponds avec ce format exact (trois blocs séparés par des délimiteurs) :
 
 ---EXPLANATION---
 Ton explication courte ici (1-3 phrases).
 ---HTML---
-<!DOCTYPE html>... (le HTML complet de l'ÉCRAN ACTIF uniquement, ou le mot NULL si aucune modification)
+<!DOCTYPE html>... (le HTML complet de l'ÉCRAN ACTIF uniquement, avec injection automatique de <script type="module" src="/api/projects/active/logic.js"></script> si besoin)
+---LOGIC---
+// Ton code GSAP ici. Utilise des imports ESM pour GSAP (ex: import gsap from "https://esm.sh/gsap").
 ---END---
 
 Pas de prose, pas de markdown, pas de JSON.
@@ -726,22 +877,40 @@ Pas de prose, pas de markdown, pas de JSON.
 
         raw_text = result.code.strip()
 
-        # Parsing par délimiteurs
+        # Parsing par délimiteurs (Mission 161: Support ---LOGIC---)
         explanation = None
         html = None
-        if "---EXPLANATION---" in raw_text and "---HTML---" in raw_text:
+        logic_js = None
+        
+        if "---EXPLANATION---" in raw_text:
             try:
-                exp_part = raw_text.split("---EXPLANATION---")[1].split("---HTML---")[0].strip()
-                html_part = raw_text.split("---HTML---")[1].split("---END---")[0].strip()
-                explanation = exp_part
-                html = None if html_part.upper() == "NULL" or not html_part.startswith("<") else html_part
-            except Exception:
+                explanation = raw_text.split("---EXPLANATION---")[1].split("---")[0].strip()
+                
+                if "---HTML---" in raw_text:
+                    html_part = raw_text.split("---HTML---")[1].split("---")[0].strip()
+                    html = None if html_part.upper() == "NULL" or not html_part.startswith("<") else html_part
+                
+                if "---LOGIC---" in raw_text:
+                    logic_part = raw_text.split("---LOGIC---")[1].split("---")[0].strip()
+                    logic_js = None if logic_part.upper() == "NULL" else logic_part
+                    
+            except Exception as e:
+                logger.error(f"Sullivan parsing error: {e}")
                 explanation = raw_text
         else:
-            # Fallback : texte brut, pas de HTML
             explanation = raw_text
 
-        return {"explanation": explanation or "Traitement terminé.", "html": html}
+        # Sauvegarde de la logique dans logic.js (Mission 161)
+        if logic_js:
+            try:
+                p_path = get_active_project_path()
+                if p_path:
+                    (p_path / "logic.js").write_text(logic_js, encoding='utf-8')
+                    logger.info(f"Sullivan: GSAP logic saved to {p_path}/logic.js")
+            except Exception as e:
+                logger.error(f"Failed to save logic.js: {e}")
+        
+        return {"explanation": explanation, "html": html, "logic_js": logic_js}
 
     except Exception as e:
         logger.error(f"Sullivan chat failed: {e}")
@@ -777,15 +946,50 @@ async def get_design_tokens():
         "source": "homeos_default"
     }
 
-# --- ROUTES : PROJECTS (Mission 111) ---
+# --- ROUTES : PROJECTS (Mission 111 + 162) ---
+
+ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
+
+def get_active_project_id() -> Optional[str]:
+    """Retourne l'ID du projet actif depuis le fichier active_project.json."""
+    if ACTIVE_PROJECT_FILE.exists():
+        try:
+            data = json.loads(ACTIVE_PROJECT_FILE.read_text(encoding='utf-8'))
+            return data.get("active_id")
+        except:
+            return None
+    return None
+
+def set_active_project_id(project_id: str):
+    """Sauvegarde l'ID du projet actif dans active_project.json."""
+    ACTIVE_PROJECT_FILE.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
+
+def get_project_manifest(project_id: str) -> Dict[str, Any]:
+    """Lit le manifest.json d'un projet."""
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    if manifest_path.exists():
+        try:
+            return json.loads(manifest_path.read_text(encoding='utf-8'))
+        except:
+            return {}
+    return {}
+
+def save_project_manifest(project_id: str, manifest: Dict[str, Any]):
+    """Sauvegarde le manifest.json d'un projet."""
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
 
 @app.get("/api/projects/active", response_model=ProjectInfo)
 async def get_active_project_route():
+    active_id = get_active_project_id()
+    if not active_id:
+        raise HTTPException(status_code=404, detail="No active project")
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
-        row = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects WHERE id=?", 
-                           (get_active_project_id(),)).fetchone()
+        row = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects WHERE id=?",
+                           (active_id,)).fetchone()
         if not row: raise HTTPException(status_code=404, detail="Active project not found")
-        return ProjectInfo(id=row[0], name=row[1], path=row[2], created_at=row[3], last_opened=row[4])
+        return ProjectInfo(id=row[0], name=row[1], path=row[2], created_at=row[3], last_opened=row[4], active=True)
 
 @app.post("/api/projects/activate")
 async def activate_project(req: ProjectActivateRequest):
@@ -793,36 +997,109 @@ async def activate_project(req: ProjectActivateRequest):
         exists = conn.execute("SELECT id FROM projects WHERE id=?", (req.id,)).fetchone()
         if not exists: raise HTTPException(status_code=404, detail="Project not found")
         conn.execute("UPDATE projects SET last_opened=datetime('now') WHERE id=?", (req.id,))
-    
+
     set_active_project_id(req.id)
     logger.info(f"Project activated: {get_active_project_id()}")
     return {"status": "ok", "active_id": get_active_project_id()}
 
+@app.get("/api/projects/active/logic.js")
+async def get_active_logic_js():
+    """Mission 161: Sert le fichier logic.js du projet actif."""
+    p_path = get_active_project_path()
+    f_path = p_path / "logic.js"
+    if not f_path.exists():
+        return HTMLResponse(content="// logic.js not found", media_type="application/javascript")
+    return FileResponse(f_path, media_type="application/javascript")
+
 @app.get("/api/projects", response_model=List[ProjectInfo])
 async def list_all_projects_route():
+    active_id = get_active_project_id()
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
-        return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4]) for r in rows]
+        return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4], active=(r[0] == active_id)) for r in rows]
 
 @app.post("/api/projects/create")
 async def create_project_route(req: ProjectCreateRequest):
     pid = req.id or str(uuid.uuid4())[:8] # Small IDs for slugs
     p_path = PROJECTS_DIR / pid
     p_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Init subfolders
     (p_path / "imports").mkdir(exist_ok=True)
     (p_path / "exports").mkdir(exist_ok=True)
     (p_path / "assets").mkdir(exist_ok=True)
-    
+
+    # Create manifest.json minimal
+    manifest = {
+        "name": req.name,
+        "archetype": None,
+        "screens": [],
+        "created_at": datetime.now().isoformat()
+    }
+    save_project_manifest(pid, manifest)
+
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         try:
-            conn.execute("INSERT INTO projects (id, name, path) VALUES (?,?,?)", 
+            conn.execute("INSERT INTO projects (id, name, path) VALUES (?,?,?)",
                          (pid, req.name, str(p_path)))
         except sqlite3.IntegrityError:
             raise HTTPException(status_code=400, detail="Project ID already exists")
-            
+
     return {"status": "ok", "id": pid}
+
+@app.delete("/api/projects/{project_id}")
+async def delete_project_route(project_id: str):
+    """Mission 162: Supprime un projet (dossier + DB entry)."""
+    p_path = PROJECTS_DIR / project_id
+    if not p_path.exists():
+        raise HTTPException(status_code=404, detail="Project folder not found")
+
+    # Supprimer le dossier
+    shutil.rmtree(p_path)
+
+    # Supprimer de la DB
+    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+        conn.execute('DELETE FROM projects WHERE id=?', (project_id,))
+
+    # Si c'était le projet actif, reset
+    if get_active_project_id() == project_id:
+        ACTIVE_PROJECT_FILE.unlink(missing_ok=True)
+
+    logger.info(f"Project deleted: {project_id}")
+    return {"status": "ok", "deleted": project_id}
+
+@app.get("/api/projects/{project_id}/manifest")
+async def get_project_manifest_route(project_id: str):
+    """Retourne le manifest.json d'un projet."""
+    manifest = get_project_manifest(project_id)
+    if not manifest:
+        raise HTTPException(status_code=404, detail="Manifest not found")
+    return manifest
+
+@app.put("/api/projects/{project_id}/manifest")
+async def update_project_manifest_route(project_id: str, manifest: ProjectManifest):
+    """Met à jour le manifest.json d'un projet."""
+    p_path = PROJECTS_DIR / project_id
+    if not p_path.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    manifest_data = manifest.model_dump()
+    save_project_manifest(project_id, manifest_data)
+    return {"status": "ok", "manifest": manifest_data}
+
+@app.post("/api/projects/{project_id}/wires")
+async def add_project_wire_route(project_id: str, wire: dict = Body(...)):
+    """Mission 160: Ajoute un 'wire' (câblage visuel) au projet."""
+    manifest = get_project_manifest(project_id)
+    if "wires" not in manifest: manifest["wires"] = []
+    
+    # Éviter les doublons exacts
+    exists = any(w for w in manifest["wires"] if w.get("trigger") == wire.get("trigger") and w.get("target") == wire.get("target"))
+    if not exists:
+        manifest["wires"].append(wire)
+        save_project_manifest(project_id, manifest)
+    
+    return {"status": "ok", "wires_count": len(manifest["wires"])}
 
 @app.get("/api/bkd/projects", response_model=Dict[str, List[ProjectInfo]])
 async def list_bkd_projects():
@@ -1104,10 +1381,19 @@ async def save_frd_file(req: FRDFileRequest):
 
 
 # --- ROUTES : FRD FILES LIST ---
-@app.get("/api/frd/files")
-async def list_frd_files():
-    files = sorted([f.name for f in (STATIC_DIR_PATH / "templates").glob("*.html")])
-    return {"files": files}
+@app.get("/api/workspace/templates")
+async def list_workspace_templates():
+    """Mission 110: Liste les templates de base pour le workspace."""
+    tpl_dir = STATIC_DIR_PATH / "templates"
+    if not tpl_dir.exists(): return {"templates": []}
+    
+    # On filtre pour ne garder que les templates "nobles" (pas les imports ou tmp)
+    files = []
+    for f in tpl_dir.glob("*.html"):
+        if f.name.startswith(("import_", "reality_", "_")): continue
+        files.append({"name": f.name.replace(".html", ""), "tpl": f.name})
+    
+    return {"templates": sorted(files, key=lambda x: x["name"])}
 
 # --- ROUTES : FRD ASSETS ---
 @app.get("/api/frd/assets")
@@ -1443,11 +1729,14 @@ async def retro_chat(body: Dict[str, Any]):
 async def cadrage_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...)):
     """SSE endpoint for multi-model chat in Cadrage."""
     from fastapi.responses import StreamingResponse
-    try:
-        async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message):
-            yield chunk
-    except Exception as e:
-        logger.error(f"Cadrage Chat SSE Error: {e}")
+    async def generate():
+        try:
+            async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message):
+                yield chunk
+        except Exception as e:
+            logger.error(f"Cadrage Chat SSE Error: {e}")
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 @app.post("/api/cadrage/capture")
 async def cadrage_capture(body: Dict[str, Any]):
@@ -1472,7 +1761,7 @@ async def cadrage_rank(body: Dict[str, Any]):
 
 @app.get("/cadrage")
 async def get_cadrage():
-    path = STATIC_DIR_PATH / "templates/cadrage_war_room_tw.html"
+    path = STATIC_DIR_PATH / "templates/cadrage_alt.html"
     if not path.exists(): raise HTTPException(status_code=404)
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=path.read_text(encoding='utf-8'))
@@ -1573,7 +1862,18 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
     today_dir = exports_dir / today_str
     today_dir.mkdir(parents=True, exist_ok=True)
     file_path = today_dir / stored_filename
+    
     content = await file.read()
+    
+    # MISSION 187 : Nettoyage & IDs sémantiques à l'import
+    if ext == '.html':
+        try:
+            html_content = content.decode('utf-8')
+            html_content = ensure_ids(html_content)
+            content = html_content.encode('utf-8')
+        except Exception as e:
+            logger.error(f"Failed to ensure IDs during import: {e}")
+
     file_path.write_bytes(content)
     
     # Update index.json
@@ -1902,6 +2202,38 @@ class GraftRequest(BaseModel):
     selector: str
     html_content: str
 
+@app.get("/api/workspace/tokens")
+async def get_workspace_tokens():
+    """
+    Mission 159 : Design System Intendant.
+    Retourne les jetons de design du projet actif (ou HoméOS par défaut).
+    """
+    try:
+        project_path = get_active_project_path()
+        tokens_path = project_path / "design_tokens.json"
+        
+        if tokens_path.exists():
+            with open(tokens_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        
+        # Fallback HoméOS Standard
+        return {
+          "fonts": ["Source Sans 3", "Geist", "Inter", "Roboto"],
+          "colors": {
+            "palette": ["#A3CD54", "#1a1a1a", "#f5f5f5", "#ffffff", "#64748b"],
+            "allowCustomColors": True
+          },
+          "effects": {
+            "allowShadows": True,
+            "allowBorders": True,
+            "allowRadius": True,
+            "defaultRadius": "20px"
+          }
+        }
+    except Exception as e:
+        logger.error(f"Error fetching design tokens: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/workspace/graft")
 async def workspace_graft(payload: GraftRequest):
     """
@@ -1969,6 +2301,452 @@ async def get_landing():
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=path.read_text(encoding='utf-8'))
 
+# --- MISSION 147 : WIRE AUDIT & SURGICAL (CLEA UX) ---
+
+class SurgicalDiagRequest(BaseModel):
+    selector: str
+    html: str
+
+class PreWireRequest(BaseModel):
+    screen_html: str
+
+class PreWireValidation(BaseModel):
+    selector: str
+    tag: str
+    text: str
+    inferred_intent: str
+    confirmed: bool
+    custom_intent: Optional[str] = None
+
+class PreWireValidateRequest(BaseModel):
+    validations: List[PreWireValidation]
+
+@app.get("/api/projects/{project_id}/wire-audit")
+async def wire_audit(project_id: str):
+    """Bilan de santé du maillage selon le Corpus CLEA."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+    project_path = PROJECTS_DIR / project_id
+    manifest_path = project_path / "manifest.json"
+    if not manifest_path.exists():
+        manifest_path = ROOT_DIR / "exports" / "manifest.json"
+    
+    manifest = {}
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except: manifest = {}
+    
+    analyzer = WireAnalyzer(ROOT_DIR)
+    registered_routes = []
+    for route in app.routes:
+        if hasattr(route, "path"):
+            registered_routes.append(route.path)
+    
+    audit = []
+    # Aplatir la structure screens[].corps[].organes[] en liste de composants
+    raw_components = manifest.get("components", [])
+    if not raw_components:
+        for screen in manifest.get("screens", []):
+            for corps in screen.get("corps", []):
+                for organe in corps.get("organes", []):
+                    raw_components.append(organe)
+    components = raw_components
+    backend_map = analyzer._get_backend_mapping()
+
+    for comp in components:
+        name = comp.get("name") or comp.get("label") or comp.get("id")
+        intent = comp.get("role") or comp.get("intent") or comp.get("label") or "action"
+        endpoint = backend_map.get(name) or backend_map.get(intent)
+        
+        status = "todo"
+        if endpoint:
+            match = any(r.rstrip('/') == endpoint.rstrip('/') for r in registered_routes)
+            status = "ok" if match else "error"
+        
+        audit.append({
+            "organ": name,
+            "intent": intent,
+            "endpoint": endpoint or "non défini",
+            "status": status
+        })
+    
+    plan = "# Plan d'Action (Revue Bionique)\n\n"
+    gaps = [a for a in audit if a["status"] != "ok"]
+    if not gaps:
+        plan += "Votre projet est sain. Tous les organes sont correctement maillés au corps de l'application."
+    else:
+        for item in gaps:
+            # Remplacement de la prose 'poétique' par du 'DNMADE-friendly' (Direct & Valeur)
+            action = f"Relier l'organe '{item['organ']}' à sa fonction '{item['intent']}'"
+            plan += f"- [ ] **Action** : {action}\n"
+    
+    return {"audit": audit, "plan": plan}
+
+@app.post("/api/projects/{project_id}/pre-wire")
+async def pre_wire(project_id: str, req: PreWireRequest):
+    """Mission 185 : Sullivan extrait les intentions du template (Infilling)."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+    
+    processed_html = ensure_ids(req.screen_html)
+    soup = BeautifulSoup(processed_html, 'html.parser')
+    interactives = []
+
+    # Sélecteurs d'éléments interactifs
+    tags = soup.find_all(['button', 'a', 'summary'])
+    inputs = soup.find_all('input', type=['submit', 'button', 'reset'])
+    onclicks = soup.find_all(lambda t: t.has_attr('onclick') and t.name not in ['button', 'a'])
+    
+    for i, el in enumerate(tags + inputs + onclicks):
+        # Générer un sélecteur simple (id ou tag + index)
+        selector = f"#{el['id']}" if el.has_attr('id') else f"{el.name}:nth-of-type({i+1})"
+        text = el.get_text(strip=True)[:50] or el.get('value', '') or el.get('placeholder', '') or "Sans label"
+        
+        interactives.append({
+            "selector": selector,
+            "tag": el.name,
+            "text": text,
+            "id": el.get('id', ''),
+            "class": " ".join(el.get('class', []))
+        })
+
+    if not interactives:
+        return {"elements": [], "bijection": "null", "manifest_exists": False}
+
+    # Appel Sullivan pour inférence d'intents
+    project_path = PROJECTS_DIR / project_id
+    manifest_path = project_path / "manifest.json"
+    manifest_exists = manifest_path.exists()
+    manifest_data = {}
+    if manifest_exists:
+        try: manifest_data = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except: manifest_exists = False
+
+    prompt = f"""Tu es Sullivan, l'Expert BRS HoméOS. 
+Voici des éléments d'interface. Pour chacun, devine son label (nom humain) et son intent (code_action).
+RÉPONDS UNIQUEMENT EN JSON : [{{ "selector": "...", "label": "...", "intent": "..." }}, ...]
+
+ÉLÉMENTS :
+{json.dumps(interactives[:20], ensure_ascii=False)}
+"""
+    config = _ARBITRATOR.pick("quick")
+    res = await asyncio.to_thread(_ARBITRATOR.dispatch, config, [{"role":"user", "content": prompt}])
+    inferred = []
+    try:
+        # Nettoyage JSON si le LLM met des markdowns
+        cleaned_json = res.get("text", "[]").strip()
+        if "```json" in cleaned_json:
+            cleaned_json = cleaned_json.split("```json")[1].split("```")[0].strip()
+        elif "```" in cleaned_json:
+            cleaned_json = cleaned_json.split("```")[1].split("```")[0].strip()
+        inferred = json.loads(cleaned_json)
+    except Exception as e:
+        logger.error(f"Failed to parse Sullivan inference: {e}")
+
+    # Calcul de la bijection
+    existing_intents = []
+    for s in manifest_data.get("screens", []):
+        for c in s.get("corps", []):
+            for o in c.get("organes", []):
+                existing_intents.append(o.get("id") or o.get("role"))
+
+    final_elements = []
+    matches = 0
+    for inf in inferred:
+        matched = inf.get("intent") in existing_intents
+        if matched: matches += 1
+        
+        # Retrouver les infos d'origine (tag, text)
+        orig = next((x for x in interactives if x['selector'] == inf.get('selector')), {})
+        
+        final_elements.append({
+            "selector": inf.get("selector"),
+            "id": orig.get("id", ""),
+            "tag": orig.get("tag", "div"),
+            "text": orig.get("text", "Sans texte"),
+            "inferred_intent": inf.get("intent"),
+            "endpoint": inf.get("endpoint", ""),
+            "matched": matched
+        })
+
+    bijection = "total" if matches == len(final_elements) else "incomplete"
+    if matches == 0: bijection = "null"
+
+    return {
+        "elements": final_elements,
+        "bijection": bijection,
+        "manifest_exists": manifest_exists,
+        "enriched_html": str(soup)  # HTML avec IDs injectés par ensure_ids()
+    }
+
+@app.post("/api/projects/{project_id}/pre-wire/validate")
+async def pre_wire_validate(project_id: str, req: PreWireValidateRequest):
+    """Mission 185 : Sullivan met à jour le manifeste après validation humaine."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+    
+    project_path = PROJECTS_DIR / project_id
+    manifest_path = project_path / "manifest.json"
+    
+    manifest = {"name": project_id, "screens": [{"id": "workspace", "corps": [{"id": "main", "organes": []}]}]}
+    if manifest_path.exists():
+        try: manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except: pass
+
+    # Extraction des organes actuels pour éviter les doublons
+    if "screens" not in manifest or not manifest["screens"]:
+        manifest["screens"] = [{"id": "workspace", "corps": [{"id": "main", "organes": []}]}]
+    
+    organs = manifest["screens"][0]["corps"][0]["organes"]
+    pending = manifest.get("pending_intents", [])
+    
+    count = 0
+    for val in req.validations:
+        if not val.confirmed:
+            # MISSION 187 : Stockage en attente si non confirmé (les "autre")
+            pending.append({
+                "selector": val.selector,
+                "text": val.text,
+                "tag": val.tag,
+                "note": val.custom_intent or "utilisateur à défini 'autre'"
+            })
+            continue
+        
+        intent = val.custom_intent or val.inferred_intent
+        # Chercher si l'organe existe déjà par son intent
+        existing = next((o for o in organs if o.get("id") == intent or o.get("role") == intent), None)
+        
+        if existing:
+            existing["name"] = val.text
+            existing["selector"] = val.selector
+        else:
+            organs.append({
+                "id": intent,
+                "name": val.text,
+                "role": intent,
+                "selector": val.selector
+            })
+        count += 1
+
+    manifest["pending_intents"] = pending
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
+    logger.info(f"✅ [WiRE] Manifeste mis à jour ({count} organes validés, {len(pending)} en attente) pour {project_id}")
+    
+    return {"status": "success", "organs_count": count, "pending_count": len(pending)}
+
+@app.post("/api/projects/{project_id}/wire-apply")
+async def wire_apply_plan(project_id: str, req: Dict[str, Any]):
+    """Mission 187 : Forge déterministe (Plus de LLM). Applique les validations confirmées."""
+    if project_id == "active": project_id = get_active_project_id()
+    
+    screen_html = req.get("screen_html")
+    validations = req.get("validations", [])
+    if not screen_html: return {"status": "error", "message": "screen_html manquant"}
+
+    try:
+        from bs4 import BeautifulSoup as BS
+        soup = BS(screen_html, 'html.parser')
+        modified_elements = []
+
+        for v in validations:
+            el_id = v.get('id')
+            intent = v.get('intent') or v.get('inferred_intent')
+            endpoint = v.get('endpoint')
+            if not el_id or not intent: continue
+                
+            el = soup.find(id=el_id)
+            if el:
+                el['data-wire'] = intent
+                if endpoint: el['data-endpoint'] = endpoint
+                modified_elements.append(f"#{el_id}")
+
+        new_html = str(soup)
+
+        # Sauvegarder dans le template d'origine si fourni
+        template_name = req.get("template_name")
+        import shutil
+        if template_name and '/' not in template_name and '..' not in template_name:
+            template_file = STATIC_DIR_PATH / "templates" / template_name
+            if template_file.exists():
+                shutil.copy2(template_file, template_file.with_suffix('.html.bak'))
+                template_file.write_text(new_html, encoding='utf-8')
+                logger.info(f"Forge saved to {template_file}")
+
+        # Injecter le runtime Wire dans le HTML forgé
+        wire_runtime = """<script>
+(function(){
+    const WIRE_BASE = window.parent?.location?.origin || window.location.origin;
+    function showToast(msg, ok){
+        let t = document.getElementById('_wire_toast');
+        if(!t){ t = document.createElement('div'); t.id='_wire_toast';
+            t.style.cssText='position:fixed;bottom:24px;right:24px;z-index:99999;padding:12px 20px;border-radius:10px;font-size:13px;font-family:system-ui,sans-serif;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:opacity .3s';
+            document.body.appendChild(t); }
+        t.style.background = ok ? '#f0fce8' : '#fff3cd';
+        t.style.color = ok ? '#2d5a0e' : '#856404';
+        t.style.border = ok ? '1px solid #8cc63f' : '1px solid #ffc107';
+        t.textContent = msg; t.style.opacity='1';
+        clearTimeout(t._hide); t._hide = setTimeout(()=>{ t.style.opacity='0'; }, 5000);
+    }
+    async function execute(wire, userInput, endpoint){
+        showToast('⏳ ' + wire + '…', true);
+        try {
+            const base = window.parent?.location?.origin || 'http://localhost:9998';
+            const res = await fetch(base + '/api/wire-execute', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ wire, user_input: userInput, endpoint })
+            });
+            const data = await res.json();
+            showToast(data.response || data.message || '✓ action exécutée', true);
+        } catch(e) { showToast('❌ erreur wire : ' + e.message, false); }
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+        document.querySelectorAll('[data-wire]').forEach(el => {
+            const wire = el.getAttribute('data-wire');
+            const endpoint = el.getAttribute('data-endpoint') || '';
+            el.addEventListener('click', e => {
+                // Chercher un input texte associé (dans le même form ou parent proche)
+                const container = el.closest('form') || el.parentElement;
+                const input = container?.querySelector('textarea,input[type=text],input:not([type])');
+                const userInput = input?.value || '';
+                if(el.tagName === 'A') e.preventDefault();
+                execute(wire, userInput, endpoint);
+            });
+        });
+    });
+})();
+</script>"""
+        if '</head>' in new_html:
+            new_html = new_html.replace('</head>', wire_runtime + '\n</head>')
+        else:
+            new_html = wire_runtime + new_html
+
+        return {"status": "success", "html": new_html, "modified_elements": modified_elements or []}
+    except Exception as e:
+        logger.error(f"❌ [WiRE] Échec de la Forge Déterministe : {e}")
+        return {"status": "error", "message": str(e)}
+
+
+_wire_preview_html: str = ""
+
+@app.post("/wire-preview")
+async def set_wire_preview(req: Dict[str, Any]):
+    global _wire_preview_html
+    _wire_preview_html = req.get("html", "")
+    return {"status": "ok"}
+
+@app.get("/wire-preview")
+async def get_wire_preview():
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=_wire_preview_html or "<p>aucun preview</p>")
+
+@app.post("/api/wire-execute")
+async def wire_execute(req: Dict[str, Any]):
+    """Runtime Wire : intercepte une action et appelle Groq."""
+    wire = req.get("wire", "")
+    user_input = req.get("user_input", "")
+    endpoint = req.get("endpoint", "")
+
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        return {"response": f"[wire:{wire}] GROQ_API_KEY manquant"}
+
+    system = (
+        f"Tu es un assistant IA branché sur l'interface HoméOS.\n"
+        f"L'utilisateur a déclenché l'action : '{wire}'.\n"
+        f"Réponds de manière courte et utile (1-3 phrases max)."
+    )
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user_input or f"action: {wire}"},
+        ],
+        "temperature": 0.7,
+        "max_tokens": 200,
+    }
+    try:
+        import urllib.request as urlreq
+        r = urlreq.Request(url, data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}", "User-Agent": "AetherFlow/1.0"})
+        with urlreq.urlopen(r, timeout=15) as resp:
+            data = json.loads(resp.read())
+        response = data["choices"][0]["message"]["content"].strip()
+        return {"response": response}
+    except Exception as e:
+        logger.error(f"[wire-execute] erreur Groq : {e}")
+        return {"response": f"erreur groq : {e}"}
+
+@app.post("/api/projects/{project_id}/wire-catchup")
+async def wire_catchup(project_id: str):
+    """Mission 187 : Sullivan suggère des intentions/endpoints pour les 'autre' mis en attente."""
+    if project_id == "active": project_id = get_active_project_id()
+    
+    project_path = PROJECTS_DIR / project_id
+    manifest_path = project_path / "manifest.json"
+    if not manifest_path.exists(): return {"status": "error", "message": "Manifeste introuvable"}
+    
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    pending = manifest.get("pending_intents", [])
+    if not pending: return {"status": "success", "suggestions": []}
+
+    prompt = f"""Tu es Sullivan, l'Expert de Maillage AetherFlow (Corpus CLEA).
+MISSION : Suggère des intentions (intent) et des endpoints (METHOD /path) pour ces éléments mis en attente.
+
+ÉLÉMENTS EN ATTENTE :
+{json.dumps(pending, ensure_ascii=False)}
+
+RÈGLES DE NOMMAGE (CLEA) :
+- intent : snake_case (ex: valider_commande, voir_profil)
+- endpoint : METHODE /chemin (ex: POST /api/cart/validate, GET /api/user/profile)
+
+Réponds UNIQUEMENT avec un JSON pur sous ce format :
+[
+  {{"id": "id-de-l-element", "intent": "suggestion_intent", "endpoint": "METHOD /suggestion/path"}},
+  ...
+]
+"""
+    try:
+        config = _ARBITRATOR.pick("construction")
+        res = await asyncio.to_thread(_ARBITRATOR.dispatch, config, [{"role":"user", "content": prompt}])
+        text = res.get("text", "[]")
+        
+        # Nettoyage JSON
+        if "```json" in text: text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text: text = text.split("```")[1].split("```")[0].strip()
+        
+        suggestions = json.loads(text)
+        return {"status": "success", "suggestions": suggestions}
+    except Exception as e:
+        logger.error(f"Error in wire-catchup: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/projects/{project_id}/surgical-diag")
+async def surgical_diag(project_id: str, req: SurgicalDiagRequest):
+    """Diagnostic chirurgical ciblé (CLEA UX)."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+        
+    manifest_context = get_manifest_context(project_id)
+
+    prompt = f"""Tu es Sullivan, l'Arbitre de Maillage HoméOS (Corpus CLEA).
+{manifest_context}
+CONTEXTE : L'utilisateur inspecte un organe spécifique qui semble présenter un défaut de câblage.
+ORGANE (Sélecteur) : {req.selector}
+EXTRAIT HTML : {req.html[:1000]}
+
+MISSION : Produis un diagnostic "Bilan de Santé" court et sémantique (style CLEA).
+- Utilise le "Fil d'Ariane émotionnel" : rassurer l'utilisateur.
+- Utilise "L'erreur qui guide" : explique comment réparer le pont serveur.
+- Jargon technique INTERDIT (pas de 'endpoint', '404', 'api'). Utilise 'Pont Serveur', 'Flux', 'Maillage', 'Organe'.
+
+Réponds en 3-4 lignes maximum. Pas de prose, pas de markdown complexe.
+"""
+    config = _ARBITRATOR.pick("quick")
+    res = await asyncio.to_thread(_ARBITRATOR.dispatch, config, [{"role":"user", "content": prompt}])
+    return {"explanation": res.get("text", "Diagnostic indisponible.")}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=9998)
+    uvicorn.run("server_v3:app", host="0.0.0.0", port=9998, reload=True)

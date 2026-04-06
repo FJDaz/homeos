@@ -9,7 +9,11 @@
       "Bash(python3 *)",
       "Bash(find *)",
       "Bash(pip install *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(pkill *)",
+      "Bash(nohup *)",
+      "Bash(cat *)",
+      "Bash(ls *)"
     ]
   },
   "$version": 3
