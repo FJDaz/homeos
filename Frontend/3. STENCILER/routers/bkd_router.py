@@ -12,7 +12,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 # --- LOGGING ---
@@ -47,6 +48,9 @@ from bkd_service import (
     resolve_bkd_project_root, bkd_safe_path, bkd_build_tree,
     BKD_DB_PATH, bkd_db_con, PROJECTS_DIR as BKD_PROJECTS_DIR,
     get_active_project_id, set_active_project_id, get_active_project_path,
+    BKD_ALLOWED_EXTENSIONS, BKD_EXCLUDE_DIRS,
+    conv_create, conv_append, conv_get, conv_list, conv_auto_title,
+    SULLIVAN_FEE_SYSTEM, get_fee_logic, save_fee_logic,
 )
 
 from sullivan_arbitrator import SullivanArbitrator, SullivanPulse
@@ -84,13 +88,25 @@ class ChatRequest(BaseModel):
     message: str
     history: List[Dict[str, str]] = []
     project_id: Optional[str] = None
+    role: str = "architect"  # architect | worker
+    conversation_id: Optional[str] = None
+
+class ConversationInfo(BaseModel):
+    id: str
+    project_id: str
+    role: str
+    title: str
+    updated_at: str
+
+class ConversationDetail(ConversationInfo):
+    content_json: str
 
 class ChatResponse(BaseModel):
     explanation: str
     html: Optional[str] = None
-    model: str
     route: str
     provider: str
+    conversation_id: Optional[str] = None
 
 class FileWriteRequest(BaseModel):
     project_id: str
@@ -212,6 +228,44 @@ async def write_file(req: FileWriteRequest):
     file_path.write_text(req.content, encoding='utf-8')
     return {"ok": True, "path": req.path, "size": len(req.content)}
 
+# --- CONVERSATIONS ---
+
+@router.get("/conversations", response_model=List[ConversationInfo])
+async def list_conversations(project_id: str = Query(...), role: Optional[str] = None):
+    with get_db_conn() as conn:
+        q = "SELECT id, project_id, role, title, updated_at FROM conversations WHERE project_id = ?"
+        params = [project_id]
+        if role:
+            q += " AND role = ?"
+            params.append(role)
+        q += " ORDER BY updated_at DESC"
+        rows = conn.execute(q, params).fetchall()
+        return [ConversationInfo(id=r[0], project_id=r[1], role=r[2], title=r[3], updated_at=r[4]) for r in rows]
+
+@router.get("/conversations/{conv_id}", response_model=ConversationDetail)
+async def get_conversation(conv_id: str):
+    with get_db_conn() as conn:
+        row = conn.execute("SELECT id, project_id, role, title, updated_at, content_json FROM conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        return ConversationDetail(id=row[0], project_id=row[1], role=row[2], title=row[3], updated_at=row[4], content_json=row[5])
+
+@router.post("/conversations/{conv_id}/append")
+async def append_to_conversation(conv_id: str, turn: Dict[str, Any] = Body(...)):
+    """Ajoute un tour (role: user|assistant, content: str) à une conversation existante."""
+    with get_db_conn() as conn:
+        row = conn.execute("SELECT content_json FROM conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        history = json.loads(row[0])
+        history.append(turn)
+        
+        conn.execute("UPDATE conversations SET content_json = ?, updated_at = datetime('now') WHERE id = ?", 
+                     (json.dumps(history), conv_id))
+        conn.commit()
+    return {"ok": True}
+
 # --- BKD CHAT ---
 @router.post("/chat", response_model=ChatResponse)
 async def bkd_chat_endpoint(req: ChatRequest):
@@ -229,9 +283,22 @@ async def bkd_chat_endpoint(req: ChatRequest):
                 tree_names = ', '.join(n['name'] for n in tree[:20])
                 project_ctx = f'\nPROJET ACTIF : {root}\nFICHIERS RACINE : {tree_names}\n'
 
-        system_instruction = SULLIVAN_BKD_SYSTEM + project_ctx + '\n\nMANIFEST PROJET :\n' + MANIFEST_FRD
+        # 3. Dispatch & History Management
+        from bkd_service import conv_auto_title
+        
+        conv_id = req.conversation_id
+        if not conv_id:
+            conv_id = str(uuid.uuid4())
+            # Création initiale
+            title = conv_auto_title(req.message, root) if req.project_id else "Nouvelle conversation"
+            with get_db_conn() as conn:
+                conn.execute(
+                    "INSERT INTO conversations (id, project_id, role, title, content_json) VALUES (?, ?, ?, ?, ?)",
+                    (conv_id, req.project_id or "homéos-default", req.role, title, json.dumps([]))
+                )
+                conn.commit()
 
-        # Tools wiring (Gemini style as used in dispatch)
+        # Tools wiring...
         tools = [{
             'functionDeclarations': [
                 {
@@ -247,7 +314,6 @@ async def bkd_chat_endpoint(req: ChatRequest):
             ]
         }]
 
-        # Simplification of the loop for M85 (porting existing logic)
         messages = [{"role": turn.get('role', 'user'), "content": turn.get('text', '')} for turn in req.history[-12:]]
         messages.append({"role": "user", "content": req.message})
 
@@ -282,12 +348,143 @@ async def bkd_chat_endpoint(req: ChatRequest):
                 final_text = res.get("text", "")
                 break
 
+        # Persister le tour dans la DB
+        with get_db_conn() as conn:
+            row = conn.execute("SELECT content_json FROM conversations WHERE id = ?", (conv_id,)).fetchone()
+            if row:
+                hist = json.loads(row[0])
+                hist.append({"role": "user", "content": req.message})
+                hist.append({"role": "assistant", "content": final_text})
+                conn.execute(
+                    "UPDATE conversations SET content_json = ?, updated_at = datetime('now') WHERE id = ?", 
+                    (json.dumps(hist), conv_id)
+                )
+                conn.commit()
+
         return ChatResponse(
             explanation=final_text,
             model=config['model'],
             route=route_type,
-            provider=config['provider']
+            provider=config['provider'],
+            conversation_id=conv_id  # Retourner le conv_id pour le frontend
         )
     except Exception as e:
         logger.error(f"BKD Chat error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# --- CONVERSATION HISTORY ROUTES ---
+
+class ConvCreateRequest(BaseModel):
+    project_id: str
+    role: str = "architect"
+    title: Optional[str] = None
+
+class ConvAppendRequest(BaseModel):
+    role: str  # 'user' | 'assistant'
+    text: str
+
+@router.post("/conversations")
+async def create_conversation(req: ConvCreateRequest):
+    cid = conv_create(req.project_id, req.role, req.title)
+    return {"id": cid}
+
+@router.get("/conversations")
+async def list_conversations(project_id: str = Query(...), limit: int = Query(5)):
+    return {"conversations": conv_list(project_id, limit)}
+
+@router.get("/conversations/{conv_id}")
+async def get_conversation(conv_id: str):
+    conv = conv_get(conv_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conv
+
+@router.post("/conversations/{conv_id}/append")
+async def append_to_conversation(conv_id: str, req: ConvAppendRequest):
+    conv_append(conv_id, req.role, req.text)
+    conv_auto_title(conv_id)
+    return {"ok": True}
+
+@router.delete("/conversations/{conv_id}")
+async def delete_conversation(conv_id: str):
+    with bkd_db_con() as con:
+        con.execute("DELETE FROM conversations WHERE id=?", (conv_id,))
+    return {"ok": True}
+
+
+# --- FEE LAB ROUTES ---
+
+@router.get("/fee/preview", response_class=HTMLResponse)
+async def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
+    """Sert le HTML brut d'un fichier projet pour l'iframe FEE."""
+    root = resolve_bkd_project_root(project_id)
+    if not root:
+        raise HTTPException(status_code=404, detail="Project not found")
+    file_path = bkd_safe_path(root, path)
+    if not file_path or not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
+
+
+@router.get("/fee/presets")
+async def get_fee_presets():
+    """Charge le catalogue des presets GSAP."""
+    path = CWD / "static/fee_presets.json"
+    if not path.exists():
+        return {"presets": []}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@router.get("/fee/logic")
+async def get_fee_logic_route(project_id: str = Query(...), screen: str = Query(...)):
+    """Lit le code logic/{screen}.js."""
+    content = get_fee_logic(project_id, screen)
+    return {"content": content, "screen": screen}
+
+
+@router.post("/fee/logic")
+async def save_fee_logic_route(req: Dict[str, Any] = Body(...)):
+    """Sauvegarde le code logic/{screen}.js."""
+    project_id = req.get("project_id")
+    screen = req.get("screen")
+    content = req.get("content")
+    if not project_id or not screen:
+        raise HTTPException(status_code=400, detail="Missing project_id or screen")
+    save_fee_logic(project_id, screen, content)
+    return {"ok": True}
+
+
+@router.post("/fee/chat")
+async def fee_chat_endpoint(req: ChatRequest):
+    """Chat spécialisé Sullivan FEE (GSAP Expert)."""
+    try:
+        # On utilise Sullivan FEE System Prompt
+        system = SULLIVAN_FEE_SYSTEM
+        
+        # Arbitrage simplifié (Geist/Kimi/Gemini-2.0-Flash recommandé pour le code rapide)
+        config = _ARBITRATOR.pick("code-simple")
+        
+        # Limiter l'historique pour Sullivan FEE
+        messages = [{"role": turn.get('role', 'user'), "content": turn.get('text', '')} for turn in req.history[-6:]]
+        messages.append({"role": "user", "content": req.message})
+        
+        # Appel Sullivan Arbitrator
+        res = _ARBITRATOR.dispatch(config, messages, system=system)
+        
+        if not res.get("success"):
+            raise HTTPException(status_code=500, detail=res.get("error", "FEE Dispatch error"))
+            
+        return ChatResponse(
+            explanation=res.get("text", ""),
+            model=config['model'],
+            route="fee-lab",
+            provider=config['provider'],
+            conversation_id=req.conversation_id
+        )
+    except Exception as e:
+        logger.error(f"FEE Chat error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+

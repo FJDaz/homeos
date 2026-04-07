@@ -1,0 +1,34 @@
+{
+    "presets": [
+        {
+            "id": "magnetic",
+            "name": "Magnetic",
+            "prompt": "Applique un effet magnétique subtil sur l'élément sélectionné au survol du curseur.",
+            "vibe": "premium-soft"
+        },
+        {
+            "id": "stagger-fade",
+            "name": "Stagger Fade",
+            "prompt": "Anime l'entrée de tous les enfants du conteneur sélectionné avec un fade-in progressif (stagger) et un léger slide vers le haut.",
+            "vibe": "orderly"
+        },
+        {
+            "id": "float-breathe",
+            "name": "Breathe",
+            "prompt": "Crée une animation de flottement infinie (y: +/- 5px) avec une easing sinusoidale pour donner de la vie à l'élément.",
+            "vibe": "organic"
+        },
+        {
+            "id": "parallax-scroll",
+            "name": "Parallax",
+            "prompt": "Utilise ScrollTrigger pour créer un effet de parallaxe inverse sur l'élément au défilement de la page.",
+            "vibe": "interactive"
+        },
+        {
+            "id": "glow-pulse",
+            "name": "Glow Pulse",
+            "prompt": "Ajoute une pulsation de l'ombre portée (drop-shadow ou glow) synchronisée sur une timeline infinie.",
+            "vibe": "attention"
+        }
+    ]
+}

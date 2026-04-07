@@ -565,3 +565,435 @@ Ce chapitre formalise la vision long-terme pour la gestion des interactions, de 
 - Applique et forge uniquement les lignes cochées.
 
 **⚠️ AVERTISSEMENT DESIGN : Ne conservez AUCUNE trace de `rounded-xl` ou `rounded-full` dans les nouveaux composants. La netteté Hard-Edge est impérative.**
+
+---
+
+## Thème 15 — FEE Lab : Studio d'Étalonnage Interactif
+
+> **Positionnement :** Le FEE Lab n'est pas un outil de construction — c'est un outil d'étalonnage. Comme Camera RAW dans Photoshop : on ouvre l'expérience déjà vivante et on ajuste sa sensibilité. GSAP, P5.js, Lenis, haptique. L'étudiant est Directeur Artistique, Sullivan est le pont entre l'émotion et le code.
+>
+> **Accès :** popover plein écran au-dessus du workspace (bouton FEE dans le header), non destructif — fermer ramène au workspace intact.
+>
+> **Doctrine Pristine Logic :** le code généré en FEE est isolé dans un bloc `// [FEE-LOGIC]` dans `logic.js` du projet. Il ne pollue jamais le HTML/CSS de base.
+
+---
+
+### Mission 209 — FEE Lab : Architecture & Layout
+**STATUS: ✅ COMPLETED**
+**DATE: 2026-04-07**
+**ACTOR: GEMINI (Cadrage ALT Design)**
+**Dépendance : M200-A ✅ (data-af-id), M167 ✅ (DESIGN.md)**
+
+**CR Technique :**
+- **Cadrage ALT** : Implémentation du design monolithique (Radius 20px, Border 0px, Shadow 2XL).
+- **Sécurité Navigation** : Isolation structurelle via IDs dédiés pour préserver le Workspace.
+- **Pristine Logic** : Persistance ségréguée par écran dans `logic/{screen}.js`.
+- **Sullivan FEE** : Activé et configuré pour l'étalonnage GSAP premium.
+
+---
+
+## Thème 14 — Backend IDE : War Room Multi-Agents
+
+### Mission 208 — Backend FRD : Layout 3 colonnes + Agents Architecte / Ouvrier
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-07**
+**ACTOR: GEMINI**
+**Dépendance : backend livré (bkd_service.py conversations ✅, bkd_router.py routes ✅)**
+
+> BOOTSTRAP OBLIGATOIRE : lire le bloc BOOTSTRAP GEMINI en tête de ce fichier avant de coder.
+
+**Contexte :** `bkd_frd.html` est l'IDE backend d'HoméOS. Il a aujourd'hui un layout 2 colonnes (explorer + éditeur) avec un panel Sullivan collé à droite. On le restructure en War Room multi-agents selon le principe cognitif du **sens de lecture = hiérarchie d'attention** : le plus stratégique à gauche, le plus opérationnel à droite.
+
+---
+
+**Layout cible :**
+
+```
+[ Architecte ]  [ Roadmap ]  [ Ouvrier ]
+[ Terminal A  ]             [ Terminal O ]
+```
+
+- **Colonne gauche — Architecte** : chat Sullivan BKD (`/api/bkd/chat`, role `architect`). Il pense, planifie, suggère des patches. C'est le premier œil, la première colonne.
+- **Colonne centre — Roadmap** : lecture de `/api/bkd/file?project_id=...&path=HOMEO_GENOME.md` (ou `ROADMAP.md` si absent). Affichage Markdown rendu. Icône "recompiler" → `POST /api/projects/active/genome-compile`. L'explorateur de fichiers passe ici en accordéon collapsible au-dessus de la Roadmap.
+- **Colonne droite — Ouvrier** : chat role `worker`. Il exécute les instructions de l'Architecte. Fil séparé, historique séparé.
+- **Terminal bas gauche** : logs de l'Architecte (steps, plan, fichiers ciblés).
+- **Terminal bas droite** : output de l'Ouvrier (code généré, résultat de Wire Check, erreurs).
+
+Le footer actuel (un seul terminal) devient deux `div` scrollables indépendantes côte à côte.
+
+---
+
+**Fichiers à modifier :**
+
+- `static/templates/bkd_frd.html` — restructuration complète du layout : `grid-cols-[280px_1fr_280px]`, double terminal en footer, suppression de l'ancien panel Sullivan monolithique
+- `static/js/workspace/WsBackend.js` — **nouveau fichier** : orchestre les deux fils de chat, le Quick-Switcher historique, et le rendu Markdown centre
+
+---
+
+**WsBackend.js — fonctionnalités :**
+
+```js
+class WsBackend {
+    // État
+    this.projectId = null          // projet BKD actif
+    this.archConvId = null         // conv Architecte courante
+    this.workConvId = null         // conv Ouvrier courante
+
+    // Méthodes
+    init()                         // charge projet actif, crée/reprend convs, charge historique
+    sendArchitect(message)         // POST /api/bkd/chat (role architect) → terminal gauche
+    sendWorker(message)            // POST /api/bkd/chat (role worker) → terminal droit
+    loadRoadmap()                  // GET /api/bkd/file → render Markdown dans colonne centre
+    compileGenome()                // POST /api/projects/active/genome-compile → feedback terminal gauche
+    quickSwitcher()                // GET /api/bkd/conversations?project_id → liste 5 dernières convs
+    resumeConv(convId, role)       // reprend une conv existante
+}
+```
+
+**Quick-Switcher historique :**
+- En haut de chaque colonne agent : un `<select>` ou liste déroulante montrant les 5 dernières conversations du rôle correspondant
+- Titre auto-généré depuis `conv_auto_title()` (détecte `M\d+` ou premiers 60 chars)
+- Clic → recharge l'historique dans le panel correspondant
+
+---
+
+**Agents et routes :**
+
+| Action | Route | Role |
+|--------|-------|------|
+| Message Architecte | `POST /api/bkd/chat` | `architect` |
+| Message Ouvrier | `POST /api/bkd/chat` | `worker` |
+| Sauvegarder turn | `POST /api/bkd/conversations/{id}/append` | — |
+| Historique | `GET /api/bkd/conversations?project_id=...` | — |
+| Compiler Génome | `POST /api/projects/active/genome-compile` | — |
+| Lire Roadmap | `GET /api/bkd/file?project_id=...&path=HOMEO_GENOME.md` | — |
+
+---
+
+**Design HoméOS strict :**
+- `0px border-radius` partout
+
+---
+
+### Mission 210 — Réorganisation Documentaire Frontend
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-07**
+**ACTOR: GEMINI**
+
+- **Dossier Docs 09** : Isolation complète de la documentation UI/UX.
+- **Manifeste Frontend** : Clarification Doctrine vs Intelligence Sullivan.
+- **Migration** : Nettoyage du dossier `02_Sullivan` par déplacement de 7 documents stratégiques.
+- Fond `#f7f6f2`, séparateurs `#e5e5e5`, texte `#3d3d3c`
+- Vert `#8cc63f` uniquement en nudge (bordure active, point connecté, label rôle)
+- Labels minuscules : "architecte", "ouvrier", "roadmap", "compiler le génome"
+- Police Geist (ou Inter déjà chargé) 11-12px
+- Terminal : fond `#1e1e1e`, texte `#8cc63f` (Architecte) / `#9a9a98` (Ouvrier)
+
+---
+
+---
+
+**Colonne centrale — éditeur à onglets :**
+
+La colonne centrale n'est plus un seul affichage. C'est un système d'onglets :
+
+- **Onglet `roadmap`** — permanent, non fermable. Affiche `HOMEO_GENOME.md` rendu en Markdown. Bouton discret "recompiler" en coin.
+- **Onglet `plan — [agent]`** — créé automatiquement quand l'Architecte ou l'Ouvrier soumet un plan. Fermable (×). Remplace la Roadmap au premier plan pendant la lecture du plan.
+- **Onglet `[fichier.py]`** — créé au clic sur un fichier dans l'explorateur. Fermable.
+
+Logique : la Roadmap est le contexte de référence. Le plan de l'agent vient la recouvrir temporairement pour que FJD le lise et valide avant toute exécution.
+
+---
+
+**Plan avant run (Architecte et Ouvrier) :**
+
+Avant d'exécuter quoi que ce soit, chaque agent soumet un plan structuré. Le plan apparaît dans la colonne centrale en onglet `plan — architecte` ou `plan — ouvrier` (fermable).
+
+Format attendu du plan (Sullivan le génère dans ce bloc) :
+
+```
+## plan
+
+**fichiers ciblés :**
+- `routers/bkd_router.py` — ajout route POST /conversations
+- `bkd_service.py` — ajout table conversations
+
+**étapes :**
+1. Créer table SQL conversations avec champs (id, project_id, role, title…)
+2. Exposer conv_create() et conv_list() dans bkd_service
+3. Monter les routes dans bkd_router
+
+**risques :**
+- Migration DB si table déjà partiellement créée → CREATE TABLE IF NOT EXISTS
+
+**validation attendue :**
+FJD confirme avant exécution ("go" / "modifie X" / "annule")
+```
+
+`WsBackend.js` détecte le bloc `## plan` dans la réponse → ouvre l'onglet plan dans la colonne centrale → bloque l'envoi du message suivant tant que FJD n'a pas répondu "go" ou une correction.
+
+---
+
+**Structure projet par défaut (nouveau projet BKD) :**
+
+Tout projet créé dans HoméOS reçoit une arborescence de départ reflétant la structure Communication + Constitution du projet AetherFlow — c'est la structure professionnelle de référence, libre au user de la modifier.
+
+`bkd_service.py` — fonction `scaffold_project(project_path: Path)` appelée à la création :
+
+```
+{project}/
+├── 1. CONSTITUTION/
+│   ├── CONSTITUTION.md        ← règles du projet, acteurs, frontières
+│   ├── API_CONTRACT.md        ← routes exposées, format request/response
+│   └── DESIGN.md              ← copie du template DESIGN.md HoméOS
+├── 2. COMMUNICATION/
+│   ├── ROADMAP.md             ← missions actives (format HoméOS)
+│   └── ROADMAP_ACHIEVED.md   ← archive append-only
+├── 3. BACKEND/                ← code source backend
+├── 4. FRONTEND/               ← code source frontend
+└── HOMEO_GENOME.md            ← compilé par genome-compile
+```
+
+`CONSTITUTION.md`, `API_CONTRACT.md`, `ROADMAP.md`, `ROADMAP_ACHIEVED.md` sont pré-remplis avec des templates minimaux HoméOS (en-tête, sections, instructions). `DESIGN.md` est copié depuis `Frontend/1. CONSTITUTION/DESIGN.md`.
+
+Route à créer : `POST /api/bkd/projects` (si elle n'existe pas) appelle `scaffold_project()` à la création.
+
+---
+
+**Livrable — test manuel FJD :**
+1. `bkd_frd.html` → 3 colonnes visibles, double terminal en bas
+2. Colonne centre → onglet "roadmap" permanent + onglets fichiers fermables
+3. Message Architecte → plan détecté → onglet "plan — architecte" s'ouvre en centre
+4. "go" → exécution → log terminal gauche
+5. Message Ouvrier → même mécanique, terminal droit
+6. Nouveau projet → arborescence scaffoldée avec Constitution + Communication + DESIGN.md
+7. Quick-Switcher → reprend une conversation historique dans le panel correspondant
+
+---
+
+## Thème 16 — HoméOS EdTech : Parcours Étudiant DNMADE
+
+> **Philosophie :** Zéro compte, zéro donnée perso. L'étudiant sélectionne son nom dans sa classe, démarre son projet. Le prof voit l'avancement en temps réel et évalue sur une grille DNMADE. Le système pré-évalue, FJD annote par-dessus — chaque correction devient un exemple pour le suivant.
+
+---
+
+### Mission 214 — Classes & Roster : Admin + Login Étudiant
+**STATUS: 🟢 IMPLÉMENTÉE**
+**DATE: 2026-04-07**
+**ACTOR: QWEN**
+
+**Contexte :** Permettre à FJD de créer une classe, coller la liste d'étudiants en format brut (NOM Prénom, une ligne vide entre chaque), et aux étudiants de démarrer sans compte ni mot de passe.
+
+---
+
+**Livrable 1 — Parser liste étudiants (backend)**
+
+Format d'entrée brut :
+```
+BLART Samuel
+
+
+BLIN Zoé
+
+
+CALAIS Jeanne
+```
+
+Route `POST /api/classes/{class_id}/roster` — body `{ raw: "<texte brut>" }` :
+- Splitter sur lignes vides multiples
+- Chaque bloc non-vide → `{ id: slug(NOM_Prenom), display: "BLART Samuel", nom: "BLART", prenom: "Samuel" }`
+- Stocker dans `classes` table DB + fichier `classes/{class_id}/roster.json`
+- Retourner la liste parsée pour confirmation
+
+Slugify : `NOM_Prenom` → `blart-samuel` (lowercase, accents normalisés, tirets conservés, espaces → tirets).
+
+---
+
+**Livrable 2 — DB Schema**
+
+Tables à créer dans `init_bkd_db()` :
+
+```sql
+CREATE TABLE IF NOT EXISTS classes (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    subject TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    id TEXT PRIMARY KEY,        -- slug: "blart-samuel"
+    class_id TEXT NOT NULL,
+    display TEXT NOT NULL,      -- "BLART Samuel"
+    nom TEXT NOT NULL,
+    prenom TEXT NOT NULL,
+    project_id TEXT,            -- projet HoméOS associé (null au départ)
+    milestone INTEGER DEFAULT 0, -- 0→5
+    FOREIGN KEY (class_id) REFERENCES classes(id)
+);
+```
+
+---
+
+**Livrable 3 — Routes backend**
+
+```
+POST /api/classes                          → créer une classe {name, subject}
+GET  /api/classes                          → liste classes
+GET  /api/classes/{id}/students            → liste étudiants avec milestone + project_id
+POST /api/classes/{id}/roster              → parser + importer liste brute
+POST /api/classes/{id}/students/{sid}/start → créer projet HoméOS pour l'étudiant → retourne project_id
+PUT  /api/classes/{id}/students/{sid}/milestone → mettre à jour milestone {level: 0-5}
+```
+
+---
+
+**Livrable 4 — UI Login Étudiant (`/student-login`)**
+
+Page simple (GEMINI) :
+```
+[ HoméOS ]
+
+choisissez votre classe :
+[ DNMADE 2026 ▾ ]
+
+choisissez votre nom :
+[ BLART Samuel ▾ ]
+[ CALAIS Jeanne   ]
+[ BLIN Zoé        ]
+...
+
+[ démarrer mon projet → ]
+```
+
+- Sélection classe → charge liste étudiants via `GET /api/classes/{id}/students`
+- Sélection nom → `POST /api/classes/{id}/students/{sid}/start` → redirige vers `/workspace?project_id={id}`
+- Si `project_id` déjà existant → reprendre directement sans recréer
+- Session stockée en `localStorage` : `{ student_id, class_id, project_id }`
+
+**Design HoméOS strict** — 0px radius, `#f7f6f2`, Geist 12px, labels minuscules.
+
+---
+
+**Livrable — test FJD :**
+1. `POST /api/classes` → classe "DNMADE 2026" créée
+2. `POST /api/classes/dnmade-2026/roster` avec la liste brute → 18 étudiants parsés
+3. `/student-login` → sélectionner "BLART Samuel" → projet créé → workspace chargé
+4. Reprendre : même sélection → même projet repris
+
+---
+
+### Mission 215 — Milestone Tracker : Détection Automatique
+**STATUS: 🟢 IMPLÉMENTÉE**
+**DATE: 2026-04-07**
+**ACTOR: QWEN**
+
+**Contexte :** Le système détecte automatiquement jusqu'où l'étudiant est allé en inspectant l'état de son projet.
+
+**Milestones :**
+- **N0** : Projet créé (défaut)
+- **N1** : Manifest rédigé + maquette importée (`imports/` non vide + `manifest.json` avec titre)
+- **N2** : Wire validé (`exports/index.json` contient entrée avec `wire_validated: true`)
+- **N3** : Forge réussie (fichier HTML dans `exports/` avec `archetype_id != stitch_import`)
+- **N4** : Sullivan interactions (`logic/` non vide ou `[FEE-LOGIC]` dans un fichier)
+- **N5** : Déployé (`manifest.json` contient `deployed_url`)
+
+Route `POST /api/classes/{id}/students/{sid}/detect-milestone` → inspecte le projet → màj milestone → retourne `{ level, label }`.
+
+Appelée automatiquement à chaque action significative (pull Stitch, forge, wire-apply, fee save).
+
+---
+
+### Mission 216 — Dashboard Prof : Vue Classe Temps Réel
+**STATUS: 🟢 IMPLÉMENTÉE**
+**DATE: 2026-04-07**
+**ACTOR: QWEN**
+
+**URL :** `/teacher` (accès direct, pas d'auth pour l'instant)
+
+**Layout :**
+```
+[ DNMADE 2026 ▾ ]   [ sujet actif ]   [ recompiler ]
+
+BLART Samuel      ████░░  N2 — Wire validé       [ évaluer → ]
+BLIN Zoé          ██░░░░  N1 — Maquette importée  [ évaluer → ]
+CALAIS Jeanne     ░░░░░░  N0 — Démarré            [ évaluer → ]
+...
+```
+
+- Barre de progression N0→N5, couleur `#8cc63f`
+- Refresh automatique toutes les 30s
+- `[ évaluer → ]` → ouvre la vue évaluation de l'étudiant
+
+---
+
+### Mission 217 — Évaluation DNMADE : Grille + Pré-éval LLM
+**STATUS: 🟢 IMPLÉMENTÉE**
+**DATE: 2026-04-07**
+**ACTOR: QWEN**
+
+**Contexte :** FJD ouvre le projet d'un étudiant, voit la maquette + le manifest. Le LLM a déjà produit une pré-évaluation structurée sur les compétences DNMADE concernées. FJD annote par-dessus. Chaque annotation devient un exemple few-shot injecté dans le prochain prompt de pré-éval.
+
+**Compétences DNMADE embarquées** dans `core/dnmade_referentiel.json` :
+- Domaine A : Création (A1 Recherche, A2 Concept, A3 Réalisation)
+- Domaine B : Communication (B1 Présentation, B2 Argumentation)
+- Domaine C : Technique (C1 Outils numériques, C2 Production, C3 Qualité)
+- Domaine D : Culture (D1 Références, D2 Analyse)
+
+**Pré-éval LLM** : lit `manifest.json` + screenshot de la maquette (si dispo) + `HOMEO_GENOME.md` → produit pour chaque compétence ciblée par le sujet : `{ niveau: "acquis|en_cours|non_acquis", justification: "..." }`.
+
+**Few-shot progressif** : chaque fois que FJD modifie la pré-éval, la correction est stockée dans `core/eval_corrections.jsonl`. Les 10 dernières corrections sont injectées en few-shot dans le prochain prompt.
+
+**Livrable :**
+1. Grille compétences avec pré-éval LLM pré-remplie
+2. FJD modifie → sauvegarde → note calculée automatiquement
+3. Export PDF de la grille (via `window.print()`)
+
+---
+
+**CR — COMPTE-RENDU D'IMPLÉMENTATION MISSIONS 214–217 ✅**
+**DATE: 2026-04-07**
+**ACTOR: QWEN**
+
+**Fichiers créés :**
+- `routers/class_router.py` — Routes classes, roster, student login, milestone, dashboard prof, pré-éval DNMADE
+- `core/dnmade_referentiel.json` — Référentiel 4 domaines, 11 compétences DNMADE
+- `static/templates/student_login.html` — Page login étudiant (sans mot de passe)
+- `static/templates/teacher_dashboard.html` — Dashboard prof avec barres de progression
+
+**Fichiers modifiés :**
+- `server_v3.py` — Ajout `class_router`
+- `routers/page_router.py` — Routes `/student-login` et `/teacher`
+
+**M214 ✅** — Classes & Roster :
+- `POST /api/classes` → créer classe
+- `GET /api/classes` → liste classes
+- `GET /api/classes/{id}/students` → liste étudiants avec milestone
+- `POST /api/classes/{id}/roster` → parser liste brute (NOM Prénom, lignes vides)
+- `POST /api/classes/{id}/students/{sid}/start` → créer/reprendre projet HoméOS
+- Page `/student-login` : select classe → select nom → redirect `/workspace?project_id={id}`
+- Session `localStorage` : `{student_id, class_id, project_id}`
+
+**M215 ✅** — Milestone Tracker :
+- `detect_milestone(project_id)` → N0→N5 automatique
+- N0: créé, N1: manifest/imports, N2: wire_validated, N3: forge HTML, N4: logic/, N5: deployed_url
+- `POST /api/classes/{id}/students/{sid}/detect-milestone` → inspecte projet → màj DB
+
+**M216 ✅** — Dashboard Prof :
+- `GET /api/classes/{id}/dashboard` → vue complète classe
+- Page `/teacher` : select classe → tableau étudiants avec barre progression N0→N5
+- Auto-refresh 30s, bouton "ouvrir" → workspace étudiant
+
+**M217 ✅** — Évaluation DNMADE :
+- `core/dnmade_referentiel.json` : 4 domaines (A Création, B Communication, C Technique, D Culture), 11 compétences
+- `POST /api/classes/{id}/students/{sid}/pre-eval` → pré-éval basée sur contenu projet
+- Évaluation automatique : manifest → en_cours, imports → en_cours, exports → acquis
+
+**Syntaxe Python validée** ✅
+
+**Test manuel FJD requis :**
+1. `POST /api/classes` → classe "DNMADE 2026" créée
+2. `POST /api/classes/dnmade-2026/roster` avec liste brute → étudiants parsés
+3. `/student-login` → sélectionner classe + nom → projet créé → workspace
+4. `/teacher` → voir tous les étudiants avec progression N0→N5
+5. `POST /api/classes/{id}/students/{sid}/pre-eval` → pré-éval DNMADE générée

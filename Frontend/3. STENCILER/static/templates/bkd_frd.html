@@ -3,436 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HoméOS — War Room (IDE Mode)</title>
+    <title>HoméOS — Backend FRD (Studio)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap">
+    <script src="/static/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        figma: { bg: '#ffffff', panel: '#f9f9f9', input: '#f2f3f5', text: '#666666', textDark: '#1a1a1a', tabActive: '#8cc63f', dotGreen: '#5ec069', sep: '#e5e5e5' }
+                        homeos: {
+                            bg: '#ffffff',
+                            panel: '#f7f6f2',
+                            input: '#ffffff',
+                            text: '#1a1a1a',
+                            textMuted: '#9a9a98',
+                            green: '#8cc63f',
+                            border: '#e5e5e5',
+                            architect: '#f0f4ff',
+                            worker: '#fffaf0'
+                        }
                     },
-                    fontFamily: { homeos: ['Helvetica', 'sans-serif'], geist: ['Inter', 'sans-serif'] }
+                    fontFamily: { 
+                        homeos: ['Inter', 'sans-serif'],
+                        mono: ['Menlo', 'Monaco', 'Courier New', 'monospace']
+                    }
                 }
             }
         }
     </script>
     <style>
+        @font-face {
+            font-family: 'Univers LT Std';
+            src: url('/static/fonts/univers-lt-std/UniversLTStd.woff2') format('woff2');
+            font-weight: normal; font-style: normal;
+        }
+        body { font-family: 'Univers LT Std', 'Inter', sans-serif; letter-spacing: -0.01em; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        [contenteditable]:focus { outline: none; }
+        * { border-radius: 0 !important; }
+        .tab-active { border-bottom: 2px solid #8cc63f; color: #1a1a1a; font-weight: 700; }
+        .terminal-log { height: 100%; overflow-y: auto; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "monospace"; font-size: 11px; line-height: 1.4; color: #9a9a98; }
+        #log-arch { color: #8cc63f; }
+        #log-work { color: #9a9a98; }
+        .roadmap-content h1 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .roadmap-content h2 { font-size: 1rem; font-weight: 700; border-bottom: 1px solid #e5e5e5; padding-bottom: 4px; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .roadmap-content h3 { font-size: 0.9rem; font-weight: 700; color: #8cc63f; margin-top: 1rem; }
+        .roadmap-content p { margin-bottom: 0.75rem; color: #4a4a48; line-height: 1.5; }
+        
+        /* Sidebar Collapse */
+        aside#sidebar-left { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        aside#sidebar-left.collapsed { width: 0px; border-right: none; overflow: hidden; }
+        
         .folder-children { margin-left: 1rem; }
     </style>
-    <script src="/static/js/bootstrap.js"></script>
 </head>
-<body class="flex h-screen overflow-hidden font-geist text-[12px] text-figma-text">
+<body class="h-screen flex flex-col bg-homeos-bg text-homeos-text selection:bg-homeos-green/20 overflow-hidden">
 
-    <!-- Sidebar gauche (Protéger HomeOS) -->
-    <aside id="sidebar" class="w-[280px] h-full border-r border-figma-sep bg-white flex flex-col flex-shrink-0">
-        <div class="h-[48px] flex items-center px-6 border-b border-figma-sep" id="lock-div-mn58ahz5" data-frd-lock="true">
-            <span class="font-homeos font-black text-lg tracking-tighter text-black">Homé<span class="text-figma-tabActive">OS</span></span>
+    <!-- HEADER -->
+    <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-white z-50">
+        <div class="flex items-center gap-4">
+            <span class="font-bold text-[14px] tracking-tighter">Homé<span class="text-homeos-green">OS</span> <span class="text-homeos-textMuted font-normal ml-1">/ Backend FRD</span></span>
+            <div class="h-4 w-px bg-homeos-border mx-2"></div>
+            <select id="project-switcher" class="text-[10px] uppercase tracking-widest font-semibold text-homeos-textMuted bg-transparent border-none outline-none cursor-pointer pt-0.5">
+                <option value="">chargement...</option>
+            </select>
         </div>
-        <div class="flex-1 overflow-y-auto px-0 py-0" id="lock-div-mn45m14g">
-            <div class="w-full bg-white flex flex-col" id="lock-div-mn45jccu" data-frd-lock="true">
-                <!-- Header de l'explorer avec bouton collapse -->
-                <div class="px-6 py-3 uppercase text-[10px] font-bold text-gray-400 border-b border-figma-sep flex items-center justify-between cursor-pointer" id="explorer-header">
-                    <span>Explorer</span>
-                    <svg id="chevron-icon" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </div>
-                <!-- Contenu de l'explorer (collapsible) -->
-                <div id="explorer-content" class="no-scrollbar">
-                    <!-- Dossiers et fichiers chargés dynamiquement -->
-                </div>
-            </div>
+        <div class="flex items-center gap-3">
+            <button id="btn-fee-lab" class="text-[9px] uppercase tracking-widest font-bold bg-homeos-green/10 border border-homeos-green/30 text-homeos-green px-3 py-1.5 hover:bg-homeos-green hover:text-white transition-all">
+                FEE Lab
+            </button>
+            <button id="toggle-sidebar" class="p-2 hover:bg-homeos-panel text-homeos-textMuted" title="Alt+B">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <button id="btn-recompile" class="text-[9px] uppercase tracking-widest font-bold border border-homeos-border px-3 py-1.5 hover:border-homeos-green hover:text-homeos-green transition-colors">
+                Recompiler Génome
+            </button>
         </div>
-    </aside>
+    </header>
 
-    <div class="flex-1 flex flex-col min-w-0 bg-white">
-        <!-- Header Local (Actions) — Le header global est injecté par bootstrap.js -->
-        <header id="main-navigation" class="h-[48px] border-b border-figma-sep flex items-center justify-between px-8 bg-white flex-shrink-0" data-frd-lock="true">
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Backend IDE</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="btn-save" class="px-3 py-1 bg-figma-tabActive text-white rounded text-[11px] font-semibold hover:opacity-90">Sauvegarder</button>
-                <button id="btn-wire" class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-[11px] font-semibold hover:bg-gray-300">Wire Check</button>
-            </div>
-        </header>
+    <!-- WRAPPER CHÂSSIS ALT (M208 FIXED) -->
+    <div class="flex-1 p-6 overflow-hidden bg-homeos-panel/10">
+        <div id="studio-chassis" class="h-full shadow-2xl rounded-[20px] flex overflow-hidden bg-white">
+            
+            <!-- SIDEBAR GAUCHE : EXPLOREUR (Collapsible) -->
+            <aside id="sidebar-left" class="w-[250px] border-r border-homeos-border bg-white flex flex-col shrink-0">
+                <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-homeos-panel/30">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-homeos-textMuted">Explorer</span>
+                    <button id="btn-refresh-files" class="text-homeos-textMuted hover:text-homeos-green">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+                <div id="explorer-grid" class="flex-1 overflow-y-auto p-3 space-y-1 no-scrollbar text-[11px]">
+                    <!-- Fichiers du projet -->
+                </div>
+            </aside>
 
-        <!-- IDE Main Content -->
-        <main id="multiverse" class="flex-1 flex overflow-hidden">
-            <div class="flex-1 grid grid-cols-2 divide-x divide-figma-sep">
-                <div class="flex flex-col">
-                    <div class="h-9 bg-figma-panel flex items-center px-4 border-b border-figma-sep text-[11px] font-medium text-black">
-                        <span id="editor-filename">Aucun fichier sélectionné</span>
+            <!-- ZONE MAIN (Centre) -->
+            <div class="flex-1 flex flex-col min-w-0 bg-white">
+                
+                <!-- TOP AREA: ARCHITECTE | WORKSPACE -->
+                <div class="flex-1 grid grid-cols-[320px_1fr] divide-x divide-homeos-border overflow-hidden">
+                    
+                    <!-- ARCHITECTE CHAT -->
+                    <div id="architect-pane" class="flex flex-col bg-homeos-architect/10">
+                        <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest">Architecte</span>
+                            </div>
+                            <select id="select-history-arch" class="text-[9px] bg-transparent border-none outline-none font-bold text-homeos-textMuted max-w-[120px]">
+                                <option value="">Nouv. Session</option>
+                            </select>
+                        </div>
+                        <div id="chat-arch-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
+                        <div class="p-3 border-t border-homeos-border bg-white">
+                            <textarea id="input-arch" placeholder="Planifier..." class="w-full bg-homeos-panel border border-homeos-border p-2 text-[11px] resize-none outline-none focus:border-blue-300 h-16"></textarea>
+                        </div>
                     </div>
-                    <div class="flex-1 p-4 font-mono text-xs text-figma-text bg-white overflow-auto" id="editor-content" contenteditable="true">
-                        Sélectionnez un fichier dans l'explorer...
+
+                    <!-- WORKSPACE (ROADMAP / EDITOR) -->
+                    <div class="flex flex-col overflow-hidden">
+                        <div id="ws-tab-row" class="h-9 border-b border-homeos-border flex items-center px-4 gap-6 bg-homeos-panel/30">
+                            <button data-tab="roadmap" class="h-full text-[10px] uppercase font-bold tracking-widest tab-active">Roadmap</button>
+                            <button data-tab="editor" class="h-full text-[10px] uppercase font-bold tracking-widest text-homeos-textMuted hover:text-homeos-text">Éditeur</button>
+                            <div class="flex-1"></div>
+                            <div id="current-filename" class="text-[9px] font-mono text-homeos-textMuted italic">ROADMAP.md</div>
+                        </div>
+                        <div id="ws-content-area" class="flex-1 overflow-hidden relative">
+                            <div class="h-full overflow-auto p-8 roadmap-content no-scrollbar" id="render-area"></div>
+                            <div class="hidden h-full overflow-hidden" id="editor-area">
+                                <div id="monaco-container" class="w-full h-full"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="flex flex-col">
-                    <div class="h-9 bg-figma-panel flex items-center px-4 border-b border-figma-sep text-[11px] font-medium text-black">Preview</div>
-                    <div class="flex-1 p-4 bg-gray-50 overflow-auto" id="preview-frame">
-                        <div class="text-gray-400 italic">Aperçu du rendu...</div>
-                    </div>
-                </div>
-            </div>
-        </main>
 
-        <!-- Footer Terminal -->
-        <footer class="h-[150px] border-t border-figma-sep bg-figma-panel p-3 text-figma-text font-mono text-[11px]">
-            <div class="flex gap-6 border-b border-figma-sep mb-3 pb-1">
-                <span class="text-black border-b border-figma-tabActive font-semibold cursor-pointer" id="tab-terminal">Terminal</span>
-                <span class="cursor-pointer" id="tab-output">Output</span>
+                <!-- BOTTOM AREA: DOUBLE TERMINAL -->
+                <footer class="h-[180px] border-t border-homeos-border bg-[#0d1117] text-white">
+                    <div id="terminal-split" class="grid grid-cols-2 h-full divide-x divide-gray-800">
+                        <div class="flex flex-col">
+                            <div class="h-6 bg-gray-900 px-3 flex items-center justify-between">
+                                <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Logs Architecte</span>
+                            </div>
+                            <div class="terminal-log no-scrollbar" id="log-arch"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="h-6 bg-gray-900 px-3 flex items-center justify-between">
+                                <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Output Ouvrier</span>
+                            </div>
+                            <div class="terminal-log no-scrollbar" id="log-work"></div>
+                        </div>
+                    </div>
+                </footer>
             </div>
-            <div class="text-figma-dotGreen overflow-y-auto h-[100px]" id="terminal-output">$ aetherflow --ready</div>
-        </footer>
+
+            <!-- SIDEBAR DROITE : OUVRIER (300px) -->
+            <aside class="w-[300px] border-l border-homeos-border bg-homeos-worker/20 flex flex-col shrink-0">
+                <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest">Ouvrier</span>
+                    </div>
+                    <select id="select-history-work" class="text-[9px] bg-transparent border-none outline-none font-bold text-homeos-textMuted max-w-[120px]">
+                        <option value="">Nouv. Session</option>
+                    </select>
+                </div>
+                <div id="chat-work-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
+                <div class="p-3 border-t border-homeos-border bg-white">
+                    <textarea id="input-work" placeholder="Faire exécuter..." class="w-full bg-homeos-panel border border-homeos-border p-2 text-[11px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
+                </div>
+            </aside>
+        </div>
     </div>
 
-    <!-- Panel Droit (ChatBox) -->
-    <section id="sullivan-panel" class="w-[280px] flex flex-col border-l border-figma-sep bg-white text-figma-text flex-shrink-0">
-        <div class="h-[48px] flex items-center px-6 border-b border-figma-sep gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-figma-tabActive"></span>
-            <span class="text-[12px] font-semibold text-black">Sullivan</span>
+    <!-- FEE LAB OVERLAY (CADRAGE ALT: 20px Radius, 0px Border) -->
+    <div id="fee-lab-overlay" class="fixed inset-0 z-[100] bg-homeos-panel/80 backdrop-blur-sm flex flex-col hidden overflow-hidden p-6">
+        <div class="h-full shadow-2xl rounded-[20px] flex flex-col overflow-hidden bg-white">
+            <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <span class="font-bold text-[14px] tracking-tighter">FEE <span class="text-homeos-green">LAB</span> <span class="text-homeos-textMuted font-normal ml-1">/ Étalonnage Animatique</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="fee-active-screen" class="text-[10px] font-mono text-homeos-textMuted italic">screen: landing.html</div>
+                    <button id="btn-close-fee" class="text-[20px] font-light hover:text-homeos-green transition-colors px-2">×</button>
+                </div>
+            </header>
+            
+            <main class="flex-1 flex overflow-hidden">
+                <!-- GAUCHE: TRIGGERS -->
+                <aside class="w-[280px] border-r border-homeos-border bg-white flex flex-col overflow-hidden">
+                    <div class="p-3 border-b border-homeos-border bg-homeos-panel/30 text-[10px] font-extrabold uppercase tracking-widest leading-none">Triggers [data-af-id]</div>
+                    <div id="fee-triggers-list" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+                        <div class="text-[10px] text-homeos-textMuted italic">Aucun élément détecté.</div>
+                    </div>
+                </aside>
+                
+                <!-- CENTRE: PREVIEW -->
+                <section class="flex-1 flex flex-col bg-homeos-panel/10 min-w-0">
+                    <div class="flex-1 p-4">
+                        <div id="fee-preview-container" class="h-full bg-white shadow-2xl relative overflow-hidden rounded-none">
+                            <iframe id="fee-preview-iframe" class="w-full h-full border-none"></iframe>
+                        </div>
+                    </div>
+                    <!-- LOGIQUE & PRESETS -->
+                    <div class="h-[120px] border-t border-homeos-border bg-white flex flex-col shrink-0">
+                        <div class="px-4 py-2 border-b border-homeos-border text-[9px] font-bold uppercase tracking-widest opacity-50">Logique & Presets</div>
+                        <div id="fee-presets-strip" class="flex-1 overflow-x-auto flex items-center gap-4 px-4 no-scrollbar border-0 shadow-none">
+                            <!-- Presets -->
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- DROITE: SULLIVAN FEE -->
+                <aside class="w-[320px] border-l border-homeos-border bg-white flex flex-col overflow-hidden">
+                    <div class="p-3 border-b border-homeos-border flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest">Expert GSAP</span>
+                        <div class="w-2 h-2 rounded-full bg-homeos-green animate-pulse"></div>
+                    </div>
+                    <div id="chat-fee-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar text-[11px]"></div>
+                    <div class="p-4 border-t border-homeos-border bg-homeos-panel/10">
+                        <textarea id="input-fee" placeholder="Décrivez l'émotion..." class="w-full bg-white border border-homeos-border p-3 text-[11px] resize-none outline-none focus:border-homeos-green h-20 transition-all"></textarea>
+                    </div>
+                </aside>
+            </main>
         </div>
-        <div id="sullivan-stream" class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-            <!-- Message exemple -->
-            <div class="text-[11px] bg-figma-panel p-3 rounded-lg text-figma-text">Bonjour, en quoi puis-je vous aider aujourd'hui ?</div>
-        </div>
-        <div class="p-4 border-t border-figma-sep">
-            <input type="text" id="sullivan-input" placeholder="Message Sullivan..." class="w-full bg-figma-input px-3 py-2 rounded border border-figma-sep focus:outline-none focus:border-figma-tabActive text-[12px]">
-        </div>
-    </section>
+    </div>
 
-    <!-- JavaScript pour les interactions -->
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/workspace/WsBackend.js"></script>
+    <script src="/static/js/workspace/WsFEE.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let currentProjectId = null;
-            let currentFilePath = null;
-            let chatHistory = [];
-            let isOutputTab = false;
-
-            // --- 1. Explorer Toggle ---
-            const explorerHeader = document.getElementById('explorer-header');
-            const explorerContent = document.getElementById('explorer-content');
-            const chevronIcon = document.getElementById('chevron-icon');
-
-            if (explorerHeader && explorerContent) {
-                explorerHeader.addEventListener('click', function() {
-                    explorerContent.classList.toggle('hidden');
-                    chevronIcon.classList.toggle('rotate-180');
-                });
-            }
-
-            // --- 2. Navigation Tabs ---
-            const navTabs = ['nav-brainstorm', 'nav-backend', 'nav-frontend', 'nav-deploy'];
-            navTabs.forEach(tabId => {
-                const tab = document.getElementById(tabId);
-                if (tab) {
-                    tab.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        // Reset all tabs
-                        navTabs.forEach(t => {
-                            const el = document.getElementById(t);
-                            el.classList.remove('font-semibold', 'text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'h-full', 'flex', 'items-center');
-                            el.classList.add('text-gray-400');
-                        });
-                        // Activate clicked tab
-                        this.classList.add('font-semibold', 'text-figma-tabActive', 'border-b-2', 'border-figma-tabActive', 'h-full', 'flex', 'items-center');
-                        this.classList.remove('text-gray-400');
-                        addToTerminal(`Navigation: ${tabId.replace('nav-', '')}`);
-                    });
-                }
-            });
-
-            // --- 3. Output Tab Toggle ---
-            const tabTerminal = document.getElementById('tab-terminal');
-            const tabOutput = document.getElementById('tab-output');
-            const terminalOutput = document.getElementById('terminal-output');
-
-            tabTerminal.addEventListener('click', function() {
-                isOutputTab = false;
-                tabTerminal.classList.add('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
-                tabOutput.classList.remove('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
-                terminalOutput.innerHTML = '$ aetherflow --ready';
-            });
-
-            tabOutput.addEventListener('click', function() {
-                isOutputTab = true;
-                tabOutput.classList.add('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
-                tabTerminal.classList.remove('text-black', 'border-b', 'border-figma-tabActive', 'font-semibold');
-                terminalOutput.innerHTML = '<div class="text-gray-400 italic">Output will appear here after actions...</div>';
-            });
-
-            // --- 4. Load Project & Files (API BKD) ---
-            const editorContent = document.getElementById('editor-content');
-            const editorFilename = document.getElementById('editor-filename');
-            const previewFrame = document.getElementById('preview-frame');
-
-            async function loadProject() {
-                try {
-                    const res = await fetch('/api/bkd/projects');
-                    const data = await res.json();
-                    if (data.projects && data.projects.length > 0) {
-                        currentProjectId = data.projects[0].id;
-                        addToTerminal(`Project: ${data.projects[0].name} loaded.`);
-                        await loadExplorer(currentProjectId);
-                    } else {
-                        // Créer un projet par défaut si aucun n'existe
-                        const createRes = await fetch('/api/bkd/projects', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name: 'Default Project', path: './default' })
-                        });
-                        const created = await createRes.json();
-                        if (created.project) {
-                            currentProjectId = created.project.id;
-                            addToTerminal(`Created project: ${created.project.name}`);
-                            await loadExplorer(currentProjectId);
-                        }
-                    }
-                } catch (err) {
-                    addToTerminal(`Error loading project: ${err.message}`);
-                }
-            }
-
-            // Fonction récursive pour construire l'arborescence des dossiers
-            function buildTree(files) {
-                const tree = {};
-                files.forEach(file => {
-                    const parts = file.path.split('/');
-                    let current = tree;
-                    parts.forEach((part, index) => {
-                        if (!current[part]) {
-                            current[part] = { 
-                                _isFile: index === parts.length - 1, 
-                                _path: file.path,
-                                _children: {}
-                            };
-                        }
-                        current = current[part]._children;
-                    });
-                });
-                return tree;
-            }
-
-            // Fonction récursive pour rendre l'arborescence en HTML avec collapse
-            function renderTree(node, depth = 0) {
-                const container = document.createElement('div');
-                container.className = 'folder-children';
-                
-                Object.keys(node).sort().forEach(key => {
-                    const item = node[key];
-                    const isFile = item._isFile;
-                    
-                    const div = document.createElement('div');
-                    div.className = `py-1 hover:bg-figma-panel cursor-pointer truncate text-black flex items-center`;
-                    div.style.paddingLeft = `${depth * 12 + 8}px`;
-                    
-                    if (isFile) {
-                        div.innerHTML = `<span class="mr-2 text-gray-400">📄</span>${key}`;
-                        div.title = item._path;
-                        div.onclick = () => loadFile(item._path);
-                        container.appendChild(div);
-                    } else {
-                        const folderId = `folder-${key.replace(/[^a-zA-Z0-9]/g, '-')}-${depth}`;
-                        div.innerHTML = `
-                            <span class="mr-2 text-gray-400">📁</span>
-                            <span class="flex-1">${key}</span>
-                            <svg class="w-3 h-3 transition-transform duration-200 chevron-${folderId}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        `;
-                        
-                        const childrenContainer = document.createElement('div');
-                        childrenContainer.id = folderId;
-                        childrenContainer.className = 'folder-children hidden';
-                        
-                        div.onclick = (e) => {
-                            e.stopPropagation();
-                            childrenContainer.classList.toggle('hidden');
-                            const chevron = document.querySelector(`.chevron-${folderId}`);
-                            if (chevron) chevron.classList.toggle('rotate-90');
-                        };
-                        
-                        container.appendChild(div);
-                        container.appendChild(childrenContainer);
-                        
-                        // Récursion pour les enfants
-                        const childTree = renderTree(item._children, depth + 1);
-                        childrenContainer.appendChild(childTree);
-                    }
-                });
-                
-                return container;
-            }
-
-            async function loadExplorer(projectId) {
-                try {
-                    const res = await fetch(`/api/bkd/files?project_id=${projectId}`);
-                    const data = await res.json();
-                    
-                    explorerContent.innerHTML = '';
-                    
-                    if (data.files && data.files.length > 0) {
-                        const tree = buildTree(data.files);
-                        const treeHtml = renderTree(tree);
-                        explorerContent.appendChild(treeHtml);
-                        
-                        // Auto-load first file if exists
-                        const firstFile = data.files.find(f => f.path.endsWith('.html') || f.path.endsWith('.js') || f.path.endsWith('.css'));
-                        if (firstFile) loadFile(firstFile.path);
-                    } else {
-                        explorerContent.innerHTML = '<div class="px-6 py-2 text-gray-400 italic">Aucun fichier dans ce projet</div>';
-                    }
-                } catch (err) {
-                    addToTerminal(`Error listing files: ${err.message}`);
-                }
-            }
-
-            // --- 5. File Loading (API BKD) ---
-            async function loadFile(path) {
-                currentFilePath = path;
-                editorFilename.textContent = path;
-                try {
-                    const res = await fetch(`/api/bkd/file?project_id=${currentProjectId}&path=${encodeURIComponent(path)}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        editorContent.textContent = data.content;
-                        addToTerminal(`Loaded ${path} ✓`);
-                        updatePreview(data.content);
-                    }
-                } catch (err) {
-                    addToTerminal(`Load error: ${err.message}`);
-                }
-            }
-
-            // --- 6. Save File (API BKD) ---
-            document.getElementById('btn-save').onclick = async () => {
-                if (!currentFilePath) {
-                    addToTerminal('No file selected to save');
-                    return;
-                }
-                const content = editorContent.textContent;
-                try {
-                    const res = await fetch('/api/bkd/file', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ project_id: currentProjectId, path: currentFilePath, content })
-                    });
-                    if (res.ok) {
-                        addToTerminal(`Saved ${currentFilePath} ✓`);
-                        updatePreview(content);
-                    }
-                } catch (err) {
-                    addToTerminal(`Save error: ${err.message}`);
-                }
-            };
-
-            // --- 7. Wire Check (API FRD) ---
-            document.getElementById('btn-wire').onclick = async () => {
-                const htmlContent = editorContent.textContent;
-                if (!htmlContent.trim()) {
-                    addToTerminal('Wire: Empty content');
-                    return;
-                }
-                addToTerminal('Running Wire Check...');
-                try {
-                    const res = await fetch('/api/frd/wire', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ html: htmlContent })
-                    });
-                    const data = await res.json();
-                    const diagnostic = data.diagnostic || 'No diagnostic returned';
-                    
-                    // Afficher dans le terminal
-                    addToTerminal(`Wire Diagnostic:\n${diagnostic}`);
-                    
-                    // Afficher dans le panneau Sullivan
-                    appendBubble(`Wire Check Result:\n${diagnostic}`, 'sullivan');
-                    
-                    // Si on est sur l'onglet Output, afficher là aussi
-                    if (isOutputTab) {
-                        terminalOutput.innerHTML = `<div class="whitespace-pre-wrap">${diagnostic}</div>`;
-                    }
-                } catch (err) {
-                    addToTerminal(`Wire error: ${err.message}`);
-                    appendBubble(`Wire Error: ${err.message}`, 'sullivan');
-                }
-            };
-
-            // --- 8. Sullivan Chat (API BKD) ---
-            const sullivanInput = document.getElementById('sullivan-input');
-            const sullivanStream = document.getElementById('sullivan-stream');
-
-            sullivanInput.onkeypress = async (e) => {
-                if (e.key === 'Enter') {
-                    const message = sullivanInput.value.trim();
-                    if (!message) return;
-
-                    appendBubble(message, 'user');
-                    sullivanInput.value = '';
-
-                    try {
-                        const res = await fetch('/api/bkd/chat', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                project_id: currentProjectId,
-                                message: message,
-                                history: chatHistory
-                            })
-                        });
-                        const data = await res.json();
-                        appendBubble(data.explanation, 'sullivan');
-                        chatHistory.push({ role: 'user', text: message }, { role: 'assistant', text: data.explanation });
-                    } catch (err) {
-                        addToTerminal(`Chat error: ${err.message}`);
-                        appendBubble(`Erreur: ${err.message}`, 'sullivan');
-                    }
-                }
-            };
-
-            function appendBubble(text, role) {
-                const div = document.createElement('div');
-                div.className = `text-[11px] p-3 rounded-lg ${role === 'user' ? 'bg-figma-tabActive text-white ml-4' : 'bg-figma-panel text-figma-text'}`;
-                div.innerText = (role === 'sullivan' ? 'Sullivan: ' : '') + text;
-                sullivanStream.appendChild(div);
-                sullivanStream.scrollTop = sullivanStream.scrollHeight;
-            }
-
-            // --- 9. Preview Update ---
-            function updatePreview(content) {
-                if (content.includes('<!DOCTYPE') || content.includes('<html') || content.includes('<div')) {
-                    previewFrame.innerHTML = content;
-                } else {
-                    previewFrame.innerHTML = `<pre class="text-xs">${content}</pre>`;
-                }
-            }
-
-            // --- 10. Terminal Helper ---
-            function addToTerminal(text) {
-                const terminal = document.getElementById('terminal-output');
-                if (isOutputTab) {
-                    // Si on est sur l'onglet Output, ajouter à la suite
-                    terminal.innerHTML += `<div class="text-gray-400">${text}</div>`;
-                } else {
-                    terminal.innerHTML += `<br>$ ${text}`;
-                }
-                terminal.scrollTop = terminal.scrollHeight;
-            }
-
-            // --- 11. Editor Input Handler ---
-            editorContent.addEventListener('input', function() {
-                // Auto-update preview on typing (debounced could be added)
-                // updatePreview(editorContent.textContent);
-            });
-
-            // Init
-            loadProject();
+        document.addEventListener('DOMContentLoaded', () => {
+            window.wsBackend = new WsBackend();
+            window.wsFEE = new WsFEE(window.wsBackend);
         });
     </script>
 </body>

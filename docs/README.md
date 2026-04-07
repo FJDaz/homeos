@@ -17,6 +17,7 @@ Documentation du projet, organisée par **pédagogie de construction**.
 | **[06_Design_Assets/](06_Design_Assets/)** | Tokens, Études Ergonomiques (Cléa UX), SVG Interfacial Language. |
 | **[07_Guides/](07_Guides/)** | Guides détaillés, tutoriels et templates `.env`. |
 | **[08_Research/](08_Research/)** | Recherche, benchmarks, notes de brainstorming et benchmarks. |
+| **[09_Frontend/](09_Frontend/)** | **Kimi & Stenciler** : Manifeste, Lois de l'Animation, UX Journey et Composants UI. |
 | **[archives/](archives/)** | Historique complet des versions V1, V2 et rapports caducs. |
 
 ---

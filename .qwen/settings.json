@@ -16,7 +16,9 @@
       "Bash(ls *)",
       "Bash(touch *)",
       "Bash(do *)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   },
   "$version": 3

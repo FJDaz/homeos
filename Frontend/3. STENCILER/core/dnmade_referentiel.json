@@ -1,0 +1,34 @@
+{
+  "domains": {
+    "A": {
+      "label": "Création",
+      "competences": {
+        "A1": { "label": "Recherche et exploration" },
+        "A2": { "label": "Concept et proposition" },
+        "A3": { "label": "Réalisation et prototypage" }
+      }
+    },
+    "B": {
+      "label": "Communication",
+      "competences": {
+        "B1": { "label": "Présentation visuelle" },
+        "B2": { "label": "Argumentation orale" }
+      }
+    },
+    "C": {
+      "label": "Technique",
+      "competences": {
+        "C1": { "label": "Maîtrise des outils numériques" },
+        "C2": { "label": "Production et intégration" },
+        "C3": { "label": "Qualité et conformité" }
+      }
+    },
+    "D": {
+      "label": "Culture",
+      "competences": {
+        "D1": { "label": "Références et veille" },
+        "D2": { "label": "Analyse contextuelle" }
+      }
+    }
+  }
+}

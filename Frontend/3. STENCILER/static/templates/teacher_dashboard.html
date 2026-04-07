@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS — Dashboard prof</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f7f6f2; color: #3d3d3c; min-height: 100vh; }
+        .header { background: #fff; border-bottom: 2px solid #000091; padding: 1rem 2rem; }
+        .header__brand { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+        .logo { font-weight: 700; font-size: 0.85rem; color: #000091; line-height: 1.2; }
+        .operator { font-size: 1.1rem; font-weight: 700; }
+        .main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        select { padding: 0.5rem 1rem; border: 1px solid #e5e5e5; border-radius: 0; font-size: 0.9rem; font-family: inherit; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a98' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
+        .refresh-btn { padding: 0.5rem 1rem; background: #000091; color: #fff; border: none; border-radius: 0; font-size: 0.85rem; cursor: pointer; }
+        .refresh-btn:hover { background: #1212ff; }
+        .table-wrap { background: #fff; border: 1px solid #e5e5e5; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.06); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.05em; color: #9a9a98; border-bottom: 1px solid #e5e5e5; background: #efefeb; }
+        td { padding: 0.75rem 1rem; font-size: 0.9rem; border-bottom: 1px solid #e5e5e5; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f7f6f2; }
+        .progress-bar { width: 120px; height: 8px; background: #e5e5e5; border-radius: 0; overflow: hidden; }
+        .progress-bar__fill { height: 100%; background: #8cc63f; transition: width 0.3s; }
+        .milestone-label { font-size: 0.8rem; color: #9a9a98; margin-top: 0.25rem; }
+        .eval-btn { padding: 0.3rem 0.75rem; background: transparent; border: 1px solid #8cc63f; color: #8cc63f; border-radius: 0; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
+        .eval-btn:hover { background: #8cc63f; color: #fff; }
+        .loading { text-align: center; padding: 3rem; color: #9a9a98; }
+        .spinner { width: 24px; height: 24px; border: 2px solid #e5e5e5; border-top-color: #000091; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.5rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { text-align: center; padding: 1.5rem; font-size: 0.75rem; color: #9a9a98; border-top: 1px solid #e5e5e5; background: #fff; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header__brand">
+            <div class="logo">République<br>Française</div>
+            <div class="operator">HoméOS — Dashboard prof</div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="controls">
+            <select id="class-select">
+                <option value="">— charger une classe —</option>
+            </select>
+            <button class="refresh-btn" onclick="loadDashboard()">↻ rafraîchir</button>
+            <span id="auto-refresh" style="font-size:0.75rem;color:#9a9a98;">auto-refresh 30s</span>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>chargement…</p>
+        </div>
+
+        <div id="dashboard" class="table-wrap" hidden>
+            <table>
+                <thead>
+                    <tr>
+                        <th>étudiant</th>
+                        <th>progression</th>
+                        <th>étape</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="students-tbody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>HoméOS — Application pédagogique — Données ouvertes</p>
+    </footer>
+
+    <script>
+        const API = '/api/classes';
+        let currentClassId = null;
+        let autoRefreshTimer = null;
+
+        async function loadClasses() {
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
+                const classes = data.classes || [];
+                const select = document.getElementById('class-select');
+                select.innerHTML = '<option value="">— choisir une classe —</option>' +
+                    classes.map(c => `<option value="${c.id}">${c.name}${c.subject ? ` — ${c.subject}` : ''}</option>`).join('');
+
+                if (classes.length > 0) {
+                    select.value = classes[0].id;
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('loadClasses error:', e);
+            }
+        }
+
+        async function loadDashboard() {
+            const classId = document.getElementById('class-select').value;
+            if (!classId) return;
+            currentClassId = classId;
+
+            document.getElementById('loading').hidden = false;
+            document.getElementById('dashboard').hidden = true;
+
+            try {
+                const res = await fetch(`${API}/${classId}/dashboard`);
+                const data = await res.json();
+                renderDashboard(data);
+            } catch (e) {
+                console.error('loadDashboard error:', e);
+            } finally {
+                document.getElementById('loading').hidden = true;
+                document.getElementById('dashboard').hidden = false;
+            }
+        }
+
+        function renderDashboard(data) {
+            const tbody = document.getElementById('students-tbody');
+            const students = data.students || [];
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9a9a98;padding:2rem;">aucun étudiant</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = students.map(s => {
+                const pct = (s.milestone.level / 5) * 100;
+                return `
+                    <tr>
+                        <td><strong>${s.display}</strong></td>
+                        <td>
+                            <div class="progress-bar"><div class="progress-bar__fill" style="width:${pct}%"></div></div>
+                        </td>
+                        <td>
+                            <span class="milestone-label">N${s.milestone.level} — ${s.milestone.label}</span>
+                        </td>
+                        <td>
+                            ${s.project_id ? `<a class="eval-btn" href="/workspace?project_id=${s.project_id}" target="_blank">ouvrir →</a>` : '—'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('class-select').addEventListener('change', () => {
+            loadDashboard();
+        });
+
+        // Auto-refresh 30s
+        function startAutoRefresh() {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            autoRefreshTimer = setInterval(() => {
+                if (currentClassId) loadDashboard();
+            }, 30000);
+        }
+
+        loadClasses().then(() => startAutoRefresh());
+    </script>
+</body>
+</html>

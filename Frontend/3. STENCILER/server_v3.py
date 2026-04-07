@@ -156,6 +156,7 @@ from routers.manifest_router import router as manifest_router
 from routers.preview_router import router as preview_router
 from routers.genome_router import router as genome_router
 from routers.retro_router import router as retro_router
+from routers.class_router import router as class_router
 from routers.page_router import router as page_router
 from routers.auth_router import router as auth_router
 from routers.stitch_router import router as stitch_router
@@ -175,6 +176,7 @@ app.include_router(retro_router)
 app.include_router(page_router)
 app.include_router(auth_router)
 app.include_router(stitch_router)
+app.include_router(class_router)
 
 # --- ACTIVE PROJECT OVERRIDES (bkd_service uses JSON file, not DB) ---
 def get_active_project_id():

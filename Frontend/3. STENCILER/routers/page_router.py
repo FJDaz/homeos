@@ -103,3 +103,21 @@ try{const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Ty
 const d=await r.json();if(d.token){localStorage.setItem('homeos_user',JSON.stringify(d));window.location.href='/workspace'}}
 catch(e){document.getElementById('error-msg').style.display='block'}};</script></body></html>""", status_code=200)
     return FileResponse(path)
+
+
+@router.get("/student-login")
+async def get_student_login():
+    """Mission 214: Page login étudiant — sans mot de passe."""
+    path = STATIC_DIR_PATH / "templates/student_login.html"
+    if not path.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(path)
+
+
+@router.get("/teacher")
+async def get_teacher_dashboard():
+    """Mission 216: Dashboard prof — vue classe temps réel."""
+    path = STATIC_DIR_PATH / "templates/teacher_dashboard.html"
+    if not path.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(path)

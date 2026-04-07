@@ -36,6 +36,13 @@ async def get_workspace_editor():
     return FileResponse(path)
 
 
+@router.get("/bkd")
+async def get_bkd_ide():
+    """Mission 208: Backend War Room IDE"""
+    path = STATIC_DIR_PATH / "templates/bkd_frd.html"
+    return FileResponse(path)
+
+
 @router.get("/api/workspace/templates")
 async def list_workspace_templates():
     """Mission 110: Liste les templates de base pour le workspace."""

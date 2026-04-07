@@ -6,6 +6,35 @@
 
 ---
 
+## Mission 208 — Backend FRD : War Room & Architecture Multi-Agents
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-07**
+**ACTOR: GEMINI**
+
+### Ce qui marche
+- **Layout "War Room"** : Grille 3 colonnes `[Architecte | Roadmap | Ouvrier]` avec design industriel `0px border-radius`.
+- **Double Terminal** : Footer scindé en deux zones de logs indépendantes (Planning vs Exécution).
+- **Architecture Multi-Agents** : Sullivan segmenté en rôles `architect` et `worker` avec contextes étanches.
+- **Persistance & Historique** : Sessions sauvegardées en SQLite avec **Quick-Switcher** (5 dernières convs par rôle).
+- **Auto-Titrage** : Détection dynamique des IDs de mission (`M208`, `M139`...) dans la Roadmap pour nommer les sessions.
+- **WsBackend.js** : Orchestrateur centralisé gérant le dual-chat et le rendu Markdown synchrone.
+
+---
+
+## Mission 210 — Réorganisation Documentaire Frontend
+**STATUS: ✅ LIVRÉ**
+**DATE: 2026-04-07**
+**ACTOR: GEMINI**
+
+### Ce qui marche
+- **Extraction Docs 09** : Création de `docs/09_Frontend/` comme pôle d'autonomie visuelle.
+- **FRONTEND_MANIFEST.md** : Clarification des rôles Kimi/Stenciler et doctrine "True HoméOS".
+- **ANIMATION_LAWS.md** : Codification des standards GSAP et Splitting.js pour le projet.
+- **Migration Chirurgicale** : 7 documents et 2 répertoires d'assets UI déplacés de `02_Sullivan` vers `09_Frontend`.
+- **README Global** : Indexation de la nouvelle section Frontend.
+
+---
+
 ## Mission 187 — Wire Pipeline End-to-End : Forge + Runtime Groq
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-06**

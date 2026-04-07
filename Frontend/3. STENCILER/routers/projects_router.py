@@ -133,7 +133,7 @@ def save_project_manifest(project_id: str, manifest: Dict[str, Any]):
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
 
 def get_active_project_path():
-    from bkd_service import get_active_project_path
+    from bkd_service import get_active_project_path, scaffold_project
     return get_active_project_path()
 
 def get_project_exports_dir():
@@ -223,6 +223,10 @@ async def create_project_route(request: Request, req: ProjectCreateRequest):
         "created_at": datetime.now().isoformat()
     }
     save_project_manifest(pid, manifest)
+    
+    # Mission 208: Scaffolding HoméOS
+    from bkd_service import scaffold_project
+    scaffold_project(p_path)
 
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         try:

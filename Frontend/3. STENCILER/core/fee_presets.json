@@ -1,0 +1,76 @@
+{
+  "presets": [
+    {
+      "id": "fade-in",
+      "name": "Fade In",
+      "category": "entrées",
+      "code": "// [FEE-LOGIC] — {id} — initial\ngsap.from('[data-af-id=\"{id}\"]', { opacity: 0, duration: 0.6, ease: 'power2.out' });"
+    },
+    {
+      "id": "slide-up",
+      "name": "Slide Up",
+      "category": "entrées",
+      "code": "// [FEE-LOGIC] — {id} — initial\ngsap.from('[data-af-id=\"{id}\"]', { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' });"
+    },
+    {
+      "id": "slide-left",
+      "name": "Slide Left",
+      "category": "entrées",
+      "code": "// [FEE-LOGIC] — {id} — initial\ngsap.from('[data-af-id=\"{id}\"]', { x: -60, opacity: 0, duration: 0.6, ease: 'power2.out' });"
+    },
+    {
+      "id": "scale-in",
+      "name": "Scale In",
+      "category": "entrées",
+      "code": "// [FEE-LOGIC] — {id} — initial\ngsap.from('[data-af-id=\"{id}\"]', { scale: 0.8, opacity: 0, duration: 0.5, ease: 'back.out(1.7)' });"
+    },
+    {
+      "id": "fade-out",
+      "name": "Fade Out",
+      "category": "sorties",
+      "code": "// [FEE-LOGIC] — {id} — exit\ngsap.to('[data-af-id=\"{id}\"]', { opacity: 0, duration: 0.4, ease: 'power2.in' });"
+    },
+    {
+      "id": "slide-down-out",
+      "name": "Slide Down",
+      "category": "sorties",
+      "code": "// [FEE-LOGIC] — {id} — exit\ngsap.to('[data-af-id=\"{id}\"]', { y: 30, opacity: 0, duration: 0.5, ease: 'power2.in' });"
+    },
+    {
+      "id": "breathe",
+      "name": "Breathe",
+      "category": "hover-states",
+      "code": "// [FEE-LOGIC] — {id} — idle\ngsap.to('[data-af-id=\"{id}\"]', { scale: 1.04, duration: 1.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });"
+    },
+    {
+      "id": "pulse-border",
+      "name": "Pulse Border",
+      "category": "hover-states",
+      "code": "// [FEE-LOGIC] — {id} — hover\nconst el = document.querySelector('[data-af-id=\"{id}\"]');\nel.addEventListener('mouseenter', () => gsap.to(el, { boxShadow: '0 0 0 2px #8cc63f', duration: 0.2 }));\nel.addEventListener('mouseleave', () => gsap.to(el, { boxShadow: 'none', duration: 0.3 }));"
+    },
+    {
+      "id": "parallax-y",
+      "name": "Parallax Y",
+      "category": "parallaxe",
+      "code": "// [FEE-LOGIC] — {id} — scroll\ngsap.to('[data-af-id=\"{id}\"]', {\n  yPercent: -30,\n  ease: 'none',\n  scrollTrigger: { trigger: '[data-af-id=\"{id}\"]', start: 'top bottom', end: 'bottom top', scrub: true }\n});"
+    },
+    {
+      "id": "reveal-scroll",
+      "name": "Reveal Scroll",
+      "category": "parallaxe",
+      "code": "// [FEE-LOGIC] — {id} — scroll\ngsap.from('[data-af-id=\"{id}\"]', {\n  opacity: 0, y: 50,\n  scrollTrigger: { trigger: '[data-af-id=\"{id}\"]', start: 'top 80%', toggleActions: 'play none none reverse' }\n});"
+    },
+    {
+      "id": "noise-shake",
+      "name": "Noise Shake",
+      "category": "distorsions",
+      "code": "// [FEE-LOGIC] — {id} — distorsion\ngsap.to('[data-af-id=\"{id}\"]', { x: 'random(-4, 4)', y: 'random(-4, 4)', duration: 0.08, ease: 'none', repeat: 20, yoyo: true });"
+    },
+    {
+      "id": "stagger-children",
+      "name": "Stagger",
+      "category": "entrées",
+      "code": "// [FEE-LOGIC] — {id} — stagger\ngsap.from('[data-af-id=\"{id}\"] > *', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power2.out' });"
+    }
+  ]
+}
