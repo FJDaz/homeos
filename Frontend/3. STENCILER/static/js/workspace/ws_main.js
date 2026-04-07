@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chat = new WsChatMain('ws-chat-mount');
     window.wsChat = chat;
     window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover');
+    window.wsStitch = new WsStitch();
     window.wsWire = new WsWire();
 
     // 2b. Initialiser l'Inspecteur (Mission 130)
@@ -28,6 +29,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         inspect.applyDesignTokens(tokens);
     } catch (err) {
         console.error("❌ ws_main: failed to load design tokens", err);
+    }
+
+    // 2d. Panels Draggables (Mission 209)
+    if (window.PanelDragger) {
+        ['panel-screens', 'panel-audit', 'panel-stitch'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) new window.PanelDragger(el);
+        });
+        console.log("✅ [M209] PanelDragger initialized");
     }
 
     // 3. Charger le contexte courant (depuis landing.html)
@@ -45,7 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.onclick = () => {
             const mode = btn.getAttribute('data-mode');
             window.wsCanvas?.setMode(mode);
-            
+
+            // Mission 207 — Ouvrir le drawer typographie quand mode = text
+            if (mode === 'text') {
+                const drawer = document.getElementById('ws-font-drawer');
+                if (drawer) drawer.classList.toggle('hidden');
+            }
+
             // Éventuel postMessage si l'iframe préview existe
             const iframe = document.querySelector('#ws-preview-frame-container iframe');
             if (iframe && iframe.contentWindow) {
@@ -140,6 +156,36 @@ async function loadCurrentContext() {
         console.error("ws_main: failed to load context", e);
     }
 }
+
+/**
+ * window.wsSendMessage (Mission 200B - Transactional Handshake)
+ * Envoie un message à l'iframe et attend un 'receipt' avec le même transactionId.
+ */
+window.wsSendMessage = function(iframe, message, timeout = 2000) {
+    return new Promise((resolve, reject) => {
+        if (!iframe || !iframe.contentWindow) return reject("Iframe non disponible");
+        
+        const transactionId = 'tx-' + Math.random().toString(36).substr(2, 9);
+        const request = { ...message, transactionId };
+        
+        const handler = (e) => {
+            if (e.data && e.data.type === 'receipt' && e.data.transactionId === transactionId) {
+                window.removeEventListener('message', handler);
+                clearTimeout(timer);
+                resolve(e.data);
+            }
+        };
+        
+        window.addEventListener('message', handler);
+        const timer = setTimeout(() => {
+            window.removeEventListener('message', handler);
+            console.warn(`⚠️ Handshake Timeout [${transactionId}] for type: ${message.type}`);
+            resolve({ status: 'timeout', transactionId });
+        }, timeout);
+        
+        iframe.contentWindow.postMessage(request, '*');
+    });
+};
 
 async function fetchWorkspaceImports() {
     const list = document.getElementById('ws-import-list');

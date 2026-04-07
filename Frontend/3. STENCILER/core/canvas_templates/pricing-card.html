@@ -1,0 +1,29 @@
+<div class="af-pricing-card af-bg-primary af-radius-lg border-2 af-border-primary p-8 shadow-xl flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] {{highlight_class}}" data-af-id="pricing-{{id}}">
+    [[if hasBadge]]
+    <span class="af-badge af-radius-max px-3 py-1 text-[9px] font-bold af-nudge-bg af-text-primary uppercase absolute top-4 right-4 shadow-sm">Populaire</span>
+    [[endif]]
+    
+    <div class="mb-6">
+        <h4 class="af-text-muted text-[10px] font-bold uppercase tracking-widest mb-1">{{planName}}</h4>
+        <div class="flex items-baseline gap-1">
+            <span class="af-text-primary text-3xl font-bold">{{price}}</span>
+            <span class="af-text-muted text-xs">/mois</span>
+        </div>
+    </div>
+    
+    <ul class="af-pricing-features mb-8 flex flex-col gap-4">
+        <li class="flex items-center gap-2 text-xs af-text-primary">
+            <svg class="w-3.5 h-3.5 af-nudge-text" ...></svg> Accès illimité
+        </li>
+        <li class="flex items-center gap-2 text-xs af-text-primary">
+            <svg class="w-3.5 h-3.5 af-nudge-text" ...></svg> Support prioritaire
+        </li>
+        <li class="flex items-center gap-2 text-xs af-text-primary">
+            <svg class="w-3.5 h-3.5 af-nudge-text" ...></svg> Export HD
+        </li>
+    </ul>
+    
+    <button class="w-full py-3 af-radius af-nudge-bg af-text-primary font-semibold text-sm transition-all focus:ring-2 focus:ring-offset-2">
+        Choisir ce plan
+    </button>
+</div>

@@ -1,0 +1,22 @@
+<div class="af-canvas-card af-bg-secondary af-radius-md af-border-primary border p-4 shadow-sm transition-all" data-af-id="card-{{id}}">
+    [[if hasImage]]
+    <div class="af-card-image mb-4 af-radius overflow-hidden h-40 bg-gray-200 flex items-center justify-center">
+        <span class="text-xs af-text-muted">IMAGE PLACEHOLDER</span>
+    </div>
+    [[endif]]
+    
+    <div class="af-card-content">
+        [[if hasBadge]]
+        <span class="af-badge af-radius-max af-nudge-bg af-text-primary px-2 py-0.5 text-[10px] mb-2 inline-block">{{badgeText}}</span>
+        [[endif]]
+        
+        <h3 class="af-text-primary text-sm font-medium mb-1">{{title}}</h3>
+        <p class="af-text-muted text-xs mb-3">{{description}}</p>
+        
+        [[if hasCTA]]
+        <button class="af-nudge-bg af-text-primary af-radius px-3 py-1.5 text-xs border border-transparent transition-all">
+            {{ctaLabel}}
+        </button>
+        [[endif]]
+    </div>
+</div>

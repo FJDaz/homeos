@@ -8,8 +8,18 @@ import re
 import json
 import asyncio
 import logging
+import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
+
+# Garantir que le répertoire parent (3. STENCILER) est dans sys.path
+_ROOT = Path(__file__).parent.parent.resolve()
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from core.key_resolver import resolve_key
+from core.canvas_library import CANVAS_LIBRARY
+from core.canvas_applier import applier
 
 from fastapi import APIRouter, HTTPException, Query, Body, Request, UploadFile, File, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -65,6 +75,16 @@ class SullivanChatRequest(BaseModel):
     canvas_screens: Optional[list] = None  # [{ id, title, html }]
     selected_element: Optional[dict] = None  # { selector, tag, html } — M154
     wires: Optional[List[Dict]] = None  # [{ trigger, target, event }] — M161
+
+class ToolCallRequest(BaseModel):
+    tool: str
+    params: Dict[str, Any]
+    project_id: Optional[str] = "active"
+
+class ToolCallResponse(BaseModel):
+    status: str
+    html: Optional[str] = None
+    error: Optional[str] = None
 
 # --- CACHE DES FONTES SYSTEME (Optimisation M148) ---
 _FONT_PATH_CACHE = {}
@@ -127,9 +147,13 @@ async def get_sullivan_pulse():
 async def sullivan_font_upload(file: UploadFile = File(...)):
     """
     Mission 109 Phase B: Upload TTF/OTF/WOFF/WOFF2 -> classification + webfont + @font-face.
+    Mission 207: Logging amélioré pour diagnostic.
     """
     from Backend.Prod.sullivan.font_classifier import FontClassifier
     from Backend.Prod.sullivan.font_webgen import FontWebGen
+
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Nom de fichier requis")
 
     # Sauvegarde temporaire
     exports_dir = ROOT_DIR / "exports" / "fonts"
@@ -139,28 +163,36 @@ async def sullivan_font_upload(file: UploadFile = File(...)):
     content = await file.read()
     temp_path.write_bytes(content)
 
+    logger.info(f"Font upload: {file.filename} ({len(content)} bytes) saved to {temp_path}")
+
     try:
         # 1. Classification
+        logger.info(f"Font upload: classifying {file.filename}")
         classifier = FontClassifier()
         classification = classifier.classify(str(temp_path))
+        logger.info(f"Font upload: classification = {classification.get('vox_atypi', '?')} / {classification.get('family_name', '?')}")
 
         # 2. Generation webfont
+        logger.info(f"Font upload: generating webfont for {classification.get('family_name', '?')}")
         webgen = FontWebGen()
         webfont_result = webgen.generate(str(temp_path), classification)
 
         # 3. Nettoyage
         temp_path.unlink()
 
+        logger.info(f"Font upload: success — {webfont_result.get('slug', '?')}")
         return {
             "status": "ok",
             "classification": classification,
             "webfont": webfont_result
         }
     except Exception as e:
-        logger.error(f"Font upload failed: {e}")
+        logger.error(f"Font upload failed for {file.filename}: {type(e).__name__}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         if temp_path.exists():
             temp_path.unlink()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
 
 
 @router.get("/api/sullivan/fonts")
@@ -176,6 +208,53 @@ async def sullivan_list_fonts():
 async def sullivan_system_fonts():
     """Liste les familles de fontes installees sur le poste via le cache."""
     return {"families": sorted(_FONT_PATH_CACHE.keys())}
+
+
+@router.post("/api/sullivan/tool-call", response_model=ToolCallResponse)
+async def sullivan_tool_call(req: ToolCallRequest):
+    """
+    Mission 204: Execute un tool-call (instrumentation de canevas ou patch).
+    """
+    try:
+        if req.tool == "insert_canvas":
+            canvas_name = req.params.get("canvas")
+            props = req.params.get("props", {})
+            
+            if canvas_name not in CANVAS_LIBRARY:
+                return {"status": "error", "error": f"Canevas '{canvas_name}' inconnu."}
+            
+            html = applier.instanciate(canvas_name, props, req.project_id)
+            return {"status": "ok", "html": html}
+            
+        elif req.tool == "patch_element":
+            # Mission 204 — patch_element complet via _apply_tailwind_diff
+            target = req.params.get("target", "")
+            add_classes = req.params.get("add", [])
+            remove_classes = req.params.get("remove", [])
+            source_html = req.params.get("html", "")
+
+            if not source_html or not target:
+                return {"status": "error", "error": "patch_element requires 'html' and 'target'"}
+
+            # Construire le diff au format attendu par _apply_tailwind_diff
+            diff = [{
+                "id": target,
+                "add": " ".join(add_classes) if isinstance(add_classes, list) else add_classes,
+                "remove": " ".join(remove_classes) if isinstance(remove_classes, list) else remove_classes
+            }]
+
+            try:
+                from routers.frd_router import _apply_tailwind_diff
+                patched_html = _apply_tailwind_diff(source_html, diff)
+                return {"status": "ok", "html": patched_html}
+            except Exception as e:
+                logger.warning(f"_apply_tailwind_diff failed: {e}, returning source")
+                return {"status": "ok", "html": source_html}
+            
+        return {"status": "error", "error": f"Outil '{req.tool}' non supporte."}
+    except Exception as e:
+        logger.error(f"Tool call failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @router.post("/api/sullivan/generate-webfont")
@@ -254,17 +333,34 @@ async def sullivan_delete_font(slug: str):
 
 
 @router.post("/api/sullivan/chat")
-async def sullivan_chat(req: SullivanChatRequest):
+async def sullivan_chat(request: Request, req: SullivanChatRequest):
     """
     Chat Sullivan - repond a un message utilisateur selon le mode courant.
     Mission 142 + 152 : Support multi-screens et Design System (DESIGN.md).
+    Mission 137 : BYOK — injection clé user au runtime.
     """
+    from core.key_resolver import resolve_key
+    user_id = getattr(request.state, 'user_id', None)
+
+    # Mission 137: Injecter clé BYOK si disponible
+    gemini_key = resolve_key("gemini", user_id)
+    original_key = os.environ.get("GOOGLE_API_KEY")
+    if gemini_key:
+        os.environ["GOOGLE_API_KEY"] = gemini_key
+
     try:
         from Backend.Prod.retro_genome.routes import _get_gemini_client
         client = _get_gemini_client()
     except Exception as e:
         logger.error(f"GeminiClient init failed: {e}")
         raise HTTPException(status_code=500, detail="LLM unavailable")
+    finally:
+        # Restaurer clé originale
+        if gemini_key:
+            if original_key:
+                os.environ["GOOGLE_API_KEY"] = original_key
+            else:
+                os.environ.pop("GOOGLE_API_KEY", None)
 
     mode_context = {
         "construct": "Tu es Sullivan, un assistant de design UI/UX et AetherFlow Architect. Aide l'utilisateur a concevoir et forger ses ecrans.",
@@ -281,7 +377,26 @@ async def sullivan_chat(req: SullivanChatRequest):
 
     base_system += f"\n\n{manifest_context}"
 
-    if "CADRAGE" in manifest_context:
+    # --- MISSION 189 : HOMEO_GENOME.md (Source de Vérité Unifiée) ---
+    genome_block = ""
+    try:
+        genome_path = get_active_project_path() / "HOMEO_GENOME.md"
+        if genome_path.exists():
+            genome_content = genome_path.read_text(encoding='utf-8')
+            # Tronquer à 8000 tokens max (~32000 chars)
+            if len(genome_content) > 32000:
+                genome_content = genome_content[:32000] + "\n\n> ... (tronqué)"
+            genome_block = f"""
+HOMEO_GENOME.md (SOURCE DE VÉRITÉ DU PROJET) :
+---
+{genome_content}
+---
+Ton fichier HOMEO_GENOME.md définit le projet. Ne génère rien qui contrevienne aux tokens §2 ou aux intentions §3/§6.
+"""
+    except Exception:
+        pass
+
+    if "CADRAGE" in manifest_context and not genome_block:
         # Fallback : Inviter au cadrage si manifest absent
         base_system += "\nTu ne peux pas effectuer de modifications majeures. Invite poliment l'utilisateur a initialiser son projet via le mode CADRAGE."
 
@@ -374,7 +489,14 @@ CONNEXIONS VISUELLES (WIRES) DETECTEES :
 {wires_json}
 ---
 Utilise ces paires Trigger/Target pour generer des animations GSAP intelligentes.
-Par exemple, si Trigger='button' et Target='menu', anime le menu lors de l'interaction sur le bouton.
+"""
+
+    # --- MISSION 204 : CATALOGUE DE CANEVAS (TOOL-CALLING) ---
+    catalogue_block = f"""
+CATALOGUE DE CANEVAS AUTORISES (MISSION 204) :
+---
+{json.dumps(CANVAS_LIBRARY, indent=2, ensure_ascii=False)}
+---
 """
 
     system_prompt = f"""
@@ -383,6 +505,8 @@ Par exemple, si Trigger='button' et Target='menu', anime le menu lors de l'inter
 {manifest_block}
 
 {design_md_block}
+
+{catalogue_block}
 
 {selected_block}
 
@@ -393,17 +517,37 @@ Par exemple, si Trigger='button' et Target='menu', anime le menu lors de l'inter
 {wires_block}
 
 REGLES DE REPONSE :
-Reponds avec ce format exact (trois blocs separes par des delimiteurs) :
+Sullivan est un orchestrateur d'outils bornes. Tu as deux modes de reponse :
 
----EXPLANATION---
-Ton explication courte ici (1-3 phrases).
----HTML---
-<!DOCTYPE html>... (le HTML complet de l'ECRAN ACTIF uniquement, avec injection automatique de <script type="module" src="/api/projects/active/logic.js"></script> si besoin)
----LOGIC---
-// Ton code GSAP ici. Utilise des imports ESM pour GSAP (ex: import gsap from "https://esm.sh/gsap").
----END---
+1. MODE TOOL-CALL (Privilegier pour ajouts/modifications ciblees) :
+Reponds avec un JSON strict contenant l'outil et ses parametres.
 
-Pas de prose, pas de markdown, pas de JSON.
+CASUQUISTIQUE — quand utiliser quel outil :
+- L'utilisateur demande d'AJOUTER un composant (bouton, card, hero, nav, formulaire, modal, badge, toast, tabs, table, avatar, timeline, pricing-card, drawer, stat-block) → "insert_canvas" avec le nom du canevas et ses props
+- L'utilisateur demande une modification de SURFACE (couleur, taille, espacement, police) sur un element existant → "patch_element" avec target, add/remove classes
+- L'utilisateur demande une restructuration MAJEURE, une generation ex-nihilo complete, ou un changement qui touche a la structure globale → reponds en HTML libre avec les delimiteurs ---EXPLANATION---, ---HTML---
+- L'utilisateur demande une ANIMATION ou interaction GSAP → reponds avec ---LOGIC---
+
+Outils autorises :
+- "insert_canvas" : params: {{ "canvas": "nom", "props": {{...}}, "anchor": {{ "after": "selector" }} }}
+- "patch_element" : params: {{ "target": "selector", "add": ["class"], "remove": ["class"], "html": "<html source>" }}
+
+Exemple de reponse JSON insert_canvas :
+{{
+  "tool": "insert_canvas",
+  "params": {{ "canvas": "card", "props": {{ "hasImage": true, "title": "Mon titre" }}, "anchor": {{ "after": "[data-af-id='hero']" }} }}
+}}
+
+Exemple de reponse JSON patch_element :
+{{
+  "tool": "patch_element",
+  "params": {{ "target": "[data-af-id='btn-login']", "add": ["font-medium", "tracking-wide"], "remove": ["font-normal"], "html": "<html source>" }}
+}}
+
+2. MODE GENERATION LIBRE (Fallback pour restructuration majeure) :
+Utilise les delimiteurs ---EXPLANATION---, ---HTML---, ---LOGIC---.
+
+DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut faire le travail.
 """
 
     try:
@@ -417,18 +561,46 @@ Pas de prose, pas de markdown, pas de JSON.
 
         raw_text = result.code.strip()
 
+        # Detection Tool-Call JSON (Mission 204)
+        if raw_text.startswith("{") and "tool" in raw_text:
+            try:
+                tool_data = json.loads(raw_text)
+                # On execute le tool call en interne pour retourner le HTML si besoin
+                tool_res = await sullivan_tool_call(ToolCallRequest(
+                    tool=tool_data["tool"],
+                    params=tool_data["params"],
+                    project_id=req.project_id
+                ))
+                if tool_res["status"] == "ok":
+                    return {
+                        "explanation": f"J'ai utilise l'outil {tool_data['tool']} pour repondre a votre demande.",
+                        "html": tool_res["html"],
+                        "tool_call": tool_data
+                    }
+            except Exception as e:
+                logger.error(f"Failed to handle inline tool-call: {e}")
+
         # Parsing par delimiteurs (Mission 161: Support ---LOGIC---)
         explanation = None
         html = None
         logic_js = None
+
+        def _strip_fences(s: str) -> str:
+            """Retire les backticks markdown si Sullivan les ajoute autour du code."""
+            s = s.strip()
+            if s.startswith("```"):
+                s = s.split("\n", 1)[-1] if "\n" in s else s[3:]
+            if s.endswith("```"):
+                s = s.rsplit("```", 1)[0]
+            return s.strip()
 
         if "---EXPLANATION---" in raw_text:
             try:
                 explanation = raw_text.split("---EXPLANATION---")[1].split("---")[0].strip()
 
                 if "---HTML---" in raw_text:
-                    html_part = raw_text.split("---HTML---")[1].split("---")[0].strip()
-                    html = None if html_part.upper() == "NULL" or not html_part.startswith("<") else html_part
+                    html_part = _strip_fences(raw_text.split("---HTML---")[1].split("---")[0].strip())
+                    html = None if html_part.upper() == "NULL" or not html_part.strip() else html_part
 
                 if "---LOGIC---" in raw_text:
                     logic_part = raw_text.split("---LOGIC---")[1].split("---")[0].strip()
@@ -438,7 +610,17 @@ Pas de prose, pas de markdown, pas de JSON.
                 logger.error(f"Sullivan parsing error: {e}")
                 explanation = raw_text
         else:
-            explanation = raw_text
+            # Sullivan n'a pas utilisé les délimiteurs — extraire le HTML si présent
+            # et ne pas polluer l'explanation avec du code
+            if "<!DOCTYPE" in raw_text or "<html" in raw_text:
+                try:
+                    start = raw_text.find("<!DOCTYPE") if "<!DOCTYPE" in raw_text else raw_text.find("<html")
+                    html = raw_text[start:].strip()
+                    explanation = raw_text[:start].strip() or "Voici le rendu mis à jour."
+                except Exception:
+                    explanation = raw_text
+            else:
+                explanation = raw_text
 
         # Sauvegarde de la logique dans logic.js (Mission 161)
         if logic_js:

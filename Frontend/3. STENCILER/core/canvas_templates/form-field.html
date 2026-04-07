@@ -1,0 +1,13 @@
+<div class="af-form-field mb-4 w-full" data-af-id="field-{{id}}">
+    [[if hasLabel]]
+    <label class="af-text-primary text-[11px] font-medium block mb-1.5 px-0.5">{{label}}</label>
+    [[endif]]
+    
+    <div class="af-input-wrapper relative">
+        <input type="{{type}}" class="af-bg-primary af-border-primary border af-radius-sm w-full px-3 py-2 text-xs focus:ring-1 focus:ring-offset-0 focus:outline-none transition-all placeholder:af-text-muted" placeholder="{{placeholder}}">
+    </div>
+    
+    [[if hasHelper]]
+    <span class="af-text-muted text-[10px] mt-1.5 block px-0.5">{{helperText}}</span>
+    [[endif]]
+</div>

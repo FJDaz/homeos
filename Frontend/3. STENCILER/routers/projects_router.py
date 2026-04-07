@@ -15,7 +15,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException, Body, UploadFile, File
+from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -176,14 +176,36 @@ async def get_active_logic_js():
     return FileResponse(f_path, media_type="application/javascript")
 
 @router.get("/projects", response_model=List[ProjectInfo])
-async def list_all_projects_route():
+async def list_all_projects_route(request: Request):
+    """Mission 190: Filtre par user_id. Admin voit tout, student voit ses projets + hérités."""
+    user_id = getattr(request.state, 'user_id', None)
     active_id = get_active_project_id()
+
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
-        rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+        # Check if user is admin
+        is_admin = False
+        if user_id:
+            admin_name = os.getenv("ADMIN_NAME", "FJD")
+            row = conn.execute("SELECT name FROM users WHERE id = ?", (user_id,)).fetchone()
+            is_admin = row and row[0] == admin_name
+
+        if is_admin:
+            rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+        elif user_id:
+            rows = conn.execute(
+                "SELECT id, name, path, created_at, last_opened FROM projects WHERE user_id = ? OR user_id IS NULL ORDER BY last_opened DESC",
+                (user_id,)
+            ).fetchall()
+        else:
+            # Legacy: no token → show all (backward compat)
+            rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+
         return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4], active=(r[0] == active_id)) for r in rows]
 
 @router.post("/projects/create")
-async def create_project_route(req: ProjectCreateRequest):
+async def create_project_route(request: Request, req: ProjectCreateRequest):
+    """Mission 190: Ajoute user_id au projet créé."""
+    user_id = getattr(request.state, 'user_id', None)
     pid = req.id or str(uuid.uuid4())[:8] # Small IDs for slugs
     p_path = PROJECTS_DIR / pid
     p_path.mkdir(parents=True, exist_ok=True)
@@ -204,8 +226,8 @@ async def create_project_route(req: ProjectCreateRequest):
 
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         try:
-            conn.execute("INSERT INTO projects (id, name, path) VALUES (?,?,?)",
-                         (pid, req.name, str(p_path)))
+            conn.execute("INSERT INTO projects (id, name, path, user_id) VALUES (?,?,?,?)",
+                         (pid, req.name, str(p_path), user_id))
         except sqlite3.IntegrityError:
             raise HTTPException(status_code=400, detail="Project ID already exists")
 
@@ -292,3 +314,49 @@ async def get_design_tokens():
         "shape": {"border_radius": "6px"},
         "source": "homeos_default"
     }
+
+
+# --- MISSION 189 : HOMEO_GENOME COMPILER ---
+@router.post("/projects/{project_id}/genome-compile")
+async def genome_compile(project_id: str):
+    """Compile HOMEO_GENOME.md unifié pour le projet."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+        if not project_id:
+            raise HTTPException(status_code=404, detail="No active project")
+
+    project_dir = PROJECTS_DIR / project_id
+    if not project_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
+
+    try:
+        import sys
+        backend_prod = ROOT_DIR / "Backend/Prod"
+        if str(backend_prod) not in sys.path:
+            sys.path.insert(0, str(backend_prod))
+        from sullivan.genome_compiler import GenomeCompiler
+
+        compiler = GenomeCompiler(project_dir)
+        result = compiler.compile()
+        logger.info(f"HOMEO_GENOME.md compiled for {project_id}: {result['size_kb']}Ko")
+        return result
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"GenomeCompiler not available: {e}")
+    except Exception as e:
+        logger.error(f"Genome compile failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/projects/{project_id}/genome")
+async def genome_read(project_id: str):
+    """Lit le HOMEO_GENOME.md du projet."""
+    if project_id == "active":
+        project_id = get_active_project_id()
+        if not project_id:
+            raise HTTPException(status_code=404, detail="No active project")
+
+    genome_path = PROJECTS_DIR / project_id / "HOMEO_GENOME.md"
+    if not genome_path.exists():
+        raise HTTPException(status_code=404, detail="HOMEO_GENOME.md not found")
+
+    return {"content": genome_path.read_text(encoding='utf-8')}

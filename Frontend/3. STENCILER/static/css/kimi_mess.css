@@ -4,7 +4,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;
@@ -252,7 +252,7 @@ body {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
-  font-family: 'Geist Mono', monospace;
+  font-family: "Univers LT Std", "Univers", monospace;
   font-size: 9px;
 }
 

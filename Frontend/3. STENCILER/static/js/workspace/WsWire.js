@@ -637,25 +637,31 @@ class WsWire {
         }
     }
 
-    _syncNudgesToIframe(nudges, attempt = 0) {
+    async _syncNudgesToIframe(nudges, attempt = 0) {
         const shell = document.getElementById(window.wsCanvas?.activeScreenId);
         const iframe = shell?.querySelector('iframe');
         if (!iframe || !iframe.contentWindow) return;
-        iframe.contentWindow.postMessage({ type: 'ws-inject-nudges', nudges }, '*');
+        
+        // Mission 200B: Transactional Handshake
+        const receipt = await window.wsSendMessage(iframe, { type: 'ws-inject-nudges', nudges });
+        if (receipt.status === 'timeout') {
+            console.warn("[WsWire] Nudge Sync Timeout — possible blocking overlay");
+        }
     }
 
-    _highlightInIframe(el) {
+    async _highlightInIframe(el) {
         if (!el) return;
         const shell = document.getElementById(window.wsCanvas?.activeScreenId);
         const iframe = shell?.querySelector('iframe');
         if (iframe) {
-            iframe.contentWindow.postMessage({
+            // Mission 200B: Transactional Handshake
+            await window.wsSendMessage(iframe, {
                 type: 'highlight-intent',
                 id: el.id,
                 selector: el.selector,
                 text: el.text,
                 tag: el.tag
-            }, '*');
+            });
         }
     }
 

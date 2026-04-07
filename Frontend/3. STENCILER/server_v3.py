@@ -42,8 +42,9 @@ def _load_env():
 _load_env()
 
 # --- IMPORTS ---
-for p in [str(ROOT_DIR), str(BACKEND_PROD), str(CWD)]:
-    if p not in sys.path: sys.path.insert(0, p)
+for p in [str(ROOT_DIR), str(BACKEND_PROD)]:
+    if p not in sys.path: sys.path.append(p)
+if str(CWD) not in sys.path: sys.path.insert(0, str(CWD))
 
 from bkd_service import (
     SULLIVAN_BKD_SYSTEM, MANIFEST_FRD, SULLIVAN_RAG,
@@ -104,6 +105,38 @@ app = FastAPI(title="AetherFlow Server V3", version="3.0.0", lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware, allow_origins=["*", "null"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
+# --- MISSION 190 : AUTH MIDDLEWARE ---
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import Response
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    """Lit X-User-Token → résout user_id → injecte request.state.user_id."""
+    EXEMPT_PATHS = ["/api/auth/", "/login", "/static", "/docs", "/openapi.json", "/.well-known"]
+
+    async def dispatch(self, request: StarletteRequest, call_next):
+        # Exempt paths
+        if any(request.url.path.startswith(p) for p in self.EXEMPT_PATHS):
+            request.state.user_id = None
+            return await call_next(request)
+
+        token = request.headers.get("X-User-Token")
+        request.state.user_id = None
+
+        if token:
+            try:
+                conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+                user = conn.execute("SELECT id FROM users WHERE token = ?", (token,)).fetchone()
+                conn.close()
+                if user:
+                    request.state.user_id = user[0]
+            except Exception:
+                pass
+
+        return await call_next(request)
+
+app.add_middleware(AuthMiddleware)
+
 # --- STATIC ---
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR_PATH)), name="static")
 
@@ -124,6 +157,8 @@ from routers.preview_router import router as preview_router
 from routers.genome_router import router as genome_router
 from routers.retro_router import router as retro_router
 from routers.page_router import router as page_router
+from routers.auth_router import router as auth_router
+from routers.stitch_router import router as stitch_router
 
 app.include_router(wire_router)
 app.include_router(sullivan_router)
@@ -138,6 +173,8 @@ app.include_router(preview_router)
 app.include_router(genome_router)
 app.include_router(retro_router)
 app.include_router(page_router)
+app.include_router(auth_router)
+app.include_router(stitch_router)
 
 # --- ACTIVE PROJECT OVERRIDES (bkd_service uses JSON file, not DB) ---
 def get_active_project_id():

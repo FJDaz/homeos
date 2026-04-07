@@ -11,13 +11,20 @@
 body {
     background-color: #fff;
     cursor: default;
+    font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Force inheritance for form elements */
+input, button, textarea, select, kbd {
+    font-family: inherit;
 }
 
 /* Background Grid (Dot Grid) */
 .bg-dot-grid {
     background-image: radial-gradient(#d1d5db 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-size: 8px 8px;
 }
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -213,8 +220,32 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     overflow: hidden;
 }
 
-#badge-screens:hover, #badge-audit:hover {
+#badge-screens:hover, #badge-audit:hover, #badge-stitch:hover {
     padding-left: 1.5rem;
+}
+
+/* --- STITCH LAYOUT SHIFT (Mission 204-B) --- */
+
+/* Quand Stitch est ouvert, on décale les panels au-dessus */
+#ws-left-panels.stitch-expanded {
+    gap: 8px !important; /* space-y-4 (16px) -> space-y-2 (8px) */
+}
+
+/* Réduction des marges entre les sections */
+#ws-left-panels.stitch-expanded .flex-col {
+    gap: 8px !important;
+}
+
+/* Le panel Screens remonte de 8px */
+#ws-left-panels.stitch-expanded #section-screens {
+    transform: translateY(-8px);
+    transition: transform 0.3s ease;
+}
+
+/* Masquage du bouton FRD en bas */
+#ws-left-panels.stitch-expanded ~ #ws-frd-btn-wrapper,
+body.stitch-open #ws-frd-btn-wrapper {
+    display: none !important;
 }
 
 /* Toolbar Active State */
@@ -349,4 +380,77 @@ input[type="range"]::-webkit-slider-thumb {
     background: #f8fafc !important;
     color: #A3CD54 !important;
     border-color: #A3CD54 !important;
+}
+/* GSAP EFFECTS DRAWER (Mission 166) */
+#ws-fee-effects-drawer {
+    box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25), 0 18px 36px -18px rgba(0,0,0,0.3);
+}
+
+.ws-paper-shadow {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 20px -5px rgba(0,0,0,0.08);
+}
+
+.ws-effect-card {
+    min-height: 140px;
+}
+
+.ws-effect-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1), 0 20px 40px -10px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+/* DEPURAGE APERÇUS INVISIBLES */
+.ws-preview-item {
+    background: #ffffff;
+    border: 1px solid #3d3d3c; /* Correction syntaxique: solid */
+    width: 40px;
+    height: 30px;
+    border-radius: var(--homeos-radius, 0px);
+}
+
+.ws-preview-btn {
+    background: var(--homeos-primary, #8cc63f);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    font-size: 8px;
+    font-weight: bold;
+    text-transform: lowercase;
+    border-radius: var(--homeos-radius, 0px);
+}
+
+/* Keyframes for previews */
+@keyframes preview-stagger {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.anim-stagger > div { animation: preview-stagger 1.5s infinite; opacity: 0; }
+.anim-stagger > div:nth-child(1) { animation-delay: 0.1s; }
+.anim-stagger > div:nth-child(2) { animation-delay: 0.3s; }
+.anim-stagger > div:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes preview-elastic {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+.anim-elastic { animation: preview-elastic 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+
+@keyframes preview-magnetic {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(3px, -3px); }
+    50% { transform: translate(-2px, 3px); }
+    75% { transform: translate(2px, 1px); }
+}
+.anim-magnetic:hover { animation: preview-magnetic 0.6s ease-out infinite; }
+
+#ws-effects-grid::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

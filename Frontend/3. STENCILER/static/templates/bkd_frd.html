@@ -387,8 +387,8 @@
                             })
                         });
                         const data = await res.json();
-                        appendBubble(data.text, 'sullivan');
-                        chatHistory.push({ role: 'user', text: message }, { role: 'assistant', text: data.text });
+                        appendBubble(data.explanation, 'sullivan');
+                        chatHistory.push({ role: 'user', text: message }, { role: 'assistant', text: data.explanation });
                     } catch (err) {
                         addToTerminal(`Chat error: ${err.message}`);
                         appendBubble(`Erreur: ${err.message}`, 'sullivan');

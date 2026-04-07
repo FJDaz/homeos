@@ -1,0 +1,22 @@
+<div class="af-drawer-overlay fixed inset-0 z-[200] flex justify-{{position_val}} bg-black/10 backdrop-blur-[2px]" data-af-id="drawer-{{id}}">
+    [[if hasOverlay]]
+    <div class="absolute inset-0 cursor-pointer"></div>
+    [[endif]]
+    
+    <div class="af-drawer af-bg-primary af-border-primary border-{{border_side}} h-full w-72 shadow-2xl relative z-10 animate-slide-in">
+        <div class="af-drawer-header px-6 py-4 flex items-center justify-between border-b af-border-primary">
+            <h2 class="af-text-primary text-[13px] font-bold tracking-tight uppercase">{{title}}</h2>
+            <button class="af-text-muted hover:af-text-primary transition-all p-1">
+                <svg class="w-4 h-4" ...></svg>
+            </button>
+        </div>
+        
+        <div class="af-drawer-body p-6">
+            <p class="af-text-muted text-xs leading-relaxed">Contenu du tiroir de navigation ou d'actions...</p>
+        </div>
+        
+        <div class="af-drawer-footer absolute bottom-0 left-0 w-full px-6 py-4 border-t af-border-primary bg-gray-50/50">
+            <button class="w-full py-2.5 af-radius af-nudge-bg af-text-primary text-xs font-semibold shadow-sm transition-all">Action principale</button>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,8 @@
 /**
  * ws_iframe_core.js — Phase 1 de l'Aether Core Architecture
  * Tracker injecté au cœur de l'iFrame pour observer le DOM, manipuler la maquette et communiquer avec WsInspect (Host).
+ * Mission 200A : ID Engine — data-af-id sur tout élément significatif.
+ * Mission 200B : Transactional Handshake — receipts pour chaque commande.
  */
 (function() {
     // Piège 2 : Garde anti-double injection (si document.write recrée le doc)
@@ -17,6 +19,55 @@
     let initialTransformX = 0, initialTransformY = 0;
     let ghostFrame = null;
 
+    // --- MISSION 200A : ID ENGINE ---
+    // Hash court et stable pour un élément (tag + texte + position)
+    function _hashElement(el) {
+        const tag = el.tagName.toLowerCase();
+        const text = (el.textContent || '').trim().slice(0, 30);
+        const id = el.id || '';
+        const cls = (el.className || '').toString().slice(0, 30);
+        let raw = tag + id + cls + text;
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+            hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+            hash |= 0;
+        }
+        return 'af-' + Math.abs(hash).toString(36).slice(0, 8);
+    }
+
+    /**
+     * Injecte data-af-id sur tous les éléments significatifs du DOM.
+     - Skip: script, style, head, meta, link, noscript
+     - Skip: éléments déjà avec data-af-id ou id HTML
+     - Cible: éléments avec texte, classes, ou enfants visibles
+     */
+    function injectAfIds() {
+        const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'HEAD', 'META', 'LINK', 'NOSCRIPT', 'BR', 'HR']);
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false);
+        let node;
+        let count = 0;
+        while (node = walker.nextNode()) {
+            if (SKIP_TAGS.has(node.tagName)) continue;
+            if (node.dataset && node.dataset.afId) continue; // déjà fait
+            if (node.id) continue; // a déjà un id HTML
+
+            // Élément significatif s'il a du texte direct, des classes, ou des enfants
+            const hasText = node.childNodes && Array.from(node.childNodes).some(c => c.nodeType === Node.TEXT_NODE && c.textContent.trim().length > 0);
+            const hasClasses = node.className && node.className.toString().trim().length > 0;
+            const hasChildren = node.children && node.children.length > 0;
+
+            if (hasText || hasClasses || hasChildren) {
+                node.setAttribute('data-af-id', _hashElement(node));
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // Injecter au chargement
+    const idsInjected = injectAfIds();
+    if (idsInjected > 0) console.log('[AetherTracker]', idsInjected, 'data-af-id injectés');
+
     function scanAtomicOrgans() {
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT, null, false);
         let node;
@@ -25,7 +76,11 @@
             if (comment.length > 5 && !comment.includes('-->')) {
                 let nextEl = node.nextElementSibling;
                 while (nextEl && ['SCRIPT', 'STYLE'].includes(nextEl.tagName)) nextEl = nextEl.nextElementSibling;
-                if (nextEl) nextEl.setAttribute('data-atomic-organ', comment);
+                if (nextEl) {
+                    nextEl.setAttribute('data-atomic-organ', comment);
+                    // M200A: aussi injecter data-af-id si absent
+                    if (!nextEl.dataset.afId) nextEl.setAttribute('data-af-id', _hashElement(nextEl));
+                }
             }
         }
     }
@@ -46,19 +101,46 @@
         }
     };
 
+    // --- MISSION 200B : TRANSACTIONAL HANDSHAKE ---
+    // Envoie un receipt pour CHAQUE commande reçue du Host
+    function _sendReceipt(transactionId, status, detail) {
+        window.parent.postMessage({
+            type: 'AF_RECEIPT',
+            transactionId: transactionId,
+            status: status,  // 'success' | 'error'
+            detail: detail || null,
+            ts: Date.now()
+        }, '*');
+    }
+
+    // Vérifie si un élément est visible/cliquable (pas overlay)
+    function _isElementVisible(el) {
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) return false;
+        const style = getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+        // Check overlay
+        const topEl = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        if (topEl && topEl !== el && !el.contains(topEl)) {
+            return { visible: false, overlapped_by: topEl.tagName + (topEl.className ? '.' + topEl.className.toString().split(' ')[0] : '') };
+        }
+        return { visible: true };
+    }
+
     window.addEventListener('message', (e) => {
         // Piège 3: Les listeners restent inchangés pour correspondre à ceux du WsInspect (Host)
         if (e.data.type === 'inspect-tool-change') {
             activeMode = e.data.mode;
-            
+
             // Clean up old classes
             document.body.classList.remove('mode-audit', 'mode-front-dev', 'mode-construct');
-            
+
             if (activeMode === 'audit') document.body.classList.add('mode-audit');
             if (activeMode === 'front-dev') document.body.classList.add('mode-front-dev');
             if (activeMode === 'construct') document.body.classList.add('mode-construct');
-            
-            document.body.style.cursor = 
+
+            document.body.style.cursor =
                 (activeMode === 'text') ? 'text' :
                 (activeMode === 'frame') ? 'crosshair' :
                 (activeMode === 'drag') ? 'grab' :
@@ -66,15 +148,33 @@
                 (activeMode === 'front-dev') ? 'alias' :
                 (activeMode === 'colors') ? 'copy' :
                 (activeMode === 'place-img') ? 'copy' : 'default';
+
+            // M200B: Receipt pour tool change
+            if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success', { mode: activeMode });
         }
-        if (e.data.type === 'inspect-clear-selection') clearSelection();
+        if (e.data.type === 'inspect-clear-selection') {
+            clearSelection();
+            if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+        }
         if (e.data.type === 'inspect-undo') {
-            document.body.innerHTML = e.data.snapshot;
-            scanAtomicOrgans(); document.body.appendChild(editBtn);
+            try {
+                document.body.innerHTML = e.data.snapshot;
+                scanAtomicOrgans();
+                document.body.appendChild(editBtn);
+                injectAfIds(); // M200A: ré-injecter après undo
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+            } catch (err) {
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'undo_failed: ' + err.message);
+            }
         }
-        if (e.data.type === 'inspect-apply-color') { 
-            const _ct = selectedEl || lastSelectedEl; 
-            if (_ct) _ct.style.backgroundColor = e.data.color; 
+        if (e.data.type === 'inspect-apply-color') {
+            const _ct = selectedEl || lastSelectedEl;
+            if (_ct) {
+                _ct.style.backgroundColor = e.data.color;
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+            } else {
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'no_element_selected');
+            }
         }
         if (e.data.type === 'inspect-apply-typo') {
             const target = selectedEl || lastSelectedEl;
@@ -82,6 +182,9 @@
                 target.style.fontFamily = e.data.font;
                 target.style.fontSize = e.data.size + 'px';
                 target.style.fontWeight = e.data.weight;
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+            } else {
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'no_element_selected');
             }
         }
         if (e.data.type === 'inspect-ready-to-place-image') {
@@ -90,16 +193,32 @@
             img.src = e.data.src; img.style.position = 'absolute';
             img.style.left = (window.lastClickX || 100) + 'px'; img.style.top = (window.lastClickY || 100) + 'px';
             img.style.maxWidth = '200px'; document.body.appendChild(img);
+            if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
         }
         if (e.data.type === 'inspect-update-dom') {
              if (e.origin !== window.location.origin) return;
-             takeSnapshot();
-             const target = document.querySelector(e.data.selector);
-             if (target) {
-                 const parser = new DOMParser();
-                 const doc = parser.parseFromString(e.data.html, 'text/html');
-                 const newEl = doc.body.firstChild;
-                 if (newEl) target.replaceWith(newEl);
+             try {
+                 takeSnapshot();
+                 const target = document.querySelector(e.data.selector);
+                 if (target) {
+                     const parser = new DOMParser();
+                     const doc = parser.parseFromString(e.data.html, 'text/html');
+                     const newEl = doc.body.firstChild;
+                     if (newEl) {
+                         target.replaceWith(newEl);
+                         // M200A: injecter data-af-id sur le nouvel élément
+                         if (newEl.nodeType === Node.ELEMENT_NODE && !newEl.dataset.afId) {
+                             newEl.setAttribute('data-af-id', _hashElement(newEl));
+                         }
+                         if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+                     } else {
+                         if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'empty_html');
+                     }
+                 } else {
+                     if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'element_not_found: ' + e.data.selector);
+                 }
+             } catch (err) {
+                 if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'dom_update_failed: ' + err.message);
              }
         }
         if (e.data.type === 'inspect-apply-effects') {
@@ -121,12 +240,17 @@
                     target.style.borderWidth = '1px';
                     target.style.borderColor = 'rgba(0,0,0,0.1)';
                 }
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+            } else {
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'no_element_selected');
             }
         }
         if (e.data.type === 'highlight-intent') {
             const { id, selector, text, tag } = e.data;
             let el = id ? document.getElementById(id) : null;
             if (!el && selector) el = document.querySelector(selector);
+            // M200A: aussi chercher par data-af-id
+            if (!el && selector && selector.includes('data-af-id')) el = document.querySelector(selector);
             if (!el && text && tag) {
                 const candidates = Array.from(document.getElementsByTagName(tag));
                 el = candidates.find(c => c.textContent.includes(text));
@@ -135,16 +259,70 @@
                 document.querySelectorAll('.intent-highlight').forEach(o => o.classList.remove('intent-highlight'));
                 el.classList.add('intent-highlight');
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+            } else {
+                if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'element_not_found');
             }
         }
         if (e.data.type === 'clear-highlights') {
             document.querySelectorAll('.intent-highlight').forEach(o => o.classList.remove('intent-highlight'));
-        }
-        if (e.data.type === 'ws-inject-nudges') {
-            _renderNudges(e.data.nudges || []);
+            if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
         }
         if (e.data.type === 'ws-clear-nudges') {
             document.querySelectorAll('.ws-nudge').forEach(n => n.remove());
+            if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+        }
+
+        // M200B: Generic command handler — toute commande avec transactionId reçoit un receipt
+        if (e.data.type === 'AF_CMD') {
+            const txId = e.data.transactionId || e.data.id;
+            try {
+                const action = e.data.action;
+                const selector = e.data.selector;
+                const value = e.data.value;
+
+                let el = null;
+                if (selector) {
+                    el = document.querySelector(selector);
+                    // M200A: fallback par data-af-id
+                    if (!el && selector.includes('data-af-id')) el = document.querySelector(selector);
+                }
+
+                if (!el) {
+                    _sendReceipt(txId, 'error', 'element_not_found: ' + (selector || 'N/A'));
+                    return;
+                }
+
+                // Visibility check
+                const visibility = _isElementVisible(el);
+                if (visibility && !visibility.visible) {
+                    _sendReceipt(txId, 'error', 'element_not_visible', { overlapped_by: visibility.overlapped_by });
+                    return;
+                }
+
+                // Execute action
+                switch (action) {
+                    case 'apply-color':
+                        el.style.backgroundColor = value;
+                        break;
+                    case 'apply-class':
+                        value.split(' ').forEach(c => {
+                            if (c.startsWith('-')) el.classList.remove(c.slice(1));
+                            else el.classList.add(c);
+                        });
+                        break;
+                    case 'set-text':
+                        el.textContent = value;
+                        break;
+                    default:
+                        _sendReceipt(txId, 'error', 'unknown_action: ' + action);
+                        return;
+                }
+
+                _sendReceipt(txId, 'success', { action, selector });
+            } catch (err) {
+                _sendReceipt(e.data.transactionId || e.data.id, 'error', 'command_failed: ' + err.message);
+            }
         }
     });
 
@@ -185,9 +363,23 @@
         if (activeMode !== 'select' && activeMode !== 'audit') return;
         const organ = e.target.closest('[data-atomic-organ]') || e.target;
         if (lastHover && lastHover !== selectedEl) lastHover.classList.remove('inspect-hover');
-        if (organ && organ !== document.body && organ !== document.documentElement) { 
-            organ.classList.add('inspect-hover'); 
-            lastHover = organ; 
+        if (organ && organ !== document.body && organ !== document.documentElement) {
+            organ.classList.add('inspect-hover');
+            lastHover = organ;
+
+            // M200B: Visibility Report sur hover
+            const visibility = _isElementVisible(organ);
+            const afId = organ.dataset.afId || organ.id || null;
+            window.parent.postMessage({
+                type: 'AF_VISIBILITY',
+                data_af_id: afId,
+                selector: getSelector(organ),
+                clickable: visibility === true || visibility.visible,
+                overlapped_by: (visibility && visibility.overlapped_by) || null,
+                z_index: +getComputedStyle(organ).zIndex || 0,
+                opacity: +getComputedStyle(organ).opacity,
+                in_viewport: true // simplifié
+            }, '*');
         } else {
             lastHover = null;
         }
@@ -308,6 +500,7 @@
     }
 
     function getSelector(el) {
+        if (el.dataset && el.dataset.afId) return '[data-af-id="' + el.dataset.afId + '"]';
         if (el.id) return '#' + el.id;
         let path = []; while (el && el.parentElement) {
             let siblingIndex = 1; let sibling = el.previousElementSibling;

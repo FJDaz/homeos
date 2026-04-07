@@ -161,7 +161,7 @@ class KimiClient:
                 client.chat.completions.create,
                 model=self.model,
                 messages=messages,
-                max_tokens=8000,
+                max_tokens=16384,
                 extra_body={"thinking": {"type": "disabled"}},
             )
             elapsed = (time.time() - start) * 1000

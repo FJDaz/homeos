@@ -1,0 +1,24 @@
+<nav class="af-nav af-bg-primary af-border-primary border-b h-12 flex items-center justify-between px-6 w-full sticky top-0 z-50 shadow-sm" data-af-id="nav-{{id}}">
+    [[if hasLogo]]
+    <div class="af-logo flex items-center gap-2">
+        <div class="w-8 h-8 af-nudge-bg af-radius-sm flex items-center justify-center">
+            <span class="text-[10px] af-text-primary font-bold">LOGO</span>
+        </div>
+        <span class="af-text-primary text-sm font-semibold tracking-tight">HoméOS</span>
+    </div>
+    [[endif]]
+    
+    <div class="af-nav-links flex items-center gap-6">
+        <a href="#" class="af-text-primary text-xs font-medium hover:opacity-75 transition-all">Accueil</a>
+        <a href="#" class="af-text-muted text-xs font-medium hover:opacity-75 transition-all">Projets</a>
+        <a href="#" class="af-text-muted text-xs font-medium hover:opacity-75 transition-all">Ressources</a>
+        <a href="#" class="af-text-muted text-xs font-medium hover:opacity-75 transition-all">Contact</a>
+    </div>
+    
+    [[if hasAuth]]
+    <div class="af-nav-auth flex items-center gap-3">
+        <button class="af-text-primary text-xs font-medium px-3 py-1.5 af-radius hover:bg-gray-100 transition-all">Connexion</button>
+        <button class="af-nudge-bg af-text-primary text-xs font-semibold px-3 py-1.5 af-radius shadow-sm transition-all focus:ring-2 focus:ring-offset-2">S'inscrire</button>
+    </div>
+    [[endif]]
+</nav>

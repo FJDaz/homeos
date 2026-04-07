@@ -44,6 +44,49 @@ class WsChatMain extends WsChatBase {
                 typoBtn.classList.toggle('text-homeos-green');
             };
         }
+
+        // Kimi Graphical Run button (Mission 201)
+        const kimiBtn = document.getElementById('btn-ws-kimi-run');
+        if (kimiBtn) {
+            kimiBtn.onclick = () => this.runKimiGraphique();
+        }
+    }
+
+    async runKimiGraphique() {
+        const payload = await this._gatherContext("");
+        if (!payload.screen_html) {
+            this.appendBubble("Ouvrez d'abord un écran pour lancer l'optimisation Kimi.", 'assistant');
+            return;
+        }
+
+        const pending = this._appendTransient("Sullivan-Design analyse et peins votre interface...");
+        
+        try {
+            const res = await fetch('/api/frd/kimi/graphique-run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    html: payload.screen_html,
+                    project_id: payload.project_id
+                })
+            });
+            const data = await res.json();
+            
+            if (pending) pending.remove();
+            
+            if (data.status === 'ok') {
+                this.appendBubble("Sullivan-Design : Optimisation appliquée (cliquez sur l'écran pour l'éditer).", 'assistant');
+                if (window.wsPreview) {
+                    window.wsPreview.updateActiveScreenHtml(data.html);
+                }
+            } else {
+                this.appendBubble("Sullivan-Design : " + (data.message || 'erreur inconnue'), 'assistant');
+            }
+        } catch (e) {
+            console.error("WsChatMain: Kimi run failed", e);
+            if (pending) pending.remove();
+            this.appendBubble("Désolé, Kimi n'est pas disponible pour le moment.", 'assistant');
+        }
     }
 
     async sendMessage() {

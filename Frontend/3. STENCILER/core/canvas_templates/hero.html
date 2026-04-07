@@ -1,0 +1,21 @@
+<section class="af-hero af-bg-primary overflow-hidden relative py-16 px-8 flex flex-col items-center text-center {{layout_class}}" data-af-id="hero-{{id}}">
+    [[if hasVideo]]
+    <div class="af-hero-video absolute inset-0 bg-gray-900/10">
+        <!-- VIDEO BACKGROUND PLACEHOLDER -->
+    </div>
+    [[endif]]
+    
+    <div class="relative z-10 max-w-2xl">
+        <h1 class="af-text-primary text-3xl font-semibold mb-4 leading-tight">{{title}}</h1>
+        
+        [[if hasSubtitle]]
+        <p class="af-text-muted text-sm mb-8 max-w-lg mx-auto">{{subtitle}}</p>
+        [[endif]]
+        
+        [[if hasCTA]]
+        <button class="af-nudge-bg af-text-primary af-radius px-6 py-3 font-medium transition-all shadow-md">
+            {{ctaLabel}}
+        </button>
+        [[endif]]
+    </div>
+</section>

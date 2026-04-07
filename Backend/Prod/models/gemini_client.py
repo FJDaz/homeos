@@ -14,24 +14,22 @@ class GeminiClient(BaseLLMClient):
     
     # Cascade de fallback pour mode FAST (priorité vitesse)
     FALLBACK_MODELS_FAST = [
-        "gemini-2.5-flash",              # GA — primary
-        "gemini-2.5-flash-lite",         # GA — économique
-        "gemini-3.1-flash-lite",         # Preview — ultra-fast
+        "gemini-1.5-flash",              # Stable
+        "gemini-1.5-flash-lite",         # Economique
+        "gemini-2.0-flash",               # High Performance
     ]
 
     # Cascade de fallback pour mode BUILD/PROD (priorité qualité)
     FALLBACK_MODELS_BUILD = [
-        "gemini-2.5-flash",              # GA — primary
-        "gemini-3.1-pro",                # Preview — raisonnement/code complexe
-        "gemini-2.5-pro",                # GA — capable
-        "gemini-3.1-flash-lite",         # Preview — ultra-fast queue
+        "gemini-1.5-pro",                # Reasoning / complex code
+        "gemini-2.0-flash",               # High Performance
+        "gemini-1.5-flash",              # Stable
     ]
 
-    # Cascade par défaut (priorité vitesse)
+    # Cascade par défaut
     FALLBACK_MODELS_DEFAULT = [
-        "gemini-2.5-flash",              # GA — primary
-        "gemini-2.5-flash-lite",         # GA — économique
-        "gemini-3.1-flash-lite",         # Preview — ultra-fast
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
     ]
 
     def __init__(
@@ -136,7 +134,8 @@ class GeminiClient(BaseLLMClient):
         temperature: Optional[float] = None,
         cache_params: Optional[Dict[str, Any]] = None,
         output_constraint: Optional[str] = None,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        use_search: bool = False
     ) -> GenerationResult:
         """
         Generate code/text from a prompt with automatic fallback cascade.
@@ -150,9 +149,9 @@ class GeminiClient(BaseLLMClient):
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
             cache_params: Optional cache control parameters (Gemini supports cached_content)
-
-        Returns:
-            GenerationResult with the generated content
+            output_constraint: Optional constraint on output format
+            system_prompt: Optional system instruction
+            use_search: Whether to enable Google Search grounding tool
         """
         start_time = time.time()
 
@@ -173,6 +172,10 @@ class GeminiClient(BaseLLMClient):
                 "temperature": temperature or settings.temperature
             }
         }
+
+        # Add tools (Mission 192 - Google Search Grounding)
+        if use_search:
+            request_data["tools"] = [{"google_search_retrieval": {}}]
         
         # Inject surgical system prompt when output_constraint == 'json_surgical'
         if output_constraint == "json_surgical":
@@ -193,8 +196,8 @@ class GeminiClient(BaseLLMClient):
         last_model_used = None
 
         for model_idx, model_name in enumerate(self.fallback_models):
-            # Build API URL for this model
-            api_url = f"{self.base_url}/{model_name}:generateContent?key={self.api_key}"
+            # Build API URL for this model (Mission 192 - fixed path construction)
+            api_url = f"{self.base_url}/models/{model_name}:generateContent?key={self.api_key}"
             
             logger.debug(f"Trying Gemini model {model_idx + 1}/{len(self.fallback_models)}: {model_name}")
             
@@ -208,21 +211,32 @@ class GeminiClient(BaseLLMClient):
                         api_url,
                         json=request_data
                     )
-                    response.raise_for_status()
+                    
+                    if response.status_code != 200:
+                        error_data = response.text
+                        logger.error(f"Gemini API Error ({response.status_code}): {error_data}")
+                        response.raise_for_status()
 
                     result_data = response.json()
 
                     # Extract response from Gemini format
                     candidates = result_data.get("candidates", [])
                     if not candidates:
+                        logger.error(f"No candidates in Gemini response: {result_data}")
                         raise ValueError("No candidates in Gemini response")
 
                     content = candidates[0].get("content", {})
                     parts = content.get("parts", [])
                     if not parts:
+                        logger.error(f"No parts in Gemini response: {result_data}")
                         raise ValueError("No parts in Gemini response")
 
-                    text_content = parts[0].get("text", "")
+                    # Concatenate all text parts (Mission 192 - handle multiple parts with grounding)
+                    text_content = "".join([p.get("text", "") for p in parts if "text" in p])
+                    
+                    if not text_content:
+                        logger.error(f"No text found in Gemini parts: {result_data}")
+                        raise ValueError("No text found in Gemini response parts")
 
                     # Extract token usage from usageMetadata
                     usage = result_data.get("usageMetadata", {})

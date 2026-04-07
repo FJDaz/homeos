@@ -1,0 +1,44 @@
+{
+  "slug": "univers-lt-std",
+  "font_family": "Univers LT Std",
+  "classification": {
+    "family_name": "Univers LT Std",
+    "style": "55 Roman",
+    "vox_atypi": "lineales",
+    "sub_family": "grotesque",
+    "is_variable": false,
+    "weights_available": [
+      400
+    ],
+    "signals": {
+      "panose_raw": [
+        2,
+        11,
+        6,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ],
+      "stress_angle_deg": 0.97,
+      "contrast_ratio": 1.45,
+      "serif_raw": 11,
+      "arm_style_raw": 2
+    }
+  },
+  "css": "@font-face {\n  font-family: 'Univers LT Std';\n  src: url('/static/fonts/univers-lt-std/univers-lt-std-400.woff2') format('woff2');\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  unicode-range: U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D, U+00AB-00BB;\n}",
+  "files": [
+    {
+      "path": "fonts/univers-lt-std/univers-lt-std-400.woff2",
+      "format": "woff2",
+      "weight": "400",
+      "style": "normal"
+    }
+  ],
+  "total_size": 155381,
+  "licensing_warning": null,
+  "created_at": "2026-04-07T03:58:57.588000"
+}

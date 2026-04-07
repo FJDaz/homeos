@@ -45,9 +45,9 @@ class Settings(BaseSettings):
     )
 
     kimi_model: str = Field(
-        default="kimi-k2.5",
+        default="kimi-k2-turbo-preview",
         alias="KIMI_MODEL",
-        description="KIMI model (kimi-k2.5 recommended)",
+        description="KIMI model (kimi-k2-turbo-preview recommended for speed, kimi-k2.5 for reasoning)",
     )
 
     use_kimi_hf: bool = Field(default=True, alias="USE_KIMI_HF", description="Use KIMI via HF (free)")
@@ -149,9 +149,9 @@ class Settings(BaseSettings):
     )
 
     gemini_api_url: str = Field(
-        default="https://generativelanguage.googleapis.com/v1/models",
+        default="https://generativelanguage.googleapis.com/v1beta",
         alias="GEMINI_API_URL",
-        description="Gemini API endpoint URL",
+        description="Gemini API base URL",
     )
 
     groq_api_url: str = Field(
@@ -225,6 +225,18 @@ class Settings(BaseSettings):
     mimo_free_quota_tokens: int = Field(
         default=5000000, alias="MIMO_FREE_QUOTA_TOKENS", description="Estimated free tokens for MiMo (default 5M)"
     )
+
+    # Qwen Cost Tracking (approx. $0.07 / 1M tokens)
+    qwen_api_key: str = Field(default="", alias="QWEN_API_KEY", description="Qwen API key")
+    qwen_input_cost_per_1k: float = Field(
+        default=0.00007, alias="QWEN_INPUT_COST_PER_1K", description="Cost per 1K input tokens for Qwen (USD)"
+    )
+    qwen_output_cost_per_1k: float = Field(
+        default=0.00007, alias="QWEN_OUTPUT_COST_PER_1K", description="Cost per 1K output tokens for Qwen (USD)"
+    )
+
+    # Watson Legacy Tracking
+    watson_api_key: str = Field(default="", alias="WATSON_API_KEY", description="IBM Watson Legacy API key")
 
     # Execution Mode Settings
     default_execution_mode: str = Field(

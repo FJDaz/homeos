@@ -152,14 +152,40 @@
         }
 
         async function enterLab() {
-            const userId = document.getElementById('user-id').value.trim();
-            if (!userId) return;
+            const userName = document.getElementById('user-id').value.trim();
+            if (!userName) return;
 
-            localStorage.setItem('homeos_user_id', userId);
-            localStorage.setItem('homeos_context', currentContext);
-
-            console.log(`[AUTH] Logical identity confirmed: ${userId} context: ${currentContext}`);
-            window.location.href = '/workspace';
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: userName })
+                });
+                const data = await res.json();
+                
+                if (data.token) {
+                    // Mission 191: Store full session
+                    localStorage.setItem('homeos_session', JSON.stringify({
+                        token: data.token,
+                        name: data.name,
+                        role: data.role,
+                        user_id: data.user_id,
+                        context: currentContext
+                    }));
+                    
+                    // Cleanup legacy keys
+                    localStorage.removeItem('homeos_user_id');
+                    localStorage.removeItem('homeos_context');
+                    
+                    console.log(`[AUTH] Session confirmed for: ${data.name} (role: ${data.role})`);
+                    window.location.href = '/workspace';
+                } else {
+                    alert("Erreur lors de l'identification.");
+                }
+            } catch (err) {
+                console.error("[AUTH] Registration failed", err);
+                alert("Le serveur d'authentification est indisponible.");
+            }
         }
     </script>
 </body>

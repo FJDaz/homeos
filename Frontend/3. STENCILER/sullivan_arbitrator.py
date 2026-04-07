@@ -254,7 +254,13 @@ class SullivanArbitrator:
                     role = "model" if m["role"] == "assistant" else m["role"]
                     contents.append({"role": role, "parts": [{"text": m["content"]}]})
                 
-                payload = {"contents": contents}
+                payload = {
+                    "contents": contents,
+                    "generationConfig": {
+                        "maxOutputTokens": 16384,
+                        "temperature": 0.7
+                    }
+                }
                 if system:
                     payload["systemInstruction"] = {"parts": [{"text": system}]}
                 if tools:
@@ -283,7 +289,8 @@ class SullivanArbitrator:
                 payload = {
                     "model": model,
                     "messages": openai_messages,
-                    "temperature": 0.7
+                    "temperature": 0.7,
+                    "max_tokens": 16384
                 }
                 # TODO: Mapper les outils vers format OpenAI si nécessaire
                 

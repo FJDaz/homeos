@@ -538,6 +538,19 @@ async def wire_apply_plan(project_id: str, req: Dict[str, Any]):
     except Exception as e:
         logger.error(f"❌ [WiRE] Échec de la Forge Déterministe : {e}")
         return {"status": "error", "message": str(e)}
+    finally:
+        # --- MISSION 189 : Auto-compile HOMEO_GENOME.md après forge ---
+        try:
+            import sys
+            backend_prod = ROOT_DIR / "Backend/Prod"
+            if str(backend_prod) not in sys.path:
+                sys.path.insert(0, str(backend_prod))
+            from sullivan.genome_compiler import GenomeCompiler
+            compiler = GenomeCompiler(PROJECTS_DIR / project_id)
+            compiler.compile()
+            logger.info(f"[WiRE] HOMEO_GENOME.md auto-compiled after wire-apply for {project_id}")
+        except Exception as e:
+            logger.warning(f"[WiRE] Genome auto-compile failed (non-blocking): {e}")
 
 
 @router.post("/wire-preview")
@@ -553,15 +566,17 @@ async def get_wire_preview():
 
 
 @router.post("/api/wire-execute")
-async def wire_execute(req: Dict[str, Any]):
-    """Runtime Wire : intercepte une action et appelle Groq."""
+async def wire_execute(request: Request, req: Dict[str, Any]):
+    """Runtime Wire : intercepte une action et appelle Groq. Mission 137: BYOK."""
+    from core.key_resolver import resolve_key
     wire = req.get("wire", "")
     user_input = req.get("user_input", "")
     endpoint = req.get("endpoint", "")
+    user_id = getattr(request.state, 'user_id', None)
 
-    api_key = os.environ.get("GROQ_API_KEY")
+    api_key = resolve_key("groq", user_id)
     if not api_key:
-        return {"response": f"[wire:{wire}] GROQ_API_KEY manquant"}
+        return {"response": f"[wire:{wire}] Clé Groq manquante — configurez-la via ⚙ Settings"}
 
     system = (
         f"Tu es un assistant IA branché sur l'interface HoméOS.\n"

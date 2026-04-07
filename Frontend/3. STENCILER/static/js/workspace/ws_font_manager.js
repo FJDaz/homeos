@@ -101,8 +101,8 @@ class WsFontManager {
 
         if (this.fonts.length === 0) {
             container.innerHTML = `
-                <div class="col-span-full border border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-slate-300">
-                    <div class="text-[10px] uppercase font-bold tracking-widest mb-2">aucune fonte active</div>
+                <div class="col-span-full border border-dashed border-[#e5e5e5] p-8 flex flex-col items-center justify-center" style="color: #9a9a98;">
+                    <div class="text-[10px] tracking-widest mb-2">aucune fonte active</div>
                     <div class="text-[9px] italic opacity-50">Sullivan attend vos fichiers .ttf...</div>
                 </div>
             `;
@@ -111,17 +111,17 @@ class WsFontManager {
 
         container.innerHTML = this.fonts.map(font => {
             return `
-                <div class="bg-white border border-slate-100 rounded-xl p-4 shadow-sm flex flex-col min-w-[200px]">
+                <div class="p-4 flex flex-col min-w-[200px]" style="background: #f7f6f2; border: 1px solid #e5e5e5; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
                     <div class="flex items-start justify-between mb-2">
                         <div>
-                            <h3 class="text-[11px] font-bold text-slate-800 lowercase">${font.font_family}</h3>
+                            <h3 class="text-[11px] lowercase" style="color: #3d3d3c;">${font.font_family}</h3>
                         </div>
-                        <button onclick="window.wsFontManager.deleteFont('${font.slug}')" class="text-slate-300 hover:text-red-500 transition-all">
+                        <button onclick="window.wsFontManager.deleteFont('${font.slug}')" class="transition-all" style="color: #9a9a98;" onmouseover="this.style.color='#ddb0b0'" onmouseout="this.style.color='#9a9a98'">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
-                    <div class="py-4 border-y border-slate-50 my-2 overflow-hidden">
-                        <p style="font-family: '${font.font_family}'; font-size: 18px; line-height: 1" class="whitespace-nowrap text-slate-900 lowercase">
+                    <div class="py-4 my-2 overflow-hidden" style="border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5;">
+                        <p style="font-family: '${font.font_family}'; font-size: 18px; line-height: 1; color: #3d3d3c;" class="whitespace-nowrap lowercase">
                             ${this.previewText}
                         </p>
                     </div>

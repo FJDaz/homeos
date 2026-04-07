@@ -125,7 +125,7 @@
     justify-content: center;
     flex-direction: column;
     gap: 15px;
-    font-family: 'Geist', sans-serif;
+    font-family: "Univers LT Std", "Univers", sans-serif;
 }
 
 .spinner {
@@ -248,7 +248,7 @@
     z-index: 10000;
     pointer-events: auto;
     cursor: pointer;
-    font-family: 'Geist', sans-serif;
+    font-family: "Univers LT Std", "Univers", sans-serif;
     white-space: nowrap;
     max-width: 200px;
     overflow: hidden;
@@ -274,7 +274,7 @@
     display: none;
     flex-direction: column;
     padding: 40px;
-    font-family: 'Geist', sans-serif;
+    font-family: "Univers LT Std", "Univers", sans-serif;
 }
 
 .bijective-overlay.active {
@@ -315,7 +315,7 @@
     display: flex; align-items: center; gap: 8px;
     padding: 8px 12px;
     background: #2d2d2d; border-bottom: 1px solid #444;
-    font-family: 'Geist', sans-serif; font-size: 11px; color: #ccc;
+    font-family: "Univers LT Std", "Univers", sans-serif; font-size: 11px; color: #ccc;
 }
 .wire-popover-badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; }
 .wire-popover-badge.ok    { background: #22c55e; color: white; }
@@ -354,7 +354,7 @@
 }
 
 .intent-cell-id {
-    font-family: 'Geist Mono', monospace;
+    font-family: "Univers LT Std", "Univers", monospace;
     color: #8cc63f;
     font-weight: bold;
 }

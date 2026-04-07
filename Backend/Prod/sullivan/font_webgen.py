@@ -13,12 +13,17 @@ Workflow:
 
 import os
 import re
+import json
 import shutil
 import hashlib
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from fontTools.ttLib import TTFont
 from fontTools.subset import Subsetter
+from datetime import datetime
+
+logger = logging.getLogger("AetherFlowV3.FontWebGen")
 
 
 # --- Configuration ---
@@ -125,9 +130,18 @@ class FontWebGen:
             woff_path = font_dir / f"{slug}-variable.woff"
 
             # Subset variable font (préserver les axes)
-            subsetter = Subsetter()
-            subsetter.populate(glyphs=self._get_subset_glyphs(font))
-            subsetter.subset(font)
+            try:
+                subset_glyphs = self._get_subset_glyphs(font)
+                cmap = font.getBestCmap()
+                if cmap:
+                    subsetter = Subsetter()
+                    subsetter.populate(glyphs=subset_glyphs)
+                    subsetter.subset(font)
+                    logger.info(f"FontWebGen: variable font subsetting OK — {len(font.getGlyphOrder())} glyphs")
+                else:
+                    logger.warning(f"FontWebGen: {family_name} (variable) pas de cmap — skip subsetting")
+            except Exception as e:
+                logger.warning(f"FontWebGen: variable font subsetting échoué: {e} — conversion directe")
 
             # Export WOFF2
             font.flavor = "woff2"
@@ -156,9 +170,23 @@ class FontWebGen:
             suffix = f"-{weight}{style}" if style != "normal" else f"-{weight}"
 
             # Subset
-            subsetter = Subsetter()
-            subsetter.populate(glyphs=self._get_subset_glyphs(font))
-            subsetter.subset(font)
+            try:
+                subset_glyphs = self._get_subset_glyphs(font)
+                logger.info(f"FontWebGen: subsetting {family_name} — {len(subset_glyphs)} glyphs targeted")
+
+                # Vérifier que la fonte a une cmap valide
+                cmap = font.getBestCmap()
+                if not cmap:
+                    logger.warning(f"FontWebGen: {family_name} n'a pas de cmap — skip subsetting")
+                    # Ne pas subsetter, convertir directement
+                else:
+                    subsetter = Subsetter()
+                    subsetter.populate(glyphs=subset_glyphs)
+                    subsetter.subset(font)
+                    logger.info(f"FontWebGen: subsetting OK — {len(font.getGlyphOrder())} glyphs restants")
+            except Exception as e:
+                logger.warning(f"FontWebGen: subsetting échoué pour {family_name}: {e} — conversion directe")
+                # Continuer sans subsetting
 
             # Export WOFF2
             woff2_name = f"{slug}{suffix}.woff2"
@@ -250,25 +278,36 @@ class FontWebGen:
     def _get_subset_glyphs(self, font: TTFont) -> set:
         """Retourne l'ensemble des glyphes à conserver."""
         glyphs = set()
+        glyph_order = set(font.getGlyphOrder())
+        cmap = font.getBestCmap()
 
         # Unicode ranges
-        for start, end in LATIN_SUBSET_RANGES:
-            for codepoint in range(start, end + 1):
-                if codepoint in font.getBestCmap():
-                    glyphs.add(font.getBestCmap()[codepoint])
+        if cmap:
+            for start, end in LATIN_SUBSET_RANGES:
+                for codepoint in range(start, end + 1):
+                    if codepoint in cmap:
+                        glyph_name = cmap[codepoint]
+                        if glyph_name in glyph_order:
+                            glyphs.add(glyph_name)
 
-        # Ponctuation typo
-        for codepoint in TYPO_PUNCTUATION:
-            if codepoint in font.getBestCmap():
-                glyphs.add(font.getBestCmap()[codepoint])
+            # Ponctuation typo
+            for codepoint in TYPO_PUNCTUATION:
+                if codepoint in cmap:
+                    glyph_name = cmap[codepoint]
+                    if glyph_name in glyph_order:
+                        glyphs.add(glyph_name)
 
-        # Glyphes essentiels
-        essential = [".notdef", ".null", "space", "uni00A0"]
-        glyphs.update(essential)
+        # Glyphes essentiels (uniquement s'ils existent dans la fonte)
+        essential = [".notdef", "space"]
+        for g in essential:
+            if g in glyph_order:
+                glyphs.add(g)
 
-        # Si la fonte a un glyphe .notdef, le garder
-        if ".notdef" in font.getGlyphOrder():
-            glyphs.add(".notdef")
+        # .null et uni00A0 — optionnels, certaines fontes OTF les omettent
+        optional = [".null", "uni00A0"]
+        for g in optional:
+            if g in glyph_order:
+                glyphs.add(g)
 
         return glyphs
 

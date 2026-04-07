@@ -17,8 +17,44 @@
         { id: 'deploy',     label: 'Déploiement', title: "La Sortie", path: '/deploy', disabled: true },
     ];
 
-    // ── État global ─────────────────────────────────────────────────────────
     window.HOMEOS = window.HOMEOS || { version: '3.1.2' };
+    
+    // ── Mission 191: AUTH ORCHESTRATION ────────────────────────────────────
+    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+    const isLoginPath = window.location.pathname === '/login';
+
+    if (!session.token && !isLoginPath) {
+        window.location.href = '/login';
+        return;
+    }
+
+    // Intercepteur Fetch Global (Monkey-patch)
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+        let [resource, config] = args;
+        if (!config) config = {};
+        if (!config.headers) config.headers = {};
+        
+        // Injecter le token s'il existe
+        if (session.token) {
+            if (config.headers instanceof Headers) {
+                config.headers.set('X-User-Token', session.token);
+            } else {
+                config.headers['X-User-Token'] = session.token;
+            }
+        }
+        
+        const response = await originalFetch(resource, config);
+        
+        // Gérer le 401 (Session expirée ou invalide)
+        if (response.status === 401 && !isLoginPath) {
+            console.warn("[AUTH] Session invalid or expired. Redirecting to login.");
+            localStorage.removeItem('homeos_session');
+            window.location.href = '/login';
+        }
+        
+        return response;
+    };
 
     // ── CSS auto-injecté ────────────────────────────────────────────────────
     function injectStyles() {
@@ -233,6 +269,145 @@
                 color: #aaa;
                 font-style: italic;
             }
+            #homeos-global-nav .hn-user-pill {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding-left: 16px;
+                border-left: 1px solid #e5e5e5;
+                margin-left: 16px;
+            }
+            #homeos-global-nav .hn-user-name {
+                font-size: 11px;
+                font-weight: 700;
+                color: #3d3d3c;
+                text-transform: capitalize;
+            }
+            #homeos-global-nav .hn-settings-btn {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: #888;
+                border-radius: 4px;
+                transition: all 0.15s;
+            }
+            #homeos-global-nav .hn-settings-btn:hover {
+                background: #fff;
+                color: #3d3d3c;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            }
+
+            /* --- SETTINGS DRAWER (Mission 191) --- */
+            #homeos-settings-drawer {
+                position: fixed;
+                top: 48px; bottom: 0; right: 0;
+                width: 320px;
+                background: #f7f6f2; /* HoméOS Cream */
+                border-left: 1px solid #e5e5e5;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                padding: 32px;
+                font-family: inherit;
+            }
+            #homeos-settings-drawer.active {
+                transform: translateX(0);
+                box-shadow: -10px 0 50px rgba(0,0,0,0.05);
+            }
+            .sd-section {
+                margin-bottom: 40px;
+            }
+            .sd-label {
+                font-size: 10px;
+                font-weight: 800;
+                color: #aaa;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 20px;
+                display: block;
+            }
+            .sd-key-group {
+                margin-bottom: 16px;
+            }
+            .sd-key-label {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+            .sd-key-name {
+                font-size: 11px;
+                font-weight: 700;
+                color: #3d3d3c;
+            }
+            .sd-key-status {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #ccc;
+            }
+            .sd-key-status.active {
+                background: #8cc63f;
+                box-shadow: 0 0 8px rgba(140, 198, 63, 0.6);
+            }
+            .sd-input {
+                width: 100%;
+                background: #fff;
+                border: 1px solid #e5e5e5;
+                border-radius: 0px; /* Hard-Edge */
+                padding: 10px 12px;
+                font-size: 11px;
+                font-family: 'Source Code Pro', monospace;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+            .sd-input:focus {
+                border-color: #8cc63f;
+            }
+            .sd-help-btn {
+                width: 14px;
+                height: 14px;
+                cursor: pointer;
+                color: #94a3b8;
+                transition: color 0.2s;
+            }
+            .sd-help-btn:hover {
+                color: #8cc63f;
+            }
+            .sd-helper-text {
+                font-size: 9px;
+                color: #94a3b8;
+                font-style: italic;
+                margin-top: 4px;
+                display: none;
+            }
+            .sd-helper-text.active {
+                display: block;
+            }
+            .sd-logout-btn {
+                margin-top: auto;
+                padding: 12px;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                background: #fff;
+                border: 1px solid #fee2e2;
+                color: #ef4444;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .sd-logout-btn:hover {
+                background: #ef4444;
+                color: #fff;
+                border-color: #ef4444;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -286,6 +461,17 @@
         projectLabel.className = 'hn-project';
         projectLabel.textContent = 'chargement...';
         actions.appendChild(projectLabel);
+
+        // Mission 191: User Identity & Settings Button
+        const userPill = document.createElement('div');
+        userPill.className = 'hn-user-pill';
+        userPill.innerHTML = `
+            <span class="hn-user-name">${session.name || '?' }</span>
+            <div id="hn-settings-toggle" class="hn-settings-btn" title="Paramètres BYOK">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+        `;
+        actions.appendChild(userPill);
         
         nav.appendChild(actions);
 
@@ -304,6 +490,9 @@
 
         // ── PROJECT SWITCHER (Mission 163) ──────────────────────────────────
         injectSwitcher();
+
+        // ── SETTINGS DRAWER (Mission 191) ───────────────────────────────────
+        injectSettingsDrawer();
     }
 
     function injectSwitcher() {
@@ -437,10 +626,182 @@
             .then(() => toggleSwitcher()); // Refresh via toggle
     }
 
+    // ── Mission 191: SETTINGS DRAWER (BYOK) ────────────────────────────────
+    function injectSettingsDrawer() {
+        if (document.getElementById('homeos-settings-drawer')) return;
+
+        const drawer = document.createElement('div');
+        drawer.id = 'homeos-settings-drawer';
+        drawer.innerHTML = `
+            <div class="sd-section">
+                <span class="sd-label">Identité</span>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[12px] font-bold text-[#3d3d3c]">${session.name || '?'}</span>
+                    <span class="text-[9px] text-slate-400 font-mono tracking-tighter uppercase">${session.role || 'student'} / ${session.user_id?.substring(0,8) || '...' }</span>
+                </div>
+            </div>
+
+            <div class="sd-section">
+                <span class="sd-label">Clés API (BYOK)</span>
+                <div id="sd-keys-list" class="space-y-6">
+                    ${['gemini', 'groq', 'openai', 'kimi', 'mimo', 'deepseek', 'qwen', 'watson'].map(provider => `
+                        <div class="sd-key-group">
+                            <div class="sd-key-label">
+                                <div class="flex items-center gap-2">
+                                    <span class="sd-key-name">${provider.toUpperCase()}</span>
+                                    <svg class="sd-help-btn" data-provider="${provider}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                                <div class="sd-key-status" data-provider="${provider}"></div>
+                            </div>
+                            <input type="password" class="sd-input" data-provider="${provider}" placeholder="Clé ${provider}...">
+                            <div class="sd-helper-text" id="helper-${provider}"></div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button id="sd-save-keys-btn" class="mt-8 w-full py-3 bg-[#A3CD54] text-[#1A1A1A] text-[10px] font-bold uppercase tracking-widest hover:opacity-90">
+                    Sauvegarder les clés
+                </button>
+            </div>
+
+            <button class="sd-logout-btn" id="hn-logout-btn">
+                Changer d'identité
+            </button>
+        `;
+        document.body.appendChild(drawer);
+
+        const toggle = document.getElementById('hn-settings-toggle');
+        if (toggle) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isActive = drawer.classList.toggle('active');
+                if (isActive) refreshKeyStatus();
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!drawer.contains(e.target) && !e.target.closest('.hn-settings-btn')) {
+                drawer.classList.remove('active');
+            }
+        });
+
+        // Logout
+        document.getElementById('hn-logout-btn').onclick = () => {
+            if (confirm("Se déconnecter et changer d'identité ?")) {
+                localStorage.removeItem('homeos_session');
+                window.location.href = '/login';
+            }
+        };
+
+        // BYOK Save
+        document.getElementById('sd-save-keys-btn').onclick = async () => {
+            const inputs = drawer.querySelectorAll('.sd-input');
+            let success = 0;
+            for (const input of inputs) {
+                const key = input.value.trim();
+                if (!key) continue;
+                
+                try {
+                    const res = await fetch('/api/me/keys', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provider: input.dataset.provider, api_key: key })
+                    });
+                    if (res.ok) {
+                        success++;
+                        input.value = ""; // Clear for security
+                    }
+                } catch(e) { console.error("BYOK Save Fail", e); }
+            }
+            if (success > 0) {
+                alert(`${success} clé(s) sauvegardée(s).`);
+                refreshKeyStatus();
+            }
+        };
+
+        // Mission 192: GPS Help Logic
+        drawer.querySelectorAll('.sd-help-btn').forEach(btn => {
+            btn.onclick = async (e) => {
+                const provider = btn.dataset.provider;
+                const helperEl = document.getElementById(`helper-${provider}`);
+                if (!helperEl) return;
+
+                helperEl.textContent = "Sullivan cherche...";
+                helperEl.classList.add('active');
+
+                try {
+                    const res = await fetch(`/api/me/keys/helper/${provider}`, {
+                        headers: { 'X-User-Token': session.user_id }
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                        helperEl.innerHTML = `<a href="${data.url}" target="_blank" style="text-decoration:underline;">Cliquez ici</a> : ${data.instructions}`;
+                    } else {
+                        helperEl.textContent = "Impossible de trouver l'URL.";
+                    }
+                } catch(err) {
+                    helperEl.textContent = "Erreur de recherche.";
+                }
+            };
+        });
+    }
+
+    async function refreshKeyStatus() {
+        try {
+            const res = await fetch('/api/me/keys');
+            const status = await res.json();
+            Object.entries(status).forEach(([provider, value]) => {
+                const dot = document.querySelector(`.sd-key-status[data-provider="${provider}"]`);
+                if (dot) {
+                    dot.classList.toggle('active', value === 'set');
+                }
+            });
+        } catch(e) { console.error("Key Status Fail", e); }
+    }
+
     // ── Init ────────────────────────────────────────────────────────────────
     function init() {
         injectStyles();
         injectNav();
+        
+        // Mission 166: Hook into Mode Toggle for Effects Button
+        const modesContainer = document.querySelector('.flex.bg-slate-100.p-1.rounded-custom');
+        if (modesContainer) {
+            modesContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.ws-mode-btn');
+                if (btn) {
+                    const mode = btn.dataset.mode;
+                    const effectsBtn = document.getElementById('ws-btn-effects-drawer');
+                    if (effectsBtn) {
+                        if (mode === 'front-dev') {
+                            effectsBtn.classList.remove('hidden');
+                        } else {
+                            effectsBtn.classList.add('hidden');
+                            const drawer = document.getElementById('ws-fee-effects-drawer');
+                            if (drawer && drawer.style.height !== '0px') {
+                                if (window.wsGsapCheatSheet) window.wsGsapCheatSheet.toggle();
+                            }
+                        }
+                    }
+                    // Dispatch event for components like GsapCheatSheet
+                    window.dispatchEvent(new CustomEvent('ws-mode-change', { detail: { mode } }));
+                }
+            });
+        }
+
+        // Mission 166: Load GsapCheatSheet
+        if (window.location.pathname.includes('/workspace')) {
+            const script = document.createElement('script');
+            script.src = '/static/js/workspace/fee/GsapCheatSheet.js';
+            script.onload = () => {
+                if (window.GsapCheatSheet) {
+                    window.wsGsapCheatSheet = new window.GsapCheatSheet();
+                }
+            };
+            document.body.appendChild(script);
+        }
     }
 
     if (document.readyState === 'loading') {

@@ -1,0 +1,23 @@
+<div class="af-modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm" data-af-id="modal-{{id}}">
+    <div class="af-modal af-bg-primary af-radius-lg shadow-xl overflow-hidden flex flex-col w-full max-w-{{size_val}}">
+        [[if hasHeader]]
+        <div class="af-modal-header af-border-primary border-b px-6 py-4 flex items-center justify-between">
+            <h2 class="af-text-primary text-sm font-semibold tracking-tight">{{title}}</h2>
+            <button class="af-text-muted hover:af-text-primary transition-all">
+                <svg class="w-4 h-4" ...></svg>
+            </button>
+        </div>
+        [[endif]]
+        
+        <div class="af-modal-body px-6 py-8 overflow-y-auto max-h-[60vh]">
+            <p class="af-text-muted text-xs leading-relaxed">Contenu de la fenêtre modal...</p>
+        </div>
+        
+        [[if hasFooter]]
+        <div class="af-modal-footer af-border-primary border-t px-6 py-4 flex justify-end gap-3 bg-gray-50/50">
+            <button class="af-text-primary text-xs font-medium px-4 py-2 af-radius hover:bg-gray-100 transition-all">Annuler</button>
+            <button class="af-nudge-bg af-text-primary text-xs font-semibold px-4 py-2 af-radius shadow-sm transition-all focus:ring-2 focus:ring-offset-2">{{ctaLabel}}</button>
+        </div>
+        [[endif]]
+    </div>
+</div>
