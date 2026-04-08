@@ -145,7 +145,7 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
             
         return code.strip()
 
-    async def convert_image(self, image_base64: str, mime_type: str, import_name: str) -> str:
+    async def convert_image(self, image_base64: str, mime_type: str, import_name: str, design_md: str = "") -> str:
         """
         Traduit une capture d'écran PNG/JPG en HTML sémantique Tailwind via Vision.
         """
@@ -154,19 +154,28 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
         # Chargement des tokens dynamiques (Mission 128)
         tokens = self._load_project_tokens()
 
-        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision-to-Code.
-MISSION : Analyse cette capture d'écran et convertis-la en HTML sémantique avec Tailwind CSS.
-
-NOM DE L'IMPORT : {import_name}
-
+        # M256-C: DESIGN.md du projet (si fourni, override les tokens par défaut)
+        design_section = ""
+        if design_md:
+            design_section = f"""
+DESIGN SYSTEM DU PROJET (IMPÉRATIF — respecte fidèlement ce document) :
+{design_md[:3000]}
+"""
+        else:
+            design_section = f"""
 TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
 - Background principal : `{tokens['colors']['neutral']}`
 - Texte principal : `{tokens['colors']['text']}`
 - Couleur d'accent (boutons, liens actifs) : `{tokens['colors']['primary']}`
 - Typographie : {tokens['typography']['body']} (via Google Fonts ou CDN)
 - Border-radius : {tokens['shape'].get('border_radius', '6px')}
-- Style : Fidèle au design system spécifié ci-dessus.
+"""
 
+        prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision-to-Code.
+MISSION : Analyse cette capture d'écran et convertis-la en HTML sémantique avec Tailwind CSS.
+
+NOM DE L'IMPORT : {import_name}
+{design_section}
 CONTRAINTES TECHNIQUES :
 - Utilise UNIQUEMENT Tailwind CSS (via CDN).
 - INTERDIT : largeurs fixes en px. Utilise Flexbox et Grid (w-full, flex-1, grid-cols-...).
@@ -206,5 +215,82 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
             code = code.split("```html")[1].split("```")[0]
         elif "```" in code:
             code = code.split("```")[1].split("```")[0]
-            
+
         return code.strip()
+
+    async def analyze_image_design(self, image_base64: str, mime_type: str, import_name: str) -> str:
+        """
+        M256-A: Analyse l'image PNG → extrait les choix de design → retourne DESIGN.md.
+        """
+        logger.info(f"[SvgToTailwind] Analyzing image design: '{import_name}'...")
+
+        prompt = f"""Tu es un Expert Designer UI/UX et Directeur Artistique.
+MISSION : Analyse cette capture d'écran et extrais les choix de design pour générer un fichier DESIGN.md.
+
+NOM DE L'IMPORT : {import_name}
+
+ANALYSE REQUISE :
+1. PALETTE DE COULEURS — chaque couleur dominante avec son usage (bg, text, accent, border, etc.)
+2. TYPOGRAPHIE — famille apparente, tailles, graisses, hiérarchie
+3. ESPACEMENT — padding/margin patterns, gutters, gaps
+4. FORMES — border-radius, ombres, bordures
+5. LAYOUT — structure générale (sidebar? grid? flex?), zones principales
+6. COMPOSANTS — boutons, cards, navbars, inputs — leur style récurrent
+7. TONALITÉ — minimaliste? corporate? playful? sombre? clair?
+
+FORMAT DE SORTIE (DESIGN.md) — réponds UNIQUEMENT avec ce contenu, pas de prose :
+```markdown
+# DESIGN.md — {import_name}
+
+## Colors
+- primary: #XXXXXX (boutons, accents)
+- neutral: #XXXXXX (backgrounds)
+- text: #XXXXXX (typographie)
+- border: #XXXXXX (borders)
+- muted: #XXXXXX (secondary text)
+
+## Typography
+- body: "font-family" (size, weight)
+- heading: "font-family" (size, weight)
+
+## Spacing
+- unit: 8px (or observed unit)
+- padding-sm: Xpx
+- padding-md: Ypx
+- padding-lg: Zpx
+
+## Shapes
+- border-radius: Xpx
+- shadow: description
+
+## Layout
+- structure: description
+
+## Components
+- button: description style
+- card: description style
+- nav: description style
+
+## Tone
+- description de la tonalité visuelle
+```
+"""
+        result = await self.client.generate_with_image(
+            prompt=prompt,
+            image_base64=image_base64,
+            mime_type=mime_type,
+            max_tokens=8000,
+            temperature=0.3
+        )
+
+        if not result.success:
+            logger.warning(f"[SvgToTailwind] Design analysis failed: {result.error}")
+            return ""
+
+        design_md = result.code
+        if "```markdown" in design_md:
+            design_md = design_md.split("```markdown")[1].split("```")[0]
+        elif "```" in design_md:
+            design_md = design_md.split("```")[1].split("```")[0]
+
+        return design_md.strip()

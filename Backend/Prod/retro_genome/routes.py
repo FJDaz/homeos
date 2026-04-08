@@ -748,13 +748,34 @@ async def generate_from_import(req: ImportGenRequest):
                         html_code = await get_svg_converter().convert(svg_content, entry["name"])
                         origin = "generated"
             else:
-                # DETECTION IMAGE (Mission 122 — Vision)
+                # DETECTION IMAGE (Mission 122 — Vision + M256 DESIGN.md)
                 IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
                 if import_path.suffix.lower() in IMAGE_EXTS:
                     import base64
                     img_b64 = base64.b64encode(import_path.read_bytes()).decode()
                     mime = "image/png" if import_path.suffix.lower() == ".png" else "image/jpeg"
-                    html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"])
+
+                    # M256-A/B: Vérifier/générer DESIGN.md du projet
+                    design_md = ""
+                    try:
+                        from bkd_service import get_active_project_path
+                        project_path = get_active_project_path()
+                        design_file = project_path / "DESIGN.md"
+                        if design_file.exists():
+                            design_md = design_file.read_text(encoding='utf-8')
+                            logger.info(f"[M256] Using existing DESIGN.md from {project_path}")
+                        else:
+                            # Analyser l'image → forger DESIGN.md
+                            design_md = await get_svg_converter().analyze_image_design(img_b64, mime, entry["name"])
+                            if design_md:
+                                design_file.write_text(design_md, encoding='utf-8')
+                                logger.info(f"[M256] DESIGN.md generated and saved to {design_file}")
+                            else:
+                                logger.warning("[M256] Design analysis returned empty, using default tokens")
+                    except Exception as e:
+                        logger.warning(f"[M256] Failed to handle DESIGN.md: {e}")
+
+                    html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"], design_md)
                 else:
                     # FORMAT SVG CLASSIQUE
                     svg_content = import_path.read_text(encoding="utf-8")
