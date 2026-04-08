@@ -758,22 +758,26 @@ async def generate_from_import(req: ImportGenRequest):
                     # M256-A/B: Vérifier/générer DESIGN.md du projet
                     design_md = ""
                     try:
-                        from bkd_service import get_active_project_path
-                        project_path = get_active_project_path()
-                        design_file = project_path / "DESIGN.md"
-                        if design_file.exists():
-                            design_md = design_file.read_text(encoding='utf-8')
-                            logger.info(f"[M256] Using existing DESIGN.md from {project_path}")
-                        else:
-                            # Analyser l'image → forger DESIGN.md
-                            design_md = await get_svg_converter().analyze_image_design(img_b64, mime, entry["name"])
-                            if design_md:
-                                design_file.write_text(design_md, encoding='utf-8')
-                                logger.info(f"[M256] DESIGN.md generated and saved to {design_file}")
-                            else:
-                                logger.warning("[M256] Design analysis returned empty, using default tokens")
+                        # Construire le chemin projet manuellement (évite l'import bkd_service)
+                        active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
+                        if active_file.exists():
+                            import json as _json
+                            active_data = _json.loads(active_file.read_text(encoding='utf-8'))
+                            project_id = active_data.get("active_id")
+                            if project_id:
+                                project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
+                                design_file = project_path / "DESIGN.md"
+                                if design_file.exists():
+                                    design_md = design_file.read_text(encoding='utf-8')
+                                    logger.info(f"[M256] Using existing DESIGN.md")
+                                else:
+                                    design_md = await get_svg_converter().analyze_image_design(img_b64, mime, entry["name"])
+                                    if design_md:
+                                        design_file.write_text(design_md, encoding='utf-8')
+                                        logger.info(f"[M256] DESIGN.md generated")
                     except Exception as e:
-                        logger.warning(f"[M256] Failed to handle DESIGN.md: {e}")
+                        logger.warning(f"[M256] DESIGN.md handling failed: {e}")
+                        design_md = ""
 
                     html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"], design_md)
                 else:

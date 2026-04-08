@@ -292,5 +292,21 @@ FORMAT DE SORTIE (DESIGN.md) — réponds UNIQUEMENT avec ce contenu, pas de pro
             design_md = design_md.split("```markdown")[1].split("```")[0]
         elif "```" in design_md:
             design_md = design_md.split("```")[1].split("```")[0]
+        design_md = design_md.strip()
 
-        return design_md.strip()
+        # Save DESIGN.md (direct path — avoid bkd_service import)
+        try:
+            active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
+            if active_file.exists():
+                import json as _json
+                active_data = _json.loads(active_file.read_text(encoding='utf-8'))
+                project_id = active_data.get("active_id")
+                if project_id:
+                    project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
+                    design_file = project_path / "DESIGN.md"
+                    design_file.write_text(design_md, encoding='utf-8')
+                    logger.info(f"[SvgToTailwind] DESIGN.md saved: {design_file}")
+        except Exception as e:
+            logger.warning(f"[SvgToTailwind] Failed to save DESIGN.md: {e}")
+
+        return design_md
