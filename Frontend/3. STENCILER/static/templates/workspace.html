@@ -83,7 +83,7 @@
     </header>
 
     <!-- GSAP EFFECTS DRAWER (Mission 166) -->
-    <div id="ws-fee-effects-drawer" class="hidden absolute top-14 left-0 w-full bg-[#f7f6f2] border-b border-slate-200 shadow-2xl z-[45] transition-all duration-500 ease-in-out overflow-hidden" style="height: 0;">
+    <div id="ws-fee-effects-drawer" class="hidden absolute top-16 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-[#f7f6f2] rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] z-[45] transition-all duration-500 ease-in-out overflow-hidden" style="height: 0; border: 1px solid #e5e5e5;">
         <div class="h-full flex flex-col p-6 max-w-7xl mx-auto">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-3">
@@ -107,7 +107,7 @@
                 <div id="ws-effects-stacher-list" class="flex-grow flex items-center space-x-2 overflow-x-auto scollbar-hide">
                     <span class="text-[9px] text-slate-400 italic">aucun effet sélectionné</span>
                 </div>
-                <button id="ws-effects-apply-all" class="ml-4 px-6 py-2 bg-slate-900 text-white text-[9px] font-bold rounded-none uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
+                <button id="ws-effects-apply-all" class="ml-4 px-6 py-2 bg-slate-900 text-white text-[9px] font-bold rounded-[20px] uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
                     lancer la mission
                 </button>
             </div>
@@ -576,7 +576,14 @@
     <!-- HIDDEN INPUTS (Mission 132-B) -->
     <input type="file" id="ws-internal-image-loader" class="hidden" accept="image/*">
 
-    <script type="module" src="/static/js/workspace/ws_main.js"></script>
+    <!-- M255: Refactored workspace modules (ordered) -->
+    <script src="/static/js/workspace/WsState.js"></script>
+    <script src="/static/js/workspace/WsBoot.js"></script>
+    <script src="/static/js/workspace/wsDom.js"></script>
+    <script src="/static/js/workspace/WsImportList.js"></script>
+    <script src="/static/js/workspace/WsAssetPicker.js"></script>
+    <!-- Orchestrator — loads modules + boots + wires -->
+    <script src="/static/js/workspace/ws_main.js"></script>
     <script>
     // Prof mode: bouton retour dashboard
     (function() {
