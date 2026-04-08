@@ -21,7 +21,7 @@
                     },
                     fontFamily: {
                         sans: ['"Source Sans 3"', 'sans-serif'],
-                        mono: ['"Source Code Pro"', 'monospace']
+                        mono: ['"Geist Mono"', 'ui-monospace', 'monospace']
                     }
                 }
             }
@@ -34,7 +34,6 @@
             color: #3D3D3C;
             font-family: 'Source Sans 3', sans-serif;
             letter-spacing: -0.01em;
-            /* Sentence Case implies we don't force lowercase globally anymore */
         }
         .hard-edge { border-radius: 0px !important; }
         
@@ -44,16 +43,15 @@
             background-color: #A3CD54;
         }
 
-        /* Surface Nesting Logic (The Rational Playroom) */
         .card-surface {
             background-color: #FFFFFF;
-            /* No lines rule: No border. Contrast via tonal shift from #F7F6F2 */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02); /* Very subtle depth elevation */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            position: relative;
         }
 
         .btn-choice {
             background-color: #F8FAFC;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             letter-spacing: -0.02em;
         }
         .btn-choice:hover {
@@ -64,128 +62,362 @@
             color: #1A1A1A;
         }
         
-        /* Ghost Border for accessibility */
         .ghost-border {
-            outline: 1px solid rgba(172, 173, 173, 0.15);
+            outline: 1px solid rgba(172, 173, 173, 0.1);
         }
 
-        .input-field {
+        .input-field, .select-field {
             background-color: #F8FAFC;
             border-bottom: 2px solid transparent;
             transition: all 0.2s ease;
+            appearance: none;
         }
-        .input-field:focus {
+        .input-field:focus, .select-field:focus {
             background-color: #FFFFFF;
             border-bottom-color: #A3CD54;
             outline: none;
         }
         
         .primary-btn {
-            background: linear-gradient(to bottom, #A3CD54, #8BB346);
-            color: #1A1A1A;
+            background: #1A1A1A;
+            color: #FFFFFF;
             font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .primary-btn:hover {
+            background: #000000;
+            transform: translateY(-1px);
+        }
+        .primary-btn:active {
+            transform: translateY(0);
+        }
+        
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Select Arrow */
+        .select-wrapper { position: relative; }
+        .select-wrapper::after {
+            content: '↓';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #94A3B8;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-6">
+<body class="h-screen flex items-center justify-center p-6 overflow-hidden">
 
-    <div class="max-w-sm w-full flex flex-col items-start translate-y-[-10%]">
-        <!-- Visual Anchor (Mission 167 : Vertical Nudge) -->
+    <div class="max-w-md w-full flex flex-col items-start">
+        <!-- Visual Anchor -->
         <div class="v-nudge mb-12"></div>
         
-        <h1 class="text-2xl font-bold tracking-tight mb-2">HoméOS</h1>
-        <p class="text-[12px] text-slate-500 mb-16 font-mono tracking-tight">The Rational Playroom / Vers une ingénierie du design conscient.</p>
+        <h1 class="text-3xl font-black tracking-tight mb-2">HoméOS</h1>
+        <p class="text-[12px] text-slate-400 mb-12 font-mono tracking-tight uppercase">The Rational Playroom / renaissance v2.0</p>
 
         <div class="w-full card-surface hard-edge p-10 ghost-border">
+            
+            <!-- Context Selection -->
             <div class="mb-10">
-                <label class="block text-[11px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-6">Cadre d'usage</label>
-                <div class="grid grid-cols-1 gap-px bg-slate-100"> <!-- Grid cell separation via background -->
-                    <button id="choice-formation" onclick="selectContext('formation')" class="btn-choice hard-edge w-full py-5 px-6 text-left flex items-center justify-between group bg-white hover:bg-slate-50">
-                        <div class="flex flex-col">
-                            <span class="text-[14px] font-bold">Cadre de formation</span>
-                            <span class="text-[11px] text-slate-400">Étudiants DNAMDE & Ateliers</span>
-                        </div>
+                <label class="block text-[10px] uppercase font-black text-slate-300 tracking-[0.2em] mb-4">Accès au Laboratoire</label>
+                <div class="grid grid-cols-2 gap-px bg-slate-100 ghost-border">
+                    <button id="choice-student" onclick="selectContext('student')" class="btn-choice active hard-edge py-5 px-6 text-left flex flex-col group bg-white">
+                        <span class="text-[14px] font-bold">Élève DNMADE</span>
+                        <span class="text-[11px] text-slate-400">Accès formation</span>
                     </button>
-                    <button id="choice-pro" onclick="selectContext('pro')" class="btn-choice hard-edge w-full py-5 px-6 text-left flex items-center justify-between group bg-white hover:bg-slate-50">
-                        <div class="flex flex-col">
-                            <span class="text-[14px] font-bold">Projet professionnel</span>
-                            <span class="text-[11px] text-slate-400">Études privées & Déploiement</span>
-                        </div>
+                    <button id="choice-prof" onclick="selectContext('prof')" class="btn-choice hard-edge py-5 px-6 text-left flex flex-col group bg-white border-l border-slate-50">
+                        <span class="text-[14px] font-bold">Enseignant</span>
+                        <span class="text-[11px] text-slate-400">Projets & Suivi</span>
                     </button>
                 </div>
             </div>
 
-            <div id="login-fields" class="hidden space-y-6">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 tracking-tight mb-2">Identifiant de session</label>
-                    <input type="text" id="user-id" class="input-field hard-edge w-full px-4 py-3 text-[13px] tracking-tight" placeholder="Exant: dnamde-2026-jean">
+            <!-- STUDENT FORM -->
+            <div id="form-student" class="tab-content active space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Sélectionnez votre classe</label>
+                        <div class="select-wrapper">
+                            <select id="select-class" onchange="loadStudents(this.value)" class="select-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight bg-slate-50">
+                                <option value="">Chargement des classes...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Qui êtes-vous ?</label>
+                        <div class="select-wrapper">
+                            <select id="select-student" class="select-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight bg-slate-50">
+                                <option value="">Choisissez d'abord une classe</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="enterLab()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.15em] hover:opacity-90 transition-opacity">
-                    Entrer dans le labo →
+                <button onclick="loginStudent()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                    Rejoindre le Labo →
                 </button>
+            </div>
+
+            <!-- PROFESSOR FORM -->
+            <div id="form-prof" class="tab-content space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Identifiant</label>
+                        <input type="text" id="prof-username" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="Nom d'utilisateur">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Mot de passe</label>
+                        <input type="password" id="prof-password" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="••••••••">
+                    </div>
+                </div>
+                <button onclick="loginProf()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                    Accès Dashboard →
+                </button>
+                <div class="text-center mt-4">
+                    <button onclick="showRegisterProf()" class="text-[11px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
+                        Première connexion ? Créer un compte
+                    </button>
+                </div>
+            </div>
+
+            <!-- PROFESSOR REGISTER FORM -->
+            <div id="form-prof-register" class="tab-content space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Choisir un Identifiant</label>
+                        <input type="text" id="reg-prof-username" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="Ex: FJD">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Définir un Mot de passe</label>
+                        <input type="password" id="reg-prof-password" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="••••••••">
+                    </div>
+                </div>
+                <button onclick="registerProf()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                    Créer mon compte →
+                </button>
+                <div class="text-center mt-4">
+                    <button onclick="selectContext('prof')" class="text-[11px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
+                        ← Retour à la connexion
+                    </button>
+                </div>
+            </div>
+
+            <div id="auth-error" class="hidden mt-6 p-4 bg-red-50 text-red-500 text-[12px] font-bold italic tracking-tight text-center">
+                Identifiants incorrects. Veuillez réessayer.
             </div>
         </div>
 
-        <div class="mt-20 flex items-center gap-4">
-            <div class="w-2 h-2 bg-homeos-green"></div>
-            <div class="text-[10px] text-slate-300 font-mono tracking-tighter uppercase">
-                Aetherflow / Build 2.0.0-Renaissance
+        <div class="mt-16 flex items-center gap-4">
+            <div class="w-1.5 h-1.5 rounded-full bg-homeos-green animate-pulse"></div>
+            <div class="text-[10px] text-slate-400 font-mono tracking-widest uppercase opacity-50">
+                Aetherflow / Build 2.0-R / Connected
             </div>
         </div>
     </div>
 
     <script>
-        let currentContext = null;
+        let currentContext = 'student';
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchClasses();
+        });
 
         function selectContext(ctx) {
             currentContext = ctx;
+            
+            // Toggle Buttons
             document.querySelectorAll('.btn-choice').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`choice-${ctx}`).classList.add('active');
             
-            const fields = document.getElementById('login-fields');
-            fields.classList.remove('hidden');
+            // Toggle Forms
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`form-${ctx}`).classList.add('active');
             
-            // Subtle transition
-            fields.style.opacity = '0';
-            setTimeout(() => fields.style.opacity = '1', 50);
-            fields.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            // Clear Error
+            document.getElementById('auth-error').classList.add('hidden');
         }
 
-        async function enterLab() {
-            const userName = document.getElementById('user-id').value.trim();
-            if (!userName) return;
-
+        async function fetchClasses() {
+            const select = document.getElementById('select-class');
             try {
-                const res = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: userName })
-                });
+                const res = await fetch('/api/classes');
                 const data = await res.json();
                 
-                if (data.token) {
-                    // Mission 191: Store full session
-                    localStorage.setItem('homeos_session', JSON.stringify({
-                        token: data.token,
-                        name: data.name,
-                        role: data.role,
-                        user_id: data.user_id,
-                        context: currentContext
-                    }));
-                    
-                    // Cleanup legacy keys
-                    localStorage.removeItem('homeos_user_id');
-                    localStorage.removeItem('homeos_context');
-                    
-                    console.log(`[AUTH] Session confirmed for: ${data.name} (role: ${data.role})`);
-                    window.location.href = '/workspace';
+                select.innerHTML = '<option value="">Choisir une classe...</option>';
+                if (data.classes && data.classes.length > 0) {
+                    data.classes.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name;
+                        select.appendChild(opt);
+                    });
                 } else {
-                    alert("Erreur lors de l'identification.");
+                    select.innerHTML = '<option value="">Aucune classe active</option>';
                 }
             } catch (err) {
-                console.error("[AUTH] Registration failed", err);
-                alert("Le serveur d'authentification est indisponible.");
+                console.error("Classes fetch failed", err);
+                select.innerHTML = '<option value="">Erreur serveur</option>';
             }
+        }
+
+        async function loadStudents(classId) {
+            const select = document.getElementById('select-student');
+            if (!classId) {
+                select.innerHTML = "<option value=''>Choisissez une classe</option>";
+                return;
+            }
+            
+            select.innerHTML = "<option value=''>Chargement des élèves...</option>";
+            try {
+                const res = await fetch(`/api/classes/${classId}/students-list`);
+                const data = await res.json();
+                
+                select.innerHTML = '<option value="">Sélectionnez votre nom...</option>';
+                if (data.students && data.students.length > 0) {
+                    data.students.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.display;
+                        select.appendChild(opt);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">Classe vide</option>';
+                }
+            } catch (err) {
+                console.error("Students fetch failed", err);
+                select.innerHTML = '<option value="">Erreur serveur</option>';
+            }
+        }
+
+        async function loginStudent() {
+            const classId = document.getElementById('select-class').value;
+            const studentId = document.getElementById('select-student').value;
+            const errorEl = document.getElementById('auth-error');
+            
+            if (!classId || !studentId) {
+                showError("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/login-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ class_id: classId, student_id: studentId })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    saveSession(data);
+                    
+                    if (data.project_id) {
+                        window.location.href = `/workspace?project_id=${data.project_id}`;
+                    } else {
+                        // Attempt to auto-start project if missing
+                        const startRes = await fetch(`/api/classes/${data.class_id}/students/${data.student_id}/start`, { method: 'POST' });
+                        const startData = await startRes.json();
+                        window.location.href = `/workspace?project_id=${startData.project_id || ''}`;
+                    }
+                } else {
+                    showError(data.detail || "Impossible de se connecter.");
+                }
+            } catch (err) {
+                showError("Le serveur d'authentification est indisponible.");
+            }
+        }
+
+        async function loginProf() {
+            const name = document.getElementById('prof-username').value.trim();
+            const password = document.getElementById('prof-password').value;
+            
+            if (!name || !password) {
+                showError("Identifiants manquants.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/login-prof', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, password })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    saveSession(data);
+                    window.location.href = '/teacher';
+                } else {
+                    showError(data.detail || "Identification échouée.");
+                }
+            } catch (err) {
+                showError("Erreur de connexion serveur.");
+            }
+        }
+
+        function showRegisterProf() {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('form-prof-register').classList.add('active');
+            document.getElementById('auth-error').classList.add('hidden');
+        }
+
+        async function registerProf() {
+            const name = document.getElementById('reg-prof-username').value.trim();
+            const password = document.getElementById('reg-prof-password').value;
+            
+            if (!name || !password) {
+                showError("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/register-prof', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, password })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    saveSession(data);
+                    window.location.href = '/teacher';
+                } else {
+                    showError(data.detail || "Erreur lors de l'inscription.");
+                }
+            } catch (err) {
+                showError("Erreur de connexion au serveur.");
+            }
+        }
+
+        function saveSession(data) {
+            localStorage.setItem('homeos_session', JSON.stringify({
+                token: data.token,
+                name: data.name,
+                role: data.role,
+                user_id: data.user_id,
+                context: currentContext,
+                student_id: data.student_id || null,
+                class_id: data.class_id || null,
+                project_id: data.project_id || null
+            }));
+            localStorage.removeItem('homeos_user_id'); // cleanup legacy
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('auth-error');
+            el.innerText = msg;
+            el.classList.remove('hidden');
         }
     </script>
 </body>

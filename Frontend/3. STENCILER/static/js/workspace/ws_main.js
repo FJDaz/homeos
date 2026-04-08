@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover');
     window.wsStitch = new WsStitch();
     window.wsWire = new WsWire();
+    window.wsFEEStudio = new WsFEEStudio(window.wsBackend);
 
     // 2b. Initialiser l'Inspecteur (Mission 130)
     const inspect = new WsInspect(window);
@@ -33,11 +34,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2d. Panels Draggables (Mission 209)
     if (window.PanelDragger) {
-        ['panel-screens', 'panel-audit', 'panel-stitch'].forEach(id => {
+        const draggablePanels = [
+            'panel-screens', 'panel-audit', 'panel-stitch', 
+            'ws-monaco-popover', 'ws-surgical-popover', 
+            'ws-color-popover', 'ws-typo-popover', 'ws-effects-popover'
+        ];
+        draggablePanels.forEach(id => {
             const el = document.getElementById(id);
             if (el) new window.PanelDragger(el);
         });
-        console.log("✅ [M209] PanelDragger initialized");
+        console.log("✅ [M209] PanelDragger initialized for all workspace panels");
     }
 
     // 3. Charger le contexte courant (depuis landing.html)

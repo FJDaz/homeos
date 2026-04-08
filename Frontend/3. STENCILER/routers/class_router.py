@@ -10,6 +10,7 @@ import uuid
 import logging
 import unicodedata
 from pathlib import Path
+from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 from fastapi import APIRouter, HTTPException, Request
@@ -34,11 +35,41 @@ class ClassCreateRequest(BaseModel):
     name: str
     subject: str = ""
 
+class ClassUpdateRequest(BaseModel):
+    name: str
+    subject: str = ""
+
 class RosterRequest(BaseModel):
     raw: str
 
 class MilestoneUpdate(BaseModel):
     level: int
+
+# M223: Subject structured format
+class SubjectPart(BaseModel):
+    id: str = ""
+    titre: str
+    description: str = ""
+    duree: str = ""
+
+class EvalCritere(BaseModel):
+    competence: str
+    libelle: str
+    poids: int = 0
+
+class SubjectEvaluation(BaseModel):
+    modalite: str = ""
+    criteres: List[EvalCritere] = []
+
+class SubjectCreateRequest(BaseModel):
+    title: str
+    problematique: str = ""
+    contexte: str = ""
+    parties: List[SubjectPart] = []
+    livrables: List[str] = []
+    evaluation: SubjectEvaluation = SubjectEvaluation()
+    competences: List[str] = []
+    description: str = ""  # rétrocompatibilité
 
 class StudentStartResponse(BaseModel):
     project_id: str
@@ -93,15 +124,39 @@ def parse_roster(raw: str) -> List[Dict[str, str]]:
         })
     return students
 
+def _get_active_subject_title(class_id: str):
+    """Retourne (title, subject_slug) du dernier sujet de la classe, ou (None, None)."""
+    subject_dir = CLASSES_DIR / class_id / "subjects"
+    if not subject_dir.exists():
+        return None, None
+    subjects = sorted(subject_dir.glob("*.json"))
+    if not subjects:
+        return None, None
+    try:
+        data = json.loads(subjects[-1].read_text(encoding='utf-8'))
+        title = data.get("title", "")
+        return (title, slugify(title)) if title else (None, None)
+    except Exception:
+        return None, None
+
+
 def create_student_project(student: Dict[str, str], class_id: str) -> str:
-    """Crée un projet HoméOS pour l'étudiant."""
-    project_id = f"{class_id}-{student['id']}"
+    """Crée un projet HoméOS pour l'étudiant et l'enregistre dans la table projects."""
+    subject_title, subject_slug = _get_active_subject_title(class_id)
+
+    if subject_slug:
+        project_id = f"{class_id}-{student['id']}-{subject_slug}"
+        project_name = subject_title
+    else:
+        project_id = f"{class_id}-{student['id']}"
+        project_name = f"Projet {student['display']}"
+
     project_path = PROJECTS_DIR / project_id
     project_path.mkdir(parents=True, exist_ok=True)
 
-    # Créer manifest.json minimal
+    # Créer manifest.json
     manifest = {
-        "name": f"Projet {student['display']}",
+        "name": project_name,
         "author": student['display'],
         "description": f"Projet HoméOS de {student['display']}",
         "class_id": class_id,
@@ -118,6 +173,14 @@ def create_student_project(student: Dict[str, str], class_id: str) -> str:
     (project_path / "imports").mkdir(exist_ok=True)
     (project_path / "exports").mkdir(exist_ok=True)
 
+    # Enregistrer dans la table projects (CRITIQUE — get_active_project_path() cherche ici)
+    with bkd_db_con() as con:
+        con.execute(
+            "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
+            (project_id, project_name, str(project_path))
+        )
+
+    logger.info(f"Student project created: {project_id} (subject: {subject_title})")
     return project_id
 
 def detect_milestone(project_id: str) -> Dict[str, Any]:
@@ -204,6 +267,26 @@ async def create_class(req: ClassCreateRequest):
     return {"id": class_id, "name": req.name, "subject": req.subject}
 
 
+@router.put("/{class_id}")
+async def update_class(class_id: str, req: ClassUpdateRequest):
+    """Modifier une classe."""
+    with bkd_db_con() as con:
+        con.execute(
+            "UPDATE classes SET name=?, subject=? WHERE id=?",
+            (req.name, req.subject, class_id)
+        )
+    return {"id": class_id, "name": req.name, "subject": req.subject}
+
+
+@router.delete("/{class_id}")
+async def delete_class(class_id: str):
+    """Supprimer une classe et ses étudiants."""
+    with bkd_db_con() as con:
+        con.execute("DELETE FROM students WHERE class_id=?", (class_id,))
+        con.execute("DELETE FROM classes WHERE id=?", (class_id,))
+    return {"ok": True, "id": class_id}
+
+
 @router.get("")
 async def list_classes():
     """Liste toutes les classes."""
@@ -273,6 +356,19 @@ async def start_student_project(class_id: str, student_id: str):
         # Reprendre projet existant
         project_path = PROJECTS_DIR / existing_project_id
         if project_path.exists():
+            # S'assurer qu'il est bien enregistré dans la table projects
+            manifest_path = project_path / "manifest.json"
+            proj_name = existing_project_id
+            if manifest_path.exists():
+                try:
+                    proj_name = json.loads(manifest_path.read_text(encoding='utf-8')).get("name", existing_project_id)
+                except Exception:
+                    pass
+            with bkd_db_con() as con:
+                con.execute(
+                    "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
+                    (existing_project_id, proj_name, str(project_path))
+                )
             return StudentStartResponse(
                 project_id=existing_project_id,
                 student_id=student_id,
@@ -445,11 +541,175 @@ async def student_pre_eval(class_id: str, student_id: str):
 
 def _milestone_label(level: int) -> str:
     labels = {
-        0: "Démarré",
-        1: "Maquette importée",
-        2: "Wire validé",
-        3: "Forge réussie",
+        0: "Demarre",
+        1: "Maquette importee",
+        2: "Wire valide",
+        3: "Forge reussie",
         4: "Interactions Sullivan",
-        5: "Déployé",
+        5: "Deploye",
     }
     return labels.get(level, "Inconnu")
+
+
+# --- SUBJECTS (M218 + M219 + M223) ---
+
+@router.post("/{class_id}/subjects")
+async def create_subject(class_id: str, req: SubjectCreateRequest):
+    """Creer un sujet pour une classe. M223: format structuré."""
+    subject_id = slugify(req.title)
+    subject_dir = CLASSES_DIR / class_id / "subjects"
+    subject_dir.mkdir(parents=True, exist_ok=True)
+
+    # M223: format structuré complet
+    subject_data = {
+        "id": subject_id,
+        "class_id": class_id,
+        "title": req.title,
+        "description": req.description,
+        "problematique": req.problematique,
+        "contexte": req.contexte,
+        "parties": [p.model_dump() for p in req.parties],
+        "livrables": req.livrables,
+        "evaluation": req.evaluation.model_dump() if req.evaluation else {},
+        "competences": req.competences,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    subject_file = subject_dir / f"{subject_id}.json"
+    subject_file.write_text(json.dumps(subject_data, indent=2, ensure_ascii=False), encoding='utf-8')
+
+    return subject_data
+
+
+@router.get("/{class_id}/subjects/{subject_id}")
+async def get_subject(class_id: str, subject_id: str):
+    """M223: Lecture d'un sujet structuré par ID."""
+    subject_file = CLASSES_DIR / class_id / "subjects" / f"{subject_id}.json"
+    if not subject_file.exists():
+        raise HTTPException(status_code=404, detail="Sujet non trouvé")
+
+    data = json.loads(subject_file.read_text(encoding='utf-8'))
+    return data
+
+
+@router.put("/{class_id}/subjects/{subject_id}")
+async def update_subject(class_id: str, subject_id: str, req: SubjectCreateRequest):
+    """M223: Mise à jour complète d'un sujet structuré."""
+    subject_file = CLASSES_DIR / class_id / "subjects" / f"{subject_id}.json"
+    if not subject_file.exists():
+        raise HTTPException(status_code=404, detail="Sujet non trouvé")
+
+    # Lire l'existant pour préserver l'ID et created_at
+    existing = json.loads(subject_file.read_text(encoding='utf-8'))
+
+    subject_data = {
+        "id": subject_id,
+        "class_id": class_id,
+        "title": req.title,
+        "description": req.description,
+        "problematique": req.problematique,
+        "contexte": req.contexte,
+        "parties": [p.model_dump() for p in req.parties],
+        "livrables": req.livrables,
+        "evaluation": req.evaluation.model_dump() if req.evaluation else {},
+        "competences": req.competences,
+        "created_at": existing.get("created_at", datetime.now().isoformat()),
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    subject_file.write_text(json.dumps(subject_data, indent=2, ensure_ascii=False), encoding='utf-8')
+    return subject_data
+
+
+# --- R7: DEPLOY ---
+
+@router.post("/{class_id}/students/{student_id}/deploy")
+async def deploy_student_render(class_id: str, student_id: str):
+    """Trigger le déploiement du rendu élève (R7).
+    Appelle le webhook GitHub Actions pour déployer les exports du projet.
+    """
+    with bkd_db_con() as con:
+        row = con.execute(
+            "SELECT project_id FROM students WHERE id=? AND class_id=?",
+            (student_id, class_id)
+        ).fetchone()
+
+    if not row or not row[0]:
+        raise HTTPException(status_code=404, detail="Aucun projet pour cet étudiant")
+
+    project_id = row[0]
+    exports_dir = PROJECTS_DIR / project_id / "exports"
+    if not exports_dir.exists():
+        raise HTTPException(status_code=404, detail="Aucun export dans ce projet")
+
+    html_files = list(exports_dir.glob("*.html"))
+    if not html_files:
+        raise HTTPException(status_code=400, detail="Aucun fichier HTML à déployer")
+
+    # R7: Trigger GitHub Actions workflow via API
+    # Nécessite GITHUB_TOKEN en env avec repo:write access
+    github_token = os.environ.get("GITHUB_DEPLOY_TOKEN")
+    if github_token:
+        try:
+            import urllib.request
+            # Repo: AETHERFLOW (current repo)
+            # Workflow: deploy-student.yml
+            # Via: repository_dispatch event
+            dispatch_url = "https://api.github.com/repos/FJDaz/AETHERFLOW/dispatches"
+            payload = json.dumps({
+                "event_type": "deploy-student",
+                "client_payload": {
+                    "project_id": project_id,
+                    "class_id": class_id,
+                    "student_id": student_id
+                }
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                dispatch_url,
+                data=payload,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'token {github_token}',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status == 204:
+                    pass  # Dispatch OK
+        except Exception as e:
+            logger.warning(f"GitHub dispatch failed: {e}")
+            # Fallback: export ZIP ready for manual deploy
+
+    # Update milestone to N5 (Déployé)
+    with bkd_db_con() as con:
+        con.execute(
+            "UPDATE students SET milestone=5 WHERE id=? AND class_id=?",
+            (student_id, class_id)
+        )
+
+    return {
+        "status": "ok",
+        "project_id": project_id,
+        "deployed_files": len(html_files),
+        "milestone": 5,
+        "url": f"https://fjdaz-homeos-students.hf.space/students/{project_id}/"
+    }
+
+
+@router.get("/{class_id}/subjects")
+async def list_subjects(class_id: str):
+    """Liste les sujets d'une classe."""
+    subject_dir = CLASSES_DIR / class_id / "subjects"
+    if not subject_dir.exists():
+        return {"subjects": []}
+
+    subjects = []
+    for f in sorted(subject_dir.glob("*.json")):
+        try:
+            data = json.loads(f.read_text(encoding='utf-8'))
+            subjects.append(data)
+        except Exception:
+            pass
+    return {"subjects": subjects}

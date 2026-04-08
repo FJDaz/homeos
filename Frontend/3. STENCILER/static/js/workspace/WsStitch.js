@@ -77,8 +77,34 @@ class WsStitch {
         // Masquer le bouton FRD Editor (via body class pour sécurité)
         document.body.classList.add('stitch-open');
 
+        // S2: Toggle button for manual form
+        const toggleBtn = document.getElementById('ws-stitch-toggle-manual');
+        if (toggleBtn) {
+            toggleBtn.onclick = () => {
+                const form = document.getElementById('ws-stitch-manual-form');
+                if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            };
+        }
+
         await this.updateStatus();
+        await this._syncProjectId();
         await this.loadSession();
+    }
+
+    async _syncProjectId() {
+        // M222: Auto-fill stitch_project_id depuis le projet HoméOS actif
+        try {
+            const res = await fetch('/api/stitch/project-info');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.linked && data.stitch_project_id && this.projectIdInput) {
+                this.projectIdInput.value = data.stitch_project_id;
+                const titleEl = document.getElementById('ws-stitch-project-title');
+                if (titleEl) titleEl.textContent = data.title || data.stitch_project_id;
+            }
+        } catch (e) {
+            console.warn('WsStitch._syncProjectId failed:', e);
+        }
     }
 
     hide() {
@@ -119,28 +145,18 @@ class WsStitch {
         try {
             const res = await fetch('/api/stitch/session');
             if (!res.ok) {
-                // Session non liée ou erreur
-                if (projectTitleEl) projectTitleEl.textContent = 'Projet non lié';
-                if (screensContainer) {
-                    screensContainer.innerHTML = `
-                        <div class="text-[10px] text-slate-400 italic mb-2">
-                            Aucun projet Stitch connecté.
-                        </div>
-                        <div class="text-[10px] text-slate-400">
-                            Importez un écran via le formulaire ci-dessous pour lier un projet.
-                        </div>
-                    `;
-                }
+                if (projectTitleEl) projectTitleEl.textContent = 'aucun projet lié';
+                if (screensContainer) screensContainer.innerHTML = '';
+                this.showManualForm();
                 return;
             }
 
             const data = await res.json();
 
             if (!data.linked) {
-                if (projectTitleEl) projectTitleEl.textContent = 'Projet non lié';
-                if (screensContainer) {
-                    screensContainer.innerHTML = '<div class="text-[10px] text-slate-400 italic">Aucun projet Stitch lié. Importez un écran pour commencer.</div>';
-                }
+                if (projectTitleEl) projectTitleEl.textContent = 'aucun projet lié';
+                if (screensContainer) screensContainer.innerHTML = '';
+                this.showManualForm();
                 return;
             }
 

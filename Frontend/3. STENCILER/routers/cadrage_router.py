@@ -17,11 +17,11 @@ router = APIRouter()
 
 
 @router.get("/api/cadrage/chat/{provider}")
-async def cadrage_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...)):
-    """SSE endpoint for multi-model chat in Cadrage."""
+async def cadrage_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...), class_id: str = Query(None), project_id: str = Query(None)):
+    """SSE endpoint for multi-model chat in Cadrage. M226: project_id + class_id injection."""
     async def generate():
         try:
-            async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message):
+            async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message, class_id=class_id, project_id=project_id):
                 yield chunk
         except Exception as e:
             logger.error(f"Cadrage Chat SSE Error: {e}")

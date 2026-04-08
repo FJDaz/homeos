@@ -31,6 +31,44 @@ CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 STATIC_DIR_PATH = CWD / "static"
 
+
+# --- R0: _apply_tailwind_diff + _strip_tailwind_blobs ---
+
+def _apply_tailwind_diff(source_html: str, diff: list) -> str:
+    """
+    Applique un patch de classes Tailwind sur source_html via BeautifulSoup.
+    diff = [{ "id": "btn-envoyer", "add": "opacity-50 cursor-not-allowed", "remove": "bg-green-500" }, ...]
+    Retourne le HTML patché, jamais de Tailwind inliné.
+    """
+    soup = BeautifulSoup(source_html, "html.parser")
+    for item in diff:
+        selector_id = item.get("id", "")
+        add_classes = item.get("add", "").split() if item.get("add") else []
+        remove_classes = item.get("remove", "").split() if item.get("remove") else []
+        if not selector_id:
+            continue
+        el = soup.find(id=selector_id)
+        if not el:
+            # fallback : chercher par data-wire ou premier élément matching
+            el = soup.find(attrs={"data-wire": selector_id})
+        if not el:
+            continue
+        existing = set(el.get("class", []))
+        existing -= set(remove_classes)
+        existing |= set(add_classes)
+        el["class"] = sorted(existing)
+    return str(soup)
+
+
+def _strip_tailwind_blobs(html: str) -> str:
+    """Supprime les blobs CSS Tailwind inline > 5000 chars."""
+    return re.sub(
+        r'<style[^>]*>(?=[^<]{5000}).{5000,}?</style>',
+        '',
+        html,
+        flags=re.DOTALL
+    )
+
 # --- IMPORTS FROM BKD SERVICE ---
 from bkd_service import (
     get_active_project_id, get_active_project_path,
@@ -370,8 +408,11 @@ async def save_frd_file(req: FRDFileRequest):
     if '/' in req.name or '..' in req.name:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
+    # R0: Strip Tailwind blobs before saving
+    content = _strip_tailwind_blobs(req.content)
+
     # Validation manifeste DOM (Mission 63)
-    is_valid, errors = validate_html(req.name, req.content)
+    is_valid, errors = validate_html(req.name, content)
     if not is_valid and not req.force:
         return JSONResponse(status_code=422, content={
             "error": "CONTRAT DOM VIOL\u00c9",
@@ -379,7 +420,7 @@ async def save_frd_file(req: FRDFileRequest):
         })
 
     path = STATIC_DIR_PATH / "templates" / req.name
-    path.write_text(req.content, encoding='utf-8')
+    path.write_text(content, encoding='utf-8')
     return {"status": "ok", "name": req.name}
 
 @router.get("/api/frd/assets")

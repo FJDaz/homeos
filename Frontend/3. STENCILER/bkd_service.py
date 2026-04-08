@@ -291,15 +291,32 @@ def bkd_db_con():
     return sqlite3.connect(str(BKD_DB_PATH), check_same_thread=False)
 
 
-# Global State for Active Project
+# Global State for Active Project — P1: read from file for cross-module consistency
 _ACTIVE_PROJECT_ID = "homéos-default"
 
 def get_active_project_id():
+    """P1: Read from active_project.json to avoid module namespace issues."""
+    try:
+        active_file = ROOT_DIR / "active_project.json"
+        if active_file.exists():
+            data = json.loads(active_file.read_text(encoding='utf-8'))
+            pid = data.get("active_id")
+            if pid:
+                return pid
+    except Exception:
+        pass
     return _ACTIVE_PROJECT_ID
 
 def set_active_project_id(pid: str):
     global _ACTIVE_PROJECT_ID
     _ACTIVE_PROJECT_ID = pid
+    # P1: Also persist to file so all module instances see the change
+    try:
+        active_file = ROOT_DIR / "active_project.json"
+        active_file.parent.mkdir(parents=True, exist_ok=True)
+        active_file.write_text(json.dumps({"active_id": pid}, ensure_ascii=False), encoding='utf-8')
+    except Exception as e:
+        logger.warning(f"set_active_project_id: failed to persist: {e}")
 
 def get_active_project_path() -> Path:
     id = get_active_project_id()

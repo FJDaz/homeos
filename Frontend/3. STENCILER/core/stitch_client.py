@@ -94,6 +94,12 @@ class StitchClient:
             self.api_key
         )
 
+        # LOG: dump ALL keys for debugging
+        logger.info(f"Stitch get_screen FULL KEYS: {list(screen_data.keys()) if isinstance(screen_data, dict) else type(screen_data)}")
+        if isinstance(screen_data, dict):
+            for k, v in screen_data.items():
+                logger.info(f"Stitch get_screen key={k} type={type(v).__name__} val={str(v)[:300]}")
+
         html_code = screen_data.get("htmlCode", {})
         download_url = html_code.get("downloadUrl")
 

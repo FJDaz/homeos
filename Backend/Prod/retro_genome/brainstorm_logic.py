@@ -244,19 +244,19 @@ async def rank_council(session_id: str):
         await client.close()
 
 
-async def sse_chat_generator(session_id: str, provider: str, message: str):
-    """Générateur SSE pour le chat individuel (MULTIPLEX)."""
-    logger.info(f"[BRS] Multiplex chat for {provider} in session {session_id}")
-    
+async def sse_chat_generator(session_id: str, provider: str, message: str, class_id: str = None, project_id: str = None):
+    """Generateur SSE pour le chat individuel (MULTIPLEX). M226: ProjectContext injection."""
+    logger.info(f"[BRS] Multiplex chat for {provider} in session {session_id}" + (f" (class={class_id}, project={project_id})" if class_id or project_id else ""))
+
     # 1. Sauvegarder le message utilisateur
     storage.save_message(session_id, provider, "user", message)
-    
+
     # 2. Charger l'historique pour construire un prompt conversationnel
     history = storage.get_messages(session_id, provider=provider)
 
-    # Construire un prompt conversationnel plat (sans passer context= qui bias vers le code)
+    # Construire un prompt conversationnel plat
     history_lines = []
-    for m in history[:-1]:  # exclure le message user qu'on vient de sauvegarder
+    for m in history[:-1]:
         role = "Utilisateur" if m['role'] == 'user' else "Assistant"
         history_lines.append(f"{role}: {m['content']}")
 
@@ -264,6 +264,11 @@ async def sse_chat_generator(session_id: str, provider: str, message: str):
         conversational_prompt = "\n".join(history_lines) + f"\nUtilisateur: {message}\nAssistant:"
     else:
         conversational_prompt = message
+
+    # M226: ProjectContext canonique
+    from .project_context import ProjectContext
+    ctx = ProjectContext(project_id=project_id, class_id=class_id)
+    system_prompt = ctx.as_system_prefix() + BRS_CHAT_SYSTEM
 
     client = None
     try:
@@ -280,8 +285,8 @@ async def sse_chat_generator(session_id: str, provider: str, message: str):
         yield f"event: status\ndata: {json.dumps({'status': 'THINKING', 'provider': provider})}\n\n"
 
         result = await client.generate(
-            f"{BRS_CHAT_SYSTEM}\n\n{conversational_prompt}",
-            output_constraint="Réponds de manière conversationnelle en français. Ne génère PAS de code sauf si explicitement demandé."
+            f"{system_prompt}\n\n{conversational_prompt}",
+            output_constraint="Reponds de maniere conversationnelle en francais. Ne genere PAS de code sauf si explicitement demande. Si le sujet est suffisamment defini, inclus en fin de reponse : <!-- SUJET: title: ... description: ... competences: [A1, C2] -->"
         )
         
         if result.success:
@@ -307,3 +312,56 @@ async def sse_chat_generator(session_id: str, provider: str, message: str):
     finally:
         if client:
             await client.close()
+
+
+# --- M220: Prof mode helpers ---
+
+def _load_class_meta(class_id: str) -> dict:
+    """Charge nom + sujet de la classe depuis la DB bkd."""
+    try:
+        import sqlite3
+        db_path = Path(__file__).parent.parent.parent.parent / "db" / "projects.db"
+        if not db_path.exists():
+            return {"name": class_id, "subject": ""}
+        con = sqlite3.connect(str(db_path))
+        row = con.execute("SELECT name, subject FROM classes WHERE id=?", (class_id,)).fetchone()
+        con.close()
+        if row:
+            return {"name": row[0], "subject": row[1] or ""}
+    except Exception as e:
+        logger.warning(f"_load_class_meta error: {e}")
+    return {"name": class_id, "subject": ""}
+
+
+def _load_dnmade_referentiel() -> str:
+    """Lit core/dnmade_referentiel.json -> retourne texte formate."""
+    try:
+        ref_path = Path(__file__).parent.parent.parent.parent / "Frontend/3. STENCILER" / "core" / "dnmade_referentiel.json"
+        if not ref_path.exists():
+            return ""
+        data = json.loads(ref_path.read_text(encoding='utf-8'))
+        lines = []
+        for domain_id, domain in data.get("domains", {}).items():
+            lines.append(f"Domaine {domain_id} -- {domain.get('label', '')}:")
+            for comp_id, comp in domain.get("competences", {}).items():
+                lines.append(f"  {comp_id} : {comp.get('label', '')}")
+        return "\n".join(lines)
+    except Exception as e:
+        logger.warning(f"_load_dnmade_referentiel error: {e}")
+        return ""
+
+
+def _build_prof_system(class_meta: dict, referentiel: str) -> str:
+    return f"""MODE PROF -- HomeOS
+Classe : {class_meta.get('name', 'inconnue')}
+Sujet actif : {class_meta.get('subject', 'non defini')}
+
+Referentiel DNMADE :
+{referentiel}
+
+Role : tu aides a formaliser un sujet de projet etudiant. Tu proposes des pistes, identifies les competences DNMADE pertinentes. Quand le sujet est suffisamment defini, inclus en fin de reponse :
+<!-- SUJET:
+title: ...
+description: ...
+competences: [A1, C2, C3]
+-->"""

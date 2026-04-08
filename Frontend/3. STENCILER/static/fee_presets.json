@@ -1,34 +1,144 @@
 {
     "presets": [
         {
-            "id": "magnetic",
-            "name": "Magnetic",
-            "prompt": "Applique un effet magnétique subtil sur l'élément sélectionné au survol du curseur.",
-            "vibe": "premium-soft"
+            "id": "fade-up-enter",
+            "name": "Fade Up",
+            "category": "entrées",
+            "prompt": "Fais apparaître l'élément avec un fade-in + slide vers le haut (y: +40 → 0), easing power3.out, durée 0.8s.",
+            "vibe": "clean"
         },
         {
-            "id": "stagger-fade",
-            "name": "Stagger Fade",
-            "prompt": "Anime l'entrée de tous les enfants du conteneur sélectionné avec un fade-in progressif (stagger) et un léger slide vers le haut.",
+            "id": "scale-pop-enter",
+            "name": "Pop In",
+            "category": "entrées",
+            "prompt": "Anime l'élément avec un effet pop : scale de 0.8 à 1, opacity 0→1, easing back.out(1.7), durée 0.6s.",
+            "vibe": "dynamic"
+        },
+        {
+            "id": "slide-left-enter",
+            "name": "Slide Left",
+            "category": "entrées",
+            "prompt": "Fais entrer l'élément depuis la gauche (x: -60 → 0) avec fade-in, easing power2.out, durée 0.7s.",
+            "vibe": "editorial"
+        },
+        {
+            "id": "stagger-children",
+            "name": "Stagger",
+            "category": "entrées",
+            "prompt": "Anime tous les enfants directs du conteneur avec un fade-in staggeré (delay 0.08s chacun), y: 20→0, easing power2.out.",
             "vibe": "orderly"
         },
         {
-            "id": "float-breathe",
-            "name": "Breathe",
-            "prompt": "Crée une animation de flottement infinie (y: +/- 5px) avec une easing sinusoidale pour donner de la vie à l'élément.",
-            "vibe": "organic"
+            "id": "rotate-enter",
+            "name": "Spin In",
+            "category": "entrées",
+            "prompt": "Fais apparaître l'élément avec une rotation -15°→0°, scale 0.9→1, fade-in, easing elastic.out(1, 0.5), durée 1s.",
+            "vibe": "playful"
+        },
+        {
+            "id": "fade-down-exit",
+            "name": "Fade Down",
+            "category": "sorties",
+            "prompt": "Fais disparaître l'élément avec fade-out + slide vers le bas (y: 0 → 40), easing power3.in, durée 0.5s.",
+            "vibe": "clean"
+        },
+        {
+            "id": "scale-shrink-exit",
+            "name": "Shrink Out",
+            "category": "sorties",
+            "prompt": "Fait disparaître l'élément avec scale 1→0.8, opacity 1→0, easing power2.in, durée 0.4s.",
+            "vibe": "subtle"
+        },
+        {
+            "id": "slide-right-exit",
+            "name": "Slide Out",
+            "category": "sorties",
+            "prompt": "Fait sortir l'élément vers la droite (x: 0 → 60) avec fade-out, easing power2.in, durée 0.5s.",
+            "vibe": "editorial"
         },
         {
             "id": "parallax-scroll",
             "name": "Parallax",
-            "prompt": "Utilise ScrollTrigger pour créer un effet de parallaxe inverse sur l'élément au défilement de la page.",
+            "category": "parallaxe",
+            "prompt": "Utilise ScrollTrigger pour créer un effet de parallaxe inverse sur l'élément au défilement de la page (y: -20% sur 100vh de scroll).",
             "vibe": "interactive"
         },
         {
-            "id": "glow-pulse",
-            "name": "Glow Pulse",
-            "prompt": "Ajoute une pulsation de l'ombre portée (drop-shadow ou glow) synchronisée sur une timeline infinie.",
+            "id": "parallax-speed",
+            "name": "Speed Lines",
+            "category": "parallaxe",
+            "prompt": "Crée un effet de vitesse au scroll : l'élément se déplace plus vite que le reste (scrub, y: -50% sur le scroll container).",
+            "vibe": "kinetic"
+        },
+        {
+            "id": "parallax-reveal",
+            "name": "Reveal",
+            "category": "parallaxe",
+            "prompt": "Utilise ScrollTrigger pour révéler l'élément progressivement au scroll (clip-path: inset(100% 0 0 0) → inset(0 0 0 0)), scrub 1.",
+            "vibe": "cinematic"
+        },
+        {
+            "id": "magnetic-hover",
+            "name": "Magnetic",
+            "category": "hover",
+            "prompt": "Applique un effet magnétique subtil sur l'élément au survol du curseur : l'élément suit légèrement la souris (x/y: ±8px).",
+            "vibe": "premium-soft"
+        },
+        {
+            "id": "glow-hover",
+            "name": "Glow",
+            "category": "hover",
+            "prompt": "Au survol, ajoute une pulsation de box-shadow (0 0 0 0 → 0 0 20px 4px rgba(140,198,63,0.3)), durée 0.3s, yoyo.",
             "vibe": "attention"
+        },
+        {
+            "id": "tilt-hover",
+            "name": "Tilt 3D",
+            "category": "hover",
+            "prompt": "Au survol, incline l'élément en 3D selon la position de la souris (rotateX/Y ±5deg), perspective 800px, transition 0.2s.",
+            "vibe": "immersive"
+        },
+        {
+            "id": "underline-hover",
+            "name": "Underline Draw",
+            "category": "hover",
+            "prompt": "Au survol, dessine une ligne sous l'élément avec scaleX de 0→1, transform-origin left, durée 0.3s, ease power2.out.",
+            "vibe": "minimal"
+        },
+        {
+            "id": "float-breathe",
+            "name": "Breathe",
+            "category": "continu",
+            "prompt": "Crée une animation de flottement infinie (y: +/- 5px) avec une easing sinusoïdale pour donner de la vie à l'élément, repeat -1, yoyo.",
+            "vibe": "organic"
+        },
+        {
+            "id": "morph-svg",
+            "name": "Morph",
+            "category": "continu",
+            "prompt": "Anime la forme SVG entre deux états (path A → path B) avec MorphSVGPlugin, durée 1s, ease power1.inOut, repeat -1 yoyo.",
+            "vibe": "abstract"
+        },
+        {
+            "id": "text-split",
+            "name": "Text Reveal",
+            "category": "entrées",
+            "prompt": "Découpe le texte en caractères individuels et anime chaque lettre avec un stagger (0.03s), y: 30→0, opacity 0→1, easing power3.out.",
+            "vibe": "typographic"
+        },
+        {
+            "id": "blur-enter",
+            "name": "Blur In",
+            "category": "entrées",
+            "prompt": "Fais apparaître l'élément avec un effet de flou : filter blur(10px)→blur(0), opacity 0→1, durée 0.8s, ease power2.out.",
+            "vibe": "dreamy"
+        },
+        {
+            "id": "elastic-click",
+            "name": "Elastic Click",
+            "category": "hover",
+            "prompt": "Au clic, compresse l'élément (scale 0.9) puis rebondit (scale 1.05 → 1), easing elastic.out(1.2, 0.3), durée 0.6s.",
+            "vibe": "haptic"
         }
     ]
 }

@@ -1,136 +1,182 @@
 /**
  * static/js/workspace/panel_dragger.js
- * Mission 209 — Panels Draggables : Repositionnement libre dans le Workspace
+ * Panels Draggables : Repositionnement libre dans le Workspace
  *
- * Module vanilla JS pour rendre les panels du workspace draggables
- * avec persistance localStorage.
+ * Architecture : un seul listener global document par type.
+ * Suppression du click parasite après un drag (onclick du handle).
  */
 
-class PanelDragger {
-    constructor(panelEl) {
-        this.el = panelEl;
-        this.isDragging = false;
-        this.offset = { x: 0, y: 0 };
-        this._init();
-    }
+(function() {
+    'use strict';
 
-    _init() {
-        // Handle de drag : header du panel ou panel entier si pas de handle
-        const handle = this.el.querySelector('[data-drag-handle]') || this.el;
-        handle.style.cursor = 'grab';
+    var activeDragger = null;
 
-        handle.addEventListener('mousedown', (e) => this._onDown(e));
-        document.addEventListener('mousemove', (e) => this._onMove(e));
-        document.addEventListener('mouseup', () => this._onUp());
+    // --- Global document listeners (single instance) ---
+    document.addEventListener('mousemove', function(e) {
+        if (!activeDragger) return;
+        activeDragger._setPosition(e.clientX, e.clientY);
+    });
 
-        // Touch support
-        handle.addEventListener('touchstart', (e) => this._onTouchDown(e), { passive: false });
-        document.addEventListener('touchmove', (e) => this._onTouchMove(e), { passive: false });
-        document.addEventListener('touchend', () => this._onTouchUp());
+    document.addEventListener('mouseup', function() {
+        if (!activeDragger) return;
+        activeDragger._finish();
+    });
 
-        // Restaurer position sauvegardée
-        this._restorePosition();
-    }
-
-    _onDown(e) {
-        // Ignorer si clic sur bouton, input, etc.
-        if (e.target.closest('button, input, select, textarea, a, [onclick]')) return;
-
-        this.isDragging = true;
-        this.el.style.cursor = 'grabbing';
-        this.el.style.zIndex = '9999';
-        this.el.style.transition = 'none'; // Désactiver transition pendant le drag
-
-        const rect = this.el.getBoundingClientRect();
-        this.offset.x = e.clientX - rect.left;
-        this.offset.y = e.clientY - rect.top;
+    document.addEventListener('touchmove', function(e) {
+        if (!activeDragger || !e.touches[0]) return;
         e.preventDefault();
-    }
+        activeDragger._setPosition(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 
-    _onMove(e) {
-        if (!this.isDragging) return;
-        this._setPosition(e.clientX, e.clientY);
-    }
+    document.addEventListener('touchend', function() {
+        if (!activeDragger) return;
+        activeDragger._finish();
+    });
 
-    _onUp() {
-        if (!this.isDragging) return;
-        this.isDragging = false;
-        this.el.style.cursor = 'grab';
-        this.el.style.zIndex = '';
-        this.el.style.transition = ''; // Réactiver transition
-        this._savePosition();
-    }
+    class PanelDragger {
+        constructor(panelEl) {
+            this.el = panelEl;
+            this.isDragging = false;
+            this.didDrag = false;
+            this.offset = { x: 0, y: 0 };
+            this._init();
+        }
 
-    // Touch events
-    _onTouchDown(e) {
-        if (e.target.closest('button, input, select, textarea, a, [onclick]')) return;
+        _init() {
+            var self = this;
+            var handle = this.el.querySelector('[data-drag-handle]') || this.el;
+            handle.style.cursor = 'grab';
 
-        this.isDragging = true;
-        this.el.style.zIndex = '9999';
-        this.el.style.transition = 'none';
+            handle.addEventListener('mousedown', function(e) { self._start(e); });
+            handle.addEventListener('touchstart', function(e) { self._startTouch(e); }, { passive: false });
 
-        const touch = e.touches[0];
-        const rect = this.el.getBoundingClientRect();
-        this.offset.x = touch.clientX - rect.left;
-        this.offset.y = touch.clientY - rect.top;
-        e.preventDefault();
-    }
+            // Kill the onclick/click that fires after a drag (toggle collapse)
+            handle.addEventListener('click', function(e) {
+                if (self.didDrag) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    self.didDrag = false;
+                }
+            }, true); // capture phase
 
-    _onTouchMove(e) {
-        if (!this.isDragging) return;
-        const touch = e.touches[0];
-        this._setPosition(touch.clientX, touch.clientY);
-        e.preventDefault();
-    }
+            this._restorePosition();
+        }
 
-    _onTouchUp() {
-        if (!this.isDragging) return;
-        this.isDragging = false;
-        this.el.style.zIndex = '';
-        this.el.style.transition = '';
-        this._savePosition();
-    }
+        _start(e) {
+            // Don't drag on interactive elements inside handle
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' ||
+                e.target.tagName === 'SELECT' ||
+                (e.target.tagName === 'A' && e.target.href) ||
+                (e.target.tagName === 'BUTTON' && !e.target.hasAttribute('data-drag-handle'))) {
+                return;
+            }
+            if (activeDragger && activeDragger !== this) activeDragger._forceFinish();
 
-    _setPosition(clientX, clientY) {
-        let x = clientX - this.offset.x;
-        let y = clientY - this.offset.y;
+            this.isDragging = true;
+            this.didDrag = false;
+            activeDragger = this;
 
-        // Clamp dans le viewport
-        const rect = this.el.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
-        x = Math.max(0, Math.min(x, maxX));
-        y = Math.max(0, Math.min(y, maxY));
+            var rect = this.el.getBoundingClientRect();
+            this.offset.x = e.clientX - rect.left;
+            this.offset.y = e.clientY - rect.top;
 
-        this.el.style.position = 'fixed';
-        this.el.style.left = `${x}px`;
-        this.el.style.top = `${y}px`;
-        this.el.style.margin = '0';
-    }
+            this.el.style.cursor = 'grabbing';
+            this.el.style.zIndex = '9999';
+            this.el.style.transition = 'none';
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-    _savePosition() {
-        const rect = this.el.getBoundingClientRect();
-        const positions = JSON.parse(localStorage.getItem('ws_panel_positions') || '{}');
-        positions[this.el.id] = { x: rect.left, y: rect.top };
-        localStorage.setItem('ws_panel_positions', JSON.stringify(positions));
-    }
+        _startTouch(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' ||
+                e.target.tagName === 'SELECT' ||
+                (e.target.tagName === 'A' && e.target.href) ||
+                (e.target.tagName === 'BUTTON' && !e.target.hasAttribute('data-drag-handle'))) {
+                return;
+            }
+            if (activeDragger && activeDragger !== this) activeDragger._forceFinish();
 
-    _restorePosition() {
-        const positions = JSON.parse(localStorage.getItem('ws_panel_positions') || '{}');
-        const pos = positions[this.el.id];
-        if (pos) {
+            this.isDragging = true;
+            this.didDrag = true; // touch always counts as drag
+            activeDragger = this;
+
+            var touch = e.touches[0];
+            var rect = this.el.getBoundingClientRect();
+            this.offset.x = touch.clientX - rect.left;
+            this.offset.y = touch.clientY - rect.top;
+
+            this.el.style.zIndex = '9999';
+            this.el.style.transition = 'none';
+            e.preventDefault();
+        }
+
+        _setPosition(clientX, clientY) {
+            var x = clientX - this.offset.x;
+            var y = clientY - this.offset.y;
+
+            // Only consider it a drag if moved > 4px
+            if (Math.abs(clientX - this.offset.x - parseFloat(this.el.style.left || 0)) > 4 ||
+                Math.abs(clientY - this.offset.y - parseFloat(this.el.style.top || 0)) > 4) {
+                this.didDrag = true;
+            }
+
+            // Clamp within viewport
+            var maxX = window.innerWidth - this.el.offsetWidth;
+            var maxY = window.innerHeight - this.el.offsetHeight;
+            x = Math.max(0, Math.min(x, maxX));
+            y = Math.max(0, Math.min(y, maxY));
+
             this.el.style.position = 'fixed';
-            this.el.style.left = `${pos.x}px`;
-            this.el.style.top = `${pos.y}px`;
+            this.el.style.left = x + 'px';
+            this.el.style.top = y + 'px';
             this.el.style.margin = '0';
+            this.el.style.right = 'auto';
+            this.el.style.bottom = 'auto';
+        }
+
+        _finish() {
+            if (!this.isDragging) return;
+            this.isDragging = false;
+            if (activeDragger === this) activeDragger = null;
+
+            this.el.style.cursor = 'grab';
+            this.el.style.zIndex = '';
+            this.el.style.transition = '';
+            this._savePosition();
+        }
+
+        _forceFinish() {
+            this.isDragging = false;
+            this.el.style.cursor = 'grab';
+            this.el.style.zIndex = '';
+            this.el.style.transition = '';
+        }
+
+        _savePosition() {
+            var rect = this.el.getBoundingClientRect();
+            var positions = JSON.parse(localStorage.getItem('ws_panel_positions') || '{}');
+            positions[this.el.id] = { x: rect.left, y: rect.top };
+            localStorage.setItem('ws_panel_positions', JSON.stringify(positions));
+        }
+
+        _restorePosition() {
+            var positions = JSON.parse(localStorage.getItem('ws_panel_positions') || '{}');
+            var pos = positions[this.el.id];
+            if (pos) {
+                this.el.style.position = 'fixed';
+                this.el.style.left = pos.x + 'px';
+                this.el.style.top = pos.y + 'px';
+                this.el.style.margin = '0';
+                this.el.style.right = 'auto';
+                this.el.style.bottom = 'auto';
+            }
+        }
+
+        static resetAll() {
+            localStorage.removeItem('ws_panel_positions');
+            window.location.reload();
         }
     }
 
-    static resetAll() {
-        localStorage.removeItem('ws_panel_positions');
-        window.location.reload();
-    }
-}
-
-// Exposer globalement
-window.PanelDragger = PanelDragger;
+    window.PanelDragger = PanelDragger;
+})();

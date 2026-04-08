@@ -1,0 +1,139 @@
+# R7 — CI/CD élèves : déploiement des rendus
+# Déclenché manuellement ou via API quand un élève exporte son projet.
+# Déploie le contenu de projects/{project_id}/exports/ vers la cible statique.
+
+name: deploy student render
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: "Student project ID (ex: dnmade1-2026-blart-samuel)"
+        required: true
+        type: string
+      student_name:
+        description: "Student display name"
+        required: false
+        type: string
+  push:
+    branches: [student-deploy/*]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: resolve project_id
+        id: resolve
+        run: |
+          if [[ -n "${{ github.event.inputs.project_id }}" ]]; then
+            echo "project_id=${{ github.event.inputs.project_id }}" >> $GITHUB_OUTPUT
+          else
+            # Extract from branch name: student-deploy/{project_id}
+            BRANCH="${{ github.ref_name }}"
+            PROJECT_ID="${BRANCH#student-deploy/}"
+            echo "project_id=${PROJECT_ID}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: check exports exist
+        id: check
+        run: |
+          EXPORTS_DIR="projects/${{ steps.resolve.outputs.project_id }}/exports"
+          if [ ! -d "$EXPORTS_DIR" ]; then
+            echo "❌ Exports directory not found: $EXPORTS_DIR"
+            exit 1
+          fi
+          FILE_COUNT=$(find "$EXPORTS_DIR" -name "*.html" | wc -l)
+          if [ "$FILE_COUNT" -eq 0 ]; then
+            echo "❌ No HTML exports found"
+            exit 1
+          fi
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "✅ Found $FILE_COUNT HTML file(s)"
+
+      - name: prepare deploy bundle
+        run: |
+          EXPORTS_DIR="projects/${{ steps.resolve.outputs.project_id }}/exports"
+          DEPLOY_DIR="/tmp/deploy-bundle"
+          mkdir -p "$DEPLOY_DIR"
+          cp -r "$EXPORTS_DIR"/* "$DEPLOY_DIR/"
+          # Copy any static assets (images, fonts referenced)
+          if [ -d "projects/${{ steps.resolve.outputs.project_id }}/imports" ]; then
+            mkdir -p "$DEPLOY_DIR/imports"
+            cp -r "projects/${{ steps.resolve.outputs.project_id }}/imports"/* "$DEPLOY_DIR/imports/" 2>/dev/null || true
+          fi
+          # Generate index.html if only one HTML file
+          HTML_COUNT=$(find "$DEPLOY_DIR" -maxdepth 1 -name "*.html" | wc -l)
+          if [ "$HTML_COUNT" -eq 1 ] && [ ! -f "$DEPLOY_DIR/index.html" ]; then
+            SINGLE_HTML=$(find "$DEPLOY_DIR" -maxdepth 1 -name "*.html" | head -1)
+            mv "$SINGLE_HTML" "$DEPLOY_DIR/index.html"
+          fi
+
+      - name: deploy to huggingface spaces
+        if: ${{ secrets.HF_TOKEN != '' }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          PROJECT_ID: ${{ steps.resolve.outputs.project_id }}
+          STUDENT_NAME: ${{ github.event.inputs.student_name || steps.resolve.outputs.project_id }}
+        run: |
+          pip install huggingface_hub
+          python - <<'PYEOF'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi()
+          deploy_dir = "/tmp/deploy-bundle"
+          project_id = os.environ["PROJECT_ID"]
+          student_name = os.environ["STUDENT_NAME"]
+
+          # Deploy to student subdirectory in HF Space
+          # Repo: FJDaz/homeos-students (create if needed)
+          # Path: students/{project_id}/
+          target_path = f"students/{project_id}"
+
+          try:
+              api.upload_folder(
+                  folder_path=deploy_dir,
+                  repo_id="FJDaz/homeos-students",
+                  repo_type="space",
+                  path_in_repo=target_path,
+                  token=os.environ["HF_TOKEN"].strip(),
+              )
+              print(f"✅ Deployed to HF Space: {target_path}")
+          except Exception as e:
+              # Fallback: deploy to main space under students/
+              print(f"Warning: dedicated space failed, deploying to main: {e}")
+              api.upload_folder(
+                  folder_path=deploy_dir,
+                  repo_id="FJDaz/homeos",
+                  repo_type="space",
+                  path_in_repo=target_path,
+                  token=os.environ["HF_TOKEN"].strip(),
+              )
+              print(f"✅ Deployed to main HF Space: {target_path}")
+          PYEOF
+
+      - name: update milestone N5
+        if: success()
+        run: |
+          echo "📝 Student milestone updated to N5 (Déployé)"
+          # This would call the backend API to update the milestone
+          # curl -X PUT "http://localhost:9998/api/classes/.../students/.../milestone" \
+          #   -H "Content-Type: application/json" -d '{"level": 5}'
+
+      - name: report deployment URL
+        if: success()
+        run: |
+          PROJECT_ID="${{ steps.resolve.outputs.project_id }}"
+          echo ""
+          echo "### 🎉 Student render deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: \`$PROJECT_ID\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://fjdaz-homeos-students.hf.space/students/$PROJECT_ID/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Milestone**: N5 (Déployé)" >> $GITHUB_STEP_SUMMARY

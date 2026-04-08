@@ -4,6 +4,7 @@ Users table + session token + isolation projets.
 """
 
 import os
+import json
 import uuid
 import sqlite3
 import logging
@@ -35,6 +36,9 @@ class RegisterResponse(BaseModel):
     name: str
     role: str
     token: str
+    student_id: Optional[str] = None
+    class_id: Optional[str] = None
+    project_id: Optional[str] = None
 
 class MeResponse(BaseModel):
     user_id: str
@@ -51,7 +55,7 @@ class KeyStatusResponse(BaseModel):
 
 # --- DB INIT ---
 def init_auth_db():
-    """Crée les tables users et user_keys, ajoute user_id à projects si absent."""
+    """Crée les tables users et user_keys, ajoute user_id à projects si absent. M224: ajoute password_hash."""
     conn = sqlite3.connect(str(PROJECTS_DB_PATH))
     cursor = conn.cursor()
 
@@ -65,6 +69,13 @@ def init_auth_db():
             created_at TEXT DEFAULT (datetime('now'))
         )
     ''')
+
+    # M224: Ajouter password_hash si absent
+    try:
+        cursor.execute('ALTER TABLE users ADD COLUMN password_hash TEXT')
+        logger.info("Auth migration M224: added password_hash to users")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
 
     # User keys table (BYOK)
     cursor.execute('''
@@ -108,22 +119,42 @@ def seed_admin():
 # --- ROUTES ---
 @router.post("/auth/register")
 async def auth_register(req: RegisterRequest):
-    """Enregistre un utilisateur par nom. Retourne user_id + token."""
+    """Enregistre un utilisateur par nom. Retourne user_id + token + infos étudiant si trouvé."""
     name = req.name.strip()
     if not name:
         raise HTTPException(status_code=400, detail="Name required")
 
     admin_name = os.getenv("ADMIN_NAME", "FJD")
-    role = "admin" if name == admin_name else "student"
+    prof_names = [n.strip() for n in os.getenv("PROF_NAMES", "FJD").split(",")]
+
+    if name == admin_name:
+        role = "admin"
+    elif name in prof_names:
+        role = "prof"
+    else:
+        role = "student"
 
     conn = sqlite3.connect(str(PROJECTS_DB_PATH))
     cursor = conn.cursor()
 
-    # Chercher par name
+    # R6-A: Lookup étudiant dans la table students
+    student_row = cursor.execute(
+        "SELECT id, class_id, project_id FROM students WHERE lower(display) = lower(?)",
+        (name,)
+    ).fetchone()
+
+    student_id = student_row[0] if student_row else None
+    class_id = student_row[1] if student_row else None
+    project_id = student_row[2] if student_row else None
+
+    # Chercher par name dans users
     existing = cursor.execute("SELECT id, name, role, token FROM users WHERE name = ?", (name,)).fetchone()
     if existing:
         conn.close()
-        return RegisterResponse(user_id=existing[0], name=existing[1], role=existing[2], token=existing[3])
+        return RegisterResponse(
+            user_id=existing[0], name=existing[1], role=existing[2], token=existing[3],
+            student_id=student_id, class_id=class_id, project_id=project_id
+        )
 
     # Créer nouveau
     user_id = str(uuid.uuid4())
@@ -135,8 +166,11 @@ async def auth_register(req: RegisterRequest):
     conn.commit()
     conn.close()
 
-    logger.info(f"Auth: new user '{name}' registered (role={role})")
-    return RegisterResponse(user_id=user_id, name=name, role=role, token=token)
+    logger.info(f"Auth: new user '{name}' registered (role={role}, student_id={student_id})")
+    return RegisterResponse(
+        user_id=user_id, name=name, role=role, token=token,
+        student_id=student_id, class_id=class_id, project_id=project_id
+    )
 
 
 @router.get("/auth/me")
@@ -248,6 +282,146 @@ async def get_key_helper(provider: str, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# --- INIT ---
-init_auth_db()
-seed_admin()
+# --- M224: PROF PASSWORD + STUDENT LOGIN ---
+
+import hashlib
+
+def _hash_password(password: str) -> str:
+    """Hash SHA-256 du mot de passe."""
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+
+class ProfRegisterRequest(BaseModel):
+    name: str
+    password: str
+
+class ProfLoginRequest(BaseModel):
+    name: str
+    password: str
+
+class StudentLoginRequest(BaseModel):
+    class_id: str
+    student_id: str
+
+
+@router.post("/auth/register-prof")
+async def auth_register_prof(req: ProfRegisterRequest):
+    """M224: Inscription prof avec mot de passe."""
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name required")
+
+    password_hash = _hash_password(req.password)
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+
+    # Vérifier si existe déjà
+    existing = cursor.execute("SELECT id FROM users WHERE name = ?", (name,)).fetchone()
+    if existing:
+        conn.close()
+        raise HTTPException(status_code=409, detail="Ce nom est déjà pris")
+
+    user_id = str(uuid.uuid4())
+    token = str(uuid.uuid4())
+    cursor.execute(
+        "INSERT INTO users (id, name, role, token, password_hash) VALUES (?, ?, 'prof', ?, ?)",
+        (user_id, name, token, password_hash)
+    )
+    conn.commit()
+    conn.close()
+
+    logger.info(f"Auth: new prof '{name}' registered")
+    return RegisterResponse(user_id=user_id, name=name, role="prof", token=token)
+
+
+@router.post("/auth/login-prof")
+async def auth_login_prof(req: ProfLoginRequest):
+    """M224: Login prof par nom + mot de passe."""
+    name = req.name.strip()
+    password_hash = _hash_password(req.password)
+
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    row = cursor.execute(
+        "SELECT id, name, role, token, password_hash FROM users WHERE name = ? AND role IN ('prof', 'admin')",
+        (name,)
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=401, detail="Nom incorrect")
+
+    user_id, db_name, role, token, stored_hash = row
+
+    # Si pas de hash (ancien compte), on accepte sans mdp pour rétrocompatibilité
+    if stored_hash and stored_hash != password_hash:
+        raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+
+    return RegisterResponse(user_id=user_id, name=db_name, role=role, token=token)
+
+
+@router.post("/auth/login-student")
+async def auth_login_student(req: StudentLoginRequest):
+    """M224: Login élève sans mot de passe — par classe + student_id."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+
+    # Vérifier que l'élève existe dans cette classe
+    student_row = cursor.execute(
+        "SELECT id, display, project_id FROM students WHERE id = ? AND class_id = ?",
+        (req.student_id, req.class_id)
+    ).fetchone()
+
+    if not student_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Étudiant non trouvé dans cette classe")
+
+    student_id, display, project_id = student_row
+
+    # Créer ou récupérer user
+    user_row = cursor.execute("SELECT id, token FROM users WHERE name = ?", (display,)).fetchone()
+    if user_row:
+        user_id, token = user_row
+        # Mettre à jour le rôle si c'était 'student' par défaut
+        cursor.execute("UPDATE users SET role = 'student' WHERE id = ?", (user_id,))
+    else:
+        user_id = str(uuid.uuid4())
+        token = str(uuid.uuid4())
+        cursor.execute(
+            "INSERT INTO users (id, name, role, token) VALUES (?, ?, 'student', ?)",
+            (user_id, display, token)
+        )
+
+    conn.commit()
+    conn.close()
+
+    # F1: Activer le projet de l'élève immédiatement
+    if project_id:
+        active_file = ROOT_DIR / "active_project.json"
+        active_file.parent.mkdir(parents=True, exist_ok=True)
+        active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
+
+    logger.info(f"Auth: student '{display}' logged in (class={req.class_id})")
+    return RegisterResponse(
+        user_id=user_id, name=display, role="student", token=token,
+        student_id=student_id, class_id=req.class_id, project_id=project_id
+    )
+
+
+@router.get("/classes/{class_id}/students-list")
+async def list_students_public(class_id: str):
+    """M224: Liste publique des élèves d'une classe (sans auth)."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    rows = cursor.execute(
+        "SELECT id, display, project_id FROM students WHERE class_id = ? ORDER BY display",
+        (class_id,)
+    ).fetchall()
+    conn.close()
+
+    return {
+        "students": [
+            {"id": r[0], "display": r[1], "project_id": r[2]}
+            for r in rows
+        ]
+    }

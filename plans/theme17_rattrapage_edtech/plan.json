@@ -1,0 +1,116 @@
+{
+  "theme": "Theme 17 — Rattrapage EdTech",
+  "date": "2026-04-07",
+  "status": "planned",
+  "missions": [
+    {
+      "id": "R0",
+      "title": "Sullivan patch_element: _apply_tailwind_diff manquant → blobs Tailwind",
+      "status": "done",
+      "priority": "critical",
+      "type": "bug",
+      "files": [
+        "Frontend/3. STENCILER/routers/frd_router.py"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R1",
+      "title": "/teacher: formulaire créer une classe ne soumet pas + edit/delete",
+      "status": "done",
+      "priority": "critical",
+      "type": "bug+feature",
+      "files": [
+        "Frontend/3. STENCILER/static/templates/teacher_dashboard.html",
+        "Frontend/3. STENCILER/routers/class_router.py"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R2",
+      "title": "Cadrage mode prof: class_id pas transmis à Sullivan",
+      "status": "done",
+      "priority": "critical",
+      "type": "bug",
+      "files": [
+        "Backend/Prod/retro_genome/brainstorm_logic.py"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R3",
+      "title": "Onglet Dashboard absent du nav en mode prof",
+      "status": "done",
+      "priority": "medium",
+      "type": "validation",
+      "files": [
+        "Frontend/3. STENCILER/static/js/bootstrap.js",
+        "Frontend/3. STENCILER/static/templates/cadrage_alt.html"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R4",
+      "title": "cadrage_alt.html: Univers LT Std Light + max-width",
+      "status": "planned",
+      "priority": "medium",
+      "type": "styling",
+      "files": [
+        "Frontend/3. STENCILER/static/templates/cadrage_alt.html"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R5",
+      "title": "Sujets créés → visibles dans /teacher",
+      "status": "done",
+      "priority": "medium",
+      "type": "validation",
+      "files": [
+        "Frontend/3. STENCILER/static/templates/teacher_dashboard.html"
+      ],
+      "depends_on": ["R1"]
+    },
+    {
+      "id": "R6-A",
+      "title": "Login élève: résolution classe + student_id",
+      "status": "done",
+      "priority": "critical",
+      "type": "feature",
+      "files": [
+        "Frontend/3. STENCILER/routers/auth_router.py",
+        "Frontend/3. STENCILER/static/templates/login.html"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R6",
+      "title": "Workspace étudiant: isolation projet dans Stitch",
+      "status": "done",
+      "priority": "critical",
+      "type": "feature",
+      "files": [],
+      "depends_on": []
+    },
+    {
+      "id": "R9",
+      "title": "bootstrap.js:814 TypeError refreshNav undefined",
+      "status": "done",
+      "priority": "critical",
+      "type": "bug",
+      "files": [
+        "Frontend/3. STENCILER/static/js/bootstrap.js"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "R7",
+      "title": "CI/CD élèves: déploiement des rendus",
+      "status": "done",
+      "priority": "low",
+      "type": "feature",
+      "files": [],
+      "depends_on": ["R1", "R2", "R3", "R4", "R5", "R6"]
+    }
+  ]
+}

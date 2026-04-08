@@ -23,7 +23,27 @@ router = APIRouter(prefix="/api/stitch")
 CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 PROJECTS_DIR = ROOT_DIR / "projects"
-STITCH_API_KEY = os.getenv("STITCH_API_KEY", "")
+
+
+# --- S3: Resolve Stitch API key from env or DB ---
+def _get_stitch_key() -> str:
+    key = os.getenv("STITCH_API_KEY", "")
+    if key:
+        return key
+    try:
+        from bkd_service import bkd_db_con
+        with bkd_db_con() as con:
+            row = con.execute(
+                "SELECT uk.api_key FROM user_keys uk "
+                "JOIN users u ON u.id = uk.user_id "
+                "WHERE uk.provider = 'stitch' AND u.role IN ('admin','prof') "
+                "ORDER BY u.role DESC LIMIT 1"
+            ).fetchone()
+            if row:
+                return row[0]
+    except Exception:
+        pass
+    return ""
 
 
 # --- MODELS ---
@@ -53,17 +73,54 @@ class SyncPushRequest(BaseModel):
 # --- ROUTES ---
 @router.get("/status")
 async def stitch_status():
-    """Vérifie que Stitch est configuré et joignable."""
+    """Vérifie que Stitch est configuré et joignable. S3: key from env or DB."""
+    key = _get_stitch_key()
     return StatusResponse(
-        connected=bool(STITCH_API_KEY),
-        api_key_set=bool(STITCH_API_KEY)
+        connected=bool(key),
+        api_key_set=bool(key)
     )
+
+
+@router.get("/project-info")
+async def stitch_project_info():
+    """M222: Retourne le stitch_project_id lié au projet HoméOS actif."""
+    active_file = ROOT_DIR / "active_project.json"
+    if not active_file.exists():
+        return {"linked": False}
+
+    try:
+        active_data = json.loads(active_file.read_text())
+        active_id = active_data.get("active_id")
+    except Exception:
+        return {"linked": False}
+
+    if not active_id:
+        return {"linked": False}
+
+    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+    if not manifest_path.exists():
+        return {"linked": False}
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        stitch_id = manifest.get("stitch_project_id")
+        if not stitch_id:
+            return {"linked": False}
+
+        return {
+            "linked": True,
+            "stitch_project_id": stitch_id,
+            "title": manifest.get("stitch_project_title", stitch_id)
+        }
+    except Exception as e:
+        logger.warning(f"stitch_project_info error: {e}")
+        return {"linked": False}
 
 
 @router.get("/session")
 async def stitch_session():
     """Source de vérité live : état du projet Stitch vs imports locaux."""
-    if not STITCH_API_KEY:
+    if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré — ajoutez STITCH_API_KEY au .env")
 
     try:
@@ -84,7 +141,7 @@ async def stitch_session():
 
         # Fetch live depuis Stitch via MCP
         from core.stitch_client import StitchClient
-        client = StitchClient()
+        client = StitchClient(api_key=_get_stitch_key())
         project_data = client.get_project_data(project_id)
         stitch_screens = project_data.get("screenInstances", [])
 
@@ -96,7 +153,8 @@ async def stitch_session():
         for s in stitch_screens:
             full_name = s.get("name", "")
             short_id = full_name.split("/")[-1]
-            title = s.get("title", short_id)
+            # Intelligible name: displayName > title > short_id
+            title = s.get("displayName") or s.get("title") or short_id
             safe = "stitch_" + "".join(c if c.isalnum() or c in "-_ " else "_" for c in title).strip().replace(" ", "_")[:60]
             screens.append({
                 "stitch_id": short_id,
@@ -137,7 +195,7 @@ async def stitch_sync_push(req: SyncPushRequest):
     body: { stitch_id: str, instructions: str }
     → appelle edit_screen({ name: "projects/{pid}/screens/{stitch_id}", instructions })
     """
-    if not STITCH_API_KEY:
+    if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
     try:
@@ -157,7 +215,7 @@ async def stitch_sync_push(req: SyncPushRequest):
             raise HTTPException(status_code=400, detail="stitch_project_id non configuré dans manifest.json")
 
         from core.stitch_client import StitchClient
-        client = StitchClient()
+        client = StitchClient(api_key=_get_stitch_key())
         result = client.edit_screen(project_id, req.stitch_id, req.instructions)
 
         logger.info(f"Stitch SYNC-PUSH: edited screen {req.stitch_id} in project {project_id}")
@@ -173,12 +231,12 @@ async def stitch_sync_push(req: SyncPushRequest):
 @router.get("/screens")
 async def stitch_screens(project_id: str):
     """Liste les écrans disponibles dans le projet Stitch."""
-    if not STITCH_API_KEY:
+    if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré — ajoutez STITCH_API_KEY au .env")
 
     try:
         from core.stitch_client import StitchClient
-        client = StitchClient()
+        client = StitchClient(api_key=_get_stitch_key())
         data = client.get_project_data(project_id)
         # Stitch retourne screenInstances (pas screens)
         raw_screens = data.get("screenInstances", data.get("screens", []))
@@ -187,7 +245,7 @@ async def stitch_screens(project_id: str):
         for s in raw_screens:
             full_name = s.get("name", s.get("id", ""))
             short_name = full_name.split("/")[-1] if "/" in full_name else full_name
-            screens.append({"name": short_name, "full_name": full_name, "title": s.get("title", short_name)})
+            screens.append({"name": short_name, "full_name": full_name, "title": s.get("displayName") or s.get("title") or short_name})
         return {"screens": screens}
     except Exception as e:
         logger.error(f"Stitch screens fetch failed: {e}")
@@ -223,22 +281,33 @@ async def stitch_pull(request: Request, req: PullRequest):
     - Si screen_name présent → télécharge le HTML + Design DNA
     - Mémorise stitch_project_id dans manifest.json
     """
-    if not STITCH_API_KEY:
+    if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré — ajoutez STITCH_API_KEY au .env")
 
     try:
         from core.stitch_client import StitchClient
-        client = StitchClient()
+        client = StitchClient(api_key=_get_stitch_key())
 
         if not req.screen_name:
             return {"screens": [], "imported": None, "design_md_written": False}
 
-        # Télécharger directement — pas de validation (le listing a déjà confirmé l'existence)
-        # screen_name = segment court (ex: "11b1df51...") issu du resource path Stitch
+        # Fetch project data to get intelligible screen names
+        project_data = client.get_project_data(req.project_id)
+        screen_instances = project_data.get("screenInstances", project_data.get("screens", []))
+        screen_name_map = {}
+        for s in screen_instances:
+            full_name = s.get("name", "")
+            short_id = full_name.split("/")[-1]
+            screen_name_map[short_id] = s.get("displayName") or s.get("title") or short_id
+        logger.info(f"Stitch screen name map: {screen_name_map}")
+
+        # Download screen code
         screen_data = client.get_screen_code(req.project_id, req.screen_name)
-        logger.info(f"Stitch screen_data keys: {list(screen_data.keys())}")
-        logger.info(f"Stitch screen_data['screen_data'] keys: {list(screen_data.get('screen_data', {}).keys())}")
-        logger.info(f"Stitch screen_data dump: {str(screen_data)[:800]}")
+        logger.info(f"Stitch screen_data ROOT keys: {list(screen_data.keys())}")
+        raw = screen_data.get("screen_data", {})
+        logger.info(f"Stitch screen_data['screen_data'] keys: {list(raw.keys())}")
+        # DUMP complet pour diagnostic
+        logger.info(f"Stitch screen_data DUMP: {json.dumps(raw, indent=2, ensure_ascii=False)[:2000]}")
         html = screen_data.get("html", screen_data.get("code", ""))
 
         if not html:
@@ -254,9 +323,12 @@ async def stitch_pull(request: Request, req: PullRequest):
         imports_dir = PROJECTS_DIR / (active_id or "default") / "imports"
         imports_dir.mkdir(parents=True, exist_ok=True)
 
-        # Utiliser le titre Stitch comme nom de fichier si disponible
+        # Use intelligible screen name from project data
+        title = screen_name_map.get(req.screen_name, req.screen_name)
+        # Also try raw_screen response for displayName/title
         raw_screen = screen_data.get("screen_data", {})
-        title = raw_screen.get("title", raw_screen.get("displayName", req.screen_name))
+        if not title or title == req.screen_name:
+            title = raw_screen.get("title", raw_screen.get("displayName", req.screen_name))
         safe_title = "".join(c if c.isalnum() or c in "-_ " else "_" for c in title).strip().replace(" ", "_")[:60]
         filename = f"stitch_{safe_title}.html" if safe_title else f"stitch_{req.screen_name[:12]}.html"
 
@@ -370,7 +442,7 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
 
         # 2. Envoyer à Stitch
         status.update("calling_stitch", "Transmission de l'ADN design à l'imaginaire Stitch...")
-        client = StitchClient()
+        client = StitchClient(api_key=_get_stitch_key())
         result = client.generate_screen_from_text(prompt, project_id)
 
         screen_name = result.get("name", result.get("screenId", "generated"))
@@ -393,7 +465,7 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
 @router.post("/push")
 async def stitch_push(req: PushRequest, background_tasks: BackgroundTasks):
     """Lance une génération d'écran Stitch en arrière-plan depuis le genome du projet."""
-    if not STITCH_API_KEY:
+    if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
     from core.task_manager import TaskManager

@@ -461,20 +461,20 @@ async def fee_chat_endpoint(req: ChatRequest):
     try:
         # On utilise Sullivan FEE System Prompt
         system = SULLIVAN_FEE_SYSTEM
-        
+
         # Arbitrage simplifié (Geist/Kimi/Gemini-2.0-Flash recommandé pour le code rapide)
         config = _ARBITRATOR.pick("code-simple")
-        
+
         # Limiter l'historique pour Sullivan FEE
         messages = [{"role": turn.get('role', 'user'), "content": turn.get('text', '')} for turn in req.history[-6:]]
         messages.append({"role": "user", "content": req.message})
-        
+
         # Appel Sullivan Arbitrator
         res = _ARBITRATOR.dispatch(config, messages, system=system)
-        
+
         if not res.get("success"):
             raise HTTPException(status_code=500, detail=res.get("error", "FEE Dispatch error"))
-            
+
         return ChatResponse(
             explanation=res.get("text", ""),
             model=config['model'],
@@ -485,6 +485,33 @@ async def fee_chat_endpoint(req: ChatRequest):
     except Exception as e:
         logger.error(f"FEE Chat error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/fee/apply")
+async def fee_apply_code(req: dict):
+    """M221: Applique le code GSAP généré dans logic.js du projet."""
+    project_id = req.get("project_id")
+    screen = req.get("screen", "landing.html")
+    code = req.get("code", "")
+    trigger = req.get("trigger")
+
+    if not project_id or not code:
+        raise HTTPException(status_code=400, detail="project_id et code requis")
+
+    # Lire logic.js existant
+    logic_path = PROJECTS_DIR / project_id / "logic" / "logic.js"
+    existing = ""
+    if logic_path.exists():
+        existing = logic_path.read_text(encoding='utf-8')
+
+    # Injecter le code avec markers FEE
+    fee_block = f"\n// [FEE-LOGIC-START] trigger={trigger}\n{code}\n// [FEE-LOGIC-END]\n"
+    new_content = existing + fee_block
+
+    logic_path.parent.mkdir(parents=True, exist_ok=True)
+    logic_path.write_text(new_content, encoding='utf-8')
+
+    return {"status": "ok", "trigger": trigger, "screen": screen}
 
 
 

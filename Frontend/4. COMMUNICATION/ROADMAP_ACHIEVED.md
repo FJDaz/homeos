@@ -6,6 +6,32 @@
 
 ---
 
+## F2 — Projet élève : création automatique depuis le sujet actif
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: CLAUDE (CODE DIRECT)**
+
+- `create_student_project()` charge le dernier sujet de la classe → nomme le projet `{class_id}-{student_id}-{subject_slug}`
+- **INSERT OR IGNORE dans la table `projects`** → `get_active_project_path()` trouve le projet (plus de fallback `default`)
+- `/start` route : enregistre aussi les projets existants sur disque mais absents de la DB
+- Helper `_get_active_subject_title()` ajouté
+
+Fichier : `Frontend/3. STENCILER/routers/class_router.py`
+
+---
+
+## F3 — Éditeur sujet dashboard prof
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: GEMINI**
+
+- Drawer fixe droite (`position: fixed; right: 0; top: 48px; width: 420px`) — slide in/out
+- Formulaire 5 sections : en-tête, parties (dynamique), livrables (dynamique), évaluation (critères DNMADE + poids), compétences (checkboxes A1-D2)
+- `editSubject(id)` → `GET /api/classes/{class_id}/subjects/{id}` → pré-remplit le formulaire
+- `createSubject()` → ouvre le drawer vide (plus de redirection vers /cadrage)
+- `saveSubjectForm()` → POST (création) ou PUT (modification) selon le mode
+- Bouton "modifier" dans chaque ligne du tableau sujets
+
+Fichier : `Frontend/3. STENCILER/static/templates/teacher_dashboard.html`
+
+---
+
 ## Mission 208 — Backend FRD : War Room & Architecture Multi-Agents
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-07**
