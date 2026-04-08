@@ -10,6 +10,10 @@ mkdir -p "/app/Frontend/3. STENCILER/logs"
 mkdir -p "/app/Frontend/3. STENCILER/output"
 mkdir -p /app/exports
 
+# M270: Seed database si vide (classes/élèves)
+cd /app
+python3 scripts/seed_db.py 2>/dev/null || echo "[seed] skipped"
+
 # Lancer le serveur depuis le bon répertoire
 # (Path(__file__).parent.resolve() dans server_v3.py dépend de ce cwd)
 cd "/app/Frontend/3. STENCILER"
