@@ -36,7 +36,7 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ## Phase Active (2026-04-08)
 
 ### Thème 0 — Hotfixes
-> M121 ✅, M116 ✅, M122–127 ✅, M233 ✅, M234 ✅ — archivées ROADMAP_ACHIEVED.md
+> M121 ✅, M116 ✅, M122–127 ✅, M233 ✅, M234 ✅, M236 ✅, M237 ✅, M238 ✅, M239 ✅, M240 ✅, M241 ✅, M242 ✅ — archivées ROADMAP_ACHIEVED.md
 
 ---
 
@@ -2152,6 +2152,31 @@ CSS dans `homeos-nav.css` :
 - Après extraction : boot + wiring toolbar + mode buttons uniquement
 - Traces : `[ws_main] toolbar 7 buttons`, `[ws_main] ✅ READY`
 - Fichier : `static/js/workspace/ws_main.js` (réécrit)
+
+---
+
+### CR — Pipeline de forge PNG : diagnostic hallucination
+
+**Traçage complet effectué :**
+
+**PNG upload → forge → HTML :**
+1. `POST /api/import/upload` — sauve le PNG dans `projects/{pid}/imports/{date}/IMPORT_xxx.png`
+2. `POST /api/retro-genome/generate-from-import` — lit le PNG, base64 → `GeminiClient.generate_with_image()`
+3. **Le PNG atteint bien le LLM** (base64 inline via Gemini `inlineData` API)
+4. **Système prompt** : tokens de design depuis `{project}/exports/design_tokens.json` (ou valeurs par défaut)
+5. **DESIGN.md n'est JAMAIS chargé** — le `design.md` à la racine du repo est ignoré
+
+**dist.zip upload → forge → HTML :**
+1. `POST /api/import/upload` — sauve le ZIP
+2. Si `dist/index.html` présent → **aucun LLM** — extraction directe + serve via iframe
+3. Si `.tsx/.jsx` → `ReactToTailwindConverter` → Gemini (texte seul)
+4. Si HTML simple → `SvgToTailwindConverter.convert()` → Gemini BUILD mode
+
+**Constat :**
+- Le PNG est bien envoyé au LLM mais le **prompt n'a aucune référence au DESIGN.md du projet**
+- Les seuls tokens design sont les valeurs par défaut (`#f7f6f2`, `#3d3d3c`, `#8cc63f`, `Geist Sans`)
+- Le `design.md` repo root existe mais n'est jamais lu par le pipeline de forge
+- **Solution** : injecter le contenu du `DESIGN.md` du projet actif dans le prompt de forge PNG
 
 ---
 
