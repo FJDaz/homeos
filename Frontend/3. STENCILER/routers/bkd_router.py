@@ -422,17 +422,27 @@ async def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
     file_path = bkd_safe_path(root, path)
+
+    # M260: Si le fichier n'est pas dans le projet BKD, chercher dans static/templates/ (forgés)
     if not file_path or not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
+        stenciler_root = Path(__file__).parent.parent / "static" / "templates"
+        alt_path = stenciler_root / path
+        if alt_path.exists():
+            file_path = alt_path
+        else:
+            raise HTTPException(status_code=404, detail=f"File not found: {path}")
 
     html = file_path.read_text(encoding="utf-8")
 
     # M260-Fix2: Injecter <base> pour que les assets relatifs (css/, images/) résolvent
-    # Le HTML est servi via /api/bkd/fee/preview → le browser cherche relatifs ici
-    # On injecte une base pointant vers le dossier du fichier HTML
-    file_dir = str(file_path.parent)
     if "<base" not in html and "<head>" in html:
-        html = html.replace("<head>", f'<head><base href="/projects/{project_id}/" />', 1)
+        # Si c'est un template forgé → base pointe vers /static/templates/
+        # Sinon → base pointe vers /projects/{project_id}/
+        if str(file_path).startswith(str(stenciler_root)):
+            base_href = "/static/templates/"
+        else:
+            base_href = f"/projects/{project_id}/"
+        html = html.replace("<head>", f'<head><base href="{base_href}" />', 1)
 
     return HTMLResponse(content=html)
 
