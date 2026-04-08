@@ -2107,6 +2107,54 @@ CSS dans `homeos-nav.css` :
 
 ---
 
+## Thème 25 — Refactorisation ws_main.js : modules isolés + boot ordonné
+
+> Objectif : éliminer les 7 catégories de bugs récurrents (état undefined, race conditions, crash en cascade, IDs manquants, pointer-events, IDs API erronés, double-binding).
+> **Règle :** zéro classe, zéro import complexe. Fonctions pures + IIFE. Chaque fichier expose `window.WsXxx` avec traces console.
+
+### Mission 250 — WsState : état global unique, tracé en console
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- Centralise `projectId`, `activeMode`, `session` en un seul objet
+- Résout le projet depuis `localStorage.homeos_session` (plus besoin de `wsBackend`)
+- Traces : `[WsState] init`, `[WsState] projectId=xxx`, `[WsState] session.role=xxx`
+- Fichier : `static/js/workspace/WsState.js`
+
+### Mission 251 — WsBoot : séquence d'init isolée, try/catch par composant
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- Remplace le bloc `async function initWorkspace()` de ws_main.js
+- Boot explicite étape par étape : Audit → Forge → Preview → Canvas → Chat → Wire → FEEStudio
+- Chaque étape dans `bootSafe(nom, fn)` — si crash, log clair + continue
+- Traces : `[WsBoot] ✅ WsAudit OK (12ms)`, `[WsBoot] ❌ WsChatMain: <erreur>`
+- Fichier : `static/js/workspace/WsBoot.js`
+
+### Mission 252 — wsDom : utilitaires DOM sécurisés
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- `safeEl(id)` — getElementById avec warning si absent
+- `safeClick(selector, handler)` — addEventListener silencieux si absent
+- Traces : `[wsDom] ⚠ #xxx not found`, `[wsDom] ✓ .btn click wired`
+- Fichier : `static/js/workspace/wsDom.js`
+
+### Mission 253 — WsImportList : extraction template + handlers imports
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- Extrait `fetchWorkspaceImports()` et son template HTML (80+ lignes)
+- Boutons [👁] [S] [↻] [×] avec handlers propres
+- Traces : `[WsImportList] 5 imports`, `[WsImportList] [S] clicked`
+- Fichier : `static/js/workspace/WsImportList.js`
+
+### Mission 254 — WsAssetPicker : extraction gestion assets
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- `toggleImagePicker()`, `fetchProjectAssets()`, `copyAssetUrl()`, `deleteAsset()`
+- Traces : `[WsAssetPicker] opened`, `[WsAssetPicker] 3 assets`
+- Fichier : `static/js/workspace/WsAssetPicker.js`
+
+### Mission 255 — ws_main.js final : ~120 lignes d'orchestration
+**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
+- Après extraction : boot + wiring toolbar + mode buttons uniquement
+- Traces : `[ws_main] toolbar 7 buttons`, `[ws_main] ✅ READY`
+- Fichier : `static/js/workspace/ws_main.js` (réécrit)
+
+---
+
 ## 🏛️ Doctrine Architecturale (Aether Core)
 
 **Principe du Miroir :** Host (WsCanvas) gère l'UI AetherFlow. Guest (Iframe) = Agents de Terrain légers, aucun scope partagé.
