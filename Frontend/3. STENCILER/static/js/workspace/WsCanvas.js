@@ -54,6 +54,23 @@ class WsCanvas {
         });
         window.addEventListener('keyup', (e) => { if (e.code === 'Space') this.isSpacePressed = false; });
 
+        // M237: Listen for hover messages from iframes
+        window.addEventListener('message', (e) => {
+            if (!e.data || !e.data.type) return;
+            if (e.data.type === 'hm-hover') {
+                // Update status bar or tooltip
+                const info = `${e.data.tag}${e.data.id ? '#' + e.data.id : ''}${e.data.cls ? '.' + e.data.cls.split(/\s+/).slice(0, 2).join('.') : ''}`;
+                const statusEl = document.getElementById('ws-status-bar');
+                if (statusEl) statusEl.textContent = info;
+            } else if (e.data.type === 'hm-clear') {
+                const statusEl = document.getElementById('ws-status-bar');
+                if (statusEl) statusEl.textContent = '';
+            } else if (e.data.type === 'hm-click') {
+                // Could open element inspector
+                console.log('[M237] iframe click:', e.data);
+            }
+        });
+
         this.updateTransform();
     }
 
@@ -276,6 +293,53 @@ class WsCanvas {
             this.content.appendChild(g);
             this.selectScreen(g);
             return g;
+        }
+    }
+
+    // --- M237: Hover Engine Injected into iframe contentDocument ---
+    injectHoverEngine(iframe) {
+        try {
+            const doc = iframe.contentDocument;
+            if (!doc || doc.__hmInjected) return;
+            doc.__hmInjected = true;
+
+            const script = doc.createElement('script');
+            script.textContent = `
+(function() {
+    let _last = null;
+    function _clear() {
+        if (_last) {
+            _last.style.removeProperty('outline');
+            _last.style.removeProperty('outline-offset');
+            _last = null;
+        }
+    }
+    document.addEventListener('mouseover', function(e) {
+        const el = e.target;
+        if (el === document.body || el === document.documentElement) return;
+        _clear();
+        el.style.outline = '2px solid #8cc63f';
+        el.style.outlineOffset = '-1px';
+        _last = el;
+        window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
+            _clear();
+            window.parent.postMessage({ type: 'hm-clear' }, '*');
+        }
+    });
+    document.addEventListener('click', function(e) {
+        const el = e.target;
+        if (el === document.body || el === document.documentElement) return;
+        e.stopPropagation();
+        window.parent.postMessage({ type: 'hm-click', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), href: el.href || '' }, '*');
+    });
+})();
+            `;
+            doc.head.appendChild(script);
+        } catch (e) {
+            // Cross-origin or not loaded yet
         }
     }
 }

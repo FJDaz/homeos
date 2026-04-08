@@ -46,7 +46,17 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Mission 237 — Canvas N0 : drag zone + moteur hover injecté dans l'iframe
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
+**STATUS: ✅ LIVRÉ**
+
+- **Zone de drag** : gripper visuel "⋯" centré sur le header du shell, `cursor: move`
+- **Moteur hover** : `injectHoverEngine()` dans `WsCanvas.js` injecté dans le contentDocument de l'iframe
+  - `mouseover` → outline vert `#8cc63f` + postMessage `{ type: 'hm-hover', tag, id, cls }`
+  - `mouseout` → clear outline + postMessage `{ type: 'hm-clear' }`
+  - `click` → stopPropagation + postMessage `{ type: 'hm-click', tag, id, cls, href }`
+- `WsScreenShell.js` : appel `wsCanvas.injectHoverEngine(iframe)` au `load`
+- `pointer-events: none` par défaut sur l'iframe, `auto` en mode `select` (déjà géré par le canvas)
+
+---
 
 > BOOTSTRAP OBLIGATOIRE
 

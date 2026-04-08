@@ -41,7 +41,17 @@ class WsScreenShell {
             'width': String(SW), 'height': '40', 'rx': '20',
             'class': 'ws-screen-header', 'fill': 'transparent', 'pointer-events': 'all'
         });
+        header.style.cursor = 'move';
         g.appendChild(header);
+
+        // M237: Gripper visuel centré
+        const grip = this._createElement('text', {
+            x: String(SW / 2), y: '26', 'text-anchor': 'middle',
+            fill: '#d1d5db',
+            style: 'font-size:11px; letter-spacing:5px; pointer-events:none; user-select:none;'
+        });
+        grip.textContent = '⋯';
+        g.appendChild(grip);
 
         // 3. Title
         const title = this._createElement('text', {
@@ -94,7 +104,11 @@ class WsScreenShell {
         const fo = this._createForeignObject('0', '40', String(SW), String(SH - 40), { 'pointer-events': 'none' });
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'width:100%; height:100%; border:none; border-radius:0 0 20px 20px; background:#fff; pointer-events:none;';
-        iframe.addEventListener('load', () => { if (window.wsFontManager) window.wsFontManager.injectStyles(); });
+        iframe.addEventListener('load', () => {
+            if (window.wsFontManager) window.wsFontManager.injectStyles();
+            // M237: Inject hover engine into iframe
+            if (window.wsCanvas) window.wsCanvas.injectHoverEngine(iframe);
+        });
         if (item.html_template) iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
         fo.appendChild(iframe);
         g.appendChild(fo);
