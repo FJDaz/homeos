@@ -161,11 +161,15 @@
     }
 
     console.log("✅ ws_main: workspace ready (hexagonal architecture active)");
-});
 
-// --- EXPOSITIONS GLOBALES (Bridging avec WsPreview) ---
-window.enterPreviewMode = (shellId, mode) => window.wsPreview?.enterPreviewMode(shellId, mode);
-window.exitPreviewMode = () => window.wsPreview?.exitPreviewMode();
+    // Global exposure — bridging avec WsPreview et handlers inline
+    window.fetchWorkspaceImports = fetchWorkspaceImports;
+    window.togglePanel = togglePanel;
+    window.enterPreviewMode = enterPreviewMode;
+    window.exitPreviewMode = exitPreviewMode;
+    window.saveProject = saveProject;
+    window.toggleImagePicker = toggleImagePicker;
+})();
 
 
 async function loadCurrentContext() {
@@ -564,11 +568,4 @@ window.deleteAsset = async (filename) => {
     } catch (e) { console.error("Lelete error", e); }
 };
 
-// Global exposure
-window.fetchWorkspaceImports = fetchWorkspaceImports;
-window.togglePanel = togglePanel;
-window.enterPreviewMode = enterPreviewMode;
-window.exitPreviewMode = exitPreviewMode;
-window.saveProject = saveProject;
 window.toggleImagePicker = toggleImagePicker;
-})();
