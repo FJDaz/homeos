@@ -84,8 +84,11 @@
         btns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var mode = btn.getAttribute('data-mode');
-                console.log('[ws_main] mode →', mode);
-                if (window.wsCanvas) window.wsCanvas.setMode(mode);
+                console.log('[ws_main] mode →', mode, 'wsCanvas=', !!window.wsCanvas);
+                if (window.wsCanvas) {
+                    window.wsCanvas.setMode(mode);
+                    console.log('[ws_main] WsCanvas.activeMode =', window.wsCanvas.activeMode);
+                }
                 if (window.wsState) window.wsState.setMode(mode);
 
                 // Mode text → toggle font drawer
@@ -201,5 +204,27 @@
     window.togglePanel = function(id) {
         var panel = document.getElementById(id);
         if (panel) panel.classList.toggle('hidden');
+    };
+
+    // wsSendMessage — transactional handshake avec les iframes (utilisé par WsWire)
+    window.wsSendMessage = function(iframe, message, timeout) {
+        timeout = timeout || 2000;
+        return new Promise(function(resolve, reject) {
+            if (!iframe || !iframe.contentWindow) return reject('Iframe non disponible');
+            var transactionId = 'tx-' + Math.random().toString(36).substr(2, 9);
+            var request = Object.assign({}, message, { transactionId: transactionId });
+            var handler = function(e) {
+                if (e.data && e.data.transactionId === transactionId && e.data.receipt) {
+                    iframe.contentWindow.removeEventListener('message', handler);
+                    resolve(e.data);
+                }
+            };
+            iframe.contentWindow.addEventListener('message', handler);
+            iframe.contentWindow.postMessage(request, '*');
+            setTimeout(function() {
+                iframe.contentWindow.removeEventListener('message', handler);
+                reject('wsSendMessage timeout: ' + message.type);
+            }, timeout);
+        });
     };
 })();
