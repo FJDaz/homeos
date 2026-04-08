@@ -1,7 +1,8 @@
 /**
  * ManifestBox — Panneau manifest flottant cross-tabs (M269)
  * Accessible via bouton [M] dans le nav global (bootstrap.js)
- * Flotte par-dessus le contenu, positionné sous le nav, à gauche (comme screen list)
+ * Flotte par-dessus le contenu, positionné sous le nav, à droite.
+ * Draggable depuis le header.
  */
 (function() {
     'use strict';
@@ -9,7 +10,10 @@
 
     let panel = null;
     let manifestData = null;
-    let isOpen = localStorage.getItem('manifest_drawer_open') === 'true';
+
+    function isOpen() {
+        return panel && panel.style.display !== 'none';
+    }
 
     async function loadManifest() {
         try {
@@ -132,25 +136,30 @@
 
         panel = document.createElement('div');
         panel.id = 'manifestbox-panel';
-        panel.className = 'fixed z-[1500] bg-white border border-[#e5e5e5] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col rounded-[16px] overflow-hidden pointer-events-auto';
-        // Position : sous le nav (top: 56px), à droite (right: 20px), width 320px
         panel.style.cssText = `
+            position: fixed;
             top: 56px;
             right: 20px;
             width: 320px;
-            height: calc(100vh - 68px);
-            max-height: 560px;
+            height: 480px;
+            max-height: calc(100vh - 72px);
+            z-index: 1500;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         `;
 
         panel.innerHTML = `
-            <!-- Header -->
-            <div class="h-[32px] border-b border-[#e5e5e5] flex items-center justify-between px-3 shrink-0 bg-white">
+            <div class="h-[32px] border-b border-[#e5e5e5] flex items-center justify-between px-3 shrink-0 bg-white" id="manifestbox-handle">
                 <span id="manifestbox-title" class="text-[9px] font-black tracking-[0.15em] uppercase text-[#8cc63f]">manifest</span>
                 <button id="manifestbox-close" class="text-[#9a9a98] hover:text-[#3d3d3c] transition-colors p-0.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <!-- Body -->
             <div id="manifestbox-body" class="flex-1 overflow-hidden flex flex-col bg-white"></div>
         `;
 
@@ -159,10 +168,9 @@
         // Close
         panel.querySelector('#manifestbox-close').onclick = () => hide();
 
-        // Drag
-        (function() {
-            const handle = panel.querySelector('.h-\\[32px\\]');
-            if (!handle) return;
+        // Drag depuis le header
+        const handle = document.getElementById('manifestbox-handle');
+        if (handle) {
             handle.style.cursor = 'grab';
             let dragging = false, ox = 0, oy = 0;
             handle.addEventListener('mousedown', (e) => {
@@ -182,28 +190,22 @@
                 dragging = false;
                 handle.style.cursor = 'grab';
             });
-        })();
-
-        if (isOpen) loadManifest().then(render);
+        }
     }
 
     async function show() {
         buildPanel();
         panel.style.display = 'flex';
-        isOpen = true;
-        localStorage.setItem('manifest_drawer_open', 'true');
         await loadManifest();
         render();
     }
 
     function hide() {
         if (panel) panel.style.display = 'none';
-        isOpen = false;
-        localStorage.setItem('manifest_drawer_open', 'false');
     }
 
     function toggle() {
-        if (isOpen) hide(); else show();
+        if (isOpen()) hide(); else show();
     }
 
     window.ManifestBox = { show, hide, toggle };

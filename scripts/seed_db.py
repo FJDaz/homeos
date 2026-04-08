@@ -118,6 +118,10 @@ def seed():
             project_id = f"{cls['id']}-{sid}"
             cur.execute("INSERT OR IGNORE INTO students (id, class_id, display, last_name, first_name, project_id) VALUES (?, ?, ?, ?, ?, ?)",
                         (sid, cls["id"], display, last, first, project_id))
+            # Create project
+            project_path = f"projects/{project_id}"
+            cur.execute("INSERT OR IGNORE INTO projects (id, name, path, user_id) VALUES (?, ?, ?, ?)",
+                        (project_id, display, project_path, sid))
 
     # Seed admin user
     admin_token = str(uuid.uuid4())
