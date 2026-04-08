@@ -33,10 +33,164 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-## Phase Active (2026-04-07)
+## Phase Active (2026-04-08)
 
 ### Thème 0 — Hotfixes
-> M121 ✅, M116 ✅, M122–127 ✅ — archivées ROADMAP_ACHIEVED.md
+> M121 ✅, M116 ✅, M122–127 ✅, M233 ✅, M234 ✅ — archivées ROADMAP_ACHIEVED.md
+
+---
+
+### Thème 16 — Pipeline Import → Canvas
+
+### Mission 233 — Backend : PATCH /api/imports/{import_id}
+**STATUS: ✅ LIVRÉ**
+
+- Route `PATCH /api/imports/{import_id}` dans `import_router.py` — merge les champs du body dans l'entrée `index.json`
+- `from fastapi import Body` ajouté
+
+### Mission 234 — Frontend : forge → update liste + masquer [S] pour non-Stitch
+**STATUS: ✅ LIVRÉ**
+
+- `WsForge.js` : après `job.status === 'done'` → `PATCH /api/imports/{importId}` avec `{ html_template, type: 'html' }` → refresh liste
+- `ws_main.js` : bouton [S] conditionnel — affiché uniquement si `archetype_id === 'stitch_import'` ou `archetype_label` contient "stitch"
+
+```js
+// Masquer [S] si l'item n'est pas un écran Stitch
+const isStitchScreen = !!item.stitch_screen_id;
+el.querySelector('.btn-s-open').style.display = isStitchScreen ? '' : 'none';
+```
+
+**Fix 3 — workspace.html + ws_main.js : suppression du panneau Stitch dédié**
+
+Le lien Stitch est désormais géré depuis le dashboard projet (panneau gauche, sous-collapse "stitch link"). Le panneau flottant `#panel-stitch` est redondant et doit être supprimé.
+
+Dans `workspace.html` :
+- Supprimer le `<div id="section-stitch">` entier et tout son contenu (`#panel-stitch` + `#badge-stitch`)
+- Supprimer le `<script src="/static/js/workspace/WsStitch.js"></script>`
+
+Dans `ws_main.js` :
+- Supprimer ligne `window.wsStitch = new WsStitch();` (ligne ~18)
+- Retirer `'panel-stitch'` du tableau `draggablePanels` (ligne ~38)
+- Remplacer `if (window.wsStitch) window.wsStitch.loadSession();` par rien (la fonction `linkStitchProject` fait déjà le fetch Stitch directement)
+
+**Livrable attendu :**
+- Forge ZIP → après done : liste rafraîchie, item passe de "dist.zip" à l'entrée avec html_template
+- Re-clic sur l'item dans la liste → charge l'iframe correctement (plus d'overlay forge)
+- Bouton [S] invisible pour les imports locaux (zip, png, svg), visible uniquement pour les screens Stitch
+- Panneau `#panel-stitch` / badge Stitch disparus de l'UI — zéro régression sur la liaison Stitch depuis le dashboard projet
+
+---
+
+---
+
+### Mission 235 — Toolbar canvas : refonte UX
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Contexte :** Audit FJD de la toolbar droite flottante (`data-purpose="floating-toolbar"` dans `workspace.html`). Plusieurs outils inutiles, illisibles, ou mal placés.
+
+**Décisions FJD :**
+
+| Outil actuel | Action |
+|---|---|
+| Flèche `select` | Garder tel quel |
+| Main `drag` | Garder — mais remplacer le picto SVG illisible par une main simple (3 tracés max), tooltip `"naviguer (H)"` |
+| Couleurs `colors` | **Masquer** (`hidden`) — viendra dans une mission Design System dédiée |
+| Typographie `text` | Garder |
+| Stitch `stitch` | **Supprimer** (intégré dans M234 — panneau Stitch supprimé) |
+| Réinitialiser vue | Garder — corriger le titre en `"recentrer (0)"` |
+| Reset layout panels | **Déplacer** hors de la toolbar → voir ci-dessous |
+
+**Fix 1 — Nouveau picto main (drag)**
+Remplacer le SVG `path` complexe actuel par un SVG main simple :
+```html
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V6a2 2 0 014 0v5m0 0V6a2 2 0 014 0v5m0 0a2 2 0 014 0v3a6 6 0 01-6 6H9a6 6 0 01-6-6v-3"/>
+</svg>
+```
+
+**Fix 2 — Masquer couleurs**
+Ajouter `hidden` au bouton `data-mode="colors"`.
+
+**Fix 3 — Supprimer le bouton Stitch de la toolbar**
+Supprimer le `<button data-mode="stitch" ...>` (le lien Stitch est désormais dans le dashboard projet).
+
+**Fix 4 — Déplacer "réinitialiser layout des panneaux" vers le header workspace**
+- Supprimer le bouton `onclick="window.PanelDragger?.resetAll()"` de la toolbar
+- L'ajouter dans le header du workspace (zone title "Workspace Canvas"), comme un bouton discret à côté du label :
+  ```html
+  <button onclick="window.PanelDragger?.resetAll()" 
+          title="réinitialiser layout des panneaux"
+          class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
+    <svg class="w-3 h-3" ...><!-- icône reset --></svg>
+  </button>
+  ```
+- Trouver le bon endroit dans le header (chercher `data-purpose` ou le label "Workspace Canvas" ou "canvas")
+
+**Fix 5 — Ajouter bouton image avec popover assets**
+Nouveau bouton dans la toolbar, entre typo et le séparateur zoom :
+- Picto : icône image (montagne + soleil) standard
+- Au clic : ouvre un popover flottant `#ws-image-picker` positionné à gauche de la toolbar
+- Le popover liste les fichiers de `assets/img/` du projet actif via `GET /api/projects/active/assets`
+- Chaque fichier affiche : thumbnail + nom + bouton "copier lien" (`/api/projects/assets/img/{filename}`)
+- Un bouton "importer" dans le popover déclenche `document.getElementById('ws-direct-upload').click()` (l'input existant filtre déjà `.png,.jpg,.jpeg`)
+
+**Note :** Les routes assets sont implémentées dans M236 (QWEN). M235 peut être livrée avec la liste vide (`{ files: [] }`) si M236 n'est pas encore joué — le popover fonctionnera à vide.
+
+**Livrable :**
+- Toolbar épurée : flèche / main (picto correct) / typo / image / séparateur / recentrer
+- Couleurs + Stitch absents
+- "Réinitialiser layout panels" déplacé vers le header
+- Popover image basique fonctionnel (même vide)
+
+---
+
+### Mission 236 — Backend : routes assets/img par projet
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Contexte :** Les élèves uploadent des images (PNG, JPG, JPEG, WebP, SVG) dans leur projet. Ces images doivent être stockées dans `projects/{project_id}/assets/img/`, listables, servables, et supprimables.
+
+**Fichier cible :** `Frontend/3. STENCILER/routers/import_router.py` (ou nouveau `assets_router.py` si plus propre — dans ce cas l'enregistrer dans `server_9998_v2.py`)
+
+**Routes à créer :**
+
+**1. Upload**
+```
+POST /api/projects/active/assets/upload
+Content-Type: multipart/form-data
+file: <UploadFile>
+```
+- Stocke dans `get_active_project_path() / "assets" / "img" / {safe_filename}`
+- `safe_filename` = slugify + timestamp pour éviter les collisions
+- Retourne `{ "status": "ok", "file": { "name": original_name, "filename": safe_filename, "url": "/api/projects/assets/img/{safe_filename}" } }`
+
+**2. Liste**
+```
+GET /api/projects/active/assets
+```
+- Retourne `{ "files": [ { "name": ..., "filename": ..., "url": ..., "size": ... }, ... ] }`
+- Scanne `assets/img/` — extensions acceptées : `.png .jpg .jpeg .webp .svg .gif`
+- Ordre : plus récent en premier
+
+**3. Servir un fichier**
+```
+GET /api/projects/assets/img/{filename}
+```
+- `FileResponse` depuis `get_active_project_path() / "assets" / "img" / filename`
+- 404 si absent
+
+**4. Supprimer**
+```
+DELETE /api/projects/assets/img/{filename}
+```
+- Supprime le fichier physique
+- Retourne `{ "status": "deleted" }`
+
+**Contraintes :**
+- Créer `assets/img/` avec `mkdir(parents=True, exist_ok=True)` à chaque accès
+- Limiter la taille upload à 10MB (vérifier `len(content) <= 10_000_000`)
+- Extensions autorisées uniquement (rejeter sinon avec 400)
 
 ---
 
@@ -731,7 +885,7 @@ if project_id:
 ---
 
 ### M232 — Refonte layout workspace : dashboard projet + nettoyage toolbar
-**STATUS: 🟠 MISSION GEMINI | DATE: 2026-04-08 | ACTOR: GEMINI**
+**STATUS: ✅ LIVRÉ (Qwen full stack) | DATE: 2026-04-08**
 
 > BOOTSTRAP OBLIGATOIRE
 
@@ -907,7 +1061,7 @@ Dans le panel gauche du workspace (section écrans/imports), ajouter une zone "i
 ---
 
 ### M230 — Workflow Stitch complet : push/pull/sync élève
-**STATUS: ✅ LIVRÉ (backend Qwen) — Frontend à faire par Gemini**
+**STATUS: ✅ LIVRÉ (Qwen full stack) | DATE: 2026-04-08**
 
 **Backend livré :**
 - `run_stitch_push_task()` extrait `project_id` depuis `screen_name` → `_patch_manifest_stitch_project_id()`

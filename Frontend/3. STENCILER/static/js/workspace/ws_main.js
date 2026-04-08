@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2d. Panels Draggables (Mission 209)
     if (window.PanelDragger) {
         const draggablePanels = [
-            'panel-screens', 'panel-audit', 'panel-stitch', 
+            'panel-screens', 'panel-stitch', 
             'ws-monaco-popover', 'ws-surgical-popover', 
             'ws-color-popover', 'ws-typo-popover', 'ws-effects-popover'
         ];
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4b. Wire upload input (après wsChat initialisé)
     const uploadInput = document.getElementById('ws-direct-upload');
-    if (uploadInput) uploadInput.addEventListener('change', (e) => chat.handleDirectUpload(e));
+    if (uploadInput) uploadInput.addEventListener('change', handleDirectUpload);
 
     // 5. Setup UI buttons (Right Toolbar)
     document.querySelectorAll('.ws-tool-btn').forEach(btn => {
@@ -195,145 +195,170 @@ window.wsSendMessage = function(iframe, message, timeout = 2000) {
 
 async function fetchWorkspaceImports() {
     const list = document.getElementById('ws-import-list');
+    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+    const isStudent = session.role === 'student';
+
     try {
         const res = await fetch('/api/retro-genome/imports');
         const data = await res.json();
         const imports = data.imports || [];
         
-        list.innerHTML = '';
+        // Mission 232: Dashboard Projet (token-aware pour élèves)
+        const manifestHeaders = session.token ? { 'X-User-Token': session.token } : {};
+        const manifestRes = await fetch('/api/projects/active/manifest', { headers: manifestHeaders });
+        const manifest = manifestRes.ok ? await manifestRes.json() : {};
+        const projectName = manifest.name || "Mon Projet HoméOS";
+        const stitchId = manifest.stitch_project_id || "";
 
-        // Screens système figés (BRS + Workspace actuel)
-        const systemScreens = [
-            { id: '_sys_cadrage_alt',name: 'Cadrage Alt',    tpl: 'cadrage_alt.html' },
-        ];
-        list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">système</div>');
-        systemScreens.forEach(s => {
-            const el = document.createElement('div');
-            el.className = 'import-card-workspace flex flex-col gap-1 group border-b border-slate-100 pb-2 mb-1';
-            el.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-zinc-400 flex items-center justify-center">SYS</div>
-                    <span class="text-[10px] font-bold text-slate-500 truncate">${s.name}</span>
-                </div>`;
-            el.style.cursor = 'pointer';
-            el.onclick = () => {
-                // Charger comme screen canvas — Sullivan peut l'éditer
-                window.wsCanvas?.addScreen({
-                    id: s.id, name: s.name, type: 'html',
-                    html_template: s.tpl, elements_count: 0
-                });
-            };
-            list.appendChild(el);
-        });
-
-        // Templates "DÉPARTS" (Mission 110 Hotfix)
-        try {
-            const tplRes = await fetch('/api/workspace/templates');
-            const tplData = await tplRes.json();
-            const tpls = tplData.templates || [];
-            
-            if (tpls.length > 0) {
-                list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:4px 0 2px;">départs</div>');
-                tpls.forEach(t => {
-                    const el = document.createElement('div');
-                    el.className = 'import-card-workspace flex flex-col gap-1 group border-b border-slate-100 pb-2 mb-1';
-                    el.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-homeos-green flex items-center justify-center">TPL</div>
-                            <span class="text-[10px] font-bold text-slate-500 truncate">${t.name}</span>
-                        </div>`;
-                    el.style.cursor = 'pointer';
-                    el.onclick = () => {
-                        window.wsCanvas?.addScreen({
-                            id: 'tpl-' + t.name, name: t.name, type: 'html',
-                            html_template: t.tpl, elements_count: 0
-                        });
-                    };
-                    list.appendChild(el);
-                });
-            }
-        } catch(err) { console.error("❌ Mission 110: templates load failed", err); }
-
-        list.insertAdjacentHTML('beforeend', '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:6px 0 2px;">imports</div>');
-        if (imports.length === 0) {
-            list.insertAdjacentHTML('beforeend', '<div class="text-[10px] text-zinc-400 italic">aucun import disponible</div>');
-            return;
-        }
-
-        imports.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'import-card-workspace flex flex-col gap-2 group';
-            
-            const ext = (item.name || 'file').split('.').pop().toUpperCase();
-            el.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="w-6 h-6 bg-slate-50 border border-slate-100 rounded text-[8px] font-bold text-zinc-400 flex items-center justify-center">${ext}</div>
-                    <div class="flex gap-1">
-                        <button class="ws-del-import-btn opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500 hover:text-white rounded text-red-400 transition-all" title="Supprimer l'import">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                        <button class="ws-add-to-canvas-btn opacity-0 group-hover:opacity-100 p-1 hover:bg-homeos-green hover:text-white rounded text-homeos-green transition-all" title="Ajouter au canvas">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        </button>
+        list.innerHTML = `
+            <div class="ws-dashboard-section mb-6">
+                <!-- Header "Mon Projet" -->
+                <div class="flex items-center justify-between mb-3 group cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">▸ mon projet</span>
                     </div>
                 </div>
-                <div class="truncate text-[11px] font-semibold text-slate-700">${item.name}</div>
-                <div class="text-[9px] text-slate-400 font-medium">${new Date(item.timestamp).toLocaleString()}</div>
+                
+                <div class="pl-2 space-y-4">
+                    <!-- Titre du projet -->
+                    <div class="text-[11px] font-bold text-slate-700">${projectName}</div>
+
+                    <!-- Sous-collapse Stitch -->
+                    <div class="rounded-lg border border-slate-100 bg-slate-50/50 overflow-hidden">
+                        <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-all" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">stitch link</span>
+                            <span class="text-[8px] text-slate-300">${stitchId ? 'lié' : 'non lié'}</span>
+                        </div>
+                        <div class="p-3 space-y-2 ${stitchId ? 'hidden' : ''}">
+                            <input id="db-stitch-id" type="text" value="${stitchId}" placeholder="ID Stitch..." 
+                                class="w-full bg-white border border-slate-200 px-2 py-1.5 text-[10px] rounded focus:border-homeos-green outline-none">
+                            <button onclick="linkStitchProject()" class="w-full py-1.5 bg-slate-800 text-white text-[9px] font-bold uppercase tracking-widest rounded hover:bg-black transition-all">
+                                lier →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Liste des écrans -->
+                    <div class="space-y-2">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">mes écrans</div>
+                        <div id="db-screens-container" class="space-y-1.5">
+                            ${imports.length === 0 ? '<div class="text-[10px] text-slate-300 italic">aucun écran — utilisez stitch</div>' : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Rendu des écrans
+        const screensContainer = document.getElementById('db-screens-container');
+        imports.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'group flex items-center justify-between p-2 rounded-lg border border-slate-100 bg-white hover:border-homeos-green/30 transition-all cursor-pointer';
+            el.innerHTML = `
+                <span class="text-[10px] font-medium text-slate-600 truncate flex-1">${item.name}</span>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <!-- [👁] HoméOS -->
+                    <button class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Aperçu HoméOS">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg>
+                    </button>
+                    <!-- [S] Stitch — only for Stitch imports -->
+                    ${item.archetype_id === 'stitch_import' || item.archetype_label?.toLowerCase().includes('stitch') ? `
+                    <button class="btn-s-open p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" title="Ouvrir dans Stitch">
+                        <span class="text-[9px] font-black font-sans">S</span>
+                    </button>` : ''}
+                    <!-- [↻] Sync -->
+                    <button class="btn-s-sync p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Synchroniser">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                    <!-- [×] Kill -->
+                    <button class="btn-s-delete p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded transition-all" title="Supprimer">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
             `;
             
-            el.style.cursor = 'pointer';
-            
-            // Clic simple -> ajoute au canvas
-            el.onclick = (e) => {
-                e.stopPropagation();
-                window.wsCanvas.addScreen(item);
-            };
-            
-            // Double clic -> ajoute au canvas ET entre en aperçu (ou entre juste en aperçu si déjà présent)
-            el.ondblclick = (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                // Vérifier si le shell existe déjà sur le canvas
-                let shell = document.getElementById(`shell-${item.id}`);
-                if (!shell) {
-                    shell = window.wsCanvas.addScreen(item);
-                }
-                // Petit délai pour laisser le DOM SVG se mettre à jour
-                setTimeout(() => {
-                    if (window.enterPreviewMode) window.enterPreviewMode(`shell-${item.id}`);
-                }, 100);
+            el.onclick = () => window.wsCanvas?.addScreen(item);
+            el.ondblclick = () => {
+                window.wsCanvas?.addScreen(item);
+                setTimeout(() => window.enterPreviewMode(`shell-${item.id}`), 100);
             };
 
-            el.querySelector('.ws-add-to-canvas-btn').onclick = (e) => {
+            // Actions
+            el.querySelector('.btn-s-open').onclick = async (e) => {
                 e.stopPropagation();
-                window.wsCanvas.addScreen(item);
+                const res = await fetch(`/api/stitch/open/${item.id}`);
+                const d = await res.json();
+                if (d.url) window.open(d.url);
             };
 
-            el.querySelector('.ws-del-import-btn').onclick = async (e) => {
+            el.querySelector('.btn-s-sync').onclick = async (e) => {
                 e.stopPropagation();
-                // Suppression immédiate — Mission 141
-                try {
-                    const res = await fetch(`/api/imports/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        el.remove();
-                        const shell = document.getElementById(`shell-${item.id}`);
-                        if (shell) shell.remove();
-                    } else {
-                        console.error("❌ Failed to delete import", res.status);
-                    }
-                } catch (err) {
-                    console.error("❌ Error deleting import", err);
+                const res = await fetch('/api/stitch/sync', { method: 'POST' });
+                if (res.ok) window.fetchWorkspaceImports();
+            };
+
+            el.querySelector('.btn-s-delete').onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`Supprimer l'import ${item.name} ?`)) {
+                    await fetch(`/api/imports/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
+                    window.fetchWorkspaceImports();
                 }
             };
 
-            list.appendChild(el);
+            screensContainer.appendChild(el);
         });
 
     } catch (e) {
         console.error("ws_main: failed to fetch imports", e);
-        list.innerHTML = '<div class="text-[10px] text-red-400">erreur chargement</div>';
+        list.innerHTML = '<div class="text-[10px] text-red-400">erreur chargement dashboard</div>';
     }
 }
+
+// Upload direct (PNG, SVG, ZIP) — découplé de WsChatMain
+async function handleDirectUpload(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    for (const file of files) {
+        try {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'svg') {
+                const svgContent = await file.text();
+                const res = await fetch('/api/retro-genome/upload-svg', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ svg: svgContent, name: file.name })
+                });
+                if (!res.ok) throw new Error(`svg upload ${res.status}`);
+            } else {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('filename', file.name);
+                const res = await fetch('/api/import/upload', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error(`upload ${res.status}`);
+            }
+            if (window.fetchWorkspaceImports) await window.fetchWorkspaceImports();
+        } catch (e) {
+            console.error('handleDirectUpload: failed for', file.name, e);
+        }
+    }
+    event.target.value = '';
+}
+
+// Helper pour lier le projet Stitch depus le dashboard
+window.linkStitchProject = async function() {
+    const id = document.getElementById('db-stitch-id').value;
+    if (!id) return;
+    try {
+        const res = await fetch('/api/stitch/pull', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_id: id })
+        });
+        if (res.ok) {
+            window.fetchWorkspaceImports();
+            if (window.wsStitch) window.wsStitch.loadSession();
+        }
+    } catch(e) { console.error("Link error", e); }
+};
 
 // --- PANEL MANAGEMENT (Mission 129) ---
 function togglePanel(id) {

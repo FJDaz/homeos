@@ -3,7 +3,7 @@ import json
 import logging
 import unicodedata
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Body
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger("ImportRouter")
@@ -272,3 +272,22 @@ async def import_delete(import_id: str):
     except Exception as e:
         logger.error(f"[Import] Deletion crash: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/api/imports/{import_id}")
+async def import_patch(import_id: str, body: dict = Body(...)):
+    """M233: Patch un import dans index.json (ex: ajouter html_template après forge)."""
+    exports_dir = get_project_imports_dir()
+    index_path = exports_dir / "index.json"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="index.json not found")
+
+    index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    imports = index_data.get("imports", [])
+    entry = next((i for i in imports if i.get("id") == import_id), None)
+    if not entry:
+        raise HTTPException(status_code=404, detail=f"Import {import_id} not found")
+
+    entry.update(body)
+    index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    return {"status": "ok", "entry": entry}

@@ -37,6 +37,17 @@ class WsForge {
                     const job = await jr.json();
                     if (job.status === 'done') {
                         clearInterval(poll);
+                        // M234: Update index.json with forge result
+                        try {
+                            await fetch(`/api/imports/${importId}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ html_template: job.template_name, type: 'html', archetype_id: job.archetype || 'stitch_import' })
+                            });
+                            // Refresh imports list
+                            if (window.fetchWorkspaceImports) await window.fetchWorkspaceImports();
+                        } catch(e) { console.warn('M234: index update failed', e); }
+
                         overlay.remove();
                         const iframe = shell.querySelector('iframe');
                         if (iframe) iframe.src = `/api/frd/file?name=${encodeURIComponent(job.template_name)}&raw=1`;
