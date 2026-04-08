@@ -291,11 +291,25 @@ def bkd_db_con():
     return sqlite3.connect(str(BKD_DB_PATH), check_same_thread=False)
 
 
-# Global State for Active Project — P1: read from file for cross-module consistency
+# Global State for Active Project — M227: token-aware
 _ACTIVE_PROJECT_ID = "homéos-default"
 
-def get_active_project_id():
-    """P1: Read from active_project.json to avoid module namespace issues."""
+def get_active_project_id(token: str = None):
+    """M227: Resolve active project. If token is a student token, return their project_id from DB."""
+    if token:
+        try:
+            with bkd_db_con() as con:
+                row = con.execute(
+                    "SELECT s.project_id FROM students s "
+                    "JOIN users u ON u.name = s.display "
+                    "WHERE u.token = ? AND s.project_id IS NOT NULL",
+                    (token,)
+                ).fetchone()
+                if row and row[0]:
+                    return row[0]
+        except Exception:
+            pass
+    # Fallback to active_project.json (prof/admin shared state)
     try:
         active_file = ROOT_DIR / "active_project.json"
         if active_file.exists():
@@ -307,10 +321,21 @@ def get_active_project_id():
         pass
     return _ACTIVE_PROJECT_ID
 
-def set_active_project_id(pid: str):
+def set_active_project_id(pid: str, token: str = None):
     global _ACTIVE_PROJECT_ID
     _ACTIVE_PROJECT_ID = pid
-    # P1: Also persist to file so all module instances see the change
+    # If token is a student, update their project_id in DB
+    if token:
+        try:
+            with bkd_db_con() as con:
+                con.execute(
+                    "UPDATE students SET project_id=? WHERE display = ("
+                    "SELECT name FROM users WHERE token=?)",
+                    (pid, token)
+                )
+        except Exception:
+            pass
+    # Also persist to active_project.json for prof/admin
     try:
         active_file = ROOT_DIR / "active_project.json"
         active_file.parent.mkdir(parents=True, exist_ok=True)

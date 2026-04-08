@@ -102,19 +102,15 @@ def parse_design_md(content: str) -> dict:
 
 ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
 
-def get_active_project_id() -> Optional[str]:
-    """Retourne l'ID du projet actif depuis le fichier active_project.json."""
-    if ACTIVE_PROJECT_FILE.exists():
-        try:
-            data = json.loads(ACTIVE_PROJECT_FILE.read_text(encoding='utf-8'))
-            return data.get("active_id")
-        except:
-            return None
-    return None
+def get_active_project_id(token: str = None) -> Optional[str]:
+    """M227: Retourne l'ID du projet actif. Si token élève, résout depuis la DB."""
+    from bkd_service import get_active_project_id as bkd_get_active_project_id
+    return bkd_get_active_project_id(token)
 
-def set_active_project_id(project_id: str):
-    """Sauvegarde l'ID du projet actif dans active_project.json."""
-    ACTIVE_PROJECT_FILE.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
+def set_active_project_id(project_id: str, token: str = None):
+    """M227: Sauvegarde l'ID du projet actif. Si token élève, met à jour la DB."""
+    from bkd_service import set_active_project_id as bkd_set_active_project_id
+    bkd_set_active_project_id(project_id, token)
 
 def get_project_manifest(project_id: str) -> Dict[str, Any]:
     """Lit le manifest.json d'un projet."""
@@ -155,15 +151,33 @@ async def get_active_project_route():
         return ProjectInfo(id=row[0], name=row[1], path=row[2], created_at=row[3], last_opened=row[4], active=True)
 
 @router.post("/projects/activate")
-async def activate_project(req: ProjectActivateRequest):
+async def activate_project(req: ProjectActivateRequest, request: Request = None):
+    token = request.headers.get("X-User-Token") if request else None
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         exists = conn.execute("SELECT id FROM projects WHERE id=?", (req.id,)).fetchone()
-        if not exists: raise HTTPException(status_code=404, detail="Project not found")
+        if not exists:
+            # Auto-register si le dossier existe sur disque (projets élèves créés avant F2)
+            project_path = PROJECTS_DIR / req.id
+            if not project_path.exists():
+                raise HTTPException(status_code=404, detail="Project not found")
+            # Lire le nom depuis le manifest si disponible
+            manifest_path = project_path / "manifest.json"
+            proj_name = req.id
+            if manifest_path.exists():
+                try:
+                    proj_name = json.loads(manifest_path.read_text(encoding='utf-8')).get("name", req.id)
+                except Exception:
+                    pass
+            conn.execute(
+                "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
+                (req.id, proj_name, str(project_path))
+            )
+            logger.info(f"Auto-registered project on activate: {req.id}")
         conn.execute("UPDATE projects SET last_opened=datetime('now') WHERE id=?", (req.id,))
 
-    set_active_project_id(req.id)
-    logger.info(f"Project activated: {get_active_project_id()}")
-    return {"status": "ok", "active_id": get_active_project_id()}
+    set_active_project_id(req.id, token)
+    logger.info(f"Project activated: {get_active_project_id(token)}")
+    return {"status": "ok", "active_id": get_active_project_id(token)}
 
 @router.get("/projects/active/logic.js")
 async def get_active_logic_js():
@@ -364,3 +378,20 @@ async def genome_read(project_id: str):
         raise HTTPException(status_code=404, detail="HOMEO_GENOME.md not found")
 
     return {"content": genome_path.read_text(encoding='utf-8')}
+@router.get("/projects/{project_id}/context")
+async def get_project_context_route(project_id: str, class_id: Optional[str] = None):
+    """Mission 225: Retourne le contexte complet du projet (summary + text)."""
+    if project_id == "active":
+        active_id = get_active_project_id()
+        if not active_id: raise HTTPException(status_code=404, detail="No active project")
+        project_id = active_id
+    
+    # Injection sys.path
+    import sys
+    backend_prod = ROOT_DIR / "Backend/Prod"
+    if str(backend_prod) not in sys.path:
+        sys.path.insert(0, str(backend_prod))
+    
+    from retro_genome.project_context import ProjectContext
+    ctx = ProjectContext(project_id=project_id, class_id=class_id)
+    return ctx.to_dict()

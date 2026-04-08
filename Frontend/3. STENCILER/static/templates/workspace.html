@@ -39,16 +39,17 @@
     <link rel="stylesheet" href="/static/css/workspace.css">
     <!-- Auth guard — inline, avant bootstrap.js -->
     <script>if(!JSON.parse(localStorage.getItem('homeos_session')||'{}').token){window.location.replace('/login');}</script>
-    <!-- R6: Activate project from URL param -->
+    <!-- R6 + M227: Activate project from URL param with user token -->
     <script>
     (function() {
         var params = new URLSearchParams(window.location.search);
         var pid = params.get('project_id');
         if (!pid) return;
-        // Block rendering until project is activated
+        var session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/projects/activate', false); // sync
+        xhr.open('POST', '/api/projects/activate', false);
         xhr.setRequestHeader('Content-Type', 'application/json');
+        if (session.token) xhr.setRequestHeader('X-User-Token', session.token);
         xhr.send(JSON.stringify({ id: pid }));
     })();
     </script>

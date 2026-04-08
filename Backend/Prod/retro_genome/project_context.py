@@ -86,7 +86,26 @@ class ProjectContext:
             "class_id": self.class_id,
             "student_id": self.student_id,
             "context_text": self.load(),
-            "has_context": bool(self.load())
+            "has_context": bool(self.load()),
+            "summary": self.get_summary()
+        }
+
+    def get_summary(self) -> dict:
+        """Retourne un résumé utile pour l'UI Mission 225."""
+        manifest_path = PROJECTS_DIR / self.project_id / "manifest.json" if self.project_id else None
+        manifest = self._read_json(manifest_path) if manifest_path else {}
+        
+        # Trouver le PRD
+        exports_dir = PROJECTS_DIR / self.project_id / "exports" if self.project_id else None
+        prd_files = sorted(exports_dir.glob("PRD_*.md"), key=lambda f: f.stat().st_mtime, reverse=True) if exports_dir and exports_dir.exists() else []
+        last_prd = prd_files[0].name if prd_files else None
+
+        return {
+            "title": manifest.get("name", self.project_id or "Projet inconnu"),
+            "stitch_id": manifest.get("stitch_project_id", "non lié"),
+            "screens_count": len(manifest.get("screens", [])),
+            "last_prd": last_prd,
+            "design_system": "HoméOS" # Par défaut
         }
 
     # --- HELPERS ---

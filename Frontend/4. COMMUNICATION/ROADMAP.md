@@ -700,6 +700,26 @@ if project_id:
 
 ---
 
+### M227 — Isolation projet par session utilisateur (critique)
+**STATUS: ✅ LIVRÉ**
+
+- `bkd_service.get_active_project_id(token)` : si token élève → résout `students.project_id` depuis DB, sinon fallback `active_project.json`
+- `bkd_service.set_active_project_id(pid, token)` : si token élève → met à jour DB `students.project_id`
+- `projects_router.activate_project` : lit `X-User-Token` → passe au setter
+- `bootstrap.js` : project switcher masqué pour `role === 'student'`
+- `workspace.html` : activation XHR inclut `X-User-Token`
+
+**Résultat :** Chaque élève voit TOUJOURS son propre projet, même si le prof navigue en même temps sur un autre.
+- `Frontend/3. STENCILER/static/templates/workspace.html` — XHR activation L43-55
+- `Frontend/3. STENCILER/static/js/bootstrap.js` — `injectNav()`, project switcher
+
+**Livrable :**
+1. Hugo ouvre le workspace → son projet, même si le prof a switché entre-temps
+2. Hugo ne voit pas le project switcher dans la nav
+3. Le prof garde l'accès à tous les projets
+
+---
+
 ### S3 — Stitch MCP : utiliser la clé API de FJD pour tous les élèves
 **STATUS: ✅ LIVRÉ**
 
@@ -710,7 +730,7 @@ if project_id:
 
 ---
 
-### S2 — Stitch : UX élève intelligible
+### M228 — Stitch : UX élève intelligible
 **STATUS: 🟠 MISSION GEMINI | DATE: 2026-04-08 | ACTOR: GEMINI**
 
 > BOOTSTRAP OBLIGATOIRE
@@ -842,7 +862,7 @@ Hugo se connecte → workspace vide (son projet propre, sans templates).
 
 ## Thème 23 — Typo globale
 
-### T1 — Audit et suppression de "Source Code Pro" sur les boutons
+### M229 — Audit et suppression de "Source Code Pro" sur les boutons
 **STATUS: 🟠 MISSION QWEN | DATE: 2026-04-07 | ACTOR: QWEN**
 
 **Symptôme :** Les boutons dans les pages `cadrage_alt.html` et `workspace.html` (et potentiellement d'autres) s'affichent en police monospace Source Code Pro au lieu de la police sans-serif attendue.

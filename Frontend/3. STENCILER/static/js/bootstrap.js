@@ -117,7 +117,12 @@
         projectLabel.id = 'hn-active-project';
         projectLabel.className = 'hn-project';
         projectLabel.textContent = 'chargement...';
-        actions.appendChild(projectLabel);
+
+        // M227: Hide project switcher for students
+        if (session.role !== 'student') {
+            actions.appendChild(projectLabel);
+            projectLabel.onclick = function(e) { e.stopPropagation(); toggleSwitcher(); };
+        }
 
         // Mission 191: User Identity & Settings Button
         const userPill = document.createElement('div');
