@@ -97,12 +97,47 @@
 
         html += `</div>
             <div class="p-2 border-t border-[#e5e5e5] bg-[#f7f6f2] space-y-1.5 shrink-0">
-                <button id="manifestbox-edit-btn" class="w-full py-1 border border-[#e5e5e5] bg-white text-[9px] font-bold uppercase tracking-wider text-[#3d3d3c] hover:border-[#8cc63f] transition-all rounded-[12px]">éditer</button>
+                <div class="flex gap-1.5">
+                    <button id="manifestbox-upload-btn" class="flex-1 py-1 border border-[#e5e5e5] bg-white text-[9px] font-bold uppercase tracking-wider text-[#3d3d3c] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[12px] cursor-pointer">↑ charger manifest</button>
+                    <button id="manifestbox-edit-btn" class="flex-1 py-1 border border-[#e5e5e5] bg-white text-[9px] font-bold uppercase tracking-wider text-[#3d3d3c] hover:border-[#8cc63f] transition-all rounded-[12px]">éditer</button>
+                </div>
                 <button id="manifestbox-wire-btn" class="w-full py-1 bg-[#8cc63f] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[12px]">envoyer au wire</button>
+                <input type="file" id="manifestbox-file-input" class="hidden" accept=".md,.json">
             </div>
         `;
 
         body.innerHTML = html;
+
+        // Upload button
+        const uploadBtn = document.getElementById('manifestbox-upload-btn');
+        const fileInput = document.getElementById('manifestbox-file-input');
+        if (uploadBtn && fileInput) {
+            uploadBtn.onclick = () => fileInput.click();
+            fileInput.onchange = async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                try {
+                    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+                    const projectId = session.active_project_id || session.project_id;
+                    const content = await file.text();
+                    const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: content
+                    });
+                    if (res.ok) {
+                        manifestData = await res.json();
+                        render();
+                    } else {
+                        const errText = await res.text();
+                        alert('Erreur: ' + res.status + ' ' + errText);
+                    }
+                } catch(e) {
+                    alert('Upload échoué: ' + e.message);
+                }
+                fileInput.value = '';
+            };
+        }
 
         const editBtn = document.getElementById('manifestbox-edit-btn');
         if (editBtn) editBtn.onclick = showEditor;
