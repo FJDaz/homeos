@@ -399,11 +399,10 @@ class GeminiClient(BaseLLMClient):
         temperature: float,
     ) -> str:
         """Use the new google-genai SDK for 3.x preview models."""
+        import functools
         from google import genai
         client = genai.Client(api_key=self.api_key)
-        
-        import base64
-        
+
         contents = [
             {
                 "parts": [
@@ -412,11 +411,17 @@ class GeminiClient(BaseLLMClient):
                 ]
             }
         ]
-        
-        response = client.models.generate_content(
+
+        # SDK synchrone → thread pour ne pas bloquer l'event loop FastAPI
+        call = functools.partial(
+            client.models.generate_content,
             model=self.primary_model,
             contents=contents,
             config={"max_output_tokens": max_tokens, "temperature": temperature},
+        )
+        response = await asyncio.wait_for(
+            asyncio.to_thread(call),
+            timeout=120.0  # 2 min max — évite le job "running forever"
         )
         return response.text
 
@@ -487,8 +492,8 @@ class GeminiClient(BaseLLMClient):
                         )
                         result_data = {}  # No usage data from genai SDK
                     else:
-                        # Use old REST API for stable models
-                        api_url = f"{self.base_url}/{model_name}:generateContent?key={self.api_key}"
+                        # Use old REST API for stable models (Mission 192 fix: /models/ required)
+                        api_url = f"{self.base_url}/models/{model_name}:generateContent?key={self.api_key}"
                         response = await self.client.post(api_url, json=request_data)
                         response.raise_for_status()
                         result_data = response.json()

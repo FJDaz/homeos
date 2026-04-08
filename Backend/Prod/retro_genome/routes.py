@@ -46,6 +46,7 @@ _NEW_IMPORTS_COUNT = 0
 
 # Mission 118/119: Generation job status tracker
 _SVG_JOBS = {}
+_SVG_TASKS: dict[str, asyncio.Task] = {}  # M266: pour cancel
 _SVG_CONVERTER = None
 _REACT_CONVERTER = None
 

@@ -109,7 +109,13 @@ class WsScreenShell {
             // M237: Inject hover engine into iframe
             if (window.wsCanvas) window.wsCanvas.injectHoverEngine(iframe);
         });
-        if (item.html_template) iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
+        // dist compilé : URL statique directe → assets relatifs du bundle résolus correctement
+        // sinon : passage par frd/file (éditable Sullivan)
+        if (item.dist_url) {
+            iframe.src = item.dist_url;
+        } else if (item.html_template) {
+            iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
+        }
         fo.appendChild(iframe);
         g.appendChild(fo);
 

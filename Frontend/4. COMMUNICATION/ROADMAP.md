@@ -40,6 +40,136 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
+### Thème 28 — Pipeline forge → cadrage → manifest
+
+---
+
+### Mission 266 — "Envoyer au Cadrage" depuis le workspace
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Contexte :** L'élève a forgé son UI dans le workspace. Il doit pouvoir l'envoyer au Cadrage pour en discuter avec Sullivan et produire son manifest — sans perdre le fil.
+
+**Comportement attendu :**
+- Dans l'overlay de forge (post-succès), un bouton `"discuter dans le cadrage →"` apparaît aux côtés du bouton "tester"
+- Clic → ouvre `/cadrage` dans le même onglet avec un paramètre `?forge_id={importId}` en session
+- Au chargement de `/cadrage`, si `forge_id` est présent en session : Sullivan reçoit en amorce automatique `"L'élève vient de forger cet écran : [nom]. Aide-le à définir l'intention derrière ce design."`
+- L'iframe du rendu forgé s'affiche en miniature dans la colonne droite de cadrage (zone contexte projet M225)
+
+**Frontend — `WsForge.js` :**
+Au `job.status === 'done'`, ajouter après le rechargement iframe :
+```js
+// Bouton "envoyer au cadrage"
+const btnCadrage = document.createElement('button');
+btnCadrage.textContent = 'discuter dans le cadrage →';
+btnCadrage.className = '...'; // style HoméOS
+btnCadrage.onclick = () => {
+    sessionStorage.setItem('forge_context', JSON.stringify({
+        import_id: importId,
+        template_name: job.template_name,
+        name: shell.dataset.name || importId
+    }));
+    window.location.href = '/cadrage';
+};
+overlay.appendChild(btnCadrage);
+```
+
+**Backend — `cadrage_router.py` :**
+Dans `sse_chat_generator()`, si `forge_context` présent en session → injecter l'amorce dans le premier message system.
+
+**Fichiers :** `WsForge.js`, `cadrage_router.py`, `cadrage_alt.html` (lire sessionStorage au load)
+
+---
+
+### Mission 267 — Persistance d'état cross-tabs
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Contexte :** Passer de l'onglet Workspace à Cadrage ou Backend vide les états en cours (conversation Sullivan, imports chargés, forge active).
+
+**Principe :** Utiliser `sessionStorage` + `localStorage` pour persister les états critiques. Pas de refacto globale — juste les 3 états les plus douloureux.
+
+**État 1 — Conversation Cadrage**
+`WsChat.js` (ou équivalent cadrage) : à chaque nouveau message → `sessionStorage.setItem('cadrage_history', JSON.stringify(history))`. Au mount → restaurer depuis sessionStorage.
+
+**État 2 — Screen list workspace**
+`WsImportList.js` : les imports viennent de l'API (`GET /api/retro-genome/imports`) — pas de perte réelle, juste un re-fetch au retour. Vérifier que `refresh()` est appelé au montage si la liste est vide. Si oui → rien à faire.
+
+**État 3 — Forge en cours**
+Si un `job_id` est actif et que l'élève change d'onglet, le job continue côté serveur. Stocker `{ job_id, import_id }` dans `sessionStorage.setItem('active_forge', ...)`. Au retour sur workspace → reprendre le polling si `job.status !== 'done'`.
+
+**Fichier :** `WsImportList.js`, `WsForge.js`, `cadrage_alt.html`
+
+---
+
+### Mission 268 — Sullivan Arbiter : boutons "Générer PRD" et "Générer Manifest"
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Symptôme :** Les boutons Arbiter dans le workspace ne font rien.
+
+**Diagnostic préalable (lire avant de coder) :**
+```js
+// Dans la console workspace
+document.querySelectorAll('[data-action="generate-prd"], [data-action="generate-manifest"]')
+// Ont-ils des listeners ?
+// Chercher dans ws_main.js et WsBootstrap.js les bindings Arbiter
+```
+
+**Comportement attendu :**
+
+*Bouton "générer PRD" :*
+- Envoie `POST /api/sullivan/prd` avec `{ project_id, conversation_history }`
+- Affiche un spinner dans le panel Sullivan
+- À la réponse : affiche le PRD dans un drawer scrollable + bouton "sauvegarder"
+- Sauvegarde dans `projects/{id}/exports/PRD_{timestamp}.md`
+
+*Bouton "générer manifest" :*
+- Envoie `POST /api/sullivan/manifest` avec `{ project_id, prd_content }` (le dernier PRD si existant, sinon la conversation)
+- Génère/met à jour `projects/{id}/manifest.json`
+- Affiche confirmation + bouton "voir le manifest" → ouvre la ManifestBox (M269)
+
+**Fichiers :** `ws_main.js` ou `WsBootstrap.js` (bindings), `sullivan_router.py` (routes PRD/manifest)
+
+---
+
+### Mission 269 — ManifestBox : boîte manifest persistante cross-tabs
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+> Dépend de M268 (génération manifest)
+
+**Concept :** Une boîte persistante, accessible depuis n'importe quel tab, qui affiche le manifest courant du projet. Calquée sur le modèle visuel de la screen list.
+
+**Position :** Dans le header global (`bootstrap.js`), à droite du nav — une icône discrète `[M]` toujours visible. Au clic → drawer latéral glisse depuis la droite, par-dessus le contenu, `z-index: 8000`.
+
+**Contenu du drawer :**
+- Titre du projet + date de dernière mise à jour du manifest
+- Liste des écrans du manifest (nom, type, stitch_id si présent)
+- Bouton "éditer" → textarea avec le JSON du manifest, éditable, bouton "sauvegarder" → `POST /api/manifest/save`
+- Bouton "envoyer au Wire" → stocke le manifest en session + redirige vers `/workspace?tab=wire`
+- Fermeture : clic extérieur ou touche Escape
+
+**Persistance :** `localStorage.setItem('manifest_drawer_open', true/false)` — le drawer se rouvre dans le même état au retour.
+
+**Charge le manifest :** `GET /api/projects/active/manifest` au `show()`. Si absent → message `"aucun manifest — générez-en un depuis le cadrage"`.
+
+**Fichiers à créer/modifier :**
+- `Frontend/3. STENCILER/static/js/ManifestBox.js` — **créer** : classe `ManifestBox`, injecte le drawer
+- `Frontend/3. STENCILER/static/js/bootstrap.js` — charger `ManifestBox.js` + icône `[M]` dans le nav
+- `Frontend/3. STENCILER/routers/manifest_router.py` — vérifier que `GET /api/projects/active/manifest` et `POST /api/manifest/save` existent
+
+**Style :** tokens HoméOS. Drawer `width: 380px`, `background: #f7f6f2`, `border-left: 1px solid #e5e5e5`. Pas d'emojis, pas de majuscules.
+
+**Livrable :**
+1. Icône `[M]` dans le nav global → présente sur toutes les pages
+2. Drawer manifest avec liste écrans + JSON éditable
+3. Bouton "envoyer au Wire" fonctionnel
+4. État open/closed persisté en localStorage
+
+---
+
 ### Thème 27 — Contexte actif dans FEE Studio et Stitch
 
 ---

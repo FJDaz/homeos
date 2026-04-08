@@ -91,7 +91,7 @@ class WsForgeMonitor {
         if (!this.activeJobId) return;
 
         try {
-            const res = await fetch(`/api/svg-job/${this.activeJobId}`);
+            const res = await fetch(`/api/retro-genome/svg-job/${this.activeJobId}`);
             if (!res.ok) return;
             const job = await res.json();
             this.render(job);
