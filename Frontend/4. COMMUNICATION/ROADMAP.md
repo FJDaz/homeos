@@ -591,95 +591,13 @@ async def _generate_with_image_genai(self, prompt, image_base64, mime_type, max_
 ### Thème 28 — Reroutage plugin Figma → Workspace (court-circuit Intent Viewer)
 
 ### Mission 265 — Plugin Figma → Workspace direct
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
 
-**Problème :** Le plugin Figma envoie les SVG vers l'Intent Viewer (`/intent-viewer`) qui les analyse puis redirige vers le FRD Editor. C'est l'ancien pipeline — lent, inutile pour du SVG propre qui n'a pas besoin d'interprétation Vision.
+**Fix 1 — `ui.html` :** lien post-export → `/workspace` (plus `/intent-viewer`)
+**Fix 2 — `import_router.py` :** nouvelle route `POST /api/import/figma` → sauve SVG dans `imports/`, met à jour `index.json`
+**Fix 3 — Plugin `ui.html` :** `fetch()` poste vers `/api/import/figma` (plus `/api/retro-genome/upload-svg`)
 
-**Flux actuel (à abandonner) :**
-```
-Plugin Figma → POST /api/import/figma → intent-viewer → analyse → FRD Editor
-```
-
-**Flux cible :**
-```
-Plugin Figma → POST /api/import/figma → imports/ du projet actif → canvas workspace
-```
-
-Le SVG arrive propre de Figma → pas de Vision, pas d'Intent Viewer, pas de forge LLM. Il suffit de le sauver dans `imports/`, créer l'entrée `index.json`, et l'afficher sur le canvas workspace.
-
----
-
-**Fix 1 — `ui.html` : changer le lien de destination après export**
-
-**Fichier :** `Frontend/figma-plugin/ui.html` — ~L261
-
-```html
-<!-- Avant -->
-<a href="http://localhost:9998/intent-viewer" target="_blank">
-    ouvrir dans l'intent viewer →
-</a>
-
-<!-- Après -->
-<a href="http://localhost:9998/workspace" target="_blank">
-    ouvrir dans le workspace →
-</a>
-```
-
----
-
-**Fix 2 — `routes.py` : créer la route `POST /api/import/figma`**
-
-**Fichier :** `Backend/Prod/retro_genome/routes.py` (ou `Frontend/3. STENCILER/routers/import_router.py`)
-
-La route doit :
-1. Recevoir le payload du plugin : `{ svg: string, name: string }`
-2. Sauver le `.svg` dans `projects/{active_id}/imports/{today_str}/name.svg`
-3. Créer/mettre à jour `index.json` :
-```json
-{
-  "id": "figma_{timestamp}",
-  "name": "nom_du_frame",
-  "file_path": "2026-04-08/mon_frame.svg",
-  "svg_path": "2026-04-08/mon_frame.svg",
-  "type": "svg",
-  "archetype_label": "import svg",
-  "html_template": null
-}
-```
-4. Retourner `{ status: "ok", import_id: "figma_..." }`
-
-Le SVG sera ensuite forgé en HTML Tailwind par le pipeline existant (`POST /generate-from-import`) quand l'utilisateur le déclenchera depuis le workspace.
-
----
-
-**Fix 3 — Plugin `code.js` : poster vers la bonne route**
-
-**Fichier :** `Frontend/figma-plugin/code.js`
-
-Vérifier que le `fetch()` dans le handler d'export pointe vers :
-```js
-fetch('http://localhost:9998/api/import/figma', {
-    method: 'POST',
-    body: JSON.stringify({ svg: svgString, name: node.name }),
-    headers: { 'Content-Type': 'application/json' }
-})
-```
-
-Et non vers un endpoint intent-viewer.
-
----
-
-**Fichiers à lire :**
-- `Frontend/figma-plugin/ui.html` — L255-265 (bouton post-export)
-- `Frontend/figma-plugin/code.js` — handlers d'export SVG, fetch destination
-- `Backend/Prod/retro_genome/routes.py` — section import upload (inspirer du pattern `upload-import`)
-- `Frontend/3. STENCILER/routers/import_router.py` — `POST /api/import/upload` (pattern existant)
-
-**Critères de succès :**
-1. Export Figma → SVG sauvegardé dans `imports/` du projet actif
-2. Entrée visible dans la screen list du workspace
-3. Bouton post-export ouvre le workspace (pas l'Intent Viewer)
-4. Aucun appel à l'Intent Viewer dans le chaînon
+Le SVG apparaît dans la screen list du workspace, forgeable via `POST /generate-from-import`.
 
 ---
 
