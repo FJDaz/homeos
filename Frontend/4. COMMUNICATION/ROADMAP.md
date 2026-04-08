@@ -51,6 +51,26 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 - `scripts/seed_student_projects.py` : idempotent, crée projets manquants
 - `seed_db.py` : inclut création projets au seed HF
 
+### Mission 272 — Bouton manifest dans Sullivan + ManifestBox collapsible sur canvas
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+**Flux :** Le bouton "design" dans le panel Sullivan → remplacé par "manifest". Clic → ouvre ManifestBox sur le canvas (positionné à gauche, à côté de la screen list).
+
+**ManifestBox :**
+- Panneau flottant `position: fixed` — pas un drawer, pas un overlay
+- Position initiale : `top: 60px, left: 340px, width: 300px`
+- **Clic header** → collapse/expand (header seul 120px ↔ expand 300px/480px)
+- **Clic ×** → ferme le panneau (`display: none`)
+- **Drag** depuis le header
+- Charge le manifest automatiquement via `GET /api/projects/{id}/manifest`
+- Affiche : archétype, liste écrans, bouton "envoyer au wire"
+- Bouton "envoyer au wire" → `sessionStorage` → `/workspace?tab=wire`
+
+**Fichiers modifiés :**
+- `workspace.html` : bouton "design" → "manifest" (`btn-ws-manifest`)
+- `ws_main.js` : wire `btn-ws-manifest` → `window.ManifestBox.toggle()`
+- `ManifestBox.js` : repositionné, collapsible, drag, lecture auto du manifest
+
 ### Thème 28 — Pipeline forge → cadrage → manifest
 > M266 ✅, M267 ✅, M268 ✅, M269 ✅ — archivées ROADMAP_ACHIEVED.md
 
