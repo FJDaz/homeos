@@ -41,45 +41,138 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Thème 16 — Pipeline Import → Canvas
-
-### Mission 233 — Backend : PATCH /api/imports/{import_id}
-**STATUS: ✅ LIVRÉ**
-
-- Route `PATCH /api/imports/{import_id}` dans `import_router.py` — merge les champs du body dans l'entrée `index.json`
-- `from fastapi import Body` ajouté
-
-### Mission 234 — Frontend : forge → update liste + masquer [S] pour non-Stitch
-**STATUS: ✅ LIVRÉ**
-
-- `WsForge.js` : après `job.status === 'done'` → `PATCH /api/imports/{importId}` avec `{ html_template, type: 'html' }` → refresh liste
-- `ws_main.js` : bouton [S] conditionnel — affiché uniquement si `archetype_id === 'stitch_import'` ou `archetype_label` contient "stitch"
-
-```js
-// Masquer [S] si l'item n'est pas un écran Stitch
-const isStitchScreen = !!item.stitch_screen_id;
-el.querySelector('.btn-s-open').style.display = isStitchScreen ? '' : 'none';
-```
-
-**Fix 3 — workspace.html + ws_main.js : suppression du panneau Stitch dédié**
-
-Le lien Stitch est désormais géré depuis le dashboard projet (panneau gauche, sous-collapse "stitch link"). Le panneau flottant `#panel-stitch` est redondant et doit être supprimé.
-
-Dans `workspace.html` :
-- Supprimer le `<div id="section-stitch">` entier et tout son contenu (`#panel-stitch` + `#badge-stitch`)
-- Supprimer le `<script src="/static/js/workspace/WsStitch.js"></script>`
-
-Dans `ws_main.js` :
-- Supprimer ligne `window.wsStitch = new WsStitch();` (ligne ~18)
-- Retirer `'panel-stitch'` du tableau `draggablePanels` (ligne ~38)
-- Remplacer `if (window.wsStitch) window.wsStitch.loadSession();` par rien (la fonction `linkStitchProject` fait déjà le fetch Stitch directement)
-
-**Livrable attendu :**
-- Forge ZIP → après done : liste rafraîchie, item passe de "dist.zip" à l'entrée avec html_template
-- Re-clic sur l'item dans la liste → charge l'iframe correctement (plus d'overlay forge)
-- Bouton [S] invisible pour les imports locaux (zip, png, svg), visible uniquement pour les screens Stitch
-- Panneau `#panel-stitch` / badge Stitch disparus de l'UI — zéro régression sur la liaison Stitch depuis le dashboard projet
+> M233 ✅, M234 ✅ — archivées ROADMAP_ACHIEVED.md
 
 ---
+
+### Mission 237 — Canvas N0 : drag zone + moteur hover injecté dans l'iframe
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Contexte :** Deux comportements attendus en mode `select` (flèche). Architecture choisie : moteur hover **injecté dans le contentDocument** de l'iframe au chargement — zéro coordinate math côté canvas, le highlight est rendu à l'intérieur de l'iframe par son propre DOM.
+
+---
+
+**Comportement 1 — Zone de drag du shell (codée mais invisible)**
+
+`WsCanvas.js` ligne 124 : drag déjà restreint à `worldY <= 40`. Manque le visuel.
+
+Dans `WsScreenShell.js`, ajouter après le `<rect class="ws-screen-header">` :
+```js
+// Cursor move sur le header
+header.style.cursor = 'move';
+
+// Gripper visuel centré
+const grip = this._createElement('text', {
+    x: String(SW / 2), y: '26', 'text-anchor': 'middle',
+    fill: '#d1d5db',
+    style: 'font-size:11px; letter-spacing:5px; pointer-events:none; user-select:none;'
+});
+grip.textContent = '⋯';
+g.appendChild(grip);
+```
+
+---
+
+**Comportement 2 — Moteur hover injecté (postMessage)**
+
+**Architecture :**
+- `WsCanvas.js` expose `injectHoverEngine(iframe)` — injecte un script dans `iframe.contentDocument` après chargement
+- Le script injecté gère `mouseover` / `mouseout` / `click` → remonte via `window.parent.postMessage`
+- `WsCanvas.js` écoute `window.addEventListener('message', ...)` → met à jour `this._selectedIframeEl`
+- `pointer-events` de l'iframe : `none` par défaut, `auto` quand `activeMode === 'select'`
+
+**Dans `WsScreenShell.js`**, modifier le listener `load` de l'iframe :
+```js
+iframe.addEventListener('load', () => {
+    if (window.wsFontManager) window.wsFontManager.injectStyles();
+    if (window.wsCanvas) window.wsCanvas.injectHoverEngine(iframe);
+});
+```
+
+**Dans `WsCanvas.js`**, ajouter la méthode `injectHoverEngine(iframe)` :
+```js
+injectHoverEngine(iframe) {
+    try {
+        const doc = iframe.contentDocument;
+        if (!doc || doc.__hmInjected) return;
+        doc.__hmInjected = true;
+
+        const script = doc.createElement('script');
+        script.textContent = `
+(function() {
+    let _last = null;
+    function _clear() {
+        if (_last) {
+            _last.style.removeProperty('outline');
+            _last.style.removeProperty('outline-offset');
+            _last = null;
+        }
+    }
+    document.addEventListener('mouseover', function(e) {
+        const el = e.target;
+        if (el === document.body || el === document.documentElement) return;
+        _clear();
+        el.style.outline = '2px solid #8cc63f';
+        el.style.outlineOffset = '-1px';
+        _last = el;
+        window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
+            _clear();
+            window.parent.postMessage({ type: 'hm-clear' }, '*');
+        }
+    });
+    document.addEventListener('click', function(e) {
+        const el = e.target;
+        window.parent.postMessage({ type: 'hm-select', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), text: (el.textContent || '').trim().slice(0, 100) }, '*');
+    });
+})();`;
+        doc.head.appendChild(script);
+    } catch(_) {}
+}
+```
+
+**Dans `WsCanvas.js` — `setMode(mode)`**, ajouter la gestion des pointer-events sur toutes les iframes des shells :
+```js
+setMode(mode) {
+    this.activeMode = mode;
+    // Activer pointer-events dans les iframes en mode select uniquement
+    const isSelect = mode === 'select';
+    document.querySelectorAll('.ws-screen-shell iframe').forEach(iframe => {
+        iframe.style.pointerEvents = isSelect ? 'auto' : 'none';
+    });
+    // ... reste du setMode existant
+}
+```
+
+**Dans `WsCanvas.js` — `init()`**, ajouter le listener message :
+```js
+window.addEventListener('message', (e) => {
+    if (e.data?.type === 'hm-select') {
+        this._selectedIframeEl = e.data;
+        console.log('[HM-SELECT]', e.data.tag, e.data.id, e.data.text);
+        // Sullivan context à brancher ici (mission suivante)
+    }
+});
+```
+
+**Points d'attention :**
+- `doc.__hmInjected` guard : évite la double injection si l'iframe reload
+- Ne pas injecter si `doc.head` n'existe pas encore (iframe vide ou error page)
+- En mode `drag` ou tout autre mode ≠ `select`, les iframes ont `pointer-events: none` → le canvas gère tout sans interférence
+- `addScreen()` appelle `WsScreenShell.build()` qui crée l'iframe — l'injection se fait au `load` event, donc après que le contenu soit rendu
+
+**Fichiers :** `WsCanvas.js` + `WsScreenShell.js`
+
+**Livrable :**
+- Header shell = curseur `move` + gripper `⋯` centré
+- Mode select → iframes activées + moteur hover injecté au load
+- Hover = outline vert `#8cc63f` sur l'élément HTML sous la souris, géré entièrement dans l'iframe
+- Click = `[HM-SELECT]` dans la console avec tag/id/text
+- Tous autres modes → pointer-events none, comportement canvas inchangé
 
 ---
 
@@ -147,7 +240,14 @@ Nouveau bouton dans la toolbar, entre typo et le séparateur zoom :
 ---
 
 ### Mission 236 — Backend : routes assets/img par projet
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+**STATUS: ✅ LIVRÉ**
+
+- `POST /api/projects/active/assets/upload` — upload image (png/jpg/jpeg/webp/svg/gif, max 10MB)
+- `GET /api/projects/active/assets` — liste images du projet (tri par date desc)
+- `GET /api/projects/assets/img/{filename}` — sert l'image
+- `DELETE /api/projects/assets/img/{filename}` — supprime
+- Stockage : `projects/{project_id}/assets/img/`
+- Extensions validées + limite 10MB
 
 **Contexte :** Les élèves uploadent des images (PNG, JPG, JPEG, WebP, SVG) dans leur projet. Ces images doivent être stockées dans `projects/{project_id}/assets/img/`, listables, servables, et supprimables.
 

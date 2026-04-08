@@ -291,3 +291,90 @@ async def import_patch(import_id: str, body: dict = Body(...)):
     entry.update(body)
     index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
     return {"status": "ok", "entry": entry}
+
+
+# --- M236: Project Assets (images) ---
+
+ALLOWED_IMG_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif'}
+MAX_UPLOAD_SIZE = 10_000_000  # 10MB
+
+
+def get_assets_dir():
+    d = get_active_project_path() / "assets" / "img"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+@router.post("/api/projects/active/assets/upload")
+async def asset_upload(file: UploadFile = File(...)):
+    """M236: Upload d'une image dans le projet actif."""
+    ext = Path(file.filename).suffix.lower() if file.filename else ""
+    if ext not in ALLOWED_IMG_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Extension non autorisée: {ext}. Autorisées: {', '.join(ALLOWED_IMG_EXTENSIONS)}")
+
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail=f"Fichier trop volumineux ({len(content)} > {MAX_UPLOAD_SIZE} bytes)")
+
+    safe_name = "".join(c if c.isalnum() or c in "-_." else "_" for c in file.filename).strip()[:128]
+    ts = datetime.now().strftime("%H%M%S")
+    filename = f"{Path(safe_name).stem}_{ts}{ext}"
+
+    assets_dir = get_assets_dir()
+    file_path = assets_dir / filename
+    file_path.write_bytes(content)
+
+    return {
+        "status": "ok",
+        "file": {
+            "name": file.filename,
+            "filename": filename,
+            "url": f"/api/projects/assets/img/{filename}",
+            "size": len(content)
+        }
+    }
+
+
+@router.get("/api/projects/active/assets")
+async def asset_list():
+    """M236: Liste les images du projet actif."""
+    assets_dir = get_assets_dir()
+    if not assets_dir.exists():
+        return {"files": []}
+
+    files = []
+    for f in assets_dir.iterdir():
+        if f.is_file() and f.suffix.lower() in ALLOWED_IMG_EXTENSIONS:
+            stat = f.stat()
+            files.append({
+                "name": f.name,
+                "filename": f.name,
+                "url": f"/api/projects/assets/img/{f.name}",
+                "size": stat.st_size,
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+
+    files.sort(key=lambda x: x["modified"], reverse=True)
+    return {"files": files}
+
+
+@router.get("/api/projects/assets/img/{filename}")
+async def asset_serve(filename: str):
+    """M236: Sert une image du projet."""
+    from fastapi.responses import FileResponse
+    assets_dir = get_assets_dir()
+    file_path = assets_dir / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Image non trouvée")
+    return FileResponse(str(file_path))
+
+
+@router.delete("/api/projects/assets/img/{filename}")
+async def asset_delete(filename: str):
+    """M236: Supprime une image du projet."""
+    assets_dir = get_assets_dir()
+    file_path = assets_dir / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image non trouvée")
+    file_path.unlink()
+    return {"status": "deleted", "filename": filename}
