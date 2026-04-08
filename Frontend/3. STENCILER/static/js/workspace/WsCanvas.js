@@ -31,6 +31,12 @@ class WsCanvas {
         this.initialHeight = 0;
         this.SNAP_SIZE = 8;
 
+        // Element drag inside iframe (N0)
+        this.isDraggingElement = false;
+        this.dragElementShell = null;
+        this.lastDragClientX = 0;
+        this.lastDragClientY = 0;
+
         this.init();
     }
 
@@ -143,6 +149,22 @@ class WsCanvas {
                     this.selectedScreen.classList.add('ws-dragging');
                     this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - tx;
                     this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
+                } else {
+                    // Element drag inside iframe (N0 level — no snap)
+                    const iframe = shell.querySelector('iframe');
+                    if (iframe?.contentWindow) {
+                        const fr = iframe.getBoundingClientRect();
+                        const ix = e.clientX - fr.left;
+                        const iy = e.clientY - fr.top;
+                        if (ix >= 0 && iy >= 0 && ix <= fr.width && iy <= fr.height) {
+                            console.log('[WsCanvas] 🖱️ hm-click x=' + Math.round(ix) + ' y=' + Math.round(iy));
+                            iframe.contentWindow.postMessage({ type: 'hm-click', x: ix, y: iy }, '*');
+                            this.isDraggingElement = true;
+                            this.dragElementShell = shell;
+                            this.lastDragClientX = e.clientX;
+                            this.lastDragClientY = e.clientY;
+                        }
+                    }
                 }
             }
         } else if (this.svg.contains(e.target)) {
@@ -166,6 +188,20 @@ class WsCanvas {
             this.updateTransform();
             return;
         }
+        if (this.isDraggingElement && this.dragElementShell) {
+            const iframe = this.dragElementShell.querySelector('iframe');
+            if (iframe?.contentWindow) {
+                const dx = e.clientX - this.lastDragClientX;
+                const dy = e.clientY - this.lastDragClientY;
+                if (dx !== 0 || dy !== 0) {
+                    console.log('[WsCanvas] 🖐️ hm-drag dx=' + Math.round(dx) + ' dy=' + Math.round(dy));
+                    iframe.contentWindow.postMessage({ type: 'hm-drag', dx, dy }, '*');
+                    this.lastDragClientX = e.clientX;
+                    this.lastDragClientY = e.clientY;
+                }
+            }
+            return;
+        }
         if (this.isResizing && this.selectedScreen) {
             const dx = (e.clientX - this.startX) / this.scale;
             const dy = (e.clientY - this.startY) / this.scale;
@@ -182,12 +218,32 @@ class WsCanvas {
             const rect = this.svg.getBoundingClientRect();
             let x = (e.clientX - rect.left - this.viewX) / this.scale - this.offsetDragX;
             let y = (e.clientY - rect.top - this.viewY) / this.scale - this.offsetDragY;
-            
-            // Snap Grid (Mission 114)
             x = Math.round(x / this.SNAP_SIZE) * this.SNAP_SIZE;
             y = Math.round(y / this.SNAP_SIZE) * this.SNAP_SIZE;
-            
             this.selectedScreen.setAttribute('transform', `matrix(1 0 0 1 ${x} ${y})`);
+            return;
+        }
+
+        // Hover probe en mode select : envoie coords à l'iframe via postMessage
+        if (this.activeMode === 'select' && !this._probeCooldown) {
+            const shell = e.target.closest?.('.ws-screen-shell');
+            if (shell) {
+                const iframe = shell.querySelector('iframe');
+                if (iframe?.contentWindow) {
+                    const fr = iframe.getBoundingClientRect();
+                    const ix = e.clientX - fr.left;
+                    const iy = e.clientY - fr.top;
+                    if (ix >= 0 && iy >= 0 && ix <= fr.width && iy <= fr.height) {
+                        iframe.contentWindow.postMessage({ type: 'hm-probe', x: ix, y: iy }, '*');
+                        this._probeCooldown = true;
+                        setTimeout(() => { this._probeCooldown = false; }, 50);
+                    }
+                }
+            } else if (this._lastProbeShell) {
+                this._lastProbeShell.querySelector('iframe')?.contentWindow?.postMessage({ type: 'hm-clear' }, '*');
+                this._lastProbeShell = null;
+            }
+            if (shell) this._lastProbeShell = shell;
         }
     }
 
@@ -198,6 +254,12 @@ class WsCanvas {
         if (this.selectedScreen) {
             this.selectedScreen.classList.remove('ws-dragging', 'ws-resizing');
             this.selectedScreen = null;
+        }
+        if (this.isDraggingElement && this.dragElementShell) {
+            const iframe = this.dragElementShell.querySelector('iframe');
+            iframe?.contentWindow?.postMessage({ type: 'hm-drop' }, '*');
+            this.isDraggingElement = false;
+            this.dragElementShell = null;
         }
         window.wsAudit?.notifyToolbar(null, this.activeMode, this.svg);
     }
@@ -304,33 +366,69 @@ class WsCanvas {
             script.textContent = `
 (function() {
     let _last = null;
+    let _selected = null;
+    let _dragAccX = 0, _dragAccY = 0;
+    let _origTransform = '';
+
     function _clear() {
-        if (_last) {
+        if (_last && _last !== _selected) {
             _last.style.removeProperty('outline');
             _last.style.removeProperty('outline-offset');
-            _last = null;
         }
+        _last = null;
     }
-    document.addEventListener('mouseover', function(e) {
-        const el = e.target;
-        if (el === document.body || el === document.documentElement || el.id === 'root') return;
-        _clear();
-        el.style.outline = '2px solid #8cc63f';
-        el.style.outlineOffset = '-1px';
-        _last = el;
-        window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
-    });
-    document.addEventListener('mouseout', function(e) {
-        if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
+
+    function _clearSelection() {
+        if (_selected) {
+            _selected.style.removeProperty('outline');
+            _selected.style.removeProperty('outline-offset');
+            _selected = null;
+        }
+        _dragAccX = 0; _dragAccY = 0;
+    }
+
+    // Reçoit les coordonnées du canvas (iframe pointer-events:none → pas de mouseover natif)
+    window.addEventListener('message', function(e) {
+        if (!e.data) return;
+        if (e.data.type === 'hm-probe') {
+            const el = document.elementFromPoint(e.data.x, e.data.y);
+            if (!el || el === document.body || el === document.documentElement) { _clear(); return; }
+            if (el === _last) return;
+            _clear();
+            if (el !== _selected) {
+                el.style.outline = '2px dashed #8cc63f';
+                el.style.outlineOffset = '-1px';
+            }
+            _last = el;
+            window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
+        } else if (e.data.type === 'hm-clear') {
             _clear();
             window.parent.postMessage({ type: 'hm-clear' }, '*');
+        } else if (e.data.type === 'hm-click') {
+            console.log('[hm-engine] click x=' + Math.round(e.data.x) + ' y=' + Math.round(e.data.y));
+            // Select element for drag
+            const el = document.elementFromPoint(e.data.x, e.data.y);
+            if (!el || el === document.body || el === document.documentElement) { console.log('[hm-engine] no element at point'); _clearSelection(); return; }
+            console.log('[hm-engine] selected:', el.tagName, el.id || el.className || '');
+            _clearSelection();
+            _selected = el;
+            _dragAccX = 0; _dragAccY = 0;
+            // Parse existing translate to resume from current position
+            const existing = el.style.transform || '';
+            const m = existing.match(/translate\\(([\\d.-]+)px,\\s*([\\d.-]+)px\\)/);
+            if (m) { _dragAccX = parseFloat(m[1]); _dragAccY = parseFloat(m[2]); }
+            _selected.style.outline = '2px solid #8cc63f';
+            _selected.style.outlineOffset = '-1px';
+            window.parent.postMessage({ type: 'hm-select', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), text: (el.textContent || '').trim().slice(0, 100) }, '*');
+        } else if (e.data.type === 'hm-drag') {
+            if (!_selected) return;
+            _dragAccX += e.data.dx;
+            _dragAccY += e.data.dy;
+            _selected.style.transform = 'translate(' + _dragAccX + 'px, ' + _dragAccY + 'px)';
+            _selected.style.position = _selected.style.position || 'relative';
+        } else if (e.data.type === 'hm-drop') {
+            console.log('[hm-engine] drop — element moved to', Math.round(_dragAccX), Math.round(_dragAccY));
         }
-    });
-    document.addEventListener('click', function(e) {
-        const el = e.target;
-        if (el === document.body || el === document.documentElement) return;
-        e.stopPropagation();
-        window.parent.postMessage({ type: 'hm-click', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), href: el.href || '' }, '*');
     });
 })();
             `;
