@@ -115,8 +115,9 @@ def seed():
         cur.execute("INSERT OR IGNORE INTO classes (id, name, teacher) VALUES (?, ?, ?)",
                     (cls["id"], cls["name"], cls["teacher"]))
         for sid, display, last, first in cls["students"]:
-            cur.execute("INSERT OR IGNORE INTO students (id, class_id, display, last_name, first_name) VALUES (?, ?, ?, ?, ?)",
-                        (sid, cls["id"], display, last, first))
+            project_id = f"{cls['id']}-{sid}"
+            cur.execute("INSERT OR IGNORE INTO students (id, class_id, display, last_name, first_name, project_id) VALUES (?, ?, ?, ?, ?, ?)",
+                        (sid, cls["id"], display, last, first, project_id))
 
     # Seed admin user
     admin_token = str(uuid.uuid4())

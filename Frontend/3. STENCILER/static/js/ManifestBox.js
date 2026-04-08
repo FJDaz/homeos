@@ -1,12 +1,13 @@
 /**
- * ManifestBox — Drawer manifest persistante cross-tabs (M269)
+ * ManifestBox — Panneau manifest flottant cross-tabs (M269)
  * Accessible via bouton [M] dans le nav global (bootstrap.js)
+ * Flotte par-dessus le contenu, positionné sous le nav, à gauche (comme screen list)
  */
 (function() {
     'use strict';
     console.log('[ManifestBox] init');
 
-    let overlay = null;
+    let panel = null;
     let manifestData = null;
     let isOpen = localStorage.getItem('manifest_drawer_open') === 'true';
 
@@ -66,14 +67,16 @@
         const archetype = manifestData?.archetype?.label || manifestData?.archetype || '—';
 
         let html = `
-            <div class="p-3 border-b border-[#e5e5e5] flex items-center justify-between bg-[#f7f6f2]">
-                <div>
-                    <div class="text-[9px] font-black uppercase tracking-widest text-[#9a9a98]">archétype</div>
-                    <div class="text-[11px] font-bold text-[#3d3d3c]">${archetype}</div>
+            <div class="p-2 border-b border-[#e5e5e5] flex items-center justify-between bg-[#f7f6f2] shrink-0">
+                <div class="flex items-center gap-2">
+                    <div>
+                        <div class="text-[8px] font-black uppercase tracking-widest text-[#9a9a98]">archétype</div>
+                        <div class="text-[10px] font-bold text-[#3d3d3c]">${archetype}</div>
+                    </div>
                 </div>
-                <div class="text-[9px] text-[#9a9a98]">${screens.length} écran(s)</div>
+                <div class="text-[8px] text-[#9a9a98]">${screens.length} écran(s)</div>
             </div>
-            <div class="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
+            <div id="manifestbox-list" class="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
         `;
 
         screens.forEach((s, i) => {
@@ -81,29 +84,25 @@
             const type = s.type || s.archetype_label || 'html';
             const stitchId = s.stitch_id || s.stitch_screen_id || '';
             html += `
-                <div class="p-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[11px]">
+                <div class="p-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[10px]">
                     <div class="font-bold text-[#3d3d3c]">${name}</div>
-                    <div class="text-[9px] text-[#9a9a98]">${type}${stitchId ? ' · stitch: ' + stitchId : ''}</div>
+                    <div class="text-[8px] text-[#9a9a98]">${type}${stitchId ? ' · stitch: ' + stitchId : ''}</div>
                 </div>
             `;
         });
 
         html += `</div>
-            <div class="p-3 border-t border-[#e5e5e5] bg-[#f7f6f2] space-y-2">
-                <button id="manifestbox-edit-btn" class="w-full py-1.5 border border-[#e5e5e5] bg-white text-[10px] font-bold uppercase tracking-wider text-[#3d3d3c] hover:border-[#8cc63f] transition-all rounded-[20px]">éditer le manifest</button>
-                <button id="manifestbox-wire-btn" class="w-full py-1.5 bg-[#8cc63f] text-white text-[10px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[20px]">envoyer au wire</button>
+            <div class="p-2 border-t border-[#e5e5e5] bg-[#f7f6f2] space-y-1.5 shrink-0">
+                <button id="manifestbox-edit-btn" class="w-full py-1 border border-[#e5e5e5] bg-white text-[9px] font-bold uppercase tracking-wider text-[#3d3d3c] hover:border-[#8cc63f] transition-all rounded-[12px]">éditer</button>
+                <button id="manifestbox-wire-btn" class="w-full py-1 bg-[#8cc63f] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[12px]">envoyer au wire</button>
             </div>
         `;
 
         body.innerHTML = html;
 
-        // Edit button
         const editBtn = document.getElementById('manifestbox-edit-btn');
-        if (editBtn) {
-            editBtn.onclick = showEditor;
-        }
+        if (editBtn) editBtn.onclick = showEditor;
 
-        // Wire button
         const wireBtn = document.getElementById('manifestbox-wire-btn');
         if (wireBtn) {
             wireBtn.onclick = () => {
@@ -112,7 +111,7 @@
             };
         }
 
-        title.textContent = `manifest · ${screens.length} écran(s)`;
+        if (title) title.textContent = `manifest · ${screens.length}`;
     }
 
     function showEditor() {
@@ -120,56 +119,77 @@
         if (!body) return;
         const json = JSON.stringify(manifestData, null, 2);
         body.innerHTML = `
-            <textarea id="manifestbox-editor" class="w-full h-full flex-1 bg-[#1a1a1a] text-[#e1e1e6] text-[10px] font-mono p-3 outline-none resize-none" spellcheck="false">${json.replace(/</g, '&lt;')}</textarea>
-            <div class="p-3 border-t border-[#e5e5e5] bg-[#f7f6f2]">
-                <button id="manifestbox-save-btn" class="w-full py-1.5 bg-[#8cc63f] text-white text-[10px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[20px]">sauvegarder</button>
+            <textarea id="manifestbox-editor" class="w-full h-full bg-[#1a1a1a] text-[#e1e1e6] text-[9px] font-mono p-2 outline-none resize-none" spellcheck="false">${json.replace(/</g, '&lt;')}</textarea>
+            <div class="p-2 border-t border-[#e5e5e5] bg-[#f7f6f2] shrink-0">
+                <button id="manifestbox-save-btn" class="w-full py-1 bg-[#8cc63f] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[12px]">sauvegarder</button>
             </div>
         `;
         document.getElementById('manifestbox-save-btn').onclick = saveManifest;
     }
 
-    function buildOverlay() {
-        if (overlay) return;
+    function buildPanel() {
+        if (panel) return;
 
-        overlay = document.createElement('div');
-        overlay.id = 'manifestbox-overlay';
-        overlay.className = 'fixed inset-0 z-[8000] pointer-events-none';
-        overlay.innerHTML = `
-            <div id="manifestbox-drawer" class="absolute right-0 top-[48px] bottom-0 w-[360px] bg-white border-l border-[#e5e5e5] shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col pointer-events-auto transform transition-transform duration-200 ${isOpen ? 'translate-x-0' : 'translate-x-full'}">
-                <!-- Header -->
-                <div class="h-[40px] border-b border-[#e5e5e5] flex items-center justify-between px-4 shrink-0">
-                    <span id="manifestbox-title" class="text-[10px] font-black tracking-[0.15em] uppercase text-[#8cc63f]">manifest</span>
-                    <button id="manifestbox-close" class="text-[#9a9a98] hover:text-[#3d3d3c] transition-colors p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <!-- Body -->
-                <div id="manifestbox-body" class="flex-1 overflow-hidden flex flex-col"></div>
-            </div>
+        panel = document.createElement('div');
+        panel.id = 'manifestbox-panel';
+        panel.className = 'fixed z-[1500] bg-white border border-[#e5e5e5] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col rounded-[16px] overflow-hidden pointer-events-auto';
+        // Position : sous le nav (top: 56px), à droite (right: 20px), width 320px
+        panel.style.cssText = `
+            top: 56px;
+            right: 20px;
+            width: 320px;
+            height: calc(100vh - 68px);
+            max-height: 560px;
         `;
 
-        document.body.appendChild(overlay);
+        panel.innerHTML = `
+            <!-- Header -->
+            <div class="h-[32px] border-b border-[#e5e5e5] flex items-center justify-between px-3 shrink-0 bg-white">
+                <span id="manifestbox-title" class="text-[9px] font-black tracking-[0.15em] uppercase text-[#8cc63f]">manifest</span>
+                <button id="manifestbox-close" class="text-[#9a9a98] hover:text-[#3d3d3c] transition-colors p-0.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- Body -->
+            <div id="manifestbox-body" class="flex-1 overflow-hidden flex flex-col bg-white"></div>
+        `;
 
-        // Close button
-        document.getElementById('manifestbox-close').onclick = () => hide();
+        document.body.appendChild(panel);
 
-        // Click outside to close
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) hide();
-        });
+        // Close
+        panel.querySelector('#manifestbox-close').onclick = () => hide();
 
-        // Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && isOpen) hide();
-        });
+        // Drag
+        (function() {
+            const handle = panel.querySelector('.h-\\[32px\\]');
+            if (!handle) return;
+            handle.style.cursor = 'grab';
+            let dragging = false, ox = 0, oy = 0;
+            handle.addEventListener('mousedown', (e) => {
+                dragging = true;
+                ox = e.clientX - panel.getBoundingClientRect().left;
+                oy = e.clientY - panel.getBoundingClientRect().top;
+                handle.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!dragging) return;
+                panel.style.left = (e.clientX - ox) + 'px';
+                panel.style.top = (e.clientY - oy) + 'px';
+                panel.style.right = 'auto';
+            });
+            document.addEventListener('mouseup', () => {
+                dragging = false;
+                handle.style.cursor = 'grab';
+            });
+        })();
 
         if (isOpen) loadManifest().then(render);
     }
 
     async function show() {
-        buildOverlay();
-        const drawer = document.getElementById('manifestbox-drawer');
-        if (drawer) drawer.classList.remove('translate-x-full');
+        buildPanel();
+        panel.style.display = 'flex';
         isOpen = true;
         localStorage.setItem('manifest_drawer_open', 'true');
         await loadManifest();
@@ -177,13 +197,9 @@
     }
 
     function hide() {
-        const drawer = document.getElementById('manifestbox-drawer');
-        if (drawer) drawer.classList.add('translate-x-full');
+        if (panel) panel.style.display = 'none';
         isOpen = false;
         localStorage.setItem('manifest_drawer_open', 'false');
-        setTimeout(() => {
-            if (overlay) { overlay.remove(); overlay = null; }
-        }, 200);
     }
 
     function toggle() {

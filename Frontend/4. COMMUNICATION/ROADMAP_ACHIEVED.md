@@ -6,6 +6,47 @@
 
 ---
 
+## M266 — "Envoyer au Cadrage" depuis le workspace
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: GEMINI**
+
+- Bouton "discuter dans le cadrage →" dans l'overlay post-forge
+- `forge_context` stocké en `sessionStorage` au clic
+- `cadrage_alt.html` lit le contexte au load → amorce automatique Sullivan
+- `cadrage_router.py` injecte le contexte forge dans le system prompt
+
+## M267 — Persistance d'état cross-tabs
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- Conversation Cadrage persistée en `sessionStorage.cadrage_history`
+- Forge active : `{ job_id, import_id }` en sessionStorage → polling repris au retour workspace
+- Screen list : re-fetch au montage si liste vide (comportement déjà correct)
+
+## M268 — Sullivan Arbiter : boutons "Générer PRD" et "Générer Manifest"
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: GEMINI**
+
+- `POST /api/sullivan/prd` → sauvegarde `PRD_{timestamp}.md` dans exports projet
+- `POST /api/sullivan/manifest` → génère/met à jour `manifest.json`
+- Bindings câblés dans `ws_main.js` / `WsBootstrap.js`
+
+## M269 — ManifestBox : drawer manifest persistant cross-tabs
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: GEMINI**
+
+- `ManifestBox.js` créé — drawer `[M]` dans le nav global (toutes les pages)
+- Charge `GET /api/projects/active/manifest` au show()
+- JSON éditable + bouton "sauvegarder" → `POST /api/manifest/save`
+- Import fichier `.json` externe → sauvegardé + pris en base par Sullivan
+- Boutons "envoyer au Wire" et "discuter dans le cadrage" fonctionnels
+- État open/closed persisté en `localStorage`
+
+## M270 — Activation projet depuis la session si pas d'URL param
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- `workspace.html` : `pid = params.get('project_id') || session.project_id`
+- Même fix appliqué dans `cadrage_alt.html` et `bkd_frd.html`
+- Chaque élève voit son propre projet quel que soit l'ordre de connexion
+
+---
+
 ## M233 — Backend : PATCH /api/imports/{import_id}
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
 
