@@ -134,11 +134,10 @@
         panel.id = 'manifestbox-panel';
         panel.style.cssText = `
             position: fixed;
-            top: 56px;
-            right: 20px;
-            width: 320px;
-            height: 480px;
-            max-height: calc(100vh - 72px);
+            top: 60px;
+            left: 340px;
+            width: 300px;
+            max-height: 480px;
             z-index: 1500;
             background: white;
             border: 1px solid #e5e5e5;
@@ -147,6 +146,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: max-height 0.2s ease;
         `;
 
         panel.innerHTML = `
@@ -162,12 +162,24 @@
         document.body.appendChild(panel);
 
         // Close
-        panel.querySelector('#manifestbox-close').onclick = () => hide();
+        panel.querySelector('#manifestbox-close').onclick = () => {
+            panel.style.display = 'none';
+        };
 
-        // Drag depuis le header
+        // Click header to collapse/expand
         const handle = document.getElementById('manifestbox-handle');
         if (handle) {
             handle.style.cursor = 'grab';
+            handle.addEventListener('click', (e) => {
+                if (e.target.closest('#manifestbox-close')) return;
+                const body = document.getElementById('manifestbox-body');
+                const isCollapsed = panel.style.width === '120px';
+                if (isCollapsed) {
+                    show();
+                } else {
+                    hide();
+                }
+            });
             let dragging = false, ox = 0, oy = 0;
             handle.addEventListener('mousedown', (e) => {
                 dragging = true;
@@ -197,7 +209,23 @@
     }
 
     function hide() {
-        if (panel) panel.style.display = 'none';
+        if (panel) {
+            // Collapse to header only
+            const body = document.getElementById('manifestbox-body');
+            if (body) body.style.display = 'none';
+            panel.style.maxHeight = '32px';
+            panel.style.width = '120px';
+        }
+    }
+
+    function show() {
+        buildPanel();
+        panel.style.display = 'flex';
+        const body = document.getElementById('manifestbox-body');
+        if (body) body.style.display = 'flex';
+        panel.style.maxHeight = '480px';
+        panel.style.width = '300px';
+        loadManifest().then(render);
     }
 
     function toggle() {

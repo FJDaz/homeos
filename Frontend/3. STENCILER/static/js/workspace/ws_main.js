@@ -150,6 +150,15 @@
             uploadInput.addEventListener('change', handleDirectUpload);
             console.log('[ws_main] upload input wired');
         }
+
+        // M272: Manifest button in Sullivan panel
+        var manifestBtn = document.getElementById('btn-ws-manifest');
+        if (manifestBtn) {
+            manifestBtn.addEventListener('click', function() {
+                if (window.ManifestBox) window.ManifestBox.toggle();
+            });
+            console.log('[ws_main] manifest button wired');
+        }
     }
 
     /**
