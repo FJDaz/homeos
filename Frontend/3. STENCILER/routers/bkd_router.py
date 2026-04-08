@@ -417,14 +417,24 @@ async def delete_conversation(conv_id: str):
 
 @router.get("/fee/preview", response_class=HTMLResponse)
 async def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
-    """Sert le HTML brut d'un fichier projet pour l'iframe FEE."""
+    """Sert le HTML brut d'un fichier projet pour l'iframe FEE — M260: injecte <base> pour les assets relatifs."""
     root = resolve_bkd_project_root(project_id)
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
     file_path = bkd_safe_path(root, path)
     if not file_path or not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
-    return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
+
+    html = file_path.read_text(encoding="utf-8")
+
+    # M260-Fix2: Injecter <base> pour que les assets relatifs (css/, images/) résolvent
+    # Le HTML est servi via /api/bkd/fee/preview → le browser cherche relatifs ici
+    # On injecte une base pointant vers le dossier du fichier HTML
+    file_dir = str(file_path.parent)
+    if "<base" not in html and "<head>" in html:
+        html = html.replace("<head>", f'<head><base href="/projects/{project_id}/" />', 1)
+
+    return HTMLResponse(content=html)
 
 
 @router.get("/fee/presets")

@@ -163,12 +163,26 @@ class WsFEEStudio {
         // M240: Resolve projectId from session, not wsBackend
         const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
         this.projectId = session.active_project_id || session.project_id || null;
-        this.activeScreen = this.ws?.currentFile || 'landing.html';
+
+        // M260: Resolve activeScreen from canvas-selected shell
+        const activeShellId = window.wsCanvas?.activeScreenId;
+        let resolvedScreen = 'landing.html';
+        if (activeShellId && activeShellId.startsWith('shell-')) {
+            const importId = activeShellId.slice(6); // strip 'shell-'
+            const items = window.WsImportList?._items || [];
+            const activeItem = items.find(i => i.id === importId);
+            resolvedScreen = activeItem?.html_template || activeItem?.file_path || 'landing.html';
+        }
+        this.activeScreen = resolvedScreen;
 
         if (!this.projectId) {
             console.warn('[FEEStudio] Aucun projet actif dans la session');
             alert("veuillez activer un projet");
             return;
+        }
+
+        if (this.activeScreen === 'landing.html') {
+            console.warn('[FEEStudio] Aucun écran sélection sur le canvas');
         }
 
         document.getElementById('fee-studio-project-label').innerText = `projet: ${this.projectId}`;

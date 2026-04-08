@@ -10,8 +10,10 @@
     console.log('[WsImportList] init');
 
     /**
-     * Récupère la liste des imports et rend le HTML.
+     * Stockage des imports pour consultation externe (M260)
      */
+    let _items = [];
+
     async function refresh() {
         console.log('[WsImportList] fetching...');
         try {
@@ -21,9 +23,9 @@
                 return;
             }
             const data = await res.json();
-            const imports = data.imports || [];
-            console.log('[WsImportList]', imports.length, 'imports');
-            render(imports);
+            _items = data.imports || [];
+            console.log('[WsImportList]', _items.length, 'imports');
+            render(_items);
         } catch(e) {
             console.error('[WsImportList] fetch error:', e);
         }
@@ -150,7 +152,8 @@
     // Exposition
     window.WsImportList = {
         refresh: refresh,
-        render: render
+        render: render,
+        get _items() { return _items; }
     };
 
     console.log('[WsImportList] ✅ OK');

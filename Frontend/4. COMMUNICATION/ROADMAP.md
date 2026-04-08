@@ -45,7 +45,12 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Mission 260 — DIAG/FIX : FEE Studio charge le mauvais fichier et casse les URLs relatives (écran blanc)
-**STATUS: 🔴 DIAG | DATE: 2026-04-08 | ACTOR: QWEN**
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Fix appliqué :**
+- `WsFEEStudio.js` L166 : `this.ws?.currentFile` remplacé par résolution depuis `window.wsCanvas.activeScreenId` → strip `shell-` → lookup exact dans `WsImportList._items` → `item.html_template` ou `item.file_path`
+- `WsImportList.js` : `_items` exposé via getter sur `window.WsImportList`
+- Si aucun écran sélectionné → `console.warn` + fallback `landing.html` (plus d'alert bloquant)
 
 **Symptômes (Double problème provoquant l'écran blanc) :** 
 1. **Mauvais Fichier** : Ouvrir FEE Studio depuis le workspace → l'iframe essaie toujours de charger `landing.html` quel que soit l'écran sélectionné sur le canvas.
@@ -386,6 +391,54 @@ _createGhostElement(shellG, rect) {
 - Mousedown → fantôme SVG vert semi-transparent sur le canvas
 - Drag du fantôme → repositionnement fluide
 - Mouseup → console `[WS-GHOST]` avec tag/id/position finale
+
+---
+
+### Mission 265 — Forge SVG/Figma : tokens HoméOS + SVG trop lourd
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Fichier unique :** `Backend/Prod/retro_genome/svg_to_tailwind.py` — méthode `convert()` L72-135
+
+**Symptôme :** Export Figma forgé → résultat identique au bug PNG (HoméOS). 62787 tokens, 78s.
+
+---
+
+**Fix 1 — Retirer les tokens HoméOS du prompt (L101-107)**
+
+`color_hint` est déjà calculé L87 — l'utiliser à la place des tokens injectés :
+
+```python
+# Avant — remplacer le bloc "TOKENS DE DESIGN À RESPECTER (IMPÉRATIF)" par :
+CONTRAINTE DESIGN :
+- Extrais les couleurs dominantes directement depuis les valeurs `fill` du SVG.
+- Couleurs détectées dans ce fichier (plus fréquentes) : {color_hint}
+- Utilise ces couleurs — ne substitue pas tes propres préférences.
+```
+
+---
+
+**Fix 2 — Réduire le SVG envoyé au LLM**
+
+Cap actuel `clean_svg[:50000]` → ~60K tokens totaux → 78s. Deux actions dans `_strip_noise()` + cap :
+
+```python
+# Dans _strip_noise(), ajouter après les suppressions existantes :
+# Supprimer les paths complexes (d= > 200 chars = bruit, pas d'info structurelle)
+content = re.sub(r'<path\b[^>]*\bd="[^"]{200,}"[^/]*/>', '', content)
+content = re.sub(r'<path\b[^>]*\bd="[^"]{200,}"[\s\S]*?/>', '', content)
+```
+
+Et dans `convert()`, abaisser le cap L99 :
+```python
+# Avant
+{clean_svg[:50000]}
+# Après
+{clean_svg[:20000]}
+```
+
+---
+
+**Livrable :** prompt sans tokens HoméOS, SVG < 20K chars, latence estimée < 30s. Aucun autre fichier.
 
 ---
 
