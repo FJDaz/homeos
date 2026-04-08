@@ -649,154 +649,217 @@ class ImportGenRequest(BaseModel):
 @router.post("/generate-from-svg")  # Alias compatibilité M118
 @router.post("/generate-from-import")
 async def generate_from_import(req: ImportGenRequest):
-    """Déclenche la conversion asynchrone de l'import (SVG ou ZIP) en Tailwind."""
+    """Déclenche la conversion asynchrone de l'import (SVG ou ZIP) en Tailwind — avec ForgeTrace."""
     job_id = f"job_{datetime.now().strftime('%H%M%S')}"
-    _SVG_JOBS[job_id] = {"status": "running", "template_name": None, "error": None}
-    
+    _SVG_JOBS[job_id] = {"status": "running", "template_name": None, "error": None, "trace": None}
+
     # Task asynchrone pour ne pas bloquer l'HTTP
     async def run_conversion():
+        import unicodedata
+        import base64
+
+        p_path = get_active_project_path()
+        imports_dir = p_path / "imports"
+        index_path = imports_dir / "index.json"
+
+        # Step 0 — Init trace
+        from .forge_trace import new_trace, get_trace
+
+        # Récupérer l'entrée pour le nom
         try:
-            p_path = get_active_project_path()
-            imports_dir = p_path / "imports"
-            index_path = imports_dir / "index.json"
-            
-            if not index_path.exists(): 
-                raise Exception("index.json missing")
-                
-            index_data = json.loads(index_path.read_text(encoding="utf-8"))
-            
-            # Matching robuste : normalisation unicode pour gérer NFC/NFD (macOS)
-            import unicodedata
+            index_data_pre = json.loads(index_path.read_text(encoding="utf-8"))
             req_id_nfc = unicodedata.normalize('NFC', req.import_id)
-            entry = next(
-                (i for i in index_data.get("imports", []) 
+            entry_pre = next(
+                (i for i in index_data_pre.get("imports", [])
                  if unicodedata.normalize('NFC', i["id"]) == req_id_nfc),
                 None
             )
-            
-            if not entry: 
+            trace = new_trace(job_id, req.import_id, entry_pre.get("name", "unknown") if entry_pre else "unknown")
+        except Exception:
+            trace = new_trace(job_id, req.import_id, "unknown")
+
+        _SVG_JOBS[job_id]["trace"] = True  # flag pour dire qu'un trace existe
+
+        try:
+            # Step 1 — Lire index.json
+            s1 = trace.step("read_index_json")
+            if not index_path.exists():
+                s1.fail("index.json missing")
+                trace.failed("index.json missing")
+                raise Exception("index.json missing")
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+            s1.ok(detail=f"{len(index_data.get('imports', []))} entries in index")
+
+            # Step 2 — Trouver l'entrée d'import
+            s2 = trace.step("find_import_entry")
+            req_id_nfc = unicodedata.normalize('NFC', req.import_id)
+            entry = next(
+                (i for i in index_data.get("imports", [])
+                 if unicodedata.normalize('NFC', i["id"]) == req_id_nfc),
+                None
+            )
+            if not entry:
+                s2.fail(f"Import {req.import_id} not found")
+                trace.failed(f"Import {req.import_id} not found")
                 raise Exception("Import not found")
-            
-            # Détection du format par extension
-            # Support SVG or HTML/Generic file_path (Mission 121)
+            s2.ok(detail=f"Found: {entry.get('name', '')}")
+
+            # Step 3 — Détecter le format
+            s3 = trace.step("detect_format")
             rel_path = entry.get("svg_path") or entry.get("file_path")
             if not rel_path:
-                raise Exception(f"Import entry {req.import_id} has no path field (svg_path or file_path)")
-                
-            import_path = imports_dir / rel_path
-            logger.info(f"[Mission 122] Raw suffix: '{import_path.suffix}', Normalized: '{import_path.suffix.lower()}'")
-            is_zip = import_path.suffix.lower() == ".zip"
-            
-            origin = "generated"  # Default for LLM paths
+                s3.fail("No svg_path or file_path in entry")
+                trace.failed("No path field in import entry")
+                raise Exception(f"Import entry {req.import_id} has no path field")
 
+            import_path = imports_dir / rel_path
+            suffix = import_path.suffix.lower()
+            is_zip = suffix == ".zip"
+            is_image = suffix in {'.png', '.jpg', '.jpeg', '.webp'}
+            is_svg = suffix == ".svg"
+            s3.ok(detail=f"suffix={suffix}, zip={is_zip}, image={is_image}, svg={is_svg}")
+
+            origin = "generated"
+            html_code = ""
+            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
+            stenciler_templates.mkdir(parents=True, exist_ok=True)
+
+            # BRANCHE ZIP
             if is_zip:
-                logger.info(f"[ZIP] Routing ZIP archive: {import_path.name}")
-                stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
+                s4 = trace.step("zip_extract")
                 with zipfile.ZipFile(import_path, 'r') as z:
                     file_list = z.namelist()
-                    
-                    # MISSION 119: PRIORITÉ REACT SOURCE (TSX/JSX)
+
+                    # React source ?
                     react_files = [f for f in file_list if f.endswith(('.tsx', '.jsx')) and not f.startswith('__MACOSX')]
-                    
                     if react_files:
-                        logger.info(f"[ZIP/M119] React source detected ({len(react_files)} files). Translating via LLM...")
-                        html_code = await get_react_converter().convert(import_path, entry["name"])
-                        origin = "generated"
+                        s4.ok(detail=f"React: {len(react_files)} files ({', '.join(react_files[:3])})")
+                        s5 = trace.step("llm_react_conversion")
+                        try:
+                            html_code = await get_react_converter().convert(import_path, entry["name"])
+                            s5.ok(detail="React→HTML conversion successful")
+                        except Exception as e:
+                            s5.fail(str(e))
+                            raise
                     else:
-                        # Cas 1 : dist/index.html présent → extraire le dist et servir directement
+                        # dist/index.html ?
                         dist_html = next((f for f in file_list if f.endswith('dist/index.html') and not f.startswith('__MACOSX')), None)
                         if dist_html:
+                            s4.ok(detail=f"dist/ detected: {dist_html}")
+                            s5 = trace.step("extract_dist")
                             safe_base = entry["name"].lower().replace(" ", "_").split(".")[0]
                             dist_dir = stenciler_templates / f"zip_dist_{safe_base}"
                             dist_dir.mkdir(parents=True, exist_ok=True)
                             dist_prefix = dist_html.replace('index.html', '')
+                            n_files = 0
                             for member in file_list:
                                 if member.startswith(dist_prefix) and not member.startswith('__MACOSX') and not member.endswith('/'):
                                     rel = member[len(dist_prefix):]
                                     dest = dist_dir / rel
                                     dest.parent.mkdir(parents=True, exist_ok=True)
                                     dest.write_bytes(z.read(member))
-                            
-                            wrapper_name = f"zip_dist_{safe_base}.html"
-                            wrapper_path = stenciler_templates / wrapper_name
-                            wrapper_path.write_text(
-                                f'<!DOCTYPE html><html><head><meta charset="UTF-8">'
-                                f'<style>html,body,iframe{{margin:0;padding:0;width:100%;height:100%;border:none;}}</style></head>'
-                                f'<body><iframe src="/static/templates/zip_dist_{safe_base}/index.html" style="width:100%;height:100%;border:none;"></iframe></body></html>',
-                                encoding='utf-8'
-                            )
-                            # Mettre à jour l'index directement (court-circuit du flux LLM)
+                                    n_files += 1
+                            s5.ok(detail=f"Extracted {n_files} files")
+
+                            dist_url = f"/static/templates/zip_dist_{safe_base}/index.html"
+                            wrapper_name = f"zip_dist_{safe_base}/index.html"
                             idx = json.loads(index_path.read_text(encoding='utf-8'))
                             for e2 in idx.get('imports', []):
                                 if e2['id'] == req.import_id:
                                     e2['html_template'] = wrapper_name
+                                    e2['dist_url'] = dist_url
                                     e2['elements_count'] = 0
                                     e2['origin'] = "compiled"
                                     break
                             index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
-                            _SVG_JOBS[job_id] = {"status": "done", "template_name": wrapper_name, "error": None}
-                            logger.info(f"[ZIP] dist/ extrait → {wrapper_name}")
+                            _SVG_JOBS[job_id] = {"status": "done", "template_name": wrapper_name, "dist_url": dist_url, "error": None, "trace_summary": trace.summary()}
+                            trace.done(wrapper_name)
                             return
 
-                        # Cas 2 : HTML simple dans le ZIP (pas de dist/, pas de React)
+                        # HTML simple ?
                         html_files = [f for f in file_list if f.endswith(('.html', '.htm')) and not f.startswith('__MACOSX')]
                         if not html_files:
+                            s4.fail("No React, no dist/, no HTML found")
+                            trace.failed("No supported files in ZIP")
                             raise Exception("Aucun code source React (.tsx, .jsx), aucun dist/ nor HTML trouvé.")
 
+                        s4.ok(detail=f"HTML: {html_files[0]}")
                         main_html = next((f for f in html_files if 'index.html' in f.lower()), html_files[0])
+                        s5 = trace.step("svg_convert_html")
                         svg_content = z.read(main_html).decode('utf-8', errors='replace')
-                        html_code = await get_svg_converter().convert(svg_content, entry["name"])
-                        origin = "generated"
-            else:
-                # DETECTION IMAGE (Mission 122 — Vision + M256 DESIGN.md)
-                IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
-                if import_path.suffix.lower() in IMAGE_EXTS:
-                    import base64
-                    img_b64 = base64.b64encode(import_path.read_bytes()).decode()
-                    mime = "image/png" if import_path.suffix.lower() == ".png" else "image/jpeg"
+                        try:
+                            html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                            s5.ok(detail="HTML→Tailwind conversion successful")
+                        except Exception as e:
+                            s5.fail(str(e))
+                            raise
 
-                    # M256-A/B: Vérifier/générer DESIGN.md du projet
-                    design_md = ""
-                    try:
-                        # Construire le chemin projet manuellement (évite l'import bkd_service)
-                        active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
-                        if active_file.exists():
-                            import json as _json
-                            active_data = _json.loads(active_file.read_text(encoding='utf-8'))
-                            project_id = active_data.get("active_id")
-                            if project_id:
-                                project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
-                                design_file = project_path / "DESIGN.md"
-                                if design_file.exists():
-                                    design_md = design_file.read_text(encoding='utf-8')
-                                    logger.info(f"[M256] Using existing DESIGN.md")
+            # BRANCHE IMAGE (Vision)
+            elif is_image:
+                s4 = trace.step("image_encode")
+                img_b64 = base64.b64encode(import_path.read_bytes()).decode()
+                mime = "image/png" if suffix == ".png" else "image/jpeg"
+                s4.ok(detail=f"size={len(img_b64)} chars, mime={mime}")
+
+                # DESIGN.md check
+                s5 = trace.step("check_design_md")
+                design_md = ""
+                try:
+                    active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
+                    if active_file.exists():
+                        active_data = json.loads(active_file.read_text(encoding='utf-8'))
+                        project_id = active_data.get("active_id")
+                        if project_id:
+                            project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
+                            design_file = project_path / "DESIGN.md"
+                            if design_file.exists():
+                                design_md = design_file.read_text(encoding='utf-8')
+                                s5.ok(detail=f"DESIGN.md found ({len(design_md)} chars)")
+                            else:
+                                s6 = trace.step("generate_design_md")
+                                design_md = await get_svg_converter().analyze_image_design(img_b64, mime, entry["name"])
+                                if design_md:
+                                    design_file.write_text(design_md, encoding='utf-8')
+                                    s6.ok(detail=f"DESIGN.md generated ({len(design_md)} chars)")
                                 else:
-                                    design_md = await get_svg_converter().analyze_image_design(img_b64, mime, entry["name"])
-                                    if design_md:
-                                        design_file.write_text(design_md, encoding='utf-8')
-                                        logger.info(f"[M256] DESIGN.md generated")
-                    except Exception as e:
-                        logger.warning(f"[M256] DESIGN.md handling failed: {e}")
-                        design_md = ""
+                                    s6.fail("analyze_image_design returned empty")
+                except Exception as e:
+                    if s5.status == "running":
+                        s5.fail(str(e))
+                    design_md = ""
 
+                s7 = trace.step("llm_vision_conversion")
+                try:
                     html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"], design_md)
-                else:
-                    # FORMAT SVG CLASSIQUE
-                    svg_content = import_path.read_text(encoding="utf-8")
-                    html_code = await get_svg_converter().convert(svg_content, entry["name"])
-                origin = "generated"
-            
-            # Sauvegarde dans static/templates du Stenciler
-            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
-            stenciler_templates.mkdir(parents=True, exist_ok=True)
+                    s7.ok(detail="Vision→HTML conversion successful")
+                except Exception as e:
+                    s7.fail(str(e))
+                    raise
 
+            # BRANCHE SVG
+            elif is_svg:
+                s4 = trace.step("read_svg")
+                svg_content = import_path.read_text(encoding="utf-8")
+                s4.ok(detail=f"{len(svg_content)} chars")
+
+                s5 = trace.step("llm_svg_conversion")
+                try:
+                    html_code = await get_svg_converter().convert(svg_content, entry["name"])
+                    s5.ok(detail="SVG→HTML conversion successful")
+                except Exception as e:
+                    s5.fail(str(e))
+                    raise
+
+            # ÉCRITURE DISQUE
+            s_write = trace.step("write_template")
             safe_name = entry["name"].lower().replace(" ", "_").split(".")[0]
             template_name = f"reality_{safe_name}.html"
             output_path = stenciler_templates / template_name
-            
             output_path.write_text(html_code, encoding="utf-8")
-            
-            # Mise à jour de l'index avec l'origine (generated)
+            s_write.ok(detail=f"{template_name} ({len(html_code)} chars)")
+
+            # UPDATE INDEX
+            s_idx = trace.step("update_index")
             idx = json.loads(index_path.read_text(encoding='utf-8'))
             for e2 in idx.get('imports', []):
                 if e2['id'] == req.import_id:
@@ -805,34 +868,42 @@ async def generate_from_import(req: ImportGenRequest):
                     e2['origin'] = origin
                     break
             index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
-            
-            # Sauvegarde dans static/templates du Stenciler
-            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
-            stenciler_templates.mkdir(parents=True, exist_ok=True)
+            s_idx.ok(detail=f"index.json updated, origin={origin}")
 
-            safe_name = entry["name"].lower().replace(" ", "_").split(".")[0]
-            template_name = f"reality_{safe_name}.html"
-            output_path = stenciler_templates / template_name
-            
-            output_path.write_text(html_code, encoding="utf-8")
-            
-            # Suivi des jobs de génération (M118 / M119 / M120)
-            _SVG_JOBS[job_id] = {"status": "done", "template_name": template_name, "error": None}
-            logger.info(f"[Mission 118] Generation complete: {template_name}")
-            
+            trace.done(template_name)
+            summary = trace.summary()
+            _SVG_JOBS[job_id] = {"status": "done", "template_name": template_name, "error": None, "trace_summary": summary}
+            logger.info(f"[ForgeTrace] ✅ {job_id} done: {summary['total_duration_s']}s, {len(summary['steps'])} steps")
+
         except Exception as e:
-            logger.error(f"[Mission 118] Generation failed for {job_id}: {e}")
-            _SVG_JOBS[job_id] = {"status": "failed", "error": str(e), "template_name": None}
+            error_msg = str(e)
+            trace.failed(error_msg)
+            summary = trace.summary()
+            _SVG_JOBS[job_id] = {"status": "failed", "error": error_msg, "template_name": None, "trace_summary": summary}
+            logger.error(f"[ForgeTrace] ❌ {job_id} failed: {error_msg}")
 
     # Lancement du background task
     asyncio.create_task(run_conversion())
-    
+
     return {"status": "started", "job_id": job_id}
 
 @router.get("/svg-job/{job_id}")
 async def get_svg_job(job_id: str):
-    """Polling pour connaître l'état de la génération."""
+    """Polling pour connaître l'état de la génération — avec trace complet."""
     job = _SVG_JOBS.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job mapping not found")
     return job
+
+@router.get("/forge/{job_id}/trace")
+async def get_forge_trace(job_id: str):
+    """Endpoint dédié : retourne le trace complet d'un job de forge."""
+    from .forge_trace import get_trace
+    trace = get_trace(job_id)
+    if not trace:
+        # Fallback sur le job status
+        job = _SVG_JOBS.get(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return job
+    return trace

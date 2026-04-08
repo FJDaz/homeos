@@ -1,5 +1,5 @@
 /**
- * WsForge.js — Sullivan Forge Polling & Job Tracking (Mission 156)
+ * WsForge.js — Sullivan Forge Polling & Job Tracking (Mission 156 + M266 ForgeTrace)
  */
 class WsForge {
     constructor() {}
@@ -27,6 +27,11 @@ class WsForge {
             if (!res.ok) throw new Error(`${res.status}`);
             const { job_id: jobId } = await res.json();
 
+            // M266: Ouvrir le ForgeTrace monitor
+            if (window.WsForgeMonitor) {
+                window.WsForgeMonitor.show(jobId);
+            }
+
             say('génération tailwind en cours...');
             let pollCount = 0;
             const MESSAGES = ['structuration du layout...', 'composants en cours...', 'presque terminé...'];
@@ -50,7 +55,13 @@ class WsForge {
 
                         overlay.remove();
                         const iframe = shell.querySelector('iframe');
-                        if (iframe) iframe.src = `/api/frd/file?name=${encodeURIComponent(job.template_name)}&raw=1`;
+                        if (iframe) {
+                            // dist compilé : URL statique directe (assets relatifs résolus)
+                            // sinon : frd/file (éditable Sullivan)
+                            iframe.src = job.dist_url
+                                ? job.dist_url
+                                : `/api/frd/file?name=${encodeURIComponent(job.template_name)}&raw=1`;
+                        }
                         say('✓ rendu forgé et chargé.');
                         if (statusEl) statusEl.textContent = '';
                     } else if (job.status === 'failed') {
