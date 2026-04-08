@@ -47,10 +47,14 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ### Mission 260 — DIAG/FIX : FEE Studio charge le mauvais fichier et casse les URLs relatives (écran blanc)
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
 
-**Fix appliqué :**
-- `WsFEEStudio.js` L166 : `this.ws?.currentFile` remplacé par résolution depuis `window.wsCanvas.activeScreenId` → strip `shell-` → lookup exact dans `WsImportList._items` → `item.html_template` ou `item.file_path`
+**Fix 1 appliqué (Mauvais fichier) :**
+- `WsFEEStudio.open()` : `this.ws?.currentFile` remplacé par résolution depuis `window.wsCanvas.activeScreenId` → strip `shell-` → lookup exact dans `WsImportList._items` → `item.html_template` ou `item.file_path`
 - `WsImportList.js` : `_items` exposé via getter sur `window.WsImportList`
 - Si aucun écran sélectionné → `console.warn` + fallback `landing.html` (plus d'alert bloquant)
+
+**Fix 2 appliqué (Assets 404) :**
+- `bkd_router.py` route `/fee/preview` : injection `<base href="/projects/{project_id}/" />` dans le `<head>` avant de servir le HTML
+- Les assets relatifs (`css/`, `images/`) résolvent maintenant correctement depuis l'iframe FEE
 
 **Symptômes (Double problème provoquant l'écran blanc) :** 
 1. **Mauvais Fichier** : Ouvrir FEE Studio depuis le workspace → l'iframe essaie toujours de charger `landing.html` quel que soit l'écran sélectionné sur le canvas.
