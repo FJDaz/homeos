@@ -40,12 +40,406 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
+### Thème 27 — Contexte actif dans FEE Studio et Stitch
+
+---
+
+### Mission 260 — DIAG/FIX : FEE Studio charge le mauvais fichier et casse les URLs relatives (écran blanc)
+**STATUS: 🔴 DIAG | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Symptômes (Double problème provoquant l'écran blanc) :** 
+1. **Mauvais Fichier** : Ouvrir FEE Studio depuis le workspace → l'iframe essaie toujours de charger `landing.html` quel que soit l'écran sélectionné sur le canvas.
+2. **Assets 404** : Même si le bon fichier est trouvé, l'aperçu dans l'iframe est "cassé" (sans styles ni images) à cause d'erreurs 404, car le backend renvoie le fichier HTML brut sans préciser d'URL de base pour les ressources.
+
+**Cause suspectée 1 (Mauvais fichier) :**
+`WsFEEStudio.open()` (ligne 166) :
+```js
+this.activeScreen = this.ws?.currentFile || 'landing.html';
+```
+`this.ws` résout `window.wsBackend || window.wsCanvas || {}`. `window.wsBackend` n'est jamais instancié. `window.wsCanvas` n'a pas de propriété `currentFile` — il a `activeScreenId`. Le fallback `'landing.html'` s'applique donc systématiquement.
+
+**Cause suspectée 2 (Assets 404) :**
+Dans `bkd_router.py` (ligne ~418), la route `/api/bkd/fee/preview` renvoie :
+```python
+return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
+```
+Comme l'iframe a pour base `/api/bkd/fee/preview`, toutes les références relatives (`<link href="css/style.css">`, `<img src="assets/... ">`) du projet échouent en 404.
+
+**Hypothèse de fix 1 (Mauvais Fichier) :**
+Remplacer dans `WsFEEStudio.open()` L166 :
+```js
+// Après — résoudre depuis l'écran actif du canvas
+const activeShellId = window.wsCanvas?.activeScreenId;
+const activeItem = window.WsImportList?._items?.find(
+    i => activeShellId && activeShellId.includes(i.id)
+);
+this.activeScreen = activeItem?.html_template || activeItem?.file_path || 'landing.html';
+```
+
+**Hypothèse QWEN (ajoutée au diag) :**
+Le fix ci-dessus est fragile — il repose sur un `includes()` implicite entre l'ID DOM (`shell-figma_142300_MonFrame`) et l'ID d'import (`figma_142300_MonFrame`). Ça marche si le shell est nommé `shell-{item.id}`, mais c'est un couplage non garanti.
+
+La vraie cause racine : `WsFEEStudio` est instancié avec `wsRef = window.wsBackend || window.wsCanvas || {}` mais **ne reçoit jamais explicitement** l'item sélectionné. Il devrait :
+1. Lire `window.wsCanvas.activeScreenId` (ex: `shell-figma_142300_MonFrame`)
+2. Extraire l'ID d'import en stripant le préfixe `shell-`
+3. Chercher cet ID exact dans `WsImportList._items`
+4. Prendre `item.html_template` ou `item.file_path`
+
+Si aucun shell n'est sélectionné sur le canvas (`activeScreenId === null`), afficher un message `"sélectionnez un écran sur le canvas"` au lieu de l'alert générique.
+
+**Hypothèse de fix 2 (Base URL) :**
+Dans `Frontend/3. STENCILER/routers/bkd_router.py` - Route `/api/bkd/fee/preview` :
+Injecter une balise `<base href=".../projects/...">` ou l'URL statique correcte pour ce projet dans le `<head>` du HTML brut avant de le renvoyer, afin que le navigateur sache où chercher les dépendances CSS et JS.
+Exemple: `html = html.replace("<head>", f"<head><base href='/projects/{project_id}/'>")`
+
+**Livrable QWEN :**
+1. Exécuter les tests console (`window.wsCanvas?.activeScreenId`) et reporter les valeurs.
+2. Appliquer le fix 1 dans `WsFEEStudio.js` L166 pour cibler le bon écran.
+3. Appliquer le fix 2 dans `bkd_router.py` pour injecter la base URL et réparer le rendu CSS/assets.
+4. Confirmer que la prévisualisation dans le FEE Studio fonctionne et affiche les bons styles.
+
+**Fichiers à lire :**
+- `Frontend/3. STENCILER/static/js/workspace/WsFEEStudio.js` — L160-185 (`open()`)
+- `Frontend/3. STENCILER/static/js/workspace/WsImportList.js`
+- `Frontend/3. STENCILER/static/js/workspace/WsCanvas.js`
+- `Frontend/3. STENCILER/routers/bkd_router.py` — Route `GET /fee/preview`
+
+---
+
+### Mission 261 — DIAG : Stitch s'ouvre sans projet — `stitch_project_id` non résolu
+**STATUS: 🔴 DIAG | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Symptôme :** Clic "modifier dans Stitch" → panel Stitch s'ouvre, champ `project_id` vide, aucune session chargée.
+
+**Chaîne d'appels à auditer :**
+```
+WsStitch.show()
+  → _syncProjectId()
+      → GET /api/stitch/project-info
+          → lit active_project.json → active_id
+          → lit projects/{active_id}/manifest.json → stitch_project_id
+          → si absent : retourne { linked: false }
+  → loadSession()
+      → si projectIdInput vide → GET /api/stitch/screens?project_id= → 400 ou vide
+```
+
+**Tests de diagnostic :**
+```js
+// 1. active_project.json est-il correct ?
+fetch('/api/projects/active').then(r=>r.json()).then(console.log)
+// Chercher : id, stitch_project_id dans le manifest
+
+// 2. project-info répond quoi ?
+fetch('/api/stitch/project-info').then(r=>r.json()).then(console.log)
+// Attendre : { linked: true/false, stitch_project_id, title }
+
+// 3. L'input est-il rempli après _syncProjectId ?
+window.wsStitch?.projectIdInput?.value  // vide = _syncProjectId n'a rien trouvé
+
+// 4. Manifest du projet actif
+fetch('/api/projects/active').then(r=>r.json()).then(d=>console.log(d.stitch_project_id))
+```
+
+**Hypothèse 1 — `manifest.stitch_project_id` est null** (TRÈS PROBABLE)
+Le projet de l'élève n'a jamais été lié à un projet Stitch → `linked: false` → pas d'auto-fill → `loadSession()` sans project_id → vide.
+
+Fix : si `linked: false`, afficher dans le panel un message `"lier ce projet à Stitch"` avec un champ de saisie manuelle du stitch_project_id + bouton "enregistrer" qui fait `PATCH /api/projects/active/manifest` avec `{ stitch_project_id: value }`.
+
+**Hypothèse 2 — `active_project.json` ne pointe pas sur le bon projet** (PROBABLE)
+Le workspace est ouvert avec `?project_id=X` mais `POST /api/projects/activate` dans le `<head>` a échoué silencieusement → `active_project.json` pointe sur un autre projet → manifest sans stitch_project_id.
+
+Test :
+```js
+// URL actuelle
+new URLSearchParams(window.location.search).get('project_id')
+// vs ce que le backend voit comme actif
+fetch('/api/projects/active').then(r=>r.json()).then(d=>console.log(d.id))
+// Les deux doivent matcher
+```
+
+**Livrable QWEN :**
+1. Exécuter les tests console, reporter les valeurs
+2. Identifier laquelle des deux hypothèses est correcte
+3. Si H1 : implémenter le flow de liaison manuelle dans `WsStitch.js` (message + input + PATCH)
+4. Si H2 : identifier pourquoi `activate` échoue et corriger dans `workspace.html` ou `projects_router.py`
+5. Objectif final : ouvrir Stitch → project_id auto-rempli depuis la session workspace
+
+**Fichiers à lire :**
+- `Frontend/3. STENCILER/static/js/workspace/WsStitch.js` — `show()`, `_syncProjectId()`, `loadSession()`
+- `Frontend/3. STENCILER/routers/stitch_router.py` — `GET /api/stitch/project-info`
+- `Frontend/3. STENCILER/static/templates/workspace.html` — balise `<head>`, appel activate
+- `Frontend/3. STENCILER/routers/projects_router.py` — `POST /api/projects/activate`
+
+---
+
 ### Thème 26 — Forge Pipeline : réparation Vision-to-Code
 
 ---
 
+### Mission 264 — dist.zip compilé : snapshot DOM via Playwright → HTML éditable
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Contexte :** Un dist.zip React sans sources TSX est actuellement extrait tel quel et servi dans l'iframe — non éditable par Sullivan. Playwright est installé (`python3 -c "import playwright"` → ok). L'objectif : charger le bundle headless, attendre le render React, snapshotter le DOM statique, convertir en Tailwind HTML via LLM → résultat éditable.
+
+**Fichiers à lire :**
+- `Backend/Prod/retro_genome/routes.py` — bloc `dist_html` (cas dist/index.html dans le ZIP, L706-739)
+- `Backend/Prod/retro_genome/react_to_tailwind.py` — `convert()` existant (source TSX → Tailwind)
+
+**Ce qu'il faut créer :**
+Ajouter une méthode `snapshot_and_convert(dist_dir: Path, entry_name: str) -> str` dans `react_to_tailwind.py` :
+
+```python
+async def snapshot_and_convert(self, dist_dir: Path, entry_name: str) -> str:
+    """
+    Charge le dist React dans Playwright, snapshotte le DOM après render,
+    nettoie le HTML (supprime scripts/styles inline lourds),
+    convertit en Tailwind via LLM.
+    """
+    from playwright.async_api import async_playwright
+
+    index_html = dist_dir / "index.html"
+    if not index_html.exists():
+        raise FileNotFoundError(f"index.html absent dans {dist_dir}")
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+        # Charger en file:// — pas besoin de serveur
+        await page.goto(f"file://{index_html.resolve()}", wait_until="networkidle", timeout=15000)
+        # Attendre que React ait rendu (div#root non vide)
+        await page.wait_for_selector("#root > *", timeout=10000)
+        dom_html = await page.content()
+        await browser.close()
+
+    # Nettoyer le HTML snapshot (supprimer scripts, styles inline lourds)
+    import re
+    dom_html = re.sub(r'<script[\s\S]*?</script>', '', dom_html, flags=re.IGNORECASE)
+    dom_html = re.sub(r'<style[^>]*>[\s\S]{2000,}?</style>', '', dom_html, flags=re.IGNORECASE)
+    dom_html = dom_html[:40000]  # cap contexte LLM
+
+    # Convertir le DOM statique en Tailwind HTML via LLM
+    prompt = f"""Tu es un Expert Intégrateur Frontend.
+MISSION : Ce HTML est un snapshot DOM d'une app React compilée.
+Convertis-le en HTML5 sémantique + Tailwind CSS autonome et éditable.
+Préserve fidèlement la structure, les textes, les couleurs visibles.
+Supprime toute dépendance React (data-reactroot, __reactFiber, etc.).
+Résultat : document HTML5 complet autonome (<!DOCTYPE html>).
+Réponds UNIQUEMENT avec le code HTML. Pas de prose.
+
+NOM : {entry_name}
+
+DOM SNAPSHOT :
+{dom_html}
+"""
+    from Backend.Prod.models.gemini_client import GeminiClient
+    client = GeminiClient(execution_mode="BUILD")
+    result = await client.generate(prompt, max_tokens=16000, temperature=0.1)
+    if not result.success:
+        raise RuntimeError(f"LLM conversion failed: {result.error}")
+    code = result.code
+    if "```html" in code:
+        code = code.split("```html")[1].split("```")[0]
+    elif "```" in code:
+        code = code.split("```")[1].split("```")[0]
+    return code.strip()
+```
+
+**Brancher dans `routes.py` — remplacer le court-circuit dist :**
+
+Actuellement (L706-739), quand `dist/index.html` est détecté, le code extrait le dist et retourne `origin: compiled`. Remplacer par :
+
+```python
+if dist_html:
+    safe_base = entry["name"].lower().replace(" ", "_").split(".")[0]
+    dist_dir = stenciler_templates / f"zip_dist_{safe_base}"
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    # Extraire le dist
+    dist_prefix = dist_html.replace('index.html', '')
+    for member in file_list:
+        if member.startswith(dist_prefix) and not member.startswith('__MACOSX') and not member.endswith('/'):
+            rel = member[len(dist_prefix):]
+            dest = dist_dir / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(z.read(member))
+    # Snapshot + conversion Tailwind
+    try:
+        html_code = await get_react_converter().snapshot_and_convert(dist_dir, entry["name"])
+        origin = "generated"
+    except Exception as e:
+        logger.warning(f"[ZIP/Playwright] Snapshot failed ({e}), fallback dist_url")
+        # Fallback : servir le dist compilé si Playwright échoue
+        dist_url = f"/static/templates/zip_dist_{safe_base}/index.html"
+        wrapper_name = f"zip_dist_{safe_base}/index.html"
+        idx = json.loads(index_path.read_text(encoding='utf-8'))
+        for e2 in idx.get('imports', []):
+            if e2['id'] == req.import_id:
+                e2['html_template'] = wrapper_name
+                e2['dist_url'] = dist_url
+                e2['elements_count'] = 0
+                e2['origin'] = "compiled"
+                break
+        index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
+        _SVG_JOBS[job_id] = {"status": "done", "template_name": wrapper_name, "dist_url": dist_url, "error": None}
+        return
+    # Suite normale : sauvegarder le HTML généré dans templates
+    # (le flux rejoint le chemin commun après le bloc ZIP)
+    template_name = f"reality_{safe_base}.html"
+    (stenciler_templates / template_name).write_text(html_code, encoding='utf-8')
+    idx = json.loads(index_path.read_text(encoding='utf-8'))
+    for e2 in idx.get('imports', []):
+        if e2['id'] == req.import_id:
+            e2['html_template'] = template_name
+            e2['elements_count'] = 0
+            e2['origin'] = "generated"
+            break
+    index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
+    _SVG_JOBS[job_id] = {"status": "done", "template_name": template_name, "error": None}
+    logger.info(f"[ZIP/Playwright] snapshot → {template_name}")
+    return
+```
+
+**Points d'attention :**
+- `wait_for_selector("#root > *")` — si le div racine React s'appelle autrement (`#app`, `#main`), Playwright timeout. Ajouter un fallback : `await page.wait_for_load_state("networkidle")` suffit si selector échoue.
+- Playwright headless en `file://` ne charge pas les assets réseau — c'est OK, on veut le DOM structurel, pas les images.
+- Si Playwright échoue (env sans Chromium, timeout) : fallback propre vers `dist_url` compilé (déjà géré dans le code ci-dessus).
+
+**Livrable :**
+- dist.zip forgé → HTML Tailwind éditable (plus d'iframe compilé)
+- Fallback silencieux vers dist compilé si Playwright échoue
+- Aucune régression sur les ZIP avec sources TSX (M119 inchangé)
+
+---
+
+### Mission 263 — Canvas N0 : drag d'éléments dans un dist React compilé
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+**Contexte :** Le hover engine M237 (injecté dans l'iframe) détecte correctement les éléments du dist React via `mouseover`. Le drag ne fonctionne pas : déplacer un nœud DOM dans un bundle React compilé est impossible sans passer par le state React — le reconciler réécrit le DOM au prochain render.
+
+**Approche :** ne pas déplacer l'élément React. À la place, créer un **calque SVG fantôme** sur le canvas au-dessus de l'iframe. Au `mousedown` sur un élément hover, capturer sa `getBoundingClientRect()`, créer un rectangle SVG fantôme aux mêmes dimensions et coordonnées canvas, le rendre draggable sur le canvas. L'iframe reste intacte.
+
+**Ce que le drag fantôme permet :**
+- Repositionner visuellement un élément sans toucher au React bundle
+- Stocker la position finale dans le manifest (`element_overrides`) pour reconstruction future
+- Sullivan peut lire ces overrides pour proposer une version HTML éditable
+
+**Séquence technique :**
+
+1. Dans `WsCanvas.js` — écouter `hm-select` depuis l'iframe :
+```js
+// Déjà présent : window.addEventListener('message', ...)
+// Ajouter sur hm-select :
+if (e.data.type === 'hm-select') {
+    this._selectedIframeEl = e.data; // { tag, id, cls, rect }
+}
+```
+
+2. Le hover engine injecté (dans `injectHoverEngine()`) doit envoyer le `rect` avec `hm-select` :
+```js
+document.addEventListener('mousedown', function(e) {
+    const el = e.target;
+    const rect = el.getBoundingClientRect();
+    window.parent.postMessage({
+        type: 'hm-select',
+        tag: el.tagName, id: el.id || '', cls: (el.className||'').toString().slice(0,80),
+        rect: { x: rect.left, y: rect.top, w: rect.width, h: rect.height }
+    }, '*');
+});
+```
+
+3. Dans `WsCanvas.js` — à réception de `hm-select` avec `rect`, créer le fantôme SVG :
+```js
+_createGhostElement(shellG, rect) {
+    // Convertir les coordonnées iframe → canvas world
+    const shellRect = shellG.querySelector('foreignObject').getBoundingClientRect();
+    const scaleX = (shellRect.width / parseFloat(shellG.querySelector('foreignObject').getAttribute('width')));
+    const wx = (shellRect.left - this.wrapper.getBoundingClientRect().left - this.viewX) / this.scale
+               + rect.x / scaleX;
+    const wy = (shellRect.top  - this.wrapper.getBoundingClientRect().top  - this.viewY) / this.scale
+               + rect.y / scaleX;
+    const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    ghost.setAttribute('x', wx); ghost.setAttribute('y', wy);
+    ghost.setAttribute('width', rect.w / scaleX); ghost.setAttribute('height', rect.h / scaleX);
+    ghost.setAttribute('fill', 'rgba(140,198,63,0.15)');
+    ghost.setAttribute('stroke', '#8cc63f'); ghost.setAttribute('stroke-width', '1.5');
+    ghost.setAttribute('rx', '4');
+    ghost.classList.add('ws-ghost-element');
+    ghost.dataset.sourceTag = this._selectedIframeEl?.tag || '';
+    ghost.dataset.sourceId  = this._selectedIframeEl?.id  || '';
+    this.content.appendChild(ghost);
+    return ghost;
+}
+```
+
+4. Rendre le fantôme draggable avec le même système `mousedown/mousemove/mouseup` que les shells.
+
+5. Au `mouseup`, émettre un event `ws-element-placed` avec `{ sourceId, sourceCls, x, y, w, h }` — Sullivan pourra le lire pour proposer une refonte positionnée.
+
+**Points d'attention :**
+- Un seul fantôme actif à la fois — supprimer le précédent au prochain `hm-select`
+- `pointer-events` de l'iframe : `auto` en mode `select` uniquement (déjà géré M238)
+- Ne pas stocker les fantômes dans le manifest pour l'instant — juste l'affichage
+
+**Fichiers :** `WsCanvas.js` (ghost + drag), `injectHoverEngine` dans `WsCanvas.js` (ajouter rect dans hm-select)
+
+**Livrable :**
+- Hover → outline vert (déjà OK)
+- Mousedown → fantôme SVG vert semi-transparent sur le canvas
+- Drag du fantôme → repositionnement fluide
+- Mouseup → console `[WS-GHOST]` avec tag/id/position finale
+
+---
+
+### Mission 262 — Forge Vision : remettre le pipeline dans un état carré
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Fichier unique :** `Backend/Prod/retro_genome/svg_to_tailwind.py`
+
+**Fix 1 — Retirer les tokens HoméOS du fallback `convert_image()` — bloc `else` du `design_section` L164-172**
+```python
+# Avant
+else:
+    design_section = f"""
+TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
+- Background principal : `{tokens['colors']['neutral']}`
+...
+"""
+# Après
+else:
+    design_section = """
+CONTRAINTE DESIGN : aucun design system prédéfini pour ce projet.
+Extrais les couleurs, typographies et espacements directement depuis l'image.
+Sois fidèle à ce que tu vois — ne substitue pas tes propres préférences.
+"""
+```
+
+**Fix 2 — Restaurer le fallback MIMO Vision (supprimé par erreur)**
+MIMO-V2-Omni supporte la Vision base64 OpenAI-compatible. Le remettre après `result = await self.client.generate_with_image(...)` :
+```python
+if not result.success:
+    logger.warning("[SvgToTailwind] Gemini Vision failed, trying Mimo fallback...")
+    try:
+        from Backend.Prod.models.mimo_client import MimoClient
+        mimo = MimoClient()
+        result = await mimo.generate_with_image(
+            prompt=prompt, image_base64=image_base64,
+            mime_type=mime_type, max_tokens=16000, temperature=0.1
+        )
+    except Exception as e:
+        logger.error(f"[SvgToTailwind] Mimo fallback vision failed: {e}")
+if not result.success:
+    logger.error(f"[SvgToTailwind] LLM Vision Error: {result.error}")
+    raise RuntimeError(f"Vision conversion failed: {result.error}")
+```
+
+**Fix 3 — Vérifier `analyze_image_design()` (même fichier L221+)**
+S'assurer que son prompt n'injecte pas de tokens HoméOS. Si oui, même correction que Fix 1.
+
+**Livrable :** aucun autre fichier touché. Scope strict.
+
+---
+
 ### Mission 257 — Hotfix : `convert_image()` — retirer les tokens HoméOS du fallback
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: CODE DIRECT — FJD**
+**STATUS: ✅ ABSORBÉE PAR M262**
 
 **Problème :** quand `design_md` est vide (projet sans DESIGN.md ou exception M256-A), `convert_image()` injecte les tokens HoméOS (`#8cc63f`, `#f7f6f2`, `#3d3d3c`, Geist) comme contrainte `IMPÉRATIVE`. Sullivan ignore l'image et produit une page HoméOS.
 
@@ -134,6 +528,101 @@ async def _generate_with_image_genai(self, prompt, image_base64, mime_type, max_
 - Badge `rendu compilé` visible dans le header du shell
 - Aucune tentative d'injection hover sur ces shells
 - Message status bar en mode select
+
+---
+
+### Thème 28 — Reroutage plugin Figma → Workspace (court-circuit Intent Viewer)
+
+### Mission 265 — Plugin Figma → Workspace direct
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+**Problème :** Le plugin Figma envoie les SVG vers l'Intent Viewer (`/intent-viewer`) qui les analyse puis redirige vers le FRD Editor. C'est l'ancien pipeline — lent, inutile pour du SVG propre qui n'a pas besoin d'interprétation Vision.
+
+**Flux actuel (à abandonner) :**
+```
+Plugin Figma → POST /api/import/figma → intent-viewer → analyse → FRD Editor
+```
+
+**Flux cible :**
+```
+Plugin Figma → POST /api/import/figma → imports/ du projet actif → canvas workspace
+```
+
+Le SVG arrive propre de Figma → pas de Vision, pas d'Intent Viewer, pas de forge LLM. Il suffit de le sauver dans `imports/`, créer l'entrée `index.json`, et l'afficher sur le canvas workspace.
+
+---
+
+**Fix 1 — `ui.html` : changer le lien de destination après export**
+
+**Fichier :** `Frontend/figma-plugin/ui.html` — ~L261
+
+```html
+<!-- Avant -->
+<a href="http://localhost:9998/intent-viewer" target="_blank">
+    ouvrir dans l'intent viewer →
+</a>
+
+<!-- Après -->
+<a href="http://localhost:9998/workspace" target="_blank">
+    ouvrir dans le workspace →
+</a>
+```
+
+---
+
+**Fix 2 — `routes.py` : créer la route `POST /api/import/figma`**
+
+**Fichier :** `Backend/Prod/retro_genome/routes.py` (ou `Frontend/3. STENCILER/routers/import_router.py`)
+
+La route doit :
+1. Recevoir le payload du plugin : `{ svg: string, name: string }`
+2. Sauver le `.svg` dans `projects/{active_id}/imports/{today_str}/name.svg`
+3. Créer/mettre à jour `index.json` :
+```json
+{
+  "id": "figma_{timestamp}",
+  "name": "nom_du_frame",
+  "file_path": "2026-04-08/mon_frame.svg",
+  "svg_path": "2026-04-08/mon_frame.svg",
+  "type": "svg",
+  "archetype_label": "import svg",
+  "html_template": null
+}
+```
+4. Retourner `{ status: "ok", import_id: "figma_..." }`
+
+Le SVG sera ensuite forgé en HTML Tailwind par le pipeline existant (`POST /generate-from-import`) quand l'utilisateur le déclenchera depuis le workspace.
+
+---
+
+**Fix 3 — Plugin `code.js` : poster vers la bonne route**
+
+**Fichier :** `Frontend/figma-plugin/code.js`
+
+Vérifier que le `fetch()` dans le handler d'export pointe vers :
+```js
+fetch('http://localhost:9998/api/import/figma', {
+    method: 'POST',
+    body: JSON.stringify({ svg: svgString, name: node.name }),
+    headers: { 'Content-Type': 'application/json' }
+})
+```
+
+Et non vers un endpoint intent-viewer.
+
+---
+
+**Fichiers à lire :**
+- `Frontend/figma-plugin/ui.html` — L255-265 (bouton post-export)
+- `Frontend/figma-plugin/code.js` — handlers d'export SVG, fetch destination
+- `Backend/Prod/retro_genome/routes.py` — section import upload (inspirer du pattern `upload-import`)
+- `Frontend/3. STENCILER/routers/import_router.py` — `POST /api/import/upload` (pattern existant)
+
+**Critères de succès :**
+1. Export Figma → SVG sauvegardé dans `imports/` du projet actif
+2. Entrée visible dans la screen list du workspace
+3. Bouton post-export ouvre le workspace (pas l'Intent Viewer)
+4. Aucun appel à l'Intent Viewer dans le chaînon
 
 ---
 
@@ -2230,14 +2719,32 @@ CSS dans `homeos-nav.css` :
 ### Mission 259 — dist.zip : mode preview statique sans React bundle
 **STATUS: 🔵 BACKLOG | ACTOR: QWEN | DATE: 2026-04-08**
 
-**Contexte :** Les dist.zip React ne sont jamais draggables car le bundle JS gère ses propres événements. C'est fondamental — pas de fix possible sans modifier le bundle.
+**CR — Diagnostic final :**
+- Les bundles React dans iframes ne sont JAMAIS draggables — leurs event listeners capturent tous les événements avant que le navigateur ne les transmette
+- `elementsFromPoint()` fonctionne pour sélectionner l'élément dans l'arbre React mais le `transform: translate()` appliqué n'a aucun effet visuel car React contrôle le rendu via son virtual DOM
+- **Décision :** dist.zip = mode preview seule. Pour modifier le contenu, utiliser le pipeline PNG (M256) sur un screenshot du dist.zip
 
-**Solutions :**
-1. **Extraction HTML brut** : pendant le forge, au lieu de servir le `dist/index.html` avec son bundle JS, extraire le HTML statique rendu (sans les event listeners React) → le rendre draggable
-2. **Screenshot + forge** : prendre un screenshot du dist.zip → le forger via le pipeline PNG (M256) → HTML Tailwind draggable
-3. **Accepter la limitation** : les dist.zip sont en "mode preview seule" — pas de drag, pas de modification dans le canvas
+---
 
-**Fichiers à modifier :** `Backend/Prod/retro_genome/routes.py` — pipeline ZIP dist/
+### CR Session 8 avril 2026 — M257/M258/M259
+
+**M257 — genai SDK pour Gemini 3.x :**
+- Tous les modèles Gemini Vision retournaient 404 via REST API `v1beta` — Google a déprécié les anciens noms
+- SDK `google-genai` v1.70.0 installé pour Python 3.14 — testé et OK avec `gemini-3.1-flash-lite-preview`
+- `generate_with_image()` route automatiquement : modèles "preview" → genai SDK, modèles stables → REST API
+- Pipeline PNG corrigé : A (analyse design) → B (save DESIGN.md) → C (forge avec DESIGN.md injecté)
+- **⚠️ Non testé end-to-end** — serveur tué avant validation. À retester au prochain redémarrage.
+
+**M258 — Drag éléments dans iframe :**
+- `elementFromPoint()` → `elementsFromPoint()` + filtre `_findElementAtPoint()`
+- Fonctionne sur HTML statique ET bundles React (traverse les conteneurs wrapper)
+- **⚠️ Le drag sur React bundles reste non-fonctionnel** — React capture les events avant le navigateur (M259)
+
+**M259 — dist.zip draggable :**
+- **Diagnostic :** Impossible — React contrôle tous les événements dans l'iframe
+- **Décision :** dist.zip = preview seule. Modification via screenshot + pipeline PNG (M256).
+
+**Fichiers modifiés :** `gemini_client.py`, `svg_to_tailwind.py`, `routes.py`, `WsCanvas.js`
 
 ---
 

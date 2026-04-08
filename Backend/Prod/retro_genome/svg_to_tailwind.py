@@ -162,13 +162,10 @@ DESIGN SYSTEM DU PROJET (IMPÉRATIF — respecte fidèlement ce document) :
 {design_md[:3000]}
 """
         else:
-            design_section = f"""
-TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
-- Background principal : `{tokens['colors']['neutral']}`
-- Texte principal : `{tokens['colors']['text']}`
-- Couleur d'accent (boutons, liens actifs) : `{tokens['colors']['primary']}`
-- Typographie : {tokens['typography']['body']} (via Google Fonts ou CDN)
-- Border-radius : {tokens['shape'].get('border_radius', '6px')}
+            design_section = """
+CONTRAINTE DESIGN : aucun design system prédéfini pour ce projet.
+Extrais les couleurs, typographies et espacements directement depuis l'image.
+Sois fidèle à ce que tu vois — ne substitue pas tes propres préférences de style.
 """
 
         prompt = f"""Tu es un Expert Intégrateur Frontend AetherFlow spécialisé en Vision-to-Code.
@@ -194,13 +191,14 @@ Réponds UNIQUEMENT avec le code HTML complet. Pas de prose, pas de markdown.
             temperature=0.1
         )
 
+        # M262-Fix2: Fallback MIMO Vision après Gemini échoué
         if not result.success:
             logger.warning("[SvgToTailwind] Gemini Vision failed, trying Mimo fallback...")
             try:
                 from Backend.Prod.models.mimo_client import MimoClient
                 mimo = MimoClient()
                 result = await mimo.generate_with_image(
-                    prompt=prompt, image_base64=image_base64, 
+                    prompt=prompt, image_base64=image_base64,
                     mime_type=mime_type, max_tokens=16000, temperature=0.1
                 )
             except Exception as e:

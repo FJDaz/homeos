@@ -246,21 +246,20 @@
                 }
                 
                 try {
-                    const response = await fetch('http://localhost:9998/api/retro-genome/upload-svg', {
+                    const response = await fetch('http://localhost:9998/api/import/figma', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ svg: msg.svg, name: msg.name })
                     });
                     const result = await response.json();
 
-                    const archetype = result.archetype?.label || result.archetype?.name || '—';
-                    const elements = result.visual_analysis?.elements?.length ?? '?';
+                    const importId = result.import_id || '—';
                     statusEl.innerHTML = `
                         <span style="color:var(--primary);font-weight:600;">${msg.name}</span>
-                        reçu — archétype : <strong>${archetype}</strong>, ${elements} éléments<br>
-                        <a href="http://localhost:9998/intent-viewer" target="_blank"
+                        reçu — ${importId}<br>
+                        <a href="http://localhost:9998/workspace" target="_blank"
                            style="color:var(--primary);font-size:10px;text-decoration:underline;margin-top:4px;display:inline-block;">
-                            ouvrir dans l'intent viewer →
+                            ouvrir dans le workspace →
                         </a>`;
                     if (msg.isLast) {
                         document.getElementById('analyze-svg').classList.remove('loading');

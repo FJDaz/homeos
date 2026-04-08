@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import logging
+import re
 import unicodedata
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Body, Request
@@ -76,6 +77,64 @@ def ensure_ids(html: str) -> str:
             logger.info(f"Ensured ID: {current_id} -> {new_id}")
 
     return str(soup)
+
+
+@router.post("/api/import/figma")
+async def import_figma_svg(body: dict = Body(...)):
+    """M265: Reçoit un SVG du plugin Figma → sauve dans imports/ du projet actif."""
+    svg_content = body.get("svg", "")
+    name = body.get("name", "figma_export")
+    if not svg_content:
+        raise HTTPException(status_code=400, detail="SVG content is empty")
+
+    imports_dir = get_project_imports_dir()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    timestamp_str = datetime.now().strftime("%H%M%S")
+
+    # Clean name for filesystem
+    safe_name = re.sub(r'[^\w\-_]', '_', name).strip()[:80]
+    stored_filename = f"{safe_name}.svg"
+    rel_path = f"{today_str}/{stored_filename}"
+
+    day_dir = imports_dir / today_str
+    day_dir.mkdir(parents=True, exist_ok=True)
+    svg_path = day_dir / stored_filename
+    svg_path.write_text(svg_content, encoding="utf-8")
+
+    # Update index.json
+    index_path = imports_dir / "index.json"
+    import_id = f"figma_{timestamp_str}_{safe_name}"
+
+    try:
+        if index_path.exists():
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+        else:
+            index_data = {"imports": []}
+
+        new_entry = {
+            "id": import_id,
+            "name": name,
+            "timestamp": datetime.now().isoformat(),
+            "file_path": rel_path,
+            "svg_path": rel_path,
+            "date": today_str,
+            "type": "svg",
+            "archetype_id": "multi_format_import",
+            "archetype_label": "import svg",
+            "html_template": None,
+            "elements_count": 0
+        }
+        index_data["imports"].insert(0, new_entry)
+        index_data["imports"] = index_data["imports"][:50]
+        index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception as e:
+        logger.error(f"[Import figma] Failed to update index.json: {e}")
+
+    global _NEW_IMPORTS_COUNT
+    _NEW_IMPORTS_COUNT += 1
+
+    logger.info(f"[Import figma] SVG saved: {svg_path}")
+    return {"status": "ok", "import_id": import_id, "name": name}
 
 
 @router.post("/api/import/upload")
