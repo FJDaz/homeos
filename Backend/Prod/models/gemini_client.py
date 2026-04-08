@@ -387,6 +387,36 @@ class GeminiClient(BaseLLMClient):
             provider=self.name
         )
 
+    async def _generate_with_image_genai(
+        self,
+        prompt: str,
+        image_base64: str,
+        mime_type: str,
+        max_tokens: int,
+        temperature: float,
+    ) -> str:
+        """Use the new google-genai SDK for 3.x preview models."""
+        from google import genai
+        client = genai.Client(api_key=self.api_key)
+        
+        import base64
+        
+        contents = [
+            {
+                "parts": [
+                    {"inline_data": {"mime_type": mime_type, "data": image_base64}},
+                    {"text": prompt},
+                ]
+            }
+        ]
+        
+        response = client.models.generate_content(
+            model=self.primary_model,
+            contents=contents,
+            config={"max_output_tokens": max_tokens, "temperature": temperature},
+        )
+        return response.text
+
     async def generate_with_image(
         self,
         prompt: str,
@@ -429,30 +459,47 @@ class GeminiClient(BaseLLMClient):
 
         last_error: Optional[str] = None
         last_model_used: Optional[str] = None
+        max_tokens_val = max_tokens or settings.max_tokens
+        temp_val = temperature if temperature is not None else settings.temperature
 
         for model_idx, model_name in enumerate(self.fallback_models):
-            api_url = f"{self.base_url}/{model_name}:generateContent?key={self.api_key}"
+            is_preview = "preview" in model_name.lower()
             logger.debug(
                 f"Trying Gemini Vision model {model_idx + 1}/{len(self.fallback_models)}: {model_name}"
+                + (" (genai SDK)" if is_preview else "")
             )
             backoff = 1.0
             model_failed = False
 
             for attempt in range(self.max_retries + 1):
                 try:
-                    response = await self.client.post(api_url, json=request_data)
-                    response.raise_for_status()
-                    result_data = response.json()
+                    if is_preview:
+                        # Use new google-genai SDK for 3.x preview models
+                        text_content = await self._generate_with_image_genai(
+                            prompt=prompt,
+                            image_base64=image_base64,
+                            mime_type=mime_type,
+                            max_tokens=max_tokens_val,
+                            temperature=temp_val,
+                        )
+                        result_data = {}  # No usage data from genai SDK
+                    else:
+                        # Use old REST API for stable models
+                        api_url = f"{self.base_url}/{model_name}:generateContent?key={self.api_key}"
+                        response = await self.client.post(api_url, json=request_data)
+                        response.raise_for_status()
+                        result_data = response.json()
 
-                    candidates = result_data.get("candidates", [])
-                    if not candidates:
-                        raise ValueError("No candidates in Gemini response")
-                    content = candidates[0].get("content", {})
-                    parts = content.get("parts", [])
-                    if not parts:
-                        raise ValueError("No parts in Gemini response")
-                    text_content = parts[0].get("text", "")
+                        candidates = result_data.get("candidates", [])
+                        if not candidates:
+                            raise ValueError("No candidates in Gemini response")
+                        content = candidates[0].get("content", {})
+                        parts = content.get("parts", [])
+                        if not parts:
+                            raise ValueError("No parts in Gemini response")
+                        text_content = parts[0].get("text", "")
 
+                    # Usage tracking (REST API only — genai SDK doesn't expose this)
                     usage = result_data.get("usageMetadata", {})
                     input_tokens = usage.get("promptTokenCount", 0)
                     output_tokens = usage.get("candidatesTokenCount", 0)
