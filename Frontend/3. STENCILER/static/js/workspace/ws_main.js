@@ -266,6 +266,10 @@ async function fetchWorkspaceImports() {
         imports.forEach(item => {
             const el = document.createElement('div');
             el.className = 'group flex items-center justify-between p-2 rounded-lg border border-slate-100 bg-white hover:border-homeos-green/30 transition-all cursor-pointer';
+
+            // M241: [S] button only for Stitch imports
+            const isStitch = item.archetype_id === 'stitch_import' || (item.archetype_label && item.archetype_label.toLowerCase().includes('stitch'));
+
             el.innerHTML = `
                 <span class="text-[10px] font-medium text-slate-600 truncate flex-1">${item.name}</span>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -273,10 +277,10 @@ async function fetchWorkspaceImports() {
                     <button class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Aperçu HoméOS">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg>
                     </button>
-                    <!-- [S] Stitch -->
+                    ${isStitch ? `<!-- [S] Stitch -->
                     <button class="btn-s-open p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" title="Ouvrir dans Stitch">
                         <span class="text-[9px] font-black font-sans">S</span>
-                    </button>
+                    </button>` : ''}
                     <!-- [↻] Sync -->
                     <button class="btn-s-sync p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Synchroniser">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>

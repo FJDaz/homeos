@@ -159,22 +159,24 @@ class WsFEEStudio {
 
     async open() {
         this.injectUI();
-        // Résoudre wsBackend dynamiquement si non passé au constructeur
-        if (!this.ws) this.ws = window.wsBackend || window.wsCanvas || {};
-        const projectId = this.ws.activeProject || null;
-        this.activeScreen = this.ws.currentFile || 'landing.html';
 
-        if (!projectId) {
+        // M240: Resolve projectId from session, not wsBackend
+        const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        this.projectId = session.active_project_id || session.project_id || null;
+        this.activeScreen = this.ws?.currentFile || 'landing.html';
+
+        if (!this.projectId) {
+            console.warn('[FEEStudio] Aucun projet actif dans la session');
             alert("veuillez activer un projet");
             return;
         }
 
-        document.getElementById('fee-studio-project-label').innerText = `projet: ${projectId}`;
+        document.getElementById('fee-studio-project-label').innerText = `projet: ${this.projectId}`;
         document.getElementById('fee-studio-overlay').classList.remove('hidden');
         this.isOpen = true;
 
         const iframe = document.getElementById('fee-studio-iframe');
-        iframe.src = `/api/bkd/fee/preview?project_id=${projectId}&path=${this.activeScreen}`;
+        iframe.src = `/api/bkd/fee/preview?project_id=${this.projectId}&path=${this.activeScreen}`;
         
         iframe.onload = () => {
              this.scanTriggers();
@@ -205,7 +207,7 @@ class WsFEEStudio {
             // Fetch coverage (logic.js content)
             let coverage = "";
             try {
-                const res = await fetch(`/api/bkd/fee/logic?project_id=${this.ws.activeProject}&screen=${this.activeScreen}`);
+                const res = await fetch(`/api/bkd/fee/logic?project_id=${this.projectId}&screen=${this.activeScreen}`);
                 const data = await res.json();
                 coverage = data.code || "";
             } catch(e) { console.warn("Coverage fetch failed", e); }
@@ -287,7 +289,7 @@ class WsFEEStudio {
                     trigger: this.selectedTrigger,
                     state: this.selectedState,
                     history: this.feeHistory,
-                    project_id: this.ws.activeProject,
+                    project_id: this.projectId,
                     screen: this.activeScreen
                 })
             });
@@ -350,7 +352,7 @@ class WsFEEStudio {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    project_id: this.ws.activeProject,
+                    project_id: this.projectId,
                     screen: this.activeScreen,
                     code: this.lastGeneratedCode,
                     trigger: this.selectedTrigger

@@ -54,48 +54,18 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Mission 240 — WsFEEStudio : résoudre projectId depuis la session
-**STATUS: 🔴 À TRAITER — ACTOR: CODE DIRECT (Claude)**
+**STATUS: ✅ LIVRÉ**
 
-**Symptôme** : FEE Studio affiche `alert("veuillez activer un projet")` même quand un projet est actif.
-
-**Cause** : `window.wsBackend` n'est **jamais instancié** dans `ws_main.js`. `WsFEEStudio.open()` lit `this.ws.activeProject` où `this.ws` tombe sur `{}` → `projectId` = undefined.
-
-**Fix** : Dans `WsFEEStudio.open()`, résoudre le projectId depuis la session localStorage au lieu de dépendre de `wsBackend.activeProject` :
-
-```js
-async open() {
-    this.injectUI();
-    // Résoudre le projet actif depuis la session
-    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
-    const projectId = session.active_project_id || session.project_id || null;
-    if (!projectId) {
-        console.warn('[FEEStudio] Aucun projet actif dans la session');
-        alert("veuillez activer un projet");
-        return;
-    }
-    // ... suite inchangée
-}
-```
-
-**Fichier** : `static/js/workspace/WsFEEStudio.js`
-
----
+- `WsFEEStudio.open()` résout `projectId` depuis `localStorage.homeos_session` au lieu de `this.ws.activeProject` (qui était toujours undefined car `wsBackend` n'est jamais instancié)
+- `this.projectId` stocké comme propriété d'instance → utilisé dans `scanTriggers()`, `sendToSullivan()`, `applyCode()`
+- Fallback : `session.active_project_id || session.project_id`
 
 ### Mission 241 — Screen list : re-fetch après upload + bouton [S] conditionnel
-**STATUS: 🟠 À TRAITER APRÈS M239 — ACTOR: CODE DIRECT (Claude)**
+**STATUS: ✅ LIVRÉ**
 
-**Bug A** : Après un upload de dist.zip réussi, la liste n'est pas rafraîchie → l'item n'apparaît pas.
-**Fix** : Dans `handleDirectUpload()` dans `ws_main.js`, appeler `fetchWorkspaceImports()` après le `fetch('/api/import/upload')` réussi.
-
-**Bug B** : Le bouton [S] dans la screen list est mort car `item.stitch_screen_id` est toujours absent (les imports dist.zip n'ont pas de lien Stitch). Le bouton ne devrait apparaître que si `item.stitch_screen_id` existe.
-**État actuel** : vérifié dans le code — le bouton [S] est soit toujours rendu soit jamais rendu selon la version courante. Confirmer avec `document.querySelectorAll('.btn-s-open').length` dans la console.
-
-**Fix B** : S'assurer que le template HTML de l'item dans `fetchWorkspaceImports()` conditionne `btn-s-open` sur `item.stitch_screen_id` :
-```js
-${item.stitch_screen_id ? `<button class="btn-s-open ...">S</button>` : ''}
-```
-
-**Fichier** : `static/js/workspace/ws_main.js`
+- **Bug A** : `handleDirectUpload()` appelait déjà `fetchWorkspaceImports()` après upload réussi ✅ (déjà fonctionnel)
+- **Bug B** : Bouton [S] maintenant conditionnel — affiché uniquement si `item.archetype_id === 'stitch_import'` ou `archetype_label` contient "stitch"
+- Les imports dist.zip n'ont plus de bouton [S] (ils ne sont pas des écrans Stitch)
 
 ---
 
