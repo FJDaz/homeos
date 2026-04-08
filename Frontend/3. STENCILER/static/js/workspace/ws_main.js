@@ -4,23 +4,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log("🚀 ws_main: starting workspace design V2 (Hexagonal Architecture)...");
 
     // 1. Initialiser l'Architecture Hexagonale (Mission 156)
-    window.wsAudit = new WsAudit();
-    window.wsForge = new WsForge();
-    window.wsPreview = new WsPreview();
-    
-    const canvas = new WsCanvas('ws-canvas', 'canvas-wrapper');
-    window.wsCanvas = canvas;
+    try { window.wsAudit = new WsAudit(); } catch(e) { console.error('[ws_main] WsAudit crash:', e); }
+    try { window.wsForge = new WsForge(); } catch(e) { console.error('[ws_main] WsForge crash:', e); }
+    try { window.wsPreview = new WsPreview(); } catch(e) { console.error('[ws_main] WsPreview crash:', e); }
+
+    try {
+        const canvas = new WsCanvas('ws-canvas', 'canvas-wrapper');
+        window.wsCanvas = canvas;
+    } catch(e) { console.error('[ws_main] WsCanvas crash:', e); }
 
     // 2. Initialiser le Chat Sullivan (Main + Surgical)
-    const chat = new WsChatMain('ws-chat-mount');
-    window.wsChat = chat;
-    window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover');
-    window.wsWire = new WsWire();
-    window.wsFEEStudio = new WsFEEStudio(window.wsBackend);
+    try {
+        const chat = new WsChatMain('ws-chat-mount');
+        window.wsChat = chat;
+    } catch(e) { console.error('[ws_main] WsChatMain crash:', e); }
+
+    try { window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover'); } catch(e) { console.error('[ws_main] WsChatSurgical crash:', e); }
+    try { window.wsWire = new WsWire(); } catch(e) { console.error('[ws_main] WsWire crash:', e); }
+    try { window.wsFEEStudio = new WsFEEStudio(window.wsBackend); } catch(e) { console.error('[ws_main] WsFEEStudio crash:', e); }
 
     // 2b. Initialiser l'Inspecteur (Mission 130)
-    const inspect = new WsInspect(window);
-    window.wsInspect = inspect;
+    try {
+        const inspect = new WsInspect(window);
+        window.wsInspect = inspect;
+    } catch(e) { console.error('[ws_main] WsInspect crash:', e); }
 
     // 2c. Charger les Design Tokens (Mission 159)
     try {

@@ -40,6 +40,65 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
+### Thème 18 — Réparations workspace généralisées (2026-04-08)
+
+---
+
+### Mission 239 — Crash ws_main.js : toolbar + aperçu + listeners morts
+**STATUS: ✅ LIVRÉ**
+
+- Tous les constructeurs dans le `DOMContentLoaded` de `ws_main.js` sont maintenant wrappés dans des `try/catch` individuels
+- Si un constructeur crashe, l'erreur est loggée clairement (`[ws_main] WsChatMain crash: ...`) et le reste de l'init continue
+- Les handlers toolbar (`.ws-tool-btn`) et mode-btn (`.ws-mode-btn`) sont attachés après les constructors — ils s'exécutent même si un constructor a crashé
+
+---
+
+### Mission 240 — WsFEEStudio : résoudre projectId depuis la session
+**STATUS: 🔴 À TRAITER — ACTOR: CODE DIRECT (Claude)**
+
+**Symptôme** : FEE Studio affiche `alert("veuillez activer un projet")` même quand un projet est actif.
+
+**Cause** : `window.wsBackend` n'est **jamais instancié** dans `ws_main.js`. `WsFEEStudio.open()` lit `this.ws.activeProject` où `this.ws` tombe sur `{}` → `projectId` = undefined.
+
+**Fix** : Dans `WsFEEStudio.open()`, résoudre le projectId depuis la session localStorage au lieu de dépendre de `wsBackend.activeProject` :
+
+```js
+async open() {
+    this.injectUI();
+    // Résoudre le projet actif depuis la session
+    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+    const projectId = session.active_project_id || session.project_id || null;
+    if (!projectId) {
+        console.warn('[FEEStudio] Aucun projet actif dans la session');
+        alert("veuillez activer un projet");
+        return;
+    }
+    // ... suite inchangée
+}
+```
+
+**Fichier** : `static/js/workspace/WsFEEStudio.js`
+
+---
+
+### Mission 241 — Screen list : re-fetch après upload + bouton [S] conditionnel
+**STATUS: 🟠 À TRAITER APRÈS M239 — ACTOR: CODE DIRECT (Claude)**
+
+**Bug A** : Après un upload de dist.zip réussi, la liste n'est pas rafraîchie → l'item n'apparaît pas.
+**Fix** : Dans `handleDirectUpload()` dans `ws_main.js`, appeler `fetchWorkspaceImports()` après le `fetch('/api/import/upload')` réussi.
+
+**Bug B** : Le bouton [S] dans la screen list est mort car `item.stitch_screen_id` est toujours absent (les imports dist.zip n'ont pas de lien Stitch). Le bouton ne devrait apparaître que si `item.stitch_screen_id` existe.
+**État actuel** : vérifié dans le code — le bouton [S] est soit toujours rendu soit jamais rendu selon la version courante. Confirmer avec `document.querySelectorAll('.btn-s-open').length` dans la console.
+
+**Fix B** : S'assurer que le template HTML de l'item dans `fetchWorkspaceImports()` conditionne `btn-s-open` sur `item.stitch_screen_id` :
+```js
+${item.stitch_screen_id ? `<button class="btn-s-open ...">S</button>` : ''}
+```
+
+**Fichier** : `static/js/workspace/ws_main.js`
+
+---
+
 ### Thème 16 — Pipeline Import → Canvas
 > M233 ✅, M234 ✅, M235 ✅, M236 ✅, M237 ✅ — archivées ROADMAP_ACHIEVED.md
 
