@@ -730,8 +730,291 @@ if project_id:
 
 ---
 
-### M228 — Stitch : UX élève intelligible
+### M232 — Refonte layout workspace : dashboard projet + nettoyage toolbar
 **STATUS: 🟠 MISSION GEMINI | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Fichiers à lire en entier :**
+- `Frontend/3. STENCILER/static/templates/workspace.html` — structure complète panels gauche + toolbar droite
+- `Frontend/3. STENCILER/static/js/workspace/ws_main.js` — `fetchWorkspaceImports()`
+- `Frontend/3. STENCILER/static/css/workspace.css`
+
+**Garder tous les IDs existants des éléments fonctionnels. Ne pas toucher à Sullivan chat ni au canvas.**
+
+---
+
+**A. Supprimer le panel Audit UX**
+
+Dans `workspace.html`, supprimer entièrement :
+- `<div id="section-audit">` et son contenu
+- `<button id="badge-audit">` et son contenu
+- Tout CSS lié à `.panel-audit`, `#panel-audit`, `#badge-audit` dans `workspace.css`
+
+---
+
+**B. Remplacer `#panel-screens` par un dashboard projet**
+
+Nouveau contenu de `#ws-import-list` (rendu par `fetchWorkspaceImports()`) :
+
+```
+┌─────────────────────────────────┐
+│  ▸ mon projet                   │  ← collapse (ouvert par défaut)
+│    [nom du projet depuis manifest]
+│    ┌ Stitch ──────────────────┐  │  ← sous-collapse fermé par défaut
+│    │ ID Stitch : [___________] │  │
+│    │ [lier →]                  │  │
+│    └───────────────────────────┘  │
+│                                   │
+│    mes écrans                     │
+│    ┌───────────────────────────┐  │
+│    │ nom-écran.html        [S] [↻] [×] │
+│    │ nom-écran-2.html      [S] [↻] [×] │
+│    │ ...                       │  │
+│    └───────────────────────────┘  │
+│    (message si vide)              │
+└─────────────────────────────────┘
+```
+
+**Comportement :**
+- Clic sur le nom d'écran → `window.wsCanvas?.addScreen({...})`
+- Bouton `[S]` (logo Stitch SVG, alt "ouvrir dans Stitch") → `fetch('/api/stitch/open/{screen_id}').then(d => window.open(d.url))`
+- Bouton `[↻]` → `POST /api/stitch/sync` puis recharger la liste
+- Bouton `[×]` → confirmation puis suppression de l'import local
+
+**Sous-collapse Stitch ID :**
+- Input texte + bouton "lier" → `POST /api/stitch/pull` avec le project_id saisi → mémorise dans manifest
+- Affiché seulement si `stitch_project_id` absent du manifest
+
+---
+
+**C. Nettoyage toolbar droite**
+
+Dans `workspace.html`, toolbar `<nav class="absolute top-1/2 right-8...">`, garder uniquement :
+
+| Outil | Action | Garder |
+|-------|--------|--------|
+| Select (V) | sélection canvas | ✅ |
+| Drag (H) | pan canvas | ✅ |
+| Typographie (T) | `#btn-ws-typo` | ✅ |
+| Couleur (C) | `#ws-color-panel` — conditionné DESIGN.md | ✅ |
+| Stitch (S) | logo Stitch → ouvre panel Stitch | ✅ NOUVEAU |
+| Place Image (I) | stitch fait mieux | ❌ supprimer |
+| Frame (F) | non fonctionnel | ❌ supprimer |
+| Effets (E) | FEE Studio remplace | ❌ supprimer |
+
+Bouton Stitch dans toolbar : icône logo Stitch (ou "S" en attendant) → `window.wsStitch?.toggle()`.
+
+---
+
+**D. Corrections de scope (notes de clarification FJD 2026-04-08)**
+
+- **Sullivan** : panneau en bas du workspace, pas à droite — il demeure
+- **Wire** : demeure dans le workspace comme outil/mode
+- **Disparaissent** : bouton KIMI (stratégie différente à venir), boutons hover/scroll/click/liste (pris en charge par FEE)
+- **Export** : aperçu localhost uniquement pour l'instant — pas de bouton forge/export dans ce scope
+- **DESIGN.md** : n'est PAS un document HoméOS exclusif. C'est le design du projet de l'élève = tokens Stitch + règles nécessaires à HoméOS pour jouer sa partie. Stitch = source de vérité design. À chaque pull Design DNA → **toujours mettre à jour** `DESIGN.md` sections `Colors`, `Typography`, `Spacing`. Ne jamais écraser les sections spécifiques HoméOS (ex: `## Wire Rules`, `## Interaction Tokens`) — merge sectionnel.
+
+**D. Règle DESIGN.md merge (backend — dans `stitch_router.py` au pull)**
+
+Structure DESIGN.md d'un projet élève :
+```markdown
+# DESIGN.md — {project_name}
+> Source: Stitch Design DNA + règles HoméOS
+
+## Colors          ← Stitch écrit ici (màj à chaque pull)
+## Typography      ← Stitch écrit ici
+## Spacing         ← Stitch écrit ici
+## Wire Rules      ← HoméOS écrit ici (ne pas écraser)
+## Interaction     ← FEE écrit ici (ne pas écraser)
+```
+
+Merge : parser les sections `##`, remplacer Stitch (Colors/Typography/Spacing), préserver le reste.
+
+**Livrable :**
+1. Panel audit UX supprimé
+2. Panel gauche = dashboard projet avec collapse + sous-collapse Stitch ID + liste écrans (3 actions par écran)
+3. Toolbar droite = 5 outils max (select, drag, typo, couleur, Stitch)
+4. Sullivan panneau bas et Wire préservés — KIMI et boutons interaction supprimés
+5. Aucune régression canvas
+
+---
+
+### M231 — Pipeline d'import multi-source : PNG / SVG / Illustrator / Figma plugin / Stitch
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-08**
+
+**Contexte :**
+Un élève arrive avec ses maquettes depuis différentes sources. Toutes convergent vers `projects/{id}/imports/`. Le reste du workflow (Wire → Forge → Sullivan) est identique quelle que soit la source.
+
+**Sources à supporter :**
+
+| Source | Format | Mécanisme |
+|--------|--------|-----------|
+| PNG / JPG | image | Upload direct → stocké dans `imports/` comme asset visuel |
+| SVG | vecteur | Upload direct → utilisable dans le canvas SVG natif |
+| Illustrator | SVG (export) | L'élève exporte en SVG depuis Illustrator → même pipeline que SVG |
+| Figma plugin HoméOS | JSON + PNG | Le plugin pousse vers `POST /api/import/figma` → normalisation → `imports/` |
+| Stitch | HTML | `POST /api/stitch/pull` → déjà opérationnel ✅ |
+
+**Ce qu'il faut :**
+
+**Backend — `import_router.py` (ACTOR: QWEN) :**
+
+Route `POST /api/import/upload` — upload générique :
+```python
+@router.post("/import/upload")
+async def import_upload(file: UploadFile, request: Request):
+    # Accepte : .png, .jpg, .svg, .ai (SVG exporté)
+    # Sauvegarde dans projects/{active_id}/imports/{filename}
+    # Enregistre dans exports/index.json (même pipeline que Stitch)
+    # Retourne { "filename": "...", "type": "png|svg", "path": "..." }
+```
+
+Route `POST /api/import/figma` — payload plugin Figma HoméOS :
+```python
+@router.post("/import/figma")
+async def import_figma(request: Request):
+    # Body: { "screen_name": str, "png_base64": str, "metadata": {} }
+    # Décode le PNG → sauvegarde dans imports/figma_{screen_name}.png
+    # Sauvegarde metadata dans imports/figma_{screen_name}.json
+    # Retourne { "filename": "...", "imported": true }
+```
+
+**Frontend — zone d'import dans le workspace (ACTOR: GEMINI) :**
+
+Dans le panel gauche du workspace (section écrans/imports), ajouter une zone "importer" :
+```
+┌─────────────────────────────┐
+│  importer des maquettes     │
+│                             │
+│  [↑ PNG / SVG]  [Figma]     │
+│  [Stitch →]                 │
+│                             │
+│  ou glisser-déposer ici     │
+└─────────────────────────────┘
+```
+
+- Bouton "PNG / SVG" → `<input type="file" accept=".png,.jpg,.svg">` → `POST /api/import/upload`
+- Bouton "Figma" → instructions pour le plugin (lien doc)
+- Bouton "Stitch →" → ouvre le panel Stitch existant
+- Drag & drop → même route
+
+**Livrable :**
+1. Un élève peut uploader un PNG ou SVG → apparaît dans `imports/` + liste du workspace
+2. Le plugin Figma peut envoyer un écran → même résultat
+3. Stitch reste la voie principale pour les aller-retours live
+
+---
+
+### M230 — Workflow Stitch complet : push/pull/sync élève
+**STATUS: ✅ LIVRÉ (backend Qwen) — Frontend à faire par Gemini**
+
+**Backend livré :**
+- `run_stitch_push_task()` extrait `project_id` depuis `screen_name` → `_patch_manifest_stitch_project_id()`
+- `POST /api/stitch/sync` — compare écrans Stitch vs imports locaux → pull les nouveaux
+- `GET /api/stitch/open/{screen_id}` — retourne URL Stitch `https://stitch.google.com/p/{pid}/s/{sid}`
+- Premier push → `stitch_project_id` mémorisé dans manifest → `stitch_url` retourné au frontend
+
+**Workflow cible :**
+```
+1. PREMIER PUSH
+   Élève clique "modifier dans Stitch" sur un écran HoméOS
+   → POST /api/stitch/push (Sullivan + genome + DESIGN.md)
+   → generate_screen_from_text → Stitch crée l'écran → retourne screen_name
+   → Extraire project_id depuis screen_name ("projects/{pid}/screens/{sid}")
+   → Sauvegarder manifest.json : stitch_project_id = pid
+   → Ouvrir https://stitch.google.com/p/{pid}/s/{sid} dans nouvel onglet
+
+2. PUSHES SUIVANTS
+   → Même stitch_project_id (lu depuis manifest)
+   → edit_screen si écran existant, generate_screen_from_text si nouveau
+
+3. PULL / SYNC (Stitch → HoméOS)
+   → window.onfocus : retour depuis Stitch → déclenche sync auto
+   → Polling toutes les 5min (si Stitch lié)
+   → Bouton "synchroniser" manuel
+   → Logique : diff écrans Stitch vs imports locaux → pull des nouveaux/modifiés
+
+4. TOOLBAR CANVAS
+   → Bouton "modifier dans Stitch" → push Sullivan → ouvre Stitch
+   → Bouton "importer de Stitch" → pull forcé
+
+5. PANEL STITCH — liste des écrans
+   Pour chaque écran :
+   [œil] ouvrir dans HoméOS  [S] ouvrir dans Stitch  [↻] pull cet écran
+   En-tête : titre projet (collapsible) + [↻ synchroniser tout]
+```
+
+**ACTOR QWEN — Backend :**
+
+A. Dans `run_stitch_push_task()` après succès : extraire `project_id` depuis `screen_name` → `_patch_manifest_stitch_project_id(pid)`.
+
+B. Route `POST /api/stitch/sync` :
+```python
+@router.post("/sync")
+async def stitch_sync(request: Request):
+    # Lit stitch_project_id depuis manifest
+    # Appelle stitch_session() pour avoir la liste live
+    # Pour chaque écran non local → pull (réutilise la logique de /pull)
+    # Retourne { "pulled": [...], "already_local": [...] }
+```
+
+C. Route `GET /api/stitch/open/{screen_id}` :
+```python
+@router.get("/open/{screen_id}")
+async def stitch_open_url(screen_id: str):
+    # Retourne { "url": "https://stitch.google.com/p/{pid}/s/{screen_id}" }
+```
+
+Fichiers : `stitch_router.py`, `stitch_client.py`
+
+---
+
+**ACTOR GEMINI — Frontend (absorbe M228) :**
+
+> BOOTSTRAP OBLIGATOIRE
+
+Fichiers à lire : `workspace.html` panel `#panel-stitch`, `WsStitch.js`
+
+**Panel Stitch — réorganiser `#stitch-content` :**
+```
+[titre projet]          [↻ synchroniser tout]
+─────────────────────────────────────────────
+liste écrans :
+  Nom écran
+  [👁 HoméOS]  [S Stitch]  [↻ pull]
+─────────────────────────────────────────────
+[modifier dans Stitch →]   ← push Sullivan
+```
+ID projet : lecture seule si lié, éditable si non lié.
+
+**`WsStitch.js` — polling + focus :**
+```js
+// Dans show() après loadSession()
+if (this.isLinked) {
+    this._pollTimer = setInterval(() => this.sync(), 5 * 60 * 1000);
+    window.addEventListener('focus', () => { if (this.isOpen) this.sync(); });
+}
+
+sync() { fetch('/api/stitch/sync', { method: 'POST' }).then(() => this.loadSession()); }
+```
+
+**Toolbar canvas — bouton "modifier dans Stitch"** dans `workspace.html` (barre d'outils droite).
+
+Garder tous les IDs existants.
+
+**Livrable :**
+1. Premier push → `stitch_project_id` mémorisé → onglet Stitch ouvert
+2. Panel : liste écrans avec 3 actions chacun
+3. Sync auto focus + polling 5min + bouton
+4. Bouton toolbar "modifier dans Stitch"
+
+---
+
+### M228 — Stitch : UX élève intelligible
+**STATUS: ✅ ABSORBÉE PAR M230 | DATE: 2026-04-08**
+
+---
 
 > BOOTSTRAP OBLIGATOIRE
 
@@ -1229,6 +1512,11 @@ CSS dans `homeos-nav.css` :
 ---
 
 ## Backlog
+ 
+### Mission 140 — DPL : Instancier le repo GitHub dans HoméOS
+**STATUS: 🔵 BACKLOG**
+- [ ] Création/Liaison automatique d'un repo GitHub par projet pour le déploiement continu.
+
 
 ### Mission 110 — Templates FRD : liste vide
 **STATUS: 🔴 HOTFIX | DATE: 2026-03-31**

@@ -448,11 +448,25 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
         screen_name = result.get("name", result.get("screenId", "generated"))
         preview_url = result.get("previewUrl") or result.get("preview_url")
 
+        # M230: Extract Stitch project_id from screen_name and patch manifest
+        # screen_name can be "projects/{pid}/screens/{sid}" or just "{sid}"
+        extracted_pid = project_id  # Use the one we already have
+        if "/" in str(screen_name):
+            parts = screen_name.split("/")
+            for i, p in enumerate(parts):
+                if p == "projects" and i + 1 < len(parts):
+                    extracted_pid = parts[i + 1]
+                    break
+        _patch_manifest_stitch_project_id(extracted_pid)
+        logger.info(f"Stitch PUSH: extracted project_id={extracted_pid} from screen_name={screen_name}")
+
         # 3. Success
         status.update("success", f"L'écran '{screen_name}' a été généré dans Stitch.",
                       success=True, data={
                           "screen_name": screen_name,
                           "preview_url": preview_url,
+                          "stitch_project_id": extracted_pid,
+                          "stitch_url": f"https://stitch.google.com/p/{extracted_pid}/s/{screen_name.split('/')[-1] if '/' in str(screen_name) else screen_name}",
                           "prompt_length": len(prompt)
                       })
         logger.info(f"Stitch PUSH Success: {task_id} → {screen_name}")
@@ -485,3 +499,85 @@ async def stitch_task_status(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     
     return status.to_dict()
+
+
+# --- M230: SYNC & OPEN ---
+
+@router.post("/sync")
+async def stitch_sync(request: Request):
+    """M230: Synchronise les écrans Stitch vers HoméOS (pull des nouveaux/modifiés)."""
+    if not _get_stitch_key():
+        raise HTTPException(status_code=501, detail="Stitch non configuré")
+
+    try:
+        # Read stitch_project_id from manifest
+        active_file = ROOT_DIR / "active_project.json"
+        active_id = None
+        if active_file.exists():
+            active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+
+        manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
+        if not manifest_path.exists():
+            raise HTTPException(status_code=404, detail="manifest.json introuvable")
+
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        stitch_pid = manifest.get("stitch_project_id")
+        if not stitch_pid:
+            raise HTTPException(status_code=400, detail="Aucun projet Stitch lié — utilisez 'lier' d'abord")
+
+        from core.stitch_client import StitchClient
+        client = StitchClient(api_key=_get_stitch_key())
+
+        # Fetch live screen list from Stitch
+        project_data = client.get_project_data(stitch_pid)
+        stitch_screens = project_data.get("screenInstances", [])
+
+        # Get local imports
+        imports_dir = PROJECTS_DIR / (active_id or "default") / "imports"
+        local_files = set(f.stem for f in imports_dir.glob("stitch_*.html")) if imports_dir.exists() else set()
+
+        pulled = []
+        for s in stitch_screens:
+            full_name = s.get("name", "")
+            short_id = full_name.split("/")[-1]
+            title = s.get("displayName") or s.get("title") or short_id
+            safe = "stitch_" + "".join(c if c.isalnum() or c in "-_ " else "_" for c in title).strip().replace(" ", "_")[:60]
+
+            if safe not in local_files:
+                # Pull this screen
+                screen_data = client.get_screen_code(stitch_pid, short_id)
+                html = screen_data.get("html", screen_data.get("code", ""))
+                if html and imports_dir:
+                    imports_dir.mkdir(parents=True, exist_ok=True)
+                    import_path = imports_dir / f"{safe}.html"
+                    import_path.write_text(html, encoding='utf-8')
+                    pulled.append(safe)
+
+        return {"pulled": pulled, "already_local": len(local_files) - len(pulled), "total_stitch": len(stitch_screens)}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Stitch sync failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/open/{screen_id}")
+async def stitch_open_url(screen_id: str):
+    """M230: Retourne l'URL Stitch pour ouvrir un écran dans l'éditeur Stitch."""
+    active_file = ROOT_DIR / "active_project.json"
+    active_id = None
+    if active_file.exists():
+        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+
+    manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="manifest.json introuvable")
+
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    stitch_pid = manifest.get("stitch_project_id")
+    if not stitch_pid:
+        raise HTTPException(status_code=400, detail="Aucun projet Stitch lié")
+
+    url = f"https://stitch.google.com/p/{stitch_pid}/s/{screen_id}"
+    return {"url": url, "project_id": stitch_pid, "screen_id": screen_id}
