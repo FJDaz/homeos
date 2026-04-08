@@ -284,16 +284,13 @@ class WsCanvas {
     }
 
     async addScreen(item) {
-        if (document.getElementById(`shell-${item.id}`)) {
-            this.selectScreen(document.getElementById(`shell-${item.id}`));
-            return;
-        }
-        if (window.WsScreenShell) {
-            const g = await window.WsScreenShell.build(item, this);
-            this.content.appendChild(g);
-            this.selectScreen(g);
-            return g;
-        }
+        const existing = document.getElementById(`shell-${item.id}`);
+        if (existing) { this.selectScreen(existing); return; }
+        if (!window.WsScreenShell) { console.error('WsScreenShell not loaded'); return; }
+        const g = await window.WsScreenShell.build(item, this);
+        this.content.appendChild(g);
+        this.selectScreen(g);
+        return g;
     }
 
     // --- M237: Hover Engine Injected into iframe contentDocument ---
@@ -316,7 +313,7 @@ class WsCanvas {
     }
     document.addEventListener('mouseover', function(e) {
         const el = e.target;
-        if (el === document.body || el === document.documentElement) return;
+        if (el === document.body || el === document.documentElement || el.id === 'root') return;
         _clear();
         el.style.outline = '2px solid #8cc63f';
         el.style.outlineOffset = '-1px';

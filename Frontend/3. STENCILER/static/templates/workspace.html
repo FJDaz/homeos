@@ -62,6 +62,11 @@
     <header class="h-14 flex items-center justify-between px-6 bg-white border-b border-slate-100 z-50 shrink-0" data-purpose="header">
         <div class="flex items-center space-x-4">
             <span class="text-[10px] text-slate-900 font-extrabold tracking-[0.2em] uppercase">workspace canvas</span>
+            <button onclick="window.PanelDragger?.resetAll()" 
+                    title="réinitialiser layout des panneaux"
+                    class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
         </div>
         
             <!-- GSAP Cheat Sheet Toggle (Mission 166) -->
@@ -215,119 +220,13 @@
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </div>
                     </div>
-                    <div class="p-4 max-h-[30vh] overflow-y-auto" id="ws-import-list">
+                    <div class="p-4 overflow-y-auto" style="max-height: calc(100vh - 160px);" id="ws-import-list">
                         <div class="text-xs text-slate-400 italic">chargement...</div>
                     </div>
                 </aside>
                 <!-- BADGE SCREENS (Shown when collapsed) -->
                 <button id="badge-screens" onclick="togglePanel('panel-screens')" class="badge-hidden pointer-events-auto bg-homeos-green text-white px-4 py-2 rounded-custom shadow-lg flex items-center justify-center transition-all hover:pl-6 w-fit">
                     <span class="text-[10px] font-bold tracking-widest">screens</span>
-                </button>
-            </div>
-
-            <!-- SECTION AUDIT UX (Stable wrapper) -->
-            <div id="section-audit" class="flex flex-col items-start">
-                <!-- PANEL AUDIT UX -->
-                <aside id="panel-audit" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" data-drag-handle onclick="togglePanel('panel-audit')">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
-                            <span class="text-[10px] font-bold text-slate-800 tracking-widest">audit ux analytics</span>
-                        </div>
-                        <div class="p-1 text-slate-300">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        </div>
-                    </div>
-                    <div class="p-6 max-h-[40vh] overflow-y-auto" id="ws-audit-content">
-                        <div class="text-[11px] text-slate-400 italic leading-relaxed">sélectionnez un écran pour lancer l'audit Sullivan.</div>
-                    </div>
-                </aside>
-                <!-- BADGE AUDIT (Shown when collapsed) -->
-                <button id="badge-audit" onclick="togglePanel('panel-audit')" class="badge-hidden pointer-events-auto bg-slate-900 text-white px-4 py-2 rounded-custom shadow-lg flex items-center justify-center transition-all hover:pl-6 w-fit">
-                    <span class="text-[10px] font-bold tracking-widest">audit ux</span>
-                </button>
-            </div>
-
-            <!-- SECTION STITCH (Mission 204-B) -->
-            <div id="section-stitch" class="flex flex-col items-start">
-                <!-- PANEL STITCH -->
-                <aside id="panel-stitch" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left collapsed" style="max-height: calc(100vh - 96px); display: flex; flex-direction: column;">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer bg-slate-50/10" data-drag-handle onclick="window.wsStitch?.toggle()">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                            <span class="text-[10px] font-bold text-slate-800 tracking-widest uppercase">Stitch</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span id="ws-stitch-status" class="text-[8px] font-bold px-2 py-0.5 border border-[#e5e5e5] bg-white text-slate-400 uppercase">offline</span>
-                            <div class="p-1 text-slate-300">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 overflow-y-auto flex-1" id="stitch-content">
-                        <!-- Status line -->
-                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#e5e5e5]">
-                            <span class="text-[10px] text-[#9a9a98]">statut :</span>
-                            <span id="ws-stitch-status" class="text-[10px] font-bold text-[#9a9a98]">non configuré</span>
-                        </div>
-
-                        <!-- Section 1: Project ID -->
-                        <div class="mb-4">
-                            <div class="text-[10px] text-[#9a9a98] mb-2">projet stitch</div>
-                            <div class="flex gap-2">
-                                <input id="ws-stitch-project-id" type="text" placeholder="ex : 11320116098300668471"
-                                    class="flex-1 bg-white border border-[#e5e5e5] px-3 py-2 text-[11px] focus:border-[#8cc63f] outline-none rounded-[4px]">
-                                <button id="ws-stitch-btn-list" class="px-3 py-2 bg-[#3d3d3c] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-black transition-all rounded-[4px]" style="white-space:nowrap;">
-                                    valider
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Section 2: Screens list -->
-                        <div class="mb-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[10px] text-[#9a9a98]">mes écrans</span>
-                                <button id="ws-stitch-toggle-manual" class="text-[9px] text-[#8cc63f] border border-[#8cc63f] px-2 py-0.5 rounded-[4px] hover:bg-[#8cc63f] hover:text-white transition-all" style="background:none;cursor:pointer;">
-                                    + importer un écran
-                                </button>
-                            </div>
-                            <div id="ws-stitch-screens-list" class="space-y-1 max-h-48 overflow-y-auto pr-2 py-2">
-                                <div class="text-[10px] text-[#9a9a98] italic">aucun écran importé</div>
-                            </div>
-
-                            <!-- Manual Form (collapsed by default) -->
-                            <div id="ws-stitch-manual-form" class="space-y-3 pt-3 mt-3 border-t border-[#e5e5e5]" style="display:none;">
-                                <div>
-                                    <label class="block text-[9px] text-[#9a9a98] mb-1">nom de l'écran</label>
-                                    <input id="ws-stitch-screen-name" type="text" placeholder="ex : accueil"
-                                        class="w-full bg-white border border-[#e5e5e5] px-3 py-2 text-[11px] focus:border-[#8cc63f] outline-none rounded-[4px]">
-                                </div>
-                                <button id="ws-stitch-btn-pull" class="w-full py-2 bg-[#8cc63f] text-[#1A1A1A] text-[10px] font-bold uppercase tracking-wider hover:opacity-90 transition-all rounded-[4px]">
-                                    importer l'écran
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Section 3: Generate via intent -->
-                        <div class="pt-3 border-t border-[#e5e5e5]">
-                            <div class="text-[10px] text-[#9a9a98] mb-2">générer via intention</div>
-                            <textarea id="ws-stitch-intent" placeholder="ex : un dashboard étudiant..."
-                                class="w-full bg-white border border-[#e5e5e5] px-3 py-2 text-[11px] focus:border-[#8cc63f] outline-none rounded-[4px] h-16 resize-none mb-2"></textarea>
-                            <button id="ws-stitch-btn-push" class="w-full py-2 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider hover:opacity-90 transition-all rounded-[4px]">
-                                générer
-                            </button>
-                        </div>
-
-                            <div id="ws-stitch-feedback" class="text-[10px] italic text-slate-400 text-center mt-2 h-4"></div>
-                        </div>
-                    </div>
-                </aside>
-                <!-- BADGE STITCH (Hidden when expanded) -->
-                <button id="badge-stitch" onclick="window.wsStitch?.toggle()" class="pointer-events-auto bg-white border border-[#e5e5e5] text-slate-900 px-4 py-2 rounded-custom shadow-lg flex items-center justify-center transition-all hover:pl-6 w-fit h-10">
-                    <span class="text-[10px] font-extrabold tracking-widest uppercase">stitch</span>
-                    <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
                 </button>
             </div>
 
@@ -343,14 +242,16 @@
                 </button>
 
                 <!-- PAN (Hand) -->
-                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="drag" title="Déplacer (H)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0V12m3.001-3.5a1.5 1.5 0 113 0V12m3.001-4.5a1.5 1.5 0 113 0V12M9 11V9m6 2V9m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2z"/></svg>
+                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="drag" title="naviguer (H)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V6a2 2 0 014 0v5m0 0V6a2 2 0 014 0v5m0 0a2 2 0 014 0v3a6 6 0 01-6 6H9a6 6 0 01-6-6v-3"/>
+                    </svg>
                 </button>
 
                 <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
 
-                <!-- PLACE IMAGE -->
-                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="place-img" title="Placer Image (I)">
+                <!-- PLACE IMAGE (Legacy) -->
+                <button class="ws-tool-btn hidden p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="place-img" title="Placer Image (I)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </button>
 
@@ -360,7 +261,7 @@
                 </button>
 
                 <!-- COLORS (Dropper) -->
-                <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="colors" title="Couleurs (C)">
+                <button class="ws-tool-btn hidden p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="colors" title="Couleurs (C)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
                 </button>
 
@@ -374,22 +275,32 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"/></svg>
                 </button>
 
+                <!-- IMAGE PICKER (Mission 235) -->
+                <button id="ws-btn-image-picker" class="p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" title="Bibliothèque d'images">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+
+                <!-- STITCH (lien direct) -->
+                <a href="https://stitch.withgoogle.com" target="_blank"
+                   class="p-3 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
+                   title="Ouvrir Stitch">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                </a>
+
                 <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
 
                 <!-- ZOOM INDICATOR -->
                 <div class="flex flex-col items-center py-2">
                     <span class="text-[9px] font-bold text-slate-300 tracking-tighter" id="zoom-level">100%</span>
-                    <button class="p-1 text-slate-300 hover:text-slate-500 transition-colors" onclick="window.wsCanvas.resetView()" title="Réinitialiser vue (0)">
+                    <button class="p-1 text-slate-300 hover:text-slate-500 transition-colors" onclick="window.wsCanvas.resetView()" title="recentrer (0)">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </button>
                 </div>
 
-                <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
-
-                <!-- RESET LAYOUT (Mission 209) -->
-                <button class="p-2 text-slate-300 hover:text-homeos-green transition-colors" onclick="window.PanelDragger?.resetAll()" title="Réinitialiser layout des panels">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                </button>
             </div>
         </nav>
 
@@ -535,7 +446,7 @@
     <script src="/static/js/workspace/WsForge.js"></script>
     <script src="/static/js/workspace/WsPreview.js"></script>
     <script src="/static/js/workspace/WsScreenShell.js"></script>
-    <script src="/static/js/workspace/WsStitch.js"></script>
+
     <script src="/static/js/workspace/WsCanvas.js"></script>
     <script src="/static/js/workspace/WsFEEStudio.js"></script>
     <!-- B2: WsBootstrap — GSAP/effects init (extrait de bootstrap.js) -->
@@ -682,5 +593,25 @@
         leftDiv.appendChild(btn);
     })();
     </script>
+    <!-- IMAGE PICKER POPOVER (Mission 235) -->
+    <div id="ws-image-picker" class="hidden fixed z-[60] bg-[#f7f6f2] border border-slate-200 shadow-2xl overflow-hidden flex flex-col w-72 transition-all duration-300 origin-right scale-95 opacity-0">
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Bibliothèque d'images</span>
+            <button onclick="document.getElementById('ws-image-picker').classList.add('hidden')" class="text-slate-300 hover:text-slate-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        
+        <div id="ws-image-list" class="flex-1 max-h-[400px] overflow-y-auto p-4 space-y-3 scrollbar-hide">
+            <!-- Images injectées ici -->
+            <div class="text-[10px] text-slate-300 italic text-center py-4">aucune image trouvée</div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-slate-200">
+            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all">
+                importer →
+            </button>
+        </div>
+    </div>
 </body>
 </html>

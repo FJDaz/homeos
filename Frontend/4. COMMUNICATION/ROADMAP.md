@@ -41,7 +41,125 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Thème 16 — Pipeline Import → Canvas
-> M233 ✅, M234 ✅ — archivées ROADMAP_ACHIEVED.md
+> M233 ✅, M234 ✅, M235 ✅, M236 ✅, M237 ✅ — archivées ROADMAP_ACHIEVED.md
+
+---
+
+### Thème 17 — Réparations post-M237 (Gemini regressions)
+
+### Mission 238 — Hotfix canvas : 4 régressions M237
+**STATUS: ✅ LIVRÉ**
+
+- **Bug 1** : Hover outline exclut maintenant `el.id === 'root'` (React containers)
+- **Bug 2** : Aucun changement de `pointer-events` sur les iframes dans `setMode()` — les iframes restent `pointer-events: none`, le moteur hover fonctionne inside l'iframe
+- **Bug 3a** : Bouton Stitch ajouté dans la toolbar droite (lien vers `https://stitch.withgoogle.com`)
+- **Bug 3b** : Bouton [S] restauré dans `fetchWorkspaceImports()` + listener `fetch('/api/stitch/open/{id}')` → `window.open(d.url)`
+- **Bug 4** : `addScreen()` défensif — log si `WsScreenShell` non chargé, structure simplifiée
+
+**Fichiers :** `WsCanvas.js`, `WsScreenShell.js`, `ws_main.js`, `workspace.html`
+
+---
+
+**Bug 1 — Hover outline ne touche que le body**
+
+Le moteur injecté utilise `mouseover` qui bubble — `e.target` est correct mais le React dist enveloppe tout dans des divs avec héritage de `pointer-events`. Fix : cibler `e.target` direct ET exclure les conteneurs racine connus (`#root`, `[data-reactroot]`).
+
+Dans le script injecté (dans `WsCanvas.injectHoverEngine`), remplacer la condition d'exclusion :
+```js
+// Avant
+if (el === document.body || el === document.documentElement) return;
+// Après
+if (el === document.body || el === document.documentElement || el.id === 'root') return;
+// Et forcer pointer-events sur tout le document
+document.documentElement.style.setProperty('pointer-events', 'all', 'important');
+```
+
+---
+
+**Bug 2 — Drag shell cassé en mode select (iframe mange les events)**
+
+Gemini a mis `pointer-events: auto` sur les iframes en mode select → le SVG canvas ne reçoit plus les mousedown quand on drag au-dessus de l'iframe.
+
+Fix dans `WsCanvas.setMode()` : ne jamais passer les iframes en `auto`. À la place, activer le moteur hover via un flag sur le canvas, et garder les iframes en `pointer-events: none` **toujours**. Le moteur hover fonctionne car il est injecté dans le document de l'iframe — il n'a pas besoin que l'iframe reçoive les events de la page parente.
+
+```js
+setMode(mode) {
+    this.activeMode = mode;
+    // NE PAS toucher pointer-events des iframes — le moteur hover est inside l'iframe
+    // Les iframes restent pointer-events: none pour que le canvas drag fonctionne
+    // ... reste du setMode
+}
+```
+
+Retirer tout le bloc `document.querySelectorAll('.ws-screen-shell iframe').forEach(...)` que Gemini a ajouté dans `setMode`.
+
+---
+
+**Bug 3 — Bouton Stitch disparu**
+
+Deux endroits à restaurer :
+
+*3a — Dans la toolbar (`workspace.html`)*, remettre le bouton Stitch entre typo et séparateur zoom, avec un `href` vers Stitch (pas de panel dédié) :
+```html
+<!-- STITCH (lien direct) -->
+<a href="https://stitch.withgoogle.com" target="_blank"
+   class="p-3 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
+   title="Ouvrir Stitch">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+    </svg>
+</a>
+```
+
+*3b — Dans `ws_main.js` `fetchWorkspaceImports()`*, le bouton [S] par item était conditionnel sur `stitch_screen_id`. Gemini l'a supprimé entièrement. Le remettre dans le template HTML des items de liste :
+```js
+${item.stitch_screen_id ? `
+<button class="btn-s-open p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" title="Ouvrir dans Stitch">
+    <span class="text-[9px] font-black font-sans">S</span>
+</button>` : ''}
+```
+Et remettre le listener correspondant :
+```js
+const btnOpen = el.querySelector('.btn-s-open');
+if (btnOpen) btnOpen.onclick = async (e) => {
+    e.stopPropagation();
+    const res = await fetch(`/api/stitch/open/${item.id}`);
+    const d = await res.json();
+    if (d.url) window.open(d.url);
+};
+```
+
+---
+
+**Bug 4 — Impossible de remettre un item sur le canvas une seconde fois**
+
+`addScreen(item)` dans `WsCanvas.js` :
+```js
+if (document.getElementById(`shell-${item.id}`)) {
+    this.selectScreen(document.getElementById(`shell-${item.id}`));
+    return; // ← si le shell a été fermé et retiré du DOM, getElementById retourne null
+}
+```
+La logique est correcte — si `getElementById` retourne `null`, il tombe dans `WsScreenShell.build`. Le bug vient sûrement d'une régression Gemini dans `WsScreenShell.build` ou dans la façon dont le shell est retiré du DOM.
+
+Vérifier dans `WsScreenShell.js` le close button :
+```js
+closeBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); g.remove(); });
+```
+Si `g.remove()` retire bien le `<g>` du SVG, `getElementById` retourne null au prochain appel → reconstruit. Tester dans la console : `document.getElementById('shell-XXX')` après fermeture. Si null → le bug est ailleurs (peut-être `addScreen` ne reconstruit pas si `WsScreenShell` est undefined).
+
+Ajouter un log défensif dans `addScreen` :
+```js
+async addScreen(item) {
+    const existing = document.getElementById(`shell-${item.id}`);
+    if (existing) { this.selectScreen(existing); return; }
+    if (!window.WsScreenShell) { console.error('WsScreenShell not loaded'); return; }
+    const g = await window.WsScreenShell.build(item, this);
+    this.content.appendChild(g);
+    this.selectScreen(g);
+    return g;
+}
+```
 
 ---
 

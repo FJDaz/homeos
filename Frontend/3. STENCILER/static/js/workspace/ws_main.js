@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chat = new WsChatMain('ws-chat-mount');
     window.wsChat = chat;
     window.wsSurgicalChat = new WsChatSurgical('ws-surgical-popover');
-    window.wsStitch = new WsStitch();
     window.wsWire = new WsWire();
     window.wsFEEStudio = new WsFEEStudio(window.wsBackend);
 
@@ -35,8 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2d. Panels Draggables (Mission 209)
     if (window.PanelDragger) {
         const draggablePanels = [
-            'panel-screens', 'panel-stitch', 
-            'ws-monaco-popover', 'ws-surgical-popover', 
+            'panel-screens',
+            'ws-monaco-popover', 'ws-surgical-popover',
             'ws-color-popover', 'ws-typo-popover', 'ws-effects-popover'
         ];
         draggablePanels.forEach(id => {
@@ -140,6 +139,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const zReset = document.getElementById('btn-reset-view');
     if (zReset) zReset.onclick = () => canvas.resetView();
+
+    // 7. Image Picker (Mission 235)
+    const btnImagePicker = document.getElementById('ws-btn-image-picker');
+    if (btnImagePicker) {
+        btnImagePicker.onclick = (e) => toggleImagePicker(e);
+    }
 
     console.log("✅ ws_main: workspace ready (hexagonal architecture active)");
 });
@@ -261,11 +266,10 @@ async function fetchWorkspaceImports() {
                     <button class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Aperçu HoméOS">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg>
                     </button>
-                    <!-- [S] Stitch — only for Stitch imports -->
-                    ${item.archetype_id === 'stitch_import' || item.archetype_label?.toLowerCase().includes('stitch') ? `
+                    <!-- [S] Stitch -->
                     <button class="btn-s-open p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" title="Ouvrir dans Stitch">
                         <span class="text-[9px] font-black font-sans">S</span>
-                    </button>` : ''}
+                    </button>
                     <!-- [↻] Sync -->
                     <button class="btn-s-sync p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Synchroniser">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -276,7 +280,7 @@ async function fetchWorkspaceImports() {
                     </button>
                 </div>
             `;
-            
+
             el.onclick = () => window.wsCanvas?.addScreen(item);
             el.ondblclick = () => {
                 window.wsCanvas?.addScreen(item);
@@ -284,11 +288,14 @@ async function fetchWorkspaceImports() {
             };
 
             // Actions
-            el.querySelector('.btn-s-open').onclick = async (e) => {
+            const btnOpen = el.querySelector('.btn-s-open');
+            if (btnOpen) btnOpen.onclick = async (e) => {
                 e.stopPropagation();
                 const res = await fetch(`/api/stitch/open/${item.id}`);
-                const d = await res.json();
-                if (d.url) window.open(d.url);
+                if (res.ok) {
+                    const d = await res.json();
+                    if (d.url) window.open(d.url);
+                }
             };
 
             el.querySelector('.btn-s-sync').onclick = async (e) => {
@@ -314,28 +321,17 @@ async function fetchWorkspaceImports() {
     }
 }
 
-// Upload direct (PNG, SVG, ZIP) — découplé de WsChatMain
+// Upload direct (PNG, SVG, ZIP, HTML…) — tout passe par /api/import/upload
 async function handleDirectUpload(event) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
     for (const file of files) {
         try {
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (ext === 'svg') {
-                const svgContent = await file.text();
-                const res = await fetch('/api/retro-genome/upload-svg', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ svg: svgContent, name: file.name })
-                });
-                if (!res.ok) throw new Error(`svg upload ${res.status}`);
-            } else {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('filename', file.name);
-                const res = await fetch('/api/import/upload', { method: 'POST', body: formData });
-                if (!res.ok) throw new Error(`upload ${res.status}`);
-            }
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', file.name);
+            const res = await fetch('/api/import/upload', { method: 'POST', body: formData });
+            if (!res.ok) throw new Error(`upload ${res.status}`);
             if (window.fetchWorkspaceImports) await window.fetchWorkspaceImports();
         } catch (e) {
             console.error('handleDirectUpload: failed for', file.name, e);
@@ -355,7 +351,6 @@ window.linkStitchProject = async function() {
         });
         if (res.ok) {
             window.fetchWorkspaceImports();
-            if (window.wsStitch) window.wsStitch.loadSession();
         }
     } catch(e) { console.error("Link error", e); }
 };
@@ -464,9 +459,97 @@ function saveProject() {
     }, 800);
 }
 
+// --- ASSETS MANAGEMENT (Mission 235) ---
+async function toggleImagePicker(event) {
+    const popover = document.getElementById('ws-image-picker');
+    if (!popover) return;
+
+    if (!popover.classList.contains('hidden')) {
+        popover.classList.add('hidden', 'scale-95', 'opacity-0');
+        return;
+    }
+
+    // Positionner à gauche de la toolbar
+    const btn = event.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    popover.style.top = `${rect.top}px`;
+    popover.style.right = `${window.innerWidth - rect.left + 12}px`;
+
+    popover.classList.remove('hidden');
+    // Petit timeout pour l'animation
+    setTimeout(() => {
+        popover.classList.remove('scale-95', 'opacity-0');
+        popover.classList.add('scale-100', 'opacity-100');
+    }, 10);
+
+    await fetchProjectAssets();
+}
+
+async function fetchProjectAssets() {
+    const list = document.getElementById('ws-image-list');
+    try {
+        const res = await fetch('/api/projects/active/assets');
+        const data = await res.json();
+        const files = data.files || [];
+
+        if (files.length === 0) {
+            list.innerHTML = '<div class="text-[10px] text-slate-300 italic text-center py-4">aucune image trouvée</div>';
+            return;
+        }
+
+        list.innerHTML = '';
+        files.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'group flex items-center gap-3 p-2 rounded-lg border border-slate-100 bg-white hover:border-homeos-green/30 transition-all';
+            
+            const isSvg = file.filename.endsWith('.svg');
+            const previewUrl = file.url;
+
+            item.innerHTML = `
+                <div class="w-10 h-10 rounded border border-slate-100 bg-slate-50 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    ${isSvg ? `<img src="${previewUrl}" class="w-6 h-6 object-contain">` : `<img src="${previewUrl}" class="w-full h-full object-cover">`}
+                </div>
+                <div class="flex-1 min-width-0">
+                    <div class="text-[10px] font-bold text-slate-700 truncate">${file.name}</div>
+                    <div class="text-[8px] text-slate-400 uppercase tracking-tighter">${(file.size / 1024).toFixed(1)} KB</div>
+                </div>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded" title="Copier le lien" onclick="copyAssetUrl('${file.url}')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    </button>
+                    <button class="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded" title="Supprimer" onclick="deleteAsset('${file.filename}')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    } catch (e) {
+        console.error("fetchProjectAssets error", e);
+        list.innerHTML = '<div class="text-[10px] text-red-400 italic">erreur chargement assets</div>';
+    }
+}
+
+window.copyAssetUrl = (url) => {
+    const fullUrl = window.location.origin + url;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+        // Feedback visuel discret ? 
+        console.log("URL copiée :", fullUrl);
+    });
+};
+
+window.deleteAsset = async (filename) => {
+    if (!confirm(`Supprimer cette image définitivement ?`)) return;
+    try {
+        const res = await fetch(`/api/projects/assets/img/${filename}`, { method: 'DELETE' });
+        if (res.ok) fetchProjectAssets();
+    } catch (e) { console.error("Lelete error", e); }
+};
+
 // Global exposure
 window.fetchWorkspaceImports = fetchWorkspaceImports;
 window.togglePanel = togglePanel;
 window.enterPreviewMode = enterPreviewMode;
 window.exitPreviewMode = exitPreviewMode;
 window.saveProject = saveProject;
+window.toggleImagePicker = toggleImagePicker;
