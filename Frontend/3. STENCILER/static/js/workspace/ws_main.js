@@ -571,3 +571,4 @@ window.enterPreviewMode = enterPreviewMode;
 window.exitPreviewMode = exitPreviewMode;
 window.saveProject = saveProject;
 window.toggleImagePicker = toggleImagePicker;
+})();
