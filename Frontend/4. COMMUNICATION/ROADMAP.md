@@ -40,6 +40,103 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
+### Thème 26 — Forge Pipeline : réparation Vision-to-Code
+
+---
+
+### Mission 257 — Hotfix : `convert_image()` — retirer les tokens HoméOS du fallback
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: CODE DIRECT — FJD**
+
+**Problème :** quand `design_md` est vide (projet sans DESIGN.md ou exception M256-A), `convert_image()` injecte les tokens HoméOS (`#8cc63f`, `#f7f6f2`, `#3d3d3c`, Geist) comme contrainte `IMPÉRATIVE`. Sullivan ignore l'image et produit une page HoméOS.
+
+**Fichier :** `Backend/Prod/retro_genome/svg_to_tailwind.py` — méthode `convert_image()`, bloc `else` du `design_section` (L164-172).
+
+**Fix :**
+```python
+# Avant
+else:
+    design_section = f"""
+TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
+- Background principal : `{tokens['colors']['neutral']}`
+...
+"""
+
+# Après
+else:
+    design_section = """
+CONTRAINTE DESIGN : aucun design system prédéfini pour ce projet.
+Extrais les couleurs, typographies et espacements directement depuis l'image.
+Sois fidèle à ce que tu vois — ne substitue pas tes propres préférences de style.
+"""
+```
+
+**Règle :** ne pas toucher à la branche `if design_md:` ni à `analyze_image_design()`. Scope strict.
+
+---
+
+### Mission 258 — Hotfix : `_generate_with_image_genai` bloque l'event loop
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: CODE DIRECT — FJD**
+
+**Problème :** `client.models.generate_content(...)` du SDK google-genai est **synchrone**. Appelé directement dans une coroutine FastAPI, il bloque l'event loop — cause probable du `zsh: killed` observé en session.
+
+**Fichier :** `Backend/Prod/models/gemini_client.py` — méthode `_generate_with_image_genai()` (L413).
+
+**Fix :**
+```python
+import asyncio
+import functools
+
+async def _generate_with_image_genai(self, prompt, image_base64, mime_type, max_tokens, temperature):
+    from google import genai
+    import base64
+    client = genai.Client(api_key=self.api_key)
+
+    contents = [{"parts": [
+        {"inline_data": {"mime_type": mime_type, "data": image_base64}},
+        {"text": prompt},
+    ]}]
+
+    # Synchronous SDK → exécuté dans un thread pour ne pas bloquer l'event loop
+    response = await asyncio.to_thread(
+        functools.partial(
+            client.models.generate_content,
+            model=self.primary_model,
+            contents=contents,
+            config={"max_output_tokens": max_tokens, "temperature": temperature},
+        )
+    )
+    return response.text
+```
+
+**Règle :** même fix à appliquer à `generate()` (text-only) si le SDK genai est utilisé dans ce chemin — vérifier.
+
+---
+
+### Mission 259 — dist.zip : badge "rendu compilé" dans le shell
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Problème :** un dist.zip React forgé charge dans l'iframe comme un rendu fidèle, mais le hover engine ne peut pas inspecter les éléments (React Virtual DOM). L'élève croit que le mode select devrait fonctionner — pas de feedback visuel indiquant que ce shell est en lecture seule.
+
+**Comportement attendu :**
+- Le shell d'un dist.zip compilé affiche un badge discret `rendu compilé` dans son header, à droite du titre
+- En mode `select`, un tooltip ou message dans la status bar indique `inspecter non disponible — rendu compilé`
+- Le hover engine n'est pas injecté dans ces shells (guard dans `WsScreenShell.js`)
+
+**Détection :** `item.origin === 'compiled'` dans l'index.json (déjà positionné par le pipeline ZIP, L734).
+
+**Fichiers :**
+- `WsScreenShell.js` — dans `build()`, si `item.origin === 'compiled'` : ajouter badge SVG + skip `injectHoverEngine`
+- `WsCanvas.js` — dans `setMode('select')` : si le shell actif a `data-origin="compiled"`, afficher message dans `#ws-status-bar`
+
+**Livrable :**
+- Badge `rendu compilé` visible dans le header du shell
+- Aucune tentative d'injection hover sur ces shells
+- Message status bar en mode select
+
+---
+
 ### Thème 18 — Diagnostics workspace généralisés (2026-04-08)
 
 ---
@@ -2104,6 +2201,43 @@ CSS dans `homeos-nav.css` :
 
 ### Mission 135-139 — Auth, Multi-tenancy, BYOK, Upload, Wire v2
 **STATUS: 🔵 BACKLOG**
+
+---
+
+### Mission 257 — Forge PNG : validation genai SDK + fidélité du rendu
+**STATUS: ✅ LIVRÉ | ACTOR: QWEN | DATE: 2026-04-08**
+
+- SDK `google-genai` installé (v1.70.0) et testé — `gemini-3.1-flash-lite-preview` répond OK
+- `gemini_client.py` : `_generate_with_image_genai()` pour modèles 3.x, REST API pour modèles stables
+- `generate_with_image()` route automatiquement selon le nom du modèle (détection "preview")
+- `svg_to_tailwind.py` : `convert_image()` accepte `design_md` optionnel, injecté dans le prompt
+- `routes.py` : séquence A (analyse) → B (save DESIGN.md) → C (forge avec DESIGN.md)
+
+**Note :** Le serveur a été tué (`killed`) avant qu'une forge PNG ne soit validée end-to-end avec le nouveau code. À retester au prochain redémarrage.
+
+---
+
+### Mission 258 — Drag d'éléments dans l'iframe : fix `elementFromPoint` React
+**STATUS: ✅ LIVRÉ | ACTOR: QWEN | DATE: 2026-04-08**
+
+- Remplacé `document.elementFromPoint(x, y)` par `document.elementsFromPoint(x, y)` (retourne TOUS les éléments au point, pas juste le premier)
+- Fonction `_findElementAtPoint(x, y)` filtre les wrappers React (`#root`, `#__next`, etc.)
+- Accepte le premier élément qui a : un id significatif, une classe CSS, du texte, ou est un élément sémantique
+- Fonctionne pour les bundles React (traverse le shadow DOM des conteneurs) ET le HTML statique
+
+---
+
+### Mission 259 — dist.zip : mode preview statique sans React bundle
+**STATUS: 🔵 BACKLOG | ACTOR: QWEN | DATE: 2026-04-08**
+
+**Contexte :** Les dist.zip React ne sont jamais draggables car le bundle JS gère ses propres événements. C'est fondamental — pas de fix possible sans modifier le bundle.
+
+**Solutions :**
+1. **Extraction HTML brut** : pendant le forge, au lieu de servir le `dist/index.html` avec son bundle JS, extraire le HTML statique rendu (sans les event listeners React) → le rendre draggable
+2. **Screenshot + forge** : prendre un screenshot du dist.zip → le forger via le pipeline PNG (M256) → HTML Tailwind draggable
+3. **Accepter la limitation** : les dist.zip sont en "mode preview seule" — pas de drag, pas de modification dans le canvas
+
+**Fichiers à modifier :** `Backend/Prod/retro_genome/routes.py` — pipeline ZIP dist/
 
 ---
 

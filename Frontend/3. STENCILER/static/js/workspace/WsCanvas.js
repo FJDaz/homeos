@@ -370,6 +370,28 @@ class WsCanvas {
     let _dragAccX = 0, _dragAccY = 0;
     let _origTransform = '';
 
+    // M258: elementsFromPoint au lieu de elementFromPoint — filtre les wrappers React
+    function _findElementAtPoint(x, y) {
+        var all = document.elementsFromPoint ? document.elementsFromPoint(x, y) : [];
+        // Éléments à ignorer (wrappers React, racine, conteneurs vides)
+        var skipIds = ['root', '__next', '___gatsby'];
+        var skipTags = ['SCRIPT', 'STYLE', 'LINK', 'META', 'HEAD', 'HTML', 'BODY', 'BR', 'HR'];
+        for (var i = 0; i < all.length; i++) {
+            var el = all[i];
+            if (!el || skipTags.indexOf(el.tagName) !== -1) continue;
+            if (el.id && skipIds.indexOf(el.id) !== -1) continue;
+            // Accepter si : a un id significatif, ou une classe, ou du texte, ou est un élément sémantique
+            var hasId = el.id && el.id.length > 2 && skipIds.indexOf(el.id) === -1;
+            var hasClass = el.className && typeof el.className === 'string' && el.className.length > 0;
+            var hasText = (el.textContent || '').trim().length > 0;
+            var isSemantic = ['IMG', 'BUTTON', 'A', 'INPUT', 'H1', 'H2', 'H3', 'H4', 'P', 'SPAN', 'DIV', 'SECTION', 'NAV', 'HEADER', 'FOOTER', 'MAIN', 'ARTICLE'].indexOf(el.tagName) !== -1;
+            if (hasId || hasClass || hasText || isSemantic) {
+                return el;
+            }
+        }
+        return all.length > 0 ? all[all.length - 1] : null;
+    }
+
     function _clear() {
         if (_last && _last !== _selected) {
             _last.style.removeProperty('outline');
@@ -391,7 +413,7 @@ class WsCanvas {
     window.addEventListener('message', function(e) {
         if (!e.data) return;
         if (e.data.type === 'hm-probe') {
-            const el = document.elementFromPoint(e.data.x, e.data.y);
+            const el = _findElementAtPoint(e.data.x, e.data.y);
             if (!el || el === document.body || el === document.documentElement) { _clear(); return; }
             if (el === _last) return;
             _clear();
@@ -407,7 +429,7 @@ class WsCanvas {
         } else if (e.data.type === 'hm-click') {
             console.log('[hm-engine] click x=' + Math.round(e.data.x) + ' y=' + Math.round(e.data.y));
             // Select element for drag
-            const el = document.elementFromPoint(e.data.x, e.data.y);
+            const el = _findElementAtPoint(e.data.x, e.data.y);
             if (!el || el === document.body || el === document.documentElement) { console.log('[hm-engine] no element at point'); _clearSelection(); return; }
             console.log('[hm-engine] selected:', el.tagName, el.id || el.className || '');
             _clearSelection();
