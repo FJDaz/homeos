@@ -1,7 +1,14 @@
 /* ws_main.js — AetherFlow Workspace Orchestrator (Mission 127 V2) */
 
-document.addEventListener('DOMContentLoaded', async () => {
+// M242: Fix — module est deferred, DOMContentLoaded est déjà passé
+// On exécute directement (le DOM est prêt car le script est defer)
+(async function initWorkspace() {
     console.log("🚀 ws_main: starting workspace design V2 (Hexagonal Architecture)...");
+
+    // Guard: si le DOM n'est pas encore prêt (très rare), attendre
+    if (document.readyState === 'loading') {
+        await new Promise(r => document.addEventListener('DOMContentLoaded', r));
+    }
 
     // 1. Initialiser l'Architecture Hexagonale (Mission 156)
     try { window.wsAudit = new WsAudit(); } catch(e) { console.error('[ws_main] WsAudit crash:', e); }

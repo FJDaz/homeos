@@ -40,32 +40,180 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-### Thème 18 — Réparations workspace généralisées (2026-04-08)
+### Thème 18 — Diagnostics workspace généralisés (2026-04-08)
 
 ---
 
-### Mission 239 — Crash ws_main.js : toolbar + aperçu + listeners morts
-**STATUS: ✅ LIVRÉ**
+### Mission 239 — DIAG : Toolbar N0 — tous les boutons morts sauf Stitch
+**STATUS: 🔴 DIAG EN ATTENTE**
 
-- Tous les constructeurs dans le `DOMContentLoaded` de `ws_main.js` sont maintenant wrappés dans des `try/catch` individuels
-- Si un constructeur crashe, l'erreur est loggée clairement (`[ws_main] WsChatMain crash: ...`) et le reste de l'init continue
-- Les handlers toolbar (`.ws-tool-btn`) et mode-btn (`.ws-mode-btn`) sont attachés après les constructors — ils s'exécutent même si un constructor a crashé
+**Symptôme** : Clic sur select (V), drag (H), frame (F), text (T), effects (E) → rien de visible. Seul le bouton Stitch (`<a>` brut) réagit.
 
 ---
 
-### Mission 240 — WsFEEStudio : résoudre projectId depuis la session
-**STATUS: ✅ LIVRÉ**
+**Hypothèse 1 — Les `onclick` des `.ws-tool-btn` ne sont jamais attachés**
+Probabilité : TRÈS PROBABLE
 
-- `WsFEEStudio.open()` résout `projectId` depuis `localStorage.homeos_session` au lieu de `this.ws.activeProject` (qui était toujours undefined car `wsBackend` n'est jamais instancié)
-- `this.projectId` stocké comme propriété d'instance → utilisé dans `scanTriggers()`, `sendToSullivan()`, `applyCode()`
-- Fallback : `session.active_project_id || session.project_id`
+`ws_main.js` est `type="module"` (workspace.html ligne 579). L'ensemble de l'init est dans un `DOMContentLoaded` async. Si une exception non catchée survient **avant la ligne 58** (setup toolbar), la promise avorte silencieusement. Le [S] de la screen list fonctionne car son onclick est attaché dans `fetchWorkspaceImports()` (ligne ~303), mais cette fonction est appelée à la ligne 52 — les onclicks toolbar sont attachés à la ligne 58, **après** le await. Si `fetchWorkspaceImports()` throw en dehors de son try/catch interne (ex: `list` null → `list.innerHTML` crash dans le catch), DOMContentLoaded avorte avant la ligne 58.
 
-### Mission 241 — Screen list : re-fetch après upload + bouton [S] conditionnel
-**STATUS: ✅ LIVRÉ**
+Test :
+```js
+document.querySelectorAll('.ws-tool-btn').length           // 0 → handlers jamais attachés
+document.querySelector('.ws-tool-btn[data-mode="select"]').onclick  // null confirme
+```
 
-- **Bug A** : `handleDirectUpload()` appelait déjà `fetchWorkspaceImports()` après upload réussi ✅ (déjà fonctionnel)
-- **Bug B** : Bouton [S] maintenant conditionnel — affiché uniquement si `item.archetype_id === 'stitch_import'` ou `archetype_label` contient "stitch"
-- Les imports dist.zip n'ont plus de bouton [S] (ils ne sont pas des écrans Stitch)
+---
+
+**Hypothèse 2 — Les `onclick` sont attachés mais `window.wsCanvas` est null**
+Probabilité : PROBABLE
+
+Si `new WsCanvas(...)` (ligne 11) throw ou retourne un objet incomplet, `window.wsCanvas` est null. Tous les appels `window.wsCanvas?.setMode(mode)` sont des no-ops silencieux.
+
+Test :
+```js
+window.wsCanvas         // null ?
+window.wsCanvas?.activeMode   // undefined ?
+```
+
+---
+
+**Hypothèse 3 — Les `onclick` sont attachés et setMode tourne, mais le feedback visuel est invisible**
+Probabilité : MOYENNE
+
+`setMode()` ajoute/retire la classe `.active-tool` sur les boutons. Si `.active-tool` n'a aucune règle CSS visible (background, couleur, border), le bouton paraît mort alors qu'il fonctionne. De plus, les modes "frame", "effects", "colors" ne déclenchent aucune ouverture de panneau dans `ws_main.js` — ils changent juste `activeMode` en silence.
+
+Test :
+```js
+document.querySelector('.ws-tool-btn[data-mode="select"]').classList.contains('active-tool') // avant clic
+// Cliquer "drag"
+document.querySelector('.ws-tool-btn[data-mode="drag"]').classList.contains('active-tool')    // → true si setMode tourne
+```
+
+---
+
+### Mission 240 — DIAG : Bouton Aperçu dans le shell — mort
+**STATUS: 🔴 DIAG EN ATTENTE**
+
+**Symptôme** : Clic sur "Aperçu" dans un shell canvas → rien ne s'ouvre.
+
+---
+
+**Hypothèse 1 — `window.wsPreview` est undefined**
+Probabilité : TRÈS PROBABLE
+
+Si ws_main.js crashe avant ou à la ligne 9 (`window.wsPreview = new WsPreview()`), `window.wsPreview` est undefined. L'appel `window.wsPreview?.enterPreviewMode(...)` dans le clic du shell est un no-op silencieux.
+
+Test :
+```js
+window.wsPreview                // undefined ?
+typeof window.wsPreview         // "undefined" ?
+```
+
+---
+
+**Hypothèse 2 — `ws-preview-overlay` absent du DOM**
+Probabilité : PROBABLE
+
+`enterPreviewMode()` fait `document.getElementById('ws-preview-overlay')`. Si l'élément est absent (supprimé par une régression Gemini), la fonction retourne silencieusement à la ligne `if (!shell || !overlay) return`.
+
+Test :
+```js
+document.getElementById('ws-preview-overlay')          // null ?
+document.getElementById('ws-preview-frame-container')  // null ?
+```
+
+---
+
+**Hypothèse 3 — Le shell id passé ne correspond à aucun élément**
+Probabilité : FAIBLE
+
+Le bouton passe `g.id` à `enterPreviewMode`. Si `g.id` est vide ou mal formé, `document.getElementById(id)` retourne null → retour silencieux ligne 76.
+
+Test :
+```js
+document.querySelector('.ws-screen-shell')?.id  // vide ou undefined ?
+```
+
+---
+
+### Mission 241 — DIAG : Bouton [S] apparaît sur les imports dist.zip
+**STATUS: 🔴 DIAG EN ATTENTE**
+
+**Symptôme** : Un import dist.zip affiche un bouton [S] dans la screen list. Clic → `GET /api/stitch/open/2026-04-08_142326_dist.zip` → 400.
+
+---
+
+**Hypothèse 1 — L'entrée index.json a un `archetype_id` hérité d'une ancienne version du code**
+Probabilité : TRÈS PROBABLE
+
+La condition `isStitch` dans `fetchWorkspaceImports()` évalue `item.archetype_id === 'stitch_import'`. Si une version précédente du code a créé des entrées avec un archetype_id différent, le check est correct **pour les nouvelles entrées** mais les anciennes dans index.json ont peut-être une valeur aberrante qui passe le test. Ou pire : une régression a enlevé la condition et tout affiche [S].
+
+Test :
+```js
+fetch('/api/retro-genome/imports').then(r=>r.json()).then(d=>console.log(JSON.stringify(d.imports.map(i=>({id:i.id,archetype_id:i.archetype_id,archetype_label:i.archetype_label})),null,2)))
+```
+
+---
+
+**Hypothèse 2 — Le fichier ws_main.js servi est une version cachée sans la condition**
+Probabilité : PROBABLE
+
+Les agents ont peut-être appliqué le fix dans le mauvais fichier, ou le serveur sert une version antérieure. Le browser peut avoir en cache une version de ws_main.js sans la condition `isStitch`.
+
+Test : Ouvrir DevTools → Sources → `ws_main.js` → chercher "isStitch". Si absent → version ancienne en cache.
+Fix : Cmd+Shift+R (hard refresh).
+
+---
+
+**Hypothèse 3 — La condition est présente mais évalue `true` pour les zips car `archetype_label` contient "stitch" par accident**
+Probabilité : FAIBLE
+
+La condition est `item.archetype_label.toLowerCase().includes('stitch')`. Si l'archetype_label d'un zip est "import multi-format" (normal), il ne contient pas "stitch". Mais si un agent a changé le label dans import_router.py, le check peut être faussé.
+
+Test : vérifier dans import_router.py l'`archetype_label` assigné aux uploads ZIP.
+
+---
+
+### Mission 242 — DIAG : FEE Studio — "veuillez activer un projet"
+**STATUS: 🔴 DIAG EN ATTENTE**
+
+**Symptôme** : Ouverture FEE Studio → `alert("veuillez activer un projet")` même quand un projet est chargé.
+
+---
+
+**Hypothèse 1 — `window.wsBackend` non instancié → `projectId` undefined**
+Probabilité : TRÈS PROBABLE
+
+`ws_main.js` n'instancie jamais `window.wsBackend = new WsBackend()`. `WsFEEStudio.open()` résout `this.ws = window.wsBackend || window.wsCanvas || {}`. Si `wsBackend` est undefined et `wsCanvas` n'a pas de propriété `activeProject`, `projectId` = undefined → alert.
+
+Test :
+```js
+window.wsBackend                    // undefined ?
+window.wsCanvas?.activeProject      // undefined ?
+JSON.parse(localStorage.getItem('homeos_session') || '{}')  // a-t-il active_project_id ?
+```
+
+---
+
+**Hypothèse 2 — La session localStorage n'a pas de clé `active_project_id`**
+Probabilité : PROBABLE
+
+Même si M240 a patché `WsFEEStudio.open()` pour lire depuis `localStorage.homeos_session`, si la session stockée n'a pas de clé `active_project_id` ou `project_id`, le fallback échoue quand même.
+
+Test :
+```js
+JSON.parse(localStorage.getItem('homeos_session') || '{}')
+// Chercher : active_project_id, project_id, token
+```
+
+---
+
+**Hypothèse 3 — Le patch M240 n'a pas été appliqué (version ancienne de WsFEEStudio.js servie)**
+Probabilité : MOYENNE
+
+Le serveur sert peut-être une version de `WsFEEStudio.js` antérieure au patch. Vérifier dans Sources DevTools que `WsFEEStudio.open()` lit bien `localStorage.homeos_session`.
+
+Test : DevTools → Sources → `WsFEEStudio.js` → chercher "homeos_session". Absent → version antérieure au patch.
 
 ---
 
