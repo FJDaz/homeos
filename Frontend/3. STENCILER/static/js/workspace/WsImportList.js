@@ -15,7 +15,7 @@
     async function refresh() {
         console.log('[WsImportList] fetching...');
         try {
-            const res = await fetch('/api/frd/imports');
+            const res = await fetch('/api/retro-genome/imports');
             if (!res.ok) {
                 console.warn('[WsImportList] fetch failed, status', res.status);
                 return;
