@@ -3,34 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trouver son représentant — République Française</title>
+    <title>Trouver son representant</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="fr-header">
         <div class="fr-header__brand">
             <div class="fr-header__brand-top">
                 <div class="fr-header__logo">
-                    <p class="fr-logo" title="République Française">
-                        République<br>Française
-                    </p>
+                    <p class="fr-logo">Republique<br>Francaise</p>
                 </div>
                 <div class="fr-header__operator">
-                    <span>Trouver son représentant</span>
+                    <span>Trouver son representant</span>
                 </div>
             </div>
-            <p class="fr-header__baseline">Service citoyen — Données ouvertes</p>
+            <p class="fr-header__baseline">Service citoyen -- Donnees ouvertes</p>
         </div>
     </header>
 
     <main class="fr-main">
-        <!-- HERO / SEARCH -->
         <section class="hero" id="hero-section">
             <div class="hero__content">
-                <h1 class="hero__title">Qui vous représente ?</h1>
-                <p class="hero__subtitle">Rue et code postal suffisent. Aucune donnée n'est conservée.</p>
+                <h1 class="hero__title">Qui vous represente ?</h1>
+                <p class="hero__subtitle">Rue et code postal suffisent. Aucune donnee n'est conservee.</p>
 
                 <form id="search-form" class="search-form" autocomplete="off">
                     <div class="search-form__input-group">
@@ -56,7 +51,7 @@
                                 required
                             >
                             <button type="submit" class="search-form__btn" id="search-btn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <path d="m21 21-4.35-4.35"></path>
                                 </svg>
@@ -66,89 +61,89 @@
                     </div>
                 </form>
 
-                <!-- RGPD -->
                 <div class="rgpd-notice">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    <p><strong>Aucune donnée personnelle n'est collectée ni stockée.</strong> Votre recherche est traitée en temps réel et immédiatement oubliée. Aucune base de données, aucun cookie traceur.</p>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <p><strong>Aucune donnee personnelle n'est collectee ni stockee.</strong> Votre recherche est traitee en temps reel et immediatement oubliee. Aucune base de donnees, aucun cookie traceur.</p>
                 </div>
 
                 <div class="hero__sources">
-                    <p>Sources : <a href="https://api-adresse.data.gouv.fr" target="_blank" rel="noopener">api-adresse.data.gouv.fr</a> · <a href="https://data.assemblee-nationale.fr" target="_blank" rel="noopener">Assemblée nationale</a> · <a href="https://www.data.gouv.fr" target="_blank" rel="noopener">data.gouv.fr</a></p>
+                    <p>Sources : <a href="https://api-adresse.data.gouv.fr" target="_blank" rel="noopener">api-adresse.data.gouv.fr</a> -- <a href="https://data.assemblee-nationale.fr" target="_blank" rel="noopener">Assemblee nationale</a> -- <a href="https://www.data.gouv.fr" target="_blank" rel="noopener">data.gouv.fr</a></p>
                 </div>
             </div>
         </section>
 
-        <!-- LOADING -->
         <section class="loading" id="loading-section" hidden>
             <div class="loading__spinner"></div>
-            <p class="loading__text">Recherche de vos représentants…</p>
+            <p class="loading__text">Recherche de vos representants...</p>
         </section>
 
-        <!-- ERROR -->
         <section class="error" id="error-section" hidden>
-            <div class="error__icon">⚠️</div>
+            <div class="error__icon">!</div>
             <h2 class="error__title" id="error-title">Adresse introuvable</h2>
-            <p class="error__message" id="error-message">Vérifiez votre saisie et réessayez.</p>
+            <p class="error__message" id="error-message">Verifiez votre saisie et reessayez.</p>
             <button class="btn btn--secondary" onclick="resetSearch()">Nouvelle recherche</button>
         </section>
 
-        <!-- RESULTS -->
         <section class="results" id="results-section" hidden>
             <div class="results__header">
-                <h2 class="results__title">Votre député</h2>
+                <h2 class="results__title">Votre depute</h2>
                 <p class="results__location" id="results-location"></p>
-                <button class="btn btn--ghost" onclick="resetSearch()">↩ Nouvelle recherche</button>
+                <button class="btn btn--ghost" onclick="resetSearch()">Nouvelle recherche</button>
             </div>
 
-            <!-- DÉPUTÉ — résultat principal -->
             <article class="card card--main" id="card-depute">
-                <div class="card__badge card__badge--blue">Assemblée nationale</div>
+                <div class="card__badge card__badge--blue">Assemblee nationale</div>
                 <div class="card__body">
                     <div class="card__photo" id="depute-photo" hidden></div>
-                    <h3 class="card__name" id="depute-name">—</h3>
+                    <h3 class="card__name" id="depute-name">--</h3>
                     <p class="card__subtitle" id="depute-circo"></p>
                     <p class="card__group" id="depute-group"></p>
 
                     <div class="card__contact" id="depute-contact">
                         <a class="card__link" id="depute-email" href="#" hidden>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                             <span id="depute-email-text"></span>
                         </a>
                         <a class="card__link" id="depute-site" href="#" target="_blank" rel="noopener">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                            <span>Fiche Assemblée nationale</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            <span>Fiche Assemblee nationale</span>
                         </a>
                     </div>
                 </div>
             </article>
 
-            <!-- AUTRES REPRÉSENTANTS -->
             <div class="other-reps">
-                <h3 class="other-reps__title">Trouver vos autres représentants</h3>
+                <h3 class="other-reps__title">Trouver vos autres representants</h3>
                 <div class="other-reps__grid">
                     <a class="other-reps__card" id="other-reps-mairie" href="#" target="_blank" rel="noopener">
-                        <div class="other-reps__icon">🏛️</div>
+                        <div class="other-reps__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+                        </div>
                         <div class="other-reps__info">
                             <span class="other-reps__label">Votre mairie</span>
                             <span class="other-reps__desc" id="other-reps-mairie-desc">Contacter la mairie</span>
                         </div>
-                        <svg class="other-reps__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        <svg class="other-reps__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
                     <a class="other-reps__card" id="other-reps-dept" href="#" target="_blank" rel="noopener">
-                        <div class="other-reps__icon">📋</div>
+                        <div class="other-reps__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
                         <div class="other-reps__info">
-                            <span class="other-reps__label">Conseil départemental</span>
+                            <span class="other-reps__label">Conseil departemental</span>
                             <span class="other-reps__desc" id="other-reps-dept-desc">Vos conseillers</span>
                         </div>
-                        <svg class="other-reps__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        <svg class="other-reps__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
                     <a class="other-reps__card" id="other-reps-region" href="#" target="_blank" rel="noopener">
-                        <div class="other-reps__icon">🗺️</div>
+                        <div class="other-reps__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        </div>
                         <div class="other-reps__info">
-                            <span class="other-reps__label">Conseil régional</span>
+                            <span class="other-reps__label">Conseil regional</span>
                             <span class="other-reps__desc" id="other-reps-region-desc">Vos conseillers</span>
                         </div>
-                        <svg class="other-reps__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        <svg class="other-reps__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
                 </div>
             </div>
@@ -157,8 +152,8 @@
 
     <footer class="fr-footer">
         <div class="fr-footer__content">
-            <p>Données ouvertes — <a href="https://api-adresse.data.gouv.fr" target="_blank" rel="noopener">api-adresse.data.gouv.fr</a> · <a href="https://data.assemblee-nationale.fr" target="_blank" rel="noopener">data.assemblee-nationale.fr</a></p>
-            <p>Application citoyenne — Aucune donnée personnelle n'est stockée.</p>
+            <p>Donnees ouvertes -- <a href="https://api-adresse.data.gouv.fr" target="_blank" rel="noopener">api-adresse.data.gouv.fr</a> -- <a href="https://data.assemblee-nationale.fr" target="_blank" rel="noopener">data.assemblee-nationale.fr</a></p>
+            <p>Application citoyenne -- Aucune donnee personnelle n'est stockee.</p>
         </div>
     </footer>
 

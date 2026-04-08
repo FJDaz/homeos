@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoméOS -- Cadrage mode prof</title>
+    <script src="/static/js/bootstrap.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f7f6f2;
+            color: #3d3d3c;
+            min-height: 100vh;
+            line-height: 1.4;
+        }
+        .header { display: none; } /* Managed by bootstrap.js or unified nav */
+        
+        /* Studio Chassis - The Desk */
+        #studio-chassis {
+            max-width: 1200px; margin: 64px auto 16px; 
+            background: #fff; border: 1px solid #e5e5e5; border-radius: 16px !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            display: flex; min-height: 85vh; overflow: hidden;
+            position: relative;
+        }
+
+        .main-content { flex: 1; padding: 32px; min-width: 0; background: #fff; }
+        
+        /* Sullivan Paper - Draggable */
+        #sullivan-paper {
+            position: fixed; top: 100px; left: 40px;
+            width: 460px; z-index: 1000;
+            background: #fff; border: 1px solid #e5e5e5; border-radius: 16px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            display: flex; flex-direction: column;
+            transition: height 0.3s ease;
+        }
+        #sullivan-paper.collapsed { height: 48px !important; overflow: hidden; }
+        #sullivan-paper.collapsed .messages, #sullivan-paper.collapsed .input-area { display: none; }
+
+        .sullivan-handle {
+            padding: 12px 16px; background: #fdfdfb; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: grab; border-radius: 16px 16px 0 0;
+        }
+        .sullivan-handle:active { cursor: grabbing; }
+        .sullivan-title { font-size: 10px; font-weight: 700; color: #3d3d3c; letter-spacing: 0.05em; text-transform: lowercase; }
+        
+        .competences-panel {
+            width: 280px; flex-shrink: 0;
+            background: #fdfdfb; border-left: 1px solid #e5e5e5;
+            padding: 24px; align-self: stretch;
+        }
+        .competences-panel__title { font-size: 11px; font-weight: 700; color: #3d3d3c; margin-bottom: 16px; text-transform: lowercase; }
+        .competence-tag {
+            display: inline-block; padding: 2px 6px; margin: 2px; font-size: 9px;
+            background: #efefeb; border: 1px solid #e5e5e5; border-radius: 2px; color: #3d3d3c;
+        }
+        .competence-tag--active { background: #8cc63f; border-color: #8cc63f; color: #f7f6f2; }
+        .messages { max-height: 450px; overflow-y: auto; padding: 20px; flex: 1; }
+        .message {
+            padding: 12px 16px; margin-bottom: 12px; border-radius: 8px !important; font-size: 14px; line-height: 1.5;
+            max-width: 90%;
+        }
+        .message--user { background: #efefeb; align-self: flex-end; margin-left: auto; color: #3d3d3c; }
+        .message--sullivan { background: #fff; border: 1px solid #e5e5e5; align-self: flex-start; }
+        
+        .input-area { padding: 16px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; }
+        .input-area textarea {
+            flex: 1; padding: 12px; border: 1px solid #e5e5e5; border-radius: 8px !important;
+            font-size: 14px; font-family: inherit; background: #fdfdfb; color: #3d3d3c;
+            outline: none; resize: none; height: 50px;
+        }
+        .input-area textarea:focus { border-color: #3d3d3c; }
+        .btn-send {
+            padding: 8px 16px; background: #3d3d3c; color: #f7f6f2; border: none; border-radius: 4px;
+            font-size: 10px; font-weight: 500; font-family: inherit; cursor: pointer; transition: opacity 150ms;
+        }
+        .btn-send:hover { opacity: 0.85; }
+        .btn-create-subject {
+            width: 100%; margin-top: 12px; padding: 8px; background: #8cc63f; color: #f7f6f2;
+            border: none; border-radius: 0; font-size: 10px; font-weight: 500; font-family: inherit;
+            cursor: pointer; transition: opacity 150ms; opacity: 0.5; pointer-events: none;
+        }
+        .btn-create-subject--active { opacity: 1; pointer-events: auto; }
+        .btn-create-subject--active:hover { opacity: 0.85; }
+        .footer { text-align: center; padding: 12px; font-size: 9px; color: #9a9a98; border-top: 1px solid #e5e5e5; background: #f7f6f2; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header__left">
+            <div class="logo">HoméOS</div>
+            <div class="title">cadrage<span class="prof-badge" id="prof-badge" style="display:none;">mode prof</span></div>
+        </div>
+        <div class="header__right" id="class-name">chargement...</div>
+    </header>
+
+    <div id="studio-chassis">
+        <div class="main-content">
+            <div id="draft-area" style="color:#9a9a98; font-style: italic; font-size: 12px; height: 100%;">
+                espace de travail sullivan -- les propositions de sujets s'afficheront ici
+            </div>
+        </div>
+
+        <div class="competences-panel">
+            <div class="competences-panel__title">compétences dnmade</div>
+            <div id="competences-list">
+                <!-- Dynamique -->
+            </div>
+            <button class="btn-create-subject" id="btn-create-subject" onclick="createSubject()">créer le sujet →</button>
+        </div>
+    </div>
+
+    <!-- Sullivan Paper (Draggable) -->
+    <div id="sullivan-paper">
+        <div class="sullivan-handle" id="sullivan-handle">
+            <div class="sullivan-title">sullivan conseiller pédagogique</div>
+            <button style="background:none; border:none; color:#9a9a98; cursor:pointer;" onclick="toggleSullivan()">−</button>
+        </div>
+        <div class="messages" id="messages">
+            <div class="message message--sullivan">
+                bonjour. je suis là pour vous aider à formaliser un sujet de projet. de quoi souhaitez-vous parler ?
+            </div>
+        </div>
+        <div class="input-area">
+            <textarea id="msg-input" placeholder="décrivez votre sujet..."></textarea>
+            <button class="btn-send" onclick="sendMessage()">envoyer</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>HoméOS -- Cadrage mode prof -- Referentiel DNMADE</p>
+    </footer>
+
+    <script>
+        var classId = null;
+        var detectedCompetences = [];
+        var subjectData = null;
+        var sessionId = 'cadrage-' + Date.now();
+
+        // Parse URL params
+        var params = new URLSearchParams(window.location.search);
+        classId = params.get('class_id');
+
+        if (classId) {
+            fetch('/api/classes/' + classId).then(function(r) { return r.json(); }).then(function(data) {
+                document.getElementById('class-name').textContent = data.name || classId;
+            });
+        }
+
+        // Drag & Drop Sullivan
+        var sullivan = document.getElementById('sullivan-paper');
+        var handle = document.getElementById('sullivan-handle');
+        var isDragging = false;
+        var offset = { x: 0, y: 0 };
+
+        handle.onmousedown = function(e) {
+            isDragging = true;
+            offset.x = e.clientX - sullivan.offsetLeft;
+            offset.y = e.clientY - sullivan.offsetTop;
+            document.body.style.userSelect = 'none';
+        };
+
+        window.onmousemove = function(e) {
+            if (!isDragging) return;
+            sullivan.style.left = (e.clientX - offset.x) + 'px';
+            sullivan.style.top = (e.clientY - offset.y) + 'px';
+        };
+
+        window.onmouseup = function() {
+            isDragging = false;
+            document.body.style.userSelect = 'auto';
+        };
+
+        function toggleSullivan() {
+            sullivan.classList.toggle('collapsed');
+        }
+
+        function sendMessage() {
+            var input = document.getElementById('msg-input');
+            var msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+
+            var messagesEl = document.getElementById('messages');
+            messagesEl.innerHTML += '<div class="message message--user">' + escapeHtml(msg) + '</div>';
+            messagesEl.innerHTML += '<div class="message message--sullivan" id="sullivan-typing">reflexion...</div>';
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+            // Build SSE URL with class_id for prof mode context injection
+            var sseUrl = '/api/cadrage/chat/gemini?session_id=' + encodeURIComponent(sessionId) + '&message=' + encodeURIComponent(msg);
+            if (classId) sseUrl += '&class_id=' + encodeURIComponent(classId);
+
+            var evtSource = new EventSource(sseUrl);
+            var fullResponse = '';
+
+            evtSource.addEventListener('status', function(e) {
+                var data = JSON.parse(e.data);
+                if (data.status === 'DONE') {
+                    evtSource.close();
+                    parseSujetComment(fullResponse);
+                }
+            });
+
+            evtSource.addEventListener('token', function(e) {
+                var token = JSON.parse(e.data);
+                fullResponse += token;
+                var typing = document.getElementById('sullivan-typing');
+                if (typing) {
+                    typing.id = '';
+                    // Render text, keep HTML comments for parsing
+                    typing.innerHTML = escapeHtml(fullResponse);
+                }
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            });
+
+            evtSource.addEventListener('error', function() {
+                evtSource.close();
+                var typing = document.getElementById('sullivan-typing');
+                if (typing) {
+                    typing.id = '';
+                    typing.textContent = 'je vous aide a structurer ce sujet. quelles competences dnmade souhaitez-vous cibler en priorite ?';
+                }
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            });
+        }
+
+        function parseSujetComment(response) {
+            // Parse <!-- SUJET: title: ... description: ... competences: [A1, C2] -->
+            var match = response.match(/<!--\s*SUJET:[\s\S]*?title:\s*(.*?)\s*description:\s*(.*?)\s*competences:\s*\[(.*?)\]\s*-->/);
+            if (match) {
+                subjectData = {
+                    title: match[1].trim(),
+                    description: match[2].trim(),
+                    competences: match[3].split(',').map(function(c) { return c.trim(); })
+                };
+                updateCompetences(subjectData.competences);
+                document.getElementById('btn-create-subject').classList.add('btn-create-subject--active');
+            }
+        }
+
+        function updateCompetences(comps) {
+            detectedCompetences = comps || [];
+            var allComps = ['A1','A2','A3','B1','B2','C1','C2','C3','D1','D2'];
+            var labels = {
+                'A1': 'Recherche', 'A2': 'Concept', 'A3': 'Realisation',
+                'B1': 'Presentation', 'B2': 'Argumentation',
+                'C1': 'Outils numeriques', 'C2': 'Production', 'C3': 'Qualite',
+                'D1': 'References', 'D2': 'Analyse'
+            };
+            var html = '';
+            allComps.forEach(function(c) {
+                var active = detectedCompetences.indexOf(c) !== -1;
+                html += '<span class="competence-tag' + (active ? ' competence-tag--active' : '') + '">' + c + ' ' + (labels[c] || '') + '</span>';
+            });
+            document.getElementById('competences-list').innerHTML = html;
+        }
+
+        function createSubject() {
+            if (!classId || !subjectData) return;
+            fetch('/api/classes/' + classId + '/subjects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: subjectData.title || 'sujet sans titre',
+                    description: subjectData.description || '',
+                    competences: subjectData.competences || detectedCompetences
+                })
+            }).then(function(r) { return r.json(); }).then(function() {
+                window.location.href = '/teacher';
+            }).catch(function(e) { console.error('createSubject error:', e); });
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('msg-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

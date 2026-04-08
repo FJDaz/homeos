@@ -6,6 +6,25 @@
 
 ---
 
+## M233 — Backend : PATCH /api/imports/{import_id}
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
+
+- Route `PATCH /api/imports/{import_id}` dans `import_router.py`
+- Merge les champs du body JSON dans l'entrée `index.json` du projet actif
+- `from fastapi import Body` ajouté
+
+---
+
+## M234 — Frontend : forge → update liste + suppression panel Stitch
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN + CODE DIRECT**
+
+- `WsForge.js` : après `job.status === 'done'` → `PATCH /api/imports/{importId}` avec `{ html_template, type: 'html' }` → refresh liste
+- `ws_main.js` : bouton [S] conditionnel — affiché uniquement si `archetype_id === 'stitch_import'` ou `archetype_label` contient "stitch"
+- `workspace.html` : suppression de `#section-stitch` (panel + badge) + script WsStitch
+- `ws_main.js` : suppression de l'instanciation WsStitch, retrait de `panel-stitch` du PanelDragger
+
+---
+
 ## F2 — Projet élève : création automatique depuis le sujet actif
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: CLAUDE (CODE DIRECT)**
 

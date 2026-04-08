@@ -86,9 +86,9 @@ class Settings(BaseSettings):
     )
 
     gemini_model: str = Field(
-        default="gemini-2.5-flash",  # GA — primary stable 2026
+        default="gemini-3.1-pro-preview",  # Most recent — primary 2026
         alias="GEMINI_MODEL",
-        description="Gemini model. GA: gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.5-pro. Preview: gemini-3.1-pro, gemini-3.1-flash-lite.",
+        description="Gemini model. Preview (3.x, genai SDK): gemini-3.1-pro-preview, gemini-3-flash-preview, gemini-3.1-flash-lite-preview. GA (REST): gemini-2.5-flash, gemini-2.5-pro.",
     )
 
     groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL", description="Groq model to use")

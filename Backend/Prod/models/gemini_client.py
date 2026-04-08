@@ -12,25 +12,28 @@ from .base_client import BaseLLMClient, GenerationResult
 class GeminiClient(BaseLLMClient):
     """Async client for Google Gemini API with automatic fallback cascade."""
     
-    # Cascade de fallback pour mode FAST (priorité vitesse)
+    # Cascade de fallback pour mode FAST (priorité vitesse — plus récent d'abord)
     FALLBACK_MODELS_FAST = [
-        "gemini-3.1-flash-lite-preview",  # Stable + fast
+        "gemini-3.1-flash-lite-preview",  # Most recent fast
         "gemini-3-flash-preview",         # Good balance
-        "gemini-3.1-pro-preview",         # Highest quality
+        "gemini-3.1-pro-preview",         # Overkill for fast but available
+        "gemini-2.5-flash",               # Last resort GA (REST)
     ]
 
-    # Cascade de fallback pour mode BUILD/PROD (priorité qualité)
+    # Cascade de fallback pour mode BUILD/PROD (priorité qualité — plus récent d'abord)
     FALLBACK_MODELS_BUILD = [
-        "gemini-3.1-pro-preview",         # Reasoning / complex code
-        "gemini-3-flash-preview",         # High Performance
+        "gemini-3.1-pro-preview",         # Most recent + highest quality
+        "gemini-3-flash-preview",         # High performance
         "gemini-3.1-flash-lite-preview",  # Stable
+        "gemini-2.5-flash",               # Last resort GA (REST)
     ]
 
     # Fallback par défaut
     FALLBACK_MODELS_DEFAULT = [
-        "gemini-3.1-flash-lite-preview",
-        "gemini-3-flash-preview",
         "gemini-3.1-pro-preview",
+        "gemini-3-flash-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-2.5-flash",               # Last resort GA (REST)
     ]
 
     def __init__(

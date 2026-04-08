@@ -116,8 +116,22 @@ async def get_student_login():
 
 @router.get("/teacher")
 async def get_teacher_dashboard():
-    """Mission 216: Dashboard prof — vue classe temps réel."""
+    """Mission 216: Dashboard prof -- vue classe temps reel."""
     path = STATIC_DIR_PATH / "templates/teacher_dashboard.html"
+    if not path.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(path)
+
+
+@router.get("/cadrage")
+async def get_cadrage(mode: str = "prof", class_id: str = ""):
+    """Mission 219/221: Cadrage mode Studio -- sujet x referentiel DNMADE."""
+    if mode == "standard":
+        path = STATIC_DIR_PATH / "templates/cadrage_alt.html"
+    else:
+        # Par défaut, on sert le nouveau Cadrage Prof "Studio Edition"
+        path = STATIC_DIR_PATH / "templates/cadrage_prof.html"
+    
     if not path.exists():
         raise HTTPException(status_code=404)
     return FileResponse(path)

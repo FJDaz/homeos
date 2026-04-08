@@ -118,7 +118,7 @@ class WsBackend {
         this.els.inputArch.onkeydown = (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 if (this.pendingPlan.architect) {
-                    this.addLog('architect', "Validation du plan requise.");
+                    this.addLog('architect', "validation du plan requise");
                     return;
                 }
                 e.preventDefault();
@@ -130,7 +130,7 @@ class WsBackend {
         this.els.inputWork.onkeydown = (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 if (this.pendingPlan.worker) {
-                    this.addLog('worker', "Validation du plan requise.");
+                    this.addLog('worker', "validation du plan requise");
                     return;
                 }
                 e.preventDefault();
@@ -159,12 +159,12 @@ class WsBackend {
 
         // Recompile
         this.els.btnRecompile.onclick = async () => {
-            this.addLog('architect', 'Recompilation du génome...');
+            this.addLog('architect', 'recompilation du génome...');
             try {
                 const res = await fetch('/api/projects/active/genome-compile', { method: 'POST' });
-                this.addLog('architect', res.ok ? 'Génome recompilé.' : 'Échec recompilation.');
+                this.addLog('architect', res.ok ? 'génome recompilé' : 'échec recompilation');
                 this.loadRoadmap();
-            } catch (e) { this.addLog('architect', 'Erreur API compile.'); }
+            } catch (e) { this.addLog('architect', 'erreur api compile'); }
         };
     }
 
@@ -174,7 +174,7 @@ class WsBackend {
         btns.forEach(btn => {
             const id = btn.getAttribute('data-tab');
             btn.classList.toggle('tab-active', id === targetId);
-            btn.classList.toggle('text-homeos-textMuted', id !== targetId);
+            btn.classList.toggle('text-homeos-muted', id !== targetId);
         });
 
         // Update Areas

@@ -179,6 +179,21 @@ async def activate_project(req: ProjectActivateRequest, request: Request = None)
     logger.info(f"Project activated: {get_active_project_id(token)}")
     return {"status": "ok", "active_id": get_active_project_id(token)}
 
+@router.get("/projects/active/manifest")
+async def get_active_manifest_route(request: Request):
+    """M232: Retourne le manifest.json du projet actif (token-aware)."""
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
+    if not active_id:
+        return {}
+    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+    if not manifest_path.exists():
+        return {}
+    try:
+        return json.loads(manifest_path.read_text(encoding='utf-8'))
+    except Exception:
+        return {}
+
 @router.get("/projects/active/logic.js")
 async def get_active_logic_js():
     """Mission 161: Sert le fichier logic.js du projet actif."""

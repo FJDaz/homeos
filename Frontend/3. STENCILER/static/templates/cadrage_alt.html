@@ -257,9 +257,19 @@
                 if (bArb) bArb.style.display = 'none';
                 if (bPrd) bPrd.style.display = 'none';
 
+                // Mission 225: Repositionner le panel contexte en mode prof
+                const ctxPanel = document.getElementById('project-context-panel');
+                if (ctxPanel) {
+                    ctxPanel.style.top = '280px'; // Sous le panneau compétences prof
+                    ctxPanel.style.right = '24px';
+                }
+
                 // Amorce silencieuse
                 const amorce = `Tu es en mode prof HoméOS pour la classe "${_classId}". Accueille le prof et demande-lui de décrire le sujet du projet à proposer aux élèves. Guide vers les compétences DNMADE. Quand le sujet est clair, produis le bloc structuré.`;
                 setTimeout(() => startStreaming('gemini', amorce), 1000);
+                
+                // Charger le contexte
+                refreshProjectContext();
             });
         }
 
@@ -307,6 +317,72 @@
                 });
                 if (r.ok) window.location.href = '/teacher';
             } catch(e) { console.error('createSujet error', e); }
+        }
+
+        // --- Context Panel Logic (Mission 225) ---
+        function toggleProjectContext() {
+            const body = document.getElementById('project-context-body');
+            const header = document.getElementById('project-context-header');
+            const label = document.getElementById('ctx-header-label');
+            const isHidden = body.style.display === 'none';
+            
+            body.style.display = isHidden ? 'block' : 'none';
+            label.textContent = isHidden ? 'contexte projet ▾' : 'contexte projet ▸';
+            header.style.background = isHidden ? '#fff' : 'rgba(255,255,255,0.5)';
+        }
+
+        async function refreshProjectContext() {
+            const content = document.getElementById('ctx-content');
+            const urlParams = new URLSearchParams(location.search);
+            const projectId = urlParams.get('project_id') || 'active';
+            const classId = urlParams.get('class_id');
+            
+            let url = `/api/projects/${projectId}/context`;
+            if (classId) url += `?class_id=${classId}`;
+
+            try {
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    const s = data.summary;
+                    content.innerHTML = `
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-[9px] uppercase tracking-wider text-slate-400 mb-1">projet</div>
+                                <div class="font-bold text-slate-700">${s.title}</div>
+                            </div>
+                            <div class="flex justify-between">
+                                <div>
+                                    <div class="text-[9px] uppercase tracking-wider text-slate-400 mb-1">stitch id</div>
+                                    <div class="font-mono text-slate-600">${s.stitch_id}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[9px] uppercase tracking-wider text-slate-400 mb-1">écrans</div>
+                                    <div class="font-bold text-slate-700">${s.screens_count}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] uppercase tracking-wider text-slate-400 mb-1">système de design</div>
+                                <div class="px-2 py-1 bg-homeos-light border border-homeos-cream rounded text-[10px] inline-block">${s.design_system}</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] uppercase tracking-wider text-slate-400 mb-1">dernier prd</div>
+                                ${s.last_prd ? `<div class="text-homeos-green font-bold">✓ ${s.last_prd}</div>` : `<div class="text-slate-300 italic">aucun prd généré</div>`}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = '<div class="text-red-400 text-[10px]">Erreur de chargement du contexte.</div>';
+                }
+            } catch (e) {
+                console.error("Context fetch error", e);
+                content.innerHTML = '<div class="text-red-400 text-[10px]">Serveur injoignable.</div>';
+            }
+        }
+        
+        // Initial load for non-prof mode
+        if (!_isProfMode) {
+             window.addEventListener('load', refreshProjectContext);
         }
 
         const streams = {

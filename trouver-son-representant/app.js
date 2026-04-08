@@ -192,7 +192,7 @@ async function geocodeAddress(query) {
 function extractLocation(feature) {
     const props = feature.properties;
 
-    console.log('🔍 Raw properties:', props);
+    console.log('Raw properties:', props);
 
     // Le champ "context" contient : "80, Somme, Hauts-de-France"
     // → [codeDept, nomDept, nomRegion]
@@ -429,7 +429,7 @@ async function searchAddress(query) {
         const best = features[0];
         const loc = extractLocation(best);
 
-        console.log('📍 Location:', loc);
+        console.log('Location:', loc);
 
         // 2. Député
         const depute = await findDepute(loc.departmentCode);

@@ -50,7 +50,7 @@ class WsFEE {
         this.activeScreen = this.ws.currentFile || 'landing.html';
         
         if (!projectId) {
-            alert("Veuillez sélectionner un projet d'abord.");
+            alert("veuillez sélectionner un projet d'abord");
             return;
         }
 
@@ -81,7 +81,7 @@ class WsFEE {
             this.els.triggersList.innerHTML = '';
             
             if (elements.length === 0) {
-                this.els.triggersList.innerHTML = '<div class="text-[10px] text-homeos-textMuted italic">Aucun [data-af-id] trouvé.</div>';
+                this.els.triggersList.innerHTML = '<div class="text-[10px] text-homeos-muted italic">aucun [data-af-id] trouvé</div>';
                 return;
             }
 
@@ -91,7 +91,7 @@ class WsFEE {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left p-2 text-[11px] border border-homeos-border bg-homeos-panel/20 hover:border-homeos-green hover:bg-homeos-green/5 transition-all flex items-center justify-between group";
                 btn.innerHTML = `
-                    <span class="font-mono text-homeos-textMuted group-hover:text-homeos-text">${id}</span>
+                    <span class="font-mono text-homeos-muted group-hover:text-homeos-text">${id}</span>
                     <span class="text-[9px] opacity-30">${tag}</span>
                 `;
                 btn.onclick = () => this.selectTrigger(id);
@@ -103,7 +103,7 @@ class WsFEE {
     }
 
     selectTrigger(id) {
-        this.els.chatInput.value = `Anime l'élément [data-af-id="${id}"] pour qu'il... `;
+        this.els.chatInput.value = `anime l'élément [data-af-id="${id}"] pour qu'il... `;
         this.els.chatInput.focus();
     }
 
@@ -115,8 +115,8 @@ class WsFEE {
             this.els.presetsStrip.innerHTML = '';
             data.presets.forEach(preset => {
                 const btn = document.createElement('button');
-                btn.className = "shrink-0 px-4 py-2 border border-homeos-border text-[10px] font-bold uppercase tracking-widest hover:border-homeos-green bg-white shadow-sm transition-all";
-                btn.innerText = preset.name;
+                btn.className = "shrink-0 px-4 py-2 border border-homeos-border text-[10px] font-medium hover:border-homeos-green bg-white shadow-sm transition-all";
+                btn.innerText = preset.name.toLowerCase();
                 btn.onclick = () => this.applyPreset(preset);
                 this.els.presetsStrip.appendChild(btn);
             });
@@ -126,7 +126,7 @@ class WsFEE {
     }
 
     applyPreset(preset) {
-        this.addChatMessage('user', `Applique le preset: ${preset.name}`);
+        this.addChatMessage('user', `applique le preset : ${preset.name.toLowerCase()}`);
         this.sendToSullivan(preset.prompt);
     }
 
@@ -170,7 +170,7 @@ class WsFEE {
                 this.extractAndPreviewCode(data.explanation);
             }
         } catch (e) {
-            this.addChatMessage('assistant', "Erreur de communication avec Sullivan FEE.");
+            this.addChatMessage('assistant', "erreur de communication avec sullivan fee");
         } finally {
             this.isGenerating = false;
         }

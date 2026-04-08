@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="fr" class="bg-white">
+<html lang="fr" class="bg-[#f7f6f2]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HoméOS — Backend FRD (Studio)</title>
+    <title>homéos — bkd studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/js/bootstrap.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         homeos: {
-                            bg: '#ffffff',
-                            panel: '#f7f6f2',
-                            input: '#ffffff',
-                            text: '#1a1a1a',
-                            textMuted: '#9a9a98',
+                            bg: '#f7f6f2',
+                            panel: '#efefeb',
+                            text: '#3d3d3c',
+                            muted: '#9a9a98',
                             green: '#8cc63f',
                             border: '#e5e5e5',
                             architect: '#f0f4ff',
-                            worker: '#fffaf0'
+                            worker: '#fffaf0',
+                            terminal: '#2a2a29'
                         }
                     },
                     fontFamily: { 
@@ -33,73 +33,79 @@
         }
     </script>
     <style>
-        @font-face {
-            font-family: 'Univers LT Std';
-            src: url('/static/fonts/univers-lt-std/UniversLTStd.woff2') format('woff2');
-            font-weight: normal; font-style: normal;
-        }
-        body { font-family: 'Univers LT Std', 'Inter', sans-serif; letter-spacing: -0.01em; }
+        body { font-family: 'Inter', sans-serif; font-size: 12px; color: #3d3d3c; letter-spacing: -0.01em; background-color: #f7f6f2; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        * { border-radius: 0 !important; }
-        .tab-active { border-bottom: 2px solid #8cc63f; color: #1a1a1a; font-weight: 700; }
-        .terminal-log { height: 100%; overflow-y: auto; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "monospace"; font-size: 11px; line-height: 1.4; color: #9a9a98; }
-        #log-arch { color: #8cc63f; }
-        #log-work { color: #9a9a98; }
-        .roadmap-content h1 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em; }
-        .roadmap-content h2 { font-size: 1rem; font-weight: 700; border-bottom: 1px solid #e5e5e5; padding-bottom: 4px; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-        .roadmap-content h3 { font-size: 0.9rem; font-weight: 700; color: #8cc63f; margin-top: 1rem; }
-        .roadmap-content p { margin-bottom: 0.75rem; color: #4a4a48; line-height: 1.5; }
+        
+        /* Global Reset Hard-Edge sauf conteneurs ALT */
+        *:not(button):not(input):not(select):not(textarea) { 
+            border-radius: 0 !important; 
+        }
+        
+        /* Boutons (Nouveau Dogme Mission 220) */
+        button, .btn-homeos { 
+            border-radius: 4px !important; 
+        }
+        
+        /* Zones de Saisie (A/Q) */
+        textarea, input[type="text"], input[type="password"] { 
+            border-radius: 4px !important; 
+        }
+        
+        .tab-active { border-bottom: 2px solid #8cc63f; color: #3d3d3c; font-weight: 600; }
+        .terminal-log { height: 100%; overflow-y: auto; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "monospace"; font-size: 11px; line-height: 1.4; color: #3d3d3c; }
+        #log-arch { color: #8cc63f; } /* Vert HoméOS Lisible */
+        #log-work { color: #3d3d3c; } /* Texte Principal */
+        
+        /* Shadow Ambient "Paper on the Desk" */
+        .shadow-ambient { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
         
         /* Sidebar Collapse */
-        aside#sidebar-left { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        aside#sidebar-left { transition: width 0.2s ease-out; }
         aside#sidebar-left.collapsed { width: 0px; border-right: none; overflow: hidden; }
         
-        .folder-children { margin-left: 1rem; }
+        button, label, select { text-transform: lowercase; }
+        .roadmap-content h1, .roadmap-content h2, .roadmap-content h3 { text-transform: none; }
     </style>
 </head>
-<body class="h-screen flex flex-col bg-homeos-bg text-homeos-text selection:bg-homeos-green/20 overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <!-- HEADER -->
-    <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-white z-50">
+    <!-- HEADER (Beige HoméOS) -->
+    <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-homeos-bg z-50">
         <div class="flex items-center gap-4">
-            <span class="font-bold text-[14px] tracking-tighter">Homé<span class="text-homeos-green">OS</span> <span class="text-homeos-textMuted font-normal ml-1">/ Backend FRD</span></span>
-            <div class="h-4 w-px bg-homeos-border mx-2"></div>
-            <select id="project-switcher" class="text-[10px] uppercase tracking-widest font-semibold text-homeos-textMuted bg-transparent border-none outline-none cursor-pointer pt-0.5">
+            <select id="project-switcher" class="text-[10px] font-semibold text-homeos-muted bg-transparent border-none outline-none cursor-pointer">
                 <option value="">chargement...</option>
             </select>
         </div>
         <div class="flex items-center gap-3">
-            <button id="btn-fee-lab" class="text-[9px] uppercase tracking-widest font-bold bg-homeos-green/10 border border-homeos-green/30 text-homeos-green px-3 py-1.5 hover:bg-homeos-green hover:text-white transition-all">
-                FEE Lab
-            </button>
-            <button id="toggle-sidebar" class="p-2 hover:bg-homeos-panel text-homeos-textMuted" title="Alt+B">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-            <button id="btn-recompile" class="text-[9px] uppercase tracking-widest font-bold border border-homeos-border px-3 py-1.5 hover:border-homeos-green hover:text-homeos-green transition-colors">
-                Recompiler Génome
+            <button id="btn-recompile" class="text-[10px] font-semibold border border-homeos-border px-3 py-1.5 text-homeos-muted hover:border-homeos-green hover:text-homeos-green transition-colors">
+                recompiler génome
             </button>
         </div>
     </header>
 
-    <!-- WRAPPER CHÂSSIS ALT (M208 FIXED) -->
-    <div class="flex-1 p-6 overflow-hidden bg-homeos-panel/10">
-        <div id="studio-chassis" class="h-full shadow-2xl rounded-[20px] flex overflow-hidden bg-white">
+    <!-- WRAPPER CHÂSSIS SOBRE (M220) -->
+    <div class="flex-1 p-4 overflow-hidden bg-homeos-bg">
+        <div id="studio-chassis" class="h-full border border-homeos-border flex overflow-hidden bg-homeos-bg">
             
             <!-- SIDEBAR GAUCHE : EXPLOREUR (Collapsible) -->
-            <aside id="sidebar-left" class="w-[250px] border-r border-homeos-border bg-white flex flex-col shrink-0">
+            <aside id="sidebar-left" class="w-[220px] border-r border-homeos-border bg-homeos-bg flex flex-col shrink-0">
                 <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-homeos-panel/30">
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-homeos-textMuted">Explorer</span>
-                    <button id="btn-refresh-files" class="text-homeos-textMuted hover:text-homeos-green">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <button id="toggle-sidebar" class="text-homeos-muted hover:text-homeos-green transition-colors" title="alt+b">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
+                    </button>
+                    <button id="btn-refresh-files" class="text-homeos-muted hover:text-homeos-green">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </button>
                 </div>
                 <div id="explorer-grid" class="flex-1 overflow-y-auto p-3 space-y-1 no-scrollbar text-[11px]">
-                    <!-- Fichiers du projet -->
+                    <!-- Fichiers -->
                 </div>
             </aside>
 
             <!-- ZONE MAIN (Centre) -->
-            <div class="flex-1 flex flex-col min-w-0 bg-white">
+            <div class="flex-1 flex flex-col min-w-0 bg-homeos-bg">
                 
                 <!-- TOP AREA: ARCHITECTE | WORKSPACE -->
                 <div class="flex-1 grid grid-cols-[320px_1fr] divide-x divide-homeos-border overflow-hidden">
@@ -107,26 +113,24 @@
                     <!-- ARCHITECTE CHAT -->
                     <div id="architect-pane" class="flex flex-col bg-homeos-architect/10">
                         <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest">Architecte</span>
-                            </div>
-                            <select id="select-history-arch" class="text-[9px] bg-transparent border-none outline-none font-bold text-homeos-textMuted max-w-[120px]">
-                                <option value="">Nouv. Session</option>
+                            <span class="text-[10px] font-semibold">architecte</span>
+                            <select id="select-history-arch" class="text-[10px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
+                                <option value="">nouv. session</option>
                             </select>
                         </div>
                         <div id="chat-arch-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
-                        <div class="p-3 border-t border-homeos-border bg-white">
-                            <textarea id="input-arch" placeholder="Planifier..." class="w-full bg-homeos-panel border border-homeos-border p-2 text-[11px] resize-none outline-none focus:border-blue-300 h-16"></textarea>
+                        <div class="p-3 border-t border-homeos-border bg-homeos-bg">
+                            <textarea id="input-arch" placeholder="planifier..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[14px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
                         </div>
                     </div>
 
                     <!-- WORKSPACE (ROADMAP / EDITOR) -->
                     <div class="flex flex-col overflow-hidden">
-                        <div id="ws-tab-row" class="h-9 border-b border-homeos-border flex items-center px-4 gap-6 bg-homeos-panel/30">
-                            <button data-tab="roadmap" class="h-full text-[10px] uppercase font-bold tracking-widest tab-active">Roadmap</button>
-                            <button data-tab="editor" class="h-full text-[10px] uppercase font-bold tracking-widest text-homeos-textMuted hover:text-homeos-text">Éditeur</button>
+                        <div id="ws-tab-row" class="h-9 border-b border-homeos-border flex items-center px-4 gap-6 bg-homeos-panel/20">
+                            <button data-tab="roadmap" class="h-full text-[10px] font-semibold tab-active">roadmap</button>
+                            <button data-tab="editor" class="h-full text-[10px] font-medium text-homeos-muted hover:text-homeos-text">éditeur</button>
                             <div class="flex-1"></div>
-                            <div id="current-filename" class="text-[9px] font-mono text-homeos-textMuted italic">ROADMAP.md</div>
+                            <div id="current-filename" class="text-[10px] font-mono text-homeos-muted italic">roadmap.md</div>
                         </div>
                         <div id="ws-content-area" class="flex-1 overflow-hidden relative">
                             <div class="h-full overflow-auto p-8 roadmap-content no-scrollbar" id="render-area"></div>
@@ -137,18 +141,18 @@
                     </div>
                 </div>
 
-                <!-- BOTTOM AREA: DOUBLE TERMINAL -->
-                <footer class="h-[180px] border-t border-homeos-border bg-[#0d1117] text-white">
-                    <div id="terminal-split" class="grid grid-cols-2 h-full divide-x divide-gray-800">
+                <!-- BOTTOM AREA: DOUBLE TERMINAL (Papier HoméOS) -->
+                <footer class="h-[180px] border-t border-homeos-border bg-[#fafafa] text-homeos-text">
+                    <div id="terminal-split" class="grid grid-cols-2 h-full divide-x divide-homeos-border">
                         <div class="flex flex-col">
-                            <div class="h-6 bg-gray-900 px-3 flex items-center justify-between">
-                                <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Logs Architecte</span>
+                            <div class="h-6 bg-homeos-panel/50 px-3 flex items-center">
+                                <span class="text-[9px] font-medium text-homeos-muted">logs architecte</span>
                             </div>
                             <div class="terminal-log no-scrollbar" id="log-arch"></div>
                         </div>
                         <div class="flex flex-col">
-                            <div class="h-6 bg-gray-900 px-3 flex items-center justify-between">
-                                <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Output Ouvrier</span>
+                            <div class="h-6 bg-homeos-panel/50 px-3 flex items-center">
+                                <span class="text-[9px] font-medium text-homeos-muted">output ouvrier</span>
                             </div>
                             <div class="terminal-log no-scrollbar" id="log-work"></div>
                         </div>
@@ -156,76 +160,23 @@
                 </footer>
             </div>
 
-            <!-- SIDEBAR DROITE : OUVRIER (300px) -->
-            <aside class="w-[300px] border-l border-homeos-border bg-homeos-worker/20 flex flex-col shrink-0">
+            <!-- SIDEBAR DROITE : OUVRIER -->
+            <aside class="w-[280px] border-l border-homeos-border bg-homeos-worker/10 flex flex-col shrink-0">
                 <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest">Ouvrier</span>
-                    </div>
-                    <select id="select-history-work" class="text-[9px] bg-transparent border-none outline-none font-bold text-homeos-textMuted max-w-[120px]">
-                        <option value="">Nouv. Session</option>
+                    <span class="text-[10px] font-semibold">ouvrier</span>
+                    <select id="select-history-work" class="text-[10px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
+                        <option value="">nouv. session</option>
                     </select>
                 </div>
                 <div id="chat-work-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
-                <div class="p-3 border-t border-homeos-border bg-white">
-                    <textarea id="input-work" placeholder="Faire exécuter..." class="w-full bg-homeos-panel border border-homeos-border p-2 text-[11px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
+                <div class="p-3 border-t border-homeos-border bg-homeos-bg">
+                    <textarea id="input-work" placeholder="exécuter..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[14px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- FEE LAB OVERLAY (CADRAGE ALT: 20px Radius, 0px Border) -->
-    <div id="fee-lab-overlay" class="fixed inset-0 z-[100] bg-homeos-panel/80 backdrop-blur-sm flex flex-col hidden overflow-hidden p-6">
-        <div class="h-full shadow-2xl rounded-[20px] flex flex-col overflow-hidden bg-white">
-            <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-white shrink-0">
-                <div class="flex items-center gap-4">
-                    <span class="font-bold text-[14px] tracking-tighter">FEE <span class="text-homeos-green">LAB</span> <span class="text-homeos-textMuted font-normal ml-1">/ Étalonnage Animatique</span></span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div id="fee-active-screen" class="text-[10px] font-mono text-homeos-textMuted italic">screen: landing.html</div>
-                    <button id="btn-close-fee" class="text-[20px] font-light hover:text-homeos-green transition-colors px-2">×</button>
-                </div>
-            </header>
-            
-            <main class="flex-1 flex overflow-hidden">
-                <!-- GAUCHE: TRIGGERS -->
-                <aside class="w-[280px] border-r border-homeos-border bg-white flex flex-col overflow-hidden">
-                    <div class="p-3 border-b border-homeos-border bg-homeos-panel/30 text-[10px] font-extrabold uppercase tracking-widest leading-none">Triggers [data-af-id]</div>
-                    <div id="fee-triggers-list" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
-                        <div class="text-[10px] text-homeos-textMuted italic">Aucun élément détecté.</div>
-                    </div>
-                </aside>
-                
-                <!-- CENTRE: PREVIEW -->
-                <section class="flex-1 flex flex-col bg-homeos-panel/10 min-w-0">
-                    <div class="flex-1 p-4">
-                        <div id="fee-preview-container" class="h-full bg-white shadow-2xl relative overflow-hidden rounded-none">
-                            <iframe id="fee-preview-iframe" class="w-full h-full border-none"></iframe>
-                        </div>
-                    </div>
-                    <!-- LOGIQUE & PRESETS -->
-                    <div class="h-[120px] border-t border-homeos-border bg-white flex flex-col shrink-0">
-                        <div class="px-4 py-2 border-b border-homeos-border text-[9px] font-bold uppercase tracking-widest opacity-50">Logique & Presets</div>
-                        <div id="fee-presets-strip" class="flex-1 overflow-x-auto flex items-center gap-4 px-4 no-scrollbar border-0 shadow-none">
-                            <!-- Presets -->
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- DROITE: SULLIVAN FEE -->
-                <aside class="w-[320px] border-l border-homeos-border bg-white flex flex-col overflow-hidden">
-                    <div class="p-3 border-b border-homeos-border flex items-center justify-between">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest">Expert GSAP</span>
-                        <div class="w-2 h-2 rounded-full bg-homeos-green animate-pulse"></div>
-                    </div>
-                    <div id="chat-fee-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar text-[11px]"></div>
-                    <div class="p-4 border-t border-homeos-border bg-homeos-panel/10">
-                        <textarea id="input-fee" placeholder="Décrivez l'émotion..." class="w-full bg-white border border-homeos-border p-3 text-[11px] resize-none outline-none focus:border-homeos-green h-20 transition-all"></textarea>
-                    </div>
-                </aside>
-            </main>
-        </div>
-    </div>
+    <div id="fee-lab-overlay" class="hidden"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -234,7 +185,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.wsBackend = new WsBackend();
-            window.wsFEE = new WsFEE(window.wsBackend);
         });
     </script>
 </body>

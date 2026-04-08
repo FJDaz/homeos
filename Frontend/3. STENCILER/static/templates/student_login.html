@@ -3,76 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HoméOS — Connexion étudiant</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>HoméOS -- Connexion etudiant</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f7f6f2; color: #3d3d3c; min-height: 100vh; display: flex; flex-direction: column; }
-        .header { background: #fff; border-bottom: 2px solid #000091; padding: 1rem 2rem; }
-        .header__brand { max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
-        .logo { font-weight: 700; font-size: 0.85rem; color: #000091; line-height: 1.2; }
-        .operator { font-size: 1.1rem; font-weight: 700; }
-        .main { flex: 1; max-width: 480px; margin: 3rem auto; padding: 0 1rem; width: 100%; }
-        .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.06); padding: 2rem; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
-        .subtitle { font-size: 0.9rem; color: #9a9a98; margin-bottom: 2rem; }
-        label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.5rem; color: #9a9a98; text-transform: lowercase; letter-spacing: 0.05em; }
-        select, button { width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e5e5; border-radius: 0; font-size: 1rem; font-family: inherit; outline: none; background: #fff; }
-        select:focus, button:focus { border-color: #000091; box-shadow: 0 0 0 3px rgba(0,0,145,0.15); }
-        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a98' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
-        .field { margin-bottom: 1.5rem; }
-        .btn { background: #000091; color: #fff; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: #1212ff; }
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f7f6f2;
+            color: #3d3d3c;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+        .header {
+            background: #f7f6f2;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 16px;
+        }
+        .header__brand {
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo { font-weight: 600; font-size: 11px; color: #3d3d3c; line-height: 1.2; }
+        .operator { font-size: 14px; font-weight: 500; }
+        .main { flex: 1; max-width: 400px; margin: 24px auto; padding: 0 16px; width: 100%; }
+        .card {
+            background: #f7f6f2;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            padding: 16px;
+        }
+        h1 { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+        .subtitle { font-size: 11px; color: #9a9a98; margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            margin-bottom: 4px;
+            color: #9a9a98;
+        }
+        select, button {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            background: #f7f6f2;
+            color: #3d3d3c;
+        }
+        select:focus, button:focus {
+            border-color: #3d3d3c;
+            box-shadow: 0 0 0 2px #f7f6f2, 0 0 0 3px #3d3d3c;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a98' stroke-width='1.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+        }
+        .field { margin-bottom: 12px; }
+        .btn {
+            background: #3d3d3c;
+            color: #f7f6f2;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 150ms;
+        }
+        .btn:hover { opacity: 0.85; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .error { color: #ddb0b0; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
-        .footer { text-align: center; padding: 1.5rem; font-size: 0.75rem; color: #9a9a98; border-top: 1px solid #e5e5e5; background: #fff; }
-        .loading { text-align: center; padding: 2rem; color: #9a9a98; }
-        .spinner { width: 24px; height: 24px; border: 2px solid #e5e5e5; border-top-color: #000091; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.5rem; }
+        .error { color: #ddb0b0; font-size: 10px; margin-top: 4px; display: none; }
+        .footer {
+            text-align: center;
+            padding: 12px;
+            font-size: 9px;
+            color: #9a9a98;
+            border-top: 1px solid #e5e5e5;
+            background: #f7f6f2;
+        }
+        .loading { text-align: center; padding: 24px; color: #9a9a98; }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid #e5e5e5;
+            border-top-color: #3d3d3c;
+            border-radius: 4px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 8px;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header__brand">
-            <div class="logo">République<br>Française</div>
-            <div class="operator">HoméOS — Connexion étudiant</div>
+            <div class="logo">HoméOS</div>
+            <div class="operator">Connexion etudiant</div>
         </div>
     </header>
 
     <main class="main">
         <div class="card">
             <h1>bonjour</h1>
-            <p class="subtitle">choisissez votre classe et votre nom pour démarrer.</p>
+            <p class="subtitle">choisissez votre classe et votre nom pour demarrer.</p>
 
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>chargement…</p>
+                <p>chargement...</p>
             </div>
 
             <form id="login-form" hidden>
                 <div class="field">
                     <label for="class-select">votre classe</label>
                     <select id="class-select" required>
-                        <option value="">— choisir une classe —</option>
+                        <option value="">-- choisir une classe --</option>
                     </select>
                 </div>
 
                 <div class="field">
                     <label for="student-select">votre nom</label>
                     <select id="student-select" required disabled>
-                        <option value="">— d'abord choisir une classe —</option>
+                        <option value="">-- d'abord choisir une classe --</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn" id="start-btn" disabled>démarrer mon projet →</button>
+                <button type="submit" class="btn" id="start-btn" disabled>demarrer mon projet</button>
                 <p class="error" id="error-msg"></p>
             </form>
         </div>
     </main>
 
     <footer class="footer">
-        <p>HoméOS — Application pédagogique — Aucune donnée personnelle stockée.</p>
+        <p>HoméOS -- Application pedagogique -- Aucune donnee personnelle stockee.</p>
     </footer>
 
     <script>
@@ -84,13 +151,12 @@
                 const res = await fetch(API);
                 const data = await res.json();
                 classes = data.classes || [];
-
                 const select = document.getElementById('class-select');
                 if (classes.length === 0) {
-                    select.innerHTML = '<option value="">— aucune classe disponible —</option>';
+                    select.innerHTML = '<option value="">-- aucune classe disponible --</option>';
                 } else {
-                    select.innerHTML = '<option value="">— choisir une classe —</option>' +
-                        classes.map(c => `<option value="${c.id}">${c.name}${c.subject ? ` — ${c.subject}` : ''}</option>`).join('');
+                    select.innerHTML = '<option value="">-- choisir une classe --</option>' +
+                        classes.map(c => '<option value="' + c.id + '">' + c.name + (c.subject ? ' -- ' + c.subject : '') + '</option>').join('');
                 }
             } catch (e) {
                 console.error('loadClasses error:', e);
@@ -100,87 +166,77 @@
         async function loadStudents(classId) {
             const studentSelect = document.getElementById('student-select');
             studentSelect.disabled = true;
-            studentSelect.innerHTML = '<option value="">— chargement… —</option>';
-
+            studentSelect.innerHTML = '<option value="">-- chargement... --</option>';
             try {
-                const res = await fetch(`${API}/${classId}/students`);
+                const res = await fetch(API + '/' + classId + '/students');
                 const data = await res.json();
                 const students = data.students || [];
-
                 if (students.length === 0) {
-                    studentSelect.innerHTML = '<option value="">— aucun étudiant —</option>';
+                    studentSelect.innerHTML = '<option value="">-- aucun etudiant --</option>';
                 } else {
-                    studentSelect.innerHTML = '<option value="">— choisir votre nom —</option>' +
-                        students.map(s => `<option value="${s.id}">${s.display}</option>`).join('');
+                    studentSelect.innerHTML = '<option value="">-- choisir votre nom --</option>' +
+                        students.map(s => '<option value="' + s.id + '">' + s.display + '</option>').join('');
                 }
                 studentSelect.disabled = false;
             } catch (e) {
-                studentSelect.innerHTML = '<option value="">— erreur chargement —</option>';
+                studentSelect.innerHTML = '<option value="">-- erreur chargement --</option>';
             }
         }
 
-        document.getElementById('class-select').addEventListener('change', (e) => {
-            const classId = e.target.value;
-            const studentSelect = document.getElementById('student-select');
-            const startBtn = document.getElementById('start-btn');
+        document.getElementById('class-select').addEventListener('change', function(e) {
+            var classId = e.target.value;
+            var studentSelect = document.getElementById('student-select');
+            var startBtn = document.getElementById('start-btn');
             studentSelect.value = '';
             startBtn.disabled = true;
-
             if (classId) {
                 loadStudents(classId);
             } else {
-                studentSelect.innerHTML = '<option value="">— d\'abord choisir une classe —</option>';
+                studentSelect.innerHTML = '<option value="">-- d\'abord choisir une classe --</option>';
                 studentSelect.disabled = true;
             }
         });
 
-        document.getElementById('student-select').addEventListener('change', (e) => {
+        document.getElementById('student-select').addEventListener('change', function(e) {
             document.getElementById('start-btn').disabled = !e.target.value;
         });
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const classId = document.getElementById('class-select').value;
-            const studentId = document.getElementById('student-select').value;
-            const errorMsg = document.getElementById('error-msg');
-            const startBtn = document.getElementById('start-btn');
-
+            var classId = document.getElementById('class-select').value;
+            var studentId = document.getElementById('student-select').value;
+            var errorMsg = document.getElementById('error-msg');
+            var startBtn = document.getElementById('start-btn');
             if (!classId || !studentId) return;
-
             startBtn.disabled = true;
-            startBtn.textContent = 'chargement…';
+            startBtn.textContent = 'chargement...';
             errorMsg.style.display = 'none';
-
             try {
-                const res = await fetch(`${API}/${classId}/students/${studentId}/start`, { method: 'POST' });
-                const data = await res.json();
-
+                var res = await fetch(API + '/' + classId + '/students/' + studentId + '/start', { method: 'POST' });
+                var data = await res.json();
                 if (data.project_id) {
-                    // Sauvegarder session
-                    localStorage.setItem('homéos_session', JSON.stringify({
+                    localStorage.setItem('homeos_session', JSON.stringify({
                         student_id: studentId,
                         class_id: classId,
                         project_id: data.project_id,
                         display: data.display
                     }));
-                    // Rediriger vers workspace
-                    window.location.href = `/workspace?project_id=${data.project_id}`;
+                    window.location.href = '/workspace?project_id=' + data.project_id;
                 } else {
                     errorMsg.textContent = data.detail || 'Erreur inattendue.';
                     errorMsg.style.display = 'block';
                     startBtn.disabled = false;
-                    startBtn.textContent = 'démarrer mon projet →';
+                    startBtn.textContent = 'demarrer mon projet';
                 }
             } catch (err) {
-                errorMsg.textContent = `Erreur: ${err.message}`;
+                errorMsg.textContent = 'Erreur: ' + err.message;
                 errorMsg.style.display = 'block';
                 startBtn.disabled = false;
-                startBtn.textContent = 'démarrer mon projet →';
+                startBtn.textContent = 'demarrer mon projet';
             }
         });
 
-        // Init
-        loadClasses().then(() => {
+        loadClasses().then(function() {
             document.getElementById('loading').hidden = true;
             document.getElementById('login-form').hidden = false;
         });

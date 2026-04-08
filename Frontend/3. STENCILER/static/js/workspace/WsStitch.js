@@ -18,6 +18,7 @@ class WsStitch {
         
         this.isOpen = false;
         this.isConnected = false;
+        this._pollTimer = null;
         
         this._init();
     }
@@ -89,6 +90,18 @@ class WsStitch {
         await this.updateStatus();
         await this._syncProjectId();
         await this.loadSession();
+
+        // M230: Auto-sync (5 min polling + window focus)
+        if (this.projectIdInput.value) {
+            if (!this._pollTimer) {
+                this._pollTimer = setInterval(() => this.sync(), 5 * 60 * 1000);
+            }
+            // Focus sync (only once)
+            if (!this._focusHandler) {
+                this._focusHandler = () => { if (this.isOpen) this.sync(); };
+                window.addEventListener('focus', this._focusHandler);
+            }
+        }
     }
 
     async _syncProjectId() {
@@ -114,6 +127,11 @@ class WsStitch {
         
         const leftPanels = document.getElementById('ws-left-panels');
         if (leftPanels) leftPanels.classList.remove('stitch-expanded');
+
+        if (this._pollTimer) {
+            clearInterval(this._pollTimer);
+            this._pollTimer = null;
+        }
 
         const badgeStitch = document.getElementById('badge-stitch');
         if (badgeStitch) badgeStitch.classList.remove('badge-hidden');
@@ -231,6 +249,17 @@ class WsStitch {
             if (projectTitleEl) projectTitleEl.textContent = 'erreur session';
             if (screensContainer) screensContainer.innerHTML = '<div class="text-[10px] italic" style="color: #ddb0b0;">Erreur lors du chargement de la session.</div>';
         }
+    }
+
+    async sync() {
+        console.log("🔄 [WsStitch] Syncing with Stitch...");
+        try {
+            const res = await fetch('/api/stitch/sync', { method: 'POST' });
+            if (res.ok) {
+                await this.loadSession();
+                if (window.fetchWorkspaceImports) window.fetchWorkspaceImports();
+            }
+        } catch(e) { console.error("Sync error", e); }
     }
 
     async importScreen(stitchId) {

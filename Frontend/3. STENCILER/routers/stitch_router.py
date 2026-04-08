@@ -252,6 +252,64 @@ async def stitch_screens(project_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _merge_design_md(project_dir: Path, dna_tokens: dict):
+    """M232: Fusionne les tokens Design DNA (Stitch) dans DESIGN.md sans écraser les sections HoméOS."""
+    design_path = project_dir / "DESIGN.md"
+    project_name = project_dir.name
+
+    # Préparer les nouvelles sections Stitch
+    stitch_sections = {
+        "Colors": f"## Colors\n{json.dumps(dna_tokens.get('colors', {}), indent=2)}\n",
+        "Typography": f"## Typography\n{json.dumps(dna_tokens.get('typography', {}), indent=2)}\n",
+        "Spacing": f"## Spacing\n{json.dumps(dna_tokens.get('spacing', {}), indent=2)}\n"
+    }
+
+    if not design_path.exists():
+        content = f"# DESIGN.md — {project_name}\n> Source: Stitch Design DNA + règles HoméOS\n\n"
+        content += stitch_sections["Colors"] + "\n"
+        content += stitch_sections["Typography"] + "\n"
+        content += stitch_sections["Spacing"] + "\n"
+        content += "## Wire Rules\n\n"
+        content += "## Interaction\n\n"
+        design_path.write_text(content, encoding='utf-8')
+        return True
+
+    # Parser le fichier existant par sections "##"
+    try:
+        lines = design_path.read_text(encoding='utf-8').splitlines()
+        existing_sections = {}
+        header_lines = []
+        current_section = None
+
+        for line in lines:
+            if line.startswith("## "):
+                current_section = line[3:].strip()
+                existing_sections[current_section] = []
+            elif current_section is None:
+                header_lines.append(line)
+            else:
+                existing_sections[current_section].append(line)
+
+        # Reconstruire le fichier
+        new_content = "\n".join(header_lines).strip() + "\n\n"
+        
+        # 1. Écrire les sections Stitch (toujours en premier)
+        new_content += stitch_sections["Colors"] + "\n"
+        new_content += stitch_sections["Typography"] + "\n"
+        new_content += stitch_sections["Spacing"] + "\n"
+
+        # 2. Préserver les autres sections (Wire Rules, Interaction, etc.)
+        for sec_name, sec_lines in existing_sections.items():
+            if sec_name not in ["Colors", "Typography", "Spacing"]:
+                new_content += f"## {sec_name}\n" + "\n".join(sec_lines).strip() + "\n\n"
+
+        design_path.write_text(new_content, encoding='utf-8')
+        return True
+    except Exception as e:
+        logger.error(f"Failed to merge DESIGN.md: {e}")
+        return False
+
+
 def _patch_manifest_stitch_project_id(project_id: str):
     """Stocke stitch_project_id dans manifest.json après un premier pull réussi."""
     try:
@@ -369,30 +427,14 @@ async def stitch_pull(request: Request, req: PullRequest):
         except Exception as e:
             logger.warning(f"Stitch index registration failed (non-blocking): {e}")
 
-        # 5. Design DNA → DESIGN.md (uniquement si absent)
+        # 5. Design DNA → DESIGN.md (Merge Mission 232)
         design_md_written = False
         try:
             dna = client.get_design_dna(req.project_id)
             project_dir = PROJECTS_DIR / (active_id or "default")
-            design_path = project_dir / "DESIGN.md"
-            if not design_path.exists():
-                # Convertir DNA en DESIGN.md minimal
-                tokens = dna.get("tokens", {})
-                content = f"""# DESIGN.md — {req.project_id}
-
-## Colors
-{json.dumps(tokens.get('colors', {}), indent=2)}
-
-## Typography
-{json.dumps(tokens.get('typography', {}), indent=2)}
-
-## Spacing
-{json.dumps(tokens.get('spacing', {}), indent=2)}
-"""
-                design_path.write_text(content, encoding='utf-8')
-                design_md_written = True
+            design_md_written = _merge_design_md(project_dir, dna.get("tokens", {}))
         except Exception as e:
-            logger.warning(f"Stitch Design DNA fetch failed (non-blocking): {e}")
+            logger.warning(f"Stitch Design DNA fetch/merge failed: {e}")
 
         logger.info(f"Stitch PULL: imported {filename} → {import_path}")
 

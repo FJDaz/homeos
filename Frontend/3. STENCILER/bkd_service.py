@@ -343,8 +343,8 @@ def set_active_project_id(pid: str, token: str = None):
     except Exception as e:
         logger.warning(f"set_active_project_id: failed to persist: {e}")
 
-def get_active_project_path() -> Path:
-    id = get_active_project_id()
+def get_active_project_path(token: str = None) -> Path:
+    id = get_active_project_id(token)
     con = bkd_db_con()
     row = con.execute("SELECT path FROM projects WHERE id=?", (id,)).fetchone()
     con.close()

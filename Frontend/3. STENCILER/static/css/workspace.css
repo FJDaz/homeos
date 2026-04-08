@@ -21,7 +21,7 @@ input, button, textarea, select, kbd {
 
 /* Background Grid (Dot Grid) */
 .bg-dot-grid {
-    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-image: radial-gradient(#8cc63f40 1px, transparent 1px);
     background-size: 8px 8px;
 }
 
@@ -180,7 +180,7 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
 }
 
 /* Collapsable Panels (Mission 129/130-C) */
-#panel-screens, #panel-audit {
+#panel-screens {
     display: flex;
     flex-direction: column;
     transition: 
@@ -192,15 +192,15 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     opacity: 1;
     visibility: visible;
 }
-
-#panel-screens.collapsed, #panel-audit.collapsed {
+ 
+#panel-screens.collapsed {
     max-height: 0;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-5px) translateX(-5px);
 }
-
-#badge-screens, #badge-audit {
+ 
+#badge-screens {
     transition: 
         opacity 0.3s ease, 
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -210,7 +210,7 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     transform: translateX(0);
     max-height: 50px; /* Approximate badge height */
 }
-
+ 
 .badge-hidden {
     opacity: 0 !important;
     pointer-events: none;
@@ -219,8 +219,8 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     margin: 0 !important;
     overflow: hidden;
 }
-
-#badge-screens:hover, #badge-audit:hover, #badge-stitch:hover {
+ 
+#badge-screens:hover, #badge-stitch:hover {
     padding-left: 1.5rem;
 }
 

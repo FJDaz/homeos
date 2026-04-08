@@ -24,8 +24,8 @@ class WsFEEStudio {
 
         const overlay = document.createElement('div');
         overlay.id = 'fee-studio-overlay';
-        overlay.className = 'hidden fixed inset-0 z-[9000] bg-[#f7f6f2] flex flex-col font-sans text-[#3d3d3c]';
-        overlay.style.fontFamily = "'Geist', -apple-system, sans-serif";
+        overlay.className = 'hidden fixed inset-6 z-[9000] bg-[#f7f6f2] flex flex-col font-sans text-[#3d3d3c] rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden border border-[#e5e5e5]';
+        overlay.style.fontFamily = "'Univers LT Std', 'Geist', -apple-system, sans-serif";
 
         overlay.innerHTML = `
             <!-- HEADER -->
@@ -35,7 +35,7 @@ class WsFEEStudio {
                     <div class="h-4 w-px bg-[#e5e5e5]"></div>
                     <span id="fee-studio-project-label" class="text-[10px] font-bold text-[#9a9a98] lowercase italic">Projet: ...</span>
                 </div>
-                <button id="fee-studio-btn-close" class="p-2 text-[#9a9a98] hover:text-[#3d3d3c] transition-colors">
+                <button id="fee-studio-btn-close" class="p-2 text-[#9a9a98] hover:text-[#3d3d3c] transition-colors rounded-[20px]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </header>
@@ -50,7 +50,7 @@ class WsFEEStudio {
                     </div>
                     <!-- State Selector -->
                     <div class="p-3 border-b border-[#e5e5e5] flex gap-1">
-                        <select id="fee-studio-state" class="w-full text-[10px] font-bold border border-[#e5e5e5] bg-white px-2 py-1 outline-none text-lowercase">
+                        <select id="fee-studio-state" class="w-full text-[10px] font-bold border border-[#e5e5e5] bg-white px-2 py-1 outline-none text-lowercase rounded-[20px]">
                             <option value="initial">état: initial</option>
                             <option value="hover">état: hover</option>
                             <option value="click">état: click</option>
@@ -66,20 +66,20 @@ class WsFEEStudio {
                 <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
                     <!-- Iframe Container -->
                     <div class="flex-1 bg-[#efefeb] overflow-hidden flex items-center justify-center p-8">
-                        <div id="fee-studio-preview-container" class="bg-white shadow-2xl relative w-full h-full border border-[#e5e5e5]">
+                        <div id="fee-studio-preview-container" class="bg-white shadow-2xl relative w-full h-full border border-[#e5e5e5] rounded-[20px] overflow-hidden">
                              <iframe id="fee-studio-iframe" class="w-full h-full border-none"></iframe>
                         </div>
                     </div>
                     
                     <!-- Controls Bar -->
                     <div class="h-[48px] border-t border-[#e5e5e5] bg-white flex items-center justify-center gap-6 shrink-0">
-                        <button id="fee-studio-btn-rewind" class="p-2 text-[#9a9a98] hover:text-[#8cc63f] transition-all" title="Rewind">
+                        <button id="fee-studio-btn-rewind" class="p-2 text-[#9a9a98] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Rewind">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
                         </button>
                         <button id="fee-studio-btn-play" class="w-10 h-10 rounded-full bg-[#3d3d3c] text-white flex items-center justify-center hover:bg-black transition-all shadow-lg active:scale-95">
                             <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </button>
-                        <button id="fee-studio-btn-slow" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-black uppercase tracking-widest text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Slow Motion x0.25">
+                        <button id="fee-studio-btn-slow" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-black uppercase tracking-widest text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Slow Motion x0.25">
                             ×0.25
                         </button>
                     </div>
@@ -93,16 +93,16 @@ class WsFEEStudio {
                     </div>
                     <!-- Chat History -->
                     <div id="fee-studio-chat" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar text-[11px] leading-relaxed">
-                        <div class="p-3 bg-white border border-[#e5e5e5] font-serif italic text-[#9a9a98]">
+                        <div class="p-3 bg-white border border-[#e5e5e5] font-serif italic text-[#9a9a98] rounded-[20px]">
                             Bonjour. Je suis prêt à étalonner l'interactivité. Sélectionnez un trigger à gauche pour commencer.
                         </div>
                     </div>
                     <!-- Input Area -->
                     <div class="p-3 border-t border-[#e5e5e5] bg-white">
-                        <textarea id="fee-studio-input" placeholder="Décrivez l'émotion visuelle..." class="w-full bg-[#f7f6f2] border border-[#e5e5e5] p-3 text-[12px] outline-none focus:border-[#8cc63f] h-20 resize-none"></textarea>
+                        <textarea id="fee-studio-input" placeholder="Décrivez l'émotion visuelle..." class="w-full bg-[#f7f6f2] border border-[#e5e5e5] p-3 text-[12px] outline-none focus:border-[#8cc63f] h-20 resize-none rounded-[20px]"></textarea>
                         <div class="flex items-center justify-between mt-2">
-                             <button id="fee-studio-btn-apply" class="px-3 py-1.5 bg-[#8cc63f] text-white text-[9px] font-black uppercase tracking-widest hidden">appliquer le code</button>
-                             <button id="fee-studio-btn-send" class="ml-auto w-8 h-8 bg-[#3d3d3c] text-white flex items-center justify-center hover:bg-black transition-all">
+                             <button id="fee-studio-btn-apply" class="px-3 py-1.5 bg-[#8cc63f] text-white text-[9px] font-black uppercase tracking-widest hidden rounded-[20px]">appliquer le code</button>
+                             <button id="fee-studio-btn-send" class="ml-auto w-8 h-8 bg-[#3d3d3c] text-white flex items-center justify-center hover:bg-black transition-all rounded-[20px]">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                              </button>
                         </div>
@@ -218,7 +218,7 @@ class WsFEEStudio {
                 const hasAnimation = coverage.includes(`[data-af-id="${id}"]`) || coverage.includes(`data-af-id="${id}"`);
                 
                 const item = document.createElement('button');
-                item.className = "w-full text-left p-2 border border-[#e5e5e5] bg-white hover:border-[#8cc63f] transition-all flex items-center justify-between group";
+                item.className = "w-full text-left p-2 border border-[#e5e5e5] bg-white hover:border-[#8cc63f] transition-all flex items-center justify-between group rounded-[20px]";
                 item.innerHTML = `
                     <div class="flex items-center gap-2">
                         <div class="w-1.5 h-1.5 rounded-full ${hasAnimation ? 'bg-[#8cc63f] shadow-[0_0_8px_rgba(140,198,63,0.6)]' : 'bg-[#efefef]'}" data-led-id="${id}"></div>
@@ -252,9 +252,9 @@ class WsFEEStudio {
 
             data.presets.forEach(p => {
                 const card = document.createElement('button');
-                card.className = "shrink-0 w-24 h-full border border-[#e5e5e5] bg-white flex flex-col p-2 hover:border-[#8cc63f] transition-all group";
+                card.className = "shrink-0 w-24 h-full border border-[#e5e5e5] bg-white flex flex-col p-2 hover:border-[#8cc63f] transition-all group rounded-[20px] overflow-hidden";
                 card.innerHTML = `
-                    <div class="flex-1 bg-[#f7f6f2] flex items-center justify-center mb-1 group-hover:bg-[#8cc63f]/10">
+                    <div class="flex-1 bg-[#f7f6f2] flex items-center justify-center mb-1 group-hover:bg-[#8cc63f]/10 rounded-[12px]">
                         <svg class="w-6 h-6 text-[#ccc] group-hover:text-[#8cc63f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <span class="text-[8px] font-black uppercase text-center truncate">${p.name}</span>
@@ -314,7 +314,7 @@ class WsFEEStudio {
     addChatMessage(role, text) {
         const chat = document.getElementById('fee-studio-chat');
         const div = document.createElement('div');
-        div.className = `p-3 border ${role === 'user' ? 'bg-white border-[#e5e5e5] ml-4' : 'bg-[#efefeb] border-[#e5e5e5] mr-4'}`;
+        div.className = `p-3 border ${role === 'user' ? 'bg-white border-[#e5e5e5] ml-4' : 'bg-[#efefeb] border-[#e5e5e5] mr-4'} rounded-[20px]`;
         div.innerHTML = `<div class="text-[11px]">${text}</div>`;
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
