@@ -44,59 +44,12 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 > M270 ✅ — archivée ROADMAP_ACHIEVED.md
 
 ### Mission 271 — Seed projets : corriger la DB + créer un projet par élève sans projet
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
 
-**Contexte :** Table `students` dans `db/projects.db` — 11 élèves sur 12 n'ont pas de `project_id`. Lilou a le `project_id` de Hugo par erreur. Résultat : tous voient les imports de Hugo ou du dernier projet actif.
-
-**Étape 1 — Corriger Lilou**
-```sql
-UPDATE students SET project_id = NULL WHERE id = 'serre-lilou';
-```
-
-**Étape 2 — Créer un projet pour chaque élève sans project_id**
-
-Lire la route `/start` existante (`projects_router.py`) — elle crée un projet et met à jour `students.project_id`. L'appeler pour chaque élève sans projet :
-
-```python
-# Script à exécuter une fois : Backend/Prod/scripts/seed_student_projects.py
-# (ou route admin POST /api/admin/seed-projects)
-
-import sqlite3
-from pathlib import Path
-import httpx, asyncio
-
-DB = Path("/Users/francois-jeandazin/AETHERFLOW/db/projects.db")
-
-def get_students_without_project():
-    conn = sqlite3.connect(DB)
-    rows = conn.execute(
-        "SELECT id, display, class_id FROM students WHERE project_id IS NULL"
-    ).fetchall()
-    conn.close()
-    return rows
-
-async def seed():
-    students = get_students_without_project()
-    print(f"[seed] {len(students)} élèves sans projet")
-    async with httpx.AsyncClient(base_url="http://localhost:9998") as client:
-        for sid, display, class_id in students:
-            # Simuler le flow login → /start
-            r = await client.post("/api/projects/start", json={
-                "student_id": sid,
-                "class_id": class_id
-            })
-            print(f"[seed] {display} → {r.status_code} {r.json()}")
-
-asyncio.run(seed())
-```
-
-**Vérifier** que la route `/api/projects/start` accepte `{ student_id, class_id }` et met bien à jour `students.project_id` en DB. Si la signature est différente, adapter.
-
-**Livrable :**
-1. `serre-lilou` : `project_id = NULL` puis recréé via `/start`
-2. Les 10 autres élèves : chacun a son propre `project_id` en DB
-3. Script loggue chaque création — vérifier qu'il n'y a pas d'erreur
-4. Vérifier avec : `SELECT id, display, project_id FROM students WHERE class_id = 'dnamde3';`
+- 42 projets créés (44/44 élèves avec projet unique)
+- Lilou corrigé : `project_id = dnamde3-serre-lilou` (plus celui de Hugo)
+- `scripts/seed_student_projects.py` : idempotent, crée projets manquants
+- `seed_db.py` : inclut création projets au seed HF
 
 ### Thème 28 — Pipeline forge → cadrage → manifest
 > M266 ✅, M267 ✅, M268 ✅, M269 ✅ — archivées ROADMAP_ACHIEVED.md
