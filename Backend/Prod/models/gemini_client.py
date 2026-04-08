@@ -14,22 +14,23 @@ class GeminiClient(BaseLLMClient):
     
     # Cascade de fallback pour mode FAST (priorité vitesse)
     FALLBACK_MODELS_FAST = [
-        "gemini-1.5-flash",              # Stable
-        "gemini-1.5-flash-lite",         # Economique
-        "gemini-2.0-flash",               # High Performance
+        "gemini-3.1-flash-lite-preview",  # Stable + fast
+        "gemini-3-flash-preview",         # Good balance
+        "gemini-3.1-pro-preview",         # Highest quality
     ]
 
     # Cascade de fallback pour mode BUILD/PROD (priorité qualité)
     FALLBACK_MODELS_BUILD = [
-        "gemini-1.5-pro",                # Reasoning / complex code
-        "gemini-2.0-flash",               # High Performance
-        "gemini-1.5-flash",              # Stable
+        "gemini-3.1-pro-preview",         # Reasoning / complex code
+        "gemini-3-flash-preview",         # High Performance
+        "gemini-3.1-flash-lite-preview",  # Stable
     ]
 
-    # Cascade par défaut
+    # Fallback par défaut
     FALLBACK_MODELS_DEFAULT = [
-        "gemini-1.5-flash",
-        "gemini-2.0-flash",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3-flash-preview",
+        "gemini-3.1-pro-preview",
     ]
 
     def __init__(
