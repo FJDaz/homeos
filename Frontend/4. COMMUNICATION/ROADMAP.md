@@ -145,35 +145,28 @@ document.querySelectorAll('[data-action="generate-prd"], [data-action="generate-
 **Position :** Dans le header global (`bootstrap.js`), à droite du nav — une icône discrète `[M]` toujours visible. Au clic → drawer latéral glisse depuis la droite, par-dessus le contenu, `z-index: 8000`.
 
 **Contenu du drawer :**
-- Titre du projet + date de dernière mise à jour
-- Liste des écrans (nom, type, stitch_id si présent)
-- Bouton "éditer" → textarea JSON éditable + bouton "sauvegarder" → `POST /api/manifest/save`
-- **Zone d'import** : bouton "importer un manifest" → `<input type="file" accept=".json">` → parse + `POST /api/manifest/save` → recharge le drawer. Permet d'apporter un manifest produit ailleurs (Figma plugin, export Stitch, document partagé par le prof).
-- Bouton "envoyer au Wire" → stocke en session + redirige `/workspace?tab=wire`
-- Bouton "discuter dans le cadrage" → stocke en session + redirige `/cadrage` (Sullivan reçoit le manifest en contexte via M226/ProjectContext)
-- Fermeture : clic extérieur ou Escape
+- Titre du projet + date de dernière mise à jour du manifest
+- Liste des écrans du manifest (nom, type, stitch_id si présent)
+- Bouton "éditer" → textarea avec le JSON du manifest, éditable, bouton "sauvegarder" → `POST /api/manifest/save`
+- Bouton "envoyer au Wire" → stocke le manifest en session + redirige vers `/workspace?tab=wire`
+- Fermeture : clic extérieur ou touche Escape
 
-**Persistance :** `localStorage.setItem('manifest_drawer_open', true/false)`.
+**Persistance :** `localStorage.setItem('manifest_drawer_open', true/false)` — le drawer se rouvre dans le même état au retour.
 
-**Charge le manifest :** `GET /api/projects/active/manifest` au `show()`. Si absent → message `"aucun manifest — importez-en un ou générez-en un depuis le cadrage"` + zone d'import visible.
+**Charge le manifest :** `GET /api/projects/active/manifest` au `show()`. Si absent → message `"aucun manifest — générez-en un depuis le cadrage"`.
 
-**Backend — vérifier dans `manifest_router.py` :**
-- `GET /api/projects/active/manifest` — retourne le manifest JSON du projet actif
-- `POST /api/manifest/save` — body `{ manifest: {...} }` → écrit `projects/{id}/manifest.json`
-- Si ces routes n'existent pas : les créer (< 20L chacune)
-
-**Fichiers :**
-- `Frontend/3. STENCILER/static/js/ManifestBox.js` — **créer**
-- `Frontend/3. STENCILER/static/js/bootstrap.js` — charger + icône `[M]` dans le nav
-- `Frontend/3. STENCILER/routers/manifest_router.py` — vérifier/créer les 2 routes
+**Fichiers à créer/modifier :**
+- `Frontend/3. STENCILER/static/js/ManifestBox.js` — **créer** : classe `ManifestBox`, injecte le drawer
+- `Frontend/3. STENCILER/static/js/bootstrap.js` — charger `ManifestBox.js` + icône `[M]` dans le nav
+- `Frontend/3. STENCILER/routers/manifest_router.py` — vérifier que `GET /api/projects/active/manifest` et `POST /api/manifest/save` existent
 
 **Style :** tokens HoméOS. Drawer `width: 380px`, `background: #f7f6f2`, `border-left: 1px solid #e5e5e5`. Pas d'emojis, pas de majuscules.
 
 **Livrable :**
-1. Icône `[M]` dans le nav → toutes les pages
-2. Drawer : liste écrans + JSON éditable + import fichier
-3. Boutons "envoyer au Wire" et "discuter dans le cadrage" fonctionnels
-4. Import manifest externe → sauvegardé + pris en base par Sullivan (via ProjectContext)
+1. Icône `[M]` dans le nav global → présente sur toutes les pages
+2. Drawer manifest avec liste écrans + JSON éditable
+3. Bouton "envoyer au Wire" fonctionnel
+4. État open/closed persisté en localStorage
 
 ---
 
@@ -739,33 +732,6 @@ Le SVG apparaît dans la screen list du workspace, forgeable via `POST /generate
 ---
 
 ### Thème 18 — Diagnostics workspace généralisés (2026-04-08)
-
----
-
-### Mission 268 — Hotfix : toolbar N0 — tous les boutons morts sauf Stitch
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-09 | ACTOR: QWEN**
-
-**Symptôme :** Clic sur select (V), drag (H), frame (F), text (T), effects (E) → rien. Seul Stitch (`<a>` brut) réagit.
-
-**Hypothèse :** `ws_main.js` `type="module"` → `DOMContentLoaded` async. Exception non catchée avant la ligne 58 (setup toolbar) → la promise avorte silencieusement. Les onclicks toolbar ne sont jamais attachés.
-
-**Fix :** Enrober chaque phase de l'init dans un try/catch isolé avec log console. Si `fetchWorkspaceImports()` throw dans le catch (ex: `list` null → `list.innerHTML`), l'exception propage et avorte la suite.
-
-**Fichier :** `ws_main.js` — inspecter la chaîne DOMContentLoaded, ajouter try/catch autour de `fetchWorkspaceImports()` et du setup toolbar.
-
----
-
-### Mission 269 — Hotfix : bouton Aperçu dans le shell — mort + [S] sur dist.zip + FEE Studio "activer un projet"
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-09 | ACTOR: QWEN**
-
-**3 bugs restants :**
-1. **Aperçu shell** : `window.wsPreview` undefined ou `ws-preview-overlay` absent du DOM → `enterPreviewMode()` return silencieux
-2. **[S] sur dist.zip** : le bouton Stitch apparaît sur les imports `dist.zip` compilés → clic → 400 car pas de `stitch_screen_id`. Fix : condition `isStitch` stricte sur `archetype_id === 'stitch_import'` uniquement
-3. **FEE Studio "activer un projet"** : `window.wsBackend` non instancié → `projectId` undefined dans `WsFEEStudio.open()`. La session `localStorage.homeos_session` n'a peut-être pas `active_project_id`
-
-**Fichiers :** `ws_main.js`, `WsFEEStudio.js`, `WsPreview.js`, `workspace.html`
-
----
 
 ---
 
