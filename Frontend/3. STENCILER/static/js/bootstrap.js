@@ -112,7 +112,16 @@
 
         const actions = document.createElement('div');
         actions.className = 'hn-actions';
-        
+
+        // M269: ManifestBox button [M]
+        const manifestBtn = document.createElement('button');
+        manifestBtn.id = 'hn-manifest-btn';
+        manifestBtn.className = 'hn-manifest-btn';
+        manifestBtn.title = 'manifest du projet';
+        manifestBtn.textContent = 'M';
+        manifestBtn.onclick = function(e) { e.stopPropagation(); window.ManifestBox?.toggle(); };
+        actions.appendChild(manifestBtn);
+
         const projectLabel = document.createElement('div');
         projectLabel.id = 'hn-active-project';
         projectLabel.className = 'hn-project';

@@ -368,3 +368,25 @@ button, input, select, label, span:not(code span), a {
     color: #fff;
     border-color: #ef4444;
 }
+
+/* --- M269: ManifestBox button [M] --- */
+#homeos-global-nav .hn-manifest-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #8cc63f;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Geist', monospace;
+}
+#homeos-global-nav .hn-manifest-btn:hover {
+    border-color: #8cc63f;
+    box-shadow: 0 2px 4px rgba(140, 198, 63, 0.15);
+}

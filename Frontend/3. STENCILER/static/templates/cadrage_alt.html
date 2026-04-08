@@ -6,6 +6,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&amp;family=Source+Code+Pro&amp;display=swap" rel="stylesheet"/>
 <!-- Bootstrap.js — Navigation globale (Mission 107) -->
 <script src="/static/js/bootstrap.js"></script>
+<!-- M269: ManifestBox -->
+<script src="/static/js/ManifestBox.js"></script>
 <script>
         tailwind.config = {
             theme: {
@@ -660,6 +662,28 @@
             // Forcer l'activation si WsInspect est chargé
             if (window.wsInspect) {
                 window.wsInspect.active = true;
+            }
+
+            // M266: Amorce automatique si forge_context en session
+            const forgeCtx = sessionStorage.getItem('forge_context');
+            if (forgeCtx) {
+                try {
+                    const ctx = JSON.parse(forgeCtx);
+                    const amorce = `L'élève vient de forger l'écran "${ctx.name}" (template: ${ctx.template_name}). Aide-le à définir l'intention derrière ce design.`;
+                    // Envoyer automatiquement au modèle gemini
+                    setTimeout(() => {
+                        // Ajouter le message dans le chat visuellement
+                        const geminiStream = document.getElementById('gemini-stream');
+                        if (geminiStream) {
+                            const userMsg = document.createElement('div');
+                            userMsg.className = 'mb-2 p-2 bg-homeos-cream border-l-2 border-homeos-green text-[12px] font-bold';
+                            userMsg.textContent = '🔗 ' + amorce;
+                            geminiStream.parentElement.insertBefore(userMsg, geminiStream);
+                        }
+                        // Envoyer au backend
+                        startStreaming('gemini', amorce);
+                    }, 500);
+                } catch(e) { console.warn('[M266] forge_context parse error:', e); }
             }
         });
     </script>
