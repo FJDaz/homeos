@@ -33,9 +33,9 @@
      * Rend la liste des imports dans le conteneur.
      */
     function render(imports) {
-        const container = document.getElementById('db-screens-container');
+        const container = document.getElementById('ws-import-list');
         if (!container) {
-            console.warn('[WsImportList] #db-screens-container not found');
+            console.warn('[WsImportList] #ws-import-list not found');
             return;
         }
         container.innerHTML = '';
