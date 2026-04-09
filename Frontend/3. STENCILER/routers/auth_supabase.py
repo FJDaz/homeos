@@ -1,9 +1,12 @@
 """
 Supabase helper functions for auth_router.py.
 Replaces direct sqlite3.connect calls.
+Uses urllib.request (stdlib) instead of requests to avoid extra dependency.
 """
 import os
-import requests
+import json
+import urllib.request
+import urllib.error
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://girgnqnswoelalccvqkh.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
@@ -16,45 +19,44 @@ _HEADERS = {
 }
 
 
+def _request(method, url, data=None):
+    """Make HTTP request using urllib (stdlib)."""
+    headers = dict(_HEADERS)
+    body = json.dumps(data).encode("utf-8") if data else None
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        if e.code == 409:
+            return None  # Conflict
+        raise Exception(f"Supabase HTTP {e.code}: {body}")
+    except urllib.error.URLError as e:
+        raise Exception(f"Supabase URL error: {e.reason}")
+
+
 def _get(table, select="*", filters=None):
-    """GET from Supabase REST API."""
     url = f"{SUPABASE_URL}/rest/v1/{table}?select={select}"
     if filters:
         for k, v in filters.items():
             url += f"&{k}=eq.{v}"
-    resp = requests.get(url, headers=_HEADERS)
-    resp.raise_for_status()
-    return resp.json()
+    return _request("GET", url)
 
 
 def _insert(table, data):
-    """INSERT via Supabase REST API."""
     url = f"{SUPABASE_URL}/rest/v1/{table}"
-    resp = requests.post(url, headers=_HEADERS, json=data)
-    if resp.status_code == 409:
-        return None  # Conflict (already exists)
-    resp.raise_for_status()
-    result = resp.json()
-    return result[0] if result else data
+    return _request("POST", url, data)
 
 
 def _update(table, id_field, id_val, data):
-    """UPDATE via Supabase REST API."""
     url = f"{SUPABASE_URL}/rest/v1/{table}?{id_field}=eq.{id_val}"
-    resp = requests.patch(url, headers=_HEADERS, json=data)
-    resp.raise_for_status()
-    result = resp.json()
-    return result[0] if result else data
+    return _request("PATCH", url, data)
 
 
-def _query(sql_text, params=None):
-    """
-    Fallback for complex queries not easily mappable to REST.
-    Uses Supabase Management API (requires service_role key).
-    """
-    # For simple auth queries, map them manually to REST calls
-    # This is a compatibility layer — prefer _get/_insert/_update when possible
-    raise NotImplementedError("Use _get/_insert/_update instead of raw SQL")
+def _delete(table, id_field, id_val):
+    url = f"{SUPABASE_URL}/rest/v1/{table}?{id_field}=eq.{id_val}"
+    return _request("DELETE", url)
 
 
 def find_student_by_display(display_name):
@@ -102,21 +104,13 @@ def list_students_by_class(class_id):
 
 
 def update_student(id_val, class_id_val, data):
-    """Update student fields."""
     url = f"{SUPABASE_URL}/rest/v1/students?id=eq.{id_val}&class_id=eq.{class_id_val}"
-    resp = requests.patch(url, headers=_HEADERS, json=data)
-    resp.raise_for_status()
-    result = resp.json()
-    return result[0] if result else data
+    return _request("PATCH", url, data)
 
 
 def delete_class(class_id):
-    """Delete a class and its students (cascade)."""
-    # Delete students first
-    requests.delete(f"{SUPABASE_URL}/rest/v1/students?class_id=eq.{class_id}", headers=_HEADERS)
-    # Then delete class
-    resp = requests.delete(f"{SUPABASE_URL}/rest/v1/classes?id=eq.{class_id}", headers=_HEADERS)
-    resp.raise_for_status()
+    _request("DELETE", f"{SUPABASE_URL}/rest/v1/students?class_id=eq.{class_id}")
+    _request("DELETE", f"{SUPABASE_URL}/rest/v1/classes?id=eq.{class_id}")
 
 
 def create_class(class_id, name, subject=""):
