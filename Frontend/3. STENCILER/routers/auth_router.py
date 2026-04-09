@@ -313,51 +313,24 @@ async def list_user_keys(request: Request):
 
 
 @router.get("/me/keys/helper/{provider}")
-async def get_key_helper(provider: str, request: Request):
+async def get_key_helper(provider: str):
     """
-    Mission 192: Sullivan GPS. 
-    Trouve l'URL officielle et les instructions de création via Gemini + Google Search.
+    Mission 192: Retourne l'URL officielle de création de clé API.
+    Utilise le cache actualisé au démarrage du serveur (TTL 24h).
     """
-    token = request.headers.get("X-User-Token")
-    if not token:
-        raise HTTPException(status_code=401, detail="X-User-Token header required")
+    from routers.api_key_urls import load_cached_urls
+    urls = load_cached_urls()
+    provider_lower = provider.lower()
 
-    try:
-        gemini = GeminiClient()
-        prompt = (
-            f"Recherche l'URL officielle et directe du tableau de bord de création de clé API pour le fournisseur '{provider}'.\n"
-            "Réponds avec UNIQUEMENT un objet JSON :\n"
-            "{\n"
-            "  \"url\": \"https://...\",\n"
-            "  \"instructions\": \"Courte instruction (max 15 mots), sans prose.\"\n"
-            "}"
-        )
-        
-        result = await gemini.generate(
-            prompt=prompt,
-            output_constraint="JSON only",
-            use_search=True # Enable Google Search Grounding
-        )
-        
-        if not result.success:
-            logger.error(f"Sullivan GPS result error: {result.error}")
-            raise HTTPException(status_code=500, detail=f"Sullivan GPS search failed: {result.error}")
-            
-        import json
-        
-        raw_code = result.code.strip()
-        if raw_code.startswith("```json"):
-            raw_code = raw_code[7:]
-        elif raw_code.startswith("```"):
-            raw_code = raw_code[3:]
-        if raw_code.endswith("```"):
-            raw_code = raw_code[:-3]
-        raw_code = raw_code.strip()
-        
-        return json.loads(raw_code)
-    except Exception as e:
-        logger.error(f"Sullivan GPS Exception: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+    if provider_lower in urls:
+        return urls[provider_lower]
+
+    # Fallback: trigger a refresh for this provider
+    from routers.api_key_urls import refresh_all_urls
+    urls = await refresh_all_urls()
+    if provider_lower in urls:
+        return urls[provider_lower]
+    raise HTTPException(status_code=404, detail=f"Provider '{provider}' URL not found")
 
 
 # --- M224: PROF PASSWORD + STUDENT LOGIN ---

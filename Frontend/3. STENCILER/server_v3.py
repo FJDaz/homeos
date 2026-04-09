@@ -97,6 +97,15 @@ RETRO_DIR = ROOT_DIR / "exports" / "retro_genome"
 async def lifespan(app: FastAPI):
     _PULSE.start()
     logger.info("Sullivan Pulse started")
+
+    # M275: Refresh API key URLs in background (Gemini + Search → cache 24h)
+    try:
+        from routers.api_key_urls import refresh_all_urls
+        asyncio.create_task(refresh_all_urls())
+        logger.info("[API URLs] Background refresh started")
+    except Exception as e:
+        logger.warning(f"[API URLs] Failed to start refresh: {e}")
+
     yield
     logger.info("Server shutting down")
 
