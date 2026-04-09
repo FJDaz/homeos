@@ -50,6 +50,17 @@ class WsCanvas {
         window.addEventListener('keydown', (e) => { 
             if (e.code === 'Space') this.isSpacePressed = true; 
             if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) return;
+
+            // M274: Deletion shortcuts
+            if ((e.code === 'Delete' || e.code === 'Backspace') && this.activeScreenId) {
+                const shell = document.getElementById(this.activeScreenId);
+                if (shell) {
+                    shell.remove();
+                    this.deselectAll();
+                }
+                return;
+            }
+
             const modeMap = { 
                 'KeyV': 'select', 'KeyH': 'drag', 'KeyI': 'place-img', 
                 'KeyF': 'frame', 'KeyC': 'colors', 'KeyT': 'text', 

@@ -165,43 +165,30 @@ Exemple: `html = html.replace("<head>", f"<head><base href='/projects/{project_i
 
 ---
 
-### Mission 273 — Zoom + Download sur le mode Aperçu (preview overlay)
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+### Mission 275 — Workspace UX & Productivity Pack (Zoom, ZIP Export & Shortcuts)
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: ANTIGRAVITY**
 
-**Cible :** Overlay preview du canvas (bouton "Aperçu" sur un shell), PAS le FEE Studio.
+**Objectif :** Améliorer radicalement l'ergonomie du Workspace pour les phases d'aperçu et de manipulation du canvas.
 
-**Changes :**
-- Barre de contrôles en haut de l'overlay : `[+]` `[-]` niveau zoom `%` + `télécharger` + `×`
-- Molette Ctrl/Cmd pour zoomer/dézoomer
-- Wrapper `overflow-auto` pour scroller quand zoom > 1
-- `setZoom(scale)` : `transform: scale()` sur le container, dimensions ajustées
-- Escape pour fermer
-- Bouton "télécharger" → export HTML de l'iframe preview
+**Livrables UI / UX :**
+1.  **Zoom Dynamique (Aperçu + FEE Studio)** :
+    *   Implémentation d'un système de zoom (20% à 300%) sur l'overlay d'aperçu du canvas.
+    *   Support du combo `Ctrl/Cmd + Molette` pour une navigation fluide type "Figma".
+    *   Barre de contrôle avec `[+]`, `[-]` et affichage du pourcentage de zoom.
+    *   Gestion intelligente de l'overflow (scroll area) permettant d'inspecter les détails en zoom élevé.
+2.  **Export ZIP "Live"** :
+    *   Nouveau bouton "Télécharger" (Download) dans l'aperçu et le FEE Studio.
+    *   **Backend** : Création de la route `POST /api/frd/export-live-zip` pour générer un paquet ZIP à la volée (HTML courant + polices système).
+    *   Permet aux étudiants de récupérer instantanément leur travail avec les animations GSAP injectées.
+3.  **Raccourcis de Manipulation Canvas** :
+    *   Touches `Suppr` (Delete) et `Backspace` fonctionnelles pour retirer un écran du canvas.
+    *   Protection contre les déclenchements accidentels lors de la saisie dans des champs texte.
+    *   Touche `Echap` (Escape) pour fermer instantanément les overlays d'aperçu.
 
-**Fichiers modifiés :**
-- `workspace.html` : overlay preview restructuré avec barre contrôles + scroll area
-- `WsPreview.js` : zoom state, setZoom(), _bindZoomControls(), downloadPreview()
-
-**Contexte :** Dans le FEE Studio (mode d'étalonnage GSAP de la mission 221), la zone centrale affiche un aperçu statique du projet via l'iframe `#fee-studio-iframe` contenue dans `#fee-studio-preview-container`. Actuellement, cet aperçu est locké à 100%. L'étudiant a besoin de pouvoir zoomer en avant/arrière pour affiner ses sélections ou voir la vue d'ensemble du site.
-
-**Comportement attendu :**
-1. **Contrôles UI (Zoom) :** Ajouter deux boutons `[+]` et `[-]` discrets en bas (ou haut) de l'aperçu central, à côté ou dans le prolongement de la barre de contrôle de temps `#fee-studio-timeline-controls` (ou flottants dans un coin du container).
-2. **Molette (Wheel) :** Ajouter un event listener `wheel` (avec ctrl/cmd maintenu, comme sur le canvas principal, ou simplement wheel si c'est ergonomique) qui agit sur le niveau de zoom.
-3. **Moteur JS :** 
-   - L'échelle (`scale`) doit être une variable interne de `WsFEEStudio` (ex: `this.previewScale = 1.0`).
-   - Le zoom doit ajuster dynamiquement la propriété CSS `transform: scale(X)` de l'iframe (`#fee-studio-iframe`), avec un `transform-origin: center center` (ou `top left` si plus gérable dans une boîte à débordement).
-   - Les min/max de scale doivent être raisonnables (ex: 0.2 à 3.0).
-4. **Bouton Download (ZIP) :**
-   - À côté des contrôles de zoom, ajouter une icône / bouton *"Télécharger"* (Download).
-   - Ce bouton permet à l'étudiant de récupérer le code source (HTML/CSS) du projet avec toutes ses animations GSAP fraîchement injectées.
-   - Ce bouton doit déclencher la route existante ou l'utilitaire d'export Zip du projet qui devait déjà exister ailleurs dans le workspace (vérifier le pipeline `export_router.py` ou `Download` dans la RM achieved).
-
-**Fichiers à modifier :**
-- `Frontend/3. STENCILER/static/js/workspace/WsFEEStudio.js` :
-   - Ajouter la logique `setZoom(amount)` et lier les boutons ou l'événement wheel.
-   - Injecter les boutons HTML (Zoom + Download) dans le DOM généré à l'initialisation (méthode d'init UI).
-
-**Attention :** Le wrapper `fee-studio-preview-container` utilise `overflow-hidden`. Il faudra s'assurer que le zoom ne casse pas l'overflow et qu'on puisse potentiellement déplacer (pan) le conteneur si on est fort zoomé (ou à minima laisser un moyen d'atteindre les coins, éventuellement avec un wrapping `div` qui scroll). Une solution de facilité de type `zoom: 0.8` (CSS property) peut être essayée, mais `transform: scale(0.8)` est plus performant et fiable.
+**Fichiers impactés :**
+*   `WsCanvas.js`, `WsPreview.js`, `WsFEEStudio.js` (Logique JS)
+*   `workspace.html` (Structure UI)
+*   `frd_router.py` (Endpoint d'export ZIP)
 
 ---
 

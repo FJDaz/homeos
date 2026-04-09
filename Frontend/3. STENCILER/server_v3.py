@@ -178,6 +178,38 @@ app.include_router(auth_router)
 app.include_router(stitch_router)
 app.include_router(class_router)
 
+# --- M274: Health/Debug endpoint ---
+@app.get("/api/health")
+async def health_check():
+    """Debug endpoint to check DB state."""
+    import sqlite3
+    result = {"status": "ok", "seed": None}
+    try:
+        db_path = PROJECTS_DB_PATH
+        result["db_path"] = str(db_path)
+        result["db_exists"] = db_path.exists()
+        if db_path.exists():
+            conn = sqlite3.connect(str(db_path))
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            result["tables"] = [r[0] for r in cur.fetchall()]
+            if "classes" in result["tables"]:
+                cur.execute("SELECT COUNT(*) FROM classes")
+                result["class_count"] = cur.fetchone()[0]
+                cur.execute("SELECT id, name, teacher FROM classes LIMIT 5")
+                result["classes"] = [dict(zip(["id","name","teacher"], r)) for r in cur.fetchall()]
+            if "students" in result["tables"]:
+                cur.execute("SELECT COUNT(*) FROM students")
+                result["student_count"] = cur.fetchone()[0]
+            conn.close()
+        # Check seed log
+        seed_log = db_path.parent / "seed.log"
+        if seed_log.exists():
+            result["seed_log"] = seed_log.read_text()
+    except Exception as e:
+        result["error"] = str(e)
+    return result
+
 # --- ACTIVE PROJECT OVERRIDES (bkd_service uses JSON file, not DB) ---
 def get_active_project_id():
     if ACTIVE_PROJECT_FILE.exists():

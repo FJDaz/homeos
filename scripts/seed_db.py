@@ -152,6 +152,16 @@ def seed():
     conn.close()
     print(f"[seed] Done. {total_students} students, {total_projects} projects created.")
 
+    # Write seed log for debugging on HF
+    log_path = DB_DIR / "seed.log"
+    try:
+        with open(str(log_path), 'w') as f:
+            f.write(f"seeded: {total_students} students, {total_projects} projects\n")
+            f.write(f"db_path: {DB_PATH}\n")
+            f.write(f"db_exists: {DB_PATH.exists()}\n")
+    except Exception as e:
+        print(f"[seed] Warning: could not write seed.log: {e}")
+
 if __name__ == "__main__":
     try:
         seed()
