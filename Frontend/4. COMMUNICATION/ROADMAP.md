@@ -165,6 +165,42 @@ Exemple: `html = html.replace("<head>", f"<head><base href='/projects/{project_i
 
 ---
 
+### Mission 273 — UX FEE Studio : Zoom In/Out + Download sur l'Aperçu
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+**Changes :**
+- Contrôles `[+]` / `[-]` dans la barre de contrôle FEE Studio
+- Niveau de zoom affiché en pourcentage (20%–300%)
+- Molette : Ctrl/Cmd + wheel pour zoomer/dézoomer
+- Wrapper `overflow-auto` pour scroller quand zoom > 1
+- Bouton "télécharger" → export HTML de l'iframe courant
+- `setZoom(scale)` : `transform: scale()` sur iframe, dimensions container ajustées
+
+**Fichier :** `WsFEEStudio.js`
+
+**Contexte :** Dans le FEE Studio (mode d'étalonnage GSAP de la mission 221), la zone centrale affiche un aperçu statique du projet via l'iframe `#fee-studio-iframe` contenue dans `#fee-studio-preview-container`. Actuellement, cet aperçu est locké à 100%. L'étudiant a besoin de pouvoir zoomer en avant/arrière pour affiner ses sélections ou voir la vue d'ensemble du site.
+
+**Comportement attendu :**
+1. **Contrôles UI (Zoom) :** Ajouter deux boutons `[+]` et `[-]` discrets en bas (ou haut) de l'aperçu central, à côté ou dans le prolongement de la barre de contrôle de temps `#fee-studio-timeline-controls` (ou flottants dans un coin du container).
+2. **Molette (Wheel) :** Ajouter un event listener `wheel` (avec ctrl/cmd maintenu, comme sur le canvas principal, ou simplement wheel si c'est ergonomique) qui agit sur le niveau de zoom.
+3. **Moteur JS :** 
+   - L'échelle (`scale`) doit être une variable interne de `WsFEEStudio` (ex: `this.previewScale = 1.0`).
+   - Le zoom doit ajuster dynamiquement la propriété CSS `transform: scale(X)` de l'iframe (`#fee-studio-iframe`), avec un `transform-origin: center center` (ou `top left` si plus gérable dans une boîte à débordement).
+   - Les min/max de scale doivent être raisonnables (ex: 0.2 à 3.0).
+4. **Bouton Download (ZIP) :**
+   - À côté des contrôles de zoom, ajouter une icône / bouton *"Télécharger"* (Download).
+   - Ce bouton permet à l'étudiant de récupérer le code source (HTML/CSS) du projet avec toutes ses animations GSAP fraîchement injectées.
+   - Ce bouton doit déclencher la route existante ou l'utilitaire d'export Zip du projet qui devait déjà exister ailleurs dans le workspace (vérifier le pipeline `export_router.py` ou `Download` dans la RM achieved).
+
+**Fichiers à modifier :**
+- `Frontend/3. STENCILER/static/js/workspace/WsFEEStudio.js` :
+   - Ajouter la logique `setZoom(amount)` et lier les boutons ou l'événement wheel.
+   - Injecter les boutons HTML (Zoom + Download) dans le DOM généré à l'initialisation (méthode d'init UI).
+
+**Attention :** Le wrapper `fee-studio-preview-container` utilise `overflow-hidden`. Il faudra s'assurer que le zoom ne casse pas l'overflow et qu'on puisse potentiellement déplacer (pan) le conteneur si on est fort zoomé (ou à minima laisser un moyen d'atteindre les coins, éventuellement avec un wrapping `div` qui scroll). Une solution de facilité de type `zoom: 0.8` (CSS property) peut être essayée, mais `transform: scale(0.8)` est plus performant et fiable.
+
+---
+
 ### Mission 261 — DIAG : Stitch s'ouvre sans projet — `stitch_project_id` non résolu
 **STATUS: 🔴 DIAG | DATE: 2026-04-08 | ACTOR: QWEN**
 

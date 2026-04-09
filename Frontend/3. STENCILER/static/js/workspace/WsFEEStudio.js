@@ -11,7 +11,10 @@ class WsFEEStudio {
         this.feeHistory = [];
         this.selectedTrigger = null;
         this.selectedState = 'initial'; // initial | hover | click | scroll-trigger
-        
+        this.previewScale = 1.0;
+        this.previewMinScale = 0.2;
+        this.previewMaxScale = 3.0;
+
         this.init();
     }
 
@@ -64,23 +67,41 @@ class WsFEEStudio {
 
                 <!-- CENTRE: LABO PHOTO (IFRAME) -->
                 <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
-                    <!-- Iframe Container -->
-                    <div class="flex-1 bg-[#efefeb] overflow-hidden flex items-center justify-center p-8">
-                        <div id="fee-studio-preview-container" class="bg-white shadow-2xl relative w-full h-full border border-[#e5e5e5] rounded-[20px] overflow-hidden">
-                             <iframe id="fee-studio-iframe" class="w-full h-full border-none"></iframe>
+                    <!-- Iframe Container (scrollable pour zoom > 1) -->
+                    <div id="fee-studio-preview-wrapper" class="flex-1 bg-[#efefeb] overflow-auto flex items-center justify-center p-8">
+                        <div id="fee-studio-preview-container" class="bg-white shadow-2xl relative border border-[#e5e5e5] rounded-[20px] overflow-hidden" style="width:100%;height:100%;">
+                             <iframe id="fee-studio-iframe" class="w-full h-full border-none" style="transform-origin:center center;transition:transform 0.15s ease;"></iframe>
                         </div>
                     </div>
-                    
+
                     <!-- Controls Bar -->
-                    <div class="h-[48px] border-t border-[#e5e5e5] bg-white flex items-center justify-center gap-6 shrink-0">
-                        <button id="fee-studio-btn-rewind" class="p-2 text-[#9a9a98] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Rewind">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
-                        </button>
-                        <button id="fee-studio-btn-play" class="w-10 h-10 rounded-full bg-[#3d3d3c] text-white flex items-center justify-center hover:bg-black transition-all shadow-lg active:scale-95">
-                            <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </button>
-                        <button id="fee-studio-btn-slow" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-black uppercase tracking-widest text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Slow Motion x0.25">
-                            ×0.25
+                    <div class="h-[48px] border-t border-[#e5e5e5] bg-white flex items-center justify-between px-4 shrink-0">
+                        <!-- Zoom Controls -->
+                        <div class="flex items-center gap-2">
+                            <button id="fee-studio-btn-zoom-out" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom Out">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                            </button>
+                            <span id="fee-studio-zoom-level" class="text-[10px] font-bold text-[#9a9a98] w-10 text-center tabular-nums">100%</span>
+                            <button id="fee-studio-btn-zoom-in" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom In">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            </button>
+                        </div>
+                        <!-- Playback Controls -->
+                        <div class="flex items-center gap-4">
+                            <button id="fee-studio-btn-rewind" class="p-2 text-[#9a9a98] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Rewind">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
+                            </button>
+                            <button id="fee-studio-btn-play" class="w-10 h-10 rounded-full bg-[#3d3d3c] text-white flex items-center justify-center hover:bg-black transition-all shadow-lg active:scale-95">
+                                <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                            <button id="fee-studio-btn-slow" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-black uppercase tracking-widest text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Slow Motion x0.25">
+                                ×0.25
+                            </button>
+                        </div>
+                        <!-- Download -->
+                        <button id="fee-studio-btn-download" class="px-3 py-1.5 border border-[#e5e5e5] text-[9px] font-bold uppercase tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Télécharger le projet">
+                            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            télécharger
                         </button>
                     </div>
                 </main>
@@ -155,6 +176,42 @@ class WsFEEStudio {
 
         const btnApply = document.getElementById('fee-studio-btn-apply');
         btnApply.onclick = () => this.applyCode();
+
+        // M273: Zoom controls
+        const btnZoomIn = document.getElementById('fee-studio-btn-zoom-in');
+        const btnZoomOut = document.getElementById('fee-studio-btn-zoom-out');
+        if (btnZoomIn) btnZoomIn.onclick = () => this.setZoom(this.previewScale + 0.25);
+        if (btnZoomOut) btnZoomOut.onclick = () => this.setZoom(this.previewScale - 0.25);
+
+        // Wheel zoom (Ctrl/Cmd + wheel)
+        const wrapper = document.getElementById('fee-studio-preview-wrapper');
+        if (wrapper) {
+            wrapper.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    this.setZoom(this.previewScale + delta);
+                }
+            }, { passive: false });
+        }
+
+        // M273: Download button
+        const btnDownload = document.getElementById('fee-studio-btn-download');
+        if (btnDownload) btnDownload.onclick = () => this.downloadProject();
+    }
+
+    // M273: Zoom logic
+    setZoom(scale) {
+        this.previewScale = Math.max(this.previewMinScale, Math.min(this.previewMaxScale, scale));
+        const iframe = document.getElementById('fee-studio-iframe');
+        const container = document.getElementById('fee-studio-preview-container');
+        const levelEl = document.getElementById('fee-studio-zoom-level');
+        if (iframe) iframe.style.transform = `scale(${this.previewScale})`;
+        if (container) {
+            container.style.width = `${100 / this.previewScale}%`;
+            container.style.height = `${100 / this.previewScale}%`;
+        }
+        if (levelEl) levelEl.textContent = `${Math.round(this.previewScale * 100)}%`;
     }
 
     async open() {
@@ -357,6 +414,31 @@ class WsFEEStudio {
     controlRewind() {
         const iframe = document.getElementById('fee-studio-iframe');
         iframe.contentWindow.postMessage({ type: 'FEE_GSAP_CONTROL', action: 'restart' }, '*');
+    }
+
+    // M273: Download project as ZIP
+    async downloadProject() {
+        try {
+            const iframe = document.getElementById('fee-studio-iframe');
+            const html = iframe.contentDocument?.documentElement?.outerHTML;
+            if (!html) {
+                alert("Aucun contenu à télécharger — chargez d'abord un écran.");
+                return;
+            }
+
+            // Create blob and download
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${this.activeScreen || 'fee-screen'}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            alert("Erreur téléchargement: " + e.message);
+        }
     }
 
     async applyCode() {

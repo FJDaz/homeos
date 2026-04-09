@@ -1,0 +1,193 @@
+<html lang="fr"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La chambre innocente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font definition to approximate the "Condensed Serif Display" */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+        
+        body {
+            font-family: 'Playfair Display', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+        }
+        
+        /* Utility to further condense text if needed, though tracking-tight usually suffices */
+        .text-condensed {
+            letter-spacing: -0.05em;
+            transform: scaleY(1.1);
+            transform-origin: bottom;
+        }
+    </style>
+<style id="ws-sullivan-font-styles-iframe">@font-face {
+  font-family: 'Univers LT Std';
+  src: url('/static/fonts/univers-lt-std/univers-lt-std-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF, U+0100-017E, U+2013-2014, U+2018-2019, U+201C-201D, U+00AB-00BB;
+}</style><script>
+(function() {
+    let _last = null;
+    let _selected = null;
+    let _dragAccX = 0, _dragAccY = 0;
+    let _origTransform = '';
+
+    // M258: elementsFromPoint au lieu de elementFromPoint — filtre les wrappers React
+    function _findElementAtPoint(x, y) {
+        var all = document.elementsFromPoint ? document.elementsFromPoint(x, y) : [];
+        // Éléments à ignorer (wrappers React, racine, conteneurs vides)
+        var skipIds = ['root', '__next', '___gatsby'];
+        var skipTags = ['SCRIPT', 'STYLE', 'LINK', 'META', 'HEAD', 'HTML', 'BODY', 'BR', 'HR'];
+        for (var i = 0; i < all.length; i++) {
+            var el = all[i];
+            if (!el || skipTags.indexOf(el.tagName) !== -1) continue;
+            if (el.id && skipIds.indexOf(el.id) !== -1) continue;
+            // Accepter si : a un id significatif, ou une classe, ou du texte, ou est un élément sémantique
+            var hasId = el.id && el.id.length > 2 && skipIds.indexOf(el.id) === -1;
+            var hasClass = el.className && typeof el.className === 'string' && el.className.length > 0;
+            var hasText = (el.textContent || '').trim().length > 0;
+            var isSemantic = ['IMG', 'BUTTON', 'A', 'INPUT', 'H1', 'H2', 'H3', 'H4', 'P', 'SPAN', 'DIV', 'SECTION', 'NAV', 'HEADER', 'FOOTER', 'MAIN', 'ARTICLE'].indexOf(el.tagName) !== -1;
+            if (hasId || hasClass || hasText || isSemantic) {
+                return el;
+            }
+        }
+        return all.length > 0 ? all[all.length - 1] : null;
+    }
+
+    function _clear() {
+        if (_last && _last !== _selected) {
+            _last.style.removeProperty('outline');
+            _last.style.removeProperty('outline-offset');
+        }
+        _last = null;
+    }
+
+    function _clearSelection() {
+        if (_selected) {
+            _selected.style.removeProperty('outline');
+            _selected.style.removeProperty('outline-offset');
+            _selected = null;
+        }
+        _dragAccX = 0; _dragAccY = 0;
+    }
+
+    // Reçoit les coordonnées du canvas (iframe pointer-events:none → pas de mouseover natif)
+    window.addEventListener('message', function(e) {
+        if (!e.data) return;
+        if (e.data.type === 'hm-probe') {
+            const el = _findElementAtPoint(e.data.x, e.data.y);
+            if (!el || el === document.body || el === document.documentElement) { _clear(); return; }
+            if (el === _last) return;
+            _clear();
+            if (el !== _selected) {
+                el.style.outline = '2px dashed #8cc63f';
+                el.style.outlineOffset = '-1px';
+            }
+            _last = el;
+            window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
+        } else if (e.data.type === 'hm-clear') {
+            _clear();
+            window.parent.postMessage({ type: 'hm-clear' }, '*');
+        } else if (e.data.type === 'hm-click') {
+            console.log('[hm-engine] click x=' + Math.round(e.data.x) + ' y=' + Math.round(e.data.y));
+            // Select element for drag
+            const el = _findElementAtPoint(e.data.x, e.data.y);
+            if (!el || el === document.body || el === document.documentElement) { console.log('[hm-engine] no element at point'); _clearSelection(); return; }
+            console.log('[hm-engine] selected:', el.tagName, el.id || el.className || '');
+            _clearSelection();
+            _selected = el;
+            _dragAccX = 0; _dragAccY = 0;
+            // Parse existing translate to resume from current position
+            const existing = el.style.transform || '';
+            const m = existing.match(/translate\(([\d.-]+)px,\s*([\d.-]+)px\)/);
+            if (m) { _dragAccX = parseFloat(m[1]); _dragAccY = parseFloat(m[2]); }
+            _selected.style.outline = '2px solid #8cc63f';
+            _selected.style.outlineOffset = '-1px';
+            window.parent.postMessage({ type: 'hm-select', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), text: (el.textContent || '').trim().slice(0, 100) }, '*');
+        } else if (e.data.type === 'hm-drag') {
+            if (!_selected) return;
+            _dragAccX += e.data.dx;
+            _dragAccY += e.data.dy;
+            _selected.style.transform = 'translate(' + _dragAccX + 'px, ' + _dragAccY + 'px)';
+            _selected.style.position = _selected.style.position || 'relative';
+        } else if (e.data.type === 'hm-drop') {
+            console.log('[hm-engine] drop — element moved to', Math.round(_dragAccX), Math.round(_dragAccY));
+        }
+    });
+})();
+            </script></head>
+<body class="bg-[#1E4363] text-[#FCEE33] min-h-screen flex flex-col items-center justify-between p-6 md:p-12 selection:bg-[#FCEE33] selection:text-[#1E4363]">
+
+    <div class="w-full max-w-2xl flex flex-col items-center flex-1">
+        
+        <!-- Header Section -->
+        <header class="w-full text-center mt-8 mb-16">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tighter leading-none">
+                La chambre innocente
+            </h1>
+        </header>
+
+        <!-- Main Content Section -->
+        <main class="w-full flex flex-col items-center gap-16">
+            
+            <!-- Illustration Section -->
+            <section class="w-full px-4 relative" aria-label="Illustration de la chambre avec un lit, une fenêtre et un livre sous le lit">
+                <svg viewBox="0 0 400 300" class="w-full h-auto drop-shadow-none" role="img">
+                    <!-- Window -->
+                    <g stroke="#FCEE33" stroke-width="6" fill="none" stroke-linecap="square">
+                        <rect x="260" y="10" width="80" height="100"></rect>
+                        <line x1="300" y1="10" x2="300" y2="110"></line>
+                        <line x1="260" y1="60" x2="340" y2="60"></line>
+                    </g>
+
+                    <!-- Bed -->
+                    <g stroke="#FCEE33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Left short post -->
+                        <line x1="30" y1="120" x2="30" y2="260" fill="none"></line>
+                        <!-- Left tall post -->
+                        <line x1="95" y1="60" x2="95" y2="160" fill="none"></line>
+                        <!-- Diagonals (Headboard) -->
+                        <line x1="30" y1="140" x2="95" y2="80" fill="none"></line>
+                        <line x1="30" y1="180" x2="95" y2="120" fill="none"></line>
+                        <!-- Mattress -->
+                        <polygon points="30,215 95,155 340,155 275,215" fill="#FCEE33"></polygon>
+                        <!-- Right front leg -->
+                        <line x1="275" y1="215" x2="275" y2="260" fill="none"></line>
+                        <!-- Right back leg -->
+                        <line x1="340" y1="155" x2="340" y2="200" fill="none"></line>
+                    </g>
+
+                    <!-- Book -->
+                    <g transform="translate(150, 235)">
+                        <!-- Book Cover -->
+                        <polygon points="0,15 35,0 65,15 30,35" fill="#FCEE33" stroke="none"></polygon>
+                        <!-- Book Spine/Pages Line -->
+                        <polyline points="0,15 5,30 30,35" fill="none" stroke="#1E4363" stroke-width="2" stroke-linejoin="round"></polyline>
+                    </g>
+                </svg>
+            </section>
+
+            <!-- Narrative Text Card -->
+            <section class="w-full border-4 border-[#FCEE33] rounded-[24px] p-8 md:p-10 bg-transparent">
+                <p class="text-2xl md:text-3xl font-bold leading-snug tracking-tight text-left">
+                    La chambre, endroit de l'insouciance où toute ta vie se trouve. Magie ! Ton journal intime est présent sous le lit. Prends-le, cet élément sera idéal afin de te connaître à nouveau.
+                </p>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Navigation Footer -->
+    <footer class="w-full max-w-2xl flex justify-end mt-16 mb-4">
+        <nav aria-label="Navigation">
+            <button class="focus:outline-none focus:ring-4 focus:ring-[#FCEE33] focus:ring-opacity-50 rounded-full transition-transform hover:scale-105" aria-label="Aller à la page suivante">
+                <svg viewBox="0 0 120 60" class="w-24 md:w-32 h-auto fill-[#FCEE33]" aria-hidden="true">
+                    <!-- Irregular arrow polygon -->
+                    <polygon points="10,20 40,25 60,20 65,5 85,10 85,25 115,35 85,45 85,55 65,45 40,50 10,45 15,35"></polygon>
+                </svg>
+            </button>
+        </nav>
+    </footer>
+
+
+</body></html>
