@@ -76,23 +76,114 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-### Mission 275 — Migration SQLite → Supabase (DB persistante)
+### Mission 266 — "Envoyer au Cadrage" post-forge
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
 
-- **Problème** : DB SQLite sur HF = éphémère (container Docker)
-- **Solution** : Supabase Postgres cloud — `supabase_db_con()` émule l'API SQLite
-- 3 classes, 43 élèves, 12 projets seedés via migrations Supabase
-- `class_router.py` switché sur Supabase avec fallback SQLite local
-- `/api/classes` et `/api/classes/{id}/students` fonctionnels sur HF
+- Bouton "discuter dans le cadrage →" ajouté après forge réussie
+- `sessionStorage.setItem('forge_context', ...)` → passage du contexte import/template au cadrage
+- Redirection vers `/cadrage` avec contexte en session
 
-**Problème :** `*.db` est dans `.gitignore` → HF ne reçoit jamais les bases de données. La dropdown des classes est vide.
+### Mission 267 — Persistance cross-tabs (forge polling)
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
 
-**Fix :**
-- `scripts/seed_db.py` — crée les tables (`users`, `classes`, `students`, `projects`, `subjects`) et seed 3 classes + 8 élèves si la DB est vide
-- `start_hf.sh` — exécute `python3 scripts/seed_db.py` avant le lancement du serveur
-- Idempotent : skip si des classes existent déjà
+- `sessionStorage` pour état de forge active (`job_id`, `import_id`)
+- Reprise automatique du polling au retour sur workspace
+- Nettoyage au done/failed
 
-**Classes seedées :** DNMADE3_2026 (8 élèves), DNMADE2_2026 (1 élève), DNMADE1_2026 (vide)
+### Mission 268 — Arbiter boutons PRD/manifest
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- Diagnostic console pour identifier pourquoi les listeners manquent
+- Boutons câblés aux endpoints Sullivan PRD/manifest
+
+### Mission 269 — ManifestBox : panneau manifest flottant sur canvas
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- Panneau flottant `position: fixed` — pas un drawer
+- Position : `top: 60px, left: 340px, width: 300px`
+- **Clic header** → collapse/expand, **Clic ×** → ferme
+- **Drag** depuis le header
+- Charge manifest via `GET /api/projects/{id}/manifest`
+- Affiche : archétype, liste écrans, bouton "envoyer au wire"
+- `ManifestBox.js` : nouveau fichier
+- `workspace.html` : bouton "manifest" dans panel Sullivan
+- `ws_main.js` : wire `btn-ws-manifest` → `window.ManifestBox.toggle()`
+
+### Mission 270 — Seed DB HF : classes/élèves au démarrage
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- `scripts/seed_db.py` — crée tables + seed 3 classes, 43 élèves
+- `start_hf.sh` — exécute seed_db.py avant lancement serveur
+- Idempotent : skip si classes existent déjà
+
+### Mission 271 — Seed projets : corriger la DB + créer un projet par élève sans projet
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- 42 projets créés (44/44 élèves avec projet unique)
+- Lilou corrigé : `project_id = dnamde3-serre-lilou` (plus celui de Hugo)
+- `scripts/seed_student_projects.py` : idempotent, crée projets manquants
+- `seed_db.py` : inclut création projets au seed HF
+
+### Mission 272 — Bouton manifest dans Sullivan + ManifestBox collapsible sur canvas
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- Bouton "design" → "manifest" dans panel Sullivan
+- `ws_main.js` : wire `btn-ws-manifest` → `window.ManifestBox.toggle()`
+- `ManifestBox.js` : repositionné, collapsible, drag, lecture auto du manifest
+
+### Mission 273 — Workspace UX : Zoom + Download + Shortcuts
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- Zoom dynamique (20%–300%) sur overlay aperçu canvas + FEE Studio
+- `Ctrl/Cmd + Molette` pour navigation fluide
+- Barre contrôle : `[+]`, `[-]`, `%`
+- Bouton "Télécharger" → export HTML de l'iframe courant
+- `WsPreview.js` : `setZoom()`, `downloadPreview()`
+- `WsFEEStudio.js` : `setZoom()`, `downloadProject()`
+- Touches `Suppr`/`Backspace` pour retirer écran du canvas
+- Touche `Escape` pour fermer overlays d'aperçu
+
+### Mission 274 — Health/Debug endpoint
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- `GET /api/health` → retourne état DB, tables, class count
+- Permet de vérifier l'état du Space HF sans accès aux logs
+
+### Mission 275 — Migration Supabase + API Key URLs + Pricing badges
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+**Partie A — Supabase (DB persistante) :**
+- `*.db` dans `.gitignore` → HF perd la DB à chaque restart
+- **Solution** : Supabase Postgres cloud pour classes/students
+- `class_router.py` : fallback Supabase → sqlite3 si pas de clé
+- `auth_router.py` : users/auth TOUJOURS sur sqlite3 (sécurité)
+- `supabase_client.py` : `SupabaseCursor` émule API sqlite3 (retourne tuples)
+- Migrations Supabase : `001_initial_schema.sql`, `002_seed_data.sql`, `003_recreate_tables.sql`, `004_users_and_keys.sql`
+- `seed_db.py` : fallback local si Supabase non configuré
+- 3 classes, 43 élèves, 12 projets seedés
+
+**Partie B — API Key URLs (BYOK) :**
+- `api_key_urls.py` : recherche Gemini + Search au démarrage du serveur
+- Cache `db/api_key_urls.json` (TTL 24h) avec validation HTTP HEAD
+- Fallback : URLs vérifiées en dur (8/8 validées)
+- Au clic `?` : réponse instantanée depuis le cache
+- Retry avec prompt affiné si provider manquant
+
+**Partie C — Pricing badges :**
+- Chaque provider a un badge coloré : vert = gratuit, orange = payant
+- 5 gratuits : gemini, groq, mimo, qwen, watson
+- 3 payants : openai, kimi, deepseek
+- Instructions précisent gratuit/payant pour chaque provider
+
+**Fichiers :**
+- `routers/supabase_client.py` — nouveau, `SupabaseCursor` pour compatibilité sqlite3
+- `routers/api_key_urls.py` — nouveau, recherche + cache + validation
+- `routers/auth_router.py` — users sur sqlite3, students sur Supabase
+- `routers/class_router.py` — fallback Supabase → sqlite3
+- `routers/auth_supabase.py` — helpers REST API Supabase (urllib, pas requests)
+- `static/js/bootstrap.js` — pricing badges dans drawer settings
+- `supabase/migrations/001-004_*.sql` — migrations DB
+- `start_hf.sh` — seed + mkdir db
 
 ---
 
