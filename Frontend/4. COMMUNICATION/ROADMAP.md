@@ -185,6 +185,29 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 - `supabase/migrations/001-004_*.sql` — migrations DB
 - `start_hf.sh` — seed + mkdir db
 
+### Mission 276 — Sync & Palette Stitch (création projet + pull écrans)
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+**Flux implémenté (testé avec API Stitch MCP) :**
+- **Création projet Stitch** : HomeOS appelle `create_project` via MCP → projet créé instantanément, ID reçu
+- **Génération 1er écran** : `generate_screen_from_text` avec méga-prompt (tokens design + badge GPS)
+- **Lien scellé** : `stitch_project_id` stocké dans manifest.json → zéro scan nécessaire
+- **Sync écrans** : Bouton ↻ "actualiser depuis stitch" en haut de la screen list
+  - Appelle `POST /api/stitch/sync` → liste les écrans via `list_screens` MCP
+  - Télécharge HTML de chaque nouvel écran via `get_screen`
+  - Sauve dans `static/templates/` + met à jour `index.json`
+  - Retourne `+N écran(s) syncés` → auto-refresh de la screen list
+
+**Tests validés :**
+- `create_project` ✅ → ID reçu instantanément
+- `generate_screen_from_text` ✅ → badge `OMB_LIVRO_2026` détecté dans la réponse
+- `list_screens` ✅ → 12 outils MCP disponibles, écran généré avec HTML téléchargeable
+
+**Fichiers :**
+- `stitch_router.py` : refonte `/api/stitch/sync` avec MCP `list_screens` + `get_screen`
+- `WsImportList.js` : bouton sync en haut de la screen list
+- `stitch_client.py` : client MCP existant (réutilisé)
+
 ---
 
 ### Thème 27 — Contexte actif dans FEE Studio et Stitch
