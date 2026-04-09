@@ -20,15 +20,25 @@ def seed():
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
 
-    # Check if already seeded
+    # Check if classes table has correct schema (subject column)
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='classes'")
     if cur.fetchone():
-        cur.execute("SELECT COUNT(*) FROM classes")
-        count = cur.fetchone()[0]
-        if count > 0:
-            print(f"[seed] DB already has {count} classes, skipping.")
-            conn.close()
-            return
+        cur.execute("PRAGMA table_info(classes)")
+        cols = [r[1] for r in cur.fetchall()]
+        if "subject" not in cols:
+            print("[seed] Dropping old tables (wrong schema)")
+            cur.execute("DROP TABLE IF EXISTS classes")
+            cur.execute("DROP TABLE IF EXISTS students")
+            cur.execute("DROP TABLE IF EXISTS projects")
+            cur.execute("DROP TABLE IF EXISTS subjects")
+            cur.execute("DROP TABLE IF EXISTS conversations")
+        else:
+            cur.execute("SELECT COUNT(*) FROM classes")
+            count = cur.fetchone()[0]
+            if count > 0:
+                print(f"[seed] DB already has {count} classes, skipping.")
+                conn.close()
+                return
 
     print("[seed] Creating tables and seeding data...")
 
@@ -38,7 +48,7 @@ def seed():
         created_at TEXT DEFAULT (datetime('now')), password_hash TEXT
     )""")
     cur.execute("""CREATE TABLE IF NOT EXISTS classes (
-        id TEXT PRIMARY KEY, name TEXT, teacher TEXT,
+        id TEXT PRIMARY KEY, name TEXT, subject TEXT,
         created_at TEXT DEFAULT (datetime('now'))
     )""")
     cur.execute("""CREATE TABLE IF NOT EXISTS students (
@@ -136,7 +146,7 @@ def seed():
     total_projects = 0
 
     for cls in SEED_CLASSES:
-        cur.execute("INSERT OR IGNORE INTO classes (id, name, teacher) VALUES (?, ?, ?)",
+        cur.execute("INSERT OR IGNORE INTO classes (id, name, subject) VALUES (?, ?, ?)",
                     (cls["id"], cls["name"], cls["teacher"]))
         for sid, display, last, first in cls["students"]:
             project_id = f"{cls['id']}-{sid}"
