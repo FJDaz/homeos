@@ -543,15 +543,18 @@ async def stitch_task_status(task_id: str):
     return status.to_dict()
 
 
-# --- M230: SYNC & OPEN ---
+# --- M230/M276: SYNC & OPEN ---
 
 @router.post("/sync")
 async def stitch_sync(request: Request):
-    """M230: Synchronise les écrans Stitch vers HoméOS (pull des nouveaux/modifiés)."""
+    """M230/M276: Synchronise les écrans Stitch vers HoméOS (pull des nouveaux/modifiés)."""
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
     try:
+        from core.stitch_client import StitchClient, _mcp_call
+        client = StitchClient(api_key=_get_stitch_key())
+
         # Read stitch_project_id from manifest
         active_file = ROOT_DIR / "active_project.json"
         active_id = None
@@ -565,37 +568,105 @@ async def stitch_sync(request: Request):
         manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
         stitch_pid = manifest.get("stitch_project_id")
         if not stitch_pid:
-            raise HTTPException(status_code=400, detail="Aucun projet Stitch lié — utilisez 'lier' d'abord")
+            # Fallback: check if there's any stitch_project_id in imports
+            raise HTTPException(status_code=400, detail="Aucun projet Stitch lié au manifest")
 
-        from core.stitch_client import StitchClient
-        client = StitchClient(api_key=_get_stitch_key())
+        # Extract numeric project ID
+        proj_id = stitch_pid.replace("projects/", "") if "/" in stitch_pid else stitch_pid
 
-        # Fetch live screen list from Stitch
-        project_data = client.get_project_data(stitch_pid)
-        stitch_screens = project_data.get("screenInstances", [])
+        # List all screens from Stitch via MCP
+        screens_data = _mcp_call("list_screens", {"projectId": proj_id}, _get_stitch_key())
+        screens = screens_data.get("screens", [])
 
-        # Get local imports
-        imports_dir = PROJECTS_DIR / (active_id or "default") / "imports"
-        local_files = set(f.stem for f in imports_dir.glob("stitch_*.html")) if imports_dir.exists() else set()
+        if not screens:
+            return {"synced": 0, "message": "Aucun écran dans le projet Stitch"}
 
-        pulled = []
-        for s in stitch_screens:
-            full_name = s.get("name", "")
-            short_id = full_name.split("/")[-1]
-            title = s.get("displayName") or s.get("title") or short_id
-            safe = "stitch_" + "".join(c if c.isalnum() or c in "-_ " else "_" for c in title).strip().replace(" ", "_")[:60]
+        # Prepare imports directory
+        from bkd_service import get_active_project_path
+        imports_dir = get_active_project_path() / "imports"
+        imports_dir.mkdir(parents=True, exist_ok=True)
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        ts_str = datetime.now().strftime("%H%M%S")
 
-            if safe not in local_files:
-                # Pull this screen
-                screen_data = client.get_screen_code(stitch_pid, short_id)
-                html = screen_data.get("html", screen_data.get("code", ""))
-                if html and imports_dir:
-                    imports_dir.mkdir(parents=True, exist_ok=True)
-                    import_path = imports_dir / f"{safe}.html"
-                    import_path.write_text(html, encoding='utf-8')
-                    pulled.append(safe)
+        # Also prepare static/templates directory
+        stenciler_templates = Path(__file__).parent.parent / "static" / "templates"
+        stenciler_templates.mkdir(parents=True, exist_ok=True)
 
-        return {"pulled": pulled, "already_local": len(local_files) - len(pulled), "total_stitch": len(stitch_screens)}
+        # Read index.json
+        index_path = imports_dir / "index.json"
+        if index_path.exists():
+            index_data = json.loads(index_path.read_text(encoding='utf-8'))
+        else:
+            index_data = {"imports": []}
+
+        existing_ids = {imp.get("stitch_screen_id") for imp in index_data.get("imports", []) if imp.get("stitch_screen_id")}
+
+        synced = []
+        for screen in screens:
+            # Screen name is like "projects/123/screens/abc123"
+            full_name = screen.get("name", screen.get("id", ""))
+            screen_id = full_name.split("/")[-1] if "/" in full_name else full_name
+            title = screen.get("title", screen.get("displayName", screen_id))
+
+            if screen_id in existing_ids:
+                continue  # Already synced
+
+            # Get screen HTML
+            screen_details = _mcp_call("get_screen", {
+                "projectId": proj_id,
+                "screenId": screen_id,
+                "name": full_name
+            }, _get_stitch_key())
+
+            # Try to get HTML from the response
+            html_code = screen_details.get("htmlCode", {})
+            download_url = html_code.get("downloadUrl")
+            html = ""
+
+            if download_url:
+                try:
+                    import urllib.request
+                    req = urllib.request.Request(download_url)
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        html = resp.read().decode('utf-8')
+                except Exception as e:
+                    logger.warning(f"Stitch sync: failed to download HTML for {screen_id}: {e}")
+
+            if not html:
+                # Try inline content
+                html = html_code.get("content", "")
+
+            if not html:
+                continue
+
+            # Save to templates
+            safe_name = "".join(c if c.isalnum() or c in "-_ " else "_" for c in title).strip()[:60]
+            template_name = f"stitch_{safe_name}_{screen_id}.html"
+            tpl_path = stenciler_templates / template_name
+            tpl_path.write_text(html, encoding='utf-8')
+
+            # Add to index.json
+            new_entry = {
+                "id": f"stitch_{ts_str}_{safe_name}",
+                "name": title,
+                "timestamp": datetime.now().isoformat(),
+                "file_path": f"{today_str}/{template_name}",
+                "html_template": template_name,
+                "type": "html",
+                "archetype_id": "stitch_import",
+                "archetype_label": "import stitch",
+                "stitch_screen_id": screen_id,
+                "stitch_project_id": stitch_pid,
+                "elements_count": 0
+            }
+            index_data["imports"].insert(0, new_entry)
+            synced.append(title)
+
+        index_data["imports"] = index_data["imports"][:50]
+        index_path.write_text(json.dumps(index_data, indent=2, ensure_ascii=False), encoding='utf-8')
+
+        logger.info(f"Stitch sync: {len(synced)} new screens synced")
+        return {"synced": len(synced), "screen_names": synced, "total_stitch": len(screens)}
 
     except HTTPException:
         raise

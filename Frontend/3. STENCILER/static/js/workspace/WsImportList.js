@@ -42,6 +42,39 @@
         }
         container.innerHTML = '';
 
+        // M276: Stitch sync button at top
+        const syncHeader = document.createElement('div');
+        syncHeader.className = 'flex items-center justify-between p-2 border-b border-slate-100 mb-2';
+        syncHeader.innerHTML =
+            '<button id="ws-stitch-sync-btn" class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-homeos-green transition-all">' +
+                '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' +
+                'actualiser depuis stitch' +
+            '</button>' +
+            '<span id="ws-stitch-sync-status" class="text-[8px] text-slate-300"></span>';
+        container.appendChild(syncHeader);
+
+        document.getElementById('ws-stitch-sync-btn').onclick = async () => {
+            const statusEl = document.getElementById('ws-stitch-sync-status');
+            statusEl.textContent = 'sync...';
+            statusEl.style.color = '#8cc63f';
+            try {
+                const res = await fetch('/api/stitch/sync', { method: 'POST' });
+                const data = await res.json();
+                if (data.synced > 0) {
+                    statusEl.textContent = `+${data.synced} écran(s)`;
+                    statusEl.style.color = '#8cc63f';
+                } else {
+                    statusEl.textContent = 'à jour';
+                    statusEl.style.color = '#9a9a98';
+                }
+                setTimeout(() => { statusEl.textContent = ''; refresh(); }, 2000);
+            } catch(e) {
+                statusEl.textContent = 'erreur';
+                statusEl.style.color = '#ddb0b0';
+                console.error('Stitch sync failed:', e);
+            }
+        };
+
         if (imports.length === 0) {
             container.innerHTML = '<div class="p-4 text-[10px] text-slate-400 italic">aucun import</div>';
             return;
