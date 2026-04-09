@@ -20,7 +20,7 @@ from Backend.Prod.config.settings import settings
 
 logger = logging.getLogger("AetherFlowV3")
 
-# Try Supabase first, fall back to sqlite3 if not available
+# Try Supabase for classes/students, but ALWAYS use sqlite3 for users/auth
 _USE_SUPABASE = bool(os.getenv("SUPABASE_KEY", ""))
 if _USE_SUPABASE:
     try:
@@ -35,6 +35,10 @@ if _USE_SUPABASE:
     except Exception as e:
         logger.warning(f"Supabase init failed ({e}), falling back to sqlite3")
         _USE_SUPABASE = False
+
+# For Supabase mode, users/auth ALWAYS stay on sqlite3 (security)
+# Only classes/students go through Supabase
+_USE_SUPABASE_FOR_USERS = False
 
 router = APIRouter(prefix="/api")
 
@@ -130,28 +134,19 @@ def _find_student_by_display(name):
     return rows[0] if rows else None
 
 def _find_user_by_name(name):
-    if _USE_SUPABASE:
-        return find_user_by_name(name)
+    # Users ALWAYS on sqlite3 (security)
     return _sqlite_get_user_by_name(name)
 
 def _create_user(user_id, name, role, token):
-    if _USE_SUPABASE:
-        return create_user(user_id, name, role, token)
     return _sqlite_create_user(user_id, name, role, token)
 
 def _find_user_by_token(token):
-    if _USE_SUPABASE:
-        return find_user_by_token(token)
     return _sqlite_get_user_by_token(token)
 
 def _find_user_by_name_with_password(name):
-    if _USE_SUPABASE:
-        return find_user_by_name_with_password(name)
     return _sqlite_get_user_by_name_with_password(name)
 
 def _update_user_password(user_id, password_hash):
-    if _USE_SUPABASE:
-        return update_user_password(user_id, password_hash)
     return _sqlite_update_user_password(user_id, password_hash)
 
 def _find_student_by_id_and_class(student_id, class_id):
@@ -161,13 +156,9 @@ def _find_student_by_id_and_class(student_id, class_id):
     return rows[0] if rows else None
 
 def _get_user_key(user_id, provider):
-    if _USE_SUPABASE:
-        return get_user_key(user_id, provider)
     return _sqlite_get_user_key(user_id, provider)
 
 def _set_user_key(user_id, provider, api_key):
-    if _USE_SUPABASE:
-        return set_user_key(user_id, provider, api_key)
     return _sqlite_set_user_key(user_id, provider, api_key)
 
 def _list_students_by_class(class_id):
