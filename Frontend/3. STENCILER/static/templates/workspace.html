@@ -132,12 +132,37 @@
             <g id="canvas-content" transform="matrix(1 0 0 1 0 0)"></g>
         </svg>
 
-        <!-- PREVIEW OVERLAY (Mission 130-B) -->
-        <div id="ws-preview-overlay" class="hidden absolute inset-0 bg-transparent z-[35] flex items-center justify-center overflow-auto">
-            <div id="ws-preview-frame-container" class="relative">
-                <!-- Actual preview content will be injected here -->
+        <!-- PREVIEW OVERLAY (Mission 130-B + M273 Zoom) -->
+        <div id="ws-preview-overlay" class="hidden absolute inset-0 bg-transparent z-[35] flex flex-col overflow-hidden">
+            <!-- Zoom Controls Bar -->
+            <div id="ws-preview-controls" class="h-[40px] bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5] flex items-center justify-between px-4 shrink-0 z-50">
+                <div class="flex items-center gap-2">
+                    <button id="ws-preview-zoom-out" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom Out">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                    </button>
+                    <span id="ws-preview-zoom-level" class="text-[10px] font-bold text-[#9a9a98] w-10 text-center tabular-nums">100%</span>
+                    <button id="ws-preview-zoom-in" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom In">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </button>
+                    <span class="text-[8px] text-[#ccc] ml-1">Ctrl+molette</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="ws-preview-download" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-bold uppercase tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Télécharger">
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        télécharger
+                    </button>
+                    <button id="ws-preview-close-btn" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-red-300 hover:text-red-400 transition-all" title="Fermer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
             </div>
-            
+            <!-- Preview Content (scrollable pour zoom > 1) -->
+            <div id="ws-preview-scroll-area" class="flex-1 overflow-auto flex items-center justify-center p-8 bg-[#efefeb]">
+                <div id="ws-preview-frame-container" class="relative bg-white shadow-2xl rounded-xl overflow-hidden" style="width:100%;height:100%;">
+                    <!-- Actual preview content will be injected here -->
+                </div>
+            </div>
+
             <!-- CANVAS DE CABLAGE (Mission 160) -->
             <svg id="ws-wire-canvas" class="absolute inset-0 pointer-events-none z-[45]" xmlns="http://www.w3.org/2000/svg">
                 <g id="ws-wire-lines"></g>

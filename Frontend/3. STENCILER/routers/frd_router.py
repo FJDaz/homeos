@@ -100,8 +100,14 @@ _ARBITRATOR = SullivanArbitrator()
 # --- PYDANTIC MODELS ---
 class FRDFileRequest(BaseModel):
     name: str
+class FRDFileRequest(BaseModel):
+    name: str
     content: str
     force: Optional[bool] = False
+
+class LiveExportRequest(BaseModel):
+    html: str
+    filename: Optional[str] = "export"
 
 class KimiStartRequest(BaseModel):
     instruction: str
@@ -389,6 +395,41 @@ async def export_zip(import_id: str):
     except Exception as e:
         logger.error(f"ZIP Export failed: {e}")
         if isinstance(e, HTTPException): raise e
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/frd/export-live-zip")
+async def export_live_zip(req: LiveExportRequest):
+    """
+    Export a live DOM HTML string as a ZIP containing HTML + fonts.
+    Mission 273: FEE Studio download functionality
+    """
+    try:
+        if not req.html:
+            raise HTTPException(status_code=400, detail="HTML content is required")
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            # Write the live HTML submitted from the client
+            zip_file.writestr("index.html", req.html)
+
+            # Write Fonts from /static/fonts/
+            fonts_dir = STATIC_DIR_PATH / "fonts"
+            if fonts_dir.exists():
+                for font_file in fonts_dir.rglob("*"):
+                    if font_file.is_file():
+                        arcname = f"fonts/{font_file.relative_to(fonts_dir)}"
+                        zip_file.write(font_file, arcname=arcname)
+
+        zip_buffer.seek(0)
+        safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', req.filename or "export")
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={safe_name}.zip"}
+        )
+
+    except Exception as e:
+        logger.error(f"Live ZIP Export failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/api/frd/file")

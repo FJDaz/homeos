@@ -1,9 +1,81 @@
 /**
- * WsPreview.js — Fullscreen Preview & Static DOM Rendering (Mission 156)
+ * WsPreview.js — Fullscreen Preview & Static DOM Rendering (Mission 156 + M273 Zoom)
  */
 class WsPreview {
     constructor() {
         this._updatingHtml = false;
+        // M273: Zoom state
+        this.previewScale = 1.0;
+        this.previewMinScale = 0.2;
+        this.previewMaxScale = 3.0;
+        this._zoomListenerBound = false;
+    }
+
+    // M273: Zoom logic
+    setZoom(scale) {
+        this.previewScale = Math.max(this.previewMinScale, Math.min(this.previewMaxScale, scale));
+        const container = document.getElementById('ws-preview-frame-container');
+        const levelEl = document.getElementById('ws-preview-zoom-level');
+        if (container) {
+            container.style.transform = `scale(${this.previewScale})`;
+            container.style.transformOrigin = 'center center';
+            container.style.width = `${100 / this.previewScale}%`;
+            container.style.height = `${100 / this.previewScale}%`;
+        }
+        if (levelEl) levelEl.textContent = `${Math.round(this.previewScale * 100)}%`;
+    }
+
+    _bindZoomControls() {
+        if (this._zoomListenerBound) return;
+        this._zoomListenerBound = true;
+
+        // Buttons
+        const btnIn = document.getElementById('ws-preview-zoom-in');
+        const btnOut = document.getElementById('ws-preview-zoom-out');
+        const btnClose = document.getElementById('ws-preview-close-btn');
+        const btnDownload = document.getElementById('ws-preview-download');
+
+        if (btnIn) btnIn.onclick = () => this.setZoom(this.previewScale + 0.25);
+        if (btnOut) btnOut.onclick = () => this.setZoom(this.previewScale - 0.25);
+        if (btnClose) btnClose.onclick = () => this.exitPreviewMode();
+
+        // M273: Download
+        if (btnDownload) btnDownload.onclick = () => this.downloadPreview();
+
+        // Wheel zoom (Ctrl/Cmd + wheel)
+        const scrollArea = document.getElementById('ws-preview-scroll-area');
+        if (scrollArea) {
+            scrollArea.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    this.setZoom(this.previewScale + delta);
+                }
+            }, { passive: false });
+        }
+    }
+
+    // M273: Download current preview as HTML
+    downloadPreview() {
+        try {
+            const iframe = document.querySelector('#ws-preview-frame-container iframe');
+            const html = iframe?.contentDocument?.documentElement?.outerHTML;
+            if (!html) {
+                alert("Aucun contenu à télécharger.");
+                return;
+            }
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `preview_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            alert("Erreur téléchargement: " + e.message);
+        }
     }
 
     /**
@@ -91,15 +163,20 @@ class WsPreview {
         const container = document.getElementById('ws-preview-frame-container');
         if (!container) return;
 
-        container.innerHTML = ''; 
+        container.innerHTML = '';
         const iframe = document.createElement('iframe');
         iframe.className = "w-full h-full border-none bg-white shadow-2xl rounded-xl";
-        
+
         // Priorité à l'HTML prospecté par Sullivan
         if (iframeSource.srcdoc) iframe.srcdoc = iframeSource.srcdoc;
         else iframe.src = iframeSource.src;
 
         container.appendChild(iframe);
+
+        // M273: Reset zoom and bind controls
+        this.previewScale = 1.0;
+        this.setZoom(1.0);
+        this._bindZoomControls();
         
         // Mission 147 / 150 : Wire Overlay Orchestration
         if (mode === 'wire' && window.wsWire) {
@@ -134,3 +211,10 @@ class WsPreview {
 }
 
 window.WsPreview = WsPreview;
+
+// M273: Escape key to close preview
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('preview-mode')) {
+        if (window.wsPreview) window.wsPreview.exitPreviewMode();
+    }
+});

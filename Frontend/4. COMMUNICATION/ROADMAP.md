@@ -165,18 +165,22 @@ Exemple: `html = html.replace("<head>", f"<head><base href='/projects/{project_i
 
 ---
 
-### Mission 273 — UX FEE Studio : Zoom In/Out + Download sur l'Aperçu
+### Mission 273 — Zoom + Download sur le mode Aperçu (preview overlay)
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
 
-**Changes :**
-- Contrôles `[+]` / `[-]` dans la barre de contrôle FEE Studio
-- Niveau de zoom affiché en pourcentage (20%–300%)
-- Molette : Ctrl/Cmd + wheel pour zoomer/dézoomer
-- Wrapper `overflow-auto` pour scroller quand zoom > 1
-- Bouton "télécharger" → export HTML de l'iframe courant
-- `setZoom(scale)` : `transform: scale()` sur iframe, dimensions container ajustées
+**Cible :** Overlay preview du canvas (bouton "Aperçu" sur un shell), PAS le FEE Studio.
 
-**Fichier :** `WsFEEStudio.js`
+**Changes :**
+- Barre de contrôles en haut de l'overlay : `[+]` `[-]` niveau zoom `%` + `télécharger` + `×`
+- Molette Ctrl/Cmd pour zoomer/dézoomer
+- Wrapper `overflow-auto` pour scroller quand zoom > 1
+- `setZoom(scale)` : `transform: scale()` sur le container, dimensions ajustées
+- Escape pour fermer
+- Bouton "télécharger" → export HTML de l'iframe preview
+
+**Fichiers modifiés :**
+- `workspace.html` : overlay preview restructuré avec barre contrôles + scroll area
+- `WsPreview.js` : zoom state, setZoom(), _bindZoomControls(), downloadPreview()
 
 **Contexte :** Dans le FEE Studio (mode d'étalonnage GSAP de la mission 221), la zone centrale affiche un aperçu statique du projet via l'iframe `#fee-studio-iframe` contenue dans `#fee-studio-preview-container`. Actuellement, cet aperçu est locké à 100%. L'étudiant a besoin de pouvoir zoomer en avant/arrière pour affiner ses sélections ou voir la vue d'ensemble du site.
 

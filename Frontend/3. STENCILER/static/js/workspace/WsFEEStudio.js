@@ -420,24 +420,50 @@ class WsFEEStudio {
     async downloadProject() {
         try {
             const iframe = document.getElementById('fee-studio-iframe');
-            const html = iframe.contentDocument?.documentElement?.outerHTML;
+            let html = iframe.contentDocument?.documentElement?.outerHTML;
             if (!html) {
                 alert("Aucun contenu à télécharger — chargez d'abord un écran.");
                 return;
             }
 
-            // Create blob and download
-            const blob = new Blob([html], { type: 'text/html' });
+            // M273 part 4: Use backend ZIP packager
+            const btnDownload = document.getElementById('fee-studio-btn-download');
+            if (btnDownload) btnDownload.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>zipping...';
+
+            // Add <!DOCTYPE html> if missing
+            if (!html.toLowerCase().startsWith('<!doctype html>')) {
+                html = '<!DOCTYPE html>\n' + html;
+            }
+
+            const activeName = (this.activeScreen || 'fee-screen').split('.')[0];
+            const response = await fetch('/api/frd/export-live-zip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html: html, filename: `FEE_export_${activeName}` })
+            });
+
+            if (!response.ok) {
+                const err = await response.text();
+                throw new Error("Erreur serveur: " + err);
+            }
+
+            // Create blob from the ZIP response and download
+            const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${this.activeScreen || 'fee-screen'}.html`;
+            a.download = `FEE_export_${activeName}.zip`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+            if (btnDownload) btnDownload.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>télécharger';
+
         } catch(e) {
             alert("Erreur téléchargement: " + e.message);
+            const btnDownload = document.getElementById('fee-studio-btn-download');
+            if (btnDownload) btnDownload.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>télécharger';
         }
     }
 
