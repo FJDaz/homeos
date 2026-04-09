@@ -326,20 +326,30 @@
             <div class="sd-section">
                 <span class="sd-label">Clés API (BYOK)</span>
                 <div id="sd-keys-list" class="space-y-6">
-                    ${['gemini', 'groq', 'openai', 'kimi', 'mimo', 'deepseek', 'qwen', 'watson'].map(provider => `
+                    ${[
+                        {id:'gemini',   pricing:'gratuit'},
+                        {id:'groq',     pricing:'gratuit'},
+                        {id:'openai',   pricing:'payant'},
+                        {id:'kimi',     pricing:'payant'},
+                        {id:'mimo',     pricing:'gratuit'},
+                        {id:'deepseek', pricing:'payant'},
+                        {id:'qwen',     pricing:'gratuit'},
+                        {id:'watson',   pricing:'gratuit'},
+                    ].map(p => `
                         <div class="sd-key-group">
                             <div class="sd-key-label">
                                 <div class="flex items-center gap-2">
-                                    <span class="sd-key-name">${provider.toUpperCase()}</span>
-                                    <svg class="sd-help-btn" data-provider="${provider}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <span class="sd-key-name">${p.id.toUpperCase()}</span>
+                                    <span class="px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded ${p.pricing === 'gratuit' ? 'bg-[#8cc63f]/20 text-[#6a9a2f]' : 'bg-orange-100 text-orange-600'}">${p.pricing}</span>
+                                    <svg class="sd-help-btn" data-provider="${p.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
                                 </div>
-                                <div class="sd-key-status" data-provider="${provider}"></div>
+                                <div class="sd-key-status" data-provider="${p.id}"></div>
                             </div>
-                            <input type="password" class="sd-input" data-provider="${provider}" placeholder="Clé ${provider}...">
-                            <div class="sd-helper-text" id="helper-${provider}"></div>
+                            <input type="password" class="sd-input" data-provider="${p.id}" placeholder="Clé ${p.id}...">
+                            <div class="sd-helper-text" id="helper-${p.id}"></div>
                         </div>
                     `).join('')}
                 </div>

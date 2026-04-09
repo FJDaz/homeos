@@ -1,37 +1,45 @@
 {
-  "cached_at": 1775776289.532156,
+  "cached_at": 1775776713.280661,
   "urls": {
     "gemini": {
       "url": "https://aistudio.google.com/app/apikey",
-      "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit"
+      "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit",
+      "pricing": "gratuit"
     },
     "groq": {
       "url": "https://console.groq.com/keys",
-      "instructions": "Gratuit — console Groq, quota limité gratuit"
+      "instructions": "Gratuit — console Groq, quota limité gratuit",
+      "pricing": "gratuit"
     },
     "openai": {
       "url": "https://platform.openai.com/api-keys",
-      "instructions": "Payant — OpenAI Platform, crédit d'essai offert"
+      "instructions": "Payant — OpenAI Platform, crédit d'essai offert",
+      "pricing": "payant"
     },
     "kimi": {
       "url": "https://platform.moonshot.cn/console/api-keys",
-      "instructions": "Payant — Moonshot Platform (Kimi)"
+      "instructions": "Payant — Moonshot Platform (Kimi)",
+      "pricing": "payant"
     },
     "mimo": {
       "url": "https://openrouter.ai/keys",
-      "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni"
+      "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni",
+      "pricing": "gratuit"
     },
     "deepseek": {
       "url": "https://platform.deepseek.com/api-keys",
-      "instructions": "Payant — DeepSeek, très bon rapport qualité/prix"
+      "instructions": "Payant — DeepSeek, très bon rapport qualité/prix",
+      "pricing": "payant"
     },
     "qwen": {
       "url": "https://bailian.console.aliyun.com/?apiKey=1#/api-key",
-      "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit"
+      "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit",
+      "pricing": "gratuit"
     },
     "watson": {
       "url": "https://cloud.ibm.com/catalog/services/watsonx-ai",
-      "instructions": "Gratuit — IBM Cloud Lite + WatsonX"
+      "instructions": "Gratuit — IBM Cloud Lite + WatsonX",
+      "pricing": "gratuit"
     }
   }
 }

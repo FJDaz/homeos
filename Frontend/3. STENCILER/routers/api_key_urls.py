@@ -18,16 +18,16 @@ CACHE_TTL = 24 * 3600  # 24 hours
 PROVIDERS = ["gemini", "groq", "openai", "kimi", "mimo", "deepseek", "qwen", "watson"]
 
 # Verified fallback URLs (tested via HTTP HEAD/GET)
-# Priority: free tier first, paid fallback noted in instructions
+# pricing: "gratuit" or "payant" — clearly indicated in UI
 VERIFIED_URLS = {
-    "gemini":   {"url": "https://aistudio.google.com/app/apikey", "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit"},
-    "groq":     {"url": "https://console.groq.com/keys", "instructions": "Gratuit — console Groq, quota limité gratuit"},
-    "openai":   {"url": "https://platform.openai.com/api-keys", "instructions": "Payant — OpenAI Platform, crédit d'essai offert"},
-    "deepseek": {"url": "https://platform.deepseek.com/api-keys", "instructions": "Payant — DeepSeek, très bon rapport qualité/prix"},
-    "qwen":     {"url": "https://bailian.console.aliyun.com/?apiKey=1#/api-key", "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit"},
-    "kimi":     {"url": "https://platform.moonshot.cn/console/api-keys", "instructions": "Payant — Moonshot Platform (Kimi)"},
-    "mimo":     {"url": "https://openrouter.ai/keys", "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni"},
-    "watson":   {"url": "https://cloud.ibm.com/catalog/services/watsonx-ai", "instructions": "Gratuit — IBM Cloud Lite + WatsonX"},
+    "gemini":   {"url": "https://aistudio.google.com/app/apikey", "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit", "pricing": "gratuit"},
+    "groq":     {"url": "https://console.groq.com/keys", "instructions": "Gratuit — console Groq, quota limité gratuit", "pricing": "gratuit"},
+    "openai":   {"url": "https://platform.openai.com/api-keys", "instructions": "Payant — OpenAI Platform, crédit d'essai offert", "pricing": "payant"},
+    "deepseek": {"url": "https://platform.deepseek.com/api-keys", "instructions": "Payant — DeepSeek, très bon rapport qualité/prix", "pricing": "payant"},
+    "qwen":     {"url": "https://bailian.console.aliyun.com/?apiKey=1#/api-key", "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit", "pricing": "gratuit"},
+    "kimi":     {"url": "https://platform.moonshot.cn/console/api-keys", "instructions": "Payant — Moonshot Platform (Kimi)", "pricing": "payant"},
+    "mimo":     {"url": "https://openrouter.ai/keys", "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni", "pricing": "gratuit"},
+    "watson":   {"url": "https://cloud.ibm.com/catalog/services/watsonx-ai", "instructions": "Gratuit — IBM Cloud Lite + WatsonX", "pricing": "gratuit"},
 }
 
 
