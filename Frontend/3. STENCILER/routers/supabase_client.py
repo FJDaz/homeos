@@ -65,19 +65,20 @@ class SupabaseCursor:
     def _select_classes(self, sql: str, params: tuple = None):
         """Handle classes SELECT queries."""
         if "from classes order by" in sql:
-            # SELECT id, name, subject, created_at FROM classes ORDER BY ...
             resp = requests.get(f"{self.url}/rest/v1/classes?select=id,name,subject,created_at&order=created_at.desc", headers=self.headers)
         elif "where id=?" in sql and params:
             resp = requests.get(f"{self.url}/rest/v1/classes?id=eq.{params[0]}", headers=self.headers)
         else:
             resp = requests.get(f"{self.url}/rest/v1/classes?select=*", headers=self.headers)
         resp.raise_for_status()
-        return resp.json()
+        # Convert dicts to tuples for sqlite3 compatibility
+        data = resp.json()
+        return [(r.get("id"), r.get("name"), r.get("subject"), r.get("created_at")) for r in data]
 
     def _select_students(self, sql: str, params: tuple = None):
         """Handle students SELECT queries."""
         if "where class_id=?" in sql and params:
-            resp = requests.get(f"{self.url}/rest/v1/students?select=id,display,nom,prenom,project_id,milestone,class_id&class_id=eq.{params[0]}", headers=self.headers)
+            resp = requests.get(f"{self.url}/rest/v1/students?select=id,display,nom,prenom,project_id,milestone&class_id=eq.{params[0]}", headers=self.headers)
         elif "where id=?" in sql and params:
             resp = requests.get(f"{self.url}/rest/v1/students?select=*&id=eq.{params[0]}", headers=self.headers)
         elif "where id=? and class_id=?" in sql and params:
@@ -85,7 +86,9 @@ class SupabaseCursor:
         else:
             resp = requests.get(f"{self.url}/rest/v1/students?select=*", headers=self.headers)
         resp.raise_for_status()
-        return resp.json()
+        # Convert dicts to tuples for sqlite3 compatibility
+        data = resp.json()
+        return [(r.get("id"), r.get("display"), r.get("nom"), r.get("prenom"), r.get("project_id"), r.get("milestone")) for r in data]
 
     def _select_projects(self, sql: str, params: tuple = None):
         """Handle projects SELECT queries."""
@@ -94,7 +97,8 @@ class SupabaseCursor:
         else:
             resp = requests.get(f"{self.url}/rest/v1/projects?select=*", headers=self.headers)
         resp.raise_for_status()
-        return resp.json()
+        data = resp.json()
+        return [(r.get("id"), r.get("name"), r.get("path"), r.get("created_at"), r.get("last_opened"), r.get("user_id")) for r in data]
 
     def _handle_insert(self, sql: str, params: tuple = None):
         """Handle INSERT statements."""
