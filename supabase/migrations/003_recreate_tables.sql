@@ -1,9 +1,51 @@
--- 002_seed_data.sql (v2 — match class_router column names)
+-- 003_recreate_tables.sql
+-- Drop old tables with wrong schema and recreate
+DROP TABLE IF EXISTS students CASCADE;
+DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS classes CASCADE;
+
+-- Recreate with correct column names
+CREATE TABLE classes (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    subject TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE students (
+    id TEXT NOT NULL,
+    class_id TEXT REFERENCES classes(id),
+    display TEXT,
+    nom TEXT,
+    prenom TEXT,
+    project_id TEXT,
+    milestone INTEGER DEFAULT 0,
+    progress INTEGER DEFAULT 0,
+    PRIMARY KEY (id, class_id)
+);
+
+CREATE TABLE projects (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    path TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_opened TIMESTAMPTZ DEFAULT NOW(),
+    user_id TEXT
+);
+
+ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "all_access" ON classes FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "all_access" ON students FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "all_access" ON projects FOR ALL USING (true) WITH CHECK (true);
+
+-- Re-seed
 INSERT INTO classes (id, name, subject) VALUES
     ('dnamde3', 'DNMADE3_2026', 'OLN'),
     ('dnmade1-2026', 'DNMADE1_2026', 'OLN'),
-    ('dnmade2-2026', 'DNMADE2_2026', 'OLN')
-ON CONFLICT (id) DO NOTHING;
+    ('dnmade2-2026', 'DNMADE2_2026', 'OLN');
 
 INSERT INTO students (id, class_id, display, nom, prenom, project_id) VALUES
     ('darnoux-cyrielle', 'dnamde3', 'DARNOUX Cyrielle', 'DARNOUX', 'Cyrielle', 'dnamde3-darnoux-cyrielle'),
@@ -48,8 +90,7 @@ INSERT INTO students (id, class_id, display, nom, prenom, project_id) VALUES
     ('sauvage-chloe', 'dnmade2-2026', 'SAUVAGE Chloé', 'SAUVAGE', 'Chloe', 'dnmade2-2026-sauvage-chloe'),
     ('viard-sixtine', 'dnmade2-2026', 'VIARD Sixtine', 'VIARD', 'Sixtine', 'dnmade2-2026-viard-sixtine'),
     ('wehrle-evan', 'dnmade2-2026', 'WEHRLE Evan', 'WEHRLE', 'Evan', 'dnmade2-2026-wehrle-evan'),
-    ('zaffiroff-adeline', 'dnmade2-2026', 'ZAFFIROFF Adeline', 'ZAFFIROFF', 'Adeline', 'dnmade2-2026-zaffiroff-adeline')
-ON CONFLICT (id, class_id) DO NOTHING;
+    ('zaffiroff-adeline', 'dnmade2-2026', 'ZAFFIROFF Adeline', 'ZAFFIROFF', 'Adeline', 'dnmade2-2026-zaffiroff-adeline');
 
 INSERT INTO projects (id, name, path, user_id) VALUES
     ('dnamde3-darnoux-cyrielle', 'DARNOUX Cyrielle', 'projects/dnamde3-darnoux-cyrielle', 'darnoux-cyrielle'),
@@ -63,5 +104,4 @@ INSERT INTO projects (id, name, path, user_id) VALUES
     ('dnamde3-romary-celio', 'ROMARY Celio', 'projects/dnamde3-romary-celio', 'romary-celio'),
     ('dnamde3-salle-abigael', 'SALLÉ Abigaël', 'projects/dnamde3-salle-abigael', 'salle-abigael'),
     ('dnamde3-schnering-marylou', 'SCHNERING Marylou', 'projects/dnamde3-schnering-marylou', 'schnering-marylou'),
-    ('dnamde3-serre-lilou', 'SERRE Lilou', 'projects/dnamde3-serre-lilou', 'serre-lilou')
-ON CONFLICT (id) DO NOTHING;
+    ('dnamde3-serre-lilou', 'SERRE Lilou', 'projects/dnamde3-serre-lilou', 'serre-lilou');

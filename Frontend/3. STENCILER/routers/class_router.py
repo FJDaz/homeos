@@ -28,7 +28,10 @@ CLASSES_DIR = ROOT_DIR / "classes"
 CLASSES_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- DB ---
-from bkd_service import bkd_db_con
+try:
+    from routers.supabase_client import supabase_db_con
+except ImportError:
+    from bkd_service import bkd_db_con as supabase_db_con
 
 # --- MODELS ---
 class ClassCreateRequest(BaseModel):
@@ -174,7 +177,7 @@ def create_student_project(student: Dict[str, str], class_id: str) -> str:
     (project_path / "exports").mkdir(exist_ok=True)
 
     # Enregistrer dans la table projects (CRITIQUE — get_active_project_path() cherche ici)
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
             (project_id, project_name, str(project_path))
@@ -259,7 +262,7 @@ def detect_milestone(project_id: str) -> Dict[str, Any]:
 async def create_class(req: ClassCreateRequest):
     """Créer une classe."""
     class_id = slugify(req.name)
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "INSERT OR IGNORE INTO classes (id, name, subject) VALUES (?, ?, ?)",
             (class_id, req.name, req.subject)
@@ -270,7 +273,7 @@ async def create_class(req: ClassCreateRequest):
 @router.put("/{class_id}")
 async def update_class(class_id: str, req: ClassUpdateRequest):
     """Modifier une classe."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "UPDATE classes SET name=?, subject=? WHERE id=?",
             (req.name, req.subject, class_id)
@@ -281,7 +284,7 @@ async def update_class(class_id: str, req: ClassUpdateRequest):
 @router.delete("/{class_id}")
 async def delete_class(class_id: str):
     """Supprimer une classe et ses étudiants."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute("DELETE FROM students WHERE class_id=?", (class_id,))
         con.execute("DELETE FROM classes WHERE id=?", (class_id,))
     return {"ok": True, "id": class_id}
@@ -290,7 +293,7 @@ async def delete_class(class_id: str):
 @router.get("")
 async def list_classes():
     """Liste toutes les classes."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         rows = con.execute(
             "SELECT id, name, subject, created_at FROM classes ORDER BY created_at DESC"
         ).fetchall()
@@ -300,7 +303,7 @@ async def list_classes():
 @router.get("/{class_id}/students")
 async def list_students(class_id: str):
     """Liste étudiants d'une classe avec milestone et project_id."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         rows = con.execute(
             "SELECT id, display, nom, prenom, project_id, milestone FROM students WHERE class_id=?",
             (class_id,)
@@ -326,7 +329,7 @@ async def import_roster(class_id: str, req: RosterRequest):
     if not students:
         return {"imported": 0, "students": []}
 
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         imported = 0
         for s in students:
             con.execute(
@@ -341,7 +344,7 @@ async def import_roster(class_id: str, req: RosterRequest):
 @router.post("/{class_id}/students/{student_id}/start")
 async def start_student_project(class_id: str, student_id: str):
     """Créer projet HoméOS pour l'étudiant (ou reprendre existant)."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         row = con.execute(
             "SELECT id, display, project_id FROM students WHERE id=? AND class_id=?",
             (student_id, class_id)
@@ -364,7 +367,7 @@ async def start_student_project(class_id: str, student_id: str):
                     proj_name = json.loads(manifest_path.read_text(encoding='utf-8')).get("name", existing_project_id)
                 except Exception:
                     pass
-            with bkd_db_con() as con:
+            with supabase_db_con() as con:
                 con.execute(
                     "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
                     (existing_project_id, proj_name, str(project_path))
@@ -379,7 +382,7 @@ async def start_student_project(class_id: str, student_id: str):
     student = {"id": student_id, "display": display}
     project_id = create_student_project(student, class_id)
 
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "UPDATE students SET project_id=? WHERE id=?",
             (project_id, student_id)
@@ -396,7 +399,7 @@ async def start_student_project(class_id: str, student_id: str):
 async def update_milestone(class_id: str, student_id: str, req: MilestoneUpdate):
     """Mettre à jour le milestone d'un étudiant."""
     level = max(0, min(5, req.level))
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "UPDATE students SET milestone=? WHERE id=? AND class_id=?",
             (level, student_id, class_id)
@@ -407,7 +410,7 @@ async def update_milestone(class_id: str, student_id: str, req: MilestoneUpdate)
 @router.post("/{class_id}/students/{student_id}/detect-milestone")
 async def detect_student_milestone(class_id: str, student_id: str):
     """Détecter automatiquement le milestone en inspectant le projet."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         row = con.execute(
             "SELECT project_id FROM students WHERE id=? AND class_id=?",
             (student_id, class_id)
@@ -418,7 +421,7 @@ async def detect_student_milestone(class_id: str, student_id: str):
 
     milestone = detect_milestone(row[0])
 
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "UPDATE students SET milestone=? WHERE id=?",
             (milestone["level"], student_id)
@@ -432,7 +435,7 @@ async def detect_student_milestone(class_id: str, student_id: str):
 @router.get("/{class_id}/dashboard")
 async def class_dashboard(class_id: str):
     """Vue complète de la classe pour le prof."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         class_row = con.execute(
             "SELECT id, name, subject FROM classes WHERE id=?", (class_id,)
         ).fetchone()
@@ -449,7 +452,7 @@ async def class_dashboard(class_id: str):
         milestone = detect_milestone(s[4]) if s[4] else {"level": 0, "label": "Aucun projet"}
         # Update DB if different
         if milestone["level"] != s[5]:
-            with bkd_db_con() as con:
+            with supabase_db_con() as con:
                 con.execute("UPDATE students SET milestone=? WHERE id=?", (milestone["level"], s[0]))
         student_list.append({
             "id": s[0],
@@ -469,7 +472,7 @@ async def class_dashboard(class_id: str):
 @router.post("/{class_id}/students/{student_id}/pre-eval")
 async def student_pre_eval(class_id: str, student_id: str):
     """Pré-évaluation LLM DNMADE pour un étudiant."""
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         row = con.execute(
             "SELECT project_id FROM students WHERE id=? AND class_id=?",
             (student_id, class_id)
@@ -629,7 +632,7 @@ async def deploy_student_render(class_id: str, student_id: str):
     """Trigger le déploiement du rendu élève (R7).
     Appelle le webhook GitHub Actions pour déployer les exports du projet.
     """
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         row = con.execute(
             "SELECT project_id FROM students WHERE id=? AND class_id=?",
             (student_id, class_id)
@@ -683,7 +686,7 @@ async def deploy_student_render(class_id: str, student_id: str):
             # Fallback: export ZIP ready for manual deploy
 
     # Update milestone to N5 (Déployé)
-    with bkd_db_con() as con:
+    with supabase_db_con() as con:
         con.execute(
             "UPDATE students SET milestone=5 WHERE id=? AND class_id=?",
             (student_id, class_id)
