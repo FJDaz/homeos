@@ -415,8 +415,10 @@
 
                 try {
                     const res = await fetch(`/api/me/keys/helper/${provider}`, {
-                        headers: { 'X-User-Token': session.user_id }
+                        headers: { 'X-User-Token': session.token }
                     });
+                    
+                    if (!res.ok) throw new Error("API Erreur");
                     const data = await res.json();
                     if (data.url) {
                         helperEl.innerHTML = `<a href="${data.url}" target="_blank" style="text-decoration:underline;">Cliquez ici</a> : ${data.instructions}`;

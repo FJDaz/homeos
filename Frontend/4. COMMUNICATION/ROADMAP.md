@@ -76,8 +76,14 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-### Mission 270 — Seed DB HF : classes/élèves au démarrage
+### Mission 275 — Migration SQLite → Supabase (DB persistante)
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-09 | ACTOR: QWEN**
+
+- **Problème** : DB SQLite sur HF = éphémère (container Docker)
+- **Solution** : Supabase Postgres cloud — `supabase_db_con()` émule l'API SQLite
+- 3 classes, 43 élèves, 12 projets seedés via migrations Supabase
+- `class_router.py` switché sur Supabase avec fallback SQLite local
+- `/api/classes` et `/api/classes/{id}/students` fonctionnels sur HF
 
 **Problème :** `*.db` est dans `.gitignore` → HF ne reçoit jamais les bases de données. La dropdown des classes est vide.
 
