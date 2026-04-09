@@ -1,0 +1,37 @@
+{
+  "cached_at": 1775775909.63578,
+  "urls": {
+    "gemini": {
+      "url": "https://aistudio.google.com/app/apikey",
+      "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit"
+    },
+    "groq": {
+      "url": "https://console.groq.com/keys",
+      "instructions": "Gratuit — console Groq, quota limité gratuit"
+    },
+    "openai": {
+      "url": "https://platform.openai.com/api-keys",
+      "instructions": "Payant — OpenAI Platform, crédit d'essai offert"
+    },
+    "kimi": {
+      "url": "https://platform.moonshot.cn/console/api-keys",
+      "instructions": "Payant — Moonshot Platform (Kimi)"
+    },
+    "mimo": {
+      "url": "https://openrouter.ai/keys",
+      "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni"
+    },
+    "deepseek": {
+      "url": "https://platform.deepseek.com/api-keys",
+      "instructions": "Payant — DeepSeek, très bon rapport qualité/prix"
+    },
+    "qwen": {
+      "url": "https://bailian.console.aliyun.com/?apiKey=1#/api-key",
+      "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit"
+    },
+    "watson": {
+      "url": "https://cloud.ibm.com/catalog/services/watsonx-ai",
+      "instructions": "Gratuit — IBM Cloud Lite + WatsonX"
+    }
+  }
+}
