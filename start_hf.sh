@@ -13,6 +13,7 @@ mkdir -p /app/exports
 
 # M270: Seed database si vide (classes/élèves)
 cd /app
+mkdir -p /app/db
 python3 scripts/seed_db.py || echo "[seed] skipped"
 
 # Lancer le serveur depuis le bon répertoire

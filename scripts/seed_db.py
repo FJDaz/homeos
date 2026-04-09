@@ -6,8 +6,10 @@ import sqlite3
 import sys
 from pathlib import Path
 
-# Resolve DB_PATH robustly for HF Docker context
-DB_DIR = Path(__file__).resolve().parent.parent / "Frontend" / "3. STENCILER" / "db"
+# Resolve DB_PATH to match server_v3.py: ROOT_DIR / "db/projects.db"
+# where ROOT_DIR = CWD.parent.parent (CWD = Frontend/3. STENCILER → ROOT = /app)
+# So DB is at /app/db/projects.db
+DB_DIR = Path(__file__).resolve().parent.parent / "db"
 DB_PATH = DB_DIR / "projects.db"
 
 def seed():
