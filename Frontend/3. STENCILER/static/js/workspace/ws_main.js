@@ -107,6 +107,33 @@
                 if (window.WsAssetPicker) window.WsAssetPicker.toggle(e);
             });
         }
+
+        // M277: Stitch toolbar button — create project + open Stitch
+        var stitchBtn = document.getElementById('ws-toolbar-stitch-btn');
+        if (stitchBtn) {
+            stitchBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                console.log('[ws_main] Stitch button clicked');
+                try {
+                    const res = await fetch('/api/stitch/create-project', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.stitch_project_id) {
+                        // Project created — open Stitch
+                        window.open('https://stitch.withgoogle.com', '_blank');
+                        // Refresh imports to show the new Stitch screens
+                        if (window.WsImportList) window.WsImportList.refresh();
+                    } else if (data.url) {
+                        window.open(data.url, '_blank');
+                    } else {
+                        alert('Erreur création projet Stitch: ' + (data.error || 'inconnue'));
+                    }
+                } catch(err) {
+                    console.error('[ws_main] Stitch create error:', err);
+                    alert('Erreur Stitch: ' + err.message);
+                }
+            });
+            console.log('[ws_main] Stitch button wired');
+        }
     }
 
     /**
