@@ -179,7 +179,7 @@ class GeminiClient(BaseLLMClient):
 
         # Add tools (Mission 192 - Google Search Grounding)
         if use_search:
-            request_data["tools"] = [{"google_search_retrieval": {}}]
+            request_data["tools"] = [{"google_search": {}}]
         
         # Inject surgical system prompt when output_constraint == 'json_surgical'
         if output_constraint == "json_surgical":

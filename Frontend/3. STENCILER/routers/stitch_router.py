@@ -543,48 +543,33 @@ async def stitch_task_status(task_id: str):
     return status.to_dict()
 
 
-# --- M277: CREATE PROJECT + GENERATE FIRST SCREEN ---
+# --- M277: CREATE PROJECT (instant — returns mega-prompt for student to paste in Stitch) ---
 
 @router.post("/create-project")
 async def stitch_create_project(request: Request):
     """
-    M277: Crée un projet Stitch pour le projet HomeOS actif + génère le 1er écran avec mega-prompt.
-    Stocke stitch_project_id dans le manifest. Retourne l'URL du projet Stitch.
+    M277: Génère le méga-prompt Stitch + crée un ID projet.
+    Retourne le prompt prêt à copier-coller dans le chat Stitch.
+    L'élève ouvre Stitch, colle le prompt, et clique Envoyer lui-même.
     """
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
-    try:
-        from core.stitch_client import _mcp_call
+    # Get active project
+    active_file = ROOT_DIR / "active_project.json"
+    active_id = None
+    if active_file.exists():
+        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
 
-        # Get active project
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
-
-        if not active_id:
-            raise HTTPException(status_code=400, detail="Aucun projet HomeOS actif")
-
-        manifest_path = PROJECTS_DIR / active_id / "manifest.json"
-        if manifest_path.exists():
-            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
-        else:
-            manifest = {}
-
+    active_id = active_id or "default"
+    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+    project_title = active_id
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
         project_title = manifest.get("name", active_id)
-        project_id = active_id  # Use as project ID for badge
 
-        # 1. Create Stitch project
-        proj_result = _mcp_call("create_project", {"title": project_title}, _get_stitch_key())
-        stitch_name = proj_result.get("name", "")
-        if not stitch_name:
-            raise HTTPException(status_code=500, detail=f"Échec création projet Stitch: {proj_result}")
-
-        stitch_project_id = stitch_name.replace("projects/", "")
-
-        # 2. Build mega-prompt with badge
-        mega_prompt = f"""Crée une landing page pour le projet étudiant "{project_title}".
+    # Build mega-prompt with badge ID embedded
+    mega_prompt = f"""Crée une landing page pour le projet étudiant "{project_title}".
 
 DESIGN:
 - Style clean, hard-edge, Tailwind CSS
@@ -593,7 +578,7 @@ DESIGN:
 - Border-radius max 20px
 
 IDENTIFICATION PROJET (OBLIGATOIRE):
-Ajoute un badge visible dans le footer avec le texte exact: "project-id: {project_id}"
+Ajoute un badge visible dans le footer avec le texte exact: "project-id: {active_id}"
 Ce badge est nécessaire pour le suivi pédagogique de la plateforme.
 
 LAYOUT:
@@ -601,31 +586,13 @@ LAYOUT:
 - Grille de features (3 colonnes)
 - Footer avec le badge d'identification du projet"""
 
-        # 3. Generate screen via API
-        screen_result = _mcp_call("generate_screen_from_text", {
-            "projectId": stitch_project_id,
-            "prompt": mega_prompt
-        }, _get_stitch_key())
-
-        # 4. Store stitch_project_id in manifest
-        manifest["stitch_project_id"] = stitch_name
-        manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
-
-        logger.info(f"Stitch create-project: {project_title} → {stitch_name}")
-        return {
-            "success": True,
-            "stitch_project_id": stitch_name,
-            "url": f"https://stitch.withgoogle.com",
-            "project_title": project_title,
-            "mega_prompt": mega_prompt
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Stitch create-project failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    logger.info(f"Stitch create-project: generated mega-prompt for {project_title} ({len(mega_prompt)} chars)")
+    return {
+        "mega_prompt": mega_prompt,
+        "project_id": active_id,
+        "project_title": project_title,
+        "stitch_url": "https://stitch.withgoogle.com"
+    }
 
 
 # --- M230/M276: SYNC & OPEN ---
