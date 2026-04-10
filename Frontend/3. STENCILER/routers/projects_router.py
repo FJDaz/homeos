@@ -299,8 +299,10 @@ async def get_project_manifest_route(project_id: str):
 async def update_project_manifest_route(project_id: str, manifest: ProjectManifest):
     """Met à jour le manifest.json d'un projet."""
     p_path = PROJECTS_DIR / project_id
+    # M277: Create directory if missing (for students with no prior project)
     if not p_path.exists():
-        raise HTTPException(status_code=404, detail="Project not found")
+        p_path.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Projects: created directory for {project_id}")
 
     manifest_data = manifest.model_dump()
     save_project_manifest(project_id, manifest_data)
