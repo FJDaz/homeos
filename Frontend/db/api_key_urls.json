@@ -1,29 +1,29 @@
 {
-  "cached_at": 1775802611.6445189,
+  "cached_at": 1775807108.349611,
   "urls": {
     "gemini": {
       "url": "https://aistudio.google.com/app/apikey",
-      "instructions": "Connectez-vous à Google AI Studio et cliquez sur 'Create API key'. Gratuit (avec limites) ou payant."
+      "instructions": "Gratuit (avec limites) et Payant (Pay-as-you-go)."
     },
     "groq": {
       "url": "https://console.groq.com/keys",
-      "instructions": "Connectez-vous à la console Groq, naviguez vers 'API Keys' et cliquez sur 'Create API Key'. Gratuit (avec limites) ou payant."
+      "instructions": "Gratuit (avec limites) et Payant."
     },
     "openai": {
       "url": "https://platform.openai.com/api-keys",
-      "instructions": "Connectez-vous à la plateforme développeur OpenAI, allez dans 'API keys' et cliquez sur 'Create new secret key'. Payant."
+      "instructions": "Payant (crédits prépayés)."
     },
     "kimi": {
       "url": "https://platform.moonshot.cn/console/api-keys",
-      "instructions": "Connectez-vous à la console Moonshot AI, accédez à 'API Key Management' et créez une nouvelle clé. Payant."
+      "instructions": "Payant (Pay-as-you-go)."
     },
     "deepseek": {
       "url": "https://platform.deepseek.com/api_keys",
-      "instructions": "Connectez-vous à la plateforme DeepSeek, allez dans l'onglet 'API Keys' et cliquez sur 'Create new API key'. Payant."
+      "instructions": "Payant (Pay-as-you-go)."
     },
     "qwen": {
       "url": "https://dashscope.console.aliyun.com/apiKey",
-      "instructions": "Connectez-vous à la console DashScope d'Alibaba Cloud, allez dans 'API-KEY Management' et générez une nouvelle clé. Payant."
+      "instructions": "Gratuit (essai) et Payant."
     },
     "mimo": {
       "url": "https://openrouter.ai/keys",

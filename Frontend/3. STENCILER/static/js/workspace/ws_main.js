@@ -114,8 +114,12 @@
             stitchBtn.addEventListener('click', async function(e) {
                 e.stopPropagation();
                 try {
+                    console.log('[Stitch] 1. Button clicked');
                     var res = await fetch('/api/stitch/create-project', { method: 'POST' });
+                    console.log('[Stitch] 2. Response status:', res.status);
                     var data = await res.json();
+                    console.log('[Stitch] 3. Response data keys:', Object.keys(data));
+                    console.log('[Stitch] 3b. mega_prompt length:', (data.mega_prompt || '').length);
 
                     if (res.status === 400 && data.detail && data.detail.includes('manifest')) {
                         alert(data.detail);
@@ -131,30 +135,42 @@
                     if (data.mega_prompt) {
                         try {
                             await navigator.clipboard.writeText(data.mega_prompt);
+                            console.log('[Stitch] 4. Copied to clipboard, length:', data.mega_prompt.length);
                         } catch(clipErr) {
+                            console.warn('[Stitch] 4b. Clipboard API failed, fallback:', clipErr);
                             // Fallback for older browsers
                             var ta = document.createElement('textarea');
                             ta.value = data.mega_prompt;
+                            ta.style.position = 'fixed';
+                            ta.style.left = '-9999px';
                             document.body.appendChild(ta);
                             ta.select();
                             document.execCommand('copy');
                             document.body.removeChild(ta);
+                            console.log('[Stitch] 4b. Copied via fallback');
                         }
 
                         var toast = document.createElement('div');
                         toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
-                        toast.textContent = 'Mega-prompt copié ! Colle-le dans le chat Stitch.';
+                        toast.textContent = 'Mega-prompt copié ! Colle-le dans le chat Stitch (Cmd+V).';
                         document.body.appendChild(toast);
-                        setTimeout(function() { toast.remove(); }, 3000);
+                        console.log('[Stitch] 5. Toast displayed');
+                        setTimeout(function() { toast.remove(); }, 4000);
+                    } else {
+                        console.warn('[Stitch] No mega_prompt in response');
                     }
 
                     // Open Stitch
-                    window.open(data.stitch_url || 'https://stitch.withgoogle.com', '_blank');
+                    var url = data.stitch_url || 'https://stitch.withgoogle.com';
+                    console.log('[Stitch] 6. Opening:', url);
+                    window.open(url, '_blank');
 
                 } catch(err) {
+                    console.error('[Stitch] ERROR:', err);
                     alert('Erreur Stitch: ' + err.message);
                 }
             });
+            console.log('[Stitch] Button wired');
         }
     }
 

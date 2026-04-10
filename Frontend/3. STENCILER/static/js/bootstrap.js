@@ -387,31 +387,51 @@
             }
         };
 
-        // BYOK Save
-        document.getElementById('sd-save-keys-btn').onclick = async () => {
+        // BYOK Save — button
+        document.getElementById('sd-save-keys-btn').onclick = saveAllKeys;
+
+        // BYOK Save — Enter key on any input
+        drawer.querySelectorAll('.sd-input').forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveSingleKey(input);
+                }
+            });
+        });
+
+        async function saveAllKeys() {
             const inputs = drawer.querySelectorAll('.sd-input');
             let success = 0;
             for (const input of inputs) {
                 const key = input.value.trim();
                 if (!key) continue;
-                
-                try {
-                    const res = await fetch('/api/me/keys', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ provider: input.dataset.provider, api_key: key })
-                    });
-                    if (res.ok) {
-                        success++;
-                        input.value = ""; // Clear for security
-                    }
-                } catch(e) { console.error("BYOK Save Fail", e); }
+                if (await saveSingleKey(input)) success++;
             }
             if (success > 0) {
                 alert(`${success} clé(s) sauvegardée(s).`);
                 refreshKeyStatus();
             }
-        };
+        }
+
+        async function saveSingleKey(input) {
+            const key = input.value.trim();
+            if (!key) return false;
+            try {
+                const res = await fetch('/api/me/keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider: input.dataset.provider, api_key: key })
+                });
+                if (res.ok) {
+                    input.value = '';
+                    input.style.borderColor = '#8cc63f';
+                    setTimeout(() => { input.style.borderColor = ''; }, 1500);
+                    return true;
+                }
+            } catch(e) { console.error('BYOK Save Fail', e); }
+            return false;
+        }
 
         // Mission 192: GPS Help Logic
         drawer.querySelectorAll('.sd-help-btn').forEach(btn => {
