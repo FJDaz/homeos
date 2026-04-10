@@ -86,6 +86,71 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
+### Thème 28 — Workflow Stitch : prompt maître + tracking
+
+---
+
+### Mission 265 — DIAG : prompt maître bloqué — ne remonte pas dans le chatbot Stitch
+**STATUS: 🔴 NON RÉSOLU | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Symptôme :** Le méga-prompt est copié dans le clipboard mais **n'apparaît pas automatiquement dans le chatbox Stitch**. L'élève doit coller manuellement (Cmd+V).
+
+**Contrainte :** Stitch est sur un domaine différent (`stitch.withgoogle.com`) — injection DOM impossible (cross-origin).
+
+**Solutions possibles :**
+1. **Background MCP** : `create_project` + `generate_screen_from_text` en arrière-plan → Stitch s'ouvre avec l'écran déjà généré (pas besoin de coller). Prend 2-3 min.
+2. **Extension Stitch** : si Google expose une API URL pour pré-remplir le chat (à vérifier).
+3. **Accepter le clipboard** : doc user, on considère le copier-coller comme le workflow normal.
+
+---
+
+### Mission 266 — Prompt maître Stitch : design brief court depuis DESIGN.md projet
+**STATUS: 🟠 PRÊTE — après M265 | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Contexte :** Le prompt maître envoyé à Stitch ne doit pas décrire l'écran existant (Stitch ne reconstruit pas — il interprète). Il doit être un **design brief court** : intention UX + style + contraintes fortes. L'élève arrive avec un point de départ cohérent, pas une spécification à reproduire.
+
+**Format cible du prompt maître (< 200 tokens) :**
+```
+Projet : [titre du sujet DNMADE]
+Écran : [nom de l'écran — ex: "page d'accueil"]
+Objectif : [1 phrase — ce que l'utilisateur fait sur cet écran]
+Style : [3 mots depuis DESIGN.md — ex: "minimaliste, tons neutres, typographie claire"]
+Couleurs : [primary + neutral + text depuis DESIGN.md]
+Contraintes : [2-3 règles fortes — ex: "pas de sidebar, hero pleine largeur, CTA unique"]
+```
+
+**Sources à agréger pour construire ce brief :**
+1. `projects/{project_id}/DESIGN.md` → style + couleurs
+2. `classes/{class_id}/subjects/` → titre du sujet + objectif pédagogique
+3. `projects/{project_id}/manifest.json` → nom de l'écran actif
+
+**Backend — créer `stitch_prompt_builder.py` dans `Frontend/3. STENCILER/core/` :**
+```python
+def build_stitch_brief(project_id: str, screen_name: str, class_id: str = None) -> str:
+    """Construit un design brief court pour Stitch depuis les sources projet."""
+    # 1. Lire DESIGN.md projet
+    # 2. Lire sujet DNMADE si class_id
+    # 3. Extraire : titre, style (3 mots), couleurs, contraintes
+    # 4. Retourner le brief formaté < 200 tokens
+```
+
+**Brancher dans `stitch_router.py`** — endpoint existant `GET /api/stitch/open/{id}` :
+- Appeler `build_stitch_brief()` pour construire le prompt
+- L'inclure dans la réponse JSON : `{ url: ..., prompt: brief, copy_ready: True }`
+
+**Selon résultat M265 :**
+- Si injection URL possible → encoder le brief dans l'URL Stitch
+- Si impossible → retourner le brief dans la réponse pour affichage panneau copier-coller côté frontend
+
+**Règle :** ne pas injecter le contenu pédagogique complet (référentiel, compétences) dans le brief Stitch — ça reste dans HoméOS. Le brief est une amorce créative, pas un cahier des charges.
+
+**Fichiers à lire :**
+- `Frontend/3. STENCILER/core/stitch_prompt_builder.py` (existe déjà — lire avant de toucher)
+- `Frontend/3. STENCILER/routers/stitch_router.py`
+- `Backend/Prod/retro_genome/project_context.py` — pour réutiliser la logique de chargement DESIGN.md
+
+---
+
 ### Thème 27 — Contexte actif dans FEE Studio et Stitch
 
 ---
