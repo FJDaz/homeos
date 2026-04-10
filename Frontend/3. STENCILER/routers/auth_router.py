@@ -126,7 +126,14 @@ def _sqlite_set_user_key(user_id, provider, api_key):
     conn.commit()
     conn.close()
 
-# --- Wrapper functions that dispatch to Supabase or sqlite3 ---
+def _sqlite_delete_user_key(user_id, provider):
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM user_keys WHERE user_id = ? AND provider = ?", (user_id, provider))
+    conn.commit()
+    deleted = cursor.rowcount > 0
+    conn.close()
+    return deleted
 # NOTE: students go through Supabase when available, but users/auth ALWAYS stay on sqlite3
 
 def _find_student_by_display(name):
@@ -313,6 +320,22 @@ async def list_user_keys(request: Request):
     all_providers = ["gemini", "groq", "openai", "kimi", "mimo", "deepseek", "qwen", "watson"]
     result = {p: _get_user_key(user_id, p) is not None and "set" or "not_set" for p in all_providers}
     return result
+
+
+@router.delete("/me/keys/{provider}")
+async def delete_user_key(provider: str, request: Request):
+    """Supprime une clé API pour un provider."""
+    token = request.headers.get("X-User-Token")
+    if not token:
+        raise HTTPException(status_code=401, detail="X-User-Token header required")
+
+    user = _find_user_by_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user_id = user[0]
+    deleted = _sqlite_delete_user_key(user_id, provider.lower())
+    return {"status": "ok", "provider": provider, "deleted": deleted}
 
 
 @router.get("/me/keys/helper/{provider}")

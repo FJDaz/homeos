@@ -67,6 +67,27 @@
         link.rel = 'stylesheet';
         link.href = '/static/css/homeos-nav.css';
         document.head.appendChild(link);
+
+        // Delete button styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .sd-delete-btn {
+                background: none;
+                border: none;
+                color: #d44;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                padding: 2px 6px;
+                border-radius: 50%;
+                transition: background 0.15s;
+                line-height: 1;
+            }
+            .sd-delete-btn:hover {
+                background: rgba(221,68,68,0.1);
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     // ── Détection tab actif ─────────────────────────────────────────────────
@@ -470,7 +491,25 @@
                 const dot = document.querySelector(`.sd-key-status[data-provider="${provider}"]`);
                 if (dot) {
                     dot.classList.toggle('active', value === 'set');
+                    // Add/delete button when key is set
+                    if (value === 'set') {
+                        dot.innerHTML = `<button class="sd-delete-btn" data-provider="${provider}" title="Supprimer">×</button>`;
+                    } else {
+                        dot.innerHTML = '';
+                    }
                 }
+            });
+            // Wire delete buttons
+            drawer.querySelectorAll('.sd-delete-btn').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const provider = btn.dataset.provider;
+                    if (!confirm(`Supprimer la clé ${provider.toUpperCase()} ?`)) return;
+                    const res = await fetch(`/api/me/keys/${provider}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        refreshKeyStatus();
+                    }
+                };
             });
         } catch(e) { console.error("Key Status Fail", e); }
     }
