@@ -33,94 +33,76 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-## Phase Active (2026-04-09)
+## Phase Active (2026-04-10)
 
 > M260, M266–M276 ✅ — archivées ROADMAP_ACHIEVED.md
+> M276 cross-platform paths ✅ (ROOT_DIR constants au lieu de /Users/...)
 
 ---
 
-### Thème 27 — Contexte actif dans FEE Studio et Stitch
+### Thème 29 — Nettoyage & Consolidation Stitch
+
+### Mission 277 — Stitch end-to-end : projet lié + sync auto + panel fonctionnel
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Objectif :** Un élève clique "Créer projet Stitch" → projet créé dans Stitch avec 1er écran généré → lien scellé dans manifest → sync auto des écrans Stitch vers HomeOS → panel Stitch affiche les écrans pullés.
+
+**3 sous-tâches :**
+
+**A. Création projet + lien manifest (one-shot)**
+- Endpoint `POST /api/stitch/create-project` → appelle MCP `create_project` + `generate_screen_from_text`
+- Stocke `stitch_project_id` dans `manifest.json` du projet actif
+- Retourne URL Stitch pour ouverture directe
+
+**B. Sync auto (listening loop)**
+- Background thread (60s) : si `stitch_project_id` présent dans manifest → appelle `list_screens` MCP
+- Si nouveaux écrans détectés → pull HTML + mise à jour `index.json` → refresh screen list
+- Bouton ↻ manuel dans WsImportList pour forcer la sync
+
+**C. Panel Stitch réparé**
+- `WsStitch.js` : `show()` → lit `stitch_project_id` du manifest → affiche écrans pullés
+- Supprimer le formulaire manuel obsolète
+- Clic sur écran → import dans workspace + preview
+
+**Fichiers :** `stitch_router.py`, `WsStitch.js`, `WsImportList.js`, `manifest.json`
 
 ---
 
-### Thème 28 — Pipeline forge → cadrage → manifest (suivi)
-> Stitch sync ✅ (M276) — à implémenter la boucle de "listening" auto
-    *   Permet aux étudiants de récupérer instantanément leur travail avec les animations GSAP injectées.
-3.  **Raccourcis de Manipulation Canvas** :
-    *   Touches `Suppr` (Delete) et `Backspace` fonctionnelles pour retirer un écran du canvas.
-    *   Protection contre les déclenchements accidentels lors de la saisie dans des champs texte.
-    *   Touche `Echap` (Escape) pour fermer instantanément les overlays d'aperçu.
+### Mission 278 — Audit cross-platform : éliminer tous les chemins en dur
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**Fichiers impactés :**
-*   `WsCanvas.js`, `WsPreview.js`, `WsFEEStudio.js` (Logique JS)
-*   `workspace.html` (Structure UI)
-*   `frd_router.py` (Endpoint d'export ZIP)
+**Contexte :** M276 a fixé `routes.py` et `svg_to_tailwind.py`, mais d'autres fichiers peuvent contenir des chemins macOS en dur.
+
+**Scope :**
+- `Backend/Prod/**/*.py` — grep `/Users/` → remplacer par `ROOT_DIR` / `Path(__file__).parent...`
+- `Frontend/3. STENCILER/**/*.py` — idem
+- `start_hf.sh` — vérifier que tous les `mkdir` et chemins sont relatifs ou `/app/`
+
+**Vérification :**
+- Test local : `python3 server_v3.py` → forge d'un PNG → doit marcher
+- Test HF : le Space rebuild avec les nouveaux chemins → forge doit marcher
+
+**Fichiers prioritaires :**
+- `Backend/Prod/retro_genome/svg_to_tailwind.py` ✅ (déjà fait)
+- `Backend/Prod/retro_genome/routes.py` ✅ (déjà fait)
+- `Frontend/3. STENCILER/routers/*.py` — à vérifier
+- `Frontend/3. STENCILER/bkd_service.py` — à vérifier
 
 ---
 
-### Mission 261 — DIAG : Stitch s'ouvre sans projet — `stitch_project_id` non résolu
-**STATUS: 🔴 DIAG | DATE: 2026-04-08 | ACTOR: QWEN**
+### Mission 279 — FEE Studio : resolve écran actif + assets 404
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**Symptôme :** Clic "modifier dans Stitch" → panel Stitch s'ouvre, champ `project_id` vide, aucune session chargée.
+**Contexte :** M260 a fixé le chargement du bon fichier dans FEE Studio, mais des régressions peuvent persister.
 
-**Chaîne d'appels à auditer :**
-```
-WsStitch.show()
-  → _syncProjectId()
-      → GET /api/stitch/project-info
-          → lit active_project.json → active_id
-          → lit projects/{active_id}/manifest.json → stitch_project_id
-          → si absent : retourne { linked: false }
-  → loadSession()
-      → si projectIdInput vide → GET /api/stitch/screens?project_id= → 400 ou vide
-```
+**Vérifications :**
+- `WsFEEStudio.open()` : résout `activeScreen` depuis `wsCanvas.activeScreenId` ✅
+- `bkd_router.py` `/fee/preview` : injecte `<base href>` ✅
+- Tester sur un écran forgé (PNG → HTML) → l'iframe affiche le rendu avec CSS
 
-**Tests de diagnostic :**
-```js
-// 1. active_project.json est-il correct ?
-fetch('/api/projects/active').then(r=>r.json()).then(console.log)
-// Chercher : id, stitch_project_id dans le manifest
+**Fichiers :** `WsFEEStudio.js`, `bkd_router.py`, `WsImportList.js`
 
-// 2. project-info répond quoi ?
-fetch('/api/stitch/project-info').then(r=>r.json()).then(console.log)
-// Attendre : { linked: true/false, stitch_project_id, title }
-
-// 3. L'input est-il rempli après _syncProjectId ?
-window.wsStitch?.projectIdInput?.value  // vide = _syncProjectId n'a rien trouvé
-
-// 4. Manifest du projet actif
-fetch('/api/projects/active').then(r=>r.json()).then(d=>console.log(d.stitch_project_id))
-```
-
-**Hypothèse 1 — `manifest.stitch_project_id` est null** (TRÈS PROBABLE)
-Le projet de l'élève n'a jamais été lié à un projet Stitch → `linked: false` → pas d'auto-fill → `loadSession()` sans project_id → vide.
-
-Fix : si `linked: false`, afficher dans le panel un message `"lier ce projet à Stitch"` avec un champ de saisie manuelle du stitch_project_id + bouton "enregistrer" qui fait `PATCH /api/projects/active/manifest` avec `{ stitch_project_id: value }`.
-
-**Hypothèse 2 — `active_project.json` ne pointe pas sur le bon projet** (PROBABLE)
-Le workspace est ouvert avec `?project_id=X` mais `POST /api/projects/activate` dans le `<head>` a échoué silencieusement → `active_project.json` pointe sur un autre projet → manifest sans stitch_project_id.
-
-Test :
-```js
-// URL actuelle
-new URLSearchParams(window.location.search).get('project_id')
-// vs ce que le backend voit comme actif
-fetch('/api/projects/active').then(r=>r.json()).then(d=>console.log(d.id))
-// Les deux doivent matcher
-```
-
-**Livrable QWEN :**
-1. Exécuter les tests console, reporter les valeurs
-2. Identifier laquelle des deux hypothèses est correcte
-3. Si H1 : implémenter le flow de liaison manuelle dans `WsStitch.js` (message + input + PATCH)
-4. Si H2 : identifier pourquoi `activate` échoue et corriger dans `workspace.html` ou `projects_router.py`
-5. Objectif final : ouvrir Stitch → project_id auto-rempli depuis la session workspace
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/js/workspace/WsStitch.js` — `show()`, `_syncProjectId()`, `loadSession()`
-- `Frontend/3. STENCILER/routers/stitch_router.py` — `GET /api/stitch/project-info`
-- `Frontend/3. STENCILER/static/templates/workspace.html` — balise `<head>`, appel activate
-- `Frontend/3. STENCILER/routers/projects_router.py` — `POST /api/projects/activate`
+---
 
 ---
 
