@@ -42,19 +42,33 @@
         if (!file) return;
         try {
             const text = await file.text();
-            const parsed = JSON.parse(text);
             const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const projectId = session.active_project_id || session.project_id;
+
+            let payload;
+            if (file.name.endsWith('.json')) {
+                payload = JSON.parse(text);
+            } else {
+                // Markdown/text file: wrap in a manifest structure
+                payload = {
+                    name: file.name.replace(/\.(md|txt)$/i, ''),
+                    description: text.substring(0, 500),
+                    raw_content: text,
+                    screens: [],
+                    components: []
+                };
+            }
+
             const res = await fetch(`/api/projects/${projectId}/manifest`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(parsed)
+                body: JSON.stringify(payload)
             });
             if (!res.ok) {
                 alert('Erreur sauvegarde manifest: ' + res.status);
                 return;
             }
-            manifestData = parsed;
+            manifestData = payload;
             render();
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
@@ -62,14 +76,14 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         } catch(e) {
-            alert('Erreur: fichier JSON invalide — ' + e.message);
+            alert('Erreur: fichier invalide — ' + e.message);
         }
     }
 
     function triggerUpload() {
         const fi = document.createElement('input');
         fi.type = 'file';
-        fi.accept = '.json';
+        fi.accept = '.json,.md,.txt';
         fi.onchange = () => handleManifestUpload(fi.files[0]);
         fi.click();
     }
@@ -85,7 +99,7 @@
                 <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
                     <div class="text-[11px] text-red-400 mb-4">${manifestData.error}</div>
                     <button id="manifestbox-upload-btn" class="px-4 py-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[10px] font-bold text-[#3d3d3c] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all cursor-pointer">
-                        ↑ Charger un manifest (.json)
+                        ↑ Charger un manifest (.json, .md, .txt)
                     </button>
                     <div class="text-[9px] text-[#9a9a98] mt-2">Requis pour Stitch</div>
                 </div>
