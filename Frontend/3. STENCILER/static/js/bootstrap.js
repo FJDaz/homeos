@@ -500,6 +500,8 @@
                 }
             });
             // Wire delete buttons
+            const drawer = document.getElementById('homeos-settings-drawer');
+            if (!drawer) return;
             drawer.querySelectorAll('.sd-delete-btn').forEach(btn => {
                 btn.onclick = async (e) => {
                     e.stopPropagation();

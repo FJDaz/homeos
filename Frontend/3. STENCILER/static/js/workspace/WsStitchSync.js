@@ -40,6 +40,12 @@
         pollCount++;
         try {
             const res = await fetch('/api/stitch/sync', { method: 'POST' });
+            if (res.status === 400) {
+                // No stitch_project_id linked — skip silently, stop polling
+                console.log('[WsStitchSync] No Stitch project linked, stopping polling');
+                stopPolling();
+                return;
+            }
             if (!res.ok) {
                 console.warn('[WsStitchSync] Sync failed, status', res.status);
                 return;
