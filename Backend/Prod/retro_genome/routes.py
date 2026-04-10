@@ -29,12 +29,19 @@ from .archetype_detector import ArchetypeDetector
 from .svg_to_tailwind import SvgToTailwindConverter
 from .react_to_tailwind import ReactToTailwindConverter
 
+# --- PATHS (cross-platform) ---
+ROOT_DIR = Path(__file__).parent.parent.parent.parent  # AETHERFLOW root
+STENCILER_ROOT = ROOT_DIR / "Frontend" / "3. STENCILER"
+TEMPLATES_DIR = STENCILER_ROOT / "static" / "templates"
+ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
+PROJECTS_DIR = ROOT_DIR / "projects"
+
 # Mission 111: Project Scoping
 try:
     from bkd_service import get_active_project_path
 except ImportError:
     # Fallback for standalone tests if needed
-    def get_active_project_path(): return Path(__file__).parent.parent.parent.parent / "projects" / "homéos-default"
+    def get_active_project_path(): return PROJECTS_DIR / "homéos-default"
 
 router = APIRouter(prefix="/retro-genome", tags=["Retro Genome"])
 
@@ -722,7 +729,7 @@ async def generate_from_import(req: ImportGenRequest):
 
             origin = "generated"
             html_code = ""
-            stenciler_templates = Path("/Users/francois-jeandazin/AETHERFLOW/Frontend/3. STENCILER/static/templates")
+            stenciler_templates = TEMPLATES_DIR
             stenciler_templates.mkdir(parents=True, exist_ok=True)
 
             # BRANCHE ZIP
@@ -806,12 +813,12 @@ async def generate_from_import(req: ImportGenRequest):
                 s5 = trace.step("check_design_md")
                 design_md = ""
                 try:
-                    active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
+                    active_file = ACTIVE_PROJECT_FILE
                     if active_file.exists():
                         active_data = json.loads(active_file.read_text(encoding='utf-8'))
                         project_id = active_data.get("active_id")
                         if project_id:
-                            project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
+                            project_path = PROJECTS_DIR / project_id
                             design_file = project_path / "DESIGN.md"
                             if design_file.exists():
                                 design_md = design_file.read_text(encoding='utf-8')

@@ -6,9 +6,13 @@ Implémente le filtrage de bruit et l'inférence structurelle pour LLM.
 """
 import re
 import json
+from pathlib import Path
 from typing import Dict, List, Optional
 from collections import Counter
 from loguru import logger
+
+# Cross-platform paths
+ROOT_DIR = Path(__file__).parent.parent.parent.parent  # AETHERFLOW root
 
 
 class SvgToTailwindConverter:
@@ -294,13 +298,13 @@ FORMAT DE SORTIE (DESIGN.md) — réponds UNIQUEMENT avec ce contenu, pas de pro
 
         # Save DESIGN.md (direct path — avoid bkd_service import)
         try:
-            active_file = Path("/Users/francois-jeandazin/AETHERFLOW/active_project.json")
+            active_file = ROOT_DIR / "active_project.json"
             if active_file.exists():
                 import json as _json
                 active_data = _json.loads(active_file.read_text(encoding='utf-8'))
                 project_id = active_data.get("active_id")
                 if project_id:
-                    project_path = Path("/Users/francois-jeandazin/AETHERFLOW/projects") / project_id
+                    project_path = ROOT_DIR / "projects" / project_id
                     design_file = project_path / "DESIGN.md"
                     design_file.write_text(design_md, encoding='utf-8')
                     logger.info(f"[SvgToTailwind] DESIGN.md saved: {design_file}")
