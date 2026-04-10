@@ -41,6 +41,9 @@
 
             // M280: Show Stitch drill if canvas is empty
             if (window.WsStitchDrill) window.WsStitchDrill.show();
+
+            // M281: Start polling if Stitch drill was completed
+            if (window.WsStitchSync) window.WsStitchSync.startPolling();
         }, 50);
     }
 

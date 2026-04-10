@@ -52,8 +52,28 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ---
 
-### Mission 279 — FEE Studio : resolve écran actif + assets 404
+### Mission 283 — Sessions hermétiques : isolation student/teacher/admin
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Symptôme :** Les clés API configurées sur le poste teacher apparaissent dans le panel API des sessions élèves. Les sessions ne sont pas hermétiques.
+
+**Cause suspectée :**
+- `api_key_urls.py` et les clés BYOK sont stockées globalement (par provider) sans isolation par `user_id`
+- Le drawer settings (bootstrap.js) lit les clés sans filtre par session active
+- `auth_router.py` — `_get_user_key` et `_set_user_key` prennent un `user_id` mais le frontend n'a peut-être pas de `X-User-Token` dans certains flows
+
+**Scope :**
+- Vérifier que TOUS les appels `/api/me/keys` passent bien le `X-User-Token`
+- Vérifier que le backend filtre strictement par `user_id` résolu depuis le token
+- Séparer les configs teacher (fallback cascade) des configs élève (BYOK pur)
+- Tester : teacher connecte → ajoute clé → élève se logue → ne voit PAS les clés du teacher
+
+**Fichiers :** `auth_router.py`, `bootstrap.js` (drawer), `api_key_urls.py`, `auth_supabase.py`
+
+---
+
+### Mission 279 — FEE Studio : resolve écran actif + assets 404
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
 
 **Contexte :** M260 a fixé le chargement du bon fichier dans FEE Studio, mais des régressions peuvent persister.
 

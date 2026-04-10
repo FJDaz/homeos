@@ -26,8 +26,10 @@
         overlay = document.createElement('div');
         overlay.id = 'ws-stitch-drill-overlay';
         overlay.style.cssText = `
-            position: fixed; inset: 0; z-index: 5000;
-            background: rgba(247,246,242,0.95);
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(247,246,242,0.5);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
             display: flex; align-items: center; justify-content: center;
             flex-direction: column;
         `;
@@ -229,6 +231,9 @@
 
             bar.style.width = '80%';
             text.textContent = 'Stitch ouvert — charge tes écrans manuellement.';
+
+            // M281: Start polling for new screens
+            if (window.WsStitchSync) window.WsStitchSync.startPolling();
 
             // Close drill overlay after delay
             setTimeout(() => {
