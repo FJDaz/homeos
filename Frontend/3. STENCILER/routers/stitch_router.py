@@ -543,75 +543,74 @@ async def stitch_task_status(task_id: str):
     return status.to_dict()
 
 
-# --- M277: CREATE PROJECT (instant — returns mega-prompt based on manifest) ---
+# --- M277/M280: CREATE PROJECT (instant via MCP) ---
 
 @router.post("/create-project")
 async def stitch_create_project(request: Request):
     """
-    M277: Génère le méga-prompt Stitch basé sur le manifest du projet.
-    Retourne le prompt prêt à copier-coller dans le chat Stitch.
-    Bloque si aucun manifest n'existe.
+    M277/M280: Crée un vrai projet Stitch via MCP + génère le méga-prompt.
+    Retourne le prompt + l'URL du projet Stitch créé.
     """
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
-    # Get active project
-    active_file = ROOT_DIR / "active_project.json"
-    active_id = None
-    if active_file.exists():
-        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+    try:
+        from core.stitch_client import _mcp_call
 
-    active_id = active_id or "default"
-    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+        # Get active project
+        active_file = ROOT_DIR / "active_project.json"
+        active_id = None
+        if active_file.exists():
+            active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
 
-    # Check manifest exists — block if not
-    if not manifest_path.exists():
-        raise HTTPException(
-            status_code=400,
-            detail=f"Aucun manifest trouvé pour le projet '{active_id}'. Génère d'abord un manifest via le bouton [M] avant d'utiliser Stitch."
-        )
+        active_id = active_id or "default"
+        manifest_path = PROJECTS_DIR / active_id / "manifest.json"
 
-    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        # Check manifest exists — block if not
+        if not manifest_path.exists():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Aucun manifest trouvé pour le projet '{active_id}'. Génère d'abord un manifest via le bouton [M] avant d'utiliser Stitch."
+            )
 
-    # Build mega-prompt based on manifest
-    project_title = manifest.get("name", active_id)
-    screens = manifest.get("screens", [])
-    components = manifest.get("components", [])
-    design_tokens = manifest.get("design_tokens", {})
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 
-    # Extract screen list for the prompt
-    screen_list_text = ""
-    if screens:
-        screen_list_text = "\nÉCRANS À CRÉER:\n"
-        for i, screen in enumerate(screens):
-            screen_name = screen.get("name", screen.get("id", f"écran_{i+1}"))
-            screen_desc = screen.get("description", screen.get("intent", ""))
-            screen_list_text += f"- {screen_name}"
-            if screen_desc:
-                screen_list_text += f": {screen_desc}"
-            screen_list_text += "\n"
+        # Build mega-prompt based on manifest
+        project_title = manifest.get("name", active_id)
+        screens = manifest.get("screens", [])
+        components = manifest.get("components", [])
+        design_tokens = manifest.get("design_tokens", {})
 
-    # Extract components for the prompt
-    components_text = ""
-    if components:
-        comp_names = [c.get("name", c.get("id", "?")) for c in components[:10]]
-        components_text = f"\nCOMPOSANTS PRINCIPAUX: {', '.join(comp_names)}\n"
+        screen_list_text = ""
+        if screens:
+            screen_list_text = "\nÉCRANS À CRÉER:\n"
+            for i, screen in enumerate(screens):
+                screen_name = screen.get("name", screen.get("id", f"écran_{i+1}"))
+                screen_desc = screen.get("description", screen.get("intent", ""))
+                screen_list_text += f"- {screen_name}"
+                if screen_desc:
+                    screen_list_text += f": {screen_desc}"
+                screen_list_text += "\n"
 
-    # Extract design info
-    colors = design_tokens.get("colors", {}) if isinstance(design_tokens, dict) else {}
-    fonts = design_tokens.get("fonts", []) if isinstance(design_tokens, dict) else []
+        components_text = ""
+        if components:
+            comp_names = [c.get("name", c.get("id", "?")) for c in components[:10]]
+            components_text = f"\nCOMPOSANTS PRINCIPAUX: {', '.join(comp_names)}\n"
 
-    design_text = "\nDESIGN TOKENS:\n"
-    if colors:
-        design_text += f"- Couleurs: primary={colors.get('primary', '#8cc63f')}, bg={colors.get('neutral', '#f7f6f2')}, text={colors.get('text', '#3d3d3c')}\n"
-    else:
-        design_text += "- Palette: #8cc63f (vert primary), #f7f6f2 (background), #3d3d3c (texte)\n"
-    if fonts:
-        design_text += f"- Typographies: {', '.join(str(f) for f in fonts[:3])}\n"
-    else:
-        design_text += "- Style: clean, hard-edge, sans-serif\n"
+        colors = design_tokens.get("colors", {}) if isinstance(design_tokens, dict) else {}
+        fonts = design_tokens.get("fonts", []) if isinstance(design_tokens, dict) else []
 
-    mega_prompt = f"""Crée un projet pour le cours étudiant "{project_title}" avec les écrans suivants.
+        design_text = "\nDESIGN TOKENS:\n"
+        if colors:
+            design_text += f"- Couleurs: primary={colors.get('primary', '#8cc63f')}, bg={colors.get('neutral', '#f7f6f2')}, text={colors.get('text', '#3d3d3c')}\n"
+        else:
+            design_text += "- Palette: #8cc63f (vert primary), #f7f6f2 (background), #3d3d3c (texte)\n"
+        if fonts:
+            design_text += f"- Typographies: {', '.join(str(f) for f in fonts[:3])}\n"
+        else:
+            design_text += "- Style: clean, hard-edge, sans-serif\n"
+
+        mega_prompt = f"""Crée un projet pour le cours étudiant "{project_title}" avec les écrans suivants.
 
 {design_text}{screen_list_text}{components_text}
 INSTRUCTIONS:
@@ -623,15 +622,35 @@ IDENTIFICATION PROJET (OBLIGATOIRE sur CHAQUE écran):
 Ajoute un badge visible dans le footer avec le texte exact: "project-id: {active_id}"
 Ce badge est nécessaire pour le suivi pédagogique de la plateforme."""
 
-    logger.info(f"Stitch create-project: manifest-based prompt for {project_title} ({len(screens)} screens, {len(components)} components)")
-    return {
-        "mega_prompt": mega_prompt,
-        "project_id": active_id,
-        "project_title": project_title,
-        "screens_count": len(screens),
-        "components_count": len(components),
-        "stitch_url": "https://stitch.withgoogle.com"
-    }
+        # Create real Stitch project via MCP (~0.8s)
+        logger.info(f"Stitch: creating project '{project_title}' via MCP...")
+        proj_result = _mcp_call("create_project", {"title": project_title}, _get_stitch_key())
+        stitch_name = proj_result.get("name", "")
+        if not stitch_name:
+            raise HTTPException(status_code=500, detail=f"Échec création projet Stitch: {proj_result}")
+
+        stitch_project_id = stitch_name.replace("projects/", "")
+
+        # Store in manifest
+        manifest["stitch_project_id"] = stitch_name
+        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
+
+        logger.info(f"Stitch create-project: {project_title} → {stitch_name}")
+        return {
+            "mega_prompt": mega_prompt,
+            "project_id": active_id,
+            "project_title": project_title,
+            "stitch_project_id": stitch_name,
+            "screens_count": len(screens),
+            "components_count": len(components),
+            "stitch_url": "https://stitch.withgoogle.com"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Stitch create-project failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # --- M230/M276: SYNC & OPEN ---
