@@ -20,12 +20,16 @@
             const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const projectId = session.active_project_id || session.project_id;
             if (!projectId) {
-                manifestData = { error: 'aucun projet actif' };
+                manifestData = { error: 'aucun projet actif — connecte-toi d\'abord' };
                 return;
             }
             const res = await fetch(`/api/projects/${projectId}/manifest`);
+            if (res.status === 404) {
+                manifestData = { error: `aucun manifest pour ce projet — génère-en un d'abord (clic droit sur un écran → "générer manifest")` };
+                return;
+            }
             if (!res.ok) {
-                manifestData = { error: `manifest non trouvé (${res.status})` };
+                manifestData = { error: `erreur serveur (${res.status})` };
                 return;
             }
             manifestData = await res.json();

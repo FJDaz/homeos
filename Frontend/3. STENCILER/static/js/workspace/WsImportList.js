@@ -114,14 +114,45 @@
                 }, 100);
             });
 
-            // [S] Stitch — ouvrir l'écran dans Stitch
+            // [S] Stitch — générer mega-prompt + ouvrir Stitch
             var btnStitch = el.querySelector('.btn-s-stitch');
             if (btnStitch) {
-                btnStitch.addEventListener('click', function(e) {
+                btnStitch.addEventListener('click', async function(e) {
                     e.stopPropagation();
-                    console.log('[WsImportList] [S] Stitch clicked for:', item.name);
-                    // Open Stitch in new tab
-                    window.open('https://stitch.withgoogle.com', '_blank');
+                    try {
+                        var res = await fetch('/api/stitch/create-project', { method: 'POST' });
+                        var data = await res.json();
+
+                        if (res.status === 400 && data.detail && data.detail.includes('manifest')) {
+                            alert(data.detail);
+                            return;
+                        }
+                        if (!res.ok) {
+                            alert('Erreur Stitch: ' + (data.detail || res.statusText));
+                            return;
+                        }
+
+                        if (data.mega_prompt) {
+                            try {
+                                await navigator.clipboard.writeText(data.mega_prompt);
+                            } catch(err) {
+                                var ta = document.createElement('textarea');
+                                ta.value = data.mega_prompt;
+                                document.body.appendChild(ta);
+                                ta.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(ta);
+                            }
+                            var toast = document.createElement('div');
+                            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+                            toast.textContent = 'Mega-prompt copié ! Colle-le dans Stitch.';
+                            document.body.appendChild(toast);
+                            setTimeout(function() { toast.remove(); }, 3000);
+                        }
+                        window.open(data.stitch_url || 'https://stitch.withgoogle.com', '_blank');
+                    } catch(err) {
+                        alert('Erreur Stitch: ' + err.message);
+                    }
                 });
             }
 

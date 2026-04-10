@@ -108,55 +108,53 @@
             });
         }
 
-        // M277: Stitch toolbar button — create project + copy prompt + open Stitch
+        // M277: Stitch toolbar button — generate mega-prompt + copy + open Stitch
         var stitchBtn = document.getElementById('ws-toolbar-stitch-btn');
         if (stitchBtn) {
             stitchBtn.addEventListener('click', async function(e) {
                 e.stopPropagation();
-                console.log('[M277] Stitch button clicked');
                 try {
-                    console.log('[M277] POST /api/stitch/create-project...');
-                    const res = await fetch('/api/stitch/create-project', { method: 'POST' });
-                    console.log('[M277] Response status:', res.status);
-                    const data = await res.json();
-                    console.log('[M277] Response data:', data);
+                    var res = await fetch('/api/stitch/create-project', { method: 'POST' });
+                    var data = await res.json();
 
-                    if (data.stitch_project_id) {
-                        console.log('[M277] Project created:', data.stitch_project_id);
+                    if (res.status === 400 && data.detail && data.detail.includes('manifest')) {
+                        alert(data.detail);
+                        return;
+                    }
 
-                        // Copy mega-prompt to clipboard
-                        if (data.mega_prompt) {
-                            try {
-                                await navigator.clipboard.writeText(data.mega_prompt);
-                                console.log('[M277] Mega-prompt copied to clipboard');
-                                // Toast notification
-                                var toast = document.createElement('div');
-                                toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
-                                toast.textContent = '📋 Mega-prompt copié ! Colle-le dans le chat Stitch.';
-                                document.body.appendChild(toast);
-                                setTimeout(() => toast.remove(), 3000);
-                            } catch(clipErr) {
-                                console.warn('[M277] Clipboard failed:', clipErr);
-                            }
+                    if (!res.ok) {
+                        alert('Erreur Stitch: ' + (data.detail || res.statusText));
+                        return;
+                    }
+
+                    // Copy mega-prompt to clipboard
+                    if (data.mega_prompt) {
+                        try {
+                            await navigator.clipboard.writeText(data.mega_prompt);
+                        } catch(clipErr) {
+                            // Fallback for older browsers
+                            var ta = document.createElement('textarea');
+                            ta.value = data.mega_prompt;
+                            document.body.appendChild(ta);
+                            ta.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(ta);
                         }
 
-                        // Open Stitch
-                        window.open('https://stitch.withgoogle.com', '_blank');
-
-                        // Refresh imports
-                        if (window.WsImportList) window.WsImportList.refresh();
-                    } else if (data.url) {
-                        window.open(data.url, '_blank');
-                    } else {
-                        console.error('[M277] No stitch_project_id in response:', data);
-                        alert('Erreur création projet Stitch: ' + (data.error || JSON.stringify(data)));
+                        var toast = document.createElement('div');
+                        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+                        toast.textContent = 'Mega-prompt copié ! Colle-le dans le chat Stitch.';
+                        document.body.appendChild(toast);
+                        setTimeout(function() { toast.remove(); }, 3000);
                     }
+
+                    // Open Stitch
+                    window.open(data.stitch_url || 'https://stitch.withgoogle.com', '_blank');
+
                 } catch(err) {
-                    console.error('[M277] Stitch create error:', err);
                     alert('Erreur Stitch: ' + err.message);
                 }
             });
-            console.log('[M277] Stitch button wired');
         }
     }
 

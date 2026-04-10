@@ -241,21 +241,29 @@ async def auth_register(req: RegisterRequest):
     # Chercher user existant
     existing = _find_user_by_name(name)
     if existing:
-        return RegisterResponse(
+        resp = RegisterResponse(
             user_id=existing[0], name=existing[1], role=existing[2], token=existing[3],
             student_id=student_id, class_id=class_id, project_id=project_id
         )
+    else:
+        # Créer nouveau
+        user_id = str(uuid.uuid4())
+        token = str(uuid.uuid4())
+        _create_user(user_id, name, role, token)
+        resp = RegisterResponse(
+            user_id=user_id, name=name, role=role, token=token,
+            student_id=student_id, class_id=class_id, project_id=project_id
+        )
 
-    # Créer nouveau
-    user_id = str(uuid.uuid4())
-    token = str(uuid.uuid4())
-    _create_user(user_id, name, role, token)
+    # M277: Update active_project.json so server-side code points to the right project
+    if project_id:
+        active_file = ACTIVE_PROJECT_FILE
+        active_file.parent.mkdir(parents=True, exist_ok=True)
+        active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
+        logger.info(f"Auth: active_project.json → {project_id}")
 
     logger.info(f"Auth: new user '{name}' registered (role={role}, student_id={student_id})")
-    return RegisterResponse(
-        user_id=user_id, name=name, role=role, token=token,
-        student_id=student_id, class_id=class_id, project_id=project_id
-    )
+    return resp
 
 
 @router.get("/auth/me")
