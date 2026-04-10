@@ -38,6 +38,9 @@
 
             var elapsed = Math.round(performance.now() - t0);
             console.log('[ws_main] ✅ WORKSPACE READY (' + elapsed + 'ms)');
+
+            // M280: Show Stitch drill if canvas is empty
+            if (window.WsStitchDrill) window.WsStitchDrill.show();
         }, 50);
     }
 

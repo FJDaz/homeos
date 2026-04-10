@@ -41,34 +41,14 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ### Thème 29 — Stitch & Manifest (en cours)
 
-### Mission 277 — Stitch end-to-end : mega-prompt + manifest-based
+### Mission 280 — Landing Canvas + Drill paramétrage Stitch
 **STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**Fait :**
-- Bouton Stitch (toolbar + [S] sur chaque row) → génère mega-prompt basé sur manifest
-- Méga-prompt copié dans le clipboard + toast + Stitch ouvert
-- Blocage 400 si aucun manifest — alert "génère d'abord un manifest"
-- ManifestBox : upload exclusif (.json, .md, .txt) depuis le panneau [M]
-- active_project.json mis à jour au login de chaque élève
-
-**À faire :**
-- Injecter le prompt automatiquement dans le chatbox Stitch (limite navigateur)
-- Sync auto des écrans Stitch vers HomeOS (polling 60s)
-- Panel Stitch : afficher les écrans pullés
-
-### Mission 278 — Cross-platform paths
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
-
-- Remplacement de tous les chemins `/Users/francois-jeandazin/AETHERFLOW/...` par des constantes relatives (`ROOT_DIR`, `TEMPLATES_DIR`, etc.)
-- Forge fonctionne maintenant sur macOS (local) et Linux (HF container)
-- Test HF : le Space rebuild avec les nouveaux chemins → forge doit marcher
-
-### Mission 279 — FEE Studio vérification
+### Mission 281 — Sync Stitch : polling 2min + toast + auto-pull
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
 
-- Vérifier que `WsFEEStudio.open()` résout bien l'écran actif depuis `wsCanvas.activeScreenId`
-- Vérifier que `/fee/preview` injecte `<base href>` correctement
-- Tester sur un écran forgé (PNG → HTML) → l'iframe affiche le rendu avec CSS
+### Mission 282 — Refonte panels : Projet + Manifest
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
 
 ---
 
