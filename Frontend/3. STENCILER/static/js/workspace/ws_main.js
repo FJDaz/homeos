@@ -108,31 +108,55 @@
             });
         }
 
-        // M277: Stitch toolbar button — create project + open Stitch
+        // M277: Stitch toolbar button — create project + copy prompt + open Stitch
         var stitchBtn = document.getElementById('ws-toolbar-stitch-btn');
         if (stitchBtn) {
             stitchBtn.addEventListener('click', async function(e) {
                 e.stopPropagation();
-                console.log('[ws_main] Stitch button clicked');
+                console.log('[M277] Stitch button clicked');
                 try {
+                    console.log('[M277] POST /api/stitch/create-project...');
                     const res = await fetch('/api/stitch/create-project', { method: 'POST' });
+                    console.log('[M277] Response status:', res.status);
                     const data = await res.json();
+                    console.log('[M277] Response data:', data);
+
                     if (data.stitch_project_id) {
-                        // Project created — open Stitch
+                        console.log('[M277] Project created:', data.stitch_project_id);
+
+                        // Copy mega-prompt to clipboard
+                        if (data.mega_prompt) {
+                            try {
+                                await navigator.clipboard.writeText(data.mega_prompt);
+                                console.log('[M277] Mega-prompt copied to clipboard');
+                                // Toast notification
+                                var toast = document.createElement('div');
+                                toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+                                toast.textContent = '📋 Mega-prompt copié ! Colle-le dans le chat Stitch.';
+                                document.body.appendChild(toast);
+                                setTimeout(() => toast.remove(), 3000);
+                            } catch(clipErr) {
+                                console.warn('[M277] Clipboard failed:', clipErr);
+                            }
+                        }
+
+                        // Open Stitch
                         window.open('https://stitch.withgoogle.com', '_blank');
-                        // Refresh imports to show the new Stitch screens
+
+                        // Refresh imports
                         if (window.WsImportList) window.WsImportList.refresh();
                     } else if (data.url) {
                         window.open(data.url, '_blank');
                     } else {
-                        alert('Erreur création projet Stitch: ' + (data.error || 'inconnue'));
+                        console.error('[M277] No stitch_project_id in response:', data);
+                        alert('Erreur création projet Stitch: ' + (data.error || JSON.stringify(data)));
                     }
                 } catch(err) {
-                    console.error('[ws_main] Stitch create error:', err);
+                    console.error('[M277] Stitch create error:', err);
                     alert('Erreur Stitch: ' + err.message);
                 }
             });
-            console.log('[ws_main] Stitch button wired');
+            console.log('[M277] Stitch button wired');
         }
     }
 

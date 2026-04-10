@@ -583,8 +583,8 @@ async def stitch_create_project(request: Request):
 
         stitch_project_id = stitch_name.replace("projects/", "")
 
-        # 2. Generate first screen with mega-prompt including badge
-        prompt = f"""Crée une landing page pour le projet étudiant "{project_title}".
+        # 2. Build mega-prompt with badge
+        mega_prompt = f"""Crée une landing page pour le projet étudiant "{project_title}".
 
 DESIGN:
 - Style clean, hard-edge, Tailwind CSS
@@ -601,12 +601,13 @@ LAYOUT:
 - Grille de features (3 colonnes)
 - Footer avec le badge d'identification du projet"""
 
+        # 3. Generate screen via API
         screen_result = _mcp_call("generate_screen_from_text", {
             "projectId": stitch_project_id,
-            "prompt": prompt
+            "prompt": mega_prompt
         }, _get_stitch_key())
 
-        # 3. Store stitch_project_id in manifest
+        # 4. Store stitch_project_id in manifest
         manifest["stitch_project_id"] = stitch_name
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
@@ -616,7 +617,8 @@ LAYOUT:
             "success": True,
             "stitch_project_id": stitch_name,
             "url": f"https://stitch.withgoogle.com",
-            "project_title": project_title
+            "project_title": project_title,
+            "mega_prompt": mega_prompt
         }
 
     except HTTPException:
