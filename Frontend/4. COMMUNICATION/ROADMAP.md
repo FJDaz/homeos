@@ -35,58 +35,40 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ## Phase Active (2026-04-10)
 
-> M260, M266–M276 ✅ — archivées ROADMAP_ACHIEVED.md
-> M276 cross-platform paths ✅ (ROOT_DIR constants au lieu de /Users/...)
+> M260, M266–M279 ✅ — archivées ROADMAP_ACHIEVED.md
 
 ---
 
-### Thème 29 — Nettoyage & Consolidation Stitch
+### Thème 29 — Stitch & Manifest (en cours)
 
-### Mission 277 — Stitch end-to-end : projet lié + sync auto + panel fonctionnel
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+### Mission 277 — Stitch end-to-end : mega-prompt + manifest-based
+**STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**Objectif :** Un élève clique "Créer projet Stitch" → projet créé dans Stitch avec 1er écran généré → lien scellé dans manifest → sync auto des écrans Stitch vers HomeOS → panel Stitch affiche les écrans pullés.
+**Fait :**
+- Bouton Stitch (toolbar + [S] sur chaque row) → génère mega-prompt basé sur manifest
+- Méga-prompt copié dans le clipboard + toast + Stitch ouvert
+- Blocage 400 si aucun manifest — alert "génère d'abord un manifest"
+- ManifestBox : upload exclusif (.json, .md, .txt) depuis le panneau [M]
+- active_project.json mis à jour au login de chaque élève
 
-**3 sous-tâches :**
+**À faire :**
+- Injecter le prompt automatiquement dans le chatbox Stitch (limite navigateur)
+- Sync auto des écrans Stitch vers HomeOS (polling 60s)
+- Panel Stitch : afficher les écrans pullés
 
-**A. Création projet + lien manifest (one-shot)**
-- Endpoint `POST /api/stitch/create-project` → appelle MCP `create_project` + `generate_screen_from_text`
-- Stocke `stitch_project_id` dans `manifest.json` du projet actif
-- Retourne URL Stitch pour ouverture directe
+### Mission 278 — Cross-platform paths
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**B. Sync auto (listening loop)**
-- Background thread (60s) : si `stitch_project_id` présent dans manifest → appelle `list_screens` MCP
-- Si nouveaux écrans détectés → pull HTML + mise à jour `index.json` → refresh screen list
-- Bouton ↻ manuel dans WsImportList pour forcer la sync
-
-**C. Panel Stitch réparé**
-- `WsStitch.js` : `show()` → lit `stitch_project_id` du manifest → affiche écrans pullés
-- Supprimer le formulaire manuel obsolète
-- Clic sur écran → import dans workspace + preview
-
-**Fichiers :** `stitch_router.py`, `WsStitch.js`, `WsImportList.js`, `manifest.json`
-
----
-
-### Mission 278 — Audit cross-platform : éliminer tous les chemins en dur
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Contexte :** M276 a fixé `routes.py` et `svg_to_tailwind.py`, mais d'autres fichiers peuvent contenir des chemins macOS en dur.
-
-**Scope :**
-- `Backend/Prod/**/*.py` — grep `/Users/` → remplacer par `ROOT_DIR` / `Path(__file__).parent...`
-- `Frontend/3. STENCILER/**/*.py` — idem
-- `start_hf.sh` — vérifier que tous les `mkdir` et chemins sont relatifs ou `/app/`
-
-**Vérification :**
-- Test local : `python3 server_v3.py` → forge d'un PNG → doit marcher
+- Remplacement de tous les chemins `/Users/francois-jeandazin/AETHERFLOW/...` par des constantes relatives (`ROOT_DIR`, `TEMPLATES_DIR`, etc.)
+- Forge fonctionne maintenant sur macOS (local) et Linux (HF container)
 - Test HF : le Space rebuild avec les nouveaux chemins → forge doit marcher
 
-**Fichiers prioritaires :**
-- `Backend/Prod/retro_genome/svg_to_tailwind.py` ✅ (déjà fait)
-- `Backend/Prod/retro_genome/routes.py` ✅ (déjà fait)
-- `Frontend/3. STENCILER/routers/*.py` — à vérifier
-- `Frontend/3. STENCILER/bkd_service.py` — à vérifier
+### Mission 279 — FEE Studio vérification
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Vérifier que `WsFEEStudio.open()` résout bien l'écran actif depuis `wsCanvas.activeScreenId`
+- Vérifier que `/fee/preview` injecte `<base href>` correctement
+- Tester sur un écran forgé (PNG → HTML) → l'iframe affiche le rendu avec CSS
 
 ---
 
@@ -103,6 +85,8 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 **Fichiers :** `WsFEEStudio.js`, `bkd_router.py`, `WsImportList.js`
 
 ---
+
+### Thème 27 — Contexte actif dans FEE Studio et Stitch
 
 ---
 
