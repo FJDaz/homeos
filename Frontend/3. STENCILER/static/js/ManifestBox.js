@@ -1,8 +1,8 @@
 /**
  * ManifestBox — Panneau manifest flottant cross-tabs (M269)
  * Accessible via bouton [M] dans le nav global (bootstrap.js)
- * Flotte par-dessus le contenu, positionné sous le nav, à droite.
- * Draggable depuis le header.
+ * Flotte par-dessus le contenu, positionné sous le nav, à gauche.
+ * Upload exclusif depuis le panneau.
  */
 (function() {
     'use strict';
@@ -20,12 +20,12 @@
             const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const projectId = session.active_project_id || session.project_id;
             if (!projectId) {
-                manifestData = { error: 'aucun projet actif — connecte-toi d\'abord' };
+                manifestData = { error: 'aucun projet actif' };
                 return;
             }
             const res = await fetch(`/api/projects/${projectId}/manifest`);
             if (res.status === 404) {
-                manifestData = { error: `aucun manifest pour ce projet — génère-en un d'abord (clic droit sur un écran → "générer manifest")` };
+                manifestData = { error: `aucun manifest — upload un fichier .json ci-dessous` };
                 return;
             }
             if (!res.ok) {
@@ -38,11 +38,11 @@
         }
     }
 
-    async function saveManifest() {
-        const textarea = document.getElementById('manifestbox-editor');
-        if (!textarea) return;
+    async function handleManifestUpload(file) {
+        if (!file) return;
         try {
-            const parsed = JSON.parse(textarea.value);
+            const text = await file.text();
+            const parsed = JSON.parse(text);
             const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const projectId = session.active_project_id || session.project_id;
             const res = await fetch(`/api/projects/${projectId}/manifest`, {
@@ -50,15 +50,28 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(parsed)
             });
-            if (res.ok) {
-                manifestData = parsed;
-                render();
-            } else {
-                alert('Erreur sauvegarde manifest');
+            if (!res.ok) {
+                alert('Erreur sauvegarde manifest: ' + res.status);
+                return;
             }
+            manifestData = parsed;
+            render();
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+            toast.textContent = '✓ Manifest mis à jour';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
         } catch(e) {
-            alert('JSON invalide: ' + e.message);
+            alert('Erreur: fichier JSON invalide — ' + e.message);
         }
+    }
+
+    function triggerUpload() {
+        const fi = document.createElement('input');
+        fi.type = 'file';
+        fi.accept = '.json';
+        fi.onchange = () => handleManifestUpload(fi.files[0]);
+        fi.click();
     }
 
     function render() {
@@ -67,7 +80,17 @@
         if (!body) return;
 
         if (manifestData && manifestData.error) {
-            body.innerHTML = `<div class="p-4 text-[11px] text-red-400">${manifestData.error}</div>`;
+            // No manifest state: show upload button + error
+            body.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                    <div class="text-[11px] text-red-400 mb-4">${manifestData.error}</div>
+                    <button id="manifestbox-upload-btn" class="px-4 py-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[10px] font-bold text-[#3d3d3c] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all cursor-pointer">
+                        ↑ Charger un manifest (.json)
+                    </button>
+                    <div class="text-[9px] text-[#9a9a98] mt-2">Requis pour Stitch</div>
+                </div>
+            `;
+            document.getElementById('manifestbox-upload-btn').onclick = triggerUpload;
             return;
         }
 
@@ -82,7 +105,7 @@
                         <div class="text-[10px] font-bold text-[#3d3d3c]">${archetype}</div>
                     </div>
                 </div>
-                <div class="text-[8px] text-[#9a9a98]">${screens.length} écran(s)</div>
+                <button id="manifestbox-upload-btn" class="text-[8px] text-slate-400 hover:text-[#8cc63f] transition-all cursor-pointer" title="Remplacer">↑ remplacer</button>
             </div>
             <div id="manifestbox-list" class="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
         `;
@@ -99,36 +122,11 @@
             `;
         });
 
-        html += `</div>
-            <div class="p-2 border-t border-[#e5e5e5] bg-[#f7f6f2] shrink-0">
-                <button id="manifestbox-wire-btn" class="w-full py-1 bg-[#8cc63f] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[12px]">envoyer au wire</button>
-            </div>
-        `;
-
+        html += `</div>`;
         body.innerHTML = html;
-
-        const wireBtn = document.getElementById('manifestbox-wire-btn');
-        if (wireBtn) {
-            wireBtn.onclick = () => {
-                sessionStorage.setItem('manifest_for_wire', JSON.stringify(manifestData));
-                window.location.href = '/workspace?tab=wire';
-            };
-        }
+        document.getElementById('manifestbox-upload-btn').onclick = triggerUpload;
 
         if (title) title.textContent = `manifest · ${screens.length}`;
-    }
-
-    function showEditor() {
-        const body = document.getElementById('manifestbox-body');
-        if (!body) return;
-        const json = JSON.stringify(manifestData, null, 2);
-        body.innerHTML = `
-            <textarea id="manifestbox-editor" class="w-full h-full bg-[#1a1a1a] text-[#e1e1e6] text-[9px] font-mono p-2 outline-none resize-none" spellcheck="false">${json.replace(/</g, '&lt;')}</textarea>
-            <div class="p-2 border-t border-[#e5e5e5] bg-[#f7f6f2] shrink-0">
-                <button id="manifestbox-save-btn" class="w-full py-1 bg-[#8cc63f] text-white text-[9px] font-bold uppercase tracking-wider hover:bg-[#7ab536] transition-all rounded-[12px]">sauvegarder</button>
-            </div>
-        `;
-        document.getElementById('manifestbox-save-btn').onclick = saveManifest;
     }
 
     function buildPanel() {
@@ -150,7 +148,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: max-height 0.2s ease;
         `;
 
         panel.innerHTML = `
@@ -166,24 +163,12 @@
         document.body.appendChild(panel);
 
         // Close
-        panel.querySelector('#manifestbox-close').onclick = () => {
-            panel.style.display = 'none';
-        };
+        panel.querySelector('#manifestbox-close').onclick = hide;
 
-        // Click header to collapse/expand
+        // Draggable
         const handle = document.getElementById('manifestbox-handle');
         if (handle) {
             handle.style.cursor = 'grab';
-            handle.addEventListener('click', (e) => {
-                if (e.target.closest('#manifestbox-close')) return;
-                const body = document.getElementById('manifestbox-body');
-                const isCollapsed = panel.style.width === '120px';
-                if (isCollapsed) {
-                    show();
-                } else {
-                    hide();
-                }
-            });
             let dragging = false, ox = 0, oy = 0;
             handle.addEventListener('mousedown', (e) => {
                 dragging = true;
@@ -213,29 +198,13 @@
     }
 
     function hide() {
-        if (panel) {
-            // Collapse to header only
-            const body = document.getElementById('manifestbox-body');
-            if (body) body.style.display = 'none';
-            panel.style.maxHeight = '32px';
-            panel.style.width = '120px';
-        }
-    }
-
-    function show() {
-        buildPanel();
-        panel.style.display = 'flex';
-        const body = document.getElementById('manifestbox-body');
-        if (body) body.style.display = 'flex';
-        panel.style.maxHeight = '480px';
-        panel.style.width = '300px';
-        loadManifest().then(render);
+        if (panel) panel.style.display = 'none';
     }
 
     function toggle() {
         if (isOpen()) hide(); else show();
     }
 
-    window.ManifestBox = { show, hide, toggle };
+    window.ManifestBox = { show, hide, toggle, upload: triggerUpload };
     console.log('[ManifestBox] ✅ OK');
 })();
