@@ -114,16 +114,19 @@
                         <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left space-y-3">
                             ${API_PROVIDERS.map(p => `
                                 <div class="flex items-start gap-2">
-                                    <div class="w-2 h-2 mt-2 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
+                                    <div class="w-2 h-2 mt-2.5 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
                                     <div class="flex-1">
-                                        <div class="flex items-center gap-1">
+                                        <div class="flex items-center gap-1 mb-1">
                                             <span class="text-[12px] font-bold text-[#3d3d3c]">${p.label}</span>
-                                            <span class="text-[11px] text-[#9a9a98] ml-1">${p.price}</span>
+                                            <span class="text-[11px] text-[#9a9a98]">${p.price}</span>
                                             <button class="drill-help-btn ml-1 text-[#9a9a98] hover:text-[#8cc63f] transition-all" data-provider="${p.id}" title="Trouver l'URL">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                             </button>
                                         </div>
-                                        <input type="password" class="drill-key-input w-full mt-1 px-2 py-1.5 text-[12px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
+                                        <div class="flex gap-1">
+                                            <input type="password" class="drill-key-input flex-1 px-2 py-1.5 text-[12px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
+                                            <button class="drill-save-btn px-2 py-1.5 text-[11px] font-bold bg-[#8cc63f] text-white rounded-[8px] hover:bg-[#7ab536] transition-all whitespace-nowrap" data-provider="${p.id}">OK</button>
+                                        </div>
                                         <div class="drill-helper-text mt-1 text-[11px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
                                     </div>
                                 </div>
@@ -142,6 +145,19 @@
                         <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet. Modifiable plus tard.</div>
                         <div id="drill-manifest-preview" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c] max-h-48 overflow-y-auto">
                             <em class="text-[#9a9a98]">Chargement...</em>
+                        </div>
+                        <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                    </div>
+                `
+            },
+            // Step 4: Forged screens display
+            {
+                html: `
+                    <div class="text-center max-w-md">
+                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Écrans forgés</div>
+                        <div class="text-[11px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans. Voici le résultat :</div>
+                        <div id="drill-forged-screens" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left max-h-64 overflow-y-auto space-y-2">
+                            <div class="text-[11px] text-[#9a9a98] italic">Chargement des écrans forgés...</div>
                         </div>
                         <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[12px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     </div>
@@ -175,7 +191,7 @@
             btn.onclick = () => { if (screenCount >= 1) { currentStep = 2; renderStep(); } };
         }
         else if (stepIndex === 2) {
-            // Step 2: Keys + help buttons
+            // Step 2: Keys + help buttons + save buttons
             document.querySelectorAll('.drill-help-btn').forEach(btn => {
                 btn.onclick = async (e) => {
                     e.stopPropagation();
@@ -197,10 +213,19 @@
                 };
             });
 
+            // Save buttons (OK)
+            document.querySelectorAll('.drill-save-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const provider = btn.dataset.provider;
+                    const input = document.querySelector(`.drill-key-input[data-provider="${provider}"]`);
+                    if (input && input.value.trim()) saveKey(provider, input.value.trim());
+                };
+            });
+
             document.querySelectorAll('.drill-key-input').forEach(input => {
                 const provider = input.dataset.provider;
                 input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveKey(provider, input.value.trim()); } });
-                input.addEventListener('blur', () => { if (input.value.trim()) saveKey(provider, input.value.trim()); });
                 input.addEventListener('input', () => {
                     const count = getActiveKeyCount() + (input.value.trim() ? 1 : 0);
                     const countEl = document.getElementById('drill-key-count');
@@ -211,7 +236,13 @@
             document.getElementById('drill-continue-keys').onclick = () => { currentStep = 3; renderStep(); };
         }
         else if (stepIndex === 3) {
+            // Step 3: Manifest preview
             loadManifestPreview();
+            document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
+        }
+        else if (stepIndex === 4) {
+            // Step 4: Forged screens display
+            loadForgedScreens();
             document.getElementById('drill-finish').onclick = finishDrill;
         }
     }
@@ -229,9 +260,9 @@
                 keyStatus[provider] = 'set';
                 const input = document.querySelector(`.drill-key-input[data-provider="${provider}"]`);
                 if (input) {
-                    input.value = '';
                     input.style.borderColor = '#8cc63f';
-                    setTimeout(() => { input.style.borderColor = ''; }, 1500);
+                    input.style.backgroundColor = '#f0fdf4';
+                    setTimeout(() => { input.style.borderColor = ''; input.style.backgroundColor = ''; }, 1500);
                     const dot = input.closest('.flex').querySelector('.rounded-full');
                     if (dot) { dot.classList.remove('bg-[#e5e5e5]'); dot.classList.add('bg-[#8cc63f]'); }
                 }
@@ -289,6 +320,33 @@
         } catch(e) { preview.innerHTML = '<em class="text-[#9a9a98]">Erreur chargement</em>'; }
     }
 
+    async function loadForgedScreens() {
+        const container = document.getElementById('drill-forged-screens');
+        if (!container) return;
+        try {
+            const res = await fetch('/api/retro-genome/imports');
+            const data = await res.json();
+            const imports = data.imports || [];
+
+            if (imports.length === 0) {
+                container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Aucun écran forgé pour le moment — la forge travaille encore.</div>';
+                return;
+            }
+
+            container.innerHTML = imports.map(imp => `
+                <div class="flex items-center gap-2 p-2 bg-[#f7f6f2] rounded-[8px]">
+                    <div class="w-8 h-8 bg-[#e5e5e5] rounded-[6px] flex items-center justify-center text-[8px] text-[#9a9a98] font-bold">${imp.type || 'html'}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[11px] font-bold text-[#3d3d3c] truncate">${imp.name || imp.id}</div>
+                        <div class="text-[9px] text-[#9a9a98]">${imp.archetype_label || imp.archetype || 'import'} · ${imp.timestamp?.substring(0, 16) || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Erreur chargement des écrans forgés.</div>';
+        }
+    }
+
     function finishDrill() {
         if (overlay) { overlay.style.display = 'none'; overlay = null; }
         if (window.WsImportList) window.WsImportList.refresh();
@@ -319,7 +377,7 @@
         btn.id = 'drill-small-btn';
         btn.textContent = '+ Nouveau projet';
         btn.style.cssText = `
-            position: fixed; bottom: 80px; right: 20px; z-index: 999;
+            position: fixed; bottom: 80px; right: 20px; z-index: 99999;
             background: #8cc63f; color: white; border: none;
             padding: 10px 18px; border-radius: 12px;
             font-size: 12px; font-weight: bold;

@@ -271,9 +271,14 @@
         panel.innerHTML = `
             <div id="manifestbox-handle" class="h-[40px] bg-white border-b border-[#e5e5e5] px-4 flex items-center justify-between cursor-grab select-none">
                 <span class="text-[10px] font-black uppercase tracking-[0.15em] text-[#8cc63f]">manifest editor</span>
-                <button id="manifestbox-close" class="text-slate-400 hover:text-red-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <button id="manifestbox-validate" class="px-3 py-1 bg-[#8cc63f] text-white text-[9px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
+                        Valider le manifeste
+                    </button>
+                    <button id="manifestbox-close" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
             </div>
             
             <div class="flex-1 flex flex-row overflow-hidden relative">
@@ -337,6 +342,9 @@
 
         // Listeners
         document.getElementById('manifestbox-close').onclick = hide;
+        document.getElementById('manifestbox-validate').onclick = () => {
+            saveManifestDeferred().then(() => hide());
+        };
         els.signetsToggle.onclick = toggleSignets;
         
         els.editor.addEventListener('input', onTextChange);

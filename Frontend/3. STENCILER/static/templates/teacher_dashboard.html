@@ -315,6 +315,23 @@
             });
         }
 
+        function deleteStudentProject(projectId, studentName) {
+            if (!confirm('Supprimer le projet de ' + studentName + ' ?\n\nCela supprimera le dossier projet et resettera le drill de création.')) return;
+            fetch('/api/projects/' + projectId, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'ok') {
+                    alert('Projet de ' + studentName + ' supprimé.');
+                    loadDashboard();
+                } else {
+                    alert('Erreur: ' + (data.detail || 'inconnue'));
+                }
+            })
+            .catch(function(e) {
+                alert('Erreur suppression: ' + e.message);
+            });
+        }
+
         function loadDashboard() {
             var classId = document.getElementById('class-select').value;
             if (!classId) return;
@@ -386,11 +403,14 @@
                 var openBtn = s.project_id
                     ? '<a class="eval-btn" href="#" onclick="openStudentProject(\'' + s.project_id + '\');return false;">ouvrir</a>'
                     : '--';
+                var deleteBtn = s.project_id
+                    ? '<a class="eval-btn" style="color:#e53e3e;margin-left:8px;" href="#" onclick="deleteStudentProject(\'' + s.project_id + '\',\'' + s.display + '\');return false;">supprimer</a>'
+                    : '';
                 return '<tr>' +
                     '<td><strong>' + s.display + '</strong></td>' +
                     '<td><div class="progress-bar"><div class="progress-bar__fill" style="width:' + pct + '%"></div></div></td>' +
                     '<td><span class="milestone-label">N' + s.milestone.level + ' -- ' + s.milestone.label + '</span></td>' +
-                    '<td>' + openBtn + '</td>' +
+                    '<td>' + openBtn + deleteBtn + '</td>' +
                     '</tr>';
             }).join('');
         }

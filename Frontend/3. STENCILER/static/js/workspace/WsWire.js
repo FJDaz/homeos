@@ -13,7 +13,7 @@ class WsWire {
         this.wireCanvas = document.getElementById('ws-wire-canvas');
         this.wireLines = document.getElementById('ws-wire-lines');
         this.wireDraft = document.getElementById('ws-wire-draft');
-        this.eventTypeSelect = document.getElementById('ws-wire-event-type');
+        this.wireDraft = document.getElementById('ws-wire-draft');
 
         this._manifest = null;
         this._triggerData = null; // { selector, rect, organName }
@@ -549,7 +549,7 @@ class WsWire {
     }
 
     async _saveWire(trigger, target) {
-        const eventType = this.eventTypeSelect ? this.eventTypeSelect.value : 'click';
+        const eventType = 'click';
         const wire = {
             trigger: trigger.selector,
             trigger_name: trigger.organName,

@@ -95,17 +95,17 @@
             }
             /* Sullivan Micro-Mode (M295) */
             .sullivan-micro {
-                height: auto !important;
-                max-height: 120px !important;
-                transition: max-height 0.3s ease-in-out;
+                height: 48px !important;
+                max-height: 48px !important;
+                transition: all 0.3s ease-in-out;
+                overflow: hidden !important;
             }
             .sullivan-micro #ws-surgical-history, 
             .sullivan-micro .sd-history-area,
-            .sullivan-micro #btn-ws-surgical-edit-code {
+            .sullivan-micro #btn-ws-surgical-edit-code,
+            .sullivan-micro textarea,
+            .sullivan-micro .p-3.border-t {
                 display: none !important;
-            }
-            .sullivan-micro textarea {
-                height: 40px !important;
             }
         `;
         document.head.appendChild(style);
