@@ -400,45 +400,48 @@
     async function handleScreenUpload(files, statusEl, countEl, btn) {
         const session = getSession();
         const projectId = session.active_project_id || session.project_id;
-        const formData = new FormData();
 
-        let count = 0;
-        for (const file of files) {
-            if (count >= 4) break;
-            formData.append('files', file);
-            count++;
-        }
-
-        if (count === 0) return;
-
+        let uploaded = 0;
         statusEl.textContent = 'Upload en cours...';
         statusEl.style.color = '#8cc63f';
 
-        try {
-            const res = await fetch(`/api/imports/upload?project_id=${projectId}`, {
-                method: 'POST',
-                body: formData
-            });
+        for (const file of files) {
+            if (uploaded >= 4) break;
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('filename', file.name);
 
-            if (!res.ok) {
-                statusEl.textContent = 'Erreur upload (' + res.status + ')';
+                const res = await fetch('/api/import/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    statusEl.textContent = 'Erreur upload (' + res.status + ')';
+                    statusEl.style.color = '#d44';
+                    return;
+                }
+
+                uploaded++;
+
+            } catch(e) {
+                statusEl.textContent = 'Erreur: ' + e.message;
                 statusEl.style.color = '#d44';
                 return;
             }
+        }
 
-            screenCount += count;
+        if (uploaded > 0) {
+            screenCount += uploaded;
             countEl.textContent = screenCount + ' écran(s) chargé(s) — min. 1 requis';
-            statusEl.textContent = '✓ ' + count + ' écran(s) uploadé(s)';
+            statusEl.textContent = '✓ ' + uploaded + ' écran(s) uploadé(s)';
             statusEl.style.color = '#8cc63f';
 
             if (screenCount >= 1) btn.disabled = false;
 
             // Refresh imports list
             if (window.WsImportList) window.WsImportList.refresh();
-
-        } catch(e) {
-            statusEl.textContent = 'Erreur: ' + e.message;
-            statusEl.style.color = '#d44';
         }
     }
 
@@ -529,6 +532,15 @@
     }
 
     function show() {
+        const session = getSession();
+        const role = session.role || 'student';
+
+        // Teachers and admins skip the drill — they have access to all class projects
+        if (role !== 'student') {
+            console.log('[WsStitchDrill] Skipping drill for role:', role);
+            return;
+        }
+
         isCanvasEmpty().then(empty => {
             if (empty) {
                 createOverlay();
