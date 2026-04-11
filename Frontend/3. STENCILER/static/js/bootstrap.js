@@ -363,20 +363,21 @@
                 <span class="sd-label">Clés API (BYOK)</span>
                 <div id="sd-keys-list" class="space-y-6">
                     ${[
-                        {id:'gemini',   pricing:'gratuit'},
-                        {id:'groq',     pricing:'gratuit'},
-                        {id:'openai',   pricing:'payant'},
-                        {id:'kimi',     pricing:'payant'},
-                        {id:'mimo',     pricing:'gratuit'},
-                        {id:'deepseek', pricing:'payant'},
-                        {id:'qwen',     pricing:'gratuit'},
-                        {id:'watson',   pricing:'gratuit'},
+                        {id:'gemini',   pricing:'gratuit', price:'Gratuit (15 RPM)'},
+                        {id:'groq',     pricing:'gratuit', price:'Gratuit (quota limité)'},
+                        {id:'openai',   pricing:'payant',  price:'~$0.005/1K tokens'},
+                        {id:'kimi',     pricing:'payant',  price:'~$0.01/1K tokens'},
+                        {id:'mimo',     pricing:'gratuit', price:'Gratuit (via OpenRouter)'},
+                        {id:'deepseek', pricing:'payant',  price:'~$0.001/1K tokens'},
+                        {id:'qwen',     pricing:'gratuit', price:'Gratuit (quota généreux)'},
+                        {id:'watson',   pricing:'gratuit', price:'Gratuit (Lite tier)'},
                     ].map(p => `
                         <div class="sd-key-group">
                             <div class="sd-key-label">
                                 <div class="flex items-center gap-2">
                                     <span class="sd-key-name">${p.id.toUpperCase()}</span>
                                     <span class="px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded ${p.pricing === 'gratuit' ? 'bg-[#8cc63f]/20 text-[#6a9a2f]' : 'bg-orange-100 text-orange-600'}">${p.pricing}</span>
+                                    <span class="text-[8px] text-[#9a9a98]">${p.price}</span>
                                     <svg class="sd-help-btn" data-provider="${p.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>

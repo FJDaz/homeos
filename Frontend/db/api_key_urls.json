@@ -1,45 +1,39 @@
 {
-  "cached_at": 1775916096.0480661,
+  "cached_at": 1775918769.637734,
   "urls": {
     "gemini": {
       "url": "https://aistudio.google.com/app/apikey",
-      "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit",
-      "pricing": "gratuit"
+      "instructions": "Gratuit (avec limites) / Payant"
     },
     "groq": {
       "url": "https://console.groq.com/keys",
-      "instructions": "Gratuit — console Groq, quota limité gratuit",
-      "pricing": "gratuit"
+      "instructions": "Gratuit (avec limites) / Payant"
     },
     "openai": {
       "url": "https://platform.openai.com/api-keys",
-      "instructions": "Payant — OpenAI Platform, crédit d'essai offert",
-      "pricing": "payant"
+      "instructions": "Payant (nécessite des crédits prépayés)"
     },
     "kimi": {
       "url": "https://platform.moonshot.cn/console/api-keys",
-      "instructions": "Payant — Moonshot Platform (Kimi)",
-      "pricing": "payant"
-    },
-    "mimo": {
-      "url": "https://openrouter.ai/keys",
-      "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni",
-      "pricing": "gratuit"
+      "instructions": "Payant (avec crédits initiaux gratuits)"
     },
     "deepseek": {
-      "url": "https://platform.deepseek.com/api-keys",
-      "instructions": "Payant — DeepSeek, très bon rapport qualité/prix",
-      "pricing": "payant"
+      "url": "https://platform.deepseek.com/api_keys",
+      "instructions": "Payant (avec crédits initiaux gratuits)"
     },
     "qwen": {
-      "url": "https://bailian.console.aliyun.com/?apiKey=1#/api-key",
-      "instructions": "Gratuit — Alibaba Bailian, Qwen gratuit",
-      "pricing": "gratuit"
+      "url": "https://dashscope.console.aliyun.com/apiKey",
+      "instructions": "Payant (avec quota gratuit initial)"
+    },
+    "mimo": {
+      "url": "https://platform.xiaomimimo.com",
+      "instructions": "Connectez-vous à la console Xiaomi MiMo. Accédez à la section de gestion des clés API pour générer votre clé. L'utilisation propose des modèles gratuits (gratuit) et des modèles facturés à l'usage (payant)."
     },
     "watson": {
       "url": "https://cloud.ibm.com/catalog/services/watsonx-ai",
       "instructions": "Gratuit — IBM Cloud Lite + WatsonX",
-      "pricing": "gratuit"
+      "pricing": "gratuit",
+      "price_hint": "Gratuit (Lite tier)"
     }
   }
 }

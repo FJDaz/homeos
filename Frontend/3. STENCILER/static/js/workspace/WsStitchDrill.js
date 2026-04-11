@@ -16,11 +16,11 @@
     let keyStatus = {}; // { gemini: 'set'|null, groq: 'set'|null, ... }
 
     const API_PROVIDERS = [
-        { id: 'gemini', label: 'Gemini', free: true },
-        { id: 'groq', label: 'Groq', free: true },
-        { id: 'openai', label: 'OpenAI', free: false },
-        { id: 'deepseek', label: 'DeepSeek', free: false },
-        { id: 'qwen', label: 'Qwen', free: true },
+        { id: 'gemini', label: 'Gemini', free: true, price: 'Gratuit (15 RPM)' },
+        { id: 'groq', label: 'Groq', free: true, price: 'Gratuit (quota limité)' },
+        { id: 'openai', label: 'OpenAI', free: false, price: '~$0.005/1K tokens' },
+        { id: 'deepseek', label: 'DeepSeek', free: false, price: '~$0.001/1K tokens' },
+        { id: 'qwen', label: 'Qwen', free: true, price: 'Gratuit (quota généreux)' },
     ];
 
     // Check if canvas is empty (no imports)
@@ -141,6 +141,7 @@
                                             ${p.free
                                                 ? '<span class="text-[8px] px-1 bg-[#8cc63f]/20 text-[#6a9a2f] rounded font-bold">gratuit</span>'
                                                 : '<span class="text-[8px] px-1 bg-orange-100 text-orange-600 rounded font-bold">payant</span>'}
+                                            <span class="text-[8px] text-[#9a9a98] ml-1">${p.price}</span>
                                             <button class="drill-help-btn ml-1 text-[#9a9a98] hover:text-[#8cc63f] transition-all" data-provider="${p.id}" title="Trouver l'URL de la clé">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                             </button>
