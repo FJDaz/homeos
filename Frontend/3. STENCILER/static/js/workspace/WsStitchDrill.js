@@ -298,7 +298,38 @@
         const session = getSession();
         const role = session.role || 'student';
         if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
-        isCanvasEmpty().then(empty => { if (empty) createOverlay(); });
+        
+        // Always show for students — check if canvas is empty for full overlay or small button
+        isCanvasEmpty().then(empty => {
+            if (empty) {
+                createOverlay();
+            } else {
+                // Canvas not empty — show small "Nouveau projet" button in corner
+                createSmallButton();
+            }
+        });
+    }
+
+    function createSmallButton() {
+        // Remove existing if any
+        const existing = document.getElementById('drill-small-btn');
+        if (existing) existing.remove();
+
+        const btn = document.createElement('button');
+        btn.id = 'drill-small-btn';
+        btn.textContent = '+ Nouveau projet';
+        btn.style.cssText = `
+            position: fixed; bottom: 80px; right: 20px; z-index: 999;
+            background: #8cc63f; color: white; border: none;
+            padding: 10px 18px; border-radius: 12px;
+            font-size: 12px; font-weight: bold;
+            cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        `;
+        btn.onmouseenter = () => { btn.style.transform = 'scale(1.05)'; };
+        btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; };
+        btn.onclick = () => { btn.remove(); createOverlay(); };
+        document.body.appendChild(btn);
     }
 
     function hide() { if (overlay) { overlay.style.display = 'none'; overlay = null; } }
