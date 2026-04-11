@@ -175,6 +175,22 @@ class ModelHealthManager:
 **Avantage marketing :** "Plus on est d'utilisateurs, plus AetherFlow détecte vite les pannes API et bascule sur des providers sains."
 
 
+### Mission 295 — Sullivan "Micro-Mode" (Global Collapsed State)
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-11 | ACTOR: GEMINI**
+
+**Objectif :** Implémenter un mode "réduit" pour Sullivan utilisable partout dans l'application pour minimiser l'encombrement visuel.
+
+**Spécifications :**
+- **UI :** Hauteur réduite au strict minimum (input + bouton send).
+- **Behavior :** Masquage de l'historique et des boutons secondaires (`edit code`, etc.) dans cet état.
+- **Trigger :** Bouton de collapse/expand sur le header.
+- **Persistence :** L'état (ouvert/réduit) est mémorisé via localStorage.
+- **Global scope :** S'applique au Chat Main et au Surgical Sullivan.
+
+**Fichiers :** `WsChatBase.js`, `WsChatSurgical.js`, `bootstrap.js` (CSS global)
+
+---
+
 ### Mission 283a — Backend : RBAC middleware + Entitlements + Workspaces DB
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
 
