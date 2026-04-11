@@ -117,8 +117,63 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ### Mission 280 — Landing Canvas + Drill paramétrage Stitch
 **STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
 
-### Mission 282 — Refonte panels : Projet + Manifest
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+### Mission 294 — Circuit Breaker + Passive Health Monitoring (Zero-Cost Smart Routing)
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-11 | ACTOR: QWEN**
+
+**Principe :** Ne jamais "pinguer" pour tester un provider. Utiliser les **vraies requêtes** comme capteurs de santé. Si DeepSeek plante, toute la classe bascule automatiquement sur Gemini/Groq.
+
+**1. Circuit Breaker (Coupe-circuit) :**
+- **Closed** (Normal) : Les requêtes passent vers le provider (ex: DeepSeek)
+- **Open** (Sécurité) : Si 3 requêtes échouent (timeout/503) → coupe-circuit saute → bascule auto sur fallback (Groq/Gemini) pendant 5 min
+- **Half-Open** (Test) : Après 5 min → 1 seule requête test → si OK → Closed, sinon → Open pour 5 min de plus
+
+**2. Monitoring Passif TTFT (Time To First Token) :**
+- Mesurer le temps du premier token de chaque requête
+- Si moyenne glissante > 10s → provider marqué "Congested" 🟠
+- UI : voyant "DeepSeek encombré — passer sur Gemini ?"
+
+**3. Headers Rate Limit :**
+- Lire `X-RateLimit-Remaining` et `X-RateLimit-Reset` sur chaque réponse réussie
+- Savoir exactement où on en est sans appel de test
+
+**4. Mutualisation classe (Smart Routing) :**
+- Si l'élève A détecte DeepSeek DOWN → info partagée via serveur AetherFlow
+- Les 29 autres élèves basculent instantanément sur fallback sans tester
+- `provider_health.json` partagé sur le serveur : `{ provider, status, last_check, avg_ttft, failure_count }`
+
+**Implémentation — `ModelHealthManager` :**
+```python
+class ModelHealthManager:
+    def __init__(self):
+        self.failure_count = 0
+        self.status = "HEALTHY"  # HEALTHY, DEGRADED, DOWN
+        self.last_failure_ts = 0
+
+    def record_success(self, latency):
+        self.failure_count = 0
+        self.status = "DEGRADED" if latency > 15.0 else "HEALTHY"
+
+    def record_failure(self):
+        self.failure_count += 1
+        self.last_failure_ts = time.time()
+        if self.failure_count >= 3:
+            self.status = "DOWN"
+
+    def can_attempt(self):
+        if self.status == "DOWN":
+            return (time.time() - self.last_failure_ts) > 300  # 5 min
+        return True
+```
+
+**Fichiers :**
+- Nouveau `model_health.py` — `ModelHealthManager` par provider (gemini, deepseek, groq, etc.)
+- `gemini_client.py` / `deepseek_client.py` — `record_success(latency)`, `record_failure()`
+- `rbac_middleware.py` — `check_provider_health(provider)` → fallback si DOWN
+- UI — voyant provider dans settings drawer (🟢/🟠/🔴)
+- `provider_health.json` — état partagé serveur (mis à jour en mémoire, persisté toutes les 30s)
+
+**Avantage marketing :** "Plus on est d'utilisateurs, plus AetherFlow détecte vite les pannes API et bascule sur des providers sains."
+
 
 ### Mission 283a — Backend : RBAC middleware + Entitlements + Workspaces DB
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
