@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#304f00",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#374d1b",
+                        "surface-bright": "#faf9f5",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c2c9b3",
+                        "on-secondary": "#ffffff",
+                        "surface": "#faf9f5",
+                        "primary": "#416900",
+                        "surface-tint": "#416900",
+                        "inverse-primary": "#9cd84f",
+                        "on-secondary-container": "#546c36",
+                        "primary-container": "#8cc63f",
+                        "tertiary-fixed-dim": "#fface8",
+                        "outline": "#737a66",
+                        "on-surface-variant": "#424938",
+                        "secondary-fixed": "#d0eca9",
+                        "primary-fixed-dim": "#9cd84f",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#b7f568",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#30312e",
+                        "background": "#faf9f5",
+                        "inverse-on-surface": "#f2f1ed",
+                        "secondary": "#4e6530",
+                        "on-secondary-fixed": "#102000",
+                        "on-tertiary-fixed-variant": "#7c1c6e",
+                        "on-background": "#1b1c1a",
+                        "on-tertiary-container": "#7c1c6d",
+                        "tertiary-fixed": "#ffd7f0",
+                        "on-surface": "#1b1c1a",
+                        "on-primary-fixed": "#102000",
+                        "on-primary-container": "#304f00",
+                        "surface-dim": "#dbdad6",
+                        "surface-container": "#efeeea",
+                        "on-tertiary-fixed": "#3a0032",
+                        "surface-container-low": "#f5f4f0",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e9e8e4",
+                        "secondary-fixed-dim": "#b4d08f",
+                        "tertiary-container": "#ff8ee4",
+                        "surface-container-highest": "#e3e2df",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e3e2df",
+                        "secondary-container": "#d0eca9",
+                        "tertiary": "#993787"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f5]/80 dark:bg-stone-900/80 backdrop-blur-xl flex items-center justify-between px-6 h-16">
+<div class="active:scale-95 duration-200 hover:opacity-70 transition-opacity flex items-center">
+<span class="material-symbols-outlined text-[#416900] dark:text-[#8cc63f]">arrow_back</span>
+</div>
+<h1 class="font-['Space_Grotesk'] lowercase tracking-tight text-xl font-bold text-[#416900] dark:text-[#8cc63f]">select character</h1>
+<div class="active:scale-95 duration-200 hover:opacity-70 transition-opacity flex items-center">
+<span class="material-symbols-outlined text-[#416900] dark:text-[#8cc63f]">settings</span>
+</div>
+</header>
+<main class="pt-20 pb-40 px-6 max-w-md mx-auto">
+<!-- Configuration Section -->
+<section class="space-y-4 mb-10">
+<!-- Number of Characters Picker -->
+<div class="bg-surface-container-low rounded-[20px] p-5">
+<label class="font-label text-xs tracking-widest text-primary lowercase mb-4 block">nombre de personnages</label>
+<div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2">
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">1</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">2</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-primary-container text-on-primary-container font-headline text-lg font-bold">3</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">4</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">5</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">6</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">7</div>
+</div>
+</div>
+<!-- Number of Rounds Picker -->
+<div class="bg-surface-container-low rounded-[20px] p-5">
+<label class="font-label text-xs tracking-widest text-primary lowercase mb-4 block">nombre de tours</label>
+<div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2">
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">1</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">2</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">3</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-primary-container text-on-primary-container font-headline text-lg font-bold">4</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">5</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">6</div>
+<div class="flex-none w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant font-headline text-lg">7</div>
+</div>
+</div>
+</section>
+<!-- Character Selection Grid -->
+<h2 class="font-headline text-2xl lowercase mb-6 px-2">choisis tes personnages</h2>
+<div class="grid grid-cols-2 gap-4">
+<!-- Nancy -->
+<div class="bg-surface-container rounded-[20px] p-4 relative overflow-hidden group active:scale-95 transition-transform">
+<div class="aspect-square rounded-xl bg-tertiary-container/30 mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a young woman with a 1980s hairstyle and vintage denim jacket, soft nostalgic lighting, editorial photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5usVW6YCqF-fGDfUFz5fMQDhmnVgk3vrNTFBP5GW6vfDiKbX8DV1Qwcwt8FpqJX5w9l0GMZOOvACNviJWp6UwnQHSllwhJkYGz7jcHjDOWdb5_t9PYg2eINpZueHsKWScx3YNGg7y-xlkiHQuOK4xKn5kaFEzfH8cJU5uCHg2sEy4A140V9h5DWUntZjba-_jKi3SUz3d_z2ynefp2EaS369S2CGwagiS02I9XrrjGtadFqRkRyzR502BE14RKPvAqSQg-jhIPXk"/>
+</div>
+<h3 class="font-headline text-lg lowercase">nancy</h3>
+<span class="font-label text-[10px] text-outline lowercase">6/19</span>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-on-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Will -->
+<div class="bg-surface-container rounded-[20px] p-4 relative overflow-hidden group active:scale-95 transition-transform border-2 border-primary-container">
+<div class="aspect-square rounded-xl bg-primary-container/20 mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="close up portrait of a young boy with bowl cut hair wearing a 1980s style striped shirt, dramatic lighting, cinematic film look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4l4vGeeXu44pEZl-D6FCKVtjY7lYAu8z5RHQDYCaaESLE_io3-uTynPT9nCm_LM16bRaUHSnnRxbX5u5aQBLJL7Y3d9PyOCK4tkNHZOU3NTGmTPUvfirGuBDUknzRVcI7GQo9a-fI7bPIBu3uVygk63RiGqvISdszRdiO7pSeS-w3kt-AbVw97OpWGHSDsNZGCD0GO0hJWVDYnjiq2-yHc-FFayV1vy40PL2hkaHnT6-Y49saKDZHDRQ5aClLX3-PAP1g1SgxUrY"/>
+</div>
+<h3 class="font-headline text-lg lowercase">will</h3>
+<span class="font-label text-[10px] text-outline lowercase">12/19</span>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-on-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Mike -->
+<div class="bg-surface-container rounded-[20px] p-4 relative overflow-hidden group active:scale-95 transition-transform">
+<div class="aspect-square rounded-xl bg-tertiary-container/30 mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a teenager with dark wavy hair and retro windbreaker, evening outdoor lighting, organic brutalist aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr3452JTUi0tnn2fO057REOPHCyS6kGQrGiTSW8twO0KjWBoOTVE0OFO3FeB6WE2vvWZMFICFxGn1Pi9eaUuM8a9DpgwHbXrGrxQnxmawjNCO1gtiRePHuOFVqLFD77NgSSUGG7NweZtWOBeNDPV3CbhlScw8rSjdkc8cfWIs0AyeIExJaY19qXG5o-g6x4TBrIXjj8d043_3MZ3quAjFQaDHXGp1blBMNvy14kkM5o_MLcSSOyX92zaKuqWuziR7D6dK41wTXJLY"/>
+</div>
+<h3 class="font-headline text-lg lowercase">mike</h3>
+<span class="font-label text-[10px] text-outline lowercase">8/19</span>
+</div>
+<!-- Dustin -->
+<div class="bg-surface-container rounded-[20px] p-4 relative overflow-hidden group active:scale-95 transition-transform border-2 border-primary-container">
+<div class="aspect-square rounded-xl bg-primary-container/20 mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a young boy with curly hair and a colorful trucker hat, laughing, bright warm natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGau4pGFDriPlUJWAIeOlE6qD7pCd650CA0poWb8oUcivvm9Nl4YSbnV2kOniWlSLE7QgZXVUHXVOha8jwzjwas6aPkNRGg8yEVIS0wDFgP-BBZmKh9upP4SXX_5TZgFE8Y_09T1T6fmVK6qyXOVPrDeRifUUh5r8uZnyR3CdYFWjc-mGvvIrP24JHxdO9szqDOREgl-8C-tv9t3y-eJLzrwEKhVNzE-R7phjjRzIimUNcl6sxXaSZOEo8goLm7bnhOH9xT2tetps"/>
+</div>
+<h3 class="font-headline text-lg lowercase">dustin</h3>
+<span class="font-label text-[10px] text-outline lowercase">15/19</span>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-on-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Joyce -->
+<div class="bg-surface-container rounded-[20px] p-4 relative overflow-hidden group active:scale-95 transition-transform">
+<div class="aspect-square rounded-xl bg-tertiary-container/30 mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a mature woman with messy hair and expressive eyes, vintage 1980s indoor domestic lighting, cinematic texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFq7tHV8RBzfXraFm1nbPW7gbSpL3vMip-U3_1R7UdX6u3vdjkvbBqxf_Fz4iprpjJU1NGBpSn1y2jLk6SvqYBONfnfwlR34TxBKGA4MJ3prm6Vgh8dRKtkWiWJ8zFp8-HS0-mRoMk2f1JV3gDnheIUO3SCbIqA70nKBnNPOml7D5Oby4PL_f25Pv2Y9RAdFg8a_KF9eBUQk1HSGHnxvZMW2u5edRdqLBeAocR0Gg3AYVf7XpI2js8AHRPQYDys0RacYP7zlDm6i4"/>
+</div>
+<h3 class="font-headline text-lg lowercase">joyce</h3>
+<span class="font-label text-[10px] text-outline lowercase">4/19</span>
+</div>
+</div>
+<!-- Footer Identification -->
+<footer class="mt-20 mb-8 flex justify-center">
+<p class="font-label text-[10px] text-[#737a66] lowercase tracking-widest">project-id: dnmade2-2026-absolu-alice</p>
+</footer>
+</main>
+<!-- Fixed Action Buttons -->
+<div class="fixed bottom-20 left-0 w-full p-6 bg-gradient-to-t from-surface via-surface/90 to-transparent pt-12 z-40">
+<div class="flex flex-col gap-3 max-w-md mx-auto">
+<button class="w-full h-14 bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline text-sm tracking-widest lowercase rounded-[20px] active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">casino</span>
+                sélection aléatoire
+            </button>
+<button class="w-full h-14 bg-surface-container-highest text-on-surface-variant font-headline text-sm tracking-widest lowercase rounded-[20px] active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">touch_app</span>
+                sélection manuelle
+            </button>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#faf9f5]/80 dark:bg-stone-900/80 backdrop-blur-xl flex justify-around items-center h-20 px-4 pb-safe rounded-t-[20px]">
+<a class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-500 hover:text-[#416900] dark:hover:text-[#8cc63f] transition-opacity" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span class="font-['Inter'] text-[10px] lowercase tracking-widest mt-1">archive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#416900] dark:text-[#8cc63f] after:content-[''] after:w-1 after:h-1 after:bg-[#8cc63f] after:rounded-full after:mt-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span class="font-['Inter'] text-[10px] lowercase tracking-widest mt-1">play</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-500 hover:text-[#416900] dark:hover:text-[#8cc63f] transition-opacity" href="#">
+<span class="material-symbols-outlined">tune</span>
+<span class="font-['Inter'] text-[10px] lowercase tracking-widest mt-1">settings</span>
+</a>
+</nav>
+</body></html>

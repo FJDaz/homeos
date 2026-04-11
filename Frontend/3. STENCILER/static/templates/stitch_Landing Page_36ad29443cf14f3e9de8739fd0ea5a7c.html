@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>manifest kimi</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Space Grotesk & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#993787",
+                    "surface-dim": "#dbdad6",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#faf9f5",
+                    "inverse-surface": "#30312e",
+                    "surface-container": "#efeeea",
+                    "secondary": "#4e6530",
+                    "on-secondary-container": "#546c36",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#416900",
+                    "on-background": "#1b1c1a",
+                    "secondary-fixed-dim": "#b4d08f",
+                    "on-primary-fixed": "#102000",
+                    "secondary-fixed": "#d0eca9",
+                    "primary": "#416900",
+                    "outline-variant": "#c2c9b3",
+                    "tertiary-fixed": "#ffd7f0",
+                    "on-surface": "#1b1c1a",
+                    "background": "#faf9f5",
+                    "outline": "#737a66",
+                    "primary-container": "#8cc63f",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#9cd84f",
+                    "tertiary-container": "#ff8ee4",
+                    "on-secondary-fixed": "#102000",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e3e2df",
+                    "on-tertiary-fixed": "#3a0032",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#fface8",
+                    "on-tertiary-fixed-variant": "#7c1c6e",
+                    "surface-container-high": "#e9e8e4",
+                    "secondary-container": "#d0eca9",
+                    "surface": "#faf9f5",
+                    "surface-container-low": "#f5f4f0",
+                    "on-tertiary-container": "#7c1c6d",
+                    "on-primary-fixed-variant": "#304f00",
+                    "inverse-on-surface": "#f2f1ed",
+                    "on-primary-container": "#304f00",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#b7f568",
+                    "inverse-primary": "#9cd84f",
+                    "on-secondary-fixed-variant": "#374d1b",
+                    "surface-variant": "#e3e2df",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#424938"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-shift-no-border {
+            border: none !important;
+        }
+        .font-space-grotesk { font-family: 'Space Grotesk', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f5]/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#416900] dark:text-[#8cc63f] hover:opacity-70 transition-opacity cursor-pointer active:scale-95 duration-200">menu</span>
+<h1 class="text-xl font-bold text-[#416900] dark:text-[#8cc63f] font-space-grotesk lowercase tracking-tight">manifest kimi</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#416900] dark:text-[#8cc63f] hover:opacity-70 transition-opacity cursor-pointer active:scale-95 duration-200">search</span>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto">
+<!-- Hero Section -->
+<section class="mb-20 lg:mb-32">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+<div class="lg:col-span-7">
+<h2 class="text-6xl md:text-8xl font-headline font-bold text-primary leading-[0.9] tracking-tighter mb-8 lowercase">
+                        manifest kimi
+                    </h2>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-xl leading-relaxed">
+                        an archive of digital intentionality. exploring the intersection of organic growth and brutalist structure through the lens of modern curation.
+                    </p>
+<div class="mt-10 flex gap-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-8 py-4 rounded-[20px] font-label text-sm tracking-wide lowercase hover:opacity-90 transition-opacity shadow-[0_10px_20px_-5px_rgba(65,105,0,0.2)]">
+                            explore the collection
+                        </button>
+<button class="bg-surface-container-high text-on-surface px-8 py-4 rounded-[20px] font-label text-sm tracking-wide lowercase hover:bg-surface-container-highest transition-colors">
+                            read manifesto
+                        </button>
+</div>
+</div>
+<div class="lg:col-span-5 h-[400px] lg:h-[600px] rounded-[20px] overflow-hidden bg-surface-container relative">
+<img alt="editorial photography" class="w-full h-full object-cover grayscale mix-blend-multiply opacity-80" data-alt="high-contrast editorial photograph of a brutalist concrete building facade with soft organic shadows from nearby trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAyz0HZGk-XEoqTTricHQz18tpwN02lWlmvhsdspsa87BmCQOWrjT6hpxfP2ojsPKf7sBO-FCkedSA4fm-JdhaY922xpESVGsQqjcBpSmFwz3R4i9EG1BpD7oY0_tB0dF7LLSXLw__SC6Ak53VjA8iCW7nF5iBfrLgKg50eKsVWcVz38OSHnGZzruyMhngHtE5hJ4H4Wywd7bXbZAaORFTZcAhmUlk9n0vvGxmLRRqdo86WEIMzku_BnDKlVi866N9TMz6Iorb_WQ"/>
+<div class="absolute inset-0 bg-primary/10"></div>
+</div>
+</div>
+</section>
+<!-- Feature Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 bg-surface-container-low p-10 rounded-[20px] flex flex-col justify-between group hover:bg-surface-container transition-colors duration-500">
+<div>
+<span class="material-symbols-outlined text-primary text-4xl mb-6">auto_awesome</span>
+<h3 class="text-3xl font-headline font-bold text-on-surface mb-4 lowercase">organic curation</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-md">
+                        we believe in the beauty of imperfection. our algorithm prioritizes human-like discovery over sterile precision, creating a digital garden that grows with your interactions.
+                    </p>
+</div>
+<div class="mt-12 h-32 w-full bg-surface-container rounded-xl overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent"></div>
+<div class="p-4 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container/30"></div>
+<div class="space-y-2">
+<div class="h-2 w-32 bg-primary/20 rounded"></div>
+<div class="h-2 w-24 bg-primary/10 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary p-10 rounded-[20px] text-on-primary flex flex-col justify-between shadow-[0_20px_40px_-15px_rgba(65,105,0,0.3)]">
+<div>
+<span class="material-symbols-outlined text-primary-container text-4xl mb-6" style="font-variation-settings: 'FILL' 1;">folder_open</span>
+<h3 class="text-3xl font-headline font-bold mb-4 lowercase">brutalist archive</h3>
+<p class="text-on-primary/80 text-lg leading-relaxed">
+                        raw, unyielding, and structured. a system designed to hold the weight of significant ideas without the clutter of unnecessary adornment.
+                    </p>
+</div>
+<div class="mt-8 pt-8 border-t border-on-primary/10">
+<span class="text-xs font-label tracking-widest lowercase opacity-60">status: active_v1.0</span>
+</div>
+</div>
+<div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-high p-8 rounded-[20px] flex items-center gap-8">
+<div class="w-24 h-24 flex-shrink-0 bg-primary-container rounded-[20px] flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-4xl">inventory_2</span>
+</div>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface lowercase">hyper-curated</h4>
+<p class="text-on-surface-variant lowercase text-sm">precision in every single digital artifact stored.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-[20px] flex items-center gap-8 border-b-2 border-primary">
+<div class="w-24 h-24 flex-shrink-0 bg-surface-container-highest rounded-[20px] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl">all_inclusive</span>
+</div>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface lowercase">eternal flow</h4>
+<p class="text-on-surface-variant lowercase text-sm">continuous updates reflecting the current cultural zeitgeist.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#f5f4f0] dark:bg-[#252525] w-full py-12 px-6 flex flex-col items-center gap-4 w-full mb-20">
+<div class="text-sm font-bold text-[#416900] dark:text-[#8cc63f] lowercase font-space-grotesk tracking-tight">manifest kimi</div>
+<div class="flex gap-6">
+<a class="font-inter text-xs lowercase tracking-wider text-[#737a66] no-underline hover:text-[#416900] transition-colors" href="#">privacy</a>
+<a class="font-inter text-xs lowercase tracking-wider text-[#737a66] no-underline hover:text-[#416900] transition-colors" href="#">terms</a>
+<span class="font-inter text-xs lowercase tracking-wider text-[#737a66]">project-id: dnmade2-2026-absolu-alice</span>
+</div>
+<div class="mt-4 font-inter text-[10px] lowercase tracking-widest text-[#737a66]/50">manifest kimi © 2024</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-[20px] bg-[#faf9f5]/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl flex justify-around items-center px-4 h-20 w-full pb-safe shadow-[0_-4px_20px_rgba(65,105,0,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#416900] dark:text-[#8cc63f] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#8cc63f] after:rounded-full" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-inter text-[10px] tracking-widest lowercase mt-1">home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#737a66] dark:text-[#a1a1a1] hover:text-[#416900] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span class="font-inter text-[10px] tracking-widest lowercase mt-1">archive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#737a66] dark:text-[#a1a1a1] hover:text-[#416900] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-inter text-[10px] tracking-widest lowercase mt-1">curate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#737a66] dark:text-[#a1a1a1] hover:text-[#416900] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[10px] tracking-widest lowercase mt-1">profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Curator | Start Your Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#3c38a1",
+                        "error-container": "#f74b6d",
+                        "on-secondary-fixed": "#28218d",
+                        "error-dim": "#a70138",
+                        "on-tertiary-container": "#5f0656",
+                        "on-primary-container": "#001867",
+                        "surface-dim": "#d2d0ff",
+                        "surface-variant": "#dcd9ff",
+                        "on-surface-variant": "#585781",
+                        "tertiary": "#913983",
+                        "on-secondary": "#f4f1ff",
+                        "on-primary-fixed-variant": "#00207e",
+                        "surface-container-high": "#e2dfff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffeef6",
+                        "on-error": "#ffefef",
+                        "on-background": "#2b2a51",
+                        "outline-variant": "#aba9d7",
+                        "inverse-on-surface": "#9a99c6",
+                        "inverse-surface": "#0a082f",
+                        "tertiary-fixed-dim": "#e883d2",
+                        "primary-container": "#859aff",
+                        "on-tertiary-fixed-variant": "#6a1460",
+                        "on-secondary-fixed-variant": "#4642aa",
+                        "secondary": "#514eb6",
+                        "secondary-dim": "#4541a9",
+                        "surface-container": "#e9e5ff",
+                        "secondary-fixed-dim": "#bfbdff",
+                        "outline": "#74739e",
+                        "error": "#b41340",
+                        "primary-fixed": "#859aff",
+                        "primary-dim": "#003cd3",
+                        "surface-container-highest": "#dcd9ff",
+                        "inverse-primary": "#6d88ff",
+                        "on-surface": "#2b2a51",
+                        "surface-container-low": "#f2efff",
+                        "on-tertiary-fixed": "#380033",
+                        "on-primary-fixed": "#000000",
+                        "surface-tint": "#0846ed",
+                        "primary": "#0846ed",
+                        "primary-fixed-dim": "#718bff",
+                        "surface": "#f9f5ff",
+                        "surface-bright": "#f9f5ff",
+                        "tertiary-container": "#f790e0",
+                        "tertiary-fixed": "#f790e0",
+                        "secondary-fixed": "#cfcdff",
+                        "tertiary-dim": "#832c76",
+                        "on-error-container": "#510017",
+                        "secondary-container": "#cfcdff",
+                        "background": "#f9f5ff",
+                        "on-primary": "#f2f1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .editorial-shadow {
+            box-shadow: 0 40px 60px -15px rgba(43, 42, 81, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-indigo-50/80 dark:bg-slate-900/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm shadow-slate-900/5">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-slate-800 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tighter font-headline">Curator</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-slate-800 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="min-h-screen flex flex-col items-center justify-center pt-16 px-6 relative overflow-hidden">
+<!-- Abstract Background Elements -->
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/5 rounded-full blur-[120px]"></div>
+<div class="w-full max-w-4xl text-center z-10">
+<!-- Brand Tag -->
+<div class="inline-flex items-center mb-8">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.2em] font-label">
+                    The Electric curator
+                </span>
+</div>
+<!-- Headline Section -->
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold text-on-surface tracking-tight mb-8 leading-[1.1]">
+                Ready to <span class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-container">Start?</span>
+</h1>
+<p class="font-body text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 leading-relaxed">
+                Step into a world of curated digital experiences. Unlock your potential with our high-energy performance tools designed for the modern creator.
+            </p>
+<!-- Main CTA Area -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+<button class="group relative px-10 py-5 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold text-lg rounded-full active:scale-95 transition-all duration-200 editorial-shadow hover:brightness-110 flex items-center gap-3">
+                    Launch Your Project
+                    <span class="material-symbols-outlined transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="px-10 py-5 bg-surface-container-high text-primary font-headline font-bold text-lg rounded-full active:scale-95 transition-all duration-200 hover:bg-surface-container-highest">
+                    View Gallery
+                </button>
+</div>
+<!-- Feature Snapshot Card -->
+<div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+<div class="p-8 bg-surface-container-lowest rounded-3xl editorial-shadow">
+<span class="material-symbols-outlined text-primary text-3xl mb-4" data-icon="bolt">bolt</span>
+<h3 class="font-headline font-bold text-xl text-on-surface mb-2">Instant Flow</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Streamlined workflows that move at the speed of your creative thought.</p>
+</div>
+<div class="p-8 bg-surface-container-lowest rounded-3xl editorial-shadow">
+<span class="material-symbols-outlined text-primary text-3xl mb-4" data-icon="layers">layers</span>
+<h3 class="font-headline font-bold text-xl text-on-surface mb-2">Deep Layers</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Rich organizational structures that handle the most complex curation tasks.</p>
+</div>
+<div class="p-8 bg-surface-container-lowest rounded-3xl editorial-shadow">
+<span class="material-symbols-outlined text-primary text-3xl mb-4" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="font-headline font-bold text-xl text-on-surface mb-2">Electric Polish</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">A visual identity that resonates with high-end aesthetic standards.</p>
+</div>
+</div>
+</div>
+<!-- Decorative Image Section (Asymmetric) -->
+<div class="mt-20 w-full max-w-6xl hidden md:block">
+<div class="relative h-96 w-full rounded-[2.5rem] overflow-hidden">
+<img alt="abstract neon electronics" class="w-full h-full object-cover" data-alt="Modern high-tech workspace with glowing electric blue lighting, minimalist mechanical keyboard and abstract digital art on a high-resolution monitor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrD7H9Lk9lwAdmwWO8c22ZMU2VPQWdgPemqECbCNJVxBKDyPUJ-pudYs8kQF6BkMQbmkXM360fkf2xXDf7qF3CtdVvv5SIrQve1O2NWjDDjk9bdPQYfRMaJOf_ORg3aocXRH39HPh45olddZ8O5tcGducae2NayQ2OFH3Cz_bM6XuSz8MbGTehgi2hZEV1YndKHdpA8uZPWfedl28ZX6PHgVqT6QpWXJG2Q-OADLW-oNiolg-cb29EJuqaagE99qrr83tcc8P7I9k"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-2 pb-6 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl z-50 rounded-t-2xl shadow-[0_-4px_20px_0_rgba(43,42,81,0.06)]">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-1 hover:text-blue-600 dark:hover:text-blue-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Gallery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-400 bg-indigo-50 dark:bg-blue-900/30 rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-1 hover:text-blue-600 dark:hover:text-blue-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Activity</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-1 hover:text-blue-600 dark:hover:text-blue-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+<!-- Hidden FAB for contextual relevance (suppressed on this focus screen per mandate, but present in architecture) -->
+</body></html>

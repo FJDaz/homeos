@@ -7,9 +7,11 @@ class WsChatBase {
         this.inputEl = document.getElementById(inputId);
         this.sendBtn = document.getElementById(sendBtnId);
         this.onMessageSent = null; // Callback
+        this.isCollapsed = localStorage.getItem(`sullivan_collapsed_${mountId}`) === 'true';
     }
 
     initBase() {
+        if (this.isCollapsed) this.setCollapsed(true);
         if (this.sendBtn) this.sendBtn.onclick = () => this.sendMessage();
         if (this.inputEl) {
             this.inputEl.onkeydown = (e) => { 
@@ -66,6 +68,23 @@ class WsChatBase {
         if (!res.ok) throw new Error(`sullivan status ${res.status}`);
         return res.json();
     }
+
+    setCollapsed(collapsed) {
+        this.isCollapsed = collapsed;
+        if (!this.mount) return;
+        
+        if (collapsed) {
+            this.mount.classList.add('sullivan-micro');
+        } else {
+            this.mount.classList.remove('sullivan-micro');
+        }
+        localStorage.setItem(`sullivan_collapsed_${this.mount.id}`, collapsed);
+    }
+
+    toggleCollapse() {
+        this.setCollapsed(!this.isCollapsed);
+    }
 }
+
 
 window.WsChatBase = WsChatBase;

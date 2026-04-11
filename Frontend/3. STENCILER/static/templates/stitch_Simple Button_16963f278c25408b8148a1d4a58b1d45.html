@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gallery - Welcome</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#d6d3d8",
+                    "tertiary-dim": "#574f6a",
+                    "on-surface": "#323232",
+                    "on-surface-variant": "#5f5f5f",
+                    "surface-container": "#f0eded",
+                    "on-error-container": "#782232",
+                    "error-container": "#ff8b9a",
+                    "tertiary": "#635b77",
+                    "on-secondary-container": "#525155",
+                    "surface-container-highest": "#e4e2e2",
+                    "surface": "#fcf9f8",
+                    "surface-tint": "#004ced",
+                    "error": "#9e3f4e",
+                    "primary-fixed": "#dde1ff",
+                    "surface-container-low": "#f6f3f2",
+                    "on-secondary-fixed-variant": "#5c5b5f",
+                    "inverse-primary": "#6a89ff",
+                    "on-tertiary-fixed": "#433b55",
+                    "outline-variant": "#b3b2b1",
+                    "inverse-on-surface": "#9e9c9c",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#dde1ff",
+                    "on-secondary": "#fbf8fc",
+                    "on-tertiary-container": "#564e69",
+                    "secondary-fixed": "#e4e1e6",
+                    "surface-variant": "#e4e2e2",
+                    "primary-dim": "#0042d1",
+                    "surface-bright": "#fcf9f8",
+                    "secondary-container": "#e4e1e6",
+                    "on-primary-fixed-variant": "#0049e6",
+                    "primary-fixed-dim": "#cad2ff",
+                    "tertiary-fixed-dim": "#dbcff0",
+                    "on-primary": "#f8f7ff",
+                    "background": "#fcf9f8",
+                    "surface-container-high": "#eae8e7",
+                    "secondary-dim": "#535356",
+                    "outline": "#7b7a7a",
+                    "on-background": "#323232",
+                    "on-secondary-fixed": "#3f3f43",
+                    "on-tertiary-fixed-variant": "#605773",
+                    "primary": "#004ced",
+                    "on-error": "#fff7f7",
+                    "surface-dim": "#dbdad9",
+                    "error-dim": "#4f0116",
+                    "inverse-surface": "#0e0e0e",
+                    "on-primary-fixed": "#0032a5",
+                    "tertiary-fixed": "#e9ddff",
+                    "on-tertiary": "#fdf7ff",
+                    "tertiary-container": "#e9ddff",
+                    "on-primary-container": "#0041d0",
+                    "secondary": "#5f5e62"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-primary/20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fcf9f8]/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm shadow-[#323232]/5">
+<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface" data-icon="menu">menu</span>
+</button>
+<h1 class="text-xl font-bold tracking-tighter text-[#323232] dark:text-slate-100">Gallery</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[#0052FF] dark:text-[#3d7eff] font-bold font-inter text-[14px] transition-colors" href="#">Home</a>
+<a class="text-[#5f5f5f] dark:text-slate-400 font-medium font-inter text-[14px] hover:text-[#0052FF] transition-colors" href="#">Explore</a>
+<a class="text-[#5f5f5f] dark:text-slate-400 font-medium font-inter text-[14px] hover:text-[#0052FF] transition-colors" href="#">Saved</a>
+<a class="text-[#5f5f5f] dark:text-slate-400 font-medium font-inter text-[14px] hover:text-[#0052FF] transition-colors" href="#">Profile</a>
+</nav>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-[#eae8e7] transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+<!-- Background Ambient Element -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10"></div>
+<!-- Hero Section -->
+<div class="max-w-2xl w-full text-center space-y-12">
+<div class="space-y-6">
+<span class="text-primary font-bold tracking-widest text-[11px] uppercase px-4 py-1.5 bg-primary/5 rounded-full">New Experience</span>
+<h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-on-surface leading-[1.1]">
+                    Curate your <br/>
+<span class="text-primary">Digital Canvas.</span>
+</h2>
+<p class="text-on-surface-variant text-lg md:text-xl leading-relaxed max-w-lg mx-auto font-body">
+                    Experience a minimalist approach to digital organization. 
+                    Simple, fast, and remarkably beautiful.
+                </p>
+</div>
+<!-- THE PRIMARY ACTION -->
+<div class="flex flex-col items-center gap-6">
+<button class="group relative flex items-center justify-center gap-3 bg-gradient-to-br from-primary to-primary-dim text-on-primary px-10 py-5 rounded-full font-headline font-bold text-lg shadow-xl shadow-primary/20 active:scale-95 duration-200 transition-all hover:shadow-2xl hover:shadow-primary/30">
+                    Get Started
+                    <span class="material-symbols-outlined transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<p class="text-on-surface-variant/60 text-sm font-label tracking-wide">
+                    NO CREDIT CARD REQUIRED • FREE TO START
+                </p>
+</div>
+</div>
+<!-- Decorative Bento Preview -->
+<div class="mt-24 w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 gap-6 opacity-40 hover:opacity-100 transition-opacity duration-500">
+<div class="md:col-span-8 bg-surface-container-lowest h-64 rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-outline-variant/10">
+<img class="w-full h-full object-cover" data-alt="Modern minimalist workspace with clean white desk and soft natural window light casting gentle shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPFmBwipZTQlJXJAy-0IDogmQxsESMCxui2IcIDKWgJYSUnxJjH_lPMl22FT5KCJaJa83AiMZqVh7IXiy4jCm-0G13E_v51FOMfP8Y5Lciv1MVk1j8QwITe9WC00RhUG5B1HPgi1wsrsb-CmOuR_AzMXu3pTNt7yqSnsJb7UWtnE3o2wNCWOyZip0LPlBGzT8ll2ZCU5jrKN__Az60pGVHaGJ6nAND-6UpWdWYCD64xg70XE0TRntHEAJir-SClzr5VDGO-jGqya8"/>
+</div>
+<div class="md:col-span-4 bg-surface-container-low h-64 rounded-lg flex items-center justify-center p-8">
+<div class="w-full h-full border-2 border-dashed border-outline-variant/30 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-4xl" data-icon="add">add</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-[#fcf9f8]/90 dark:bg-slate-950/90 backdrop-blur-xl rounded-t-[24px] shadow-[0_-4px_24px_rgba(50,50,50,0.06)] pb-safe">
+<div class="flex justify-around items-center h-20 w-full px-4">
+<!-- Active Tab: Home -->
+<a class="flex flex-col items-center justify-center text-[#0052FF] dark:text-[#3d7eff] bg-[#0052FF]/10 dark:bg-[#0052FF]/20 rounded-full px-4 py-1.5 active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-inter text-[11px] font-medium tracking-wide uppercase mt-0.5">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5f5f5f] dark:text-slate-400 opacity-70 hover:opacity-100 transition-opacity active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-inter text-[11px] font-medium tracking-wide uppercase mt-0.5">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5f5f5f] dark:text-slate-400 opacity-70 hover:opacity-100 transition-opacity active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-inter text-[11px] font-medium tracking-wide uppercase mt-0.5">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5f5f5f] dark:text-slate-400 opacity-70 hover:opacity-100 transition-opacity active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-inter text-[11px] font-medium tracking-wide uppercase mt-0.5">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

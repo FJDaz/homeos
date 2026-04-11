@@ -1,148 +1,251 @@
 /**
- * ManifestBox — Panneau manifest flottant cross-tabs (M269)
- * Accessible via bouton [M] dans le nav global (bootstrap.js)
- * Flotte par-dessus le contenu, positionné sous le nav, à gauche.
- * Upload exclusif depuis le panneau.
+ * ManifestBox — M292: Manifest Editor + Sullivan (Contextual) + Signets
+ * Remplace l'ancien panneau par un éditeur complet avec layout 3 colonnes.
  */
 (function() {
     'use strict';
-    console.log('[ManifestBox] init');
-
+    
     let panel = null;
     let manifestData = null;
+    let isSignetsOpen = true;
+    let saveTimeout = null;
+    
+    // UI Refs
+    let els = {};
 
-    function isOpen() {
-        return panel && panel.style.display !== 'none';
+    // --- UTILS ---
+    function getSession() {
+        return JSON.parse(localStorage.getItem('homeos_session') || '{}');
     }
 
+    /**
+     * Calcule la position relative (X, Y) du curseur dans un textarea.
+     * Utilise un div miroir invisible pour calculer la hauteur du texte.
+     */
+    function getCaretCoordinates(element, position) {
+        const div = document.createElement('div');
+        const style = window.getComputedStyle(element);
+        
+        const properties = [
+            'direction', 'boxSizing', 'width', 'height', 'overflowX', 'overflowY',
+            'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+            'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+            'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
+            'lineHeight', 'fontFamily', 'textAlign', 'textTransform', 'textIndent',
+            'textDecoration', 'letterSpacing', 'wordSpacing', 'tabSize', 'whiteSpace',
+            'wordBreak', 'wordWrap'
+        ];
+        properties.forEach(prop => div.style[prop] = style[prop]);
+        
+        div.style.position = 'absolute';
+        div.style.top = '-9999px';
+        div.style.left = '-9999px';
+        // Important pour conserver les espaces et retours à la ligne
+        div.style.whiteSpace = 'pre-wrap';
+        
+        const textUpToCaret = element.value.substring(0, position);
+        div.textContent = textUpToCaret;
+        
+        const span = document.createElement('span');
+        span.textContent = element.value.substring(position) || '.';
+        div.appendChild(span);
+        
+        document.body.appendChild(div);
+        const coords = { top: span.offsetTop, left: span.offsetLeft, height: span.offsetHeight };
+        document.body.removeChild(div);
+        
+        return coords;
+    }
+
+    // --- API ---
     async function loadManifest() {
         try {
-            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const session = getSession();
             const projectId = session.active_project_id || session.project_id;
-            if (!projectId) {
-                manifestData = { error: 'aucun projet actif' };
-                return;
-            }
+            if (!projectId) return;
+
             const res = await fetch(`/api/projects/${projectId}/manifest`);
-            if (res.status === 404) {
-                manifestData = { error: `aucun manifest — upload un fichier .json ci-dessous` };
-                return;
-            }
-            if (!res.ok) {
-                manifestData = { error: `erreur serveur (${res.status})` };
-                return;
-            }
-            manifestData = await res.json();
-        } catch(e) {
-            manifestData = { error: e.message };
-        }
-    }
-
-    async function handleManifestUpload(file) {
-        if (!file) return;
-        try {
-            const text = await file.text();
-            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
-            const projectId = session.active_project_id || session.project_id;
-
-            let payload;
-            if (file.name.endsWith('.json')) {
-                payload = JSON.parse(text);
+            if (res.ok) {
+                manifestData = await res.json();
+                
+                // Si pas de raw_content, on génère un markdown par défaut à partir des écrans (legacy fallback)
+                if (!manifestData.raw_content && manifestData.screens) {
+                    let md = `# Manifeste : ${manifestData.name || 'Projet'}\n\n`;
+                    manifestData.screens.forEach(s => {
+                        md += `## ${s.name || 'Écran'}\n- Type: ${s.type || s.archetype_label}\n\n`;
+                    });
+                    manifestData.raw_content = md;
+                }
             } else {
-                // Markdown/text file: wrap in a manifest structure
-                payload = {
-                    name: file.name.replace(/\.(md|txt)$/i, ''),
-                    description: text.substring(0, 500),
-                    raw_content: text,
-                    screens: [],
-                    components: []
+                // Initialise un nouveau manifest vide
+                manifestData = {
+                    name: 'Nouveau Projet',
+                    raw_content: '# Mon Manifeste\n\nDécrivez votre intention ici...'
                 };
             }
+        } catch(e) {
+            console.error('Erreur chargement manifest', e);
+        }
+    }
 
-            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+    async function saveManifestDeferred() {
+        const text = els.editor.value;
+        const session = getSession();
+        const projectId = session.active_project_id || session.project_id;
+        if (!projectId) return;
+
+        const payload = manifestData || {};
+        payload.raw_content = text;
+        // Mettre à jour le nom si on a un # Titre principal
+        const matchTitle = text.match(/^#\s+(.+)$/m);
+        if (matchTitle) payload.name = matchTitle[1];
+
+        try {
+            await fetch(`/api/projects/${projectId}/manifest`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
                 body: JSON.stringify(payload)
             });
-            if (!res.ok) {
-                alert('Erreur sauvegarde manifest: ' + res.status);
-                return;
-            }
-            manifestData = payload;
-            render();
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
-            toast.textContent = '✓ Manifest mis à jour';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            console.log('[WsManifestEditor] saved');
         } catch(e) {
-            alert('Erreur: fichier invalide — ' + e.message);
+            console.error('Erreur save', e);
         }
     }
 
-    function triggerUpload() {
-        const fi = document.createElement('input');
-        fi.type = 'file';
-        fi.accept = '.json,.md,.txt';
-        fi.onchange = () => handleManifestUpload(fi.files[0]);
-        fi.click();
+    function onTextChange() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveManifestDeferred, 1000);
+        updateSignets();
+        updateSullivanPosition();
     }
 
-    function render() {
-        const body = document.getElementById('manifestbox-body');
-        const title = document.getElementById('manifestbox-title');
-        if (!body) return;
+    // --- SULLIVAN (Contextual floating chat) ---
+    async function sendSullivanMessage() {
+        const msg = els.sullivanInput.value.trim();
+        if (!msg) return;
 
-        if (manifestData && manifestData.error) {
-            // No manifest state: show upload button + error
-            body.innerHTML = `
-                <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-                    <div class="text-[11px] text-red-400 mb-4">${manifestData.error}</div>
-                    <button id="manifestbox-upload-btn" class="px-4 py-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[10px] font-bold text-[#3d3d3c] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all cursor-pointer">
-                        ↑ Charger un manifest (.json, .md, .txt)
-                    </button>
-                    <div class="text-[9px] text-[#9a9a98] mt-2">Requis pour Stitch</div>
-                </div>
-            `;
-            document.getElementById('manifestbox-upload-btn').onclick = triggerUpload;
-            return;
+        // Context line
+        const caretPos = els.editor.selectionStart;
+        const textBefore = els.editor.value.substring(0, caretPos);
+        const currentLine = textBefore.split('\n').pop() || '';
+
+        appendBubble(msg, 'user');
+        els.sullivanInput.value = '';
+
+        const pending = appendBubble('analyse...', 'sullivan');
+        pending.classList.add('opacity-50', 'italic');
+
+        try {
+            const res = await fetch('/api/sullivan/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: msg,
+                    mode: 'manifest_assist',
+                    context: `L'utilisateur travaille sur le manifest. Ligne actuelle : "${currentLine}"\nTout le texte:\n${els.editor.value}`
+                })
+            });
+            const data = await res.json();
+            pending.remove();
+            if (data.explanation) appendBubble(data.explanation, 'sullivan');
+        } catch(e) {
+            pending.remove();
+            appendBubble('Erreur de communication.', 'sullivan');
         }
+    }
 
-        const screens = manifestData?.screens || manifestData?.components || [];
-        const archetype = manifestData?.archetype?.label || manifestData?.archetype || '—';
+    function appendBubble(text, sender) {
+        const b = document.createElement('div');
+        b.className = `p-2 rounded-lg text-[10px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
+        if (sender === 'sullivan') {
+            b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
+        } else {
+            b.innerText = text;
+        }
+        els.sullivanHist.appendChild(b);
+        els.sullivanHist.scrollTop = els.sullivanHist.scrollHeight;
+        return b;
+    }
 
-        let html = `
-            <div class="p-2 border-b border-[#e5e5e5] flex items-center justify-between bg-[#f7f6f2] shrink-0">
-                <div class="flex items-center gap-2">
-                    <div>
-                        <div class="text-[8px] font-black uppercase tracking-widest text-[#9a9a98]">archétype</div>
-                        <div class="text-[10px] font-bold text-[#3d3d3c]">${archetype}</div>
-                    </div>
-                </div>
-                <button id="manifestbox-upload-btn" class="text-[8px] text-slate-400 hover:text-[#8cc63f] transition-all cursor-pointer" title="Remplacer">↑ remplacer</button>
-            </div>
-            <div id="manifestbox-list" class="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
-        `;
+    function updateSullivanPosition() {
+        if (!els.editor || !els.sullivanBox) return;
+        
+        const pos = els.editor.selectionStart;
+        const coords = getCaretCoordinates(els.editor, pos);
+        
+        // Calculer l'offset Y en retranchant le scroll de la zone parente de l'editeur
+        let targetY = coords.top - els.editorWrap.scrollTop;
+        
+        // Contraindre Sullivan pour ne pas sortir de l'ecran (padding 40px en haut, bottom constraint)
+        const maxY = els.editorWrap.clientHeight - els.sullivanBox.offsetHeight - 20;
+        targetY = Math.max(0, Math.min(targetY, maxY));
+        
+        // Animation fluide
+        els.sullivanBox.style.transform = `translateY(${targetY}px)`;
+    }
 
-        screens.forEach((s, i) => {
-            const name = s.name || s.id || `screen_${i}`;
-            const type = s.type || s.archetype_label || 'html';
-            const stitchId = s.stitch_id || s.stitch_screen_id || '';
-            html += `
-                <div class="p-2 bg-white border border-[#e5e5e5] rounded-[12px] text-[10px]">
-                    <div class="font-bold text-[#3d3d3c]">${name}</div>
-                    <div class="text-[8px] text-[#9a9a98]">${type}${stitchId ? ' · stitch: ' + stitchId : ''}</div>
-                </div>
-            `;
+    // --- SIGNETS (TOC) ---
+    function updateSignets() {
+        const text = els.editor.value;
+        const lines = text.split('\n');
+        
+        els.signetsList.innerHTML = '';
+        
+        let positionInStr = 0;
+        let count = 0;
+
+        lines.forEach(line => {
+            const len = line.length + 1; // +1 for newline
+            const match = line.match(/^(#{1,3})\s+(.*)$/);
+            if (match) {
+                const level = match[1].length;
+                const title = match[2];
+                const pos = positionInStr;
+                
+                const btn = document.createElement('button');
+                btn.className = `text-left w-full truncate py-1 hover:text-homeos-green transition-colors ${level === 1 ? 'font-bold text-[#3d3d3c] text-[11px] mt-2' : level === 2 ? 'text-[10px] text-slate-500 pl-2' : 'text-[9px] text-slate-400 pl-4'}`;
+                btn.innerText = title;
+                btn.onclick = () => {
+                    els.editor.focus();
+                    els.editor.setSelectionRange(pos, pos);
+                    
+                    // Scroll to position
+                    const coords = getCaretCoordinates(els.editor, pos);
+                    els.editorWrap.scrollTo({ top: coords.top - 40, behavior: 'smooth' });
+                    
+                    updateSullivanPosition();
+                };
+                els.signetsList.appendChild(btn);
+                count++;
+            }
+            positionInStr += len;
         });
 
-        html += `</div>`;
-        body.innerHTML = html;
-        document.getElementById('manifestbox-upload-btn').onclick = triggerUpload;
-
-        if (title) title.textContent = `manifest · ${screens.length}`;
+        if (count === 0) {
+            els.signetsList.innerHTML = '<span class="text-slate-300 italic">Aucun chapitre (#, ##)...</span>';
+        }
     }
 
+    function toggleSignets() {
+        isSignetsOpen = !isSignetsOpen;
+        if (isSignetsOpen) {
+            els.signetsCol.style.width = '250px';
+            els.signetsTitle.style.display = 'block';
+            els.signetsList.style.display = 'flex';
+            els.signetsToggle.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            `;
+        } else {
+            els.signetsCol.style.width = '40px';
+            els.signetsTitle.style.display = 'none';
+            els.signetsList.style.display = 'none';
+            els.signetsToggle.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            `;
+        }
+    }
+
+    // --- UI BUILD ---
     function buildPanel() {
         if (panel) return;
 
@@ -150,52 +253,123 @@
         panel.id = 'manifestbox-panel';
         panel.style.cssText = `
             position: fixed;
-            top: 60px;
-            left: 340px;
-            width: 300px;
-            max-height: 480px;
-            z-index: 1500;
-            background: white;
+            top: 5vh;
+            left: 5vw;
+            width: 90vw;
+            height: 90vh;
+            z-index: 2000;
+            background: #fdfdfc;
             border: 1px solid #e5e5e5;
             border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-            display: flex;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            display: none;
             flex-direction: column;
             overflow: hidden;
+            font-family: 'Inter', sans-serif;
         `;
 
         panel.innerHTML = `
-            <div class="h-[32px] border-b border-[#e5e5e5] flex items-center justify-between px-3 shrink-0 bg-white" id="manifestbox-handle">
-                <span id="manifestbox-title" class="text-[9px] font-black tracking-[0.15em] uppercase text-[#8cc63f]">manifest</span>
-                <button id="manifestbox-close" class="text-[#9a9a98] hover:text-[#3d3d3c] transition-colors p-0.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <div id="manifestbox-handle" class="h-[40px] bg-white border-b border-[#e5e5e5] px-4 flex items-center justify-between cursor-grab select-none">
+                <span class="text-[10px] font-black uppercase tracking-[0.15em] text-[#8cc63f]">manifest editor</span>
+                <button id="manifestbox-close" class="text-slate-400 hover:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div id="manifestbox-body" class="flex-1 overflow-hidden flex flex-col bg-white"></div>
+            
+            <div class="flex-1 flex flex-row overflow-hidden relative">
+                
+                <!-- EDITOR COL -->
+                <div id="manifest-editor-wrap" class="flex-1 relative p-10 overflow-y-auto scrollbar-hide" style="scroll-behavior: smooth;">
+                    <!-- SULLIVAN PAPER FLOAT -->
+                    <div id="manifest-sullivan-box" class="absolute right-10 top-10 w-[320px] bg-white rounded-xl border border-slate-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col z-20" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height:400px;">
+                        
+                        <!-- TOP INPUT (M292 spec) -->
+                        <div class="p-3 bg-white border-b border-slate-50 flex items-center gap-2 rounded-t-xl z-10 sticky top-0 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-homeos-green animate-pulse shrink-0"></div>
+                            <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?" 
+                                   class="flex-1 border-none bg-transparent text-[11px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
+                        </div>
+                        
+                        <!-- HISTORY -->
+                        <div id="manifest-sullivan-hist" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 max-h-[300px] scrollbar-hide bg-slate-50/30">
+                            <!-- bulles injectées -->
+                            <div class="p-2 rounded-lg text-[10px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]">
+                                <span class="font-bold text-[#8cc63f] mr-1">S.</span>Je lis par-dessus votre épaule. Saisissez du texte par ici.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <textarea id="manifest-editor-textarea" spellcheck="false"
+                              placeholder="# Votre Manifeste..."
+                              class="w-[calc(100%-360px)] min-h-[150%] max-w-[800px] bg-transparent border-none outline-none text-[#3d3d3c] focus:ring-0 resize-none font-mono text-[13px] leading-relaxed tracking-tight"
+                              style="font-family: 'JetBrains Mono', 'Monaco', monospace; margin-bottom:50vh;"></textarea>
+                </div>
+
+                <!-- SIGNETS COL -->
+                <div id="manifest-signets-col" class="w-[250px] bg-[#fcfaf7] border-left border-white shadow-[-5px_0_15px_rgba(0,0,0,0.02)] flex flex-col transition-all duration-300 shrink-0 z-30 relative">
+                    <div class="h-[40px] px-3 flex items-center justify-between border-b border-[#f0eee4] bg-[#fcfaf7]">
+                        <span id="manifest-signets-title" class="text-[9px] font-bold uppercase tracking-widest text-slate-400">chapitres (toc)</span>
+                        <button id="manifest-signets-toggle" class="p-1 rounded-md text-slate-400 hover:bg-slate-100 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <div id="manifest-signets-list" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5 scrollbar-hide">
+                        <!-- signets -->
+                    </div>
+                </div>
+
+            </div>
         `;
 
         document.body.appendChild(panel);
 
-        // Close
-        panel.querySelector('#manifestbox-close').onclick = hide;
+        // Bind Refs
+        els.editorWrap = document.getElementById('manifest-editor-wrap');
+        els.editor = document.getElementById('manifest-editor-textarea');
+        els.sullivanBox = document.getElementById('manifest-sullivan-box');
+        els.sullivanInput = document.getElementById('manifest-sullivan-input');
+        els.sullivanHist = document.getElementById('manifest-sullivan-hist');
+        els.signetsCol = document.getElementById('manifest-signets-col');
+        els.signetsList = document.getElementById('manifest-signets-list');
+        els.signetsTitle = document.getElementById('manifest-signets-title');
+        els.signetsToggle = document.getElementById('manifest-signets-toggle');
 
-        // Draggable
+        // Listeners
+        document.getElementById('manifestbox-close').onclick = hide;
+        els.signetsToggle.onclick = toggleSignets;
+        
+        els.editor.addEventListener('input', onTextChange);
+        els.editor.addEventListener('click', updateSullivanPosition);
+        els.editor.addEventListener('keyup', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+                updateSullivanPosition();
+            }
+        });
+
+        els.editorWrap.addEventListener('scroll', updateSullivanPosition);
+
+        els.sullivanInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendSullivanMessage();
+            }
+        };
+
+        // Drag Header
         const handle = document.getElementById('manifestbox-handle');
         if (handle) {
-            handle.style.cursor = 'grab';
             let dragging = false, ox = 0, oy = 0;
             handle.addEventListener('mousedown', (e) => {
                 dragging = true;
                 ox = e.clientX - panel.getBoundingClientRect().left;
                 oy = e.clientY - panel.getBoundingClientRect().top;
                 handle.style.cursor = 'grabbing';
-                e.preventDefault();
             });
             document.addEventListener('mousemove', (e) => {
                 if (!dragging) return;
                 panel.style.left = (e.clientX - ox) + 'px';
                 panel.style.top = (e.clientY - oy) + 'px';
-                panel.style.right = 'auto';
             });
             document.addEventListener('mouseup', () => {
                 dragging = false;
@@ -208,17 +382,30 @@
         buildPanel();
         panel.style.display = 'flex';
         await loadManifest();
-        render();
+        if (manifestData && manifestData.raw_content) {
+            els.editor.value = manifestData.raw_content;
+        }
+        updateSignets();
+        
+        // Timeout pour s'assurer que le composant est bien affiché avant de calculer les coords
+        setTimeout(updateSullivanPosition, 100);
+        
+        // Focus sur l'éditeur
+        els.editor.focus();
     }
 
     function hide() {
         if (panel) panel.style.display = 'none';
+        clearTimeout(saveTimeout);
+        saveManifestDeferred();
     }
 
     function toggle() {
-        if (isOpen()) hide(); else show();
+        if (panel && panel.style.display !== 'none') hide();
+        else show();
     }
 
-    window.ManifestBox = { show, hide, toggle, upload: triggerUpload };
-    console.log('[ManifestBox] ✅ OK');
+    // API Publique
+    window.ManifestBox = { show, hide, toggle };
+    console.log('[WsManifestEditor] ✅ Override OK');
 })();

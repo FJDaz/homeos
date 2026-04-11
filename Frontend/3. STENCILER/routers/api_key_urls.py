@@ -25,7 +25,7 @@ VERIFIED_URLS = {
     "groq":     {"url": "https://console.groq.com/keys", "instructions": "Gratuit — console Groq, quota limité gratuit", "pricing": "gratuit", "price_hint": "Gratuit (quota limité)"},
     "openai":   {"url": "https://platform.openai.com/api-keys", "instructions": "Payant — OpenAI Platform, $5 de crédit offerts", "pricing": "payant", "price_hint": "~$0.005/1K tokens"},
     "deepseek": {"url": "https://platform.deepseek.com/api-keys", "instructions": "Payant — DeepSeek, très bon rapport qualité/prix", "pricing": "payant", "price_hint": "~$0.001/1K tokens"},
-    "qwen":     {"url": "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key", "instructions": "Gratuit — Qwen via DashScope (plateforme chinoise, utiliser traduction navigateur)", "pricing": "gratuit", "price_hint": "Gratuit (quota généreux)"},
+    "qwen":     {"url": "https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.4af2525cpffRpb", "instructions": "Gratuit — Alibaba Cloud (DashScope), quota généreux", "pricing": "gratuit", "price_hint": "Gratuit (quota généreux)"},
     "kimi":     {"url": "https://platform.moonshot.cn/console/api-keys", "instructions": "Payant — Moonshot Platform (Kimi)", "pricing": "payant", "price_hint": "~$0.01/1K tokens"},
     "mimo":     {"url": "https://openrouter.ai/keys", "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni", "pricing": "gratuit", "price_hint": "Gratuit (via OpenRouter)"},
     "watson":   {"url": "https://cloud.ibm.com/catalog/services/watsonx-ai", "instructions": "Gratuit — IBM Cloud Lite + WatsonX", "pricing": "gratuit", "price_hint": "Gratuit (Lite tier)"},

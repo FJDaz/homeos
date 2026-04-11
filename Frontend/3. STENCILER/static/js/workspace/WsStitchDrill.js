@@ -134,20 +134,17 @@
                         <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left space-y-3">
                             ${API_PROVIDERS.map(p => `
                                 <div class="flex items-start gap-2" id="drill-key-row-${p.id}">
-                                    <div class="w-2 h-2 mt-1.5 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
+                                    <div class="w-2 h-2 mt-2 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-1">
-                                            <span class="text-[10px] font-bold text-[#3d3d3c]">${p.label}</span>
-                                            ${p.free
-                                                ? '<span class="text-[8px] px-1 bg-[#8cc63f]/20 text-[#6a9a2f] rounded font-bold">gratuit</span>'
-                                                : '<span class="text-[8px] px-1 bg-orange-100 text-orange-600 rounded font-bold">payant</span>'}
-                                            <span class="text-[8px] text-[#9a9a98] ml-1">${p.price}</span>
+                                            <span class="text-[12px] font-bold text-[#3d3d3c]">${p.label}</span>
+                                            <span class="text-[11px] text-[#9a9a98] ml-1">${p.price}</span>
                                             <button class="drill-help-btn ml-1 text-[#9a9a98] hover:text-[#8cc63f] transition-all" data-provider="${p.id}" title="Trouver l'URL de la clé">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                             </button>
                                         </div>
-                                        <input type="password" class="drill-key-input w-full mt-1 px-2 py-1.5 text-[11px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
-                                        <div class="drill-helper-text mt-1 text-[9px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
+                                        <input type="password" class="drill-key-input w-full mt-1 px-2 py-1.5 text-[12px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
+                                        <div class="drill-helper-text mt-1 text-[11px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
                                     </div>
                                 </div>
                             `).join('')}

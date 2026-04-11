@@ -8,6 +8,7 @@ class WsChatSurgical {
         this.sendBtn = document.getElementById('btn-ws-surgical-send');
         this.closeBtn = document.getElementById('ws-surgical-close');
         this.editCodeBtn = document.getElementById('btn-ws-surgical-edit-code');
+        this.collapseBtn = document.getElementById('ws-surgical-collapse');
         this.header = document.getElementById('ws-surgical-header');
         
         this.currentTarget = null; // { selector, html }
@@ -28,6 +29,7 @@ class WsChatSurgical {
             };
         }
         if (this.closeBtn) this.closeBtn.onclick = () => this.hide();
+        if (this.collapseBtn) this.collapseBtn.onclick = () => this.toggleCollapse();
         if (this.editCodeBtn) {
             this.editCodeBtn.onclick = () => {
                 this.onEditCodeClick();
