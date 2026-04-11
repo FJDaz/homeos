@@ -401,7 +401,7 @@
         }
 
         function saveSession(data) {
-            localStorage.setItem('homeos_session', JSON.stringify({
+            const session = {
                 token: data.token,
                 name: data.name,
                 role: data.role,
@@ -409,8 +409,13 @@
                 context: currentContext,
                 student_id: data.student_id || null,
                 class_id: data.class_id || null,
-                project_id: data.project_id || null
-            }));
+                project_id: data.project_id || null,
+                // M283b: plan, workspace, entitlements
+                plan: data.plan || 'FREE',
+                workspace_id: data.workspace_id || null,
+                entitlements: data.entitlements || {}
+            };
+            localStorage.setItem('homeos_session', JSON.stringify(session));
             localStorage.removeItem('homeos_user_id'); // cleanup legacy
         }
 

@@ -143,6 +143,23 @@ def _create_workspace(workspace_id: str, name: str, owner_id: str):
     conn.commit()
     conn.close()
 
+def _get_user_workspace_and_plan(user_id):
+    """M283a: Retourne (workspace_id, plan) pour un user."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("SELECT workspace_id FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    workspace_id = row[0] if row else None
+    if not workspace_id:
+        workspace_id = f"ws_{user_id}"
+        _create_workspace(workspace_id, "Workspace", user_id)
+        _link_user_to_workspace(user_id, workspace_id, "owner")
+    cursor.execute("SELECT plan FROM workspaces WHERE id = ?", (workspace_id,))
+    ws_row = cursor.fetchone()
+    plan = ws_row[0] if ws_row else "FREE"
+    conn.close()
+    return workspace_id, plan
+
 def _link_user_to_workspace(user_id: str, workspace_id: str, role_in_workspace: str):
     """M283a: Lie un user à un workspace."""
     conn = sqlite3.connect(str(PROJECTS_DB_PATH))
@@ -231,6 +248,12 @@ class RegisterRequest(BaseModel):
     name: str
 
 class RegisterResponse(BaseModel):
+    user_id: str
+    name: str
+    role: str
+    token: str
+    student_id: Optional[str] = None
+    class_id: Optional[str] = None
     project_id: Optional[str] = None
     plan: str = "FREE"
     workspace_id: Optional[str] = None
@@ -366,7 +389,7 @@ async def auth_register(req: RegisterRequest):
         active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
         logger.info(f"Auth: active_project.json → {project_id}")
 
-    logger.info(f"Auth: user '{name}' registered (role={role}, student_id={student_id}, workspace={workspace_id if not existing else 'existing'})")
+    logger.info(f"Auth: user '{name}' registered (role={role}, student_id={student_id}, workspace={resp.workspace_id})")
     return resp
 
 
