@@ -283,9 +283,23 @@
                         <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
                     </div>
                     <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
-                    <div class="mt-3 text-[10px] text-[#9a9a98]">Pas de manifeste ? <a href="/cadrage" class="text-[#8cc63f] underline" target="_blank">Va dans Cadrage pour en créer un</a></div>
+                    <div class="mt-3 text-[10px] text-[#9a9a98]">Pas de manifeste ? <button id="drill-open-manifest-editor" class="text-[#8cc63f] underline font-bold">Ouvre le panel Manifeste</button> pour en créer un.</div>
                     <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
                 `;
+
+                const manifestBtn = document.getElementById('drill-open-manifest-editor');
+                if (manifestBtn) {
+                    manifestBtn.onclick = () => {
+                        // Try manifest editor panel first, fallback to Cadrage
+                        if (window.WsManifestEditor) {
+                            window.WsManifestEditor.show();
+                        } else if (window.ManifestBox) {
+                            window.ManifestBox.show();
+                        } else {
+                            window.open('/cadrage', '_blank');
+                        }
+                    };
+                }
 
                 const zone = document.getElementById('drill-manifest-upload-zone');
                 const input = document.getElementById('drill-manifest-input');
