@@ -47,6 +47,61 @@
 
 ---
 
+## M275 — BYOK : Pricing badges + Enter-to-submit + Delete keys
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Pricing badges dans settings drawer : vert = gratuit, orange = payant
+- 5 gratuits (gemini, groq, mimo, qwen, watson) + 3 payants (openai, kimi, deepseek)
+- Toucher Entrée sur un champ clé → sauvegarde instantanée (bordure verte)
+- Bouton × rouge sur les clés actives → suppression avec confirmation
+- `DELETE /api/me/keys/{provider}` endpoint ajouté
+- `api_key_urls.py` : 8/8 URLs validées + cache 24h
+
+## M276 — Stitch sync : bouton actualiser + pull écrans via MCP
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Bouton ↻ "actualiser depuis stitch" en haut de la screen list
+- `POST /api/stitch/sync` → `list_screens` MCP → pull HTML → update `index.json`
+- Retourne `+N écran(s) syncés` → auto-refresh
+
+## M277 — Stitch toolbar button + S button sur chaque écran
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Bouton Stitch dans la toolbar → génère mega-prompt basé sur manifest
+- Méga-prompt copié dans le clipboard + toast + Stitch ouvert
+- Blocage 400 si aucun manifest — alert "génère d'abord un manifest"
+- Bouton [S] sur chaque row de la screen list
+- `create-project` appelle MCP `create_project` (~0.8s) → vrai projet Stitch créé
+- `stitch_project_id` stocké dans le manifest
+
+## M278 — Cross-platform paths : éliminer les chemins en dur
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Remplacement de tous les chemins `/Users/francois-jeandazin/AETHERFLOW/...` par des constantes relatives
+- `ROOT_DIR`, `TEMPLATES_DIR`, `ACTIVE_PROJECT_FILE`, `PROJECTS_DIR`
+- Forge fonctionne sur macOS (local) et Linux (HF container)
+- `routes.py` + `svg_to_tailwind.py` fixés
+
+## M281 — Sync Stitch : polling 2min + toast + auto-pull
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- `WsStitchSync.js` : polling `/api/stitch/sync` toutes les 2 min (max 8 polls/session = 16 min)
+- Toast "Nouveau screen Stitch détecté" quand le nombre d'écrans augmente
+- Arrêt auto si pas de `stitch_project_id` lié (400)
+- Refresh auto de la screen list après détection
+- Démarrage polling : après drill Stitch OU au workspace ready
+
+## M280 (partiel) — WsStitchDrill : landing canvas + drill 3 étapes
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+- Bouton rond vert pulsant "Créer un projet" sur canvas vide (z-index 99999, backdrop blur 3px)
+- Étape 1 : Upload manifest (.json/.md/.txt) — bloquant, drag&drop ou click
+- Étape 2 : Clés API — cascade fallback expliquée + lien vers paramètres
+- Étape 3 : "Charger sur Stitch" → crée projet Stitch via MCP + ouvre Stitch + progress bar
+- Démarrage polling auto après drill
+
+---
+
 ## M233 — Backend : PATCH /api/imports/{import_id}
 **STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
 

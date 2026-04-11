@@ -35,7 +35,80 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ## Phase Active (2026-04-10)
 
-> M260, M266–M279 ✅ — archivées ROADMAP_ACHIEVED.md
+> M260, M266–M276 ✅ — archivées ROADMAP_ACHIEVED.md
+> M278, M281, M275 (BYOK) ✅ — archivées ROADMAP_ACHIEVED.md
+
+---
+
+### Thème 30 — Moteur AetherFlow (optimisation par les sessions)
+
+### Mission 290 — Contrôle des clés API par session + optimisation cascade
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Principe :** À chaque nouveau projet d'un user, la stack de clés API est contrôlée. Le résultat met à jour la "meilleure stack du moment" globale. Plus il y a d'utilisateurs, mieux le système marche — effet réseau.
+
+**Mécanisme :**
+- Au `POST /api/projects/activate` → contrôle asynchrone de chaque provider configuré (gemini, groq, openai, etc.)
+- Résultat stocké dans `db/provider_health.json` : `{ provider, latency_ms, success: bool, last_check, model }`
+- Cascade optimisée automatiquement : le provider le plus rapide + fiable passe en #1
+- Fallback sur la stack précédente si la nouvelle échoue
+
+**Avantage :**
+- Pas de ping permanent — les contrôles sont déclenchés par les sessions réelles
+- Les erreurs API (quota, clé expirée, downtime) sont détectées organiquement
+- Argument marketing : "plus on est d'utilisateurs, plus AetherFlow est rapide"
+- L'expérimentation avec les étudiants = données massives de fiabilité API
+
+**Stack actuelle à tester :**
+1. Gemini (vision + design tokens) — fiable mais lent
+2. Groq (vision ? ultra rapide) — à tester, si oui → priorité #1
+3. OpenAI — payant, bon fallback
+4. DeepSeek — bon rapport qualité/prix
+5. Qwen — gratuit, fallback
+6. Mimo — gratuit via OpenRouter
+7. Watson — gratuit IBM Cloud Lite
+
+**Fichiers :** `auth_router.py` (vérif au login), nouveau `engine_optimizer.py`, `api_key_urls.py`
+
+### Mission 291 — Drill A : Avec manifest (voie Stitch)
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Flux :** Upload manifest → Upload écrans (1-4) → Contrôle clés → Lancement Stitch → Sync polling 2min
+
+- Bouton rond pulsant "Créer un projet" sur canvas vide
+- Manifest obligatoire (sinon → redirect Cadrage)
+- Écrans uploadés (max 4 pour latence)
+- Clés vérifiées → ouverture Stitch
+- Polling 2min → détection nouveaux screens → pull auto
+
+**Fichiers :** `WsStitchDrill.js` (existant, à adapter), `WsStitchSync.js` (existant), `stitch_router.py`
+
+### Mission 292 — Drill B : Sans manifest (voie locale HomeOS)
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Flux :** Upload écrans (1-4, obligatoire) → Contrôle clés + optimisation cascade → Cadrage (manifest editor + extraction tokens + validation Sullivan) → Forge background → Canvas ready
+
+- Pas de manifest bloquant — les écrans suffisent
+- Clés contrôlées → cascade optimisée
+- Cadrage transformé : manifest editor inline avec design MD + swatches + "voici ce que j'ai compris"
+- Pendant la validation → forge HTML Tailwind en background
+- Canvas → écrans prêts, draggables, éditables
+
+**Fichiers :** nouveau `WsLocalDrill.js`, `cadrage_alt.html` → `WsManifestEditor.js`, `forge_router.py` optimisé
+
+### Mission 293 — Extraction tokens design dès 1er upload
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Objectif :** Dès le 1er écran uploadé, extraire les tokens design (couleurs, typo, spacing) via vision LLM.
+
+**Priorité cascade :**
+1. **Groq vision** — si disponible, ultra rapide (~1s) → extraction couleurs/typo
+2. Gemini vision — fallback (~3-5s)
+3. Regex SVG/CSS — dernier recours (couleurs hex, font-family)
+
+**Résultat :** Design MD généré automatiquement → swatches → Sullivan propose "voici ce que j'ai compris, tu valides ?"
+
+**Fichiers :** `svg_to_tailwind.py` (existant), nouveau `design_token_extractor.py`, `cadrage_router.py`
 
 ---
 
@@ -44,38 +117,14 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ### Mission 280 — Landing Canvas + Drill paramétrage Stitch
 **STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
 
-### Mission 281 — Sync Stitch : polling 2min + toast + auto-pull
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
 ### Mission 282 — Refonte panels : Projet + Manifest
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
----
 
 ### Mission 283 — Sessions hermétiques : isolation student/teacher/admin
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
 
-**Symptôme :** Les clés API configurées sur le poste teacher apparaissent dans le panel API des sessions élèves. Les sessions ne sont pas hermétiques.
-
-**Cause suspectée :**
-- `api_key_urls.py` et les clés BYOK sont stockées globalement (par provider) sans isolation par `user_id`
-- Le drawer settings (bootstrap.js) lit les clés sans filtre par session active
-- `auth_router.py` — `_get_user_key` et `_set_user_key` prennent un `user_id` mais le frontend n'a peut-être pas de `X-User-Token` dans certains flows
-
-**Scope :**
-- Vérifier que TOUS les appels `/api/me/keys` passent bien le `X-User-Token`
-- Vérifier que le backend filtre strictement par `user_id` résolu depuis le token
-- Séparer les configs teacher (fallback cascade) des configs élève (BYOK pur)
-- Tester : teacher connecte → ajoute clé → élève se logue → ne voit PAS les clés du teacher
-
-**Fichiers :** `auth_router.py`, `bootstrap.js` (drawer), `api_key_urls.py`, `auth_supabase.py`
-
----
-
 ### Mission 279 — FEE Studio : resolve écran actif + assets 404
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Contexte :** M260 a fixé le chargement du bon fichier dans FEE Studio, mais des régressions peuvent persister.
 
 **Vérifications :**
 - `WsFEEStudio.open()` : résout `activeScreen` depuis `wsCanvas.activeScreenId` ✅
