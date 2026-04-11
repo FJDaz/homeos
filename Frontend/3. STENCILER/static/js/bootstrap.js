@@ -42,8 +42,10 @@
         if (session.token) {
             if (config.headers instanceof Headers) {
                 config.headers.set('X-User-Token', session.token);
+                if (session.workspace_id) config.headers.set('X-Workspace-Id', session.workspace_id);
             } else {
                 config.headers['X-User-Token'] = session.token;
+                if (session.workspace_id) config.headers['X-Workspace-Id'] = session.workspace_id;
             }
         }
         
@@ -85,6 +87,11 @@
             }
             .sd-delete-btn:hover {
                 background: rgba(221,68,68,0.1);
+            }
+            .rbac-blocked {
+                opacity: 0.5 !important;
+                filter: grayscale(1) !important;
+                cursor: not-allowed !important;
             }
         `;
         document.head.appendChild(style);
@@ -337,10 +344,18 @@
         drawer.id = 'homeos-settings-drawer';
         drawer.innerHTML = `
             <div class="sd-section">
-                <span class="sd-label">Identité</span>
-                <div class="flex flex-col gap-1">
-                    <span class="text-[12px] font-bold text-[#3d3d3c]">${session.name || '?'}</span>
+                <span class="sd-label">Compte & Workspace</span>
+                <div class="flex flex-col gap-1 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[12px] font-bold text-[#3d3d3c]">${session.name || '?'}</span>
+                        <span class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded ${session.plan === 'MAX' ? 'bg-indigo-600 text-white' : session.plan === 'PRO' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}">${session.plan || 'FREE'}</span>
+                    </div>
                     <span class="text-[9px] text-slate-400 font-mono tracking-tighter uppercase">${session.role || 'student'} / ${session.user_id?.substring(0,8) || '...' }</span>
+                </div>
+                
+                <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div class="text-[8px] uppercase tracking-widest text-slate-400 mb-1">Workspace actif</div>
+                    <div class="text-[11px] font-bold text-slate-700 truncate">${session.workspace_id || 'Personnel'}</div>
                 </div>
             </div>
 

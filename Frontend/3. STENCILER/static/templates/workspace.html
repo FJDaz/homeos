@@ -55,6 +55,7 @@
     })();
     </script>
     <!-- Bootstrap.js — Navigation globale (Mission 107) -->
+    <script src="/static/js/rbac_guard.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <!-- M269: ManifestBox -->
     <script src="/static/js/ManifestBox.js"></script>
@@ -312,6 +313,7 @@
 
                 <!-- STITCH (M277: create project + open Stitch) -->
                 <button id="ws-toolbar-stitch-btn"
+                   data-feature="stitch"
                    class="p-3 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
                    title="Créer projet Stitch">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>

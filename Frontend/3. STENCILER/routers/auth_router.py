@@ -10,7 +10,8 @@ import sqlite3
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
+import requests
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
@@ -48,6 +49,7 @@ ROOT_DIR = CWD.parent.parent
 PROJECTS_DB_PATH = ROOT_DIR / "db/projects.db"
 PROJECTS_DIR = ROOT_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
 
 # --- MODELS ---
 
@@ -112,8 +114,12 @@ def _sqlite_update_user_password(user_id, password_hash):
     conn.close()
 
 def _sqlite_get_user_key(user_id, provider):
-    # Not implemented in sqlite3 fallback — returns None (treated as "not_set")
-    return None
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("SELECT api_key FROM user_keys WHERE user_id = ? AND provider = ?", (user_id, provider))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
 
 def _sqlite_set_user_key(user_id, provider, api_key):
     conn = sqlite3.connect(str(PROJECTS_DB_PATH))
@@ -126,6 +132,47 @@ def _sqlite_set_user_key(user_id, provider, api_key):
     conn.commit()
     conn.close()
 
+def _create_workspace(workspace_id: str, name: str, owner_id: str):
+    """M283a: Crée un workspace personnel pour un user."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO workspaces (id, name, plan, owner_id) VALUES (?, ?, 'FREE', ?)",
+        (workspace_id, name, owner_id)
+    )
+    conn.commit()
+    conn.close()
+
+def _link_user_to_workspace(user_id: str, workspace_id: str, role_in_workspace: str):
+    """M283a: Lie un user à un workspace."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO workspace_members (user_id, workspace_id, role_in_workspace) VALUES (?, ?, ?)",
+        (user_id, workspace_id, role_in_workspace)
+    )
+    cursor.execute("UPDATE users SET workspace_id = ? WHERE id = ?", (workspace_id, user_id))
+    conn.commit()
+    conn.close()
+
+def _get_user_workspace_and_plan(user_id):
+    """M283a: Récupère le workspace et plan d'un user."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("SELECT workspace_id FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    workspace_id = row[0] if row else None
+    
+    plan = "FREE"
+    if workspace_id:
+        cursor.execute("SELECT plan FROM workspaces WHERE id = ?", (workspace_id,))
+        ws_row = cursor.fetchone()
+        if ws_row: plan = ws_row[0]
+    
+    conn.close()
+    return workspace_id, plan
+
+# --- Wrapper functions that dispatch to Supabase or sqlite3 ---
 def _sqlite_delete_user_key(user_id, provider):
     conn = sqlite3.connect(str(PROJECTS_DB_PATH))
     cursor = conn.cursor()
@@ -184,18 +231,18 @@ class RegisterRequest(BaseModel):
     name: str
 
 class RegisterResponse(BaseModel):
-    user_id: str
-    name: str
-    role: str
-    token: str
-    student_id: Optional[str] = None
-    class_id: Optional[str] = None
     project_id: Optional[str] = None
+    plan: str = "FREE"
+    workspace_id: Optional[str] = None
+    entitlements: Optional[dict] = None
 
 class MeResponse(BaseModel):
     user_id: str
     name: str
     role: str
+    plan: Optional[str] = "FREE"
+    workspace_id: Optional[str] = None
+    entitlements: Optional[Dict[str, Any]] = None
 
 class KeyRequest(BaseModel):
     provider: str
@@ -207,8 +254,43 @@ class KeyStatusResponse(BaseModel):
 
 # --- DB INIT (no-op on Supabase — schema managed via migrations) ---
 def init_auth_db():
-    """Supabase tables are managed via migrations. No local init needed."""
-    pass
+    """Migre le schéma SQLite local pour supporter M283a (RBAC)."""
+    if _USE_SUPABASE: return
+    
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    
+    # 1. Tables Workspaces
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS workspaces (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            plan TEXT DEFAULT 'FREE',
+            owner_id TEXT,
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS workspace_members (
+            user_id TEXT,
+            workspace_id TEXT,
+            role_in_workspace TEXT,
+            PRIMARY KEY (user_id, workspace_id)
+        )
+    """)
+    
+    # 2. Migration colonnes users
+    cursor.execute("PRAGMA table_info(users)")
+    cols = [c[1] for c in cursor.fetchall()]
+    if "workspace_id" not in cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN workspace_id TEXT")
+        logger.info("Migration: added workspace_id to users")
+    
+    conn.commit()
+    conn.close()
+
+# Appeler l'init au chargement
+init_auth_db()
 
 # --- SEED ADMIN ---
 def seed_admin():
@@ -248,19 +330,34 @@ async def auth_register(req: RegisterRequest):
     # Chercher user existant
     existing = _find_user_by_name(name)
     if existing:
+        user_id = existing[0]
+        workspace_id, plan = _get_user_workspace_and_plan(user_id)
         resp = RegisterResponse(
-            user_id=existing[0], name=existing[1], role=existing[2], token=existing[3],
-            student_id=student_id, class_id=class_id, project_id=project_id
+            user_id=user_id, name=existing[1], role=existing[2], token=existing[3],
+            student_id=student_id, class_id=class_id, project_id=project_id,
+            workspace_id=workspace_id, plan=plan
         )
     else:
         # Créer nouveau
         user_id = str(uuid.uuid4())
         token = str(uuid.uuid4())
+        workspace_id = f"ws_{user_id}"
+        
         _create_user(user_id, name, role, token)
+        
+        # M283a: Create personal workspace
+        _create_workspace(workspace_id, f"Workspace {name}", user_id)
+        _link_user_to_workspace(user_id, workspace_id, "owner")
+        
         resp = RegisterResponse(
             user_id=user_id, name=name, role=role, token=token,
-            student_id=student_id, class_id=class_id, project_id=project_id
+            student_id=student_id, class_id=class_id, project_id=project_id,
+            plan="FREE", workspace_id=workspace_id
         )
+
+    # M283a: Resolve entitlements for the response
+    from .rbac_middleware import resolve_entitlements
+    resp.entitlements = resolve_entitlements(resp.plan, resp.role)
 
     # M277: Update active_project.json so server-side code points to the right project
     if project_id:
@@ -269,13 +366,13 @@ async def auth_register(req: RegisterRequest):
         active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
         logger.info(f"Auth: active_project.json → {project_id}")
 
-    logger.info(f"Auth: new user '{name}' registered (role={role}, student_id={student_id})")
+    logger.info(f"Auth: user '{name}' registered (role={role}, student_id={student_id}, workspace={workspace_id if not existing else 'existing'})")
     return resp
 
 
 @router.get("/auth/me")
 async def auth_me(request: Request):
-    """Retourne les infos de l'utilisateur authentifié."""
+    """Retourne les infos de l'utilisateur authentifié (M283a : inclut workspace + plan + entitlements)."""
     token = request.headers.get("X-User-Token")
     if not token:
         raise HTTPException(status_code=401, detail="X-User-Token header required")
@@ -284,7 +381,28 @@ async def auth_me(request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return MeResponse(user_id=user[0], name=user[1], role=user[2])
+    # M283a: Resolve entitlements
+    from .rbac_middleware import resolve_entitlements
+    user_id = user[0]
+    role = user[2]
+
+    # Get workspace info
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("SELECT workspace_id FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    workspace_id = row[0] if row else f"ws_{user_id}"
+    cursor.execute("SELECT plan FROM workspaces WHERE id = ?", (workspace_id,))
+    ws_row = cursor.fetchone()
+    ws_plan = ws_row[0] if ws_row else "FREE"
+    conn.close()
+
+    entitlements = resolve_entitlements(ws_plan, role)
+
+    return MeResponse(
+        user_id=user_id, name=user[1], role=role,
+        plan=ws_plan, workspace_id=workspace_id, entitlements=entitlements
+    )
 
 
 @router.post("/me/keys")

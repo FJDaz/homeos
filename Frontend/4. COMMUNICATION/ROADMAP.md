@@ -120,8 +120,77 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ### Mission 282 — Refonte panels : Projet + Manifest
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
 
-### Mission 283 — Sessions hermétiques : isolation student/teacher/admin
+### Mission 283a — Backend : RBAC middleware + Entitlements + Workspaces DB
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Objectif :** Mettre en place le modèle RBAC + Entitlements côté backend (DB + middleware FastAPI).
+
+**Livrables :**
+1. **Migration 005** — `supabase/migrations/005_workspaces_and_entitlements.sql`
+   - Table `workspaces` (id, name, plan, owner_id)
+   - Table `workspace_members` (user_id, workspace_id, role_in_workspace)
+   - Colonne `plan` dans `users` (FREE/PRO/MAX)
+   - Seed : workspace personnel par user existant
+
+2. **`rbac_middleware.py`** — Middleware FastAPI + dépendances
+   - `get_current_user(token) → User` — résout le token, retourne `{ id, name, role, plan, workspace_id, entitlements }`
+   - `@require_role("TEACHER")` — décorateur d'accès par rôle
+   - `check_entitlement(user, feature) → bool` — vérifie un droit spécifique
+   - `check_quota(user, feature) → bool` — vérifie un quota dynamique
+
+3. **Matrice d'entitlements par plan :**
+   ```python
+   PLAN_LIMITS = {
+       "FREE":  {"max_projects": 3,  "ai_models": ["qwen", "llama"],    "stitch": False, "byok": False, "monthly_tokens": 50_000},
+       "PRO":   {"max_projects": 20, "ai_models": ["*"],               "stitch": True,  "byok": True,  "monthly_tokens": 500_000},
+       "MAX":   {"max_projects": 999,"ai_models": ["*"],               "stitch": True,  "byok": True,  "monthly_tokens": None},
+   }
+   ```
+
+4. **Enrichir les endpoints existants :**
+   - `POST /api/auth/register` → crée workspace personnel (`ws_{user_id}`)
+   - `GET /api/me` → retourne `{ user_id, name, role, plan, workspace_id, entitlements }`
+   - `GET /api/me/keys` → protégé par `X-User-Token`
+
+**Fichiers :** `auth_router.py`, `rbac_middleware.py`, `bkd_service.py`, `005_workspaces_and_entitlements.sql`, `server_v3.py`
+
+---
+
+### Mission 283b — Frontend : Session RBAC + UI Workspace
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: GEMINI**
+
+**Contexte :** Le backend M283a expose maintenant des sessions enrichies avec `workspace_id`, `plan` et `entitlements`. Le frontend doit adapter la session, le bootstrap et l'UI.
+
+**Livrables :**
+
+1. **Session enrichie** — `bootstrap.js` :
+   - `homeos_session` = `{ user_id, name, role, plan, workspace_id, entitlements, token }`
+   - Le monkey-patch `fetch` inclut `X-User-Token` (déjà fait)
+   - Ajout : `X-Workspace-Id` header optionnel
+
+2. **Guard RBAC frontend** — nouveau `rbac_guard.js` :
+   - `canAccess(feature) → bool` — vérifie les entitlements de la session
+   - Masque les boutons non autorisés (ex: Stitch si FREE)
+   - Affiche un toast "Upgrade to Pro" si quota dépassé
+   - Appliqué sur : bouton Stitch, bouton Forge, bouton Cadrage avancé
+
+3. **UI Workspace selector** — dans le drawer Settings :
+   - Affiche le workspace actif + plan badge (FREE/PRO/MAX)
+   - Si teacher → lien vers "Ma classe" (dashboard)
+   - Si student → affiche "Classe : DNMADE3"
+   - Si user solo → "Workspace personnel"
+
+4. **Matrice de visibilité UI :**
+   | Élément UI | FREE | PRO | MAX |
+   |------------|------|-----|-----|
+   | Bouton Stitch | ❌ (grisé) | ✅ | ✅ |
+   | BYOK panel | ❌ | ✅ | ✅ |
+   | Max 4 écrans upload | ✅ (hard limit) | ✅ (20) | ✅ (∞) |
+   | Quota indicator | ✅ | ✅ | ❌ (pas de quota) |
+
+5. **Migration login/register** — le login retourne maintenant `plan` + `workspace_id` + `entitlements` → mettre à jour le stockage localStorage
+
+**Fichiers :** `bootstrap.js`, nouveau `rbac_guard.js`, `WsStitchDrill.js` (adapter bouton Stitch si FREE), `ws_main.js` (guard sur forge)
 
 ### Mission 279 — FEE Studio : resolve écran actif + assets 404
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
