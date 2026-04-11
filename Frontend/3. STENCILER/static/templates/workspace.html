@@ -259,6 +259,34 @@
                 </button>
             </div>
 
+            <!-- SECTION MANIFEST (Mission 292B) -->
+            <div id="section-manifest" class="flex flex-col items-start">
+                <!-- PANEL MANIFEST (Initially collapsed) -->
+                <aside id="panel-manifest" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left collapsed">
+                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" onclick="togglePanel('panel-manifest')">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-homeos-green shadow-[0_0_8px_rgba(163,205,84,0.4)]"></div>
+                            <span class="text-[10px] font-bold text-slate-800 tracking-widest">manifest editor</span>
+                        </div>
+                        <div class="p-1 text-slate-300">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50/50">
+                        <div id="manifest-summary-content" class="text-[10px] text-slate-500 leading-relaxed italic mb-4">
+                            Chargement du manifeste...
+                        </div>
+                        <button onclick="window.ManifestBox.show(); togglePanel('panel-manifest')" class="w-full py-2 border border-[#8cc63f] text-[#8cc63f] text-[9px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] hover:text-white transition-all rounded-custom">
+                            Ouvrir l'éditeur complet
+                        </button>
+                    </div>
+                </aside>
+                <!-- BADGE MANIFEST (Shown by default) -->
+                <button id="badge-manifest" onclick="togglePanel('panel-manifest')" class="pointer-events-auto bg-slate-900 shadow-xl shadow-slate-900/10 text-white px-4 py-2 rounded-custom flex items-center justify-center transition-all hover:pl-6 w-fit">
+                    <span class="text-[10px] font-bold tracking-widest">manifest</span>
+                </button>
+            </div>
+
         </div>
 
         <!-- TOOLBAR DROITE : CANVAS TOOLS (Mission 129) -->

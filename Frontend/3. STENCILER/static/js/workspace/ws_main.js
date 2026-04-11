@@ -283,7 +283,16 @@
     };
     window.togglePanel = function(id) {
         var panel = document.getElementById(id);
-        if (panel) panel.classList.toggle('hidden');
+        if (!panel) return;
+
+        panel.classList.toggle('collapsed');
+        
+        // Gérer le badge correspondant
+        var badgeId = id.replace('panel-', 'badge-');
+        var badge = document.getElementById(badgeId);
+        if (badge) {
+            badge.classList.toggle('badge-hidden');
+        }
     };
 
     // wsSendMessage — transactional handshake avec les iframes (utilisé par WsWire)

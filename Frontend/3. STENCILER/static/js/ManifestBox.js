@@ -107,9 +107,34 @@
                 body: JSON.stringify(payload)
             });
             console.log('[WsManifestEditor] saved');
+            updateSideSummary(text);
         } catch(e) {
             console.error('Erreur save', e);
         }
+    }
+
+    /**
+     * Met à jour le résumé dans le panneau latéral persistant.
+     */
+    function updateSideSummary(text) {
+        const el = document.getElementById('manifest-summary-content');
+        if (!el) return;
+
+        if (!text || text.trim() === '') {
+            el.innerHTML = '<span class="italic opacity-50">Manifeste vide...</span>';
+            return;
+        }
+
+        // Nettoyer un peu le texte (virer les gros titres MD pour le résumé)
+        let summary = text
+            .replace(/^#+\s+/gm, '') // Enlever les #
+            .split('\n')
+            .filter(line => line.trim().length > 0)
+            .slice(0, 3) // 3 premières lignes non vides
+            .join(' / ');
+
+        if (summary.length > 120) summary = summary.substring(0, 117) + '...';
+        el.innerText = summary;
     }
 
     function onTextChange() {
@@ -415,5 +440,16 @@
 
     // API Publique
     window.ManifestBox = { show, hide, toggle };
+    
+    // Initialisation automatique du résumé latéral (M292B)
+    document.addEventListener('DOMContentLoaded', async () => {
+        const session = getSession();
+        const projectId = session.active_project_id || session.project_id;
+        if (projectId) {
+            await loadManifest();
+            if (manifestData) updateSideSummary(manifestData.raw_content);
+        }
+    });
+
     console.log('[WsManifestEditor] ✅ Override OK');
 })();

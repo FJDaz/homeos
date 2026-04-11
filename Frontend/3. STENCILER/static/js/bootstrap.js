@@ -70,7 +70,7 @@
         link.href = '/static/css/homeos-nav.css';
         document.head.appendChild(link);
 
-        // Delete button styles
+        // Delete button styles + help buttons
         const style = document.createElement('style');
         style.textContent = `
             .sd-delete-btn {
@@ -87,6 +87,14 @@
             }
             .sd-delete-btn:hover {
                 background: rgba(221,68,68,0.1);
+            }
+            .sd-help-btn {
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .sd-help-btn:hover {
+                color: #8cc63f !important;
+                stroke: #8cc63f !important;
             }
             .rbac-blocked {
                 opacity: 0.5 !important;

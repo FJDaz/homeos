@@ -180,7 +180,7 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
 }
 
 /* Collapsable Panels (Mission 129/130-C) */
-#panel-screens {
+#panel-screens, #panel-manifest {
     display: flex;
     flex-direction: column;
     transition: 
@@ -193,14 +193,14 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     visibility: visible;
 }
  
-#panel-screens.collapsed {
+#panel-screens.collapsed, #panel-manifest.collapsed {
     max-height: 0;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-5px) translateX(-5px);
 }
  
-#badge-screens {
+#badge-screens, #badge-manifest {
     transition: 
         opacity 0.3s ease, 
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -220,7 +220,7 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     overflow: hidden;
 }
  
-#badge-screens:hover, #badge-stitch:hover {
+#badge-screens:hover, #badge-stitch:hover, #badge-manifest:hover {
     padding-left: 1.5rem;
 }
 

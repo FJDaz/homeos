@@ -137,16 +137,15 @@
                     </div>
                 `
             },
-            // Step 3: Manifest preview
+            // Step 3: Manifest upload or preview
             {
                 html: `
                     <div class="text-center max-w-md">
                         <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Manifeste</div>
-                        <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet. Modifiable plus tard.</div>
-                        <div id="drill-manifest-preview" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c] max-h-48 overflow-y-auto">
-                            <em class="text-[#9a9a98]">Chargement...</em>
+                        <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet.</div>
+                        <div id="drill-manifest-section">
+                            <div class="text-[11px] text-[#9a9a98] mb-2">Chargement...</div>
                         </div>
-                        <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
                     </div>
                 `
             },
@@ -236,14 +235,116 @@
             document.getElementById('drill-continue-keys').onclick = () => { currentStep = 3; renderStep(); };
         }
         else if (stepIndex === 3) {
-            // Step 3: Manifest preview
-            loadManifestPreview();
-            document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
+            // Step 3: Manifest upload or preview
+            loadManifestStep();
         }
         else if (stepIndex === 4) {
             // Step 4: Forged screens display
             loadForgedScreens();
             document.getElementById('drill-finish').onclick = finishDrill;
+        }
+    }
+
+    async function loadManifestStep() {
+        const section = document.getElementById('drill-manifest-section');
+        if (!section) return;
+
+        try {
+            const session = getSession();
+            const projectId = session.active_project_id || session.project_id;
+            const res = await fetch(`/api/projects/${projectId}/manifest`);
+
+            if (res.ok) {
+                // Manifest exists — show preview + continue button
+                const m = await res.json();
+                const name = m.name || 'Sans titre';
+                const screens = (m.screens || []).length;
+                const archetype = m.archetype?.label || m.archetype || '—';
+                const desc = m.description || '';
+
+                section.innerHTML = `
+                    <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
+                        <div class="font-bold text-[12px] mb-1">${name}</div>
+                        ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
+                        <div class="flex gap-3 text-[9px] text-[#9a9a98]">
+                            <span>Archétype: ${archetype}</span><span>Écrans: ${screens}</span>
+                        </div>
+                    </div>
+                    <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                `;
+                document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
+            } else {
+                // No manifest — show upload zone
+                section.innerHTML = `
+                    <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-manifest-upload-zone">
+                        <div class="text-[24px] mb-2">↑</div>
+                        <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser ton manifeste ici</div>
+                        <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir (.json, .md, .txt)</div>
+                        <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
+                    </div>
+                    <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
+                    <div class="mt-3 text-[10px] text-[#9a9a98]">Pas de manifeste ? <a href="/cadrage" class="text-[#8cc63f] underline" target="_blank">Va dans Cadrage pour en créer un</a></div>
+                    <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
+                `;
+
+                const zone = document.getElementById('drill-manifest-upload-zone');
+                const input = document.getElementById('drill-manifest-input');
+                const status = document.getElementById('drill-manifest-status');
+
+                zone.onclick = () => input.click();
+                zone.ondragover = (e) => { e.preventDefault(); zone.style.borderColor = '#8cc63f'; };
+                zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
+                zone.ondrop = (e) => {
+                    e.preventDefault(); zone.style.borderColor = '#e5e5e5';
+                    if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status);
+                };
+                input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
+
+                document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
+            }
+        } catch(e) {
+            section.innerHTML = '<div class="text-[11px] text-[#d44]">Erreur chargement manifeste.</div><button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer →</button>';
+            document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
+        }
+    }
+
+    async function uploadManifest(file, statusEl) {
+        try {
+            const text = await file.text();
+            const session = getSession();
+            const projectId = session.active_project_id || session.project_id;
+
+            let payload;
+            if (file.name.endsWith('.json')) {
+                payload = JSON.parse(text);
+            } else {
+                payload = {
+                    name: file.name.replace(/\.(md|txt)$/i, ''),
+                    description: text.substring(0, 500),
+                    raw_content: text,
+                    screens: [], components: []
+                };
+            }
+
+            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                statusEl.textContent = 'Erreur sauvegarde (' + res.status + ')';
+                statusEl.style.color = '#d44';
+                return;
+            }
+
+            statusEl.textContent = '✓ Manifest sauvegardé';
+            statusEl.style.color = '#8cc63f';
+            setTimeout(() => { currentStep = 4; renderStep(); }, 800);
+
+        } catch(e) {
+            statusEl.textContent = 'Erreur: ' + e.message;
+            statusEl.style.color = '#d44';
         }
     }
 
