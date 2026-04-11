@@ -147,7 +147,7 @@
                         </div>
                         <div class="text-[10px] text-[#9a9a98] mb-3">
                             <span id="drill-key-count">${getActiveKeyCount()}</span> clé(s) configurée(s)
-                            ${plan === 'FREE' ? ' — <span class="text-orange-500">Plan FREE (max 3 projets)</span>' : ''}
+                            <span class="text-[#8cc63f] ml-2">💡 Tu peux aussi configurer tes clés via le bouton ⚙ dans la barre de navigation</span>
                         </div>
                         <button id="drill-continue-keys" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all disabled:opacity-40 disabled:cursor-not-allowed" ${getActiveKeyCount() === 0 ? 'disabled' : ''}>
                             Continuer →
@@ -155,27 +155,38 @@
                     </div>
                 `
             },
-            // Step 3: Launch Stitch (with RBAC guard)
+            // Step 3: Screens upload (1-4)
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Lancer Stitch</div>
-                        ${plan === 'FREE' ? `
-                            <div class="p-3 bg-orange-50 border border-orange-200 rounded-[12px] mb-4">
-                                <div class="text-[11px] text-orange-600 font-bold">⚠ Plan FREE</div>
-                                <div class="text-[10px] text-orange-500">Stitch nécessite un plan PRO. Upgrade pour accéder à toutes les fonctionnalités.</div>
-                            </div>
-                        ` : ''}
-                        <div class="text-[11px] text-[#9a9a98] mb-6">HomeOS va créer ton projet Stitch et charger tes écrans. Laisse la page ouverte.</div>
-                        <button id="drill-launch-stitch" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[12px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all ${plan === 'FREE' ? 'opacity-40 cursor-not-allowed' : ''}" ${plan === 'FREE' ? 'disabled' : ''}>
-                            Charger sur Stitch →
-                        </button>
-                        <div id="drill-progress" class="mt-4 hidden">
-                            <div class="w-full bg-[#e5e5e5] rounded-full h-2 overflow-hidden">
-                                <div id="drill-progress-bar" class="h-full bg-[#8cc63f] transition-all duration-500" style="width: 0%"></div>
-                            </div>
-                            <div id="drill-progress-text" class="text-[10px] text-[#9a9a98] mt-2">Création du projet Stitch...</div>
+                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Écrans</div>
+                        <div class="text-[11px] text-[#9a9a98] mb-4">Charge 1 à 4 écrans (PNG, SVG, JPG) pour démarrer ton projet.</div>
+                        <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-screen-upload-zone">
+                            <div class="text-[24px] mb-2">↑</div>
+                            <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser tes écrans ici</div>
+                            <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir</div>
+                            <input type="file" id="drill-screen-input" class="hidden" accept=".png,.svg,.jpg,.jpeg" multiple>
                         </div>
+                        <div id="drill-screen-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
+                        <div class="mt-2 text-[10px] text-[#9a9a98]" id="drill-screen-count">0 écran(s) chargé(s) — min. 1 requis</div>
+                        <button id="drill-continue-screens" class="mt-4 px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                            Continuer →
+                        </button>
+                    </div>
+                `
+            },
+            // Step 4: Manifest editor (simple — full editor later)
+            {
+                html: `
+                    <div class="text-center max-w-md">
+                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Manifeste</div>
+                        <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet. Tu peux le modifier plus tard.</div>
+                        <div id="drill-manifest-preview" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c] max-h-48 overflow-y-auto">
+                            <em class="text-[#9a9a98]">Chargement du manifeste...</em>
+                        </div>
+                        <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[12px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">
+                            Commencer à travailler →
+                        </button>
                     </div>
                 `
             }
@@ -185,6 +196,9 @@
         overlay.innerHTML = step.html;
         wireStep(currentStep);
     }
+
+    let screenCount = 0;
+    let uploadedScreens = [];
 
     function wireStep(stepIndex) {
         if (stepIndex === 0) {
@@ -225,11 +239,9 @@
                 });
 
                 input.addEventListener('input', () => {
-                    // Live update key count
                     const count = getActiveKeyCount() + (input.value.trim() ? 1 : 0);
                     const countEl = document.getElementById('drill-key-count');
                     if (countEl) countEl.textContent = count;
-                    // Enable/disable continue button
                     const btn = document.getElementById('drill-continue-keys');
                     if (btn) btn.disabled = count === 0;
                 });
@@ -238,14 +250,33 @@
             document.getElementById('drill-continue-keys').onclick = () => {
                 if (getActiveKeyCount() === 0) return;
                 currentStep = 3;
+                screenCount = 0;
+                uploadedScreens = [];
                 renderStep();
             };
         }
         else if (stepIndex === 3) {
-            const launchBtn = document.getElementById('drill-launch-stitch');
-            if (launchBtn && !launchBtn.disabled) {
-                launchBtn.onclick = launchStitchProject;
-            }
+            // Step 3: Screen upload
+            const zone = document.getElementById('drill-screen-upload-zone');
+            const input = document.getElementById('drill-screen-input');
+            const status = document.getElementById('drill-screen-status');
+            const countEl = document.getElementById('drill-screen-count');
+            const btn = document.getElementById('drill-continue-screens');
+
+            zone.onclick = () => input.click();
+            zone.ondragover = (e) => { e.preventDefault(); zone.style.borderColor = '#8cc63f'; };
+            zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
+            zone.ondrop = (e) => {
+                e.preventDefault();
+                zone.style.borderColor = '#e5e5e5';
+                if (e.dataTransfer.files.length) handleScreenUpload(e.dataTransfer.files, status, countEl, btn);
+            };
+            input.onchange = () => { if (input.files.length) handleScreenUpload(input.files, status, countEl, btn); };
+        }
+        else if (stepIndex === 4) {
+            // Step 4: Manifest preview
+            loadManifestPreview();
+            document.getElementById('drill-finish').onclick = finishDrill;
         }
     }
 
@@ -330,6 +361,92 @@
             statusEl.textContent = 'Erreur: ' + e.message;
             statusEl.style.color = '#d44';
         }
+    }
+
+    async function handleScreenUpload(files, statusEl, countEl, btn) {
+        const session = getSession();
+        const projectId = session.active_project_id || session.project_id;
+        const formData = new FormData();
+
+        let count = 0;
+        for (const file of files) {
+            if (count >= 4) break;
+            formData.append('files', file);
+            count++;
+        }
+
+        if (count === 0) return;
+
+        statusEl.textContent = 'Upload en cours...';
+        statusEl.style.color = '#8cc63f';
+
+        try {
+            const res = await fetch(`/api/imports/upload?project_id=${projectId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                statusEl.textContent = 'Erreur upload (' + res.status + ')';
+                statusEl.style.color = '#d44';
+                return;
+            }
+
+            screenCount += count;
+            countEl.textContent = screenCount + ' écran(s) chargé(s) — min. 1 requis';
+            statusEl.textContent = '✓ ' + count + ' écran(s) uploadé(s)';
+            statusEl.style.color = '#8cc63f';
+
+            if (screenCount >= 1) btn.disabled = false;
+
+            // Refresh imports list
+            if (window.WsImportList) window.WsImportList.refresh();
+
+        } catch(e) {
+            statusEl.textContent = 'Erreur: ' + e.message;
+            statusEl.style.color = '#d44';
+        }
+    }
+
+    async function loadManifestPreview() {
+        const preview = document.getElementById('drill-manifest-preview');
+        if (!preview) return;
+
+        try {
+            const session = getSession();
+            const projectId = session.active_project_id || session.project_id;
+            const res = await fetch(`/api/projects/${projectId}/manifest`);
+            if (res.ok) {
+                const manifest = await res.json();
+                const name = manifest.name || 'Sans titre';
+                const screens = (manifest.screens || []).length;
+                const components = (manifest.components || []).length;
+                const archetype = manifest.archetype?.label || manifest.archetype || '—';
+                const desc = manifest.description || '';
+
+                preview.innerHTML = `
+                    <div class="font-bold text-[12px] mb-1">${name}</div>
+                    ${desc ? '<div class="text-[#9a9a98] mb-2">' + desc.substring(0, 200) + '</div>' : ''}
+                    <div class="flex gap-3 text-[9px] text-[#9a9a98]">
+                        <span>Archétype: ${archetype}</span>
+                        <span>Écrans: ${screens}</span>
+                        <span>Composants: ${components}</span>
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = '<em class="text-[#9a9a98]">Aucun manifeste trouvé — tu pourras le créer plus tard depuis le canvas.</em>';
+            }
+        } catch(e) {
+            preview.innerHTML = '<em class="text-[#9a9a98]">Erreur chargement manifeste</em>';
+        }
+    }
+
+    function finishDrill() {
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay = null;
+        }
+        if (window.WsImportList) window.WsImportList.refresh();
     }
 
     async function launchStitchProject() {
