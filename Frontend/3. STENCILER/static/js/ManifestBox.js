@@ -68,13 +68,17 @@
             if (res.ok) {
                 manifestData = await res.json();
                 
-                // Si pas de raw_content, on génère un markdown par défaut à partir des écrans (legacy fallback)
-                if (!manifestData.raw_content && manifestData.screens) {
-                    let md = `# Manifeste : ${manifestData.name || 'Projet'}\n\n`;
-                    manifestData.screens.forEach(s => {
-                        md += `## ${s.name || 'Écran'}\n- Type: ${s.type || s.archetype_label}\n\n`;
-                    });
-                    manifestData.raw_content = md;
+                // Si pas de raw_content : utiliser description si dispo, sinon générer depuis les écrans
+                if (!manifestData.raw_content) {
+                    if (manifestData.description) {
+                        manifestData.raw_content = manifestData.description;
+                    } else if (manifestData.screens && manifestData.screens.length > 0) {
+                        let md = `# Manifeste : ${manifestData.name || 'Projet'}\n\n`;
+                        manifestData.screens.forEach(s => {
+                            md += `## ${s.name || 'Écran'}\n- Type: ${s.type || s.archetype_label}\n\n`;
+                        });
+                        manifestData.raw_content = md;
+                    }
                 }
             } else {
                 // Initialise un nouveau manifest vide
@@ -297,6 +301,10 @@
             <div id="manifestbox-handle" class="h-[40px] bg-white border-b border-[#e5e5e5] px-4 flex items-center justify-between cursor-grab select-none">
                 <span class="text-[12px] font-black uppercase tracking-[0.15em] text-[#8cc63f]">manifest editor</span>
                 <div class="flex items-center gap-3">
+                    <button id="manifestbox-reload" class="p-1 px-2 text-slate-400 hover:text-[#8cc63f] transition-all flex items-center gap-1" title="Recharger depuis le serveur">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 13a8.1 8.1 0 0015.4 3M20 11a8.1 8.1 0 00-15.4-3"/></svg>
+                        <span class="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">Recharger</span>
+                    </button>
                     <button id="manifestbox-validate" class="px-3 py-1 bg-[#8cc63f] text-white text-[11px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
                         Valider le manifeste
                     </button>
@@ -370,6 +378,26 @@
         document.getElementById('manifestbox-validate').onclick = () => {
             saveManifestDeferred().then(() => hide());
         };
+        
+        const reloadBtn = document.getElementById('manifestbox-reload');
+        if (reloadBtn) {
+            reloadBtn.onclick = async () => {
+                reloadBtn.classList.add('animate-spin');
+                reloadBtn.style.pointerEvents = 'none';
+                await loadManifest();
+                if (manifestData && manifestData.raw_content) {
+                    els.editor.value = manifestData.raw_content;
+                    updateSignets();
+                    updateSullivanPosition();
+                    updateSideSummary(manifestData.raw_content);
+                }
+                setTimeout(() => {
+                    reloadBtn.classList.remove('animate-spin');
+                    reloadBtn.style.pointerEvents = 'auto';
+                }, 600);
+            };
+        }
+
         els.signetsToggle.onclick = toggleSignets;
         
         els.editor.addEventListener('input', onTextChange);
@@ -415,8 +443,8 @@
         buildPanel();
         panel.style.display = 'flex';
         await loadManifest();
-        if (manifestData && manifestData.raw_content) {
-            els.editor.value = manifestData.raw_content;
+        if (manifestData) {
+            els.editor.value = manifestData.raw_content || manifestData.description || '';
         }
         updateSignets();
         

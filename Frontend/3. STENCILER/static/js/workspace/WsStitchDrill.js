@@ -302,10 +302,21 @@
         if (uploaded > 0) {
             screenCount += uploaded;
             countEl.textContent = screenCount + ' écran(s) chargé(s) — min. 1 requis';
-            statusEl.textContent = '✓ ' + uploaded + ' écran(s) uploadé(s)';
+            statusEl.textContent = '✓ ' + uploaded + ' écran(s) uploadé(s) — extraction des tokens en cours...';
             statusEl.style.color = '#8cc63f';
             if (screenCount >= 1) btn.disabled = false;
             if (window.WsImportList) window.WsImportList.refresh();
+
+            // M293: Trigger background design token extraction
+            triggerTokenExtraction();
+        }
+    }
+
+    async function triggerTokenExtraction() {
+        try {
+            await fetch('/api/imports/extract-tokens', { method: 'POST' });
+        } catch(e) {
+            console.warn('[WsStitchDrill] Token extraction failed:', e);
         }
     }
 
@@ -331,6 +342,25 @@
                 if (!hasContent) {
                     showManifestUpload(section);
                 } else {
+                    // Fetch design tokens too
+                    let tokensHtml = '';
+                    try {
+                        const tokenRes = await fetch('/api/imports/design-tokens');
+                        const tokenData = await tokenRes.json();
+                        const tokens = tokenData.tokens || {};
+                        const palette = tokens.colors?.palette || [];
+                        if (palette.length > 0) {
+                            tokensHtml = `
+                                <div class="mt-3 pt-3 border-t border-[#e5e5e5]">
+                                    <div class="text-[9px] font-bold text-[#9a9a98] uppercase tracking-wider mb-2">tokens extraits des écrans</div>
+                                    <div class="flex gap-1 flex-wrap">
+                                        ${palette.map(c => `<div class="w-6 h-6 rounded-[4px] border border-[#e5e5e5] cursor-pointer" style="background:${c}" title="${c}"></div>`).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } catch(e) {}
+
                     const name = m.name || 'Sans titre';
                     const desc = m.description || m.raw_content || '';
                     const archetype = m.archetype?.label || m.archetype || '—';
@@ -338,7 +368,8 @@
                         <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[13px] text-[#3d3d3c]">
                             <div class="font-bold text-[14px] mb-1">${name}</div>
                             ${desc ? '<div class="text-[#9a9a98] mb-2 text-[12px]">' + desc.substring(0, 200) + '</div>' : ''}
-                            <div class="flex gap-3 text-[11px] text-[#9a9a98] mb-3"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
+                            <div class="flex gap-3 text-[11px] text-[#9a9a98]"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
+                            ${tokensHtml}
                         </div>
                         <div class="flex gap-2">
                             <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
@@ -392,7 +423,7 @@
             if (file.name.endsWith('.json')) {
                 payload = JSON.parse(text);
             } else {
-                payload = { name: file.name.replace(/\.(md|txt)$/i, ''), description: text.substring(0, 500), raw_content: text, screens: [], components: [] };
+                payload = { name: file.name.replace(/\.(md|txt)$/i, ''), description: text.substring(0, 500), raw_content: text, screens: [] };
             }
             const res = await fetch(`/api/projects/${projectId}/manifest`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)

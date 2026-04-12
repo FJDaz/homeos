@@ -51,6 +51,7 @@ class ProjectCreateRequest(BaseModel):
 class ProjectManifest(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    raw_content: Optional[str] = None
     archetype: Optional[str] = None
     design_tokens: Optional[Dict] = None
     screens: Optional[List] = None

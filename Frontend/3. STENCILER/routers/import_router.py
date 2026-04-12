@@ -437,3 +437,46 @@ async def asset_delete(filename: str):
         raise HTTPException(status_code=404, detail="Image non trouvée")
     file_path.unlink()
     return {"status": "deleted", "filename": filename}
+
+
+@router.post("/api/imports/extract-tokens")
+async def extract_design_tokens():
+    """M293: Trigger background design token extraction from uploaded screens."""
+    from routers.design_token_extractor import extract_tokens_background
+    from bkd_service import get_active_project_path
+
+    active_file = ROOT_DIR / "active_project.json"
+    active_id = None
+    if active_file.exists():
+        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+
+    if not active_id:
+        return {"status": "skipped", "reason": "no active project"}
+
+    # Launch in background
+    import asyncio
+    asyncio.create_task(extract_tokens_background(active_id))
+    logger.info(f"M293: Triggered design token extraction for {active_id}")
+    return {"status": "started", "project_id": active_id}
+
+
+@router.get("/api/imports/design-tokens")
+async def get_design_tokens():
+    """M293: Return current design tokens from manifest."""
+    active_file = ROOT_DIR / "active_project.json"
+    active_id = None
+    if active_file.exists():
+        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+
+    if not active_id:
+        return {"tokens": {}}
+
+    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+    if not manifest_path.exists():
+        return {"tokens": {}}
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        return {"tokens": manifest.get("design_tokens", {})}
+    except:
+        return {"tokens": {}}
