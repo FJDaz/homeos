@@ -12,7 +12,7 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             font-family: 'Geist', sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             text-transform: lowercase;
         }
         .homeos-table {
@@ -24,7 +24,7 @@
         .homeos-th {
             padding: 10px 16px;
             text-align: left;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-subtle);
@@ -39,7 +39,7 @@
         .btn-homeos {
             padding: 4px 10px;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.1s ease;
             border: 1px solid var(--border-subtle);
@@ -54,11 +54,11 @@
             background: var(--bg-primary);
         }
         .drawer-header { border-bottom: 1px solid var(--border-subtle); background: var(--bg-secondary); }
-        .drawer-content { font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
-        .drawer-content h1, .drawer-content h2 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 16px; }
-        .drawer-content pre { background: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle); margin: 8px 0; overflow-x: auto; font-family: 'Geist Mono', monospace; font-size: 11px; }
+        .drawer-content { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+        .drawer-content h1, .drawer-content h2 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-top: 16px; }
+        .drawer-content pre { background: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle); margin: 8px 0; overflow-x: auto; font-family: 'Geist Mono', monospace; font-size: 13px; }
 
-        .tag-status { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; background: var(--bg-tertiary); color: var(--text-muted); }
+        .tag-status { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; background: var(--bg-tertiary); color: var(--text-muted); }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -72,7 +72,7 @@
             <div class="max-w-6xl mx-auto flex flex-col gap-8">
                 
                 <section>
-                    <div class="text-[11px] text-[#7aca6a] font-bold tracking-widest mb-1 italic">phase_102</div>
+                    <div class="text-[13px] text-[#7aca6a] font-bold tracking-widest mb-1 italic">phase_102</div>
                     <h2 class="text-3xl font-medium tracking-tight mb-2">registre des intentions</h2>
                     <p class="text-zinc-500 max-w-xl leading-relaxed">
                         explorez les composants détectés et leurs intentions fonctionnelles. lancez l'annotation assistée pour préparer l'implémentation frd.
@@ -107,7 +107,7 @@
     <div id="drawer" class="fixed right-0 top-0 h-full w-[450px] border-l border-zinc-200 translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col">
         <div class="drawer-header p-6 flex items-center justify-between">
             <div class="flex flex-col">
-                <span class="text-[9px] font-bold tracking-widest text-[#7aca6a] uppercase">kimi_architect</span>
+                <span class="text-[11px] font-bold tracking-widest text-[#7aca6a] uppercase">kimi_architect</span>
                 <h3 id="drawer-title" class="font-bold text-lg tracking-tight lowercase">plan d'implémentation</h3>
             </div>
             <button onclick="closeDrawer()" class="text-zinc-400 hover:text-zinc-600 text-xl">✕</button>
@@ -116,7 +116,7 @@
             <!-- AI Content -->
         </div>
         <div class="p-6 border-t border-zinc-100 bg-zinc-50">
-            <button id="drawer-editor-btn" class="btn-homeos-primary btn-homeos w-full justify-center h-10 text-white">ouvrir dans le frd editor</button>
+            <button id="drawer-editor-btn" class="btn-homeos-primary btn-homeos w-full justify-center h-[42px] text-white">ouvrir dans le frd editor</button>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
         async function annotate(id, name, desc) {
             openDrawer(id);
             const content = document.getElementById('drawer-content');
-            content.innerHTML = '<div class="animate-pulse flex flex-col gap-4"><div class="h-4 bg-zinc-100 rounded w-3/4"></div><div class="h-20 bg-zinc-100 rounded"></div></div>';
+            content.innerHTML = '<div class="animate-pulse flex flex-col gap-4"><div class="h-[18px] bg-zinc-100 rounded w-[14px]/4"></div><div class="h-20 bg-zinc-100 rounded"></div></div>';
 
             try {
                 const res = await fetch('/api/frd/annotate', {
@@ -244,11 +244,11 @@
                 const el = document.getElementById('analysis-content');
                 if (!el) return;
                 el.innerHTML = `
-                    <div style="padding:16px;font-size:12px;color:var(--text-primary,#3d3d3c);">
+                    <div style="padding:16px;font-size:14px;color:var(--text-primary,#3d3d3c);">
                         <div style="font-weight:600;margin-bottom:6px;">${latest.name}</div>
                         <div style="color:var(--text-secondary,#6a6a69);margin-bottom:3px;">archétype : <strong>${latest.archetype_label || '—'}</strong></div>
                         <div style="color:var(--text-secondary,#6a6a69);">${latest.elements_count ?? 0} éléments</div>
-                        <div style="margin-top:10px;font-size:11px;color:var(--text-muted,#999);">
+                        <div style="margin-top:10px;font-size:13px;color:var(--text-muted,#999);">
                             importé le ${new Date(latest.timestamp).toLocaleString('fr-FR')}
                         </div>
                     </div>`;

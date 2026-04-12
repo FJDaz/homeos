@@ -54,7 +54,7 @@
             border-left: 2px solid #c4b5d4;
             padding-left: 10px;
             margin-bottom: 15px;
-            font-size: 15px;
+            font-size: 17px;
         }
     </style>
 </head>
@@ -63,14 +63,14 @@
     <!-- Sidebar Gauche (Aside) - 350px -->
     <aside class="flex flex-col w-[350px] h-full p-[42px] border-r-[0.5px] border-figma-sep bg-white flex-shrink-0">
         <div class="flex justify-center mb-[40px]">
-            <div class="font-homeos text-[40px] font-[900] text-black tracking-[-0.02em] leading-tight">
+            <div class="font-homeos text-[42px] font-[900] text-black tracking-[-0.02em] leading-tight">
                 Homé<span class="text-figma-tabActive">os</span>
             </div>
         </div>
         <input type="text" id="search-input" placeholder="Envoyer un prompt aux 3 modèles…"
-               class="bg-figma-input border-none p-[12px_16px] text-[15px] outline-none rounded-none">
+               class="bg-figma-input border-none p-[12px_16px] text-[17px] outline-none rounded-none">
 
-        <div id="session-info" class="mt-auto text-[15px] text-gray-400">Id: --</div>
+        <div id="session-info" class="mt-auto text-[17px] text-gray-400">Id: --</div>
     </aside>
 
     <!-- RIGHT SECTION -->
@@ -78,7 +78,7 @@
 
         <!-- Header bar (Contrôles spécifiques Cadrage) -->
         <header class="h-[48px] border-b-[0.5px] border-figma-sep bg-[#f7f6f2] flex-shrink-0 flex items-center px-8">
-            <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Cadrage War Room</span>
+            <span class="text-[12px] text-gray-400 uppercase font-bold tracking-widest">Cadrage War Room</span>
         </header>
 
         <!-- Lower Workspace -->
@@ -92,37 +92,37 @@
                     <!-- Column: Gemini -->
                     <section class="flex flex-col overflow-hidden">
                         <div class="p-[24px_20px] flex flex-col items-center">
-                            <div class="font-inter text-[15px] text-figma-text mb-3 tracking-wider">Gemini</div>
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg" class="h-6 w-auto" alt="Gemini">
+                            <div class="font-inter text-[17px] text-figma-text mb-3 tracking-wider">Gemini</div>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg" class="h-[26px] w-auto" alt="Gemini">
                         </div>
-                        <div id="stream-gemini" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[15px] border-r-[0.5px] border-figma-sep items-center"></div>
+                        <div id="stream-gemini" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[17px] border-r-[0.5px] border-figma-sep items-center"></div>
                     </section>
                     <!-- Column: Groq -->
                     <section class="flex flex-col overflow-hidden">
                         <div class="p-[24px_20px] flex flex-col items-center">
-                            <div class="font-inter text-[15px] text-figma-text mb-3 tracking-wider">Groq</div>
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f55036"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">G</text></svg>
+                            <div class="font-inter text-[17px] text-figma-text mb-3 tracking-wider">Groq</div>
+                            <svg class="h-[26px] w-[26px]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f55036"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">G</text></svg>
                         </div>
-                        <div id="stream-groq" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[15px] border-r-[0.5px] border-figma-sep items-center"></div>
+                        <div id="stream-groq" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[17px] border-r-[0.5px] border-figma-sep items-center"></div>
                     </section>
                     <!-- Column: Codestral -->
                     <section class="flex flex-col overflow-hidden">
                         <div class="p-[24px_20px] flex flex-col items-center flex items-center gap-2">
-                            <div class="font-inter text-[15px] text-figma-text mb-3 tracking-wider flex items-center gap-2">
+                            <div class="font-inter text-[17px] text-figma-text mb-3 tracking-wider flex items-center gap-2">
                                 Codestral
-                                <span class="w-1.5 h-1.5 rounded-full bg-figma-tabActive"></span>
+                                <span class="w-[6px].5 h-[6px].5 rounded-full bg-figma-tabActive"></span>
                             </div>
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ff7000"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">M</text></svg>
+                            <svg class="h-[26px] w-[26px]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ff7000"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">M</text></svg>
                         </div>
-                        <div id="stream-codestral" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[15px] items-center"></div>
+                        <div id="stream-codestral" class="flex-1 overflow-y-auto p-5 no-scrollbar flex flex-col gap-4 text-[17px] items-center"></div>
                     </section>
                 </main>
 
                 <!-- IA Footer (3 invisible columns for results) -->
                 <footer class="h-[100px] border-t-[0.5px] border-figma-sep bg-figma-input grid grid-cols-3 flex-shrink-0">
-                    <div id="results-gemini" class="p-4 overflow-y-auto no-scrollbar text-[15px] text-gray-500 italic flex flex-col items-center"></div>
-                    <div id="results-groq" class="p-4 overflow-y-auto no-scrollbar text-[15px] text-gray-500 italic flex flex-col items-center"></div>
-                    <div id="results-codestral" class="p-4 overflow-y-auto no-scrollbar text-[15px] text-gray-500 italic flex flex-col items-center"></div>
+                    <div id="results-gemini" class="p-4 overflow-y-auto no-scrollbar text-[17px] text-gray-500 italic flex flex-col items-center"></div>
+                    <div id="results-groq" class="p-4 overflow-y-auto no-scrollbar text-[17px] text-gray-500 italic flex flex-col items-center"></div>
+                    <div id="results-codestral" class="p-4 overflow-y-auto no-scrollbar text-[17px] text-gray-500 italic flex flex-col items-center"></div>
 
                     <!-- Preserved but hidden interaction markers -->
                     <button id="btn-dispatch" class="hidden"></button>
@@ -133,8 +133,8 @@
             <!-- Sullivan Panel (Next to IA Workspace, Down to bottom) -->
             <section id="sullivan-panel" class="w-[336px] flex flex-col border-l-[0.5px] border-figma-sep bg-figma-panel flex-shrink-0">
                 <div class="h-[101px] flex items-center p-[0_32px] bg-white border-b-[0.5px] border-black gap-3 flex-shrink-0">
-                    <div class="w-2 h-2 rounded-full bg-figma-dotGreen shadow-[0_0_8px_rgba(94,192,105,0.5)]"></div>
-                    <div class="font-geist text-[15px] text-figma-text">Sullivan</div>
+                    <div class="w-[10px] h-[10px] rounded-full bg-figma-dotGreen shadow-[0_0_8px_rgba(94,192,105,0.5)]"></div>
+                    <div class="font-geist text-[17px] text-figma-text">Sullivan</div>
                 </div>
 
                 <div id="nugget-list" class="flex-1 overflow-y-auto p-8 no-scrollbar flex flex-col gap-4">
@@ -142,10 +142,10 @@
                 </div>
 
                 <div class="p-6 bg-white border-t-[0.5px] border-figma-sep flex flex-col gap-3 flex-shrink-0">
-                    <button id="btn-arbitrate" class="w-full h-[40px] border-[0.5px] border-black text-[15px] font-geist hover:bg-gray-50 transition-colors tracking-widest">
+                    <button id="btn-arbitrate" class="w-full h-[40px] border-[0.5px] border-black text-[17px] font-geist hover:bg-gray-50 transition-colors tracking-widest">
                         Sullivan Arbitrage
                     </button>
-                    <button id="btn-prd" disabled class="w-full h-[40px] bg-figma-tabActive text-white text-[15px] font-bold disabled:bg-gray-300 disabled:cursor-not-allowed tracking-widest">
+                    <button id="btn-prd" disabled class="w-full h-[40px] bg-figma-tabActive text-white text-[17px] font-bold disabled:bg-gray-300 disabled:cursor-not-allowed tracking-widest">
                         Générer PRD
                     </button>
                 </div>
@@ -157,13 +157,13 @@
     <div id="prd-modal" class="hidden fixed inset-0 bg-black/50 z-[1000] items-center justify-center p-10">
         <div class="bg-white w-full max-w-4xl h-full flex flex-col shadow-2xl font-homeos">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
-                <span class="font-semibold text-figma-textDark whitespace-nowrap text-[15px]">Dossier de conception AI</span>
+                <span class="font-semibold text-figma-textDark whitespace-nowrap text-[17px]">Dossier de conception AI</span>
                 <div class="flex gap-4">
-                    <a id="prd-download" download="PRD.md" href="#" class="text-figma-tabActive font-bold border-b border-transparent hover:border-figma-tabActive px-2 py-1 transition-all text-[15px]">Télécharger</a>
-                    <button onclick="document.getElementById('prd-modal').classList.add('hidden')" class="px-4 py-1 text-red-500 hover:bg-red-50 rounded transition-all text-[15px]">Fermer</button>
+                    <a id="prd-download" download="PRD.md" href="#" class="text-figma-tabActive font-bold border-b border-transparent hover:border-figma-tabActive px-2 py-1 transition-all text-[17px]">Télécharger</a>
+                    <button onclick="document.getElementById('prd-modal').classList.add('hidden')" class="px-4 py-1 text-red-500 hover:bg-red-50 rounded transition-all text-[17px]">Fermer</button>
                 </div>
             </div>
-            <pre id="prd-content" class="flex-1 p-10 overflow-y-auto whitespace-pre-wrap font-geist text-figma-text text-[15px] leading-relaxed"></pre>
+            <pre id="prd-content" class="flex-1 p-10 overflow-y-auto whitespace-pre-wrap font-geist text-figma-text text-[17px] leading-relaxed"></pre>
         </div>
     </div>
 
@@ -179,7 +179,7 @@
             const inputEl = document.getElementById('main-input') || document.querySelector('textarea, input[type="text"]');
             if (inputEl) inputEl.value = `Contexte wire détecté :\n${_wireContext}\n\nQue veux-tu faire avec ce screen ?`;
             const badge = document.createElement('div');
-            badge.style.cssText = 'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;padding:6px 12px;border-radius:6px;font-size:10px;font-weight:600;margin-bottom:8px;';
+            badge.style.cssText = 'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;margin-bottom:8px;';
             badge.textContent = `⟵ Wire : ${_wireImportId || 'import'}`;
             document.querySelector('.max-w-screen-2xl') && document.querySelector('.max-w-screen-2xl').prepend(badge);
         }
@@ -200,8 +200,8 @@
             const div = document.createElement('div');
             div.className = 'bg-white p-4 border-l-4 border-figma-tabActive shadow-sm self-end max-w-[90%] relative mb-2';
             div.innerHTML = `
-                <div class="text-[15px] leading-relaxed">${text}</div>
-                <div class="text-[15px] text-gray-400 mt-2 tracking-tighter">${provider} · capture</div>
+                <div class="text-[17px] leading-relaxed">${text}</div>
+                <div class="text-[17px] text-gray-400 mt-2 tracking-tighter">${provider} · capture</div>
             `;
             nuggetList.prepend(div);
             basketCount++;
@@ -223,7 +223,7 @@
             const card = document.createElement('div');
             card.className = 'bg-white border-b-[0.5px] border-figma-input pb-8 relative group mb-4 w-full';
             const content = document.createElement('div');
-            content.className = 'text-[15px] leading-relaxed';
+            content.className = 'text-[17px] leading-relaxed';
             card.appendChild(content);
             const btn = document.createElement('button');
             btn.className = 'absolute bottom-0 right-0 w-11 h-11 bg-figma-input flex items-center justify-center text-xl hover:bg-accent-bleu/20 transition-colors opacity-0 group-hover:opacity-100';

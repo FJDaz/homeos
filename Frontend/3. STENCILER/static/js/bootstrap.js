@@ -77,7 +77,7 @@
                 background: none;
                 border: none;
                 color: #d44;
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: bold;
                 cursor: pointer;
                 padding: 2px 6px;
@@ -369,15 +369,15 @@
                 <span class="sd-label">Compte & Workspace</span>
                 <div class="flex flex-col gap-1 mb-3">
                     <div class="flex items-center gap-2">
-                        <span class="text-[12px] font-bold text-[#3d3d3c]">${session.name || '?'}</span>
-                        <span class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded ${session.plan === 'MAX' ? 'bg-indigo-600 text-white' : session.plan === 'PRO' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}">${session.plan || 'FREE'}</span>
+                        <span class="text-[14px] font-bold text-[#3d3d3c]">${session.name || '?'}</span>
+                        <span class="px-1.5 py-0.5 text-[10px] font-black uppercase tracking-widest rounded ${session.plan === 'MAX' ? 'bg-indigo-600 text-white' : session.plan === 'PRO' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}">${session.plan || 'FREE'}</span>
                     </div>
                     <span class="text-[9px] text-slate-400 font-mono tracking-tighter uppercase">${session.role || 'student'} / ${session.user_id?.substring(0,8) || '...' }</span>
                 </div>
                 
                 <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <div class="text-[8px] uppercase tracking-widest text-slate-400 mb-1">Workspace actif</div>
-                    <div class="text-[11px] font-bold text-slate-700 truncate">${session.workspace_id || 'Personnel'}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Workspace actif</div>
+                    <div class="text-[13px] font-bold text-slate-700 truncate">${session.workspace_id || 'Personnel'}</div>
                 </div>
             </div>
 
@@ -397,8 +397,8 @@
                         <div class="sd-key-group">
                             <div class="sd-key-label">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[12px] font-bold text-[#3d3d3c]">${p.id.toUpperCase()}</span>
-                                    <span class="text-[11px] text-[#9a9a98]">${p.price}</span>
+                                    <span class="text-[14px] font-bold text-[#3d3d3c]">${p.id.toUpperCase()}</span>
+                                    <span class="text-[13px] text-[#9a9a98]">${p.price}</span>
                                     <svg class="sd-help-btn" data-provider="${p.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -411,7 +411,7 @@
                         </div>
                     `).join('')}
                 </div>
-                <button id="sd-save-keys-btn" class="mt-8 w-full py-3 bg-[#A3CD54] text-[#1A1A1A] text-[10px] font-bold uppercase tracking-widest hover:opacity-90">
+                <button id="sd-save-keys-btn" class="mt-8 w-full py-3 bg-[#A3CD54] text-[#1A1A1A] text-[12px] font-bold uppercase tracking-widest hover:opacity-90">
                     Sauvegarder les clés
                 </button>
             </div>

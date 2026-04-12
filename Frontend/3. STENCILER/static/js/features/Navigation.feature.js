@@ -22,7 +22,7 @@ class NavigationFeature extends StencilerFeature {
       return `
                 <li style="padding: 2px 0; display: flex; align-items: center; gap: 6px;">
                   ${index > 0 ? '<span style="color: var(--text-muted);">›</span>' : ''}
-                  <a href="#${id}" class="${components.tab}" style="text-decoration: none; color: inherit; font-size: 11px;">${name}</a>
+                  <a href="#${id}" class="${components.tab}" style="text-decoration: none; color: inherit; font-size: 13px;">${name}</a>
                 </li>
               `;
     }).join('')}

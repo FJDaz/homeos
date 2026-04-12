@@ -16,7 +16,7 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             font-family: 'Geist', sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             text-transform: lowercase; /* Règle absolue HoméOS */
         }
         .sidebar-brand { color: var(--vert-homeos); }
@@ -26,7 +26,7 @@
             color: var(--text-secondary);
             padding: 6px 12px;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 13px;
             transition: all 0.12s ease;
         }
         .btn-homeos:hover {
@@ -61,15 +61,15 @@
         <!-- PROJECT SIDEBAR (Mission 111) -->
         <aside class="sidebar w-[220px] bg-[#fdfdfb] border-r border-zinc-200 flex flex-col pt-6">
             <div class="px-6 mb-8">
-                <div class="text-[10px] uppercase font-black text-zinc-400 tracking-widest mb-4">projets</div>
+                <div class="text-[12px] uppercase font-black text-zinc-400 tracking-widest mb-4">projets</div>
                 <div id="project-list" class="flex flex-col gap-1">
                     <!-- Projects injected here -->
-                    <div class="text-[11px] text-zinc-300 italic">chargement...</div>
+                    <div class="text-[13px] text-zinc-300 italic">chargement...</div>
                 </div>
             </div>
             
             <div class="px-6 mt-auto pb-8">
-                <button onclick="projectManager.promptCreate()" class="w-full py-2 border border-dashed border-zinc-300 rounded text-[10px] font-bold text-zinc-400 hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all">
+                <button onclick="projectManager.promptCreate()" class="w-full py-2 border border-dashed border-zinc-300 rounded text-[12px] font-bold text-zinc-400 hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all">
                     + nouveau projet
                 </button>
             </div>
@@ -81,16 +81,16 @@
 
                 <section>
                     <div class="flex items-center gap-2 mb-1 italic">
-                        <div class="text-[11px] text-[#8cc63f] font-bold tracking-widest">phase_100-bis</div>
-                        <div id="stitch-badge" class="hidden px-2 py-0.5 bg-slate-900 text-white text-[9px] font-bold rounded uppercase tracking-tighter">Stitch Compatible</div>
+                        <div class="text-[13px] text-[#8cc63f] font-bold tracking-widest">phase_100-bis</div>
+                        <div id="stitch-badge" class="hidden px-2 py-0.5 bg-slate-900 text-white text-[11px] font-bold rounded uppercase tracking-tighter">Stitch Compatible</div>
                     </div>
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-3xl font-medium tracking-tight">hub d’import universel</h2>
                         <div id="design-status" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full shadow-sm opacity-0 transition-opacity">
-                            <div id="design-color-dot" class="w-2 h-2 rounded-full bg-zinc-300"></div>
-                            <span id="design-label" class="text-[9px] font-bold uppercase tracking-widest text-zinc-400">design standard</span>
+                            <div id="design-color-dot" class="w-[10px] h-[10px] rounded-full bg-zinc-300"></div>
+                            <span id="design-label" class="text-[11px] font-bold uppercase tracking-widest text-zinc-400">design standard</span>
                             <button onclick="document.getElementById('design-input').click()" class="ml-2 p-1 hover:bg-zinc-50 rounded" title="uploader DESIGN.md">
-                                <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                <svg class="w-[14px] h-[14px] text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                             </button>
                             <input type="file" id="design-input" class="hidden" accept=".md" onchange="uploadDesignMd(event)">
                         </div>
@@ -103,19 +103,19 @@
                 <!-- MULTI-FORMAT DROP ZONE -->
                 <section>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-zinc-400 text-[10px] uppercase tracking-widest">zone d'import</h3>
-                        <span class="text-[10px] text-zinc-400">svg · zip · tsx · html</span>
+                        <h3 class="font-bold text-zinc-400 text-[12px] uppercase tracking-widest">zone d'import</h3>
+                        <span class="text-[12px] text-zinc-400">svg · zip · tsx · html</span>
                     </div>
 
                     <div id="drop-zone" class="border-2 border-dashed border-zinc-300 rounded-xl p-12 text-center transition-all cursor-pointer hover:border-[#8cc63f] hover:bg-zinc-50"
                          onclick="document.getElementById('file-input').click()">
                         <div class="flex flex-col items-center gap-4">
-                            <svg class="w-12 h-12 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-[50px] h-[50px] text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
                             <div class="flex flex-col gap-1">
                                 <div class="text-zinc-600 font-medium">glissez-déposez vos fichiers</div>
-                                <div class="text-zinc-400 text-[11px]">svg figma · svg illustrator · zip stitch · react tsx · html/css</div>
+                                <div class="text-zinc-400 text-[13px]">svg figma · svg illustrator · zip stitch · react tsx · html/css</div>
                             </div>
                             <input type="file" id="file-input" class="hidden" multiple accept=".svg,.zip,.tsx,.ts,.html,.css,.js" onchange="handleFileSelect(event)">
                         </div>
@@ -124,37 +124,37 @@
                     <!-- UPLOAD PROGRESS -->
                     <div id="upload-progress" class="hidden mt-4">
                         <div class="flex items-center gap-3 p-4 bg-white border border-zinc-200 rounded-lg">
-                            <div class="w-4 h-4 border-2 border-[#8cc63f] border-t-transparent rounded-full animate-spin"></div>
-                            <div class="text-[11px] text-zinc-500">traitement en cours...</div>
+                            <div class="w-[18px] h-[18px] border-2 border-[#8cc63f] border-t-transparent rounded-full animate-spin"></div>
+                            <div class="text-[13px] text-zinc-500">traitement en cours...</div>
                         </div>
                     </div>
 
                     <!-- MANIFEST CREATION FORM (hidden by default) -->
                     <div id="manifest-form" class="hidden mt-6 p-6 bg-white border border-zinc-200 rounded-xl">
                         <div class="flex items-center gap-2 mb-4">
-                            <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-[22px] h-[22px] text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                             </svg>
                             <div class="font-bold text-zinc-700">manifest.json requis</div>
                         </div>
-                        <p class="text-[11px] text-zinc-500 mb-4">aucun manifest détecté. créez le contexte de votre projet pour continuer.</p>
+                        <p class="text-[13px] text-zinc-500 mb-4">aucun manifest détecté. créez le contexte de votre projet pour continuer.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">nom du projet</label>
-                                <input type="text" id="manifest-name" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: mon-projet">
+                                <label class="block text-[12px] uppercase font-bold text-zinc-400 mb-1">nom du projet</label>
+                                <input type="text" id="manifest-name" class="w-full px-3 py-2 border border-zinc-300 rounded text-[13px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: mon-projet">
                             </div>
                             <div>
-                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">auteur</label>
-                                <input type="text" id="manifest-author" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: jean">
+                                <label class="block text-[12px] uppercase font-bold text-zinc-400 mb-1">auteur</label>
+                                <input type="text" id="manifest-author" class="w-full px-3 py-2 border border-zinc-300 rounded text-[13px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: jean">
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">description</label>
-                                <input type="text" id="manifest-desc" class="w-full px-3 py-2 border border-zinc-300 rounded text-[11px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: interface de gestion...">
+                                <label class="block text-[12px] uppercase font-bold text-zinc-400 mb-1">description</label>
+                                <input type="text" id="manifest-desc" class="w-full px-3 py-2 border border-zinc-300 rounded text-[13px] focus:outline-none focus:border-[#8cc63f]" placeholder="ex: interface de gestion...">
                             </div>
                         </div>
                         <div class="flex gap-3 mt-4">
-                            <button onclick="submitManifest()" class="px-4 py-2 bg-[#8cc63f] text-white rounded text-[11px] font-bold hover:opacity-90">créer le manifest</button>
-                            <button onclick="hideManifestForm()" class="px-4 py-2 bg-white border border-zinc-300 text-zinc-600 rounded text-[11px] hover:bg-zinc-50">annuler</button>
+                            <button onclick="submitManifest()" class="px-4 py-2 bg-[#8cc63f] text-white rounded text-[13px] font-bold hover:opacity-90">créer le manifest</button>
+                            <button onclick="hideManifestForm()" class="px-4 py-2 bg-white border border-zinc-300 text-zinc-600 rounded text-[13px] hover:bg-zinc-50">annuler</button>
                         </div>
                     </div>
                 </section>
@@ -162,7 +162,7 @@
                 <!-- IMPORTED SCREENS SELECTION -->
                 <section id="screens-section" class="hidden">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-zinc-400 text-[10px] uppercase tracking-widest">écrans importés</h3>
+                        <h3 class="font-bold text-zinc-400 text-[12px] uppercase tracking-widest">écrans importés</h3>
                         <div class="flex gap-3">
                             <button class="text-xs text-zinc-400 hover:underline" onclick="clearImports()">vider</button>
                             <button class="text-xs text-[#8cc63f] hover:underline" onclick="fetchImports()">rafraîchir</button>
@@ -175,7 +175,7 @@
 
                     <!-- CONTINUE TO FRD EDITOR BUTTON -->
                     <div class="mt-6 flex justify-end">
-                        <button id="btn-continue-frd" onclick="continueToFRDEditor()" class="px-6 py-2.5 bg-[#8cc63f] text-white rounded text-[11px] font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <button id="btn-continue-frd" onclick="continueToFRDEditor()" class="px-6 py-2.5 bg-[#8cc63f] text-white rounded text-[13px] font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                             continuer vers frd editor →
                         </button>
                     </div>
@@ -183,24 +183,24 @@
 
                 <!-- EMPTY STATE (when no imports) -->
                 <section id="empty-state" class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-zinc-400">
-                    <svg class="w-10 h-10 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[42px] h-[42px] mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
-                    <div class="text-[11px] italic">en attente d'imports...</div>
+                    <div class="text-[13px] italic">en attente d'imports...</div>
                 </section>
 
                 <!-- TYPOGRAPHIE (Mission 109-C) -->
                 <section class="pt-12 border-t border-zinc-100 mb-12">
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-[#8cc63f]">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-[34px] h-[34px] rounded-full bg-zinc-100 flex items-center justify-center text-[#8cc63f]">
+                                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/>
                                 </svg>
                             </div>
-                            <h2 class="text-[14px] font-bold tracking-tight text-slate-800">typographie <span class="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-400 text-[9px] font-bold uppercase rounded tracking-widest">sullivan advisor</span></h2>
+                            <h2 class="text-[16px] font-bold tracking-tight text-slate-800">typographie <span class="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-400 text-[11px] font-bold uppercase rounded tracking-widest">sullivan advisor</span></h2>
                         </div>
-                        <label for="font-upload" class="px-4 py-1.5 border border-zinc-200 rounded text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all cursor-pointer">
+                        <label for="font-upload" class="px-4 py-1.5 border border-zinc-200 rounded text-[12px] font-bold uppercase tracking-wider text-zinc-500 hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all cursor-pointer">
                             téléverser une fonte
                             <input id="font-upload" type="file" class="hidden" accept=".ttf,.otf,.woff,.woff2" multiple onchange="window.fontManager.handleUpload(this.files)">
                         </label>
@@ -208,9 +208,9 @@
 
                     <!-- PREVIEW TEXT INPUT (Mission 109-C) -->
                     <div class="mb-8 p-4 bg-zinc-50 border border-zinc-100 rounded-xl flex items-center gap-4 shadow-inner-soft">
-                        <span class="text-[10px] uppercase font-black text-zinc-400 tracking-widest pl-2">tester</span>
+                        <span class="text-[12px] uppercase font-black text-zinc-400 tracking-widest pl-2">tester</span>
                         <input id="font-preview-input" type="text" placeholder="Entrez un texte (ex: homéos en minuscules...)" 
-                               class="flex-1 bg-transparent border-none outline-none text-[14px] text-slate-700 placeholder-zinc-300"
+                               class="flex-1 bg-transparent border-none outline-none text-[16px] text-slate-700 placeholder-zinc-300"
                                oninput="window.fontManager.updatePreviewText(this.value)">
                     </div>
 
@@ -218,8 +218,8 @@
                     <div id="font-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Type Cards will be injected here -->
                         <div class="border border-dashed border-zinc-200 rounded-xl p-8 flex flex-col items-center justify-center text-zinc-300 min-h-[160px]">
-                            <div class="text-[10px] uppercase font-bold tracking-widest mb-2">aucune fonte active</div>
-                            <div class="text-[9px] italic opacity-50 font-serif">Sullivan attend vos fichiers .ttf...</div>
+                            <div class="text-[12px] uppercase font-bold tracking-widest mb-2">aucune fonte active</div>
+                            <div class="text-[11px] italic opacity-50 font-serif">Sullivan attend vos fichiers .ttf...</div>
                         </div>
                     </div>
                 </section>
@@ -227,7 +227,7 @@
                 <!-- MANIFEST INFO -->
                 <section class="pt-8 border-t border-zinc-100 mb-20">
                     <div class="flex items-center justify-between">
-                        <div class="text-[10px] uppercase font-bold text-zinc-300">contexte</div>
+                        <div class="text-[12px] uppercase font-bold text-zinc-300">contexte</div>
                         <div class="flex gap-2">
                             <button id="btn-sync-stitch" class="hidden btn-homeos bg-zinc-100" onclick="syncStitch()">synchroniser stitch</button>
                             <button id="btn-manifest-info" class="btn-homeos" onclick="showManifestInfo()">voir le manifest</button>
@@ -244,10 +244,10 @@
         <div class="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
             <div>
                 <h3 class="font-bold text-slate-800">HoméOS Manifest</h3>
-                <div class="text-[10px] text-zinc-400 uppercase tracking-widest">backend.md (Source of Truth)</div>
+                <div class="text-[12px] text-zinc-400 uppercase tracking-widest">backend.md (Source of Truth)</div>
             </div>
             <div class="flex gap-2">
-                <button onclick="saveManifestBackend()" class="px-3 py-1 bg-[#8cc63f] text-white rounded text-[10px] font-bold">Enregistrer</button>
+                <button onclick="saveManifestBackend()" class="px-3 py-1 bg-[#8cc63f] text-white rounded text-[12px] font-bold">Enregistrer</button>
                 <button onclick="hideManifestDrawer()" class="text-zinc-400 hover:text-zinc-600">✕</button>
             </div>
         </div>
@@ -333,10 +333,10 @@
                     
                     item.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="text-[12px] ${isActive ? 'font-bold text-slate-800' : 'text-zinc-500'}">${p.name.toLowerCase()}</span>
-                            <span class="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">${p.id}</span>
+                            <span class="text-[14px] ${isActive ? 'font-bold text-slate-800' : 'text-zinc-500'}">${p.name.toLowerCase()}</span>
+                            <span class="text-[11px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">${p.id}</span>
                         </div>
-                        ${isActive ? '<div class="w-1.5 h-1.5 rounded-full bg-[#8cc63f]"></div>' : ''}
+                        ${isActive ? '<div class="w-[6px].5 h-[6px].5 rounded-full bg-[#8cc63f]"></div>' : ''}
                     `;
                     list.appendChild(item);
                 });
@@ -677,20 +677,20 @@
                 
                 card.innerHTML = `
                     <div class="flex items-start justify-between">
-                        <div class="w-8 h-8 bg-zinc-100 rounded flex items-center justify-center text-[10px] font-bold text-zinc-400">${(item.name || 'file').split('.').pop().toUpperCase() || 'SVG'}</div>
+                        <div class="w-[34px] h-[34px] bg-zinc-100 rounded flex items-center justify-center text-[12px] font-bold text-zinc-400">${(item.name || 'file').split('.').pop().toUpperCase() || 'SVG'}</div>
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" onchange="toggleSelection('${item.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 accent-[#8cc63f]">
-                            <span class="text-[9px] text-zinc-400">sélectionner</span>
+                            <input type="checkbox" onchange="toggleSelection('${item.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-[18px] h-[18px] accent-[#8cc63f]">
+                            <span class="text-[11px] text-zinc-400">sélectionner</span>
                         </label>
                     </div>
                     <div>
                         <div class="font-bold text-zinc-700 truncate">${item.name}</div>
-                        <div class="text-[10px] text-zinc-400 mt-0.5">${new Date(item.timestamp).toLocaleString()}</div>
-                        ${item.archetype_label ? `<div class="text-[9px] text-[#8cc63f] mt-1 font-bold">${item.archetype_label}</div>` : ''}
+                        <div class="text-[12px] text-zinc-400 mt-0.5">${new Date(item.timestamp).toLocaleString()}</div>
+                        ${item.archetype_label ? `<div class="text-[11px] text-[#8cc63f] mt-1 font-bold">${item.archetype_label}</div>` : ''}
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <button onclick="openInFRD(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[11px] font-bold">ouvrir dans frd editor</button>
-                        <button onclick="openInWorkspace(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos bg-zinc-800 text-white w-full justify-center text-[11px] font-bold border-none hover:bg-black">workspace</button>
+                        <button onclick="openInFRD(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos-primary btn-homeos text-white w-full justify-center text-[13px] font-bold">ouvrir dans frd editor</button>
+                        <button onclick="openInWorkspace(${JSON.stringify(item).replace(/\"/g, '&quot;')})" class="btn-homeos bg-zinc-800 text-white w-full justify-center text-[13px] font-bold border-none hover:bg-black">workspace</button>
                     </div>
                 `;
                 list.appendChild(card);

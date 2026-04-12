@@ -20,7 +20,7 @@ button, input, select, label, span:not(code span), a {
 }
 */
 #homeos-global-nav .hn-brand {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #3d3d3c;
     letter-spacing: -0.02em;
@@ -37,7 +37,7 @@ button, input, select, label, span:not(code span), a {
     flex: 1;
 }
 #homeos-global-nav .hn-tab {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     color: #888;
     text-decoration: none;
@@ -65,7 +65,7 @@ button, input, select, label, span:not(code span), a {
     margin-left: auto;
 }
 #homeos-global-nav .hn-project {
-    font-size: 10px;
+    font-size: 12px;
     text-transform: lowercase;
     font-weight: 700;
     color: #8cc63f;
@@ -113,7 +113,7 @@ button, input, select, label, span:not(code span), a {
     background: #fafaf9;
 }
 .ps-title {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     color: #3d3d3c;
     text-transform: uppercase;
@@ -127,7 +127,7 @@ button, input, select, label, span:not(code span), a {
     border: 1px solid #e5e5e5;
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
 }
@@ -146,7 +146,7 @@ button, input, select, label, span:not(code span), a {
     justify-content: space-between;
     cursor: pointer;
     transition: background 0.2s;
-    font-size: 12px;
+    font-size: 14px;
     color: #555;
 }
 .ps-item:hover {
@@ -188,7 +188,7 @@ button, input, select, label, span:not(code span), a {
     border: 1px solid #e5e5e5;
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 14px;
     outline: none;
 }
 .ps-new-btn {
@@ -197,7 +197,7 @@ button, input, select, label, span:not(code span), a {
     border: none;
     border-radius: 6px;
     padding: 0 10px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
     transition: opacity 0.2s;
@@ -208,7 +208,7 @@ button, input, select, label, span:not(code span), a {
 .ps-empty {
     padding: 20px;
     text-align: center;
-    font-size: 11px;
+    font-size: 13px;
     color: #aaa;
     font-style: italic;
 }
@@ -221,7 +221,7 @@ button, input, select, label, span:not(code span), a {
     margin-left: 16px;
 }
 #homeos-global-nav .hn-user-name {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     color: #3d3d3c;
     text-transform: capitalize;
@@ -283,7 +283,7 @@ button, input, select, label, span:not(code span), a {
     margin-bottom: 40px;
 }
 .sd-label {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     color: #aaa;
     text-transform: uppercase;
@@ -301,7 +301,7 @@ button, input, select, label, span:not(code span), a {
     margin-bottom: 8px;
 }
 .sd-key-name {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     color: #3d3d3c;
 }
@@ -321,7 +321,7 @@ button, input, select, label, span:not(code span), a {
     border: 1px solid #e5e5e5;
     border-radius: 0px; /* Hard-Edge */
     padding: 10px 12px;
-    font-size: 11px;
+    font-size: 13px;
     font-family: 'Source Code Pro', monospace;
     outline: none;
     transition: border-color 0.2s;
@@ -340,7 +340,7 @@ button, input, select, label, span:not(code span), a {
     color: #8cc63f;
 }
 .sd-helper-text {
-    font-size: 9px;
+    font-size: 11px;
     color: #94a3b8;
     font-style: italic;
     margin-top: 4px;
@@ -353,7 +353,7 @@ button, input, select, label, span:not(code span), a {
     margin-top: auto;
     padding: 12px;
     text-align: center;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -379,7 +379,7 @@ button, input, select, label, span:not(code span), a {
     background: #fff;
     border: 1px solid #e5e5e5;
     border-radius: 8px;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 800;
     color: #8cc63f;
     cursor: pointer;

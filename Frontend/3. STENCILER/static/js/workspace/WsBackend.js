@@ -193,8 +193,8 @@ class WsBackend {
         if (!btn) {
             btn = document.createElement('button');
             btn.setAttribute('data-tab', tabId);
-            btn.className = 'h-full text-[10px] uppercase font-bold tracking-widest text-homeos-textMuted hover:text-homeos-text flex items-center gap-2';
-            btn.innerHTML = `${label} <span class="text-[8px] opacity-30 hover:opacity-100 close-tab">×</span>`;
+            btn.className = 'h-full text-[12px] uppercase font-bold tracking-widest text-homeos-textMuted hover:text-homeos-text flex items-center gap-2';
+            btn.innerHTML = `${label} <span class="text-[10px] opacity-30 hover:opacity-100 close-tab">×</span>`;
             
             // Insert before the spacers/filename
             this.els.tabRow.insertBefore(btn, this.els.tabRow.querySelector('.flex-1'));
@@ -329,7 +329,7 @@ class WsBackend {
                     return;
                 }
             }
-            this.els.renderArea.innerHTML = '<p style="color:#9a9a98;font-size:11px;padding:16px">Aucune roadmap trouvée pour ce projet.</p>';
+            this.els.renderArea.innerHTML = '<p style="color:#9a9a98;font-size:13px;padding:16px">Aucune roadmap trouvée pour ce projet.</p>';
         } catch (e) {}
     }
 
@@ -383,7 +383,7 @@ class WsBackend {
             <div class="roadmap-content p-4 bg-homeos-panel/20 border-l-4 border-homeos-green h-full flex flex-col">
                 <div class="flex-1">${marked.parse(content)}</div>
                 <div class="p-6 border-t border-homeos-border flex justify-center sticky bottom-0 bg-white shadow-xl">
-                    <button id="btn-go-${role}" class="px-12 py-3 bg-homeos-green text-white font-bold tracking-widest text-[12px] hover:opacity-90 shadow-lg">GO</button>
+                    <button id="btn-go-${role}" class="px-12 py-3 bg-homeos-green text-white font-bold tracking-widest text-[14px] hover:opacity-90 shadow-lg">GO</button>
                 </div>
             </div>
         `;
@@ -408,8 +408,8 @@ class WsBackend {
     appendBubble(role, text, sender) {
         const container = role === 'architect' ? this.els.chatArch : this.els.chatWork;
         const b = document.createElement('div');
-        b.className = `p-3 text-[11px] leading-relaxed mb-4 ${sender === 'user' ? 'bg-white border border-homeos-border' : 'bg-white border-l-2 border-homeos-green shadow-sm'}`;
-        b.innerHTML = sender === 'assistant' ? `<div class="text-[9px] font-bold uppercase mb-1 opacity-40">${role}</div><div class="whitespace-pre-wrap">${text}</div>` : text;
+        b.className = `p-3 text-[13px] leading-relaxed mb-4 ${sender === 'user' ? 'bg-white border border-homeos-border' : 'bg-white border-l-2 border-homeos-green shadow-sm'}`;
+        b.innerHTML = sender === 'assistant' ? `<div class="text-[11px] font-bold uppercase mb-1 opacity-40">${role}</div><div class="whitespace-pre-wrap">${text}</div>` : text;
         container.appendChild(b);
         container.scrollTop = container.scrollHeight;
     }

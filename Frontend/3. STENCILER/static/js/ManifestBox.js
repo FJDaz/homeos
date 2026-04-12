@@ -181,7 +181,7 @@
 
     function appendBubble(text, sender) {
         const b = document.createElement('div');
-        b.className = `p-2 rounded-lg text-[10px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
+        b.className = `p-2 rounded-lg text-[12px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
         if (sender === 'sullivan') {
             b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
         } else {
@@ -228,7 +228,7 @@
                 const pos = positionInStr;
                 
                 const btn = document.createElement('button');
-                btn.className = `text-left w-full truncate py-1 hover:text-homeos-green transition-colors ${level === 1 ? 'font-bold text-[#3d3d3c] text-[11px] mt-2' : level === 2 ? 'text-[10px] text-slate-500 pl-2' : 'text-[9px] text-slate-400 pl-4'}`;
+                btn.className = `text-left w-full truncate py-1 hover:text-homeos-green transition-colors ${level === 1 ? 'font-bold text-[#3d3d3c] text-[13px] mt-2' : level === 2 ? 'text-[12px] text-slate-500 pl-2' : 'text-[11px] text-slate-400 pl-4'}`;
                 btn.innerText = title;
                 btn.onclick = () => {
                     els.editor.focus();
@@ -258,14 +258,14 @@
             els.signetsTitle.style.display = 'block';
             els.signetsList.style.display = 'flex';
             els.signetsToggle.innerHTML = `
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             `;
         } else {
             els.signetsCol.style.width = '40px';
             els.signetsTitle.style.display = 'none';
             els.signetsList.style.display = 'none';
             els.signetsToggle.innerHTML = `
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             `;
         }
     }
@@ -295,13 +295,13 @@
 
         panel.innerHTML = `
             <div id="manifestbox-handle" class="h-[40px] bg-white border-b border-[#e5e5e5] px-4 flex items-center justify-between cursor-grab select-none">
-                <span class="text-[10px] font-black uppercase tracking-[0.15em] text-[#8cc63f]">manifest editor</span>
+                <span class="text-[12px] font-black uppercase tracking-[0.15em] text-[#8cc63f]">manifest editor</span>
                 <div class="flex items-center gap-3">
-                    <button id="manifestbox-validate" class="px-3 py-1 bg-[#8cc63f] text-white text-[9px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
+                    <button id="manifestbox-validate" class="px-3 py-1 bg-[#8cc63f] text-white text-[11px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
                         Valider le manifeste
                     </button>
                     <button id="manifestbox-close" class="text-slate-400 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
             </div>
@@ -315,15 +315,15 @@
                         
                         <!-- TOP INPUT (M292 spec) -->
                         <div class="p-3 bg-white border-b border-slate-50 flex items-center gap-2 rounded-t-xl z-10 sticky top-0 shadow-sm">
-                            <div class="w-2 h-2 rounded-full bg-homeos-green animate-pulse shrink-0"></div>
+                            <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse shrink-0"></div>
                             <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?" 
-                                   class="flex-1 border-none bg-transparent text-[11px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
+                                   class="flex-1 border-none bg-transparent text-[13px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
                         </div>
                         
                         <!-- HISTORY -->
                         <div id="manifest-sullivan-hist" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 max-h-[300px] scrollbar-hide bg-slate-50/30">
                             <!-- bulles injectées -->
-                            <div class="p-2 rounded-lg text-[10px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]">
+                            <div class="p-2 rounded-lg text-[12px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]">
                                 <span class="font-bold text-[#8cc63f] mr-1">S.</span>Je lis par-dessus votre épaule. Saisissez du texte par ici.
                             </div>
                         </div>
@@ -339,9 +339,9 @@
                 <!-- SIGNETS COL -->
                 <div id="manifest-signets-col" class="w-[250px] bg-[#fcfaf7] border-left border-white shadow-[-5px_0_15px_rgba(0,0,0,0.02)] flex flex-col transition-all duration-300 shrink-0 z-30 relative">
                     <div class="h-[40px] px-3 flex items-center justify-between border-b border-[#f0eee4] bg-[#fcfaf7]">
-                        <span id="manifest-signets-title" class="text-[9px] font-bold uppercase tracking-widest text-slate-400">chapitres (toc)</span>
+                        <span id="manifest-signets-title" class="text-[11px] font-bold uppercase tracking-widest text-slate-400">chapitres (toc)</span>
                         <button id="manifest-signets-toggle" class="p-1 rounded-md text-slate-400 hover:bg-slate-100 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                     <div id="manifest-signets-list" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5 scrollbar-hide">

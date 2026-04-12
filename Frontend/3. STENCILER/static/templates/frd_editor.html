@@ -104,61 +104,61 @@
     <header class="h-[48px] border-b border-figma-sep flex items-center px-8 justify-between flex-shrink-0 bg-[#f7f6f2]" data-frd-lock="true">
         <div class="flex items-center gap-6">
             <div class="flex items-center gap-2">
-                <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">frd editor</span>
-                <span id="frd-import-context" class="hidden px-2 py-0.5 bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0] text-[9px] font-bold tracking-widest rounded"></span>
+                <span class="text-[12px] text-gray-400 uppercase font-bold tracking-widest">frd editor</span>
+                <span id="frd-import-context" class="hidden px-2 py-0.5 bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0] text-[11px] font-bold tracking-widest rounded"></span>
             </div>
             <!-- Mode Switcher -->
             <div class="flex bg-white border border-figma-sep rounded-md p-0.5 shadow-sm">
                 <button id="toggle-construct" onclick="setMode('construct')"
-                    class="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded transition-all bg-figma-tabActive text-white">construct</button>
+                    class="px-4 py-1.5 text-[12px] uppercase font-bold tracking-widest rounded transition-all bg-figma-tabActive text-white">construct</button>
                 <button id="toggle-wire" onclick="setMode('wire')"
-                    class="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded transition-all text-gray-400 hover:text-gray-600">wire</button>
+                    class="px-4 py-1.5 text-[12px] uppercase font-bold tracking-widest rounded transition-all text-gray-400 hover:text-gray-600">wire</button>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
             <button id="btn-inspect" title="Mode Inspection"
-                class="px-3 py-1.5 border border-figma-sep text-[11px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
+                class="px-3 py-1.5 border border-figma-sep text-[13px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
                 inspect
             </button>
             <button id="btn-lock" title="Mode Lock — zones invariantes"
-                class="px-3 py-1.5 border border-figma-sep text-[11px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
+                class="px-3 py-1.5 border border-figma-sep text-[13px] hover:border-figma-tabActive hover:text-figma-tabActive transition-all rounded-md bg-white hover:shadow-soft">
                 lock
             </button>
             <button id="btn-clear-locks" title="Effacer tous les locks"
-                class="hidden px-3 py-1.5 text-orange-600 text-[12px] hover:bg-orange-50 hover:border-orange-400 transition-all rounded-md bg-white hover:shadow-soft nudge-warning">
+                class="hidden px-3 py-1.5 text-orange-600 text-[14px] hover:bg-orange-50 hover:border-orange-400 transition-all rounded-md bg-white hover:shadow-soft nudge-warning">
                 Clear locks
             </button>
             <span id="lock-breadcrumb"
                 class="hidden text-[10px] text-orange-500 font-mono max-w-[150px] truncate ml-2"></span>
 
             <select id="template-select"
-                class="bg-figma-input px-3 py-1.5 outline-none text-[12px] border border-transparent focus:border-figma-sep rounded-md shadow-inner-soft">
+                class="bg-figma-input px-3 py-1.5 outline-none text-[14px] border border-transparent focus:border-figma-sep rounded-md shadow-inner-soft">
                 <option value="">— chargement… —</option>
             </select>
 
             <label id="btn-open" for="file-input"
-                class="flex items-center px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md cursor-pointer bg-white hover:shadow-soft">
+                class="flex items-center px-3 py-1.5 border border-figma-sep text-[14px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md cursor-pointer bg-white hover:shadow-soft">
                 Parcourir…
             </label>
             
             <button id="btn-exit-zip"
-                class="hidden px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft">
+                class="hidden px-3 py-1.5 border border-figma-sep text-[14px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft">
                 ✕ Quitter ZIP
             </button>
             <span id="current-file" class="hidden text-[11px] font-mono text-figma-text"></span>
             <button id="btn-undo"
-                class="hidden px-3 py-1.5 border border-figma-sep text-[12px] hover:border-orange-300 hover:text-orange-500 transition-all rounded-md bg-white hover:shadow-soft"
+                class="hidden px-3 py-1.5 border border-figma-sep text-[14px] hover:border-orange-300 hover:text-orange-500 transition-all rounded-md bg-white hover:shadow-soft"
                 title="Annuler dernière action Sullivan">Undo</button>
             
             <input id="save-name" type="text" placeholder="nom-fichier.html"
                 class="px-2 py-1.5 border border-figma-sep text-[12px] font-mono bg-transparent text-figma-text w-32 focus:outline-none focus:border-figma-tabActive rounded-md shadow-inner-soft"
                 title="Nom du fichier à sauvegarder">
             <button id="btn-preview-tab"
-                class="px-3 py-1.5 border border-figma-sep text-[12px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft"
+                class="px-3 py-1.5 border border-figma-sep text-[14px] hover:border-gray-400 hover:text-gray-700 transition-all rounded-md bg-white hover:shadow-soft"
                 title="Ouvrir dans un nouvel onglet">Aperçu ↗</button>
             <button id="btn-save"
-                class="px-4 py-1.5 bg-figma-tabActive text-white text-[12px] hover:bg-figma-tabActiveHover font-bold rounded-md transition-all shadow-soft hover:shadow-soft-hover">Save</button>
+                class="px-4 py-1.5 bg-figma-tabActive text-white text-[14px] hover:bg-figma-tabActiveHover font-bold rounded-md transition-all shadow-soft hover:shadow-soft-hover">Save</button>
         </div>
     </header>
 
@@ -169,14 +169,14 @@
         <div id="intent-panel" class="hidden w-[380px] border-r border-figma-sep flex flex-col bg-[#f7f6f2] shadow-sm transform transition-transform duration-300 -translate-x-full">
             <div class="h-[48px] flex items-center justify-between px-4 border-b border-figma-sep bg-[#f0efeb]">
                 <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#8cc63f]"></span>
-                    <span class="text-[11px] font-bold tracking-widest text-[#3d3d3c] uppercase">registre des intentions</span>
+                    <span class="w-[10px] h-[10px] rounded-full bg-[#8cc63f]"></span>
+                    <span class="text-[13px] font-bold tracking-widest text-[#3d3d3c] uppercase">registre des intentions</span>
                 </div>
                 <button id="btn-close-intent" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
             
             <div class="flex-1 overflow-y-auto p-4 no-scrollbar">
-                <table class="w-full border-collapse text-[11px]">
+                <table class="w-full border-collapse text-[13px]">
                     <thead>
                         <tr class="border-b border-figma-sep">
                             <th class="text-left py-2 font-bold text-gray-400 uppercase tracking-tighter">id</th>
@@ -192,7 +192,7 @@
             </div>
 
             <div class="p-4 border-t border-figma-sep bg-[#f0efeb]">
-                <button id="btn-generate-tailwind" class="w-full py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold uppercase tracking-widest rounded-md shadow-sm hover:opacity-90 transition-all">
+                <button id="btn-generate-tailwind" class="w-full py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold uppercase tracking-widest rounded-md shadow-sm hover:opacity-90 transition-all">
                     générer le template tailwind
                 </button>
             </div>
@@ -208,7 +208,7 @@
                 </div>
                 <iframe id="preview-iframe" class="w-full h-full border-none bg-white"></iframe>
                 <button onclick="document.getElementById('preview-iframe').requestFullscreen()" title="Plein écran"
-                    style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.35);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;line-height:1;opacity:0.6;box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                    style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.35);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:15px;cursor:pointer;line-height:1;opacity:0.6;box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                     onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">⛶</button>
             </div>
             <div id="monaco-resize-handle" class="relative group">
@@ -224,33 +224,33 @@
 
         <div id="sullivan-pane" class="w-[280px] border-l border-figma-sep flex flex-col bg-figma-panel">
             <div class="h-[48px] flex items-center px-6 border-b border-figma-sep gap-2 bg-white shadow-sm">
-                <span class="w-1.5 h-1.5 rounded-full bg-figma-tabActive"></span>
-                <span class="text-[12px] font-semibold text-black">Sullivan</span>
+                <span class="w-[6px].5 h-[6px].5 rounded-full bg-figma-tabActive"></span>
+                <span class="text-[14px] font-semibold text-black">Sullivan</span>
             </div>
 
             <details id="ux-audit-panel" class="border-b-[0.5px] border-figma-sep bg-figma-auditBg sticky top-0 z-10">
                 <summary
-                    class="px-4 py-2 text-[10px] font-bold tracking-widest text-figma-auditText cursor-pointer flex justify-between items-center hover:bg-[#dcfce7] transition-colors">
+                    class="px-4 py-2 text-[12px] font-bold tracking-widest text-figma-auditText cursor-pointer flex justify-between items-center hover:bg-[#dcfce7] transition-colors">
                     <span>Audit UX <span id="audit-stats" class="ml-2 font-normal opacity-60"></span></span>
-                    <span class="text-[10px] toggle-icon font-wingdings-3">&#211;</span> <!-- Wingdings 3 210 (Down) -->
+                    <span class="text-[12px] toggle-icon font-wingdings-3">&#211;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div id="audit-content"
-                    class="px-4 pb-4 text-[11px] leading-relaxed text-figma-auditText border-t border-figma-auditBorder mt-2 pt-2 max-h-[200px] overflow-y-auto no-scrollbar">
+                    class="px-4 pb-4 text-[13px] leading-relaxed text-figma-auditText border-t border-figma-auditBorder mt-2 pt-2 max-h-[200px] overflow-y-auto no-scrollbar">
                     <p class="italic opacity-50">Aucun audit disponible.</p>
                 </div>
             </details>
 
             <details id="wire-panel" class="hidden border-b-[0.5px] border-figma-sep bg-[#f1f5f9] flex-shrink-0">
-                <summary class="px-4 py-2 text-[10px] font-bold tracking-widest text-slate-700 cursor-pointer flex justify-between items-center hover:bg-slate-200">
+                <summary class="px-4 py-2 text-[12px] font-bold tracking-widest text-slate-700 cursor-pointer flex justify-between items-center hover:bg-slate-200">
                     <div class="flex items-center gap-2">
                         <span>Analyse Wire</span>
-                        <button id="btn-wire-table" class="px-2 py-0.5 bg-slate-700 text-white rounded hover:bg-slate-800 text-[8px] transform-none">BILAN DE BIJECTION</button>
+                        <button id="btn-wire-table" class="px-2 py-0.5 bg-slate-700 text-white rounded hover:bg-slate-800 text-[10px] transform-none">BILAN DE BIJECTION</button>
                     </div>
-                    <span class="text-[10px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
+                    <span class="text-[12px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-[10px] font-bold tracking-widest text-slate-700">Audit Automatique</h3>
+                        <h3 class="text-[12px] font-bold tracking-widest text-slate-700">Audit Automatique</h3>
                     </div>
                     <div id="wire-content"
                         class="text-[11px] font-mono leading-tight text-slate-800 bg-white border border-slate-200 p-2 max-h-[150px] overflow-y-auto no-scrollbar rounded-md shadow-inner whitespace-pre-wrap">
@@ -260,13 +260,13 @@
             </details>
 
             <details id="assets-zone" class="border-b-[0.5px] border-figma-sep bg-white">
-                <summary class="px-4 py-2 text-[9px] font-bold tracking-widest text-figma-text cursor-pointer flex justify-between items-center hover:bg-gray-50">
+                <summary class="px-4 py-2 text-[11px] font-bold tracking-widest text-figma-text cursor-pointer flex justify-between items-center hover:bg-gray-50">
                     <span>Assets</span>
-                    <span class="text-[10px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
+                    <span class="text-[12px] toggle-icon font-wingdings-3">&#210;</span> <!-- Wingdings 3 210 (Down) -->
                 </summary>
                 <div class="px-4 pt-2">
                     <div id="drop-zone" class="mb-3 h-[60px] border border-dashed border-[#333]
-                         flex items-center justify-center text-[10px] text-figma-text cursor-pointer
+                         flex items-center justify-center text-[12px] text-figma-text cursor-pointer
                          transition-colors hover:border-figma-tabActive hover:bg-gray-50 rounded-md shadow-inner-soft">
                         Glisser une image ici
                     </div>
@@ -284,12 +284,12 @@
                     class="w-full h-24 bg-figma-input p-3 text-xs outline-none border-none resize-none shadow-inner rounded-md"></textarea>
                 
                 <div class="flex items-center justify-between mt-1">
-                    <span id="current-mode-label" class="text-[9px] uppercase font-black text-[#8cc63f] tracking-tighter">designing world</span>
+                    <span id="current-mode-label" class="text-[11px] uppercase font-black text-[#8cc63f] tracking-tighter">designing world</span>
                     <!-- Label simple -->
-                    <span class="text-[12px] text-gray-500 mr-3 font-semibold">Ask Sullivan</span>
+                    <span class="text-[14px] text-gray-500 mr-3 font-semibold">Ask Sullivan</span>
                     <!-- Bouton rond fléché -->
                     <button id="btn-send"
-                        class="w-8 h-8 bg-figma-tabActive text-white rounded-full flex items-center justify-center hover:bg-figma-tabActiveHover transition-all shadow-soft hover:shadow-soft-hover font-wingdings-3 text-[14px]">
+                        class="w-[34px] h-[34px] bg-figma-tabActive text-white rounded-full flex items-center justify-center hover:bg-figma-tabActiveHover transition-all shadow-soft hover:shadow-soft-hover font-wingdings-3 text-[16px]">
                         &#210; <!-- Wingdings 3 Fleche Droite -->
                     </button>
                 </div>
@@ -310,17 +310,17 @@
             <div class="flex flex-1 overflow-hidden">
                 <!-- Colonne Gauche: BILAN -->
                 <div class="flex-1 border-r border-slate-100 flex flex-col">
-                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[10px] font-bold tracking-widest text-slate-500 uppercase">1. Bilan (Intentions Détectées)</div>
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[12px] font-bold tracking-widest text-slate-500 uppercase">1. Bilan (Intentions Détectées)</div>
                     <div id="bijection-bilan" class="flex-1 overflow-y-auto p-0 divide-y divide-slate-50 no-scrollbar"></div>
                 </div>
                 <!-- Colonne Droite: PLAN -->
                 <div class="flex-1 bg-slate-50/50 flex flex-col">
-                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[10px] font-bold tracking-widest text-slate-500 uppercase">2. Plan (Implémentation)</div>
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-100 italic text-[12px] font-bold tracking-widest text-slate-500 uppercase">2. Plan (Implémentation)</div>
                     <div id="bijection-plan" class="flex-1 overflow-y-auto p-0 divide-y divide-slate-50 no-scrollbar"></div>
                 </div>
             </div>
             <div class="px-6 py-4 bg-white border-t border-slate-200">
-                <button id="btn-wire-implement-all" class="w-full py-4 bg-figma-tabActive text-white text-[12px] font-bold uppercase tracking-widest rounded-xl hover:bg-figma-tabActiveHover transition-all shadow-lg">
+                <button id="btn-wire-implement-all" class="w-full py-4 bg-figma-tabActive text-white text-[14px] font-bold uppercase tracking-widest rounded-xl hover:bg-figma-tabActiveHover transition-all shadow-lg">
                     Lancer l'implémentation du plan
                 </button>
             </div>
@@ -346,11 +346,11 @@
             <div class="p-6 space-y-6">
                 <!-- Architect Phase -->
                 <div class="flex gap-4">
-                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <div class="w-[42px] h-[42px] rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
                         <span class="text-indigo-600 font-bold">A</span>
                     </div>
                     <div class="space-y-1">
-                        <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Architecte (Analyse)</p>
+                        <p class="text-[12px] font-bold text-indigo-600 uppercase tracking-wider">Architecte (Analyse)</p>
                         <p id="architect-advice" class="text-xs text-slate-700 leading-relaxed italic">"Analyse de l'intention en cours..."</p>
                     </div>
                 </div>
@@ -359,11 +359,11 @@
 
                 <!-- Ouvrier Phase -->
                 <div class="flex gap-4">
-                    <div class="w-10 h-10 rounded-full bg-figma-tabActive flex items-center justify-center flex-shrink-0">
+                    <div class="w-[42px] h-[42px] rounded-full bg-figma-tabActive flex items-center justify-center flex-shrink-0">
                         <span class="text-white font-bold">O</span>
                     </div>
                     <div class="space-y-1">
-                        <p class="text-[10px] font-bold text-figma-tabActive uppercase tracking-wider">Ouvrier (Exécution)</p>
+                        <p class="text-[12px] font-bold text-figma-tabActive uppercase tracking-wider">Ouvrier (Exécution)</p>
                         <p id="ouvrier-mission" class="text-xs text-slate-900 font-medium leading-relaxed">"Mission en attente de rédaction..."</p>
                     </div>
                 </div>

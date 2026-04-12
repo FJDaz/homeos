@@ -398,7 +398,7 @@ class ComponentsZoneFeature extends StencilerFeature {
                 </div>
 
                 <div class="input-group" style="margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-                    <button id="st-apply-all" class="btn-secondary" style="width: 100%; font-size: 10px;">APPLIQUER À TOUT LE CORPS</button>
+                    <button id="st-apply-all" class="btn-secondary" style="width: 100%; font-size: 12px;">APPLIQUER À TOUT LE CORPS</button>
                 </div>
             </div>
         </div>

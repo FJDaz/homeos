@@ -59,7 +59,7 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
@@ -110,14 +110,14 @@ body {
 }
 
 .brand-homeos {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #8cc63f; /* Vert HoméOS */
   letter-spacing: -0.02em;
 }
 
 .brand-version {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -138,7 +138,7 @@ body {
   border: 1px solid transparent;
   border-radius: 4px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.12s ease;
@@ -164,7 +164,7 @@ body {
 }
 
 .tab-icon {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
 }
 
@@ -206,7 +206,7 @@ body {
 }
 
 .status-text {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: lowercase;
 }
@@ -216,7 +216,7 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.12s ease;
   line-height: 1;
@@ -228,7 +228,7 @@ body {
 }
 
 .stenciler-header h1 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
@@ -247,7 +247,7 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
@@ -264,7 +264,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -304,7 +304,7 @@ body {
 }
 
 .sidebar-brand {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #7aca6a;
   /* Vert HomeOS fixe */
@@ -324,7 +324,7 @@ body {
 }
 
 .sidebar-tagline {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
   letter-spacing: 0.05em;
@@ -340,7 +340,7 @@ body {
 }
 
 .sidebar-section-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -359,7 +359,7 @@ body {
 }
 
 .sidebar-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -369,7 +369,7 @@ body {
 
 /* Breadcrumb Navigation */
 .breadcrumb {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-primary);
   padding: 6px 8px;
   background: var(--bg-tertiary);
@@ -385,7 +385,7 @@ body {
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
   display: flex;
@@ -449,7 +449,7 @@ body {
 }
 
 .border-value {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 4px;
   text-align: center;
@@ -488,7 +488,7 @@ body {
 }
 
 .prim-row label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: lowercase;
@@ -501,7 +501,7 @@ body {
 }
 
 .section-chevron {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   transition: transform 0.2s ease;
 }
@@ -516,7 +516,7 @@ body {
 }
 
 .panel-section-title {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--text-muted);
   letter-spacing: 0.1em;
@@ -551,7 +551,7 @@ body {
   background: var(--bg-secondary);
   cursor: pointer;
   user-select: none;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-secondary);
   letter-spacing: 0.05em;
@@ -563,7 +563,7 @@ body {
 
 .panel-header .chevron {
   transition: transform 0.2s ease;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .cz-panel.collapsed .panel-content {
@@ -598,7 +598,7 @@ body {
   border: none;
   background: none;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border-radius: 3px;
@@ -648,7 +648,7 @@ body {
 
 .hsl-row span {
   width: 15px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: bold;
   color: var(--text-muted);
 }
@@ -677,7 +677,7 @@ body {
   color: var(--text-primary);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -692,7 +692,7 @@ body {
 .small-input {
   width: 40px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   background: transparent;
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -708,11 +708,11 @@ body {
   border-radius: 4px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .transform-grid .input-group label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: bold;
   color: var(--accent-bleu);
   width: 12px;
@@ -722,7 +722,7 @@ body {
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 13px;
   width: 100%;
   padding: 4px;
   font-family: 'Geist Mono', monospace;
@@ -739,7 +739,7 @@ body {
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -751,7 +751,7 @@ body {
 }
 
 .btn-delete .delete-icon {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 300;
   margin-right: 4px;
 }
@@ -762,7 +762,7 @@ body {
   justify-content: center;
   gap: 4px;
   margin-top: 6px;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -772,7 +772,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
   font-family: "Univers LT Std", "Univers", monospace;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 /* Color Mode Toggle */
@@ -797,7 +797,7 @@ body {
   border-radius: 4px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 12px;
   transition: all 0.12s ease;
 }
 
@@ -813,12 +813,12 @@ body {
 }
 
 .mode-icon {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .mode-label {
-  font-size: 9px;
+  font-size: 11px;
 }
 
 /* TSL Color Picker */
@@ -854,7 +854,7 @@ body {
 
 .tsl-row label {
   width: 12px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
   text-align: center;
@@ -898,7 +898,7 @@ body {
 
 .tsl-value {
   width: 26px;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   text-align: right;
   flex-shrink: 0;
@@ -911,7 +911,7 @@ body {
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -930,7 +930,7 @@ body {
   background: var(--bg-tertiary);
   border-radius: 4px;
   margin-bottom: 8px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* status-dot défini dans le bloc Mission 107 ci-dessus */
@@ -947,7 +947,7 @@ body {
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -1010,7 +1010,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   z-index: 1001;
 }
@@ -1082,7 +1082,7 @@ body {
   border: none;
   background: transparent;
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 11px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1095,13 +1095,13 @@ body {
 }
 
 .preview-card .name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   margin-top: 4px;
 }
 
 .preview-card .count {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -1126,7 +1126,7 @@ body {
 }
 
 .preview-card .organe-mini {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-secondary);
   padding: 2px 0;
   border-bottom: 1px solid var(--border-subtle);
@@ -1282,7 +1282,7 @@ body {
   border-radius: 3px;
   cursor: pointer;
   color: var(--text-secondary);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .dropped-bar .toggle-btn:hover {
@@ -1291,7 +1291,7 @@ body {
 }
 
 .dropped-bar .corps-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   flex: 1;
 }
@@ -1299,7 +1299,7 @@ body {
 .dropped-bar .corps-badge {
   padding: 2px 8px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 12px;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
@@ -1349,12 +1349,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-secondary);
 }
 
 .canvas-placeholder p {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* ========== COMPONENTS (BOTTOM) ========== */
@@ -1367,7 +1367,7 @@ body {
 }
 
 .components-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -1396,12 +1396,12 @@ body {
 }
 
 .component-card .name {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 .component-card .type {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-top: 1px;
 }
@@ -1657,7 +1657,7 @@ body {
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
   display: flex;
@@ -1671,7 +1671,7 @@ body {
 }
 
 .zoom-controls span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   min-width: 40px;
   text-align: center;

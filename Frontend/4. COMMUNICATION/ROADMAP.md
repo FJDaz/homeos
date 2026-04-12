@@ -31,6 +31,33 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
    Vert HoméOS (#8cc63f) uniquement en nudge — jamais en fond large.
 ```
 
+
+---
+
+## 🧠 BOOTSTRAP QWEN — RÈGLES DE PERFORMANCE UI (Mission Performance)
+
+
+---
+
+## 🧠 BOOTSTRAP QWEN — RÈGLES DE PERFORMANCE UI (Mission Performance)
+
+```
+RÈGLES D'ANIMATION LOW-CPU :
+1. INTERDICTION DU BOX-SHADOW ANIMÉ (trop gourmand en CPU).
+2. LA FORMULE "PULSE" OPTIMISÉE (TRANSFORM + OPACITY) :
+   Utiliser un pseudo-élément (::after) animé :
+   #mon-bouton { position: relative; }
+   #mon-bouton::after {
+     content: ""; position: absolute; inset: 0;
+     border: 2px solid #COLOR; border-radius: 50%;
+     animation: pulse-low-cpu 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+   }
+   @keyframes pulse-low-cpu {
+     0% { transform: scale(1); opacity: 0.8; }
+     100% { transform: scale(1.6); opacity: 0; }
+   }
+```
+
 ---
 
 ## Phase Active (2026-04-10)
@@ -113,6 +140,81 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 ---
 
 ### Thème 29 — Stitch & Manifest (en cours)
+
+### Mission 281 — Drill step 3 : bouton "ouvrir dans l'éditeur" + fix 404 manifest
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: GEMINI**
+
+> BOOTSTRAP OBLIGATOIRE
+
+**Contexte :** Le drill `WsStitchDrill.js` a 5 étapes. Step 3 (manifest) s'arrête à l'affichage du manifest ou au formulaire d'upload — **il n'y a aucun bouton pour ouvrir le manifest dans l'éditeur**. `window.ManifestBox.show()` existe (ManifestBox.js L442) mais n'est jamais appelé depuis le drill.
+
+**Fichier unique :** `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js`
+
+---
+
+**Fix 1 — Ajouter le bouton "ouvrir l'éditeur" dans `loadManifestStep()`**
+
+Dans la branche `hasContent` (L331-339), remplacer le HTML du step manifest par :
+
+```js
+section.innerHTML = `
+    <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
+        <div class="font-bold text-[12px] mb-1">${name}</div>
+        ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
+        <div class="flex gap-3 text-[9px] text-[#9a9a98] mb-3"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
+    </div>
+    <div class="flex gap-2">
+        <button id="drill-open-editor" class="px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all">ouvrir l'éditeur →</button>
+        <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
+    </div>
+`;
+document.getElementById('drill-open-editor').onclick = () => {
+    if (window.ManifestBox) window.ManifestBox.show();
+};
+document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
+```
+
+---
+
+**Fix 2 — Ajouter le même bouton après un upload réussi**
+
+Dans `uploadManifest()` (L374), après `statusEl.textContent = '✓ Manifest sauvegardé'`, avant le `setTimeout` :
+
+```js
+// Afficher le bouton éditeur sans attendre le step suivant
+const editorBtn = document.createElement('button');
+editorBtn.textContent = 'ouvrir l\'éditeur →';
+editorBtn.className = 'mt-3 px-6 py-2 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all block';
+editorBtn.onclick = () => { if (window.ManifestBox) window.ManifestBox.show(); };
+statusEl.parentNode.insertBefore(editorBtn, statusEl.nextSibling);
+```
+
+---
+
+**Fix 3 — Guard projectId null dans `loadManifestStep()`**
+
+L318 : `const projectId = session.active_project_id || session.project_id;`
+
+Si `projectId` est null/undefined → la fetch part sur `/api/projects/undefined/manifest` → 404 silencieux → `showManifestUpload()` alors que le manifest existe.
+
+Ajouter avant le fetch :
+```js
+if (!projectId) {
+    showManifestUpload(section, 'projet non trouvé dans la session');
+    return;
+}
+```
+
+---
+
+**Livrable :**
+- Step 3 manifest présent → boutons "ouvrir l'éditeur" ET "continuer"
+- Step 3 manifest absent → upload + bouton "ouvrir l'éditeur" après upload réussi
+- Guard projectId null → message explicite au lieu de 404 silencieux
+- `window.ManifestBox` vérifié avant appel (`if (window.ManifestBox)`)
+- Aucun autre fichier touché
+
+---
 
 ### Mission 280-DIAG — Trois bugs bloquants du drill : manifest 404, stitch sync loop, race condition upload
 **STATUS: 🔴 DIAG | DATE: 2026-04-12 | ACTOR: QWEN**

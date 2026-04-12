@@ -184,7 +184,7 @@ class WsStitch {
                 // Lien "changer" discret
                 const changeLink = document.createElement('a');
                 changeLink.href = '#';
-                changeLink.className = 'text-[9px] text-slate-400 underline ml-2';
+                changeLink.className = 'text-[11px] text-slate-400 underline ml-2';
                 changeLink.textContent = 'changer';
                 changeLink.onclick = (e) => {
                     e.preventDefault();
@@ -202,11 +202,11 @@ class WsStitch {
                 const screens = data.screens || [];
 
                 if (screens.length === 0) {
-                    screensContainer.innerHTML = '<div class="text-[10px] text-slate-400 italic">Aucun écran dans ce projet Stitch.</div>';
+                    screensContainer.innerHTML = '<div class="text-[12px] text-slate-400 italic">Aucun écran dans ce projet Stitch.</div>';
                 } else {
                     screens.forEach(screen => {
                         const el = document.createElement('div');
-                        el.className = 'text-[11px] py-1 border-b border-[#e5e5e5] flex items-center justify-between';
+                        el.className = 'text-[13px] py-1 border-b border-[#e5e5e5] flex items-center justify-between';
 
                         const isLocal = screen.local;
                         const dotColor = isLocal ? '#8cc63f' : '#9a9a98';
@@ -218,7 +218,7 @@ class WsStitch {
                                 <span style="color: ${dotColor};">●</span>
                                 <span style="color: ${isLocal ? '#3d3d3c' : '#9a9a98'};">${screen.title}</span>
                             </div>
-                            <span class="text-[9px] cursor-pointer underline" style="color: ${isLocal ? '#8cc63f' : '#9a9a98'};" data-action="${isLocal ? 'open' : 'import'}" data-stitch-id="${screen.stitch_id}" data-local-file="${screen.local_file || ''}">${actionLabel}</span>
+                            <span class="text-[11px] cursor-pointer underline" style="color: ${isLocal ? '#8cc63f' : '#9a9a98'};" data-action="${isLocal ? 'open' : 'import'}" data-stitch-id="${screen.stitch_id}" data-local-file="${screen.local_file || ''}">${actionLabel}</span>
                         `;
 
                         // Event listeners sur les actions
@@ -238,7 +238,7 @@ class WsStitch {
 
                 if (data.offline) {
                     const offlineBadge = document.createElement('div');
-                    offlineBadge.className = 'text-[9px] text-slate-400 italic mt-2';
+                    offlineBadge.className = 'text-[11px] text-slate-400 italic mt-2';
                     offlineBadge.textContent = '⚠ hors-ligne — données en cache';
                     screensContainer.appendChild(offlineBadge);
                 }
@@ -247,7 +247,7 @@ class WsStitch {
         } catch (err) {
             console.error("[WsStitch] loadSession fail:", err);
             if (projectTitleEl) projectTitleEl.textContent = 'erreur session';
-            if (screensContainer) screensContainer.innerHTML = '<div class="text-[10px] italic" style="color: #ddb0b0;">Erreur lors du chargement de la session.</div>';
+            if (screensContainer) screensContainer.innerHTML = '<div class="text-[12px] italic" style="color: #ddb0b0;">Erreur lors du chargement de la session.</div>';
         }
     }
 
@@ -325,7 +325,7 @@ class WsStitch {
         }
 
         this.showFeedback("Récupération des écrans...");
-        this.screensList.innerHTML = '<div class="text-[10px] text-slate-400 italic">Chargement...</div>';
+        this.screensList.innerHTML = '<div class="text-[12px] text-slate-400 italic">Chargement...</div>';
 
         try {
             const res = await fetch(`/api/stitch/screens?project_id=${projectId}`);
@@ -336,12 +336,12 @@ class WsStitch {
             
             this.screensList.innerHTML = '';
             if (screens.length === 0) {
-                this.screensList.innerHTML = '<div class="text-[10px] text-slate-400 italic">Aucun écran trouvé.</div>';
+                this.screensList.innerHTML = '<div class="text-[12px] text-slate-400 italic">Aucun écran trouvé.</div>';
             } else {
                 screens.forEach(screen => {
                     const name = screen.name || screen.id;
                     const el = document.createElement('div');
-                    el.className = 'text-[11px] cursor-pointer py-1 border-b border-[#e5e5e5] transition-colors';
+                    el.className = 'text-[13px] cursor-pointer py-1 border-b border-[#e5e5e5] transition-colors';
                     el.style.color = '#3d3d3c';
                     el.onmouseenter = () => { el.style.color = '#8cc63f'; };
                     el.onmouseleave = () => { el.style.color = '#3d3d3c'; };

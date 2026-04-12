@@ -33,17 +33,17 @@ class WsForgeMonitor {
             <div class="bg-[#1a1a1a] text-[#e1e1e6] rounded-2xl shadow-2xl w-[640px] max-h-[80vh] flex flex-col overflow-hidden border border-[#333]">
                 <!-- Header -->
                 <div class="h-[40px] border-b border-[#333] flex items-center justify-between px-4 shrink-0">
-                    <span class="text-[10px] font-bold tracking-[0.15em] uppercase text-[#8cc63f]">forge trace</span>
+                    <span class="text-[12px] font-bold tracking-[0.15em] uppercase text-[#8cc63f]">forge trace</span>
                     <div class="flex items-center gap-3">
-                        <span id="forge-status" class="text-[10px] text-[#999] lowercase">running</span>
+                        <span id="forge-status" class="text-[12px] text-[#999] lowercase">running</span>
                         <button id="forge-monitor-close" class="text-[#999] hover:text-white transition-colors p-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                 </div>
 
                 <!-- Summary bar -->
-                <div id="forge-summary" class="h-[32px] border-b border-[#333] bg-[#222] flex items-center gap-4 px-4 text-[10px] text-[#999] shrink-0">
+                <div id="forge-summary" class="h-[32px] border-b border-[#333] bg-[#222] flex items-center gap-4 px-4 text-[12px] text-[#999] shrink-0">
                     <span>⏱ <span id="forge-duration">—</span></span>
                     <span>📦 <span id="forge-tokens">—</span></span>
                     <span>💰 <span id="forge-cost">—</span></span>
@@ -57,8 +57,8 @@ class WsForgeMonitor {
 
                 <!-- Footer -->
                 <div class="h-[36px] border-t border-[#333] flex items-center justify-between px-4 shrink-0 bg-[#151515]">
-                    <span id="forge-job-id" class="text-[9px] text-[#555]">job_—</span>
-                    <span id="forge-polling" class="text-[9px] text-[#8cc63f]">polling 1s</span>
+                    <span id="forge-job-id" class="text-[11px] text-[#555]">job_—</span>
+                    <span id="forge-polling" class="text-[11px] text-[#8cc63f]">polling 1s</span>
                 </div>
             </div>
         `;
@@ -141,7 +141,7 @@ class WsForgeMonitor {
                         <div class="flex items-center gap-2 py-1.5 px-2 rounded ${s.status === 'error' ? 'bg-red-500/5' : ''}">
                             <span class="${color}">${icon}</span>
                             <span class="text-[#e1e1e6] font-bold">${s.name}</span>
-                            ${meta ? `<span class="text-[10px]">${meta}</span>` : ''}
+                            ${meta ? `<span class="text-[12px]">${meta}</span>` : ''}
                             ${detail}
                             ${model}
                         </div>

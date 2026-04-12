@@ -68,16 +68,16 @@
         }
 
         if (files.length === 0) {
-            container.innerHTML = '<div class="p-3 text-[10px] text-slate-400 italic">aucune image</div>';
+            container.innerHTML = '<div class="p-3 text-[12px] text-slate-400 italic">aucune image</div>';
             return;
         }
 
         container.innerHTML = files.map(function(f) {
             return '<div class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded">' +
-                '<img src="' + f.url + '" class="w-8 h-8 object-cover rounded" alt="' + f.name + '">' +
-                '<span class="text-[9px] text-slate-600 flex-1 truncate">' + f.name + '</span>' +
-                '<button class="asset-copy-btn text-[8px] text-slate-400 hover:text-homeos-green" title="Copier URL" data-url="' + f.url + '">📋</button>' +
-                '<button class="asset-delete-btn text-[8px] text-slate-400 hover:text-red-500" title="Supprimer" data-filename="' + f.filename + '">✕</button>' +
+                '<img src="' + f.url + '" class="w-[34px] h-[34px] object-cover rounded" alt="' + f.name + '">' +
+                '<span class="text-[11px] text-slate-600 flex-1 truncate">' + f.name + '</span>' +
+                '<button class="asset-copy-btn text-[10px] text-slate-400 hover:text-homeos-green" title="Copier URL" data-url="' + f.url + '">📋</button>' +
+                '<button class="asset-delete-btn text-[10px] text-slate-400 hover:text-red-500" title="Supprimer" data-filename="' + f.filename + '">✕</button>' +
                 '</div>';
         }).join('');
 

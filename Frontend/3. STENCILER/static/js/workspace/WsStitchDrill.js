@@ -74,28 +74,43 @@
             // Step 0: Landing
             {
                 html: `
-                    <button id="drill-start-btn" class="w-32 h-32 rounded-full text-white font-bold text-[14px] uppercase tracking-widest shadow-lg cursor-pointer"
-                            style="background: linear-gradient(135deg, #a3d960 0%, #8cc63f 30%, #7ab536 70%, #5a8a26 100%); animation: pulse 2s ease-in-out infinite;">
+                    <button id="drill-landing-btn" class="w-32 h-32 rounded-full text-white font-bold text-[16px] uppercase tracking-widest shadow-lg cursor-pointer"
+                            style="background: linear-gradient(135deg, #a3d960 0%, #8cc63f 30%, #7ab536 70%, #5a8a26 100%);">
                         Créer un<br>projet
                     </button>
-                    <style>@keyframes pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(140,198,63,0.4)} 50%{transform:scale(1.05);box-shadow:0 0 30px 10px rgba(140,198,63,0.2)} }</style>
+                    <style>
+                        #drill-landing-btn { position: relative; }
+                        #drill-landing-btn::after {
+                            content: "";
+                            position: absolute;
+                            inset: 0;
+                            border: 2px solid #8cc63f;
+                            border-radius: 50%;
+                            animation: pulse-low-cpu 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+                            pointer-events: none;
+                        }
+                        @keyframes pulse-low-cpu {
+                            0% { transform: scale(1); opacity: 0.8; }
+                            100% { transform: scale(1.6); opacity: 0; }
+                        }
+                    </style>
                 `
             },
             // Step 1: Screens FIRST
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 1 — Écrans</div>
-                        <div class="text-[11px] text-[#9a9a98] mb-6">Charge 1 à 4 écrans (PNG, SVG, JPG). La forge les traitera dès tes clés configurées.</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 1 — Écrans</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-6">Charge 1 à 4 écrans (PNG, SVG, JPG). La forge les traitera dès tes clés configurées.</div>
                         <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-screen-upload-zone">
-                            <div class="text-[24px] mb-2">↑</div>
-                            <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser tes écrans ici</div>
-                            <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir</div>
+                            <div class="text-[26px] mb-2">↑</div>
+                            <div class="text-[14px] font-bold text-[#3d3d3c]">Glisser tes écrans ici</div>
+                            <div class="text-[12px] text-[#9a9a98]">ou cliquer pour parcourir</div>
                             <input type="file" id="drill-screen-input" class="hidden" accept=".png,.svg,.jpg,.jpeg" multiple>
                         </div>
-                        <div id="drill-screen-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
-                        <div class="mt-2 text-[10px] text-[#9a9a98]" id="drill-screen-count">0 écran(s) — min. 1 requis</div>
-                        <button id="drill-continue-screens" class="mt-4 px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>Continuer →</button>
+                        <div id="drill-screen-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
+                        <div class="mt-2 text-[12px] text-[#9a9a98]" id="drill-screen-count">0 écran(s) — min. 1 requis</div>
+                        <button id="drill-continue-screens" class="mt-4 px-8 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>Continuer →</button>
                     </div>
                 `
             },
@@ -103,10 +118,10 @@
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 2 — Moteur AetherFlow</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 2 — Moteur AetherFlow</div>
                         <div class="bg-[#8cc63f]/10 border border-[#8cc63f]/30 rounded-[16px] p-4 mb-4 text-left">
-                            <div class="text-[11px] font-bold text-[#6a9a2f] mb-1">⚡ Optimisation du moteur</div>
-                            <div class="text-[10px] text-[#3d3d3c] leading-relaxed">
+                            <div class="text-[13px] font-bold text-[#6a9a2f] mb-1">⚡ Optimisation du moteur</div>
+                            <div class="text-[12px] text-[#3d3d3c] leading-relaxed">
                                 HomeOS utilise un <strong>fallback en cascade</strong> : si un modèle ne répond pas, le suivant prend le relais.
                                 <strong>Plus tu renseignes de clés, plus le moteur est fiable et rapide.</strong>
                                 C'est gratuit et ça profite à toute la classe.
@@ -115,26 +130,26 @@
                         <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left space-y-3">
                             ${API_PROVIDERS.map(p => `
                                 <div class="flex items-start gap-2">
-                                    <div class="w-2 h-2 mt-2.5 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
+                                    <div class="w-[10px] h-[10px] mt-2.5 rounded-full ${keyStatus[p.id] === 'set' ? 'bg-[#8cc63f]' : 'bg-[#e5e5e5]'}"></div>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-1 mb-1">
-                                            <span class="text-[12px] font-bold text-[#3d3d3c]">${p.label}</span>
-                                            <span class="text-[11px] text-[#9a9a98]">${p.price}</span>
+                                            <span class="text-[14px] font-bold text-[#3d3d3c]">${p.label}</span>
+                                            <span class="text-[13px] text-[#9a9a98]">${p.price}</span>
                                             <button class="drill-help-btn ml-1 text-[#9a9a98] hover:text-[#8cc63f] transition-all" data-provider="${p.id}" title="Trouver l'URL">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                             </button>
                                         </div>
                                         <div class="flex gap-1">
-                                            <input type="password" class="drill-key-input flex-1 px-2 py-1.5 text-[12px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
-                                            <button class="drill-save-btn px-2 py-1.5 text-[11px] font-bold bg-[#8cc63f] text-white rounded-[8px] hover:bg-[#7ab536] transition-all whitespace-nowrap" data-provider="${p.id}">OK</button>
+                                            <input type="password" class="drill-key-input flex-1 px-2 py-1.5 text-[14px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
+                                            <button class="drill-save-btn px-2 py-1.5 text-[13px] font-bold bg-[#8cc63f] text-white rounded-[8px] hover:bg-[#7ab536] transition-all whitespace-nowrap" data-provider="${p.id}">OK</button>
                                         </div>
-                                        <div class="drill-helper-text mt-1 text-[11px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
+                                        <div class="drill-helper-text mt-1 text-[13px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
-                        <div class="text-[10px] text-[#9a9a98] mb-3"><span id="drill-key-count">${getActiveKeyCount()}</span> clé(s) configurée(s) — <span class="text-[#8cc63f]">💡 aussi dispo via ⚙</span></div>
-                        <button id="drill-continue-keys" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                        <div class="text-[12px] text-[#9a9a98] mb-3"><span id="drill-key-count">${getActiveKeyCount()}</span> clé(s) configurée(s) — <span class="text-[#8cc63f]">💡 aussi dispo via ⚙</span></div>
+                        <button id="drill-continue-keys" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
                     </div>
                 `
             },
@@ -142,10 +157,10 @@
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Manifeste</div>
-                        <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet.</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Manifeste</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet.</div>
                         <div id="drill-manifest-section">
-                            <div class="text-[11px] text-[#9a9a98]">Chargement...</div>
+                            <div class="text-[13px] text-[#9a9a98]">Chargement...</div>
                         </div>
                     </div>
                 `
@@ -154,12 +169,12 @@
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Écrans forgés</div>
-                        <div class="text-[11px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans.</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Écrans forgés</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans.</div>
                         <div id="drill-forged-screens" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left max-h-64 overflow-y-auto space-y-2">
-                            <div class="text-[11px] text-[#9a9a98] italic">Chargement...</div>
+                            <div class="text-[13px] text-[#9a9a98] italic">Chargement...</div>
                         </div>
-                        <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[12px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
+                        <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[14px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     </div>
                 `
             }
@@ -172,7 +187,7 @@
 
     function wireStep(stepIndex) {
         if (stepIndex === 0) {
-            document.getElementById('drill-start-btn').onclick = () => { currentStep = 1; renderStep(); };
+            document.getElementById('drill-landing-btn').onclick = () => { currentStep = 1; renderStep(); };
         }
         else if (stepIndex === 1) {
             const zone = document.getElementById('drill-screen-upload-zone');
@@ -301,6 +316,12 @@
         try {
             const session = getSession();
             const projectId = session.active_project_id || session.project_id;
+
+            if (!projectId) {
+                showManifestUpload(section, 'projet non trouvé dans la session');
+                return;
+            }
+
             const res = await fetch(`/api/projects/${projectId}/manifest`);
 
             if (res.ok) {
@@ -314,12 +335,14 @@
                     const desc = m.description || m.raw_content || '';
                     const archetype = m.archetype?.label || m.archetype || '—';
                     section.innerHTML = `
-                        <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
-                            <div class="font-bold text-[12px] mb-1">${name}</div>
-                            ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
-                            <div class="flex gap-3 text-[9px] text-[#9a9a98]"><span>Archétype: ${archetype}</span><span>Écrans: ${(m.screens||[]).length}</span></div>
+                        <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[13px] text-[#3d3d3c]">
+                            <div class="font-bold text-[14px] mb-1">${name}</div>
+                            ${desc ? '<div class="text-[#9a9a98] mb-2 text-[12px]">' + desc.substring(0, 200) + '</div>' : ''}
+                            <div class="flex gap-3 text-[11px] text-[#9a9a98] mb-3"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
                         </div>
-                        <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                        <div class="flex gap-2">
+                            <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
+                        </div>
                     `;
                     document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
                 }
@@ -334,14 +357,14 @@
     function showManifestUpload(section, errorMsg) {
         section.innerHTML = `
             <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-manifest-upload-zone">
-                <div class="text-[24px] mb-2">↑</div>
-                <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser ton manifeste ici</div>
-                <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir (.json, .md, .txt)</div>
+                <div class="text-[26px] mb-2">↑</div>
+                <div class="text-[14px] font-bold text-[#3d3d3c]">Glisser ton manifeste ici</div>
+                <div class="text-[12px] text-[#9a9a98]">ou cliquer pour parcourir (.json, .md, .txt)</div>
                 <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
             </div>
-            <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
-            ${errorMsg ? '<div class="mt-2 text-[10px] text-[#d44]">' + errorMsg + '</div>' : ''}
-            <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
+            <div id="drill-manifest-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
+            ${errorMsg ? '<div class="mt-2 text-[12px] text-[#d44]">' + errorMsg + '</div>' : ''}
+            <button id="drill-skip-manifest" class="mt-4 px-6 py-2 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Construire la logique d'application →</button>
         `;
 
         const zone = document.getElementById('drill-manifest-upload-zone');
@@ -353,7 +376,11 @@
         zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
         zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status); };
         input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
-        document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
+        document.getElementById('drill-skip-manifest').onclick = () => {
+            // Open manifest editor for brainstorm
+            if (window.ManifestBox) window.ManifestBox.show();
+            else hide();
+        };
     }
 
     async function uploadManifest(file, statusEl) {
@@ -372,7 +399,8 @@
             });
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
             statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
-            setTimeout(() => { currentStep = 4; renderStep(); }, 800);
+
+            setTimeout(() => { currentStep = 4; renderStep(); }, 1200);
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
@@ -384,24 +412,25 @@
             const data = await res.json();
             const imports = data.imports || [];
             if (imports.length === 0) {
-                container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Aucun écran forgé pour le moment.</div>';
+                container.innerHTML = '<div class="text-[13px] text-[#9a9a98] italic">Aucun écran forgé pour le moment.</div>';
                 return;
             }
             container.innerHTML = imports.map(imp => `
                 <div class="flex items-center gap-2 p-2 bg-[#f7f6f2] rounded-[8px]">
-                    <div class="w-8 h-8 bg-[#e5e5e5] rounded-[6px] flex items-center justify-center text-[8px] text-[#9a9a98] font-bold">${imp.type || 'html'}</div>
+                    <div class="w-[34px] h-[34px] bg-[#e5e5e5] rounded-[6px] flex items-center justify-center text-[10px] text-[#9a9a98] font-bold">${imp.type || 'html'}</div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-[11px] font-bold text-[#3d3d3c] truncate">${imp.name || imp.id}</div>
-                        <div class="text-[9px] text-[#9a9a98]">${imp.archetype_label || imp.archetype || 'import'}</div>
+                        <div class="text-[13px] font-bold text-[#3d3d3c] truncate">${imp.name || imp.id}</div>
+                        <div class="text-[11px] text-[#9a9a98]">${imp.archetype_label || imp.archetype || 'import'}</div>
                     </div>
                 </div>
             `).join('');
-        } catch(e) { container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Erreur chargement.</div>'; }
+        } catch(e) { container.innerHTML = '<div class="text-[13px] text-[#9a9a98] italic">Erreur chargement.</div>'; }
     }
 
     function finishDrill() {
         if (overlay) { overlay.style.display = 'none'; overlay = null; }
         if (window.WsImportList) window.WsImportList.refresh();
+        if (window.ManifestBox) window.ManifestBox.show();
     }
 
     function show() {
@@ -419,7 +448,7 @@
         const btn = document.createElement('button');
         btn.id = 'drill-small-btn';
         btn.textContent = '+ Nouveau projet';
-        btn.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:99999;background:#8cc63f;color:white;border:none;padding:10px 18px;border-radius:12px;font-size:12px;font-weight:bold;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.15);`;
+        btn.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:99999;background:#8cc63f;color:white;border:none;padding:10px 18px;border-radius:12px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.15);`;
         btn.onclick = () => { btn.remove(); createOverlay(); };
         document.body.appendChild(btn);
     }

@@ -65,21 +65,21 @@
     <!-- HEADER LOCAL (Contrôles spécifiques Canvas) -->
     <header class="h-14 flex items-center justify-between px-6 bg-white border-b border-slate-100 z-50 shrink-0" data-purpose="header">
         <div class="flex items-center space-x-4">
-            <span class="text-[10px] text-slate-900 font-extrabold tracking-[0.2em] uppercase">workspace canvas</span>
+            <span class="text-[12px] text-slate-900 font-extrabold tracking-[0.2em] uppercase">workspace canvas</span>
             <button onclick="window.PanelDragger?.resetAll()" 
                     title="réinitialiser layout des panneaux"
                     class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </button>
         </div>
         
             <!-- GSAP Cheat Sheet Toggle (Mission 166) -->
-            <button id="ws-btn-effects-drawer" class="hidden px-4 py-1.5 border border-indigo-100 bg-indigo-50/30 rounded-custom text-[10px] font-bold text-indigo-500 tracking-widest hover:bg-indigo-50 transition-all" title="Catalogue d'effets GSAP">
+            <button id="ws-btn-effects-drawer" class="hidden px-4 py-1.5 border border-indigo-100 bg-indigo-50/30 rounded-custom text-[12px] font-bold text-indigo-500 tracking-widest hover:bg-indigo-50 transition-all" title="Catalogue d'effets GSAP">
                 effets
             </button>
             <!-- Preview exit button (Visible only in preview mode) -->
             <div id="ws-preview-exit" class="hidden">
-                <button onclick="window.exitPreviewMode()" class="px-6 py-2 border border-slate-200 rounded-custom text-[11px] font-bold text-slate-500 hover:text-homeos-green transition-all">
+                <button onclick="window.exitPreviewMode()" class="px-6 py-2 border border-slate-200 rounded-custom text-[13px] font-bold text-slate-500 hover:text-homeos-green transition-all">
                     quitter l'aperçu
                 </button>
             </div>
@@ -91,13 +91,13 @@
         <div class="h-full flex flex-col p-6 max-w-7xl mx-auto">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-3">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">sullivan recommendations</span>
-                    <div id="ws-effects-statcher-count" class="px-2 py-0.5 bg-indigo-500 text-white text-[9px] font-bold rounded-full hidden">0</div>
+                    <span class="text-[13px] font-bold text-slate-400 uppercase tracking-[0.2em]">sullivan recommendations</span>
+                    <div id="ws-effects-statcher-count" class="px-2 py-0.5 bg-indigo-500 text-white text-[11px] font-bold rounded-full hidden">0</div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="ws-effects-btn-more" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-all">voir plus d'exemples</button>
+                    <button id="ws-effects-btn-more" class="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-all">voir plus d'exemples</button>
                     <button id="ws-effects-btn-expand" class="p-1 text-slate-300 hover:text-slate-500 transition-all" title="Agrandir le panneau">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                 </div>
             </div>
@@ -109,9 +109,9 @@
             <!-- STATCHER / FOOTER -->
             <div id="ws-effects-footer" class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between">
                 <div id="ws-effects-stacher-list" class="flex-grow flex items-center space-x-2 overflow-x-auto scollbar-hide">
-                    <span class="text-[9px] text-slate-400 italic">aucun effet sélectionné</span>
+                    <span class="text-[11px] text-slate-400 italic">aucun effet sélectionné</span>
                 </div>
-                <button id="ws-effects-apply-all" class="ml-4 px-6 py-2 bg-slate-900 text-white text-[9px] font-bold rounded-[20px] uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
+                <button id="ws-effects-apply-all" class="ml-4 px-6 py-2 bg-slate-900 text-white text-[11px] font-bold rounded-[20px] uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
                     lancer la mission
                 </button>
             </div>
@@ -140,21 +140,21 @@
             <div id="ws-preview-controls" class="h-[40px] bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5] flex items-center justify-between px-4 shrink-0 z-50">
                 <div class="flex items-center gap-2">
                     <button id="ws-preview-zoom-out" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom Out">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                        <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
                     </button>
-                    <span id="ws-preview-zoom-level" class="text-[10px] font-bold text-[#9a9a98] w-10 text-center tabular-nums">100%</span>
+                    <span id="ws-preview-zoom-level" class="text-[12px] font-bold text-[#9a9a98] w-[42px] text-center tabular-nums">100%</span>
                     <button id="ws-preview-zoom-in" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Zoom In">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     </button>
-                    <span class="text-[8px] text-[#ccc] ml-1">Ctrl+molette</span>
+                    <span class="text-[10px] text-[#ccc] ml-1">Ctrl+molette</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="ws-preview-download" class="px-3 py-1 border border-[#e5e5e5] text-[9px] font-bold uppercase tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Télécharger">
-                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <button id="ws-preview-download" class="px-3 py-1 border border-[#e5e5e5] text-[11px] font-bold uppercase tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Télécharger">
+                        <svg class="w-[14px] h-[14px] inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         télécharger
                     </button>
                     <button id="ws-preview-close-btn" class="w-7 h-7 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#9a9a98] hover:border-red-300 hover:text-red-400 transition-all" title="Fermer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
             </div>
@@ -188,10 +188,10 @@
                   <!-- Gauche: Bilan de Santé -->
                   <div class="rounded-lg border border-slate-200 bg-white shadow-sm scrollbar-hide" style="flex:3;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;">
                     <div class="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                         <span class="text-[10px] font-bold text-slate-400 tracking-widest px-1">bilan de santé des organes</span>
+                         <span class="text-[12px] font-bold text-slate-400 tracking-widest px-1">bilan de santé des organes</span>
                          <div class="flex items-center space-x-1.5">
-                             <div class="w-1.5 h-1.5 rounded-full bg-homeos-green animate-pulse"></div>
-                             <span class="text-[9px] font-bold text-slate-500">maillage bijectif actif</span>
+                             <div class="w-[6px].5 h-[6px].5 rounded-full bg-homeos-green animate-pulse"></div>
+                             <span class="text-[11px] font-bold text-slate-500">maillage bijectif actif</span>
                          </div>
                     </div>
                     <div class="flex-1 overflow-auto">
@@ -214,7 +214,7 @@
                   <!-- Droite: Plan de Maillage -->
                   <div class="flex-[2] flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm scrollbar-hide">
                     <div class="p-3 bg-slate-50 border-b border-slate-100">
-                         <span class="text-[10px] font-bold text-slate-400 tracking-widest px-1">plan de maillage émotionnel</span>
+                         <span class="text-[12px] font-bold text-slate-400 tracking-widest px-1">plan de maillage émotionnel</span>
                     </div>
                     <div id="ws-wire-plan-content" class="flex-1 overflow-auto p-6 text-xs text-slate-600 leading-relaxed font-serif italic text-balance">
                         Chargement du plan...
@@ -224,8 +224,8 @@
 
                 <!-- Actions -->
                 <div class="flex items-center gap-3 justify-end">
-                  <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[10px] font-bold tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all">vers le cadrage</button>
-                  <button id="ws-wire-apply-plan" class="px-6 py-2.5 text-[10px] font-bold tracking-widest rounded-[20px] transition-all" style="background:#8cc63f;color:#fff;">implémenter le plan d'action</button>
+                  <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[12px] font-bold tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all">vers le cadrage</button>
+                  <button id="ws-wire-apply-plan" class="px-6 py-2.5 text-[12px] font-bold tracking-widest rounded-[20px] transition-all" style="background:#8cc63f;color:#fff;">implémenter le plan d'action</button>
                 </div>
               </div>
             </div>
@@ -242,11 +242,11 @@
                 <aside id="panel-screens" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" data-drag-handle onclick="togglePanel('panel-screens')">
                         <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-homeos-green"></div>
-                            <span class="text-[10px] font-bold text-slate-800 tracking-widest">screens list</span>
+                            <div class="w-[10px] h-[10px] rounded-full bg-homeos-green"></div>
+                            <span class="text-[12px] font-bold text-slate-800 tracking-widest">screens list</span>
                         </div>
                         <div class="p-1 text-slate-300">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </div>
                     </div>
                     <div class="p-4 overflow-y-auto" style="max-height: calc(100vh - 160px);" id="ws-import-list">
@@ -255,7 +255,7 @@
                 </aside>
                 <!-- BADGE SCREENS (Shown when collapsed) -->
                 <button id="badge-screens" onclick="togglePanel('panel-screens')" class="badge-hidden pointer-events-auto bg-homeos-green text-white px-4 py-2 rounded-custom shadow-lg flex items-center justify-center transition-all hover:pl-6 w-fit">
-                    <span class="text-[10px] font-bold tracking-widest">screens</span>
+                    <span class="text-[12px] font-bold tracking-widest">screens</span>
                 </button>
             </div>
 
@@ -265,25 +265,25 @@
                 <aside id="panel-manifest" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left collapsed">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" onclick="togglePanel('panel-manifest')">
                         <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-homeos-green shadow-[0_0_8px_rgba(163,205,84,0.4)]"></div>
-                            <span class="text-[10px] font-bold text-slate-800 tracking-widest">manifest editor</span>
+                            <div class="w-[10px] h-[10px] rounded-full bg-homeos-green shadow-[0_0_8px_rgba(163,205,84,0.4)]"></div>
+                            <span class="text-[12px] font-bold text-slate-800 tracking-widest">manifest editor</span>
                         </div>
                         <div class="p-1 text-slate-300">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </div>
                     </div>
                     <div class="p-4 bg-slate-50/50">
-                        <div id="manifest-summary-content" class="text-[10px] text-slate-500 leading-relaxed italic mb-4">
+                        <div id="manifest-summary-content" class="text-[12px] text-slate-500 leading-relaxed italic mb-4">
                             Chargement du manifeste...
                         </div>
-                        <button onclick="window.ManifestBox.show(); togglePanel('panel-manifest')" class="w-full py-2 border border-[#8cc63f] text-[#8cc63f] text-[9px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] hover:text-white transition-all rounded-custom">
+                        <button onclick="window.ManifestBox.show(); togglePanel('panel-manifest')" class="w-full py-2 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] hover:text-white transition-all rounded-custom">
                             Ouvrir l'éditeur complet
                         </button>
                     </div>
                 </aside>
                 <!-- BADGE MANIFEST (Shown by default) -->
                 <button id="badge-manifest" onclick="togglePanel('panel-manifest')" class="pointer-events-auto bg-slate-900 shadow-xl shadow-slate-900/10 text-white px-4 py-2 rounded-custom flex items-center justify-center transition-all hover:pl-6 w-fit">
-                    <span class="text-[10px] font-bold tracking-widest">manifest</span>
+                    <span class="text-[12px] font-bold tracking-widest">manifest</span>
                 </button>
             </div>
 
@@ -295,46 +295,46 @@
                 
                 <!-- SELECT (Arrow) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green active-tool shadow-inner-soft transition-all" data-mode="select" title="Sélectionner (V)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
                 </button>
 
                 <!-- PAN (Hand) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="drag" title="naviguer (H)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V6a2 2 0 014 0v5m0 0V6a2 2 0 014 0v5m0 0a2 2 0 014 0v3a6 6 0 01-6 6H9a6 6 0 01-6-6v-3"/>
                     </svg>
                 </button>
 
-                <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
+                <div class="h-px bg-slate-100 w-[34px] mx-auto my-1"></div>
 
                 <!-- PLACE IMAGE (Legacy) -->
                 <button class="ws-tool-btn hidden p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="place-img" title="Placer Image (I)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </button>
 
                 <!-- FRAME (Rectangle) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="frame" title="Créer un cadre (F)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/></svg>
                 </button>
 
                 <!-- COLORS (Dropper) -->
                 <button class="ws-tool-btn hidden p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="colors" title="Couleurs (C)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
                 </button>
 
                 <!-- TEXT (Type) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="text" title="Typographie (T)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
                 </button>
 
                 <!-- EFFECTS (Sparkles) -->
                 <button class="ws-tool-btn p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" data-mode="effects" title="Effets (E)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"/></svg>
                 </button>
 
                 <!-- IMAGE PICKER (Mission 235) -->
                 <button id="ws-btn-image-picker" class="p-3 rounded-xl text-slate-400 hover:text-homeos-green transition-all" title="Bibliothèque d'images">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </button>
@@ -344,16 +344,16 @@
                    data-feature="stitch"
                    class="p-3 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
                    title="Créer projet Stitch">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                 </button>
 
-                <div class="h-px bg-slate-100 w-8 mx-auto my-1"></div>
+                <div class="h-px bg-slate-100 w-[34px] mx-auto my-1"></div>
 
                 <!-- ZOOM INDICATOR -->
                 <div class="flex flex-col items-center py-2">
-                    <span class="text-[9px] font-bold text-slate-300 tracking-tighter" id="zoom-level">100%</span>
+                    <span class="text-[11px] font-bold text-slate-300 tracking-tighter" id="zoom-level">100%</span>
                     <button class="p-1 text-slate-300 hover:text-slate-500 transition-colors" onclick="window.wsCanvas.resetView()" title="recentrer (0)">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </button>
                 </div>
 
@@ -365,15 +365,15 @@
             <div class="glass-card rounded-custom overflow-hidden shadow-2xl border border-slate-100">
                 <!-- Header (Mission 143 Compact) -->
                 <div class="flex items-center px-4 py-3 border-b border-slate-100">
-                    <span class="text-[11px] font-semibold text-slate-800 tracking-wider">sullivan</span>
-                    <span class="text-[8px] font-bold text-[#A3CD54] tracking-tighter ml-2">beta</span>
+                    <span class="text-[13px] font-semibold text-slate-800 tracking-wider">sullivan</span>
+                    <span class="text-[10px] font-bold text-[#A3CD54] tracking-tighter ml-2">beta</span>
                 </div>
                 
                 <!-- Typography Drawer (Mission 129 / M207) -->
                 <div id="ws-font-drawer" class="hidden px-6 py-4 border-t border-[#e5e5e5] transition-all duration-300" style="background: #f7f6f2;">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-[10px] tracking-widest" style="color: #9a9a98;">typographie</div>
-                        <label for="ws-font-upload" class="px-3 py-1 border border-[#e5e5e5] text-[9px] tracking-wider cursor-pointer transition-all" style="color: #9a9a98;" onmouseover="this.style.borderColor='#8cc63f';this.style.color='#8cc63f'" onmouseout="this.style.borderColor='#e5e5e5';this.style.color='#9a9a98'">
+                        <div class="text-[12px] tracking-widest" style="color: #9a9a98;">typographie</div>
+                        <label for="ws-font-upload" class="px-3 py-1 border border-[#e5e5e5] text-[11px] tracking-wider cursor-pointer transition-all" style="color: #9a9a98;" onmouseover="this.style.borderColor='#8cc63f';this.style.color='#8cc63f'" onmouseout="this.style.borderColor='#e5e5e5';this.style.color='#9a9a98'">
                             téléverser
                             <input id="ws-font-upload" type="file" class="hidden" accept=".ttf,.otf" multiple onchange="window.wsFontManager.handleUpload(this.files)">
                         </label>
@@ -384,43 +384,43 @@
                 </div>
 
                 <!-- Messages area (Mission 143: max 2 bulles, ~96px) -->
-                <div id="ws-chat-history" class="hidden flex flex-col gap-1 px-4 py-2 max-h-24 overflow-y-auto text-[11px]"></div>
+                <div id="ws-chat-history" class="hidden flex flex-col gap-1 px-4 py-2 max-h-24 overflow-y-auto text-[13px]"></div>
 
                 <!-- Input area (Mission 143: compact heights) -->
                 <div class="p-3 bg-[#fcfcfc]">
-                    <textarea id="ws-chat-input" class="w-full bg-transparent border-none focus:ring-0 text-slate-600 text-sm placeholder-slate-300 resize-none h-12" placeholder="Un coup de main ?"></textarea>
+                    <textarea id="ws-chat-input" class="w-full bg-transparent border-none focus:ring-0 text-slate-600 text-sm placeholder-slate-300 resize-none h-[50px]" placeholder="Un coup de main ?"></textarea>
                     
                     <div class="flex items-center justify-between mt-2">
                         <div class="flex items-center space-x-2">
                             <!-- Direct Upload -->
-                            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-[26px] h-[26px] rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all">
+                                <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                             </button>
                             <input type="file" id="ws-direct-upload" class="hidden" multiple accept=".svg,.zip,.tsx,.ts,.html,.css,.js,.png,.jpg,.jpeg,.md,.json,.txt">
 
                             <!-- Toggle Group (Mission 160: 3 Positions) -->
                             <div class="flex bg-slate-100 p-1 rounded-custom">
-                                <button data-mode="construct" class="ws-mode-btn bg-white shadow-sm text-slate-600 px-3 py-1.5 rounded-custom text-[9px] font-bold tracking-widest hover:text-slate-600 transition-all">
+                                <button data-mode="construct" class="ws-mode-btn bg-white shadow-sm text-slate-600 px-3 py-1.5 rounded-custom text-[11px] font-bold tracking-widest hover:text-slate-600 transition-all">
                                     construct
                                 </button>
-                                <button data-mode="audit" class="ws-mode-btn px-3 py-1.5 rounded-custom text-slate-400 text-[9px] font-bold tracking-widest hover:text-slate-600 transition-all">
+                                <button data-mode="audit" class="ws-mode-btn px-3 py-1.5 rounded-custom text-slate-400 text-[11px] font-bold tracking-widest hover:text-slate-600 transition-all">
                                     wire
                                 </button>
-                                <button data-mode="front-dev" class="ws-mode-btn px-3 py-1.5 rounded-custom text-slate-400 text-[9px] font-bold tracking-widest hover:text-slate-600 transition-all">
+                                <button data-mode="front-dev" class="ws-mode-btn px-3 py-1.5 rounded-custom text-slate-400 text-[11px] font-bold tracking-widest hover:text-slate-600 transition-all">
                                     front dev
                                 </button>
                             </div>
 
 
                             <!-- Typography Drawer Toggle -->
-                            <button id="btn-ws-typo" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all" title="Typographie">
-                                <span class="text-[10px] font-bold">Aa</span>
+                            <button id="btn-ws-typo" class="w-[34px] h-[34px] rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all" title="Typographie">
+                                <span class="text-[12px] font-bold">Aa</span>
                             </button>
 
                         </div>
                         
                         <!-- Submit Button -->
-                        <button id="btn-ws-send" class="w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-homeos-green hover:border-homeos-green hover:shadow-md transition-all">
+                        <button id="btn-ws-send" class="w-[34px] h-[34px] rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-homeos-green hover:border-homeos-green hover:shadow-md transition-all">
                             <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
                         </button>
                     </div>
@@ -436,14 +436,14 @@
         <div id="ws-monaco-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md scale-95 opacity-0 transition-all duration-300">
             <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 cursor-move" id="ws-popover-header" data-drag-handle>
                 <div class="flex items-center space-x-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-homeos-green animate-pulse"></div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Snippets Engine</span>
+                    <div class="w-[6px].5 h-[6px].5 rounded-full bg-homeos-green animate-pulse"></div>
+                    <span class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Snippets Engine</span>
                     <span id="ws-popover-tag" class="text-[9px] font-mono text-slate-300 bg-slate-100 px-1 rounded lowercase">div</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button id="ws-popover-save" class="px-3 py-1 bg-homeos-green text-white text-[10px] font-bold rounded-md hover:opacity-90 transition-all uppercase tracking-widest">Graft</button>
+                    <button id="ws-popover-save" class="px-3 py-1 bg-homeos-green text-white text-[12px] font-bold rounded-md hover:opacity-90 transition-all uppercase tracking-widest">Graft</button>
                     <button id="ws-popover-close" class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
             </div>
@@ -455,28 +455,28 @@
     <div id="ws-color-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
         <div id="ws-color-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-64 scale-95 opacity-0 transition-all duration-300">
             <div class="flex items-center justify-between cursor-grab" data-drag-handle>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Color TSL</span>
+                <span class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Color TSL</span>
                 <div class="flex items-center space-x-2">
-                    <div id="ws-color-preview" class="w-4 h-4 rounded-full border border-slate-200"></div>
-                    <button id="ws-color-close" class="text-slate-300 hover:text-slate-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    <div id="ws-color-preview" class="w-[18px] h-[18px] rounded-full border border-slate-200"></div>
+                    <button id="ws-color-close" class="text-slate-300 hover:text-slate-500"><svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                 </div>
             </div>
             
             <div class="space-y-3">
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Teinte (H)</label>
-                    <input type="range" id="ws-tsl-h" min="0" max="360" value="163" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Teinte (H)</label>
+                    <input type="range" id="ws-tsl-h" min="0" max="360" value="163" class="w-full h-[6px] bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
                 </div>
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Saturation (S)</label>
-                    <input type="range" id="ws-tsl-s" min="0" max="100" value="50" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Saturation (S)</label>
+                    <input type="range" id="ws-tsl-s" min="0" max="100" value="50" class="w-full h-[6px] bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
                 </div>
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Luminosité (L)</label>
-                    <input type="range" id="ws-tsl-l" min="0" max="100" value="50" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Luminosité (L)</label>
+                    <input type="range" id="ws-tsl-l" min="0" max="100" value="50" class="w-full h-[6px] bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
                 </div>
             </div>
-            <button id="ws-color-apply" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer</button>
+            <button id="ws-color-apply" class="w-full py-2 bg-slate-900 text-white text-[12px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer</button>
         </div>
     </div>
 
@@ -499,13 +499,13 @@
     <div id="ws-typo-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
         <div id="ws-typo-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-72 scale-95 opacity-0 transition-all duration-300">
             <div class="flex items-center justify-between cursor-grab" data-drag-handle>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Arsenal Typo</span>
-                <button id="ws-typo-close" class="text-slate-300 hover:text-slate-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <span class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Arsenal Typo</span>
+                <button id="ws-typo-close" class="text-slate-300 hover:text-slate-500"><svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             
             <div class="space-y-4">
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Police Système</label>
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Police Système</label>
                     <select id="ws-typo-font" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2 focus:ring-homeos-green focus:border-homeos-green font-sans">
                         <option value="Source Sans 3">Source Sans 3 (Default)</option>
                         <option value="Arial">Arial</option>
@@ -514,11 +514,11 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="flex flex-col space-y-1">
-                        <label class="text-[9px] uppercase font-bold text-slate-400">Taille (px)</label>
+                        <label class="text-[11px] uppercase font-bold text-slate-400">Taille (px)</label>
                         <input type="number" id="ws-typo-size" value="16" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2">
                     </div>
                     <div class="flex flex-col space-y-1">
-                        <label class="text-[9px] uppercase font-bold text-slate-400">Graisse</label>
+                        <label class="text-[11px] uppercase font-bold text-slate-400">Graisse</label>
                         <select id="ws-typo-weight" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2">
                             <option value="400">Regular</option>
                             <option value="500">Medium</option>
@@ -527,7 +527,7 @@
                         </select>
                     </div>
                 </div>
-                <button id="ws-typo-apply" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer & Générer</button>
+                <button id="ws-typo-apply" class="w-full py-2 bg-slate-900 text-white text-[12px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer & Générer</button>
             </div>
         </div>
     </div>
@@ -536,14 +536,14 @@
     <div id="ws-effects-container" class="hidden fixed z-[60] pointer-events-none origin-top-left transition-all duration-300">
         <div id="ws-effects-popover" class="glass-card shadow-2xl border border-slate-200 rounded-xl overflow-hidden pointer-events-auto flex flex-col bg-white/95 backdrop-blur-md p-4 space-y-4 w-72 scale-95 opacity-0 transition-all duration-300">
             <div class="flex items-center justify-between cursor-grab" data-drag-handle>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Arsenal Effets</span>
-                <button id="ws-effects-close" class="text-slate-300 hover:text-slate-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <span class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Arsenal Effets</span>
+                <button id="ws-effects-close" class="text-slate-300 hover:text-slate-500"><svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             
             <div class="space-y-4">
                 <!-- Elevation (Shadows) -->
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Élévation (Shadow)</label>
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Élévation (Shadow)</label>
                     <select id="ws-effects-shadow" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2 focus:ring-homeos-green">
                         <option value="none">Aucune</option>
                         <option value="shadow-sm">Small</option>
@@ -555,13 +555,13 @@
                 </div>
                 <!-- Radius -->
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Arrondi (Radius)</label>
-                    <input type="range" id="ws-effects-radius" min="0" max="40" value="20" class="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
-                    <div class="flex justify-between text-[8px] text-slate-300 font-bold uppercase mt-1"><span>0px</span><span id="ws-val-radius">20px</span><span>40px</span></div>
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Arrondi (Radius)</label>
+                    <input type="range" id="ws-effects-radius" min="0" max="40" value="20" class="w-full h-[6px] bg-slate-100 rounded-lg appearance-none cursor-pointer accent-homeos-green">
+                    <div class="flex justify-between text-[10px] text-slate-300 font-bold uppercase mt-1"><span>0px</span><span id="ws-val-radius">20px</span><span>40px</span></div>
                 </div>
                 <!-- Borders -->
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[9px] uppercase font-bold text-slate-400">Bordure</label>
+                    <label class="text-[11px] uppercase font-bold text-slate-400">Bordure</label>
                     <select id="ws-effects-border" class="w-full bg-slate-50 border-slate-200 rounded-lg text-xs py-2 focus:ring-homeos-green">
                         <option value="none">Aucune</option>
                         <option value="solid" selected>Plein (Solid)</option>
@@ -569,7 +569,7 @@
                         <option value="dotted">Point (Dotted)</option>
                     </select>
                 </div>
-                <button id="ws-effects-apply" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer</button>
+                <button id="ws-effects-apply" class="w-full py-2 bg-slate-900 text-white text-[12px] font-bold rounded-lg uppercase tracking-widest hover:bg-black transition-all">Appliquer</button>
             </div>
         </div>
     <!-- SURGICAL SULLIVAN POPOVER (Mission 147) -->
@@ -577,15 +577,15 @@
         <!-- Header / Handle -->
         <div id="ws-surgical-header" class="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between cursor-grab select-none" data-drag-handle>
             <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-homeos-green animate-pulse"></div>
-                <span class="text-[9px] font-bold text-slate-500 tracking-widest">surgical sullivan</span>
+                <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse"></div>
+                <span class="text-[11px] font-bold text-slate-500 tracking-widest">surgical sullivan</span>
             </div>
             <div class="flex items-center gap-1">
                 <button id="ws-surgical-collapse" class="text-slate-300 hover:text-slate-500 p-1" title="Réduire/Agrandir">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <button id="ws-surgical-close" class="text-slate-300 hover:text-slate-500 p-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
@@ -601,11 +601,11 @@
                 class="w-full bg-white border border-slate-200 rounded-lg text-xs p-2 focus:ring-homeos-green focus:border-homeos-green resize-none h-16 scrollbar-hide"></textarea>
             
             <div class="flex items-center justify-between mt-2">
-                <button id="btn-ws-surgical-edit-code" class="px-4 py-1.5 text-[9px] font-bold tracking-widest text-slate-400 border border-slate-100 rounded-[20px] hover:bg-slate-100 transition-all">
+                <button id="btn-ws-surgical-edit-code" class="px-4 py-1.5 text-[11px] font-bold tracking-widest text-slate-400 border border-slate-100 rounded-[20px] hover:bg-slate-100 transition-all">
                     éditer le code
                 </button>
                 <button id="btn-ws-surgical-send" class="p-2 bg-slate-900 text-white rounded-lg hover:bg-black transition-all">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 </button>
             </div>
         </div>
@@ -645,7 +645,7 @@
         if (!leftDiv) return;
         var btn = document.createElement('a');
         btn.href = '/teacher';
-        btn.className = 'inline-flex items-center gap-1 px-3 py-1 text-[10px] font-bold tracking-wider uppercase rounded border border-[#8cc63f] text-[#8cc63f] hover:bg-[#8cc63f] hover:text-white transition-all';
+        btn.className = 'inline-flex items-center gap-1 px-3 py-1 text-[12px] font-bold tracking-wider uppercase rounded border border-[#8cc63f] text-[#8cc63f] hover:bg-[#8cc63f] hover:text-white transition-all';
         btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> dashboard';
         leftDiv.appendChild(btn);
     })();
@@ -653,19 +653,19 @@
     <!-- IMAGE PICKER POPOVER (Mission 235) -->
     <div id="ws-image-picker" class="hidden fixed z-[60] bg-[#f7f6f2] border border-slate-200 shadow-2xl overflow-hidden flex flex-col w-72 transition-all duration-300 origin-right scale-95 opacity-0">
         <div class="p-4 border-b border-slate-200 flex items-center justify-between">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Bibliothèque d'images</span>
+            <span class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Bibliothèque d'images</span>
             <button onclick="document.getElementById('ws-image-picker').classList.add('hidden')" class="text-slate-300 hover:text-slate-500">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
         
         <div id="ws-image-list" class="flex-1 max-h-[400px] overflow-y-auto p-4 space-y-3 scrollbar-hide">
             <!-- Images injectées ici -->
-            <div class="text-[10px] text-slate-300 italic text-center py-4">aucune image trouvée</div>
+            <div class="text-[12px] text-slate-300 italic text-center py-4">aucune image trouvée</div>
         </div>
 
         <div class="p-4 bg-white border-t border-slate-200">
-            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-full py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all">
+            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-full py-2 bg-slate-900 text-white text-[12px] font-bold uppercase tracking-widest hover:bg-black transition-all">
                 importer →
             </button>
         </div>

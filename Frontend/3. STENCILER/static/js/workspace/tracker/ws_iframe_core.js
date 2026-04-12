@@ -89,7 +89,7 @@
     const editBtn = document.createElement('button');
     editBtn.id = 'ws-in-preview-edit-btn';
     editBtn.innerHTML = '<svg style="width:12px;height:12px;margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg> Edit code';
-    editBtn.style.cssText = 'position: fixed; display: none; z-index: 999999; background: #fff; color: #64748b; border: 1px solid #e2e8f0; padding: 6px 12px; font-size: 11px; font-family: "Source Sans 3", sans-serif; font-weight: 600; border-radius: 6px; cursor: pointer; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: translateY(-100%); transition: opacity 0.2s;';
+    editBtn.style.cssText = 'position: fixed; display: none; z-index: 999999; background: #fff; color: #64748b; border: 1px solid #e2e8f0; padding: 6px 12px; font-size: 13px; font-family: "Source Sans 3", sans-serif; font-weight: 600; border-radius: 6px; cursor: pointer; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: translateY(-100%); transition: opacity 0.2s;';
     document.body.appendChild(editBtn);
 
     // Fix: Stop propagation to prevent body.onmousedown from hiding the button before the click

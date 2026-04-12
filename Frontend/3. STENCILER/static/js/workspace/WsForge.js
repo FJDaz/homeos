@@ -77,7 +77,7 @@ class WsForge {
                         // M266: Bouton "discuter dans le cadrage →"
                         const btnCadrage = document.createElement('button');
                         btnCadrage.textContent = 'discuter dans le cadrage →';
-                        btnCadrage.className = 'mt-2 px-4 py-2 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[20px] hover:bg-[#7ab536] transition-all cursor-pointer border border-[#8cc63f]';
+                        btnCadrage.className = 'mt-2 px-4 py-2 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[20px] hover:bg-[#7ab536] transition-all cursor-pointer border border-[#8cc63f]';
                         btnCadrage.onclick = () => {
                             sessionStorage.setItem('forge_context', JSON.stringify({
                                 import_id: importId,

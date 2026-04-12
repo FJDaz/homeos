@@ -157,7 +157,7 @@
                         }
 
                         var toast = document.createElement('div');
-                        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+                        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:99999;';
                         toast.textContent = 'Mega-prompt copié ! Colle-le dans le chat Stitch (Cmd+V).';
                         document.body.appendChild(toast);
                         console.log('[Stitch] 5. Toast displayed');

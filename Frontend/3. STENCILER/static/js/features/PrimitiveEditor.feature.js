@@ -152,7 +152,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 min-width: 210px;
                 box-shadow: 0 4px 16px rgba(0,0,0,0.12);
                 font-family: Geist, sans-serif;
-                font-size: 11px;
+                font-size: 13px;
             }
             .prim-editor-panel.hidden { display: none; }
             .prim-editor-header {
@@ -163,7 +163,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 border-bottom: 1px solid var(--border-subtle, #d5d4d0);
             }
             .prim-editor-tag {
-                font-size: 9px;
+                font-size: 11px;
                 font-weight: 700;
                 letter-spacing: 0.06em;
                 color: white;
@@ -172,7 +172,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 border-radius: 3px;
             }
             .prim-editor-title {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.08em;
                 color: var(--text-secondary, #6a6a69);
@@ -182,7 +182,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 background: none;
                 border: none;
                 cursor: pointer;
-                font-size: 11px;
+                font-size: 13px;
                 color: var(--text-muted, #999);
                 padding: 2px 4px;
                 border-radius: 3px;
@@ -201,7 +201,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 gap: 8px;
             }
             .prim-row label {
-                font-size: 9px;
+                font-size: 11px;
                 font-weight: 700;
                 letter-spacing: 0.06em;
                 color: var(--text-muted, #999);
@@ -223,7 +223,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
                 accent-color: var(--accent-ardoise, #5A6B7C);
             }
             .prim-none-btn {
-                font-size: 9px;
+                font-size: 11px;
                 color: var(--text-muted, #999);
                 background: none;
                 border: 1px solid var(--border-subtle, #d5d4d0);
@@ -234,7 +234,7 @@ class PrimitiveEditorFeature extends StencilerFeature {
             }
             .prim-none-btn:hover { border-color: var(--text-secondary, #6a6a69); }
             #prim-sw-val, #prim-opacity-val {
-                font-size: 10px;
+                font-size: 12px;
                 color: var(--text-secondary, #6a6a69);
                 width: 28px;
                 text-align: right;

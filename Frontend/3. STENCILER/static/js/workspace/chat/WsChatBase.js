@@ -25,13 +25,13 @@ class WsChatBase {
 
     appendBubble(text, sender = 'user') {
         const b = document.createElement('div');
-        b.className = `p-3 rounded-lg text-[12px] max-w-[90%] transition-all ${sender === 'sullivan' ? 'bg-slate-50 border border-slate-100 self-start shadow-sm' : 'bg-slate-900 text-white self-end ml-auto'}`;
+        b.className = `p-3 rounded-lg text-[14px] max-w-[90%] transition-all ${sender === 'sullivan' ? 'bg-slate-50 border border-slate-100 self-start shadow-sm' : 'bg-slate-900 text-white self-end ml-auto'}`;
         
         if (sender === 'sullivan') {
             b.innerHTML = `
                 <div class="flex items-center gap-2 mb-1">
-                    <div class="w-1.5 h-1.5 rounded-full bg-homeos-green"></div>
-                    <span class="font-bold text-[9px] uppercase tracking-tighter">sullivan arbitrator</span>
+                    <div class="w-[6px].5 h-[6px].5 rounded-full bg-homeos-green"></div>
+                    <span class="font-bold text-[11px] uppercase tracking-tighter">sullivan arbitrator</span>
                 </div>
                 <div class="leading-relaxed whitespace-pre-wrap">${text}</div>
             `;

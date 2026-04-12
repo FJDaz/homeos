@@ -97,7 +97,7 @@ class HeaderFeature extends StencilerFeature {
         body { margin: 0; padding: 20px; background: #f7f6f2; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; }
         .export-container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         svg { max-width: 100%; height: auto; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
-        .export-footer { margin-top: 20px; text-align: center; font-size: 12px; color: #94a3b8; }
+        .export-footer { margin-top: 20px; text-align: center; font-size: 14px; color: #94a3b8; }
     </style>
 </head>
 <body>

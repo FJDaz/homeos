@@ -46,11 +46,11 @@
         const syncHeader = document.createElement('div');
         syncHeader.className = 'flex items-center justify-between p-2 border-b border-slate-100 mb-2';
         syncHeader.innerHTML =
-            '<button id="ws-stitch-sync-btn" class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-homeos-green transition-all">' +
-                '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' +
+            '<button id="ws-stitch-sync-btn" class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-homeos-green transition-all">' +
+                '<svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' +
                 'actualiser depuis stitch' +
             '</button>' +
-            '<span id="ws-stitch-sync-status" class="text-[8px] text-slate-300"></span>';
+            '<span id="ws-stitch-sync-status" class="text-[10px] text-slate-300"></span>';
         container.appendChild(syncHeader);
 
         document.getElementById('ws-stitch-sync-btn').onclick = async () => {
@@ -76,7 +76,7 @@
         };
 
         if (imports.length === 0) {
-            container.innerHTML = '<div class="p-4 text-[10px] text-slate-400 italic">aucun import</div>';
+            container.innerHTML = '<div class="p-4 text-[12px] text-slate-400 italic">aucun import</div>';
             return;
         }
 
@@ -85,18 +85,18 @@
             el.className = 'group flex items-center justify-between p-2 rounded-lg border border-slate-100 bg-white hover:border-homeos-green/30 transition-all cursor-pointer';
 
             el.innerHTML =
-                '<span class="text-[10px] font-medium text-slate-600 truncate flex-1">' + item.name + '</span>' +
+                '<span class="text-[12px] font-medium text-slate-600 truncate flex-1">' + item.name + '</span>' +
                 '<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">' +
                     '<button class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" title="Aperçu">' +
-                        '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg>' +
+                        '<svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg>' +
                     '</button>' +
                     '<button class="btn-s-stitch p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" data-feature="stitch" title="Ouvrir dans Stitch">' +
-                        '<span class="text-[9px] font-black font-sans">S</span></button>' +
+                        '<span class="text-[11px] font-black font-sans">S</span></button>' +
                     '<button class="btn-s-sync p-1.5 hover:bg-slate-50 text-slate-400 hover:text-homeos-green rounded transition-all" data-feature="stitch" title="Sync">' +
-                        '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' +
+                        '<svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' +
                     '</button>' +
                     '<button class="btn-s-delete p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded transition-all" title="Supprimer">' +
-                        '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+                        '<svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
                     '</button>' +
                 '</div>';
 
@@ -144,7 +144,7 @@
                                 document.body.removeChild(ta);
                             }
                             var toast = document.createElement('div');
-                            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;';
+                            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:99999;';
                             toast.textContent = 'Mega-prompt copié ! Colle-le dans Stitch.';
                             document.body.appendChild(toast);
                             setTimeout(function() { toast.remove(); }, 3000);

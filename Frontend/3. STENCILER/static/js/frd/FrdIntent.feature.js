@@ -167,17 +167,17 @@ const FrdIntent = {
             row.innerHTML = `
                 <td class="intent-cell intent-cell-id font-mono text-[10px] text-[#8cc63f]">${comp.id}</td>
                 <td class="intent-cell">
-                    <span class="intent-cell-type px-1.5 py-0.5 rounded bg-gray-100 text-[9px] uppercase font-bold text-gray-500">
+                    <span class="intent-cell-type px-1.5 py-0.5 rounded bg-gray-100 text-[11px] uppercase font-bold text-gray-500">
                         ${typeBadge}
                     </span>
                 </td>
                 <td class="intent-cell">
-                    <div class="text-[11px] text-[#3d3d3c] font-medium leading-tight">${comp.name}</div>
-                    <div class="text-[10px] text-gray-400 italic">${comp.inferred_intent}</div>
+                    <div class="text-[13px] text-[#3d3d3c] font-medium leading-tight">${comp.name}</div>
+                    <div class="text-[12px] text-gray-400 italic">${comp.inferred_intent}</div>
                 </td>
                 <td class="intent-cell text-right">
                     <button class="btn-intent-action" title="Annoter">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     </button>
                 </td>
             `;

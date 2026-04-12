@@ -33,7 +33,7 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; font-size: 12px; color: #3d3d3c; letter-spacing: -0.01em; background-color: #f7f6f2; }
+        body { font-family: 'Inter', sans-serif; font-size: 14px; color: #3d3d3c; letter-spacing: -0.01em; background-color: #f7f6f2; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
         /* Global Reset Hard-Edge sauf conteneurs ALT */
@@ -72,12 +72,12 @@
     <!-- HEADER (Beige HoméOS) -->
     <header class="h-[48px] border-b border-homeos-border flex items-center justify-between px-6 bg-homeos-bg z-50">
         <div class="flex items-center gap-4">
-            <select id="project-switcher" class="text-[10px] font-semibold text-homeos-muted bg-transparent border-none outline-none cursor-pointer">
+            <select id="project-switcher" class="text-[12px] font-semibold text-homeos-muted bg-transparent border-none outline-none cursor-pointer">
                 <option value="">chargement...</option>
             </select>
         </div>
         <div class="flex items-center gap-3">
-            <button id="btn-recompile" class="text-[10px] font-semibold border border-homeos-border px-3 py-1.5 text-homeos-muted hover:border-homeos-green hover:text-homeos-green transition-colors">
+            <button id="btn-recompile" class="text-[12px] font-semibold border border-homeos-border px-3 py-1.5 text-homeos-muted hover:border-homeos-green hover:text-homeos-green transition-colors">
                 recompiler génome
             </button>
         </div>
@@ -91,15 +91,15 @@
             <aside id="sidebar-left" class="w-[220px] border-r border-homeos-border bg-homeos-bg flex flex-col shrink-0">
                 <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-homeos-panel/30">
                     <button id="toggle-sidebar" class="text-homeos-muted hover:text-homeos-green transition-colors" title="alt+b">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                         </svg>
                     </button>
                     <button id="btn-refresh-files" class="text-homeos-muted hover:text-homeos-green">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </button>
                 </div>
-                <div id="explorer-grid" class="flex-1 overflow-y-auto p-3 space-y-1 no-scrollbar text-[11px]">
+                <div id="explorer-grid" class="flex-1 overflow-y-auto p-3 space-y-1 no-scrollbar text-[13px]">
                     <!-- Fichiers -->
                 </div>
             </aside>
@@ -113,22 +113,22 @@
                     <!-- ARCHITECTE CHAT -->
                     <div id="architect-pane" class="flex flex-col bg-homeos-architect/10">
                         <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
-                            <span class="text-[10px] font-semibold">architecte</span>
-                            <select id="select-history-arch" class="text-[10px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
+                            <span class="text-[12px] font-semibold">architecte</span>
+                            <select id="select-history-arch" class="text-[12px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
                                 <option value="">nouv. session</option>
                             </select>
                         </div>
                         <div id="chat-arch-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
                         <div class="p-3 border-t border-homeos-border bg-homeos-bg">
-                            <textarea id="input-arch" placeholder="planifier..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[14px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
+                            <textarea id="input-arch" placeholder="planifier..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[16px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
                         </div>
                     </div>
 
                     <!-- WORKSPACE (ROADMAP / EDITOR) -->
                     <div class="flex flex-col overflow-hidden">
                         <div id="ws-tab-row" class="h-9 border-b border-homeos-border flex items-center px-4 gap-6 bg-homeos-panel/20">
-                            <button data-tab="roadmap" class="h-full text-[10px] font-semibold tab-active">roadmap</button>
-                            <button data-tab="editor" class="h-full text-[10px] font-medium text-homeos-muted hover:text-homeos-text">éditeur</button>
+                            <button data-tab="roadmap" class="h-full text-[12px] font-semibold tab-active">roadmap</button>
+                            <button data-tab="editor" class="h-full text-[12px] font-medium text-homeos-muted hover:text-homeos-text">éditeur</button>
                             <div class="flex-1"></div>
                             <div id="current-filename" class="text-[10px] font-mono text-homeos-muted italic">roadmap.md</div>
                         </div>
@@ -145,14 +145,14 @@
                 <footer class="h-[180px] border-t border-homeos-border bg-[#fafafa] text-homeos-text">
                     <div id="terminal-split" class="grid grid-cols-2 h-full divide-x divide-homeos-border">
                         <div class="flex flex-col">
-                            <div class="h-6 bg-homeos-panel/50 px-3 flex items-center">
-                                <span class="text-[9px] font-medium text-homeos-muted">logs architecte</span>
+                            <div class="h-[26px] bg-homeos-panel/50 px-3 flex items-center">
+                                <span class="text-[11px] font-medium text-homeos-muted">logs architecte</span>
                             </div>
                             <div class="terminal-log no-scrollbar" id="log-arch"></div>
                         </div>
                         <div class="flex flex-col">
-                            <div class="h-6 bg-homeos-panel/50 px-3 flex items-center">
-                                <span class="text-[9px] font-medium text-homeos-muted">output ouvrier</span>
+                            <div class="h-[26px] bg-homeos-panel/50 px-3 flex items-center">
+                                <span class="text-[11px] font-medium text-homeos-muted">output ouvrier</span>
                             </div>
                             <div class="terminal-log no-scrollbar" id="log-work"></div>
                         </div>
@@ -163,14 +163,14 @@
             <!-- SIDEBAR DROITE : OUVRIER -->
             <aside class="w-[280px] border-l border-homeos-border bg-homeos-worker/10 flex flex-col shrink-0">
                 <div class="p-3 border-b border-homeos-border flex items-center justify-between bg-white/50">
-                    <span class="text-[10px] font-semibold">ouvrier</span>
-                    <select id="select-history-work" class="text-[10px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
+                    <span class="text-[12px] font-semibold">ouvrier</span>
+                    <select id="select-history-work" class="text-[12px] bg-transparent border-none outline-none font-medium text-homeos-muted max-w-[120px]">
                         <option value="">nouv. session</option>
                     </select>
                 </div>
                 <div id="chat-work-history" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
                 <div class="p-3 border-t border-homeos-border bg-homeos-bg">
-                    <textarea id="input-work" placeholder="exécuter..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[14px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
+                    <textarea id="input-work" placeholder="exécuter..." class="w-full bg-homeos-bg border border-homeos-border p-2 text-[16px] resize-none outline-none focus:border-homeos-green h-16"></textarea>
                 </div>
             </aside>
         </div>

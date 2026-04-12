@@ -100,7 +100,7 @@ export class FrdWire {
 
             .badge-wire-v3 {
                 position: absolute; padding: 3px 8px; border-radius: 4px;
-                font-size: 10px; font-weight: bold; color: white;
+                font-size: 12px; font-weight: bold; color: white;
                 z-index: 10000; pointer-events: auto; cursor: pointer;
                 font-family: sans-serif; white-space: nowrap;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -205,11 +205,11 @@ export class FrdWire {
             const bilanItem = document.createElement('div');
             bilanItem.className = 'px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors cursor-pointer';
             bilanItem.innerHTML = `
-                <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${status === 'ok' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
-                    <span class="text-[14px] font-wingdings-3">${status === 'ok' ? '&#252;' : '&#251;'}</span>
+                <div class="w-[26px] h-[26px] rounded-full flex items-center justify-center shrink-0 ${status === 'ok' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                    <span class="text-[16px] font-wingdings-3">${status === 'ok' ? '&#252;' : '&#251;'}</span>
                 </div>
                 <div class="flex-1 min-width-0">
-                    <div class="text-[12px] font-bold text-slate-900 truncate">${intent}</div>
+                    <div class="text-[14px] font-bold text-slate-900 truncate">${intent}</div>
                     <div class="text-[10px] text-slate-500 font-mono truncate">${finding?.target || 'no-route'}</div>
                 </div>
             `;
@@ -223,7 +223,7 @@ export class FrdWire {
             const planItem = document.createElement('div');
             planItem.className = 'px-6 py-4 hover:bg-slate-50 transition-colors';
             planItem.innerHTML = `
-                <div class="text-[11px] leading-relaxed ${status === 'error' ? 'text-slate-700' : 'text-slate-400 italic'}">
+                <div class="text-[13px] leading-relaxed ${status === 'error' ? 'text-slate-700' : 'text-slate-400 italic'}">
                     ${planText}
                 </div>
             `;
@@ -352,7 +352,7 @@ export class FrdWire {
         if (!applyBtn) {
             applyBtn = document.createElement('button');
             applyBtn.id = 'wire-apply-btn';
-            applyBtn.className = 'mt-3 w-full py-2 bg-[#8cc63f] text-white text-[10px] font-bold uppercase tracking-widest rounded hover:bg-opacity-90 transition-all';
+            applyBtn.className = 'mt-3 w-full py-2 bg-[#8cc63f] text-white text-[12px] font-bold uppercase tracking-widest rounded hover:bg-opacity-90 transition-all';
             applyBtn.innerText = '→ Implémenter le plan';
             const content = document.getElementById('wire-content');
             content.parentNode.appendChild(applyBtn);

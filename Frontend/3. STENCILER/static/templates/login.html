@@ -112,7 +112,7 @@
             right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 10px;
+            font-size: 12px;
             color: #94A3B8;
             pointer-events: none;
         }
@@ -131,15 +131,15 @@
             
             <!-- Context Selection -->
             <div class="mb-10">
-                <label class="block text-[10px] uppercase font-black text-slate-300 tracking-[0.2em] mb-4">Accès au Laboratoire</label>
+                <label class="block text-[12px] uppercase font-black text-slate-300 tracking-[0.2em] mb-4">Accès au Laboratoire</label>
                 <div class="grid grid-cols-2 gap-px bg-slate-100 ghost-border">
                     <button id="choice-student" onclick="selectContext('student')" class="btn-choice active hard-edge py-5 px-6 text-left flex flex-col group bg-white">
-                        <span class="text-[14px] font-bold">Élève DNMADE</span>
-                        <span class="text-[11px] text-slate-400">Accès formation</span>
+                        <span class="text-[16px] font-bold">Élève DNMADE</span>
+                        <span class="text-[13px] text-slate-400">Accès formation</span>
                     </button>
                     <button id="choice-prof" onclick="selectContext('prof')" class="btn-choice hard-edge py-5 px-6 text-left flex flex-col group bg-white border-l border-slate-50">
-                        <span class="text-[14px] font-bold">Enseignant</span>
-                        <span class="text-[11px] text-slate-400">Projets & Suivi</span>
+                        <span class="text-[16px] font-bold">Enseignant</span>
+                        <span class="text-[13px] text-slate-400">Projets & Suivi</span>
                     </button>
                 </div>
             </div>
@@ -148,23 +148,23 @@
             <div id="form-student" class="tab-content active space-y-6">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Sélectionnez votre classe</label>
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Sélectionnez votre classe</label>
                         <div class="select-wrapper">
-                            <select id="select-class" onchange="loadStudents(this.value)" class="select-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight bg-slate-50">
+                            <select id="select-class" onchange="loadStudents(this.value)" class="select-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight bg-slate-50">
                                 <option value="">Chargement des classes...</option>
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Qui êtes-vous ?</label>
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Qui êtes-vous ?</label>
                         <div class="select-wrapper">
-                            <select id="select-student" class="select-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight bg-slate-50">
+                            <select id="select-student" class="select-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight bg-slate-50">
                                 <option value="">Choisissez d'abord une classe</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <button onclick="loginStudent()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                <button onclick="loginStudent()" class="primary-btn hard-edge w-full py-4 text-[14px] uppercase tracking-[0.2em] shadow-lg">
                     Rejoindre le Labo →
                 </button>
             </div>
@@ -173,19 +173,19 @@
             <div id="form-prof" class="tab-content space-y-6">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Identifiant</label>
-                        <input type="text" id="prof-username" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="Nom d'utilisateur">
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Identifiant</label>
+                        <input type="text" id="prof-username" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="Nom d'utilisateur">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Mot de passe</label>
-                        <input type="password" id="prof-password" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="••••••••">
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Mot de passe</label>
+                        <input type="password" id="prof-password" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="••••••••">
                     </div>
                 </div>
-                <button onclick="loginProf()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                <button onclick="loginProf()" class="primary-btn hard-edge w-full py-4 text-[14px] uppercase tracking-[0.2em] shadow-lg">
                     Accès Dashboard →
                 </button>
                 <div class="text-center mt-4">
-                    <button onclick="showRegisterProf()" class="text-[11px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
+                    <button onclick="showRegisterProf()" class="text-[13px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
                         Première connexion ? Créer un compte
                     </button>
                 </div>
@@ -195,31 +195,31 @@
             <div id="form-prof-register" class="tab-content space-y-6">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Choisir un Identifiant</label>
-                        <input type="text" id="reg-prof-username" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="Ex: FJD">
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Choisir un Identifiant</label>
+                        <input type="text" id="reg-prof-username" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="Ex: FJD">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-2">Définir un Mot de passe</label>
-                        <input type="password" id="reg-prof-password" class="input-field hard-edge w-full px-4 py-3 text-[14px] font-medium tracking-tight" placeholder="••••••••">
+                        <label class="block text-[13px] font-bold text-slate-400 mb-2">Définir un Mot de passe</label>
+                        <input type="password" id="reg-prof-password" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="••••••••">
                     </div>
                 </div>
-                <button onclick="registerProf()" class="primary-btn hard-edge w-full py-4 text-[12px] uppercase tracking-[0.2em] shadow-lg">
+                <button onclick="registerProf()" class="primary-btn hard-edge w-full py-4 text-[14px] uppercase tracking-[0.2em] shadow-lg">
                     Créer mon compte →
                 </button>
                 <div class="text-center mt-4">
-                    <button onclick="selectContext('prof')" class="text-[11px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
+                    <button onclick="selectContext('prof')" class="text-[13px] text-slate-400 hover:text-homeos-green transition-colors font-bold uppercase tracking-widest">
                         ← Retour à la connexion
                     </button>
                 </div>
             </div>
 
-            <div id="auth-error" class="hidden mt-6 p-4 bg-red-50 text-red-500 text-[12px] font-bold italic tracking-tight text-center">
+            <div id="auth-error" class="hidden mt-6 p-4 bg-red-50 text-red-500 text-[14px] font-bold italic tracking-tight text-center">
                 Identifiants incorrects. Veuillez réessayer.
             </div>
         </div>
 
         <div class="mt-16 flex items-center gap-4">
-            <div class="w-1.5 h-1.5 rounded-full bg-homeos-green animate-pulse"></div>
+            <div class="w-[6px].5 h-[6px].5 rounded-full bg-homeos-green animate-pulse"></div>
             <div class="text-[10px] text-slate-400 font-mono tracking-widest uppercase opacity-50">
                 Aetherflow / Build 2.0-R / Connected
             </div>

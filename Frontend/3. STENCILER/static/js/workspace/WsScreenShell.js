@@ -48,7 +48,7 @@ class WsScreenShell {
         const grip = this._createElement('text', {
             x: String(SW / 2), y: '26', 'text-anchor': 'middle',
             fill: '#d1d5db',
-            style: 'font-size:11px; letter-spacing:5px; pointer-events:none; user-select:none;'
+            style: 'font-size:13px; letter-spacing:5px; pointer-events:none; user-select:none;'
         });
         grip.textContent = '⋯';
         g.appendChild(grip);
@@ -65,9 +65,9 @@ class WsScreenShell {
             const badgeFo = this._createForeignObject(String(25 + (item.name || '').length * 7), '12', '300', '20');
             const badgeDiv = document.createElement('div');
             if (item.origin === 'generated') {
-                badgeDiv.innerHTML = `<span style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">Tailwind généré — peut différer du rendu exact</span>`;
+                badgeDiv.innerHTML = `<span style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; white-space:nowrap;">Tailwind généré — peut différer du rendu exact</span>`;
             } else if (item.origin === 'compiled') {
-                badgeDiv.innerHTML = `<span style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600; white-space:nowrap;">build compilé</span>`;
+                badgeDiv.innerHTML = `<span style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600; white-space:nowrap;">build compilé</span>`;
             }
             badgeFo.appendChild(badgeDiv);
             g.appendChild(badgeFo);
@@ -91,7 +91,7 @@ class WsScreenShell {
                 g.dataset.hasManifest = "false";
                 const badgeFo = this._createForeignObject('20', String(SH - 35), '180', '30');
                 const badgeDiv = document.createElement('div');
-                badgeDiv.innerHTML = `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; display:flex; align-items:center; gap:6px; width:fit-content;">
+                badgeDiv.innerHTML = `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; display:flex; align-items:center; gap:6px; width:fit-content;">
                     <span style="width:6px; height:6px; border-radius:50%; background:#f97316;"></span>
                     cadrage requis
                 </span>`;
@@ -159,7 +159,7 @@ class WsScreenShell {
         const wireDiv = document.createElement('div');
         wireDiv.style.cssText = 'height:100%;';
         wireDiv.className = "flex items-center space-x-2 text-homeos-green cursor-pointer hover:opacity-80 transition-opacity";
-        wireDiv.innerHTML = `<span style="font-size:10px; font-weight:800; border:1px solid #A3CD54; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em;">Wire</span>`;
+        wireDiv.innerHTML = `<span style="font-size:12px; font-weight:800; border:1px solid #A3CD54; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em;">Wire</span>`;
         wireDiv.addEventListener('mousedown', (e) => e.stopPropagation());
         wireDiv.addEventListener('click', (e) => { e.stopPropagation(); window.wsCanvas.selectScreen(g); window.wsPreview?.enterPreviewMode(g.id, 'wire'); });
         wireFo.appendChild(wireDiv);
@@ -172,7 +172,7 @@ class WsScreenShell {
         const previewDiv = document.createElement('div');
         previewDiv.className = "flex items-center space-x-2 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors";
         previewDiv.style.cssText = 'height:100%;';
-        previewDiv.innerHTML = `<span style="font-size:10px; font-weight:600; background:rgba(0,0,0,0.03); padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.02em;">Aperçu</span>`;
+        previewDiv.innerHTML = `<span style="font-size:12px; font-weight:600; background:rgba(0,0,0,0.03); padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.02em;">Aperçu</span>`;
         previewDiv.addEventListener('mousedown', (e) => e.stopPropagation());
         previewDiv.addEventListener('click', (e) => { e.stopPropagation(); window.wsCanvas.selectScreen(g); window.wsPreview?.enterPreviewMode(g.id, 'construct'); });
         previewFo.appendChild(previewDiv);
@@ -183,7 +183,7 @@ class WsScreenShell {
             'pointer-events': 'all', 'data-right-offset': '140', 'class': 'ws-shell-tool'
         });
         const saveBtn = document.createElement('button');
-        saveBtn.style.cssText = "width:100%; height:100%; line-height:1; background:#8cc63f; color:#fff; border:none; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;";
+        saveBtn.style.cssText = "width:100%; height:100%; line-height:1; background:#8cc63f; color:#fff; border:none; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;";
         saveBtn.innerText = "SAVE";
         saveBtn.addEventListener('mousedown', (e) => e.stopPropagation());
         saveBtn.addEventListener('click', async (e) => {
@@ -221,17 +221,17 @@ class WsScreenShell {
         wrap.style.cssText = 'text-align:center; font-family:"Source Sans 3",sans-serif;';
         
         const nameLabel = document.createElement('div');
-        nameLabel.style.cssText = 'font-size:10px; color:#94a3b8; margin-bottom:10px;';
+        nameLabel.style.cssText = 'font-size:12px; color:#94a3b8; margin-bottom:10px;';
         nameLabel.textContent = (item.name || '').toLowerCase();
         
         const forgeBtn = document.createElement('button');
         forgeBtn.id = `forge-btn-${item.id}`;
-        forgeBtn.style.cssText = 'background:#A3CD54; color:#fff; border:none; border-radius:20px; padding:8px 20px; font-size:11px; cursor:pointer; text-transform:lowercase;';
+        forgeBtn.style.cssText = 'background:#A3CD54; color:#fff; border:none; border-radius:20px; padding:8px 20px; font-size:13px; cursor:pointer; text-transform:lowercase;';
         forgeBtn.textContent = 'forger le rendu';
         
         const statusEl = document.createElement('div');
         statusEl.id = `forge-status-${item.id}`;
-        statusEl.style.cssText = 'font-size:9px; color:#94a3b8; margin-top:6px;';
+        statusEl.style.cssText = 'font-size:11px; color:#94a3b8; margin-top:6px;';
         
         wrap.appendChild(nameLabel);
         wrap.appendChild(forgeBtn);

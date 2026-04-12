@@ -25,7 +25,7 @@
 }
 
 #slot-header h1 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--text-primary);
@@ -46,7 +46,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
@@ -63,7 +63,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -90,7 +90,7 @@
 }
 
 .sidebar-brand {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #7aca6a;
   /* Vert HomeOS fixe */
@@ -108,7 +108,7 @@
 }
 
 .sidebar-tagline {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
   letter-spacing: 0.05em;
@@ -125,7 +125,7 @@
 }
 
 .sidebar-section-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -178,14 +178,14 @@
 }
 
 .preview-card .name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   margin-top: 4px;
   color: var(--text-primary);
 }
 
 .preview-card .count {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -278,7 +278,7 @@
 }
 
 .component-card .name {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
 }
@@ -305,7 +305,7 @@
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
   display: flex;
@@ -320,7 +320,7 @@
 }
 
 .zoom-controls span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   min-width: 40px;
   text-align: center;
@@ -374,7 +374,7 @@
   border-radius: 4px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 12px;
   transition: all 0.12s ease;
 }
 
@@ -394,7 +394,7 @@
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
   display: flex;
@@ -412,7 +412,7 @@
 }
 
 .btn-api {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .btn-delete {
@@ -448,7 +448,7 @@
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   text-decoration: none;
   margin-bottom: 4px;
   transition: all 0.12s ease;
@@ -491,13 +491,13 @@
 }
 
 .phase-name {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .phase-confidence {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -508,7 +508,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
   font-family: inherit;
@@ -713,7 +713,7 @@
 }
 
 .breadcrumb-mini {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -733,13 +733,13 @@
 }
 
 .empty-icon {
-  font-size: 32px;
+  font-size: 34px;
   margin-bottom: 12px;
   opacity: 0.5;
 }
 
 .empty-text {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -755,14 +755,14 @@
 }
 
 .components-zone-header h3 {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--text-primary);
 }
 
 .components-zone-header .count {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -797,13 +797,13 @@
 }
 
 .cell-name {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
 /* ========== MISSION 5E — CONTEXTE HIÉRARCHIQUE ========== */
 .cz-breadcrumb {
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   color: var(--text-secondary);
   letter-spacing: 0.05em;
@@ -824,7 +824,7 @@
 
 .cz-invite {
   margin-top: 20px;
-  font-size: 12px;
+  font-size: 14px;
   opacity: 0.7;
   color: var(--text-muted);
 }
@@ -885,7 +885,7 @@
 }
 
 .atom-method-select {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   padding: 2px 5px;
   border-radius: 3px;
@@ -921,7 +921,7 @@
   background: transparent;
   border: none;
   border-bottom: 1px dashed transparent;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   padding: 2px 0;
@@ -937,7 +937,7 @@
   align-items: center;
   gap: 4px;
   font-family: monospace;
-  font-size: 10px;
+  font-size: 12px;
   background: rgba(0, 0, 0, 0.03);
   padding: 4px 6px;
   border-radius: 3px;
@@ -945,7 +945,7 @@
 
 .endpoint-label {
   color: var(--text-muted);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -968,7 +968,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-left: 2px solid var(--border-subtle);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   padding: 2px 8px;
   resize: none;
@@ -1028,7 +1028,7 @@
 .btn-export {
   padding: 4px 10px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   font-family: inherit;
   font-weight: 500;
   cursor: pointer;

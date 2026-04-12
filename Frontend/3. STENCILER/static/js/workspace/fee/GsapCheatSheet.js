@@ -98,9 +98,9 @@ class GsapCheatSheet {
 
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[8px] font-bold text-slate-800 uppercase tracking-tight">${effect.title}</span>
+                    <span class="text-[10px] font-bold text-slate-800 uppercase tracking-tight">${effect.title}</span>
                     <button class="ws-effect-add-btn p-1 rounded-full ${isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-50 text-slate-300 hover:text-indigo-500'} transition-all" data-id="${effect.id}">
-                        <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="${isSelected ? 'M5 13l4 4L19 7' : 'M12 4v16m8-8H4'}"/></svg>
+                        <svg class="w-[10px] h-[10px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="${isSelected ? 'M5 13l4 4L19 7' : 'M12 4v16m8-8H4'}"/></svg>
                     </button>
                 </div>
                 <div class="flex-1 bg-slate-50 rounded border border-slate-100 overflow-hidden flex items-center justify-center relative min-h-[50px] mb-1.5 p-1">
@@ -108,7 +108,7 @@ class GsapCheatSheet {
                         ${this.getPreviewMarkup(effect.id)}
                     </div>
                 </div>
-                <p class="text-[7px] text-slate-400 leading-none italic truncate">${effect.description}</p>
+                <p class="text-[9px] text-slate-400 leading-none italic truncate">${effect.description}</p>
             `;
 
             card.querySelector('.ws-effect-add-btn').onclick = (e) => {
@@ -137,9 +137,9 @@ class GsapCheatSheet {
             case 'elastic':
                 return `<button class="ws-preview-btn">btn</button>`;
             case 'splittext':
-                return `<span class="text-[8px] font-bold text-slate-600 uppercase">text</span>`;
+                return `<span class="text-[10px] font-bold text-slate-600 uppercase">text</span>`;
             default:
-                return `<div class="ws-preview-item w-12 h-8"></div>`;
+                return `<div class="ws-preview-item w-[50px] h-[34px]"></div>`;
         }
     }
 
@@ -158,12 +158,12 @@ class GsapCheatSheet {
         
         this.statcherList.innerHTML = '';
         if (count === 0) {
-            this.statcherList.innerHTML = '<span class="text-[8px] text-slate-400 italic">aucun sélectionné</span>';
+            this.statcherList.innerHTML = '<span class="text-[10px] text-slate-400 italic">aucun sélectionné</span>';
         } else {
             this.selectedEffects.forEach(id => {
                 const effect = this.effects.find(e => e.id === id);
                 const tag = document.createElement('div');
-                tag.className = 'px-2 py-0.5 bg-white border border-slate-200 text-[8px] font-bold text-slate-600 uppercase flex items-center space-x-1';
+                tag.className = 'px-2 py-0.5 bg-white border border-slate-200 text-[10px] font-bold text-slate-600 uppercase flex items-center space-x-1';
                 tag.innerHTML = `<span>${effect.title}</span><button class="hover:text-red-500" data-id="${id}">×</button>`;
                 tag.querySelector('button').onclick = () => this.toggleEffect(id);
                 this.statcherList.appendChild(tag);

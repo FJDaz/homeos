@@ -14,7 +14,7 @@ body { font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFo
 /* Wingdings arrows */
 .wingding-arrow {
     font-family: 'Wingdings3', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     display: inline-block;
     transition: transform 0.2s;
 }
@@ -39,7 +39,7 @@ body { font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFo
     align-items: center; 
     justify-content: center; 
     cursor: pointer; 
-    font-size: 14px; 
+    font-size: 16px; 
     color: #64748b; 
     border-right: 1px solid #f1f5f9; 
     transition: all 0.2s; 
@@ -66,12 +66,12 @@ body { font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFo
     flex-shrink: 0;
 }
 .sidebar-header { padding: 20px; border-bottom: 1px solid #e2e8f0; }
-.sidebar-title { font-size: 22px; font-weight: 800; color: #7aca6a; }
+.sidebar-title { font-size: 24px; font-weight: 800; color: #7aca6a; }
 .K { color: #000; font-weight: 500; }
-.sidebar-subtitle { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+.sidebar-subtitle { font-size: 14px; color: #94a3b8; margin-top: 4px; }
 .sidebar-section { padding: 18px; border-bottom: 1px solid #f1f5f9; }
 .sidebar-label { 
-    font-size: 12px; 
+    font-size: 14px; 
     font-weight: 700; 
     color: #94a3b8; 
     text-transform: uppercase; 
@@ -88,8 +88,8 @@ body { font-family: "Univers LT Std", "Univers", -apple-system, BlinkMacSystemFo
 }
 .container { max-width: 1400px; margin: 0 auto; }
 
-h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-.subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; }
+h1 { font-size: 26px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+.subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; }
 
 /* Collapsible Section */
 .section { 
@@ -115,7 +115,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 }
 
 .section-title { 
-    font-size: 14px; 
+    font-size: 16px; 
     font-weight: 700; 
     color: #1e293b;
     display: flex;
@@ -123,7 +123,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     gap: 8px;
 }
 .section-count {
-    font-size: 12px;
+    font-size: 14px;
     color: #64748b;
     font-weight: 500;
     background: white;
@@ -132,7 +132,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     border: 1px solid #e2e8f0;
 }
 .section-desc {
-    font-size: 12px;
+    font-size: 14px;
     color: #64748b;
     margin-left: auto;
     font-style: italic;
@@ -177,7 +177,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 
 .comp-info { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; min-height: 70px; }
 .comp-name { 
-    font-size: 13px; 
+    font-size: 15px; 
     font-weight: 700; 
     color: #1e293b; 
     white-space: nowrap; 
@@ -186,7 +186,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     margin-bottom: 4px; 
 }
 .comp-endpoint { 
-    font-size: 10px; 
+    font-size: 12px; 
     color: #94a3b8; 
     font-family: 'SF Mono', Monaco, monospace; 
     white-space: nowrap; 
@@ -202,7 +202,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     background: #fafafa;
 }
 .comp-method { 
-    font-size: 10px; 
+    font-size: 12px; 
     font-weight: 700; 
     text-transform: uppercase;
     padding: 3px 10px; 
@@ -233,7 +233,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     opacity: 0.5;
@@ -260,12 +260,12 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     transform: translateY(-2px);
 }
 .stat-number {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
     color: #7aca6a;
 }
 .stat-label {
-    font-size: 11px;
+    font-size: 13px;
     color: #94a3b8;
     font-weight: 600;
     text-transform: uppercase;
@@ -286,7 +286,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     box-shadow: 0 8px 24px rgba(122,202,106,0.15);
 }
 .style-option-header {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 20px;
@@ -344,13 +344,13 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     padding: 10px;
 }
 .style-preview .sp-title {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     margin-bottom: 3px;
     letter-spacing: 0.3px;
 }
 .style-preview .sp-sub {
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 400;
     opacity: 0.7;
     letter-spacing: 0.5px;
@@ -367,7 +367,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     font-weight: 400; 
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Corporate: Executive elegance */
@@ -379,7 +379,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 .corporate-preview .sp-title { 
     font-weight: 600; 
     letter-spacing: 0.5px; 
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* Creative: Artistic sophistication */
@@ -403,7 +403,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 .tech-preview .sp-title { 
     font-weight: 500; 
     letter-spacing: 1px;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Elegant: Timeless luxury */
@@ -416,7 +416,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     font-weight: 400; 
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Playful: Approachable warmth */
@@ -440,7 +440,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     font-weight: 400; 
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Colorful: Curated harmony */
@@ -455,15 +455,15 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 }
 
 /* Section header emoji removal */
-.section-title { font-size: 14px; font-weight: 700; }
-.style-option-header { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 20px; text-align: center; }
+.section-title { font-size: 16px; font-weight: 700; }
+.style-option-header { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 20px; text-align: center; }
 .btn-secondary {
     margin-top: 12px;
     padding: 8px 24px;
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #475569;
     cursor: pointer;
@@ -534,7 +534,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 .preview-header {
     padding: 8px;
     color: white;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     text-align: center;
     border-radius: 6px 6px 0 0;
@@ -551,7 +551,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
     padding: 4px 6px;
     background: #f1f5f9;
     border-radius: 4px;
-    font-size: 9px;
+    font-size: 11px;
     color: #64748b;
 }
 
@@ -597,14 +597,14 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 }
 
 .sidebar-header h3 {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #1f2937;
     margin-bottom: 4px;
 }
 
 #selection-info {
-    font-size: 11px;
+    font-size: 13px;
     color: #64748b;
 }
 
@@ -613,7 +613,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 }
 
 .tool-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: #64748b;
     margin-bottom: 8px;
@@ -670,7 +670,7 @@ h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 }
 
 .slider-value {
-    font-size: 11px;
+    font-size: 13px;
     color: #64748b;
     min-width: 35px;
     text-align: right;

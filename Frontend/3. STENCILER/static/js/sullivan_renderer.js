@@ -22,17 +22,17 @@ class SullivanRenderer {
         if (visualHint === "brainstorm") {
             return `<div style="background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);padding:8px;border-radius:8px;height:70px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
                 <div style="display:flex;gap:6px;align-items:center;">
-                    <span style="font-size:20px;">💡</span>
+                    <span style="font-size:22px;">💡</span>
                     <div style="width:40px;height:3px;background:#fbbf24;border-radius:2px;"></div>
-                    <span style="font-size:16px;">📝</span>
+                    <span style="font-size:18px;">📝</span>
                     <div style="width:40px;height:3px;background:#cbd5e1;border-radius:2px;"></div>
-                    <span style="font-size:16px;opacity:0.5;">✓</span>
+                    <span style="font-size:18px;opacity:0.5;">✓</span>
                 </div>
-                <div style="font-size:10px;color:#92400e;font-weight:600;">Phase créative</div>
+                <div style="font-size:12px;color:#92400e;font-weight:600;">Phase créative</div>
             </div>`;
         } else if (visualHint === "backend") {
             return `<div style="background:linear-gradient(135deg,#e0e7ff 0%,#c7d2fe 100%);padding:8px;border-radius:8px;height:70px;display:flex;flex-direction:column;gap:4px;">
-                <div style="font-size:10px;color:#3730a3;font-weight:600;">⚙️ Moteur & Données</div>
+                <div style="font-size:12px;color:#3730a3;font-weight:600;">⚙️ Moteur & Données</div>
                 <div style="display:flex;gap:4px;align-items:flex-end;flex:1;padding:4px 0;">
                     <div style="flex:1;height:40%;background:#6366f1;border-radius:2px 2px 0 0;"></div>
                     <div style="flex:1;height:70%;background:#6366f1;border-radius:2px 2px 0 0;"></div>
@@ -42,7 +42,7 @@ class SullivanRenderer {
             </div>`;
         } else if (visualHint === "frontend") {
             return `<div style="background:linear-gradient(135deg,#fce7f3 0%,#fbcfe8 100%);padding:8px;border-radius:8px;height:70px;display:flex;flex-direction:column;gap:4px;">
-                <div style="font-size:10px;color:#9d174d;font-weight:600;">Design & Interface</div>
+                <div style="font-size:12px;color:#9d174d;font-weight:600;">Design & Interface</div>
                 <div style="display:flex;gap:4px;justify-content:center;align-items:center;flex:1;">
                     <div style="width:30%;height:45px;background:rgba(59,130,246,0.3);border:1px dashed #3b82f6;border-radius:4px;"></div>
                     <div style="width:35%;height:45px;background:rgba(16,185,129,0.3);border:1px dashed #10b981;border-radius:4px;"></div>
@@ -51,10 +51,10 @@ class SullivanRenderer {
             </div>`;
         } else if (visualHint === "deploy") {
             return `<div style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:8px;border-radius:8px;height:70px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
-                <div style="padding:8px 20px;background:linear-gradient(145deg,#10b981 0%,#059669 100%);border-radius:16px;color:white;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;">
+                <div style="padding:8px 20px;background:linear-gradient(145deg,#10b981 0%,#059669 100%);border-radius:16px;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;">
                     <span>🚀</span> Publier
                 </div>
-                <div style="font-size:9px;color:#065f46;">Mise en ligne</div>
+                <div style="font-size:11px;color:#065f46;">Mise en ligne</div>
             </div>`;
         }
         return this.generateWireframeGeneral(visualHint, color);
@@ -64,7 +64,7 @@ class SullivanRenderer {
         if (visualHint === "analyse") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:6px;height:65px;display:flex;flex-direction:column;gap:3px;">
                 <div style="display:flex;gap:3px;align-items:center;">
-                    <span style="font-size:12px;">🔍</span>
+                    <span style="font-size:14px;">🔍</span>
                     <div style="flex:1;height:6px;background:#e2e8f0;border-radius:1px;"></div>
                 </div>
                 <div style="display:flex;gap:3px;"><div style="flex:2;height:5px;background:#cbd5e1;border-radius:1px;"></div><div style="flex:1;height:5px;background:#7aca6a;border-radius:1px;"></div></div>
@@ -73,8 +73,8 @@ class SullivanRenderer {
             </div>`;
         } else if (visualHint === "choix") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:6px;height:65px;display:flex;gap:6px;justify-content:center;align-items:center;">
-                <div style="width:40%;height:45px;background:white;border:2px solid #7aca6a;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#7aca6a;font-size:16px;font-weight:bold;">✓</span></div>
-                <div style="width:40%;height:45px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#94a3b8;font-size:16px;">○</span></div>
+                <div style="width:40%;height:45px;background:white;border:2px solid #7aca6a;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#7aca6a;font-size:18px;font-weight:bold;">✓</span></div>
+                <div style="width:40%;height:45px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#94a3b8;font-size:18px;">○</span></div>
             </div>`;
         } else if (visualHint === "sauvegarde") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:6px;height:65px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
@@ -84,7 +84,7 @@ class SullivanRenderer {
                     <div style="width:14px;height:14px;background:#7aca6a;border-radius:50%;box-shadow:0 0 8px #7aca6a;"></div>
                     <div style="width:14px;height:14px;background:#e2e8f0;border-radius:50%;"></div>
                 </div>
-                <div style="font-size:9px;color:#64748b;">3/4 sauvegardé</div>
+                <div style="font-size:11px;color:#64748b;">3/4 sauvegardé</div>
             </div>`;
         }
         return this.generateWireframeGeneral(visualHint, color);
@@ -137,15 +137,15 @@ class SullivanRenderer {
         // Bouton
         else if (visualHint === "button" || visualHint === "launch-button") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
-                <div style="padding:6px 24px;background:${color};border-radius:6px;color:white;font-size:11px;font-weight:600;">Action</div>
-                <div style="font-size:9px;color:#94a3b8;">Bouton cliquable</div>
+                <div style="padding:6px 24px;background:${color};border-radius:6px;color:white;font-size:13px;font-weight:600;">Action</div>
+                <div style="font-size:11px;color:#94a3b8;">Bouton cliquable</div>
             </div>`;
         }
         // Carte de choix
         else if (visualHint === "choice-card" || visualHint === "card") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;gap:8px;align-items:center;">
-                <div style="width:40%;height:45px;background:white;border:2px solid ${color};border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:${color};font-size:14px;font-weight:bold;">✓</span></div>
-                <div style="width:40%;height:45px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#94a3b8;font-size:14px;">○</span></div>
+                <div style="width:40%;height:45px;background:white;border:2px solid ${color};border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:${color};font-size:16px;font-weight:bold;">✓</span></div>
+                <div style="width:40%;height:45px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="color:#94a3b8;font-size:16px;">○</span></div>
             </div>`;
         }
         // Grille
@@ -179,8 +179,8 @@ class SullivanRenderer {
         // Upload
         else if (visualHint === "upload") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;border:2px dashed #cbd5e1;">
-                <div style="font-size:16px;color:#94a3b8;">☁️</div>
-                <div style="font-size:9px;color:#64748b;">Glisser-déposer</div>
+                <div style="font-size:18px;color:#94a3b8;">☁️</div>
+                <div style="font-size:11px;color:#64748b;">Glisser-déposer</div>
             </div>`;
         }
         // Modal
@@ -212,8 +212,8 @@ class SullivanRenderer {
         // Chat / Bulles
         else if (visualHint === "chat/bubble") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;">
-                <div style="align-self:flex-start;padding:4px 8px;background:#e2e8f0;border-radius:12px 12px 12px 4px;font-size:8px;color:#64748b;">Message</div>
-                <div style="align-self:flex-end;padding:4px 8px;background:${color};border-radius:12px 12px 4px 12px;font-size:8px;color:white;">Réponse</div>
+                <div style="align-self:flex-start;padding:4px 8px;background:#e2e8f0;border-radius:12px 12px 12px 4px;font-size:10px;color:#64748b;">Message</div>
+                <div style="align-self:flex-end;padding:4px 8px;background:${color};border-radius:12px 12px 4px 12px;font-size:10px;color:white;">Réponse</div>
             </div>`;
         }
         // Input chat
@@ -228,9 +228,9 @@ class SullivanRenderer {
         // Breadcrumb
         else if (visualHint === "breadcrumb") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;align-items:center;gap:4px;">
-                <div style="padding:3px 8px;background:${color};border-radius:4px;font-size:9px;color:white;">Accueil</div>
-                <span style="color:#94a3b8;font-size:10px;">›</span>
-                <div style="padding:3px 8px;background:#e2e8f0;border-radius:4px;font-size:9px;color:#64748b;">Page</div>
+                <div style="padding:3px 8px;background:${color};border-radius:4px;font-size:11px;color:white;">Accueil</div>
+                <span style="color:#94a3b8;font-size:12px;">›</span>
+                <div style="padding:3px 8px;background:#e2e8f0;border-radius:4px;font-size:11px;color:#64748b;">Page</div>
             </div>`;
         }
         // Palette de couleurs
@@ -242,26 +242,26 @@ class SullivanRenderer {
                     <div style="width:16px;height:16px;background:#3b82f6;border-radius:4px;"></div>
                     <div style="width:16px;height:16px;background:#eab308;border-radius:4px;"></div>
                 </div>
-                <div style="font-size:9px;color:#64748b;">Palette</div>
+                <div style="font-size:11px;color:#64748b;">Palette</div>
             </div>`;
         }
         // Stepper / Étapes
         else if (visualHint === "stepper") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <div style="width:18px;height:18px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:bold;">1</div>
+                <div style="width:18px;height:18px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:bold;">1</div>
                 <div style="width:20px;height:2px;background:${color};"></div>
-                <div style="width:18px;height:18px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:bold;">2</div>
+                <div style="width:18px;height:18px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:bold;">2</div>
                 <div style="width:20px;height:2px;background:#e2e8f0;"></div>
-                <div style="width:18px;height:18px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;">3</div>
+                <div style="width:18px;height:18px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#94a3b8;">3</div>
             </div>`;
         }
         // Contrôles zoom
         else if (visualHint === "zoom-controls") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
                 <div style="display:flex;gap:4px;align-items:center;">
-                    <div style="padding:2px 8px;background:#e2e8f0;border-radius:4px;font-size:12px;color:#64748b;">−</div>
+                    <div style="padding:2px 8px;background:#e2e8f0;border-radius:4px;font-size:14px;color:#64748b;">−</div>
                     <div style="width:60px;height:4px;background:#cbd5e1;border-radius:2px;"></div>
-                    <div style="padding:2px 8px;background:#e2e8f0;border-radius:4px;font-size:12px;color:#64748b;">+</div>
+                    <div style="padding:2px 8px;background:#e2e8f0;border-radius:4px;font-size:14px;color:#64748b;">+</div>
                 </div>
             </div>`;
         }
@@ -270,19 +270,19 @@ class SullivanRenderer {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:3px;">
                 <div style="padding:4px 8px;background:${color};border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
                     <div style="width:40%;height:4px;background:white;border-radius:1px;opacity:0.8;"></div>
-                    <div style="font-size:10px;color:white;">▼</div>
+                    <div style="font-size:12px;color:white;">▼</div>
                 </div>
                 <div style="padding:4px 8px;background:#e2e8f0;border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
                     <div style="width:40%;height:4px;background:#64748b;border-radius:1px;"></div>
-                    <div style="font-size:10px;color:#64748b;">▶</div>
+                    <div style="font-size:12px;color:#64748b;">▶</div>
                 </div>
             </div>`;
         }
         // Téléchargement
         else if (visualHint === "download") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
-                <div style="font-size:16px;color:${color};">⬇️</div>
-                <div style="font-size:9px;color:#64748b;">Télécharger</div>
+                <div style="font-size:18px;color:${color};">⬇️</div>
+                <div style="font-size:11px;color:#64748b;">Télécharger</div>
             </div>`;
         }
         // Aperçu / Preview
@@ -304,13 +304,13 @@ class SullivanRenderer {
                     <div style="width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e;"></div>
                     <div style="width:40px;height:4px;background:#e2e8f0;border-radius:1px;"></div>
                 </div>
-                <div style="font-size:9px;color:#64748b;">En ligne</div>
+                <div style="font-size:11px;color:#64748b;">En ligne</div>
             </div>`;
         }
         // Appliquer changements
         else if (visualHint === "apply-changes") {
             return `<div style="background:#f8fafc;padding:6px;border-radius:4px;height:60px;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;">
-                <div style="padding:5px 16px;background:linear-gradient(135deg,${color} 0%,#22c55e 100%);border-radius:6px;color:white;font-size:10px;font-weight:600;">Appliquer ✓</div>
+                <div style="padding:5px 16px;background:linear-gradient(135deg,${color} 0%,#22c55e 100%);border-radius:6px;color:white;font-size:12px;font-weight:600;">Appliquer ✓</div>
             </div>`;
         }
         // Fallback générique amélioré
@@ -388,7 +388,7 @@ class SullivanRenderer {
             <div class="comp-info">
                 <div class="comp-name">${name}</div>
                 <div class="comp-endpoint">${id}</div>
-                <div style="font-size:9px;color:#94a3b8;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${descriptionText}</div>
+                <div style="font-size:11px;color:#94a3b8;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${descriptionText}</div>
             </div>
             <div class="comp-footer">
                 <div class="comp-method" style="background:${color}20; color:${color};">${method}</div>
@@ -464,7 +464,7 @@ class SullivanRenderer {
             updateSection('atomes', atomes, 'Atomes');
 
             // Global stats
-            const confidenceEl = document.querySelector('.sidebar-section [style*="font-size: 42px"]');
+            const confidenceEl = document.querySelector('.sidebar-section [style*="font-size: 44px"]');
             if (confidenceEl) {
                 const conf = Math.round((genome.metadata?.confidence_global || 0.85) * 100);
                 confidenceEl.innerHTML = `${conf}%`;

@@ -126,7 +126,7 @@ input, button, textarea, select, kbd {
 
 .ws-screen-title {
     fill: #1a1a1a;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
 }
 
@@ -148,7 +148,7 @@ input, button, textarea, select, kbd {
 
 #ws-chat-input::placeholder {
     color: #cbd5e1;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
 }
 
@@ -367,7 +367,7 @@ input[type="range"]::-webkit-slider-thumb {
     color: #64748b !important; /* text-slate-500 */
     border: 1px solid #e2e8f0 !important;
     padding: 6px 12px !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     border-radius: 6px !important;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
@@ -413,7 +413,7 @@ input[type="range"]::-webkit-slider-thumb {
     color: white;
     padding: 6px 12px;
     border: none;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: bold;
     text-transform: lowercase;
     border-radius: var(--homeos-radius, 0px);

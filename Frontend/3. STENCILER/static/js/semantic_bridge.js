@@ -436,13 +436,13 @@ class SemanticBridge {
 
         alert.innerHTML = `
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 20px; margin-right: 8px;">🚨</span>
+                <span style="font-size: 22px; margin-right: 8px;">🚨</span>
                 <strong>Violation Constitutionnelle</strong>
             </div>
-            <div style="font-size: 14px; margin-bottom: 12px;">
+            <div style="font-size: 16px; margin-bottom: 12px;">
                 ${error.message}
             </div>
-            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 12px;">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">
                 Type: ${error.violationType}
             </div>
             <button onclick="this.parentElement.remove()" 
@@ -452,7 +452,7 @@ class SemanticBridge {
                            padding: 6px 12px; 
                            border-radius: 4px; 
                            cursor: pointer; 
-                           font-size: 12px;">
+                           font-size: 14px;">
                 Compris
             </button>
         `;

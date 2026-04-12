@@ -23,10 +23,10 @@ export class FrdAssets {
         wrap.className = 'relative group';
         wrap.innerHTML = `
             <img src="${url}" title="${name} (Click to copy URL)"
-                 class="w-8 h-8 object-cover border border-[#333] cursor-pointer hover:border-figma-tabActive transition-all"
+                 class="w-[34px] h-[34px] object-cover border border-[#333] cursor-pointer hover:border-figma-tabActive transition-all"
                  onclick="window.frdApp.assets.copyUrl('${url}', this)">
-            <span class="absolute -top-1 -right-1 hidden group-hover:flex w-3 h-3
-                         bg-red-500 text-white text-[8px] items-center justify-center
+            <span class="absolute -top-1 -right-1 hidden group-hover:flex w-[14px] h-[14px]
+                         bg-red-500 text-white text-[10px] items-center justify-center
                          cursor-pointer rounded-full"
                   onclick="event.stopPropagation(); window.frdApp.assets.remove('${url}', this.parentElement)">×</span>
         `;

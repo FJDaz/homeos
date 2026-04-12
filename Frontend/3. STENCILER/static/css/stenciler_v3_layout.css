@@ -25,7 +25,7 @@
 }
 
 #slot-header .header-logo {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
@@ -40,7 +40,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.12s ease;
@@ -88,7 +88,7 @@
 #slot-navigation .nav-link {
   padding: 6px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.12s ease;
@@ -103,7 +103,7 @@
 /* Genome section */
 #slot-genome h3,
 #slot-style h3 {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -136,12 +136,12 @@
 }
 
 #slot-genome .phase-name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 #slot-genome .phase-confidence {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -160,7 +160,7 @@
   padding: 6px 8px;
   border-radius: 4px;
   border: 1px solid var(--border-subtle);
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -222,13 +222,13 @@
 }
 
 #slot-preview-band .preview-card .name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   margin-top: 4px;
 }
 
 #slot-preview-band .preview-card .count {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -324,7 +324,7 @@
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
   display: flex;
@@ -338,7 +338,7 @@
 }
 
 #slot-canvas-zone .zoom-controls span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   min-width: 40px;
   text-align: center;
@@ -367,7 +367,7 @@
 
 #slot-tsl-picker label {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
@@ -428,7 +428,7 @@
 /* Border Slider */
 #slot-border-slider label {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
@@ -458,7 +458,7 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   flex-shrink: 0;
 }

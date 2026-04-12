@@ -59,16 +59,16 @@
 <body class="flex flex-col h-screen overflow-hidden font-geist text-figma-text">
     <!-- Top Bar -->
     <div class="h-[28px] bg-white border-b-[0.5px] border-figma-sep px-4 flex items-center gap-4 z-50">
-        <div id="dot" class="w-2 h-2 rounded-full bg-figma-sep transition-colors"></div>
-        <span class="text-[9px] font-bold uppercase tracking-widest text-black/40">Blueprint Viewer</span>
-        <span id="ts" class="text-[9px] font-bold uppercase tracking-widest text-figma-tabActive ml-2">Prêt</span>
-        <span class="ml-auto text-[9px] font-bold uppercase tracking-widest text-figma-text/30">XHR · Sullivan Cockpit</span>
+        <div id="dot" class="w-[10px] h-[10px] rounded-full bg-figma-sep transition-colors"></div>
+        <span class="text-[11px] font-bold uppercase tracking-widest text-black/40">Blueprint Viewer</span>
+        <span id="ts" class="text-[11px] font-bold uppercase tracking-widest text-figma-tabActive ml-2">Prêt</span>
+        <span class="ml-auto text-[11px] font-bold uppercase tracking-widest text-figma-text/30">XHR · Sullivan Cockpit</span>
     </div>
 
     <div id="main" class="flex-1 flex overflow-hidden">
         <!-- Canvas Area -->
         <div id="canvas" class="flex-1 overflow-auto p-12 flex justify-center items-start no-scrollbar">
-            <div id="empty" class="text-figma-text/30 font-bold uppercase tracking-[0.2em] text-[11px] m-auto animate-pulse">
+            <div id="empty" class="text-figma-text/30 font-bold uppercase tracking-[0.2em] text-[13px] m-auto animate-pulse">
                 Chargement du Blueprint...
             </div>
         </div>
@@ -77,40 +77,40 @@
         <div id="chat" class="w-[380px] border-l-[0.5px] border-figma-sep bg-figma-panel flex flex-col overflow-hidden">
             <div class="h-[50px] px-6 flex items-center justify-between border-b-[0.5px] border-figma-sep bg-white">
                 <div>
-                    <div class="text-[11px] font-bold uppercase tracking-widest text-black">Sullivan Cockpit</div>
-                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Blueprint Mentor</div>
+                    <div class="text-[13px] font-bold uppercase tracking-widest text-black">Sullivan Cockpit</div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-figma-text/40">Blueprint Mentor</div>
                 </div>
             </div>
 
             <!-- Pedagogy Panel -->
             <div id="pedo-panel" class="hidden p-6 bg-figma-tabActive/5 border-b-[0.5px] border-figma-sep space-y-4">
                 <div>
-                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Empreinte Sémantique</div>
-                    <div id="pedo-title" class="text-[13px] font-bold text-black uppercase tracking-tight">Comp...</div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Empreinte Sémantique</div>
+                    <div id="pedo-title" class="text-[15px] font-bold text-black uppercase tracking-tight">Comp...</div>
                 </div>
                 <div>
-                    <div class="text-[8px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Intention du Génome</div>
-                    <div id="pedo-intent" class="text-[12px] text-figma-text leading-relaxed italic">...</div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-figma-tabActive mb-1">Intention du Génome</div>
+                    <div id="pedo-intent" class="text-[14px] text-figma-text leading-relaxed italic">...</div>
                 </div>
-                <button id="btn-quick-prompt" class="w-full py-2 bg-white border-[0.5px] border-figma-tabActive/30 text-figma-tabActive text-[9px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white transition-all">
+                <button id="btn-quick-prompt" class="w-full py-2 bg-white border-[0.5px] border-figma-tabActive/30 text-figma-tabActive text-[11px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white transition-all">
                     Challenge AI Logic
                 </button>
             </div>
 
             <!-- Export Panel (Mission 37) -->
             <div id="export-panel" class="hidden p-6 bg-white border-b-[0.5px] border-figma-sep space-y-3">
-                <div class="text-[8px] font-bold uppercase tracking-widest text-figma-text/40">Multi-Vector Exports</div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-figma-text/40">Multi-Vector Exports</div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="generatePRD()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                    <button onclick="generatePRD()" class="p-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
                         <span class="text-figma-tabActive">📄</span> PRD & ROADMAP
                     </button>
-                    <button onclick="exportZIP()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                    <button onclick="exportZIP()" class="p-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
                         <span class="text-figma-tabActive">📦</span> ZIP VANILLA
                     </button>
-                    <button onclick="exportManifest()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                    <button onclick="exportManifest()" class="p-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
                         <span class="text-figma-tabActive">🔗</span> FIGMA BRIDGE
                     </button>
-                    <button onclick="exportSchema()" class="p-2 border-[0.5px] border-figma-sep text-[8px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
+                    <button onclick="exportSchema()" class="p-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:border-black transition-all flex items-center gap-2">
                         <span class="text-figma-tabActive">🧬</span> SCHEMA JSON
                     </button>
                 </div>
@@ -122,10 +122,10 @@
             <!-- Chat Input -->
             <div class="p-6 bg-white border-t-[0.5px] border-figma-sep space-y-3">
                 <textarea id="txt" placeholder="Dites à Sullivan ce que vous souhaitez changer..."
-                    class="w-full h-24 bg-figma-input border-none text-[13px] text-figma-textDark p-4 outline-none focus:ring-1 focus:ring-figma-tabActive transition-all resize-none"></textarea>
+                    class="w-full h-24 bg-figma-input border-none text-[15px] text-figma-textDark p-4 outline-none focus:ring-1 focus:ring-figma-tabActive transition-all resize-none"></textarea>
                 <div class="flex gap-2">
-                    <button id="btn-send" class="flex-1 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">ENVOYER</button>
-                    <button id="btn-accept" class="flex-1 py-2 border-[0.5px] border-figma-sep text-[10px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white hover:border-figma-tabActive transition-all">ACCEPTER</button>
+                    <button id="btn-send" class="flex-1 py-2 bg-black text-white text-[12px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">ENVOYER</button>
+                    <button id="btn-accept" class="flex-1 py-2 border-[0.5px] border-figma-sep text-[12px] font-bold uppercase tracking-widest hover:bg-figma-tabActive hover:text-white hover:border-figma-tabActive transition-all">ACCEPTER</button>
                 </div>
             </div>
         </div>

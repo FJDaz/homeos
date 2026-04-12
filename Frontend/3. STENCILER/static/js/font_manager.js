@@ -107,8 +107,8 @@ class FontManager {
         if (this.fonts.length === 0) {
             container.innerHTML = `
                 <div class="col-span-full border border-dashed border-zinc-200 rounded-xl p-8 flex flex-col items-center justify-center text-zinc-300 min-h-[160px]">
-                    <div class="text-[10px] uppercase font-bold tracking-widest mb-2">aucune fonte active</div>
-                    <div class="text-[9px] italic opacity-50 font-serif">Sullivan attend vos fichiers .ttf...</div>
+                    <div class="text-[12px] uppercase font-bold tracking-widest mb-2">aucune fonte active</div>
+                    <div class="text-[11px] italic opacity-50 font-serif">Sullivan attend vos fichiers .ttf...</div>
                 </div>
             `;
             return;
@@ -123,39 +123,39 @@ class FontManager {
                 <div class="group bg-white border border-zinc-100 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#8cc63f]/30 transition-all flex flex-col">
                     <div class="flex items-start justify-between mb-4">
                         <div>
-                            <h3 class="text-[12px] font-bold text-slate-800 lowercase">${font.font_family}</h3>
-                            <p class="text-[9px] text-zinc-400 uppercase tracking-widest mt-0.5">${c.vox_atypi || 'Unknown'} — ${font.is_variable ? 'Variable' : 'Static'}</p>
+                            <h3 class="text-[14px] font-bold text-slate-800 lowercase">${font.font_family}</h3>
+                            <p class="text-[11px] text-zinc-400 uppercase tracking-widest mt-0.5">${c.vox_atypi || 'Unknown'} — ${font.is_variable ? 'Variable' : 'Static'}</p>
                         </div>
                         <div class="flex flex-col items-end">
-                            <span class="text-[10px] font-black ${score > 80 ? 'text-[#8cc63f]' : 'text-orange-400'}">${score}%</span>
-                            <span class="text-[8px] text-zinc-300 uppercase font-bold tracking-tighter">HoméOS Match</span>
+                            <span class="text-[12px] font-black ${score > 80 ? 'text-[#8cc63f]' : 'text-orange-400'}">${score}%</span>
+                            <span class="text-[10px] text-zinc-300 uppercase font-bold tracking-tighter">HoméOS Match</span>
                         </div>
                     </div>
 
                     <!-- PREVIEW -->
                     <div class="py-6 border-y border-zinc-50 my-2 overflow-hidden">
-                        <p style="font-family: '${font.font_family}'; font-size: 24px; line-height: 1" class="whitespace-nowrap text-slate-900 lowercase">
+                        <p style="font-family: '${font.font_family}'; font-size: 26px; line-height: 1" class="whitespace-nowrap text-slate-900 lowercase">
                             ${this.previewText}
                         </p>
-                        <p style="font-family: '${font.font_family}'; font-size: 11px;" class="mt-2 text-zinc-400 font-serif italic">
+                        <p style="font-family: '${font.font_family}'; font-size: 13px;" class="mt-2 text-zinc-400 font-serif italic">
                             Sullivan Specimen — ${font.font_family.toLowerCase()}
                         </p>
                     </div>
 
                     <div class="mt-auto pt-4 flex items-center justify-between">
                         <div class="flex flex-col">
-                            <span class="text-[8px] text-zinc-300 uppercase font-black tracking-widest">PAIRING</span>
-                            <span class="text-[10px] text-slate-600 font-bold lowercase">${pairing}</span>
+                            <span class="text-[10px] text-zinc-300 uppercase font-black tracking-widest">PAIRING</span>
+                            <span class="text-[12px] text-slate-600 font-bold lowercase">${pairing}</span>
                         </div>
-                        <button onclick="window.fontManager.deleteFont('${font.slug}')" class="w-8 h-8 rounded-full border border-zinc-100 flex items-center justify-center text-zinc-300 hover:text-red-500 hover:border-red-100 transition-all">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="window.fontManager.deleteFont('${font.slug}')" class="w-[34px] h-[34px] rounded-full border border-zinc-100 flex items-center justify-center text-zinc-300 hover:text-red-500 hover:border-red-100 transition-all">
+                            <svg class="w-[14px].5 h-[14px].5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
                     </div>
 
                     ${font.licensing_warning ? `
-                        <div class="mt-3 p-2 bg-orange-50 rounded text-[9px] text-orange-600 border border-orange-100 leading-tight">
+                        <div class="mt-3 p-2 bg-orange-50 rounded text-[11px] text-orange-600 border border-orange-100 leading-tight">
                             ⚠️ <strong>Licensing:</strong> ${font.licensing_warning}
                         </div>
                     ` : ''}

@@ -83,14 +83,14 @@ export class FrdKimi {
         div.className = 'chat-bubble kimi-bubble mb-4';
 
         const header = document.createElement('div');
-        header.className = 'px-3 py-2 bg-[#0f0f1e] text-[9px] font-bold uppercase tracking-widest border-b border-[#3d3d63]';
+        header.className = 'px-3 py-2 bg-[#0f0f1e] text-[11px] font-bold uppercase tracking-widest border-b border-[#3d3d63]';
         header.textContent = '🎨 KIMI — ' + label;
 
         const body = document.createElement('div');
         body.className = 'p-3';
 
         const btn = document.createElement('button');
-        btn.className = 'w-full py-2 bg-[#0f0f1e] text-[9px] border border-[#3d3d63] rounded hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all uppercase tracking-widest font-bold';
+        btn.className = 'w-full py-2 bg-[#0f0f1e] text-[11px] border border-[#3d3d63] rounded hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all uppercase tracking-widest font-bold';
         btn.textContent = 'Appliquer';
         btn.addEventListener('click', () => this.applyResult());
 

@@ -79,7 +79,7 @@
 
     function showToast(count) {
         const toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:12px;z-index:99999;animation:slideDown 0.3s ease;';
+        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3d3d3c;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:99999;animation:slideDown 0.3s ease;';
         toast.textContent = '🎨 ' + count + ' nouveau(x) screen(s) Stitch détecté(s)';
         document.body.appendChild(toast);
         setTimeout(() => {
