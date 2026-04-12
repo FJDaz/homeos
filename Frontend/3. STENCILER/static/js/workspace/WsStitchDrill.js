@@ -1,11 +1,12 @@
 /**
  * WsStitchDrill — M280/M292
- * Landing canvas + drill paramétrage (Écrans → Clés → Manifeste)
- * 
+ * Landing canvas + drill paramétrage (Écrans → Clés → Manifeste → Écrans forgés)
+ *
  * ORDRE:
  * 1. Écrans (1-4) — uploadés en premier pour que la forge les traite dès les clés configurées
  * 2. Clés API — avec explication optimisation moteur AetherFlow
- * 3. Manifeste aperçu — puis canvas
+ * 3. Manifeste — upload ou aperçu
+ * 4. Écrans forgés — résultat de la forge
  */
 (function() {
     'use strict';
@@ -80,7 +81,7 @@
                     <style>@keyframes pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(140,198,63,0.4)} 50%{transform:scale(1.05);box-shadow:0 0 30px 10px rgba(140,198,63,0.2)} }</style>
                 `
             },
-            // Step 1: Screens FIRST (so forge processes them while keys are configured)
+            // Step 1: Screens FIRST
             {
                 html: `
                     <div class="text-center max-w-md">
@@ -98,7 +99,7 @@
                     </div>
                 `
             },
-            // Step 2: Keys + Motor optimization explanation
+            // Step 2: Keys
             {
                 html: `
                     <div class="text-center max-w-md">
@@ -137,26 +138,26 @@
                     </div>
                 `
             },
-            // Step 3: Manifest upload or preview
+            // Step 3: Manifest
             {
                 html: `
                     <div class="text-center max-w-md">
                         <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Manifeste</div>
                         <div class="text-[11px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet.</div>
                         <div id="drill-manifest-section">
-                            <div class="text-[11px] text-[#9a9a98] mb-2">Chargement...</div>
+                            <div class="text-[11px] text-[#9a9a98]">Chargement...</div>
                         </div>
                     </div>
                 `
             },
-            // Step 4: Forged screens display
+            // Step 4: Forged screens
             {
                 html: `
                     <div class="text-center max-w-md">
                         <div class="text-[18px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Écrans forgés</div>
-                        <div class="text-[11px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans. Voici le résultat :</div>
+                        <div class="text-[11px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans.</div>
                         <div id="drill-forged-screens" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left max-h-64 overflow-y-auto space-y-2">
-                            <div class="text-[11px] text-[#9a9a98] italic">Chargement des écrans forgés...</div>
+                            <div class="text-[11px] text-[#9a9a98] italic">Chargement...</div>
                         </div>
                         <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[12px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     </div>
@@ -174,7 +175,6 @@
             document.getElementById('drill-start-btn').onclick = () => { currentStep = 1; renderStep(); };
         }
         else if (stepIndex === 1) {
-            // Step 1: Screen upload
             const zone = document.getElementById('drill-screen-upload-zone');
             const input = document.getElementById('drill-screen-input');
             const status = document.getElementById('drill-screen-status');
@@ -186,11 +186,10 @@
             zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
             zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) handleScreenUpload(e.dataTransfer.files, status, countEl, btn); };
             input.onchange = () => { if (input.files.length) handleScreenUpload(input.files, status, countEl, btn); };
-
             btn.onclick = () => { if (screenCount >= 1) { currentStep = 2; renderStep(); } };
         }
         else if (stepIndex === 2) {
-            // Step 2: Keys + help buttons + save buttons
+            // Step 2: Keys + help + save buttons
             document.querySelectorAll('.drill-help-btn').forEach(btn => {
                 btn.onclick = async (e) => {
                     e.stopPropagation();
@@ -212,7 +211,6 @@
                 };
             });
 
-            // Save buttons (OK)
             document.querySelectorAll('.drill-save-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     e.stopPropagation();
@@ -235,127 +233,11 @@
             document.getElementById('drill-continue-keys').onclick = () => { currentStep = 3; renderStep(); };
         }
         else if (stepIndex === 3) {
-            // Step 3: Manifest upload or preview
             loadManifestStep();
         }
         else if (stepIndex === 4) {
-            // Step 4: Forged screens display
             loadForgedScreens();
             document.getElementById('drill-finish').onclick = finishDrill;
-        }
-    }
-
-    async function loadManifestStep() {
-        const section = document.getElementById('drill-manifest-section');
-        console.log('[WsStitchDrill] loadManifestStep, section found:', !!section);
-        if (!section) return;
-
-        try {
-            const session = getSession();
-            const projectId = session.active_project_id || session.project_id;
-            console.log('[WsStitchDrill] Fetching manifest for:', projectId);
-            const res = await fetch(`/api/projects/${projectId}/manifest`);
-            console.log('[WsStitchDrill] Manifest response status:', res.status, 'ok:', res.ok);
-
-            if (res.ok) {
-                // Manifest exists — show preview + continue button
-                const m = await res.json();
-                const name = m.name || 'Sans titre';
-                const screens = (m.screens || []).length;
-                const archetype = m.archetype?.label || m.archetype || '—';
-                const desc = m.description || '';
-
-                section.innerHTML = `
-                    <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
-                        <div class="font-bold text-[12px] mb-1">${name}</div>
-                        ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
-                        <div class="flex gap-3 text-[9px] text-[#9a9a98]">
-                            <span>Archétype: ${archetype}</span><span>Écrans: ${screens}</span>
-                        </div>
-                    </div>
-                    <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
-                `;
-                document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
-            } else {
-                // No manifest — show upload zone
-                section.innerHTML = `
-                    <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-manifest-upload-zone">
-                        <div class="text-[24px] mb-2">↑</div>
-                        <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser ton manifeste ici</div>
-                        <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir (.json, .md, .txt)</div>
-                        <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
-                    </div>
-                    <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
-                    <div class="mt-3 text-[10px] text-[#9a9a98]">Pas de manifeste ? <button id="drill-open-manifest-editor" class="text-[#8cc63f] underline font-bold">Ouvre l'éditeur de manifeste</button></div>
-                    <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
-                `;
-
-                const manifestBtn = document.getElementById('drill-open-manifest-editor');
-                if (manifestBtn) {
-                    manifestBtn.onclick = () => {
-                        if (window.ManifestBox) window.ManifestBox.show();
-                        else alert('Le panel Manifest Editor n\'est pas encore disponible.');
-                    };
-                }
-
-                const zone = document.getElementById('drill-manifest-upload-zone');
-                const input = document.getElementById('drill-manifest-input');
-                const status = document.getElementById('drill-manifest-status');
-
-                zone.onclick = () => input.click();
-                zone.ondragover = (e) => { e.preventDefault(); zone.style.borderColor = '#8cc63f'; };
-                zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
-                zone.ondrop = (e) => {
-                    e.preventDefault(); zone.style.borderColor = '#e5e5e5';
-                    if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status);
-                };
-                input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
-
-                document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
-            }
-        } catch(e) {
-            section.innerHTML = '<div class="text-[11px] text-[#d44]">Erreur chargement manifeste.</div><button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer →</button>';
-            document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
-        }
-    }
-
-    async function uploadManifest(file, statusEl) {
-        try {
-            const text = await file.text();
-            const session = getSession();
-            const projectId = session.active_project_id || session.project_id;
-
-            let payload;
-            if (file.name.endsWith('.json')) {
-                payload = JSON.parse(text);
-            } else {
-                payload = {
-                    name: file.name.replace(/\.(md|txt)$/i, ''),
-                    description: text.substring(0, 500),
-                    raw_content: text,
-                    screens: [], components: []
-                };
-            }
-
-            const res = await fetch(`/api/projects/${projectId}/manifest`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!res.ok) {
-                statusEl.textContent = 'Erreur sauvegarde (' + res.status + ')';
-                statusEl.style.color = '#d44';
-                return;
-            }
-
-            statusEl.textContent = '✓ Manifest sauvegardé';
-            statusEl.style.color = '#8cc63f';
-            setTimeout(() => { currentStep = 4; renderStep(); }, 800);
-
-        } catch(e) {
-            statusEl.textContent = 'Erreur: ' + e.message;
-            statusEl.style.color = '#d44';
         }
     }
 
@@ -396,7 +278,6 @@
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('filename', file.name);
-
                 const res = await fetch('/api/import/upload', { method: 'POST', body: formData });
                 if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
                 uploaded++;
@@ -413,23 +294,86 @@
         }
     }
 
-    async function loadManifestPreview() {
-        const preview = document.getElementById('drill-manifest-preview');
-        if (!preview) return;
+    async function loadManifestStep() {
+        const section = document.getElementById('drill-manifest-section');
+        if (!section) return;
+
         try {
             const session = getSession();
             const projectId = session.active_project_id || session.project_id;
             const res = await fetch(`/api/projects/${projectId}/manifest`);
+
             if (res.ok) {
                 const m = await res.json();
-                const name = m.name || 'Sans titre';
-                const screens = (m.screens || []).length;
-                const archetype = m.archetype?.label || m.archetype || '—';
-                preview.innerHTML = `<div class="font-bold text-[12px] mb-1">${name}</div><div class="flex gap-3 text-[9px] text-[#9a9a98]"><span>Archétype: ${archetype}</span><span>Écrans: ${screens}</span></div>`;
+                const hasContent = m.raw_content || m.description || m.archetype || (m.screens && m.screens.length > 0);
+
+                if (!hasContent) {
+                    showManifestUpload(section);
+                } else {
+                    const name = m.name || 'Sans titre';
+                    const desc = m.description || m.raw_content || '';
+                    const archetype = m.archetype?.label || m.archetype || '—';
+                    section.innerHTML = `
+                        <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
+                            <div class="font-bold text-[12px] mb-1">${name}</div>
+                            ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
+                            <div class="flex gap-3 text-[9px] text-[#9a9a98]"><span>Archétype: ${archetype}</span><span>Écrans: ${(m.screens||[]).length}</span></div>
+                        </div>
+                        <button id="drill-continue-manifest" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                    `;
+                    document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
+                }
             } else {
-                preview.innerHTML = '<em class="text-[#9a9a98]">Aucun manifeste — tu pourras le créer plus tard.</em>';
+                showManifestUpload(section);
             }
-        } catch(e) { preview.innerHTML = '<em class="text-[#9a9a98]">Erreur chargement</em>'; }
+        } catch(e) {
+            showManifestUpload(section, 'Erreur: ' + e.message);
+        }
+    }
+
+    function showManifestUpload(section, errorMsg) {
+        section.innerHTML = `
+            <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-manifest-upload-zone">
+                <div class="text-[24px] mb-2">↑</div>
+                <div class="text-[12px] font-bold text-[#3d3d3c]">Glisser ton manifeste ici</div>
+                <div class="text-[10px] text-[#9a9a98]">ou cliquer pour parcourir (.json, .md, .txt)</div>
+                <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
+            </div>
+            <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
+            ${errorMsg ? '<div class="mt-2 text-[10px] text-[#d44]">' + errorMsg + '</div>' : ''}
+            <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
+        `;
+
+        const zone = document.getElementById('drill-manifest-upload-zone');
+        const input = document.getElementById('drill-manifest-input');
+        const status = document.getElementById('drill-manifest-status');
+
+        zone.onclick = () => input.click();
+        zone.ondragover = (e) => { e.preventDefault(); zone.style.borderColor = '#8cc63f'; };
+        zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
+        zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status); };
+        input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
+        document.getElementById('drill-skip-manifest').onclick = () => { currentStep = 4; renderStep(); };
+    }
+
+    async function uploadManifest(file, statusEl) {
+        try {
+            const text = await file.text();
+            const session = getSession();
+            const projectId = session.active_project_id || session.project_id;
+            let payload;
+            if (file.name.endsWith('.json')) {
+                payload = JSON.parse(text);
+            } else {
+                payload = { name: file.name.replace(/\.(md|txt)$/i, ''), description: text.substring(0, 500), raw_content: text, screens: [], components: [] };
+            }
+            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+            if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
+            statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
+            setTimeout(() => { currentStep = 4; renderStep(); }, 800);
+        } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
     async function loadForgedScreens() {
@@ -439,24 +383,20 @@
             const res = await fetch('/api/retro-genome/imports');
             const data = await res.json();
             const imports = data.imports || [];
-
             if (imports.length === 0) {
-                container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Aucun écran forgé pour le moment — la forge travaille encore.</div>';
+                container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Aucun écran forgé pour le moment.</div>';
                 return;
             }
-
             container.innerHTML = imports.map(imp => `
                 <div class="flex items-center gap-2 p-2 bg-[#f7f6f2] rounded-[8px]">
                     <div class="w-8 h-8 bg-[#e5e5e5] rounded-[6px] flex items-center justify-center text-[8px] text-[#9a9a98] font-bold">${imp.type || 'html'}</div>
                     <div class="flex-1 min-w-0">
                         <div class="text-[11px] font-bold text-[#3d3d3c] truncate">${imp.name || imp.id}</div>
-                        <div class="text-[9px] text-[#9a9a98]">${imp.archetype_label || imp.archetype || 'import'} · ${imp.timestamp?.substring(0, 16) || ''}</div>
+                        <div class="text-[9px] text-[#9a9a98]">${imp.archetype_label || imp.archetype || 'import'}</div>
                     </div>
                 </div>
             `).join('');
-        } catch(e) {
-            container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Erreur chargement des écrans forgés.</div>';
-        }
+        } catch(e) { container.innerHTML = '<div class="text-[11px] text-[#9a9a98] italic">Erreur chargement.</div>'; }
     }
 
     function finishDrill() {
@@ -468,36 +408,18 @@
         const session = getSession();
         const role = session.role || 'student';
         if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
-        
-        // Always show for students — check if canvas is empty for full overlay or small button
         isCanvasEmpty().then(empty => {
-            if (empty) {
-                createOverlay();
-            } else {
-                // Canvas not empty — show small "Nouveau projet" button in corner
-                createSmallButton();
-            }
+            if (empty) { createOverlay(); } else { createSmallButton(); }
         });
     }
 
     function createSmallButton() {
-        // Remove existing if any
         const existing = document.getElementById('drill-small-btn');
         if (existing) existing.remove();
-
         const btn = document.createElement('button');
         btn.id = 'drill-small-btn';
         btn.textContent = '+ Nouveau projet';
-        btn.style.cssText = `
-            position: fixed; bottom: 80px; right: 20px; z-index: 99999;
-            background: #8cc63f; color: white; border: none;
-            padding: 10px 18px; border-radius: 12px;
-            font-size: 12px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-        `;
-        btn.onmouseenter = () => { btn.style.transform = 'scale(1.05)'; };
-        btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; };
+        btn.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:99999;background:#8cc63f;color:white;border:none;padding:10px 18px;border-radius:12px;font-size:12px;font-weight:bold;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.15);`;
         btn.onclick = () => { btn.remove(); createOverlay(); };
         document.body.appendChild(btn);
     }
