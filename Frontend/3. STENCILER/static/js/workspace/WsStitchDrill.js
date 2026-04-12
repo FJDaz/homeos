@@ -283,8 +283,17 @@
                         <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
                     </div>
                     <div id="drill-manifest-status" class="mt-3 text-[10px] text-[#9a9a98]"></div>
+                    <div class="mt-3 text-[10px] text-[#9a9a98]">Pas de manifeste ? <button id="drill-open-manifest-editor" class="text-[#8cc63f] underline font-bold">Ouvre l'éditeur de manifeste</button></div>
                     <button id="drill-skip-manifest" class="mt-4 px-6 py-2 text-[11px] text-[#9a9a98] underline">Passer cette étape →</button>
                 `;
+
+                const manifestBtn = document.getElementById('drill-open-manifest-editor');
+                if (manifestBtn) {
+                    manifestBtn.onclick = () => {
+                        if (window.ManifestBox) window.ManifestBox.show();
+                        else alert('Le panel Manifest Editor n\'est pas encore disponible.');
+                    };
+                }
 
                 const zone = document.getElementById('drill-manifest-upload-zone');
                 const input = document.getElementById('drill-manifest-input');
