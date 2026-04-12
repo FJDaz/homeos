@@ -673,13 +673,12 @@ async def stitch_sync(request: Request):
 
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         if not manifest_path.exists():
-            raise HTTPException(status_code=404, detail="manifest.json introuvable")
+            return {"synced": 0, "total_stitch": 0, "message": "Aucun projet actif"}
 
         manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
         stitch_pid = manifest.get("stitch_project_id")
         if not stitch_pid:
-            # Fallback: check if there's any stitch_project_id in imports
-            raise HTTPException(status_code=400, detail="Aucun projet Stitch lié au manifest")
+            return {"synced": 0, "total_stitch": 0, "message": "Aucun projet Stitch lié"}
 
         # Extract numeric project ID
         proj_id = stitch_pid.replace("projects/", "") if "/" in stitch_pid else stitch_pid

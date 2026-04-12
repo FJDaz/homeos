@@ -114,8 +114,120 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ### Thème 29 — Stitch & Manifest (en cours)
 
+### Mission 280-DIAG — Trois bugs bloquants du drill : manifest 404, stitch sync loop, race condition upload
+**STATUS: 🔴 DIAG | DATE: 2026-04-12 | ACTOR: QWEN**
+
+---
+
+**Bug 1 — Manifest 404 persistant pour les étudiants existants**
+
+**Cause identifiée :** `GET /api/projects/{project_id}/manifest` (projects_router.py L290-295) lève 404 si `manifest.json` est absent sur disque. Le dossier projet n'est créé qu'au `register` (nouveaux étudiants). Les sessions existantes n'ont pas de dossier `projects/{project_id}/` → le fichier n'existe pas → 404 systématique.
+
+Le `PUT /api/projects/{project_id}/manifest` crée le dossier (L303) mais le `GET` n'a pas ce filet.
+
+**Fix :** dans `GET /api/projects/{project_id}/manifest`, si manifest absent → créer le dossier + retourner un manifest par défaut plutôt que 404 :
+```python
+@router.get("/projects/{project_id}/manifest")
+async def get_project_manifest_route(project_id: str):
+    p_path = PROJECTS_DIR / project_id
+    manifest_path = p_path / "manifest.json"
+    if not manifest_path.exists():
+        # Créer le dossier + manifest minimal plutôt que 404
+        p_path.mkdir(parents=True, exist_ok=True)
+        default = {"id": project_id, "name": project_id, "screens": [], "stitch_project_id": None}
+        manifest_path.write_text(json.dumps(default, indent=2), encoding='utf-8')
+        return default
+    manifest = get_project_manifest(project_id)
+    if not manifest:
+        raise HTTPException(status_code=404, detail="Manifest not found")
+    return manifest
+```
+
+**Fichier :** `Frontend/3. STENCILER/routers/projects_router.py` — L290-296
+
+---
+
+**Bug 2 — Stitch sync 404 en boucle au premier poll**
+
+**Cause identifiée :** `WsStitch._syncProjectId()` appelle `GET /api/stitch/project-info`. Si `stitch_project_id` est null dans le manifest → retourne `{ linked: false }` (HTTP 200, pas 404). Le 404 vient d'ailleurs : `WsStitch.sync()` (L254) appelle `POST /api/stitch/sync` — cette route appelle `_get_stitch_key()` puis tente de récupérer les données Stitch. Si la clé est absente → route lève HTTPException 501, pas 404. 
+
+Le 404 est probablement sur `GET /api/stitch/screens?project_id=` avec `project_id` vide (string vide) → endpoint Stitch retourne 404 car l'ID est invalide.
+
+**Test de diagnostic :**
+```js
+// Dans la console workspace après ouverture du panel Stitch
+fetch('/api/stitch/project-info').then(r=>r.json()).then(console.log)
+// Si linked: false → project_id vide → screens?project_id= → 404
+
+// Vérifier la valeur exacte envoyée
+window.wsStitch?.projectIdInput?.value  // vide = cause confirmée
+```
+
+**Fix :** dans `WsStitch.loadSession()`, si `project_id` est vide ou null → ne pas appeler `GET /api/stitch/screens` → afficher "aucun projet lié" sans requête :
+```js
+async loadSession() {
+    const projectId = this.projectIdInput?.value?.trim();
+    if (!projectId) {
+        // Afficher état "non lié" sans appel API
+        this._renderUnlinked();
+        return;
+    }
+    // ... suite normale
+}
+```
+
+**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsStitch.js` — `loadSession()` L159
+
+---
+
+**Bug 3 — Race condition upload manifest dans le drill**
+
+**Cause suspectée :** `WsStitchDrill.js` upload le manifest via `PUT /api/projects/{id}/manifest`, puis immédiatement lit l'état via `GET /api/projects/active/manifest`. Si le `PUT` est async et que le `GET` arrive avant que l'écriture disque soit terminée → le GET retourne l'ancienne version ou 404.
+
+**Test de diagnostic :**
+```js
+// Dans WsStitchDrill.js, chercher la séquence upload → read
+// Y a-t-il un await sur le PUT avant le GET suivant ?
+// Si le GET suit sans await → race condition confirmée
+```
+
+**Fix probable :** s'assurer que le GET ne part qu'après résolution du PUT :
+```js
+await fetch('/api/projects/active/manifest', { method: 'PUT', ... });
+// Seulement après :
+const manifest = await fetch('/api/projects/active/manifest').then(r => r.json());
+```
+
+**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js` — séquence upload manifest
+
+---
+
+**Livrable QWEN :**
+1. Fix Bug 1 : `GET /api/projects/{id}/manifest` → créer manifest par défaut si absent
+2. Confirmer Bug 2 via test console → fix `loadSession()` guard
+3. Confirmer Bug 3 via lecture `WsStitchDrill.js` → fix await séquence
+4. Reporter les résultats des tests console dans le rapport
+
+---
+
 ### Mission 280 — Landing Canvas + Drill paramétrage Stitch
 **STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
+
+**Flux du drill actuel (implémenté) :**
+1. **Écrans** (1-4) → upload PNG/SVG/JPG avec drag&drop
+2. **Clés API** → 5 champs (Gemini, Groq, OpenAI, DeepSeek, Qwen) avec boutons OK + explication optimisation moteur ("Plus tu renseignes de clés, plus le moteur est fiable et rapide")
+3. **Manifeste** → upload si absent, aperçu si présent + lien vers ManifestBox editor
+4. **Écrans forgés** → liste les imports forgés pendant la config des clés
+5. **Canvas** → "Commencer à travailler"
+
+**Bouton "+ Nouveau projet"** → affiché en bas à droite pour les élèves quand le canvas n'est pas vide (z-index 99999)
+
+**Issues connues :**
+- **Manifest 404 persistant** : Même avec le fichier manifest.json sur disque, l'endpoint `/api/projects/{id}/manifest` retourne 404. Le dossier projet n'est pas créé automatiquement au login pour les étudiants existants (seulement pour les nouveaux). Fix partiel : `auth_router.py` crée le dossier + manifest par défaut au register, mais les sessions existantes n'ont pas de dossier projet.
+- **Stitch sync 404 en boucle** : Le polling retourne 404 quand aucun `stitch_project_id` n'est lié. Arrêt auto implémenté mais le 404 persiste au premier poll.
+- **Manifest upload du drill** : Le upload fonctionne mais le manifest n'est pas toujours persisté correctement (race condition ?)
+
+**Fichiers :** `WsStitchDrill.js`, `auth_router.py`, `projects_router.py`, `WsImportList.js`
 
 ### Mission 294 — Circuit Breaker + Passive Health Monitoring (Zero-Cost Smart Routing)
 **STATUS: 🟠 PRÊTE | DATE: 2026-04-11 | ACTOR: QWEN**
@@ -276,6 +388,105 @@ class ModelHealthManager:
 ---
 
 ### Thème 29 — Sécurité clés API : isolation élève + masquage
+
+---
+
+### Mission 268 — Chiffrement : bcrypt pour les mots de passe + Fernet pour les clés API
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: QWEN**
+
+**Contexte :** deux faiblesses crypto dans la DB SQLite :
+- Mots de passe profs : SHA-256 sans sel → vulnérable aux rainbow tables si DB volée
+- Clés API (Stitch, HF) : stockées en clair → exploitables directement si DB volée
+
+**Dépendances à ajouter dans `requirements.txt` :**
+```
+bcrypt>=4.0.0
+cryptography>=41.0.0
+```
+
+---
+
+**Fix 1 — Mots de passe : SHA-256 → bcrypt**
+
+Fichier : `Frontend/3. STENCILER/routers/auth_router.py` — `_hash_password()` L516-518 et les deux appels.
+
+```python
+# Avant
+import hashlib
+def _hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+# Après
+import bcrypt
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def _verify_password(password: str, stored_hash: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+```
+
+Remplacer la comparaison directe dans le login prof :
+```python
+# Avant
+if password_hash != stored_hash:
+
+# Après
+if not _verify_password(req.password, stored_hash):
+```
+
+**Migration :** les hashes SHA-256 existants en DB sont incompatibles avec bcrypt. À la première connexion d'un utilisateur avec l'ancien hash, forcer la réinitialisation de mot de passe (retourner 401 avec `detail="reset_required"`). Le frontend affiche "veuillez redéfinir votre mot de passe".
+
+---
+
+**Fix 2 — Clés API : stockage Fernet (AES-128 symétrique)**
+
+Fichier : `Frontend/3. STENCILER/core/key_resolver.py` (lire avant de toucher — il existe déjà).
+
+Créer un helper `crypto_keys.py` dans `Frontend/3. STENCILER/core/` :
+```python
+from cryptography.fernet import Fernet
+import os
+
+def _get_fernet() -> Fernet:
+    key = os.getenv("FERNET_KEY")
+    if not key:
+        raise RuntimeError("FERNET_KEY manquante dans .env — générer avec: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
+    return Fernet(key.encode())
+
+def encrypt_key(plain: str) -> str:
+    return _get_fernet().encrypt(plain.encode()).decode()
+
+def decrypt_key(token: str) -> str:
+    return _get_fernet().decrypt(token.encode()).decode()
+```
+
+Modifier `stitch_router.py` — `_get_stitch_key()` : déchiffrer à la lecture.
+Modifier toute route qui fait `INSERT INTO user_keys` : chiffrer à l'écriture.
+
+**Migration DB :** les clés en clair existantes sont invalides avec Fernet. Ajouter une colonne `encrypted BOOLEAN DEFAULT 0` dans `user_keys`. À la lecture : si `encrypted=0` → retourner en clair + re-chiffrer + mettre `encrypted=1`. Migration transparente sans downtime.
+
+---
+
+**Générer la FERNET_KEY une fois :**
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+Ajouter dans `.env` : `FERNET_KEY=<valeur générée>`. Ne jamais la committer.
+
+---
+
+**Livrable QWEN :**
+1. `bcrypt` pour hash + verify mots de passe dans `auth_router.py`
+2. Logique `reset_required` sur ancien hash SHA-256
+3. `core/crypto_keys.py` avec `encrypt_key` / `decrypt_key`
+4. `stitch_router.py` : déchiffrement à la lecture des clés
+5. Migration transparente (`encrypted` column) dans `user_keys`
+6. `requirements.txt` mis à jour
+
+**Fichiers à lire :**
+- `Frontend/3. STENCILER/routers/auth_router.py` — L514-570
+- `Frontend/3. STENCILER/routers/stitch_router.py` — `_get_stitch_key()`
+- `Frontend/3. STENCILER/core/key_resolver.py`
 
 ---
 

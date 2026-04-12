@@ -40,19 +40,21 @@
         pollCount++;
         try {
             const res = await fetch('/api/stitch/sync', { method: 'POST' });
-            if (res.status === 400) {
-                // No stitch_project_id linked — skip silently, stop polling
-                console.log('[WsStitchSync] No Stitch project linked, stopping polling');
-                stopPolling();
-                return;
-            }
             if (!res.ok) {
                 console.warn('[WsStitchSync] Sync failed, status', res.status);
+                if (res.status === 400 || res.status === 404) {
+                    console.log('[WsStitchSync] No Stitch project linked, stopping polling');
+                    stopPolling();
+                }
                 return;
             }
             const data = await res.json();
 
-            if (data.total_stitch === undefined) return;
+            // Handle clean no-project responses
+            if (data.total_stitch === 0) {
+                console.log('[WsStitchSync] No Stitch screens yet');
+                return;
+            }
 
             if (knownScreenCount === 0) {
                 // Premier poll — establish baseline

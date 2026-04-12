@@ -289,10 +289,24 @@ async def delete_project_route(project_id: str):
 
 @router.get("/projects/{project_id}/manifest")
 async def get_project_manifest_route(project_id: str):
-    """Retourne le manifest.json d'un projet."""
+    """Retourne le manifest.json d'un projet. Crée un manifest par défaut si absent."""
     manifest = get_project_manifest(project_id)
     if not manifest:
-        raise HTTPException(status_code=404, detail="Manifest not found")
+        # Project dir doesn't exist — create it with default manifest
+        p_path = PROJECTS_DIR / project_id
+        p_path.mkdir(parents=True, exist_ok=True)
+        default_manifest = {
+            "name": project_id,
+            "description": "",
+            "archetype": None,
+            "design_tokens": None,
+            "screens": [],
+            "wires": [],
+            "pending_intents": []
+        }
+        (p_path / "manifest.json").write_text(json.dumps(default_manifest, indent=2, ensure_ascii=False), encoding='utf-8')
+        logger.info(f"Projects: created default manifest for {project_id}")
+        return default_manifest
     return manifest
 
 @router.put("/projects/{project_id}/manifest")
