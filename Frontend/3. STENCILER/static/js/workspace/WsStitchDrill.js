@@ -250,10 +250,6 @@
         else if (stepIndex === 3) {
             loadManifestStep();
         }
-        else if (stepIndex === 4) {
-            loadForgedScreens();
-            document.getElementById('drill-finish').onclick = finishDrill;
-        }
     }
 
     async function saveKey(provider, key) {
@@ -371,15 +367,12 @@
                             <div class="flex gap-3 text-[11px] text-[#9a9a98]"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
                             ${tokensHtml}
                         </div>
-                        <div class="flex gap-2">
-                            <button id="drill-open-editor" class="px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[13px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all">ouvrir l'éditeur →</button>
-                            <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
-                        </div>
+                        <button id="drill-start-work" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     `;
-                    document.getElementById('drill-open-editor').onclick = () => {
+                    document.getElementById('drill-start-work').onclick = () => {
+                        hide();
                         if (window.ManifestBox) window.ManifestBox.show();
                     };
-                    document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
                 }
             } else {
                 showManifestUpload(section);
@@ -399,7 +392,7 @@
             </div>
             <div id="drill-manifest-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
             ${errorMsg ? '<div class="mt-2 text-[12px] text-[#d44]">' + errorMsg + '</div>' : ''}
-            <button id="drill-skip-manifest" class="mt-4 px-6 py-2 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Construire la logique d'application →</button>
+            <button id="drill-skip-manifest" class="mt-4 px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
         `;
 
         const zone = document.getElementById('drill-manifest-upload-zone');
@@ -411,11 +404,7 @@
         zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
         zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status); };
         input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
-        document.getElementById('drill-skip-manifest').onclick = () => {
-            // Open manifest editor for brainstorm
-            if (window.ManifestBox) window.ManifestBox.show();
-            else hide();
-        };
+        document.getElementById('drill-skip-manifest').onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
     }
 
     async function uploadManifest(file, statusEl) {
@@ -435,13 +424,11 @@
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
             statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
 
-            const editorBtn = document.createElement('button');
-            editorBtn.textContent = 'ouvrir l\'éditeur →';
-            editorBtn.className = 'mt-3 px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all block cursor-pointer';
-            editorBtn.onclick = () => { if (window.ManifestBox) window.ManifestBox.show(); };
-            statusEl.parentNode.insertBefore(editorBtn, statusEl.nextSibling);
-
-            setTimeout(() => { currentStep = 4; renderStep(); }, 2000);
+            const startBtn = document.createElement('button');
+            startBtn.textContent = 'Commencer à travailler →';
+            startBtn.className = 'mt-4 px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all block cursor-pointer';
+            startBtn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
+            statusEl.parentNode.insertBefore(startBtn, statusEl.nextSibling);
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
