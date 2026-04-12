@@ -4,7 +4,7 @@
  */
 (function() {
     'use strict';
-    
+
     let _expanded = {};
 
     function getSession() {
@@ -15,30 +15,33 @@
         return s;
     }
 
-    async function refresh() {
-        // En mode onboarding, le Drill injecte souvent via l'API avant de rafraîchir le panel
-        // On peut faire un fetch optionnel ici si la session est vide
+    // M294-A: Auth headers helper
+    function _authHeaders(extraHeaders = {}) {
         const session = getSession();
-        if (!session.projects && !session.student?.projects) {
-            try {
-                const res = await fetch('/api/projects');
-                const projects = await res.json();
-                // On ne touche pas à la session ici pour ne pas corrompre le drill, 
-                // mais on peut utiliser les données pour le rendu immédiat.
-                render(projects);
-                return;
-            } catch(e) {}
-        }
+        const headers = { ...extraHeaders };
+        if (session.token) headers['X-User-Token'] = session.token;
+        return headers;
+    }
+
+    async function refresh() {
+        // M294-A: Always send token to get scoped projects
+        try {
+            const res = await fetch('/api/projects', { headers: _authHeaders() });
+            if (!res.ok) { render([]); return; }
+            const projects = await res.json();
+            render(projects);
+            return;
+        } catch(e) {}
         render();
     }
 
     async function activateAndShow(projectId) {
         console.log('[WsProjectPanel] Selecting project:', projectId);
         try {
-            // 1. Activation Backend (établit le contexte serveur)
+            // M294-A: Send token headers for proper auth
             await fetch('/api/projects/activate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: _authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ id: projectId })
             });
 
@@ -49,7 +52,7 @@
 
             // 3. Trigger ManifestBox (Ouvre l'éditeur directement comme demandé)
             if (window.ManifestBox) window.ManifestBox.showForProject(projectId);
-            
+
             render();
         } catch(e) {
             console.error('[WsProjectPanel] Selection error:', e);
