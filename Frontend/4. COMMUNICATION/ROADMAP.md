@@ -141,6 +141,21 @@ RÈGLES D'ANIMATION LOW-CPU :
 
 ### Thème 29 — Stitch & Manifest (en cours)
 
+### Mission 282 — Refonte panels : Project Panel V2 & Synchro Manifeste
+**STATUS: ✅ FAIT | DATE: 2026-04-12 | ACTOR: ANTIGRAVITY**
+
+**Objectif :** Gestionnaire multi-projets avec accordéon explicite et synchronisation automatique du manifeste.
+
+**CR (Compte-Rendu) :**
+- **Boucle Projets** : Rendu explicite de tous les projets avec header [Titre] + gestion de l'état `expanded` par projet.
+- **Activation Auto** : Le déploiement d'un projet dans la sidebar l'active automatiquement (`POST /api/projects/activate`).
+- **Synchro Manifeste** : L'activation d'un projet déclenche instantanément `window.ManifestBox.showForProject(id)`, mettant à jour l'éditeur de manifeste.
+- **Backend Evolutif** : L'API `/api/retro-genome/imports` accepte désormais un `project_id` pour charger les écrans de n'importe quel projet sans forcément l'activer au préalable (prévisualisation).
+
+**Fichiers :** `WsProjectPanel.js` (V2), `ManifestBox.js` (Synchro), `retro_genome/routes.py` (API params).
+
+
+
 ### Mission 281 — Drill step 3 : bouton "ouvrir dans l'éditeur" + fix 404 manifest
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: GEMINI**
 

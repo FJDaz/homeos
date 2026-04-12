@@ -524,11 +524,16 @@ async def get_notifications():
     return {"new_count": _NEW_IMPORTS_COUNT}
 
 @router.get("/imports")
-async def get_imports():
-    """Mission 101 bis: Retourne la liste des imports depuis index.json du projet actif."""
+async def get_imports(project_id: Optional[str] = None):
+    """Mission 101 bis: Retourne la liste des imports depuis index.json du projet spécifié ou actif."""
     import shutil
     from pathlib import Path as _Path
-    p_path = get_active_project_path()
+    
+    if project_id:
+        p_path = PROJECTS_DIR / project_id
+    else:
+        p_path = get_active_project_path()
+        
     index_path = p_path / "imports" / "index.json"
     if not index_path.exists():
         return {"imports": []}

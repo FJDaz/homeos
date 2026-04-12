@@ -58,10 +58,13 @@
     }
 
     // --- API ---
-    async function loadManifest() {
+    /**
+     * Charge le manifest d'un projet spécifié ou du projet actif.
+     */
+    async function loadManifest(targetProjectId = null) {
         try {
             const session = getSession();
-            const projectId = session.active_project_id || session.project_id;
+            const projectId = targetProjectId || session.active_project_id || session.project_id;
             if (!projectId) return;
 
             const res = await fetch(`/api/projects/${projectId}/manifest`);
@@ -320,14 +323,14 @@
                 <div id="manifest-editor-wrap" class="flex-1 relative p-10 overflow-y-auto scrollbar-hide" style="scroll-behavior: smooth;">
                     <!-- SULLIVAN PAPER FLOAT -->
                     <div id="manifest-sullivan-box" class="absolute right-10 top-10 w-[320px] bg-white rounded-xl border border-slate-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col z-20" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height:400px;">
-                        
+
                         <!-- TOP INPUT (M292 spec) -->
                         <div class="p-3 bg-white border-b border-slate-50 flex items-center gap-2 rounded-t-xl z-10 sticky top-0 shadow-sm">
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse shrink-0"></div>
-                            <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?" 
+                            <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?"
                                    class="flex-1 border-none bg-transparent text-[13px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
                         </div>
-                        
+
                         <!-- HISTORY -->
                         <div id="manifest-sullivan-hist" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 max-h-[300px] scrollbar-hide bg-slate-50/30">
                             <!-- bulles injectées -->
@@ -336,6 +339,19 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- MINI TOOLBAR (M282) -->
+                    <div class="flex items-center gap-1 mb-3 px-1">
+                        <button class="manifest-toolbar-btn" data-md="# " title="Titre 1"><span class="text-[12px] font-bold text-[#3d3d3c]">H1</span></button>
+                        <button class="manifest-toolbar-btn" data-md="## " title="Titre 2"><span class="text-[11px] font-bold text-[#3d3d3c]">H2</span></button>
+                        <button class="manifest-toolbar-btn" data-md="### " title="Titre 3"><span class="text-[10px] font-bold text-[#3d3d3c]">H3</span></button>
+                        <span class="text-[#e5e5e5] mx-1">|</span>
+                        <button class="manifest-toolbar-btn" data-md="- " title="Liste à puces"><span class="text-[12px] text-[#9a9a98]">•</span></button>
+                        <button class="manifest-toolbar-btn" data-md="1. " title="Liste numérotée"><span class="text-[10px] text-[#9a9a98]">1.</span></button>
+                        <span class="text-[#e5e5e5] mx-1">|</span>
+                        <button class="manifest-toolbar-btn" data-md="**" title="Gras"><span class="text-[12px] font-bold text-[#3d3d3c]">B</span></button>
+                        <button class="manifest-toolbar-btn" data-md="*" title="Italique"><span class="text-[12px] italic text-[#3d3d3c]">I</span></button>
                     </div>
 
                     <textarea id="manifest-editor-textarea" spellcheck="false"
@@ -443,6 +459,32 @@
                 handle.style.cursor = 'grab';
             });
         }
+
+        // M282: Toolbar buttons — insert markdown at cursor
+        document.querySelectorAll('.manifest-toolbar-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                const md = btn.dataset.md;
+                if (!md || !els.editor) return;
+                const ta = els.editor;
+                const start = ta.selectionStart;
+                const end = ta.selectionEnd;
+                const selected = ta.value.substring(start, end);
+
+                if (md === '**' || md === '*') {
+                    // Wrap selection or insert at cursor
+                    ta.value = ta.value.substring(0, start) + md + selected + md + ta.value.substring(end);
+                    ta.selectionStart = ta.selectionEnd = start + md.length + selected.length;
+                } else {
+                    // Insert at start of line
+                    const lineStart = ta.value.lastIndexOf('\n', start - 1) + 1;
+                    ta.value = ta.value.substring(0, lineStart) + md + ta.value.substring(lineStart);
+                    ta.selectionStart = ta.selectionEnd = start + md.length;
+                }
+                ta.focus();
+                onTextChange();
+            };
+        });
     }
 
     async function show() {
@@ -461,19 +503,27 @@
         els.editor.focus();
     }
 
-    function hide() {
-        if (panel) panel.style.display = 'none';
-        clearTimeout(saveTimeout);
-        saveManifestDeferred();
-    }
-
-    function toggle() {
-        if (panel && panel.style.display !== 'none') hide();
-        else show();
+    /**
+     * Charge et affiche le manifeste pour un projet spécifique (Mission 282 V2).
+     */
+    async function showForProject(projectId) {
+        console.log('[ManifestBox] Remote activating project:', projectId);
+        if (!panel) buildPanel();
+        panel.style.display = 'flex';
+        await loadManifest(projectId);
+        if (manifestData) {
+            els.editor.value = manifestData.raw_content || manifestData.description || '';
+            updateSideSummary(manifestData.raw_content);
+        } else {
+            els.editor.value = '';
+        }
+        updateSignets();
+        setTimeout(updateSullivanPosition, 100);
+        els.editor.focus();
     }
 
     // API Publique
-    window.ManifestBox = { show, hide, toggle };
+    window.ManifestBox = { show, hide, toggle, showForProject };
     
     // Initialisation automatique du résumé latéral (M292B)
     document.addEventListener('DOMContentLoaded', async () => {

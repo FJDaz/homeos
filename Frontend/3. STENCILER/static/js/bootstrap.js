@@ -101,6 +101,23 @@
                 filter: grayscale(1) !important;
                 cursor: not-allowed !important;
             }
+            .manifest-toolbar-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 24px;
+                border: 1px solid #e5e5e5;
+                border-radius: 6px;
+                background: white;
+                cursor: pointer;
+                transition: all 0.15s;
+                padding: 0;
+            }
+            .manifest-toolbar-btn:hover {
+                border-color: #8cc63f;
+                background: #f0fdf4;
+            }
             /* Sullivan Micro-Mode (M295) */
             .sullivan-micro {
                 height: 48px !important;

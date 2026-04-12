@@ -99,8 +99,8 @@ class WsForgeMonitor {
             if (job.status === 'done' || job.status === 'failed') {
                 this.stopPolling();
                 if (job.status === 'done') {
-                    // Refresh import list
-                    if (window.WsImportList) window.WsImportList.refresh();
+                    // Refresh project panel
+                    if (window.WsProjectPanel) window.WsProjectPanel.refresh();
                 }
             }
         } catch (e) {

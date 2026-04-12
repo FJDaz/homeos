@@ -25,7 +25,7 @@
         });
         loadScript('/static/js/workspace/WsBoot.js');
         loadScript('/static/js/workspace/wsDom.js');
-        loadScript('/static/js/workspace/WsImportList.js');
+        loadScript('/static/js/workspace/WsProjectPanel.js');
         loadScript('/static/js/workspace/WsAssetPicker.js');
 
         // Étape 2 : Boot des composants (après un tick pour que les scripts soient parse)
@@ -65,7 +65,7 @@
         if (typeof WsBoot === 'function') {
             WsBoot().then(function() {
                 // Après boot : charger la liste des imports
-                if (window.WsImportList) window.WsImportList.refresh();
+                if (window.WsProjectPanel) window.WsProjectPanel.refresh();
             });
         } else {
             console.warn('[ws_main] WsBoot not loaded, using fallback init');
@@ -77,7 +77,7 @@
                 window.wsCanvas = new WsCanvas('ws-canvas', 'canvas-wrapper');
             } catch(e) { console.error('[ws_main] WsCanvas:', e); }
             try { window.wsWire = new WsWire(); } catch(e) { console.error('[ws_main] WsWire:', e); }
-            if (window.WsImportList) window.WsImportList.refresh();
+            if (window.WsProjectPanel) window.WsProjectPanel.refresh();
         }
     }
 
@@ -248,7 +248,7 @@
                 var res = await fetch('/api/import/upload', { method: 'POST', body: formData });
                 if (!res.ok) throw new Error('upload ' + res.status);
                 console.log('[ws_main] uploaded:', file.name);
-                if (window.WsImportList) window.WsImportList.refresh();
+                if (window.WsProjectPanel) window.WsProjectPanel.refresh();
             } catch(e) {
                 console.error('[ws_main] upload failed:', file.name, e);
             }

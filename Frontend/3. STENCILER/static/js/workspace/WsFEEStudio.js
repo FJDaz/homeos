@@ -226,7 +226,7 @@ class WsFEEStudio {
         let resolvedScreen = 'landing.html';
         if (activeShellId && activeShellId.startsWith('shell-')) {
             const importId = activeShellId.slice(6); // strip 'shell-'
-            const items = window.WsImportList?._items || [];
+            const items = window.WsProjectPanel?.activeProjectScreens || [];
             const activeItem = items.find(i => i.id === importId);
             resolvedScreen = activeItem?.html_template || activeItem?.file_path || 'landing.html';
         }

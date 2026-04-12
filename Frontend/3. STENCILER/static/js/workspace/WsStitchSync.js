@@ -70,7 +70,7 @@
                 knownScreenCount = data.total_stitch;
 
                 // Refresh la liste des imports
-                if (window.WsImportList) window.WsImportList.refresh();
+                if (window.WsProjectPanel) window.WsProjectPanel.refresh();
             }
         } catch(e) {
             console.error('[WsStitchSync] Poll error:', e);

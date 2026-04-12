@@ -305,7 +305,7 @@
             statusEl.textContent = '✓ ' + uploaded + ' écran(s) uploadé(s) — extraction des tokens en cours...';
             statusEl.style.color = '#8cc63f';
             if (screenCount >= 1) btn.disabled = false;
-            if (window.WsImportList) window.WsImportList.refresh();
+            if (window.WsProjectPanel) window.WsProjectPanel.refresh();
 
             // M293: Trigger background design token extraction
             triggerTokenExtraction();
@@ -460,7 +460,7 @@
 
     function finishDrill() {
         if (overlay) { overlay.style.display = 'none'; overlay = null; }
-        if (window.WsImportList) window.WsImportList.refresh();
+        if (window.WsProjectPanel) window.WsProjectPanel.refresh();
         if (window.ManifestBox) window.ManifestBox.show();
     }
 
