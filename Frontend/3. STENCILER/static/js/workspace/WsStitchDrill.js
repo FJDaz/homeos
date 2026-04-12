@@ -372,9 +372,13 @@
                             ${tokensHtml}
                         </div>
                         <div class="flex gap-2">
+                            <button id="drill-open-editor" class="px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[13px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all">ouvrir l'éditeur →</button>
                             <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
                         </div>
                     `;
+                    document.getElementById('drill-open-editor').onclick = () => {
+                        if (window.ManifestBox) window.ManifestBox.show();
+                    };
                     document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
                 }
             } else {
@@ -431,7 +435,13 @@
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
             statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
 
-            setTimeout(() => { currentStep = 4; renderStep(); }, 1200);
+            const editorBtn = document.createElement('button');
+            editorBtn.textContent = 'ouvrir l\'éditeur →';
+            editorBtn.className = 'mt-3 px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all block cursor-pointer';
+            editorBtn.onclick = () => { if (window.ManifestBox) window.ManifestBox.show(); };
+            statusEl.parentNode.insertBefore(editorBtn, statusEl.nextSibling);
+
+            setTimeout(() => { currentStep = 4; renderStep(); }, 2000);
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
