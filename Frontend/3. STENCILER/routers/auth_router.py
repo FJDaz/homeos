@@ -389,6 +389,15 @@ async def auth_register(req: RegisterRequest):
         active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
         logger.info(f"Auth: active_project.json → {project_id}")
 
+        # M292: Create project directory on disk if missing (for students)
+        project_dir = PROJECTS_DIR / project_id
+        if not project_dir.exists():
+            project_dir.mkdir(parents=True, exist_ok=True)
+            # Create default manifest
+            default_manifest = {"name": name, "description": "", "archetype": None, "design_tokens": None, "screens": [], "wires": [], "pending_intents": []}
+            (project_dir / "manifest.json").write_text(json.dumps(default_manifest, indent=2, ensure_ascii=False), encoding='utf-8')
+            logger.info(f"Auth: created project directory for {project_id}")
+
     logger.info(f"Auth: user '{name}' registered (role={role}, student_id={student_id}, workspace={resp.workspace_id})")
     return resp
 

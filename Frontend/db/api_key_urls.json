@@ -1,47 +1,33 @@
 {
-  "cached_at": 1775920079.143275,
+  "cached_at": 1775987570.3488588,
   "urls": {
     "gemini": {
       "url": "https://aistudio.google.com/app/apikey",
-      "instructions": "Gratuit — Google AI Studio, 15 RPM gratuit",
-      "pricing": "gratuit",
-      "price_hint": "Gratuit (15 RPM)"
+      "instructions": "Gratuit avec des limites de requêtes, ou payant à l'usage."
     },
     "groq": {
       "url": "https://console.groq.com/keys",
-      "instructions": "Gratuit — console Groq, quota limité gratuit",
-      "pricing": "gratuit",
-      "price_hint": "Gratuit (quota limité)"
+      "instructions": "Gratuit avec des limites, ou payant selon l'utilisation."
     },
     "openai": {
       "url": "https://platform.openai.com/api-keys",
-      "instructions": "Payant — OpenAI Platform, $5 de crédit offerts",
-      "pricing": "payant",
-      "price_hint": "~$0.005/1K tokens"
+      "instructions": "Payant à l'usage (nécessite d'ajouter des crédits)."
     },
     "kimi": {
-      "url": "https://platform.moonshot.cn/console/api-keys",
-      "instructions": "Payant — Moonshot Platform (Kimi)",
-      "pricing": "payant",
-      "price_hint": "~$0.01/1K tokens"
+      "url": "https://platform.moonshot.ai/console/api-keys",
+      "instructions": "Payant à l'usage (crédits offerts à l'inscription)."
     },
     "mimo": {
-      "url": "https://openrouter.ai/keys",
-      "instructions": "Gratuit — OpenRouter, accès gratuit à MIMO-V2-Omni",
-      "pricing": "gratuit",
-      "price_hint": "Gratuit (via OpenRouter)"
+      "url": "https://platform.xiaomimimo.com/",
+      "instructions": "Payant à l'usage avec des crédits gratuits initiaux."
     },
     "deepseek": {
-      "url": "https://platform.deepseek.com/api-keys",
-      "instructions": "Payant — DeepSeek, très bon rapport qualité/prix",
-      "pricing": "payant",
-      "price_hint": "~$0.001/1K tokens"
+      "url": "https://platform.deepseek.com/api_keys",
+      "instructions": "Payant à l'usage (nécessite d'ajouter des crédits)."
     },
     "qwen": {
-      "url": "https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.4af2525cpffRpb",
-      "instructions": "Gratuit — Alibaba Cloud (DashScope), quota généreux",
-      "pricing": "gratuit",
-      "price_hint": "Gratuit (quota généreux)"
+      "url": "https://dashscope.console.aliyun.com/apiKey",
+      "instructions": "Gratuit avec des limites, ou payant selon l'utilisation."
     },
     "watson": {
       "url": "https://cloud.ibm.com/catalog/services/watsonx-ai",

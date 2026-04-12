@@ -275,6 +275,99 @@ class ModelHealthManager:
 
 ---
 
+### Thème 29 — Sécurité clés API : isolation élève + masquage
+
+---
+
+### Mission 267 — DIAG + FIX : gestion des clés API — isolation élève, masquage, logs
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: QWEN**
+
+**Contexte :** Audit sécurité sur la gestion des clés API (Stitch, Hugging Face). Trois problèmes identifiés à corriger dans le même fichier principal `stitch_router.py` + `stitch_client.py`.
+
+---
+
+**Problème 1 — Résolution de clé biaisée admin/prof** (CRITIQUE)
+
+Dans `stitch_router.py` — `_get_stitch_key()` L37-39 :
+```python
+"WHERE uk.provider = 'stitch' AND u.role IN ('admin','prof') "
+"ORDER BY u.role DESC LIMIT 1"
+```
+Un élève qui renseigne son propre token Stitch ne sera jamais trouvé. Pire : le token du prof est utilisé à sa place.
+
+**Fix :** résoudre d'abord par `user_id` de la session courante, puis fallback prof/admin :
+```python
+def _get_stitch_key(user_id: str = None) -> str:
+    key = os.getenv("STITCH_API_KEY", "")
+    if key:
+        return key
+    try:
+        conn = get_db_connection()
+        # 1. Clé propre à l'utilisateur
+        if user_id:
+            row = conn.execute(
+                "SELECT api_key FROM user_keys WHERE user_id=? AND provider='stitch'",
+                (user_id,)
+            ).fetchone()
+            if row:
+                return row[0]
+        # 2. Fallback prof/admin
+        row = conn.execute(
+            "SELECT uk.api_key FROM user_keys uk JOIN users u ON uk.user_id=u.id "
+            "WHERE uk.provider='stitch' AND u.role IN ('admin','prof') "
+            "ORDER BY u.role DESC LIMIT 1"
+        ).fetchone()
+        return row[0] if row else ""
+    except:
+        return ""
+```
+Passer `user_id` depuis la session dans tous les appels `_get_stitch_key()`.
+
+---
+
+**Problème 2 — Logs bavards qui exposent les clés** (ÉLEVÉ)
+
+Dans `stitch_client.py` — supprimer ou masquer toute ligne loggant des données brutes de l'API :
+```python
+# Avant (à supprimer)
+logger.info(f"Stitch get_screen FULL KEYS: {list(screen_data.keys())} ...")
+
+# Remplacer par
+logger.debug(f"Stitch get_screen keys count: {len(screen_data)}")
+```
+Règle générale : passer tous les logs `INFO` contenant des données de réponse API en `DEBUG`. Ne jamais logger de dict complet depuis une réponse externe.
+
+---
+
+**Problème 3 — Tokens HF stockés en clair + exposés dans les réponses API** (MOYEN)
+
+**3a — Masquage dans les réponses :** créer un helper `mask_key(key: str) -> str` :
+```python
+def mask_key(key: str) -> str:
+    if not key or len(key) < 8:
+        return "****"
+    return key[:4] + "****" + key[-4:]
+# hf_hub_abcdef1234 → hf_h****1234
+```
+Utiliser dans toutes les routes qui retournent des settings utilisateur.
+
+**3b — Champ password côté frontend :** dans `teacher_dashboard.html` ou la page settings, le champ de saisie du token HF doit être `type="password"`. Mission frontend séparée si Gemini doit intervenir — noter ici comme dette.
+
+---
+
+**Livrable QWEN :**
+1. `_get_stitch_key(user_id)` avec résolution user-first dans `stitch_router.py`
+2. Logs `stitch_client.py` nettoyés (DEBUG uniquement pour les données API)
+3. `mask_key()` helper utilisé dans les routes settings/profil
+4. Aucun autre fichier touché sauf `stitch_router.py` et `stitch_client.py`
+
+**Fichiers à lire :**
+- `Frontend/3. STENCILER/routers/stitch_router.py` — `_get_stitch_key()` + tous ses appels
+- `Frontend/3. STENCILER/core/stitch_client.py` — lignes logger.info avec données API
+- `Frontend/3. STENCILER/routers/auth_router.py` — pour comprendre comment `user_id` est résolu depuis la session
+
+---
+
 ### Thème 28 — Workflow Stitch : prompt maître + tracking
 
 ---

@@ -247,12 +247,15 @@
 
     async function loadManifestStep() {
         const section = document.getElementById('drill-manifest-section');
+        console.log('[WsStitchDrill] loadManifestStep, section found:', !!section);
         if (!section) return;
 
         try {
             const session = getSession();
             const projectId = session.active_project_id || session.project_id;
+            console.log('[WsStitchDrill] Fetching manifest for:', projectId);
             const res = await fetch(`/api/projects/${projectId}/manifest`);
+            console.log('[WsStitchDrill] Manifest response status:', res.status, 'ok:', res.ok);
 
             if (res.ok) {
                 // Manifest exists — show preview + continue button
