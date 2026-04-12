@@ -355,6 +355,12 @@
                     <div id="manifest-signets-list" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5 scrollbar-hide">
                         <!-- signets -->
                     </div>
+                    <!-- DESIGN TOKENS SWATCHES (M293) -->
+                    <div id="manifest-tokens-section" class="border-t border-[#f0eee4] bg-[#fcfaf7] p-3 hidden">
+                        <div class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">tokens extraits</div>
+                        <div id="manifest-tokens-palette" class="flex gap-1.5 flex-wrap"></div>
+                        <div id="manifest-tokens-info" class="text-[9px] text-slate-400 mt-1.5"></div>
+                    </div>
                 </div>
 
             </div>
