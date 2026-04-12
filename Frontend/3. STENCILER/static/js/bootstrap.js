@@ -433,6 +433,14 @@
                 </button>
             </div>
 
+            <!-- M294: Provider Health -->
+            <div class="sd-section mt-4" id="sd-provider-health">
+                <span class="sd-label">État des moteurs AI</span>
+                <div id="provider-health-list" class="space-y-2 mt-2">
+                    <div class="text-[9px] text-slate-400 italic">Chargement...</div>
+                </div>
+            </div>
+
             <button class="sd-logout-btn" id="hn-logout-btn">
                 Changer d'identité
             </button>
@@ -508,6 +516,9 @@
             return false;
         }
 
+        // M294: Load provider health status
+        loadProviderHealth();
+
         // Mission 192: GPS Help Logic
         drawer.querySelectorAll('.sd-help-btn').forEach(btn => {
             btn.onclick = async (e) => {
@@ -535,6 +546,31 @@
                 }
             };
         });
+    }
+
+    async function loadProviderHealth() {
+        try {
+            const res = await fetch('/api/health/providers');
+            const data = await res.json();
+            const list = document.getElementById('provider-health-list');
+            if (!list || !data.providers) return;
+
+            const statusColors = { healthy: '#8cc63f', degraded: '#f59e0b', down: '#ef4444' };
+            const statusLabels = { healthy: 'OK', degraded: 'Lent', down: 'HS' };
+
+            list.innerHTML = data.providers.map(p => {
+                const color = statusColors[p.status] || '#9a9a98';
+                const label = statusLabels[p.status] || p.status;
+                const ttft = p.avg_ttft > 0 ? `${p.avg_ttft.toFixed(1)}s` : '—';
+                return `<div class="flex items-center justify-between text-[9px]">
+                    <span class="text-slate-500 font-bold uppercase">${p.name}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400">${ttft}</span>
+                        <span class="px-1.5 py-0.5 rounded font-bold" style="background:${color}22;color:${color}">${label}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {}
     }
 
     async function refreshKeyStatus() {

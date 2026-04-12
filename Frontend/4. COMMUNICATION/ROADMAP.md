@@ -141,20 +141,112 @@ RÈGLES D'ANIMATION LOW-CPU :
 
 ### Thème 29 — Stitch & Manifest (en cours)
 
-### Mission 282 — Refonte panels : Project Panel V2 & Synchro Manifeste
+### Mission 282 — Refonte panels : Project Panel V3 (Clean Session)
 **STATUS: ✅ FAIT | DATE: 2026-04-12 | ACTOR: ANTIGRAVITY**
 
-**Objectif :** Gestionnaire multi-projets avec accordéon explicite et synchronisation automatique du manifeste.
+**Objectif :** Nettoyage complet du panneau projet pour débloquer le drill onboarding et aligner sur le scope `student.projects`.
 
 **CR (Compte-Rendu) :**
-- **Boucle Projets** : Rendu explicite de tous les projets avec header [Titre] + gestion de l'état `expanded` par projet.
-- **Activation Auto** : Le déploiement d'un projet dans la sidebar l'active automatiquement (`POST /api/projects/activate`).
-- **Synchro Manifeste** : L'activation d'un projet déclenche instantanément `window.ManifestBox.showForProject(id)`, mettant à jour l'éditeur de manifeste.
-- **Backend Evolutif** : L'API `/api/retro-genome/imports` accepte désormais un `project_id` pour charger les écrans de n'importe quel projet sans forcément l'activer au préalable (prévisualisation).
+- **Nettoyage Drastique** : Le panneau est désormais piloté à 100% par `homeos_session` (localStorage) pour éviter les conflits d'onboarding.
+- **Boucle Explicite** : Implémentation de la boucle `for(i=0; i<count; i++)` sur `student.projects`.
+- **Zéro Bloqueur** : Synchronisation fluide avec le Drill Stitch ; "Commencer à travailler" ouvre directement le Manifest Editor.
+- **Synchro Manifeste** : `window.ManifestBox.showForProject(id)` permet une activation instantanée du contexte projet.
 
-**Fichiers :** `WsProjectPanel.js` (V2), `ManifestBox.js` (Synchro), `retro_genome/routes.py` (API params).
+**Fichiers :** `WsProjectPanel.js` (V3), `ManifestBox.js`, `WsStitchDrill.js` (Ciblés).
 
+---
 
+### Mission 294 — Project Panel : token auth + scope réel user.projects[i]
+**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: QWEN**
+
+**Fichier unique :** `Frontend/3. STENCILER/static/js/workspace/WsProjectPanel.js`
+
+---
+
+**Contexte :**
+
+`/api/projects` filtre par `user_id` côté serveur (via header `X-User-Token`). Mais `WsProjectPanel.js` appelle `fetch('/api/projects')` **sans token** → `user_id = null` → retourne tous les projets (fallback legacy) ou rien selon le cas.
+
+La session `homeos_session` (localStorage) contient `token`. Il suffit de l'envoyer.
+
+`student_id` et `user_id` sont deux choses distinctes dans le back — ne pas les confondre. Le token est dans `session.token`.
+
+---
+
+**Fix 1 — Helper `_authHeaders()` (à ajouter en haut de la IIFE)**
+
+```js
+function _authHeaders() {
+    const session = getSession();
+    const headers = { 'Content-Type': 'application/json' };
+    if (session.token) headers['X-User-Token'] = session.token;
+    return headers;
+}
+```
+
+---
+
+**Fix 2 — Passer le token dans `refresh()`**
+
+Ligne actuelle :
+```js
+const res = await fetch('/api/projects');
+```
+
+Remplacer par :
+```js
+const res = await fetch('/api/projects', { headers: _authHeaders() });
+```
+
+---
+
+**Fix 3 — Passer le token dans `activateAndShow()`**
+
+Ligne actuelle :
+```js
+await fetch('/api/projects/activate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: projectId })
+});
+```
+
+Remplacer par :
+```js
+await fetch('/api/projects/activate', {
+    method: 'POST',
+    headers: _authHeaders(),
+    body: JSON.stringify({ id: projectId })
+});
+```
+
+---
+
+**Fix 4 — Supprimer le fallback `render(projects)` depuis le fetch sans token**
+
+Dans `refresh()`, la branche `if (!session.projects && !session.student?.projects)` doit simplement passer le résultat du fetch authentifié. Remplacer toute la fonction `refresh()` par :
+
+```js
+async function refresh() {
+    try {
+        const res = await fetch('/api/projects', { headers: _authHeaders() });
+        if (!res.ok) { render([]); return; }
+        const projects = await res.json();
+        render(projects);
+    } catch(e) {
+        render([]);
+    }
+}
+```
+
+---
+
+**Livrable :**
+- `fetch('/api/projects')` envoie `X-User-Token` → retourne uniquement les projets du user connecté
+- Panel affiche `projects[i]` correctement filtrés
+- Aucun autre fichier touché
+
+---
 
 ### Mission 281 — Drill step 3 : bouton "ouvrir dans l'éditeur" + fix 404 manifest
 **STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: GEMINI**

@@ -253,6 +253,14 @@ class GeminiClient(BaseLLMClient):
 
                     # Calculate execution time
                     execution_time_ms = (time.time() - start_time) * 1000
+                    ttft_s = execution_time_ms / 1000.0
+
+                    # M294: Record health
+                    try:
+                        from routers.model_health import record_provider_success
+                        record_provider_success("gemini", ttft_s)
+                    except Exception:
+                        pass
 
                     if model_name != self.primary_model:
                         logger.info(
@@ -373,6 +381,13 @@ class GeminiClient(BaseLLMClient):
 
         # All models in cascade failed
         execution_time_ms = (time.time() - start_time) * 1000
+
+        # M294: Record failure for Gemini
+        try:
+            from routers.model_health import record_provider_failure
+            record_provider_failure("gemini")
+        except Exception:
+            pass
 
         logger.error(
             f"Generation failed after trying {len(self.fallback_models)} models: {last_error}"

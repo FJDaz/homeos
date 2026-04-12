@@ -505,3 +505,10 @@ async def manifest_analyze(body: dict = Body(default={})):
     from routers.manifest_analyzer import analyze_manifest
     result = await analyze_manifest(project_id, manifest_data, tokens)
     return result
+
+
+@router.get("/api/health/providers")
+async def provider_health_status():
+    """M294: Return health status of all AI providers."""
+    from routers.model_health import get_all_health
+    return {"providers": get_all_health()}
