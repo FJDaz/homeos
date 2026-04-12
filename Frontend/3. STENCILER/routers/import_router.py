@@ -480,3 +480,28 @@ async def get_design_tokens():
         return {"tokens": manifest.get("design_tokens", {})}
     except:
         return {"tokens": {}}
+
+
+@router.post("/api/manifest/analyze")
+async def manifest_analyze(body: dict = Body(default={})):
+    """M282/M292: Analyze manifest + tokens → propose content or ask questions."""
+    project_id = body.get("project_id", "")
+    if not project_id:
+        return {"error": "project_id required"}
+
+    # Load manifest
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    manifest_data = {}
+    if manifest_path.exists():
+        try:
+            manifest_data = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except:
+            pass
+
+    # Load tokens
+    tokens = manifest_data.get("design_tokens", {})
+
+    # Call analyzer
+    from routers.manifest_analyzer import analyze_manifest
+    result = await analyze_manifest(project_id, manifest_data, tokens)
+    return result

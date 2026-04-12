@@ -491,16 +491,70 @@
         buildPanel();
         panel.style.display = 'flex';
         await loadManifest();
-        if (manifestData) {
+
+        const hasManifest = manifestData && (manifestData.raw_content || manifestData.description);
+
+        if (hasManifest) {
             els.editor.value = manifestData.raw_content || manifestData.description || '';
+            analyzeManifestQuestions();
+        } else {
+            els.editor.value = '# Analyse en cours...\n\nJe regarde les tokens extraits de tes écrans...';
+            inferFromTokens();
         }
+
         updateSignets();
-        
-        // Timeout pour s'assurer que le composant est bien affiché avant de calculer les coords
+        loadDesignTokens();
         setTimeout(updateSullivanPosition, 100);
-        
-        // Focus sur l'éditeur
         els.editor.focus();
+    }
+
+    async function inferFromTokens() {
+        try {
+            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const projectId = session.active_project_id || session.project_id;
+            if (!projectId) return;
+            const res = await fetch('/api/manifest/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: projectId })
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.proposed_content) els.editor.value = data.proposed_content;
+            if (data.questions && data.questions.length > 0) {
+                addSullivanBubble("Voilà ce que je crois avoir compris de ce que tu veux faire, d'après tes écrans. Ai-je raison ? Corrige-moi.");
+                data.questions.forEach((q, i) => { setTimeout(() => addSullivanBubble(q), (i+1) * 800); });
+            }
+        } catch(e) { console.warn('[ManifestBox] Token inference failed:', e); }
+    }
+
+    async function analyzeManifestQuestions() {
+        try {
+            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const projectId = session.active_project_id || session.project_id;
+            if (!projectId) return;
+            const res = await fetch('/api/manifest/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: projectId })
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.questions && data.questions.length > 0) {
+                addSullivanBubble("J'ai lu ton manifeste. Quelques questions pour mieux cerner ton intention :");
+                data.questions.forEach((q, i) => { setTimeout(() => addSullivanBubble(q), (i+1) * 800); });
+            }
+        } catch(e) { console.warn('[ManifestBox] Analysis failed:', e); }
+    }
+
+    function addSullivanBubble(text) {
+        const hist = document.getElementById('manifest-sullivan-hist');
+        if (!hist) return;
+        const div = document.createElement('div');
+        div.className = 'p-2 rounded-lg text-[12px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]';
+        div.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
+        hist.appendChild(div);
+        hist.scrollTop = hist.scrollHeight;
     }
 
     /**
