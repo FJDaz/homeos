@@ -22,7 +22,7 @@ from Backend.Prod.config.settings import settings
 logger = logging.getLogger("AetherFlowV3")
 
 # Try Supabase for classes/students, but ALWAYS use sqlite3 for users/auth
-_USE_SUPABASE = bool(os.getenv("SUPABASE_KEY", ""))
+_USE_SUPABASE = False  # students.user_id n'existe pas sur Supabase — SQLite uniquement
 if _USE_SUPABASE:
     try:
         from routers.auth_supabase import (
@@ -65,7 +65,7 @@ def _sqlite_get_students(class_id=None, display_name=None, student_id=None):
         ).fetchall()
     elif student_id and class_id:
         rows = cursor.execute(
-            "SELECT id, display, project_id FROM students WHERE id = ? AND class_id = ?",
+            "SELECT id, display, project_id, class_id FROM students WHERE id = ? AND class_id = ?",
             (student_id, class_id)
         ).fetchall()
     elif class_id:
@@ -129,6 +129,23 @@ def _sqlite_set_user_key(user_id, provider, api_key):
         "ON CONFLICT(user_id, provider) DO UPDATE SET api_key = ?, updated_at = datetime('now')",
         (user_id, provider, api_key, api_key)
     )
+    conn.commit()
+    conn.close()
+
+def _sqlite_get_student_user_id(student_id, class_id):
+    """M298: Lit le user_id d'un étudiant (sqlite3 only)."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM students WHERE id = ? AND class_id = ?", (student_id, class_id))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+def _sqlite_set_student_user_id(student_id, class_id, user_id):
+    """M298: Écrit le lien FK students.user_id = users.id (write once)."""
+    conn = sqlite3.connect(str(PROJECTS_DB_PATH))
+    cursor = conn.cursor()
+    cursor.execute("UPDATE students SET user_id = ? WHERE id = ? AND class_id = ?", (user_id, student_id, class_id))
     conn.commit()
     conn.close()
 
@@ -244,6 +261,24 @@ def _list_students_by_class(class_id):
     if _USE_SUPABASE:
         return list_students_by_class(class_id)
     return _sqlite_get_students(class_id=class_id)
+
+def _get_student_user_id(student_id, class_id):
+    """M298: Lit le user_id lié à un étudiant (Supabase ou sqlite3)."""
+    if _USE_SUPABASE:
+        from routers.auth_supabase import _get
+        rows = _get("students", select="user_id", filters={"id": student_id, "class_id": class_id})
+        if rows and len(rows) > 0:
+            return rows[0].get("user_id")
+        return None
+    return _sqlite_get_student_user_id(student_id, class_id)
+
+def _set_student_user_id(student_id, class_id, user_id):
+    """M298: Écrit le lien FK students.user_id = users.id (write once)."""
+    if _USE_SUPABASE:
+        from routers.auth_supabase import update_student
+        update_student(student_id, class_id, {"user_id": user_id})
+    else:
+        _sqlite_set_student_user_id(student_id, class_id, user_id)
 class RegisterRequest(BaseModel):
     name: str
 
@@ -360,6 +395,12 @@ async def auth_register(req: RegisterRequest):
             student_id=student_id, class_id=class_id, project_id=project_id,
             workspace_id=workspace_id, plan=plan
         )
+        # M298: Write FK link even for existing users (idempotent backfill)
+        if student_id and class_id and resp.role == "student":
+            existing_link = _get_student_user_id(student_id, class_id)
+            if not existing_link:
+                _set_student_user_id(student_id, class_id, user_id)
+                logger.info(f"M298: Backfilled student {student_id} → user {user_id}")
     else:
         # Créer nouveau
         user_id = str(uuid.uuid4())
@@ -381,6 +422,13 @@ async def auth_register(req: RegisterRequest):
     # M283a: Resolve entitlements for the response
     from .rbac_middleware import resolve_entitlements
     resp.entitlements = resolve_entitlements(resp.plan, resp.role)
+
+    # M298: Write FK link for students (write once)
+    if student_id and class_id and resp.role == "student":
+        existing_link = _get_student_user_id(student_id, class_id)
+        if not existing_link:
+            _set_student_user_id(student_id, class_id, resp.user_id)
+            logger.info(f"M298: Linked student {student_id} → user {resp.user_id} (register)")
 
     # M277: Update active_project.json so server-side code points to the right project
     if project_id:
@@ -575,7 +623,8 @@ async def auth_login_prof(req: ProfLoginRequest):
 
 @router.post("/auth/login-student")
 async def auth_login_student(req: StudentLoginRequest):
-    """M224: Login élève sans mot de passe — par classe + student_id."""
+    """M224: Login élève sans mot de passe — par classe + student_id.
+    M298: Écrit le lien FK students.user_id (write once)."""
     student = _find_student_by_id_and_class(req.student_id, req.class_id)
     if not student:
         raise HTTPException(status_code=404, detail="Étudiant non trouvé dans cette classe")
@@ -591,13 +640,19 @@ async def auth_login_student(req: StudentLoginRequest):
         token = str(uuid.uuid4())
         _create_user(user_id, display, "student", token)
 
+    # M298: Write FK link if not already set (write once)
+    existing_link = _get_student_user_id(student_id, req.class_id)
+    if not existing_link:
+        _set_student_user_id(student_id, req.class_id, user_id)
+        logger.info(f"M298: Linked student {student_id} → user {user_id}")
+
     # F1: Activer le projet de l'élève immédiatement
     if project_id:
         active_file = ROOT_DIR / "active_project.json"
         active_file.parent.mkdir(parents=True, exist_ok=True)
         active_file.write_text(json.dumps({"active_id": project_id}, ensure_ascii=False), encoding='utf-8')
 
-    logger.info(f"Auth: student '{display}' logged in (class={req.class_id})")
+    logger.info(f"Auth: student '{display}' logged in (class={req.class_id}, user_id={user_id[:8]}...)")
     return RegisterResponse(
         user_id=user_id, name=display, role="student", token=token,
         student_id=student_id, class_id=req.class_id, project_id=project_id
@@ -608,9 +663,11 @@ async def auth_login_student(req: StudentLoginRequest):
 async def list_students_public(class_id: str):
     """M224: Liste publique des élèves d'une classe (sans auth)."""
     students = _list_students_by_class(class_id)
-    return {
-        "students": [
-            {"id": s["id"], "display": s.get("display", s["id"]), "project_id": s.get("project_id")}
-            for s in students
-        ]
-    }
+    result = []
+    for s in students:
+        if isinstance(s, dict):
+            result.append({"id": s["id"], "display": s.get("display", s["id"]), "project_id": s.get("project_id")})
+        else:
+            # tuple: (id, display, project_id)
+            result.append({"id": s[0], "display": s[1] if len(s) > 1 else s[0], "project_id": s[2] if len(s) > 2 else None})
+    return {"students": result}

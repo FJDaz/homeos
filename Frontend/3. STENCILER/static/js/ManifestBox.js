@@ -503,7 +503,6 @@
         }
 
         updateSignets();
-        loadDesignTokens();
         setTimeout(updateSullivanPosition, 100);
         els.editor.focus();
     }
@@ -568,12 +567,17 @@
         if (manifestData) {
             els.editor.value = manifestData.raw_content || manifestData.description || '';
             updateSideSummary(manifestData.raw_content);
-        } else {
-            els.editor.value = '';
         }
-        updateSignets();
-        setTimeout(updateSullivanPosition, 100);
-        els.editor.focus();
+    }
+
+    /** Ferme le panel ManifestBox. */
+    function hide() {
+        if (panel) panel.style.display = 'none';
+    }
+
+    /** Bascule l'affichage du ManifestBox. */
+    function toggle() {
+        if (panel && panel.style.display === 'none') show(); else hide();
     }
 
     // API Publique

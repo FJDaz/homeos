@@ -29,7 +29,7 @@ CLASSES_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- DB ---
 # Try Supabase first, fall back to sqlite3 if not configured or fails
-_USE_SUPABASE = bool(os.getenv("SUPABASE_KEY", ""))
+_USE_SUPABASE = False  # Supabase schema désynchronisé — SQLite uniquement
 if _USE_SUPABASE:
     try:
         from routers.supabase_client import supabase_db_con

@@ -183,6 +183,15 @@
         const step = steps[currentStep];
         overlay.innerHTML = step.html;
         wireStep(currentStep);
+        // M298 debug: post-wire snapshot (after async injection settles)
+        setTimeout(() => {
+            const btns = overlay.querySelectorAll('button');
+            const commenceBtns = Array.from(btns).filter(b => b.textContent.includes('Commencer'));
+            console.log('[WsStitchDrill] post-render step', currentStep, '—',
+                btns.length, 'btn(s) total,',
+                commenceBtns.length, '"Commencer":',
+                commenceBtns.map(b => ({id: b.id, parent: b.parentElement?.tagName})));
+        }, 800);
     }
 
     function wireStep(stepIndex) {
@@ -249,6 +258,14 @@
         }
         else if (stepIndex === 3) {
             loadManifestStep();
+        }
+        else if (stepIndex === 4) {
+            document.getElementById('drill-finish').onclick = () => {
+                console.log('[WsStitchDrill] step4 finish clicked — ManifestBox:', typeof window.ManifestBox !== 'undefined');
+                hide();
+                if (window.ManifestBox) window.ManifestBox.show();
+                else console.error('[WsStitchDrill] ManifestBox NOT loaded');
+            };
         }
     }
 
@@ -424,7 +441,12 @@
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
             statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
 
+            // Retirer le bouton "skip" existant pour éviter le doublon
+            const skipBtn = document.getElementById('drill-skip-manifest');
+            if (skipBtn) skipBtn.remove();
+
             const startBtn = document.createElement('button');
+            startBtn.id = 'drill-start-work';
             startBtn.textContent = 'Commencer à travailler →';
             startBtn.className = 'mt-4 px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all block cursor-pointer';
             startBtn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
@@ -456,7 +478,7 @@
     }
 
     function finishDrill() {
-        if (overlay) { overlay.style.display = 'none'; overlay = null; }
+        if (overlay) { overlay.remove(); overlay = null; }
         if (window.WsProjectPanel) window.WsProjectPanel.refresh();
         if (window.ManifestBox) window.ManifestBox.show();
     }
@@ -481,7 +503,7 @@
         document.body.appendChild(btn);
     }
 
-    function hide() { if (overlay) { overlay.style.display = 'none'; overlay = null; } }
+    function hide() { if (overlay) { overlay.remove(); overlay = null; } }
 
     window.WsStitchDrill = { show, hide };
     console.log('[WsStitchDrill] ✅ OK');

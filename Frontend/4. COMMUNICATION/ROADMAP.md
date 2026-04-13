@@ -231,6 +231,110 @@ if (!projectId) {
 
 ---
 
+### Mission 298 — Double contexte student / user : pont FK + project panel double tab
+**STATUS: 🟠 PRÊTE | DATE: 2026-04-12 | ACTOR: QWEN (Back) + GEMINI (Front) — PARALLÈLE**
+
+**Principe :** Un étudiant a deux vies :
+1. **Student** — le drill école : le prof assigne un sujet, l'étudiant travaille dessus. Workflow basique, services institutionnels.
+2. **User** — le citoyen moyen : multi-projets perso, BYOK, libre.
+
+Les deux coexistent. Le student n'est pas exclu du user. Le panel projet affiche deux tabs :
+- Tab 1 (student) : `sujet assigné → écrans`
+- Tab 2 (user) : `mes projets perso → écrans`
+
+**Lien secure :** `students.user_id` (FK nullable → `users.id`). Au login étudiant, si pas de lien → créer user + écrire le lien (write once).
+
+---
+
+#### BACKEND (QWEN) — 3 fichiers
+
+**Fichier 1 — Migration SQL (one-shot)**
+
+`supabase/migrations/006_student_user_link.sql` :
+```sql
+ALTER TABLE students ADD COLUMN user_id TEXT REFERENCES users(id);
+CREATE INDEX IF NOT EXISTS idx_students_user_id ON students(user_id);
+```
+
+**Fichier 2 — `auth_router.py`**
+
+Dans `auth_login_student()` (après `user = _find_user_by_name(display)`) :
+- Si student a un `user_id` → l'utiliser directement (plus de lookup par nom)
+- Si student n'a pas de `user_id` → créer/récupérer user → écrire `students.user_id = user_id`
+- Retourner les deux : `student_id` ET `user_id` dans la réponse
+
+Dans `auth_register()` (bloc student) :
+- Même logique : après création du user, écrire `students.user_id = user_id`
+
+**Fichier 3 — `projects_router.py`**
+
+Dans `list_all_projects_route()` :
+- Student voit : ses projets perso (`user_id = uuid`) + le projet student (`students.project_id`)
+- La requête UNION les deux sources
+
+```python
+# Student : projets perso + projet student
+rows = conn.execute("""
+    SELECT DISTINCT p.id, p.name, p.path, p.created_at, p.last_opened
+    FROM projects p
+    WHERE p.user_id = ?
+       OR p.id = (SELECT s.project_id FROM students s WHERE s.id = ? AND s.project_id IS NOT NULL)
+    ORDER BY p.last_opened DESC
+""", (user_id, student_id)).fetchall()
+```
+
+Dans `activate_project_route()` :
+- Si le projet activé appartient au student (via `students.project_id`) → écrire dans `students.project_id`
+- Sinon → c'est un projet perso du user, juste `last_opened`
+
+---
+
+#### FRONTEND (GEMINI) — 2 fichiers
+
+**Fichier 1 — `bootstrap.js`**
+
+Ne plus cacher le project switcher aux students. Le student a besoin de naviguer entre son sujet et ses projets perso.
+
+**Fichier 2 — `WsProjectPanel.js`**
+
+Deux tabs :
+```
+┌─────────────────┬──────────────────┐
+│ sujet assigné   │ mes projets      │
+└─────────────────┴──────────────────┘
+```
+
+- **Tab 1 (student)** : affiché si `session.student_id && session.project_id`
+  - Header : nom du sujet (via `GET /api/projects/{project_id}/manifest`)
+  - Liste des écrans du sujet (via `/api/retro-genome/imports?project_id=...`)
+  - Pas de bouton supprimer, pas de bouton créer
+
+- **Tab 2 (user)** : affiché pour tous les users
+  - Liste des projets perso (`GET /api/projects` — déjà filtré par user_id côté serveur)
+  - Bouton "+ Nouveau projet" (appelle `POST /api/projects/create`)
+  - Chaque projet : expand → écrans → activer
+
+**Logique de tab :**
+- Par défaut → Tab 1 si student, Tab 2 sinon
+- `localStorage` mémorise le dernier tab actif
+- Les deux tabs partagent le même mécanisme d'activation (`POST /api/projects/activate`)
+
+**Session :** `homeos_session` stocke maintenant `student_id` ET `user_id` comme champs distincts. Le code existant qui lit `session.project_id` continue de fonctionner.
+
+---
+
+**Fichiers Backend :** `auth_router.py`, `projects_router.py`, `supabase/migrations/006_student_user_link.sql`
+**Fichiers Frontend :** `WsProjectPanel.js`, `bootstrap.js`, `login.html`, `student_login.html`
+
+**Critères de succès :**
+1. Au login étudiant → `students.user_id` écrit (FK)
+2. Panel projet : 2 tabs visibles pour un student
+3. Tab 1 = sujet prof, Tab 2 = projets perso
+4. Student peut créer un projet perso (Tab 2 → "+ Nouveau projet")
+5. Aucun projet existant cassé
+
+---
+
 ### Mission 280-DIAG — Trois bugs bloquants du drill : manifest 404, stitch sync loop, race condition upload
 **STATUS: 🔴 DIAG | DATE: 2026-04-12 | ACTOR: QWEN**
 

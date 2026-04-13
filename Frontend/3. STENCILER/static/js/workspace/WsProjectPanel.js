@@ -5,19 +5,50 @@
  */
 (function() {
     'use strict';
-    console.log('[WsProjectPanel] init V2');
 
     let _projects = [];
     let _screensCache = {}; // { projectId: [screens] }
     let _expandedState = {}; // { projectId: bool }
 
+    /**
+     * M298 debug: trace le scope réel de la session utilisée pour les projets.
+     */
+    function _sessionTrace() {
+        const s = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        return {
+            hasToken: !!s.token,
+            token8: s.token ? s.token.substring(0, 8) : 'NONE',
+            user_id: s.user_id || null,
+            role: s.role || null,
+            student_id: s.student_id || null,
+            project_id: s.project_id || null,
+        };
+    }
+
     async function refresh() {
-        console.log('[WsProjectPanel] fetching all projects...');
         try {
-            const res = await fetch('/api/projects');
+            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const headers = {};
+            if (session.token) headers['X-User-Token'] = session.token;
+
+            console.log('[WsProjectPanel] session:', _sessionTrace());
+
+            const res = await fetch('/api/projects', { headers });
+            console.log('[WsProjectPanel] GET /api/projects →', res.status);
             if (!res.ok) return;
             _projects = await res.json();
-            
+            console.log('[WsProjectPanel] reçu', _projects.length, 'projet(s):', _projects.map(p => p.name + (p.active ? ' [ACTIF]' : '')).join(', '));
+
+            // Filtrer : ne garder que les projets appartenant au user_id de la session
+            // (le backend peut retourner des projets partagés ou orphan — on filtre côté client en sécurité)
+            const userId = session.user_id;
+            if (userId && session.role !== 'admin') {
+                // Le backend devrait déjà filtrer, mais on double-check
+                // Les projets perso ont user_id = session.user_id
+                // Les projets étudiant n'ont pas de user_id mais sont liés via students.user_id
+                // On garde tout ce que le backend retourte (déjà filtré côté serveur)
+            }
+
             // Initialiser l'état d'expansion : le projet actif est déplié par défaut
             _projects.forEach(p => {
                 if (p.active && _expandedState[p.id] === undefined) {
@@ -56,7 +87,6 @@
      * Active un projet et synchronise le ManifestBox.
      */
     async function activateProject(projectId) {
-        console.log('[WsProjectPanel] Activating:', projectId);
         try {
             // 1. Backend activation
             const res = await fetch('/api/projects/activate', {
@@ -190,6 +220,4 @@
         toggleProject: toggleProject,
         get projects() { return _projects; }
     };
-
-    console.log('[WsProjectPanel] ✅ OK V2');
 })();

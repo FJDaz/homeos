@@ -207,9 +207,11 @@ async def get_active_logic_js():
 
 @router.get("/projects", response_model=List[ProjectInfo])
 async def list_all_projects_route(request: Request):
-    """Mission 190: Filtre par user_id. Admin voit tout, student voit ses projets + hérités."""
+    """Mission 190 + M298: Admin voit tout, user voit ses projets + (si étudiant) son sujet assigné."""
     user_id = getattr(request.state, 'user_id', None)
     active_id = get_active_project_id()
+
+    logger.info(f"[M298] GET /api/projects — user_id={user_id}, active_id={active_id}")
 
     with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
         # Check if user is admin
@@ -222,10 +224,16 @@ async def list_all_projects_route(request: Request):
         if is_admin:
             rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
         elif user_id:
-            rows = conn.execute(
-                "SELECT id, name, path, created_at, last_opened FROM projects WHERE user_id = ? OR user_id IS NULL ORDER BY last_opened DESC",
-                (user_id,)
-            ).fetchall()
+            # M298: UNION — projets perso du user + projet étudiant assigné (via students.user_id)
+            # NOTE: pas de "user_id IS NULL" — les projets legacy sans user_id sont exclus
+            rows = conn.execute("""
+                SELECT DISTINCT p.id, p.name, p.path, p.created_at, p.last_opened
+                FROM projects p
+                WHERE p.user_id = ?
+                   OR p.id = (SELECT s.project_id FROM students s WHERE s.user_id = ? AND s.project_id IS NOT NULL)
+                ORDER BY p.last_opened DESC
+            """, (user_id, user_id)).fetchall()
+            logger.info(f"[M298] user_id={user_id[:8]}... → {len(rows)} projet(s)")
         else:
             # Legacy: no token → show all (backward compat)
             rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()

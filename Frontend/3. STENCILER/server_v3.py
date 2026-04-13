@@ -139,8 +139,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 conn.close()
                 if user:
                     request.state.user_id = user[0]
-            except Exception:
-                pass
+                else:
+                    print(f"[M298-MW] {request.url.path} — token={token[:8]}... → user NOT FOUND")
+            except Exception as e:
+                print(f"[M298-MW] {request.url.path} — middleware error: {e}")
+        else:
+            if request.url.path == "/api/projects":
+                print(f"[M298-MW] {request.url.path} — NO token in headers → user_id=None → fallback legacy (ALL projects)")
 
         return await call_next(request)
 
