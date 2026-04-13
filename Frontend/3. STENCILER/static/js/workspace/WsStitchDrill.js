@@ -174,7 +174,6 @@
                         <div id="drill-forged-screens" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left max-h-64 overflow-y-auto space-y-2">
                             <div class="text-[13px] text-[#9a9a98] italic">Chargement...</div>
                         </div>
-                        <button id="drill-finish" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[14px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     </div>
                 `
             }
@@ -260,12 +259,7 @@
             loadManifestStep();
         }
         else if (stepIndex === 4) {
-            document.getElementById('drill-finish').onclick = () => {
-                console.log('[WsStitchDrill] step4 finish clicked — ManifestBox:', typeof window.ManifestBox !== 'undefined');
-                hide();
-                if (window.ManifestBox) window.ManifestBox.show();
-                else console.error('[WsStitchDrill] ManifestBox NOT loaded');
-            };
+            loadForgedScreens();
         }
     }
 
@@ -384,12 +378,8 @@
                             <div class="flex gap-3 text-[11px] text-[#9a9a98]"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
                             ${tokensHtml}
                         </div>
-                        <button id="drill-start-work" class="px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
                     `;
-                    document.getElementById('drill-start-work').onclick = () => {
-                        hide();
-                        if (window.ManifestBox) window.ManifestBox.show();
-                    };
+                    _finishButton(section);
                 }
             } else {
                 showManifestUpload(section);
@@ -409,7 +399,6 @@
             </div>
             <div id="drill-manifest-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
             ${errorMsg ? '<div class="mt-2 text-[12px] text-[#d44]">' + errorMsg + '</div>' : ''}
-            <button id="drill-skip-manifest" class="mt-4 px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all">Commencer à travailler →</button>
         `;
 
         const zone = document.getElementById('drill-manifest-upload-zone');
@@ -421,7 +410,7 @@
         zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
         zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status); };
         input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
-        document.getElementById('drill-skip-manifest').onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
+        _finishButton(section);
     }
 
     async function uploadManifest(file, statusEl) {
@@ -440,17 +429,7 @@
             });
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
             statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
-
-            // Retirer le bouton "skip" existant pour éviter le doublon
-            const skipBtn = document.getElementById('drill-skip-manifest');
-            if (skipBtn) skipBtn.remove();
-
-            const startBtn = document.createElement('button');
-            startBtn.id = 'drill-start-work';
-            startBtn.textContent = 'Commencer à travailler →';
-            startBtn.className = 'mt-4 px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all block cursor-pointer';
-            startBtn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
-            statusEl.parentNode.insertBefore(startBtn, statusEl.nextSibling);
+            _finishButton(statusEl.parentNode);
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
@@ -475,6 +454,7 @@
                 </div>
             `).join('');
         } catch(e) { container.innerHTML = '<div class="text-[13px] text-[#9a9a98] italic">Erreur chargement.</div>'; }
+        _finishButton(container);
     }
 
     function finishDrill() {
@@ -504,6 +484,25 @@
     }
 
     function hide() { if (overlay) { overlay.remove(); overlay = null; } }
+
+    /**
+     * Bouton "Commencer à travailler" unique — supprime tout existant et en crée un.
+     * Appelé par loadManifestStep(), uploadManifest(), loadForgedScreens().
+     */
+    function _finishButton(container, prepend) {
+        // Retirer tout bouton "Commencer" existant dans le container
+        container.querySelectorAll('button').forEach(b => {
+            if (b.textContent.includes('Commencer')) b.remove();
+        });
+        const btn = document.createElement('button');
+        btn.id = 'drill-finish';
+        btn.textContent = 'Commencer à travailler →';
+        btn.className = 'px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all cursor-pointer';
+        btn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
+        if (prepend) container.insertBefore(btn, container.firstChild);
+        else container.appendChild(btn);
+        return btn;
+    }
 
     window.WsStitchDrill = { show, hide };
     console.log('[WsStitchDrill] ✅ OK');
