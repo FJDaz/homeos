@@ -40,12 +40,26 @@ class WsForge {
 
             say('génération tailwind en cours...');
             let pollCount = 0;
+            const pollStart = Date.now();
             const MESSAGES = ['structuration du layout...', 'composants en cours...', 'presque terminé...'];
 
             const poll = setInterval(async () => {
                 try {
                     const jr = await fetch(`/api/retro-genome/svg-job/${jobId}`);
                     const job = await jr.json();
+
+                    // M298: Forge monitoring console
+                    const elapsed = ((Date.now() - pollStart) / 1000).toFixed(1);
+                    if (job.status === 'running') {
+                        const steps = job.trace_summary?.steps || [];
+                        const lastStep = steps.filter(s => s.status !== 'pending').pop();
+                        console.log(`[Forge ${jobId}] ${elapsed}s — ${lastStep?.name || 'en cours'} (${steps.filter(s=>s.status==='done').length}/${steps.length})`);
+                    } else if (job.status === 'done') {
+                        console.log(`[Forge ${jobId}] ✓ DONE en ${elapsed}s — template: ${job.template_name || 'N/A'}`);
+                    } else if (job.status === 'failed') {
+                        console.error(`[Forge ${jobId}] ✗ FAILED après ${elapsed}s — ${job.error || 'unknown'}`);
+                    }
+
                     if (job.status === 'done') {
                         clearInterval(poll);
                         // M234: Update index.json with forge result

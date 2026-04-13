@@ -5759,4 +5759,22 @@ Le `postMessage` `inspect-hover` est debouncé côté parent : Monaco ne scrolle
 ## Mission 131 — Exclusivité des Outils en Mode Aperçu & Nettoyage
 **STATUS: ✅ LIVRÉ**
 **DATE: 2026-04-01 | ACTOR: GEMINI**
+
+## M298 — Double contexte student / user : pont FK + project panel filtré
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-13 | ACTOR: QWEN (Back) + CLAUDE (Front fixes)**
+
+**Backend :**
+- Migration 006 : `students.user_id` FK → `users(id)` + index (applied SQLite)
+- `auth_router.py` : `_get_student_user_id` / `_set_student_user_id` helpers (write-once FK)
+- `auth_login_student` : écrit `students.user_id` au login (backfill idempotent)
+- `auth_register` : idem pour la branche student
+- `projects_router.py` : requête UNION — projets perso (`user_id = ?`) + sujet assigné (`students.project_id` via subquery)
+- Suppression de `OR user_id IS NULL` — retournait TOUS les projets legacy
+- `class_router.py` : forcé SQLite (Supabase schema désynchronisé)
+
+**Frontend :**
+- `WsProjectPanel.js` : envoie `X-User-Token` header, trace de session
+- `WsStitchDrill.js` : bouton step 4 wired, `hide()` supprime overlay du DOM, déduplication bouton upload
+- `ManifestBox.js` : `hide()` + `toggle()` ajoutés (ReferenceError fix), `loadDesignTokens` orphelin retiré
+- `_finishButton(container)` — helper unique pour le bouton "Commencer à travailler" (4 occurrences → 1)
 - Nettoyage des outils et focus sur le mode aperçu.
