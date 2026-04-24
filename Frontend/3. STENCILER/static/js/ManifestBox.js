@@ -15,7 +15,14 @@
 
     // --- UTILS ---
     function getSession() {
-        return JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        try {
+            const isImpersonate = new URLSearchParams(window.location.search).get('impersonate') === '1';
+            if (isImpersonate) {
+                const imp = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
+                if (imp.token) return imp;
+            }
+            return JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        } catch(e) { return {}; }
     }
 
     /**
@@ -67,7 +74,9 @@
             const projectId = targetProjectId || session.active_project_id || session.project_id;
             if (!projectId) return;
 
-            const res = await fetch(`/api/projects/${projectId}/manifest`);
+            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                headers: { 'X-User-Token': session.token || '' }
+            });
             if (res.ok) {
                 manifestData = await res.json();
                 
@@ -509,12 +518,12 @@
 
     async function inferFromTokens() {
         try {
-            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const session = getSession();
             const projectId = session.active_project_id || session.project_id;
             if (!projectId) return;
             const res = await fetch('/api/manifest/analyze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
                 body: JSON.stringify({ project_id: projectId })
             });
             if (!res.ok) return;
@@ -529,12 +538,12 @@
 
     async function analyzeManifestQuestions() {
         try {
-            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            const session = getSession();
             const projectId = session.active_project_id || session.project_id;
             if (!projectId) return;
             const res = await fetch('/api/manifest/analyze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
                 body: JSON.stringify({ project_id: projectId })
             });
             if (!res.ok) return;

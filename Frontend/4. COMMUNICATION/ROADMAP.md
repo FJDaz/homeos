@@ -100,7 +100,8 @@ RÈGLES D'ANIMATION LOW-CPU :
 | M335 | UX : bouton nouveau projet + header panel | 🟢 TERMINÉE | GEMINI |
 | M336 | Fix critique : impersonation localStorage bridge + 401 guard | 🟢 TERMINÉE | CLAUDE |
 | M337 | Fix manifest impersonation — JWT decode dans get_active_project_id | 🔴 BLOQUANT | CLAUDE |
-| M338 | Tab Dashboard en mode impersonation | 🟡 QUICK-WIN | CLAUDE |
+| M338 | Tab Dashboard en mode impersonation | 🟢 TERMINÉE | CLAUDE |
+| M339 | ManifestBox impersonation-aware — getSession + projectId élève | 🟢 TERMINÉE | GEMINI |
 
 ---
 
@@ -183,6 +184,54 @@ Aucun changement attendu — juste vérifier que la route est intacte après mod
 - `/login` → formulaire email+password uniquement, pas de session code
 - Session de l'onglet impersonation isolée (sessionStorage) → fermeture onglet = session détruite
 - Session prof dans l'onglet dashboard intacte (localStorage)
+
+---
+
+### M339 — ManifestBox impersonation-aware
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+> BOOTSTRAP GEMINI OBLIGATOIRE
+
+**Contexte :** En mode impersonation (`?impersonate=1`), ManifestBox.js lit la session depuis `localStorage.homeos_session` (session prof). Le `projectId` résolu est donc celui du prof, pas de l'élève. Le manifest ne se charge pas (mauvais projet) ou charge le manifest du prof.
+
+**Fichier :** `Frontend/3. STENCILER/static/js/ManifestBox.js`
+
+**Fix 1 — `getSession()` (lignes 17-19) :**
+
+```js
+// AVANT
+function getSession() {
+    return JSON.parse(localStorage.getItem('homeos_session') || '{}');
+}
+
+// APRÈS
+function getSession() {
+    try {
+        const isImpersonate = new URLSearchParams(window.location.search).get('impersonate') === '1';
+        if (isImpersonate) {
+            const imp = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
+            if (imp.token) return imp;
+        }
+        return JSON.parse(localStorage.getItem('homeos_session') || '{}');
+    } catch(e) { return {}; }
+}
+```
+
+**Fix 2 — `loadManifest` (ligne 70) :** Ajouter le token dans le fetch :
+
+```js
+// AVANT
+const res = await fetch(`/api/projects/${projectId}/manifest`);
+
+// APRÈS
+const res = await fetch(`/api/projects/${projectId}/manifest`, {
+    headers: { 'X-User-Token': session.token || '' }
+});
+```
+
+**Même pattern** à appliquer dans `saveManifestDeferred` (ligne 111) — le token est déjà présent là, vérifier qu'il vient bien de `getSession()` et pas d'un appel direct à `localStorage`.
+
+**output attendu :** En mode impersonation, ManifestBox charge le manifest du projet de l'élève. L'éditeur affiche le contenu correct. La sauvegarde écrit dans le bon projet.
 
 ---
 
