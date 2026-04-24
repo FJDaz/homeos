@@ -94,11 +94,13 @@ RÈGLES D'ANIMATION LOW-CPU :
 |---------|-------|--------|-------|
 | M330 | Nettoyage structure ROADMAP.md | 🟢 TERMINÉE | GEMINI |
 | M331 | Fix onboarding student — session + drill | 🟢 TERMINÉE | GEMINI |
-| M332 | Handoff dev senior — chapitre ROADMAP | 🟢 CLAUDE | CLAUDE |
+| M332 | Handoff dev senior — chapitre ROADMAP | 🟢 TERMINÉE | CLAUDE |
 | M333 | UX drill : nouveau projet + sortie croix | 🟢 TERMINÉE | GEMINI |
 | M334 | Fix impersonation : WsStitchDrill lit sessionStorage | 🟢 TERMINÉE | GEMINI |
 | M335 | UX : bouton nouveau projet + header panel | 🟢 TERMINÉE | GEMINI |
-| M336 | Fix critique : impersonation + séparation login/session | 🔴 BLOQUANT | GEMINI |
+| M336 | Fix critique : impersonation localStorage bridge + 401 guard | 🟢 TERMINÉE | CLAUDE |
+| M337 | Fix manifest impersonation — JWT decode dans get_active_project_id | 🔴 BLOQUANT | CLAUDE |
+| M338 | Tab Dashboard en mode impersonation | 🟡 QUICK-WIN | CLAUDE |
 
 ---
 
@@ -181,6 +183,104 @@ Aucun changement attendu — juste vérifier que la route est intacte après mod
 - `/login` → formulaire email+password uniquement, pas de session code
 - Session de l'onglet impersonation isolée (sessionStorage) → fermeture onglet = session détruite
 - Session prof dans l'onglet dashboard intacte (localStorage)
+
+---
+
+### M338 — Tab Dashboard en mode impersonation
+**STATUS: 🟡 QUICK-WIN | DATE: 2026-04-24 | ACTOR: CLAUDE — CODE DIRECT**
+
+**Contexte :** En mode `?impersonate=1`, `session` dans bootstrap.js est la session élève (role: 'student'). Le tab Dashboard n'est jamais affiché car le check `session.role === 'prof'` échoue. Le prof perd son accès au Dashboard dans l'onglet workspace impersonation.
+
+**Fix (3 lignes — `bootstrap.js`) :**
+
+```js
+// AVANT
+if (session.role === 'prof' || session.role === 'admin') {
+    if (!isImpersonate) {
+        TABS.unshift({ id: 'dashboard', ... });
+    }
+}
+
+// APRÈS — lire la session prof depuis localStorage (toujours présente)
+const profSession = isImpersonate
+    ? JSON.parse(localStorage.getItem('homeos_session') || '{}')
+    : session;
+if (profSession.role === 'prof' || profSession.role === 'admin') {
+    TABS.unshift({ id: 'dashboard', ... });
+}
+```
+
+**Bannière impersonation :** Supprimer le bouton "stop impersonation" cassé. Garder une bannière épurée texte seul ("vue en tant que : X — fermer l'onglet pour revenir au dashboard"). Les vraies restrictions role student sont implémentées en amont (login, AuthMiddleware, drill) — confiance dans les mécanismes existants.
+
+**output attendu :** Tab Dashboard visible en mode impersonation. Clic → retour au dashboard prof. Fermeture onglet = fin de session impersonation.
+
+---
+
+### M337 — Fix manifest impersonation — JWT decode dans get_active_project_id
+**STATUS: 🔴 BLOQUANT | DATE: 2026-04-24 | ACTOR: CLAUDE — CODE DIRECT**
+
+**Diagnostic :**
+
+`get_active_project_id(token)` dans `bkd_service.py` résout le projet actif via `WHERE u.token = ?`. Les tokens UUID legacy sont stockés en DB — ça marche. Le token d'impersonation est un **JWT généré à la volée** (`create_access_token({"user_id": s_user_id, "role": "student"})`) — il n'est **pas** en DB. Résultat : lookup retourne None → fallback `homéos-default` → `manifest.json` introuvable → ManifestBox ne s'ouvre pas.
+
+**Périmètre exact :** uniquement en mode impersonation (JWT token). Les tokens UUID legacy (profs, vrais élèves) ne sont pas affectés.
+
+**Fix (`bkd_service.py`, fonction `get_active_project_id`) :**
+
+Après l'échec du lookup legacy, tenter un decode JWT :
+
+```python
+def get_active_project_id(token: str = None):
+    if token:
+        try:
+            with bkd_db() as con:
+                row = con.execute(
+                    "SELECT s.project_id, u.role, u.active_project_id FROM users u "
+                    "LEFT JOIN students s ON s.display = u.name "
+                    "WHERE u.token = ?", (token,)
+                ).fetchone()
+                if row:
+                    stud_pid, role, user_pid = row
+                    if role == 'student' and stud_pid:
+                        return stud_pid
+                    if role in ('teacher', 'admin', 'prof') and user_pid:
+                        return user_pid
+        except Exception as e:
+            logger.error(f"get_active_project_id: DB error: {e}")
+
+        # Fallback JWT — token non stocké en DB (impersonation)
+        if token.startswith('eyJ'):
+            try:
+                from core.auth_utils import decode_access_token
+                payload = decode_access_token(token)
+                if payload:
+                    user_id = payload.get('user_id', '')
+                    role = payload.get('role', '')
+                    with bkd_db() as con:
+                        if role == 'student':
+                            # user_id peut être "student_<slug>" ou un vrai UUID FK
+                            row = con.execute(
+                                "SELECT project_id FROM students WHERE user_id = ?",
+                                (user_id,)
+                            ).fetchone()
+                            if row and row[0]:
+                                return row[0]
+                        # Si prof JWT (rare) — chercher active_project_id
+                        row = con.execute(
+                            "SELECT active_project_id FROM users WHERE id = ?",
+                            (user_id,)
+                        ).fetchone()
+                        if row and row[0]:
+                            return row[0]
+            except Exception as e:
+                logger.error(f"get_active_project_id: JWT decode error: {e}")
+
+    return "homéos-default"
+```
+
+**Redémarrage serveur obligatoire après livraison.**
+
+**output attendu :** ManifestBox se charge en mode impersonation. Le manifest de l'élève (et non `homéos-default`) est retourné par `/api/manifest/get`.
 
 ---
 

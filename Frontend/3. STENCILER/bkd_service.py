@@ -447,14 +447,11 @@ def _write_json_locked(file_path: Path, data: dict):
 # Global State for Active Project — M309: Pure DB persistence
 
 def get_active_project_id(token: str = None):
-    """M309: Resolve active project with Role Isolation.
-    Students: return their private project_id.
-    Teachers/Admins: return their last active project_id from DB.
-    """
+    """M309/M337: Resolve active project with Role Isolation and JWT support."""
     if token:
         try:
             with bkd_db() as con:
-                # Optimized join to get project_id based on role
+                # 1. Tentative lookup DB (tokens UUID legacy)
                 row = con.execute(
                     "SELECT s.project_id, u.role, u.active_project_id FROM users u "
                     "LEFT JOIN students s ON s.display = u.name "
@@ -470,6 +467,34 @@ def get_active_project_id(token: str = None):
                         return user_pid
         except Exception as e:
             logger.error(f"get_active_project_id: DB error: {e}")
+
+        # 2. Fallback JWT — token non stocké en DB (impersonation)
+        if token.startswith('eyJ'):
+            try:
+                from core.auth_utils import decode_access_token
+                payload = decode_access_token(token)
+                if payload:
+                    user_id = payload.get('user_id', '')
+                    role = payload.get('role', '')
+                    with bkd_db() as con:
+                        if role == 'student':
+                            # user_id peut être "student_<slug>" ou un vrai UUID
+                            row = con.execute(
+                                "SELECT project_id FROM students WHERE user_id = ?",
+                                (user_id,)
+                            ).fetchone()
+                            if row and row[0]:
+                                return row[0]
+                        
+                        # Si prof JWT — chercher active_project_id dans users
+                        row = con.execute(
+                            "SELECT active_project_id FROM users WHERE id = ?",
+                            (user_id,)
+                        ).fetchone()
+                        if row and row[0]:
+                            return row[0]
+            except Exception as e:
+                logger.error(f"get_active_project_id: JWT decode error: {e}")
 
     return "homéos-default"
 

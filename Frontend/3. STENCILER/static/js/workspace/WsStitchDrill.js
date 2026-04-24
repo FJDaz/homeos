@@ -26,15 +26,14 @@
     ];
 
     function getSession() {
-        try { return JSON.parse(localStorage.getItem('homeos_session') || '{}'); } catch(e) { return {}; }
-    }
-
-    async function isCanvasEmpty() {
         try {
-            const res = await fetch('/api/retro-genome/imports');
-            const data = await res.json();
-            return (data.imports || []).length === 0;
-        } catch(e) { return true; }
+            const isImpersonate = new URLSearchParams(window.location.search).get('impersonate') === '1';
+            if (isImpersonate) {
+                const imp = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
+                if (imp.token) return imp;
+            }
+            return JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        } catch(e) { return {}; }
     }
 
     async function fetchKeyStatus() {
@@ -467,20 +466,7 @@
         const session = getSession();
         const role = session.role || 'student';
         if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
-        isCanvasEmpty().then(empty => {
-            if (empty) { createOverlay(); } else { createSmallButton(); }
-        });
-    }
-
-    function createSmallButton() {
-        const existing = document.getElementById('drill-small-btn');
-        if (existing) existing.remove();
-        const btn = document.createElement('button');
-        btn.id = 'drill-small-btn';
-        btn.textContent = '+ Nouveau projet';
-        btn.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:99999;background:#8cc63f;color:white;border:none;padding:10px 18px;border-radius:12px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.15);`;
-        btn.onclick = () => { btn.remove(); createOverlay(); };
-        document.body.appendChild(btn);
+        createOverlay();
     }
 
     function hide() { if (overlay) { overlay.remove(); overlay = null; } }

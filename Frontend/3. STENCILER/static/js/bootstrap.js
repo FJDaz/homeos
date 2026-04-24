@@ -38,11 +38,13 @@
         }
     }
 
-    if (session.role === 'prof' || session.role === 'admin') {
-        // En mode impersonation (student), on ne montre pas le dashboard enseignant
-        if (!isImpersonate) {
-            TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
-        }
+    // M338: Détection rôle prof même en mode impersonation (student)
+    const profSession = isImpersonate
+        ? JSON.parse(localStorage.getItem('homeos_session') || '{}')
+        : session;
+
+    if (profSession.role === 'prof' || profSession.role === 'admin') {
+        TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
     }
 
     const isLoginPath = window.location.pathname === '/login';
@@ -284,23 +286,10 @@
             padding: 0 10px;
         `;
         banner.innerHTML = `
-            <div style="flex:1; text-align:center; padding-left:60px;">⚠️ Mode Impersonation — Vue en tant que : ${session.name || 'Étudiant'}</div>
-            <button id="stop-impersonation-btn" style="background:white; color:#e53e3e; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; text-transform:uppercase; transition: opacity 0.2s; white-space:nowrap;">Stop Impersonation</button>
+            <div style="flex:1; text-align:center;">⚠️ Mode Impersonation — Vue en tant que : ${session.name || 'Étudiant'} — Fermer l'onglet pour revenir au Dashboard</div>
         `;
         document.body.appendChild(banner);
         document.body.style.paddingTop = (parseInt(document.body.style.paddingTop || '48') + 26) + 'px';
-
-        const stopBtn = document.getElementById('stop-impersonation-btn');
-        if (stopBtn) {
-            stopBtn.onclick = function() {
-                const impData = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
-                const classId = impData.class_id || '';
-                sessionStorage.removeItem('homeos_impersonation');
-                window.location.href = classId ? `/teacher?class_id=${classId}` : '/teacher';
-            };
-            stopBtn.onmouseover = () => stopBtn.style.opacity = '0.9';
-            stopBtn.onmouseout = () => stopBtn.style.opacity = '1';
-        }
     }
 
     function injectSwitcher() {
