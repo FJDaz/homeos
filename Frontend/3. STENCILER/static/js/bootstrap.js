@@ -38,11 +38,11 @@
         }
     }
 
-    if (session.role === 'prof' || session.role === 'admin') {
-        // En mode impersonation (student), on ne montre pas le dashboard enseignant
-        if (!isImpersonate) {
-            TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
-        }
+    const profSession = isImpersonate
+        ? JSON.parse(localStorage.getItem('homeos_session') || '{}')
+        : session;
+    if (profSession.role === 'prof' || profSession.role === 'admin') {
+        TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
     }
 
     const isLoginPath = window.location.pathname === '/login';
@@ -271,36 +271,17 @@
     function injectImpersonationBanner() {
         if (!isImpersonate) return;
         if (document.getElementById('homeos-impersonation-banner')) return;
-        
         const banner = document.createElement('div');
         banner.id = 'homeos-impersonation-banner';
         banner.style.cssText = `
-            position: fixed; top: 48px; left: 0; right: 0; height: 26px;
+            position: fixed; top: 48px; left: 0; right: 0; height: 22px;
             background: #e53e3e; color: white; display: flex; align-items: center;
-            justify-content: space-between; font-size: 11px; font-weight: bold;
-            z-index: 10001; text-transform: uppercase;
-            letter-spacing: 0.1em;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 0 10px;
+            justify-content: center; font-size: 10px; font-weight: 600;
+            z-index: 10001; letter-spacing: 0.08em; text-transform: uppercase;
         `;
-        banner.innerHTML = `
-            <div style="flex:1; text-align:center; padding-left:60px;">⚠️ Mode Impersonation — Vue en tant que : ${session.name || 'Étudiant'}</div>
-            <button id="stop-impersonation-btn" style="background:white; color:#e53e3e; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; text-transform:uppercase; transition: opacity 0.2s; white-space:nowrap;">Stop Impersonation</button>
-        `;
+        banner.textContent = `vue en tant que : ${session.name || 'étudiant'} — fermer l'onglet pour revenir au dashboard`;
         document.body.appendChild(banner);
-        document.body.style.paddingTop = (parseInt(document.body.style.paddingTop || '48') + 26) + 'px';
-
-        const stopBtn = document.getElementById('stop-impersonation-btn');
-        if (stopBtn) {
-            stopBtn.onclick = function() {
-                const impData = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
-                const classId = impData.class_id || '';
-                sessionStorage.removeItem('homeos_impersonation');
-                window.location.href = classId ? `/teacher?class_id=${classId}` : '/teacher';
-            };
-            stopBtn.onmouseover = () => stopBtn.style.opacity = '0.9';
-            stopBtn.onmouseout = () => stopBtn.style.opacity = '1';
-        }
+        document.body.style.paddingTop = (parseInt(document.body.style.paddingTop || '48') + 22) + 'px';
     }
 
     function injectSwitcher() {
