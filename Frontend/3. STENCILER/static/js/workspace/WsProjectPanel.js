@@ -1,14 +1,27 @@
 /**
- * WsProjectPanel — Mission 282 V2
- * Gestion multi-projets avec accordéon explicite et activation automatique.
- * Synchronisé avec ManifestBox.
+ * WsProjectPanel — Clean V3 (Mission 282)
+ * Scope : student.projects[i]. Piloté par la session homeos_session.
  */
 (function() {
     'use strict';
 
-    let _projects = [];
-    let _screensCache = {}; // { projectId: [screens] }
-    let _expandedState = {}; // { projectId: bool }
+    let _expanded = {};
+
+    function getSession() {
+        let s = {};
+        try {
+            s = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        } catch(e) {}
+        return s;
+    }
+
+    // M294-A: Auth headers helper
+    function _authHeaders(extraHeaders = {}) {
+        const session = getSession();
+        const headers = { ...extraHeaders };
+        if (session.token) headers['X-User-Token'] = session.token;
+        return headers;
+    }
 
     function _getSession() {
         try {
@@ -150,6 +163,12 @@
     function render() {
         const container = document.getElementById('ws-project-list');
         if (!container) return;
+        
+        const session = getSession();
+        const student = session.student || session; 
+        const projects = optionalProjects || student.projects || [];
+        const activeId = session.active_project_id || session.project_id;
+
         container.innerHTML = '';
 
         const session = _getSession();
