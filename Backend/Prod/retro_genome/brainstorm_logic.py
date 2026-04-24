@@ -268,7 +268,16 @@ async def sse_chat_generator(session_id: str, provider: str, message: str, class
     # M226: ProjectContext canonique
     from .project_context import ProjectContext
     ctx = ProjectContext(project_id=project_id, class_id=class_id)
-    system_prompt = ctx.as_system_prefix() + BRS_CHAT_SYSTEM
+    
+    # M323: Subject Injection
+    subject_context = ""
+    if project_id:
+        # Tenter de trouver le subject_id lié au projet
+        subject_id = _find_subject_id_for_project(project_id)
+        if subject_id:
+            subject_context = _load_subject_as_context(subject_id)
+
+    system_prompt = ctx.as_system_prefix() + (f"\nCONTEXTE SUJET :\n{subject_context}\n" if subject_context else "") + BRS_CHAT_SYSTEM
 
     client = None
     try:
@@ -365,3 +374,33 @@ title: ...
 description: ...
 competences: [A1, C2, C3]
 -->"""
+
+
+# --- M323: Subject Helpers ---
+
+def _find_subject_id_for_project(project_id: str) -> Optional[str]:
+    try:
+        import sqlite3
+        db_path = Path(__file__).parent.parent.parent.parent / "db" / "projects.db"
+        con = sqlite3.connect(str(db_path))
+        row = con.execute("SELECT subject_id FROM projects WHERE id=?", (project_id,)).fetchone()
+        con.close()
+        return row[0] if row else None
+    except:
+        return None
+
+def _load_subject_as_context(subject_id: str) -> str:
+    try:
+        import sqlite3
+        db_path = Path(__file__).parent.parent.parent.parent / "db" / "projects.db"
+        con = sqlite3.connect(str(db_path))
+        row = con.execute("SELECT name, description, referential_json FROM subjects WHERE id=?", (subject_id,)).fetchone()
+        con.close()
+        if not row: return ""
+        name, desc, ref_json = row
+        ref = json.loads(ref_json)
+        ref_text = "\n".join([f"- {c['label']}: {c.get('criteria','')}" for c in ref])
+        return f"Sujet: {name}\nObjectifs: {desc}\nRéférentiel de compétences :\n{ref_text}"
+    except Exception as e:
+        logger.warning(f"_load_subject_as_context error: {e}")
+        return ""

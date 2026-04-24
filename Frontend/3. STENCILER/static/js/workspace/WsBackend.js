@@ -272,16 +272,22 @@ class WsBackend {
             div.className = `py-1 hover:bg-homeos-panel cursor-pointer truncate flex items-center group`;
             
             if (item._isFile) {
-                div.innerHTML = `<span class="mr-2 opacity-40">📄</span>${key}`;
+                const svgFile = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-40"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14.5 2 14.5 7.5 20 7.5"/></svg>`;
+                div.innerHTML = `${svgFile}${key}`;
                 div.onclick = () => this.loadFile(item._path);
             } else {
-                div.innerHTML = `<span class="mr-2 opacity-40">📁</span><span class="font-bold">${key}</span>`;
+                const svgFolder = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-40"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`;
+                div.innerHTML = `${svgFolder}<span class="font-bold">${key}</span>`;
                 const children = this.renderTree(item._children, depth + 1);
                 children.classList.add('hidden');
                 div.onclick = (e) => {
                     e.stopPropagation();
                     children.classList.toggle('hidden');
-                    div.querySelector('span:first-child').innerHTML = children.classList.contains('hidden') ? '📁' : '📂';
+                    const isHidden = children.classList.contains('hidden');
+                    const folderIcon = isHidden 
+                        ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-40"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-40"><path d="M18 19H6c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2h7c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`;
+                    div.innerHTML = `${folderIcon}<span class="font-bold">${key}</span>`;
                 };
                 container.appendChild(div);
                 container.appendChild(children);

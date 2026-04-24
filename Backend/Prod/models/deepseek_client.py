@@ -3,12 +3,14 @@ import asyncio
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 import httpx
 from loguru import logger
 
 from ..config.settings import settings
 from .plan_reader import Step
 from .base_client import BaseLLMClient, GenerationResult
+from ..rag.pageindex_store import PageIndexRetriever
 
 
 @dataclass
@@ -62,6 +64,38 @@ class DeepSeekClient(BaseLLMClient):
                 "Content-Type": "application/json"
             }
         )
+        self._retriever = None
+
+    async def retrieve_context(self, query: str, top_k: int = 5) -> str:
+        """
+        Retrieve relevant context from codebase using PageIndexRAG.
+        
+        Args:
+            query: The search query
+            top_k: Number of snippets to retrieve
+            
+        Returns:
+            Formatted context string
+        """
+        if self._retriever is None:
+            # Hierarchical root detection
+            # models/Prod/Backend (3 levels)
+            project_root = Path(__file__).resolve().parents[3]
+            self._retriever = PageIndexRetriever(docs_path=str(project_root))
+        
+        if not self._retriever.enabled:
+            return "RAG context retrieval not available."
+
+        results = await self._retriever.retrieve(query, top_k=top_k)
+        if not results:
+            return "No relevant context found in codebase."
+
+        context_parts = ["### Relevant Codebase Context:"]
+        for res in results:
+            context_parts.append(f"--- Fichier: {res['file_name']} ({res['reference']}) ---")
+            context_parts.append(res['content'])
+        
+        return "\n\n".join(context_parts)
     
     @property
     def name(self) -> str:
@@ -83,44 +117,19 @@ class DeepSeekClient(BaseLLMClient):
         await self.client.aclose()
     
     async def check_balance(self) -> Optional[float]:
-        """
-        Check account balance (if API supports it).
-        
-        Note: DeepSeek API may not provide a direct balance endpoint.
-        This method attempts to check balance via account/billing endpoints.
-        
-        Returns:
-            Balance in USD if available, None if not supported or check failed
-        """
+        """Check account balance (if API supports it)."""
         if not self._should_check_balance():
             return None
         
         try:
-            # Try to check balance via account endpoint (if available)
-            # Note: DeepSeek API structure may vary - adjust endpoint as needed
             balance_url = self.api_url.replace("/v1/chat/completions", "/v1/account/balance")
-            
-            try:
-                response = await self.client.get(balance_url)
-                if response.status_code == 200:
-                    data = response.json()
-                    # Adjust based on actual API response structure
-                    balance = data.get("balance") or data.get("available_balance") or data.get("credits")
-                    if balance is not None:
-                        logger.info(f"Account balance: ${balance:.2f}")
-                        return float(balance)
-            except httpx.HTTPStatusError as e:
-                if e.response.status_code == 404:
-                    # Endpoint not available - balance check not supported
-                    logger.debug("Balance check endpoint not available for DeepSeek API")
-                else:
-                    logger.warning(f"Failed to check balance: HTTP {e.response.status_code}")
-            except Exception as e:
-                logger.debug(f"Balance check not supported: {e}")
-                
-        except Exception as e:
-            logger.debug(f"Balance check failed: {e}")
-        
+            response = await self.client.get(balance_url)
+            if response.status_code == 200:
+                data = response.json()
+                balance = data.get("balance") or data.get("available_balance") or data.get("credits")
+                if balance is not None:
+                    return float(balance)
+        except: pass
         return None
     
     async def generate(
@@ -133,58 +142,23 @@ class DeepSeekClient(BaseLLMClient):
         output_constraint: Optional[str] = None,
         system_prompt: Optional[str] = None
     ) -> GenerationResult:
-        """
-        Generate code from a prompt (BaseLLMClient interface).
-        
-        Args:
-            prompt: The task description
-            context: Additional context (framework, language, etc.)
-            max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            
-        Returns:
-            GenerationResult with the generated code
-        """
+        """Generate code from a prompt."""
         start_time = datetime.now()
         
-        # Check balance before request (if enabled and supported)
         if self._should_check_balance():
             balance = await self.check_balance()
-            if balance is not None:
-                min_balance = settings.min_balance_threshold
-                if balance < min_balance:
-                    error_msg = f"Insufficient balance: ${balance:.2f} (minimum: ${min_balance:.2f})"
-                    logger.error(error_msg)
-                    return GenerationResult(
-                        success=False,
-                        code="",
-                        tokens_used=0,
-                        input_tokens=0,
-                        output_tokens=0,
-                        cost_usd=0.0,
-                        execution_time_ms=0.0,
-                        error=error_msg,
-                        provider=self.name
-                    )
-                logger.info(f"Balance check passed: ${balance:.2f}")
+            if balance is not None and balance < settings.min_balance_threshold:
+                return GenerationResult(success=False, code="", tokens_used=0, input_tokens=0, output_tokens=0, cost_usd=0.0, execution_time_ms=0.0, error="Insufficient balance", provider=self.name)
         
-        # Build full prompt (context may be cacheable block)
         full_prompt = self._build_simple_prompt(prompt, context)
-
-        # Prepare messages list; inject surgical system prompt if needed
         messages = []
         if output_constraint == "json_surgical":
             from ..core.prompts.surgical_protocol import SURGICAL_SYSTEM_PROMPT
-            messages.append({
-                "role": "system",
-                "content": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context provided in task prompt]")
-            })
+            messages.append({"role": "system", "content": SURGICAL_SYSTEM_PROMPT.format(ast_summary="[AST context]")})
         elif system_prompt:
-            # 2B: static context as system message (enables DeepSeek prefix caching)
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": full_prompt})
 
-        # Prepare request
         request_data = {
             "model": self.model,
             "messages": messages,
@@ -195,338 +169,59 @@ class DeepSeekClient(BaseLLMClient):
         if output_constraint == "json_surgical":
             request_data["response_format"] = {"type": "json_object"}
         
-        # Add cache control if provided (DeepSeek API support)
-        if cache_params:
-            # DeepSeek may support cache_id or cache_control
-            if "cache_id" in cache_params:
-                request_data["cache_id"] = cache_params["cache_id"]
-            if "cache_control" in cache_params:
-                # If DeepSeek supports cache_control, add it
-                # Note: Check DeepSeek API docs for exact format
-                pass
-        
-        # Execute with retries
-        last_error = None
         for attempt in range(self.max_retries + 1):
             try:
-                response = await self.client.post(
-                    self.api_url,
-                    json=request_data
-                )
+                response = await self.client.post(self.api_url, json=request_data)
                 response.raise_for_status()
-                
                 result_data = response.json()
-                
-                # Extract response
                 content = result_data["choices"][0]["message"]["content"]
                 usage = result_data.get("usage", {})
-                input_tokens = usage.get("prompt_tokens", 0)
-                output_tokens = usage.get("completion_tokens", 0)
-                total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
-                
-                # Calculate cost
-                cost = self._calculate_cost(input_tokens, output_tokens)
-                
-                # Calculate execution time
+                it, ot = usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+                cost = self._calculate_cost(it, ot)
                 execution_time = (datetime.now() - start_time).total_seconds() * 1000
-                
-                logger.info(
-                    f"Generation completed: {total_tokens} tokens, "
-                    f"${cost:.4f}, {execution_time:.0f}ms"
-                )
-                
-                return GenerationResult(
-                    success=True,
-                    code=content,
-                    tokens_used=total_tokens,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    cost_usd=cost,
-                    execution_time_ms=execution_time,
-                    provider=self.name
-                )
-                
-            except httpx.HTTPStatusError as e:
-                last_error = f"HTTP {e.response.status_code}: {e.response.text}"
-                logger.warning(f"Generation attempt {attempt + 1} failed: {last_error}")
-                
-                if e.response.status_code == 429:  # Rate limit
-                    wait_time = 2 ** attempt
-                    logger.info(f"Rate limited, waiting {wait_time}s before retry")
-                    await asyncio.sleep(wait_time)
-                elif e.response.status_code >= 500:  # Server error
-                    if attempt < self.max_retries:
-                        wait_time = 2 ** attempt
-                        await asyncio.sleep(wait_time)
-                        continue
-                else:
-                    break
-                    
-            except httpx.RequestError as e:
-                last_error = f"Request error: {str(e)}"
-                logger.warning(f"Generation attempt {attempt + 1} failed: {last_error}")
-                
-                if attempt < self.max_retries:
-                    wait_time = 2 ** attempt
-                    await asyncio.sleep(wait_time)
-                    continue
-                else:
-                    break
-            
+                return GenerationResult(success=True, code=content, tokens_used=it+ot, input_tokens=it, output_tokens=ot, cost_usd=cost, execution_time_ms=execution_time, provider=self.name)
             except Exception as e:
-                last_error = f"Unexpected error: {str(e)}"
-                logger.error(f"Generation failed with unexpected error: {last_error}")
-                break
+                if attempt == self.max_retries: break
+                await asyncio.sleep(2 ** attempt)
         
-        # All retries failed
-        execution_time = (datetime.now() - start_time).total_seconds() * 1000
-        
-        logger.error(f"Generation failed after {self.max_retries + 1} attempts: {last_error}")
-        
-        return GenerationResult(
-            success=False,
-            code="",
-            tokens_used=0,
-            input_tokens=0,
-            output_tokens=0,
-            cost_usd=0.0,
-            execution_time_ms=execution_time,
-            error=last_error,
-            provider=self.name
-        )
+        return GenerationResult(success=False, code="", tokens_used=0, input_tokens=0, output_tokens=0, cost_usd=0.0, execution_time_ms=0.0, error="Max retries reached", provider=self.name)
     
     def _build_simple_prompt(self, prompt: str, context: Optional[str] = None, output_constraint: Optional[str] = None) -> str:
-        """
-        Build a simple prompt from task and context.
-        
-        Args:
-            prompt: Task description
-            context: Additional context
-            output_constraint: Optional constraint on output format
-            
-        Returns:
-            Formatted prompt string
-        """
         prompt_parts = []
-        
-        # Add context if provided
-        if context:
-            prompt_parts.append(f"Context: {context}\n\n")
-        
-        # Add task description
+        if context: prompt_parts.append(f"Context: {context}\n\n")
         prompt_parts.append(f"Task: {prompt}\n\n")
-        
-        # Add output constraint if specified
-        if output_constraint:
-            if output_constraint == "Code only":
-                prompt_parts.append("Generate only code, no explanations or prose.")
-            elif output_constraint == "JSON only":
-                prompt_parts.append("Generate only valid JSON, no explanations.")
-            elif output_constraint == "No prose":
-                prompt_parts.append("Generate output without prose or explanations.")
-            else:
-                prompt_parts.append(f"Output constraint: {output_constraint}")
-        else:
-            prompt_parts.append("Generate the complete code implementation.")
-        
+        if output_constraint: prompt_parts.append(f"Output constraint: {output_constraint}")
+        else: prompt_parts.append("Generate the complete code implementation.")
         return "".join(prompt_parts)
     
-    async def execute_step(
-        self,
-        step: Step,
-        context: Optional[str] = None
-    ) -> StepResult:
-        """
-        Execute a step using DeepSeek API.
-        
-        Args:
-            step: Step to execute
-            context: Additional context for the step
-            
-        Returns:
-            StepResult with execution results
-        """
+    async def execute_step(self, step: Step, context: Optional[str] = None) -> StepResult:
         start_time = datetime.now()
-        step_id = step.id
-        
-        logger.info(f"Executing step {step_id}: {step.description[:50]}...")
-        
-        # Build prompt
         prompt = self._build_prompt(step, context)
+        request_data = {"model": self.model, "messages": [{"role": "user", "content": prompt}], "max_tokens": min(step.estimated_tokens, settings.deepseek_max_tokens), "temperature": settings.temperature}
         
-        # Prepare request
-        request_data = {
-            "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "max_tokens": min(step.estimated_tokens, settings.deepseek_max_tokens),
-            "temperature": settings.temperature
-        }
-        
-        # Execute with retries
-        last_error = None
         for attempt in range(self.max_retries + 1):
             try:
-                response = await self.client.post(
-                    self.api_url,
-                    json=request_data
-                )
+                response = await self.client.post(self.api_url, json=request_data)
                 response.raise_for_status()
-                
                 result_data = response.json()
-                
-                # Extract response
                 content = result_data["choices"][0]["message"]["content"]
                 usage = result_data.get("usage", {})
-                input_tokens = usage.get("prompt_tokens", 0)
-                output_tokens = usage.get("completion_tokens", 0)
-                total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
-                
-                # Calculate cost
-                cost = self._calculate_cost(input_tokens, output_tokens)
-                
-                # Calculate execution time
+                it, ot = usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+                cost = self._calculate_cost(it, ot)
                 execution_time = (datetime.now() - start_time).total_seconds() * 1000
-                
-                logger.info(
-                    f"Step {step_id} completed: {total_tokens} tokens, "
-                    f"${cost:.4f}, {execution_time:.0f}ms"
-                )
-                
-                return StepResult(
-                    step_id=step_id,
-                    success=True,
-                    output=content,
-                    tokens_used=total_tokens,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    execution_time_ms=execution_time,
-                    cost_usd=cost
-                )
-                
-            except httpx.HTTPStatusError as e:
-                last_error = f"HTTP {e.response.status_code}: {e.response.text}"
-                logger.warning(f"Step {step_id} attempt {attempt + 1} failed: {last_error}")
-                
-                if e.response.status_code == 429:  # Rate limit
-                    # Wait before retry
-                    wait_time = 2 ** attempt
-                    logger.info(f"Rate limited, waiting {wait_time}s before retry")
-                    await asyncio.sleep(wait_time)
-                elif e.response.status_code >= 500:  # Server error
-                    # Retry on server errors
-                    if attempt < self.max_retries:
-                        wait_time = 2 ** attempt
-                        await asyncio.sleep(wait_time)
-                        continue
-                else:
-                    # Client error, don't retry
-                    break
-                    
-            except httpx.RequestError as e:
-                last_error = f"Request error: {str(e)}"
-                logger.warning(f"Step {step_id} attempt {attempt + 1} failed: {last_error}")
-                
-                if attempt < self.max_retries:
-                    wait_time = 2 ** attempt
-                    await asyncio.sleep(wait_time)
-                    continue
-                else:
-                    break
-            
+                return StepResult(step_id=step.id, success=True, output=content, tokens_used=it+ot, input_tokens=it, output_tokens=ot, execution_time_ms=execution_time, cost_usd=cost)
             except Exception as e:
-                last_error = f"Unexpected error: {str(e)}"
-                logger.error(f"Step {step_id} failed with unexpected error: {last_error}")
-                break
+                if attempt == self.max_retries: break
+                await asyncio.sleep(2 ** attempt)
         
-        # All retries failed
-        execution_time = (datetime.now() - start_time).total_seconds() * 1000
-        
-        logger.error(f"Step {step_id} failed after {self.max_retries + 1} attempts: {last_error}")
-        
-        return StepResult(
-            step_id=step_id,
-            success=False,
-            output="",
-            tokens_used=0,
-            input_tokens=0,
-            output_tokens=0,
-            execution_time_ms=execution_time,
-            error=last_error,
-            cost_usd=0.0
-        )
+        return StepResult(step_id=step.id, success=False, output="", tokens_used=0, input_tokens=0, output_tokens=0, execution_time_ms=0.0, error="Max retries reached")
     
     def _build_prompt(self, step: Step, context: Optional[str] = None) -> str:
-        """
-        Build the prompt for a step.
-        
-        Args:
-            step: Step to build prompt for
-            context: Additional context (may contain existing file contents)
-            
-        Returns:
-            Formatted prompt string
-        """
-        prompt_parts = []
-        
-        # Add step context if available
-        if step.context and isinstance(step.context, dict):
-            if step.context.get("language"):
-                prompt_parts.append(f"Language: {step.context['language']}\n")
-            if step.context.get("framework"):
-                prompt_parts.append(f"Framework: {step.context['framework']}\n")
-            if step.context.get("files"):
-                files = ", ".join(step.context["files"])
-                prompt_parts.append(f"Target files: {files}\n")
-        
-        # Add task description
-        prompt_parts.append(f"Task: {step.description}\n")
-        
-        # Add validation criteria if available
+        prompt_parts = [f"Task: {step.description}\n"]
         if step.validation_criteria:
-            criteria = "\n".join(f"- {criterion}" for criterion in step.validation_criteria)
-            prompt_parts.append(f"\nRequirements:\n{criteria}\n")
-        
-        # Add context if provided (may contain existing file contents)
-        if context:
-            # Check if context contains existing files section
-            if "Existing code files:" in context:
-                # Format existing files section clearly
-                prompt_parts.append(f"\n{context}\n")
-            else:
-                # Regular context
-                prompt_parts.append(f"\nContext: {context}\n")
-        
-        # Add instruction based on type
-        if step.type == "code_generation":
-            if context and "Existing code files:" in context:
-                prompt_parts.append("\nGenerate code that integrates with the existing files above.")
-            else:
-                prompt_parts.append("\nGenerate the complete code implementation.")
-        elif step.type == "refactoring":
-            prompt_parts.append("\nRefactor the existing code according to the requirements above.")
-        elif step.type == "analysis":
-            prompt_parts.append("\nAnalyze and provide insights about the code.")
-        elif step.type == "patch":
-            prompt_parts.append("\nGenerate ONLY the fragment to insert at the specified marker/line (patch mode). Do not output the complete file.")
-        
+            prompt_parts.append("\nRequirements:\n" + "\n".join(f"- {c}" for c in step.validation_criteria) + "\n")
+        if context: prompt_parts.append(f"\nContext: {context}\n")
         return "".join(prompt_parts)
     
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
-        """
-        Calculate cost based on token usage.
-        
-        Args:
-            input_tokens: Number of input tokens
-            output_tokens: Number of output tokens
-            
-        Returns:
-            Cost in USD
-        """
-        input_cost = (input_tokens / 1000) * settings.deepseek_input_cost_per_1k
-        output_cost = (output_tokens / 1000) * settings.deepseek_output_cost_per_1k
-        return input_cost + output_cost
+        return (input_tokens / 1000) * settings.deepseek_input_cost_per_1k + (output_tokens / 1000) * settings.deepseek_output_cost_per_1k

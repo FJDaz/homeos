@@ -4,7 +4,7 @@ import re
 import logging
 from datetime import datetime
 from typing import Any, Dict
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 logger = logging.getLogger("ManifestRouter")
 
@@ -14,21 +14,23 @@ ROOT_DIR = CWD.parent.parent
 router = APIRouter()
 
 
-def get_active_project_path():
+def get_active_project_path(token: str = None):
     from bkd_service import get_active_project_path
-    return get_active_project_path()
+    return get_active_project_path(token)
 
 
-def get_project_manifest_path():
-    return get_active_project_path() / "manifest.json"
+def get_project_manifest_path(token: str = None):
+    return get_active_project_path(token) / "manifest.json"
 
 
 @router.get("/api/manifest/check")
-async def manifest_check():
-    """Check if manifest.json and design.md exist."""
-    m_path = ROOT_DIR / "manifest.json"
-    d_path = ROOT_DIR / "design.md"
-    b_path = ROOT_DIR / "backend.md"
+def manifest_check(request: Request):
+    """Check if manifest.json and design.md exist in the project."""
+    token = request.headers.get("X-User-Token")
+    p_path = get_active_project_path(token)
+    m_path = p_path / "manifest.json"
+    d_path = p_path / "design.md"
+    b_path = p_path / "backend.md"
     return {
         "exists": m_path.exists(),
         "stitch_ready": d_path.exists(),
@@ -37,28 +39,32 @@ async def manifest_check():
 
 
 @router.get("/api/manifest/backend")
-async def manifest_backend_get():
+def manifest_backend_get(request: Request):
     """Get backend.md content."""
-    b_path = get_active_project_path() / "backend.md"
+    token = request.headers.get("X-User-Token")
+    b_path = get_active_project_path(token) / "backend.md"
     if not b_path.exists():
         return {"content": "# HomeOS Backend Manifest\n\n*Not initialized*"}
     return {"content": b_path.read_text(encoding="utf-8")}
 
 
 @router.put("/api/manifest/backend")
-async def manifest_backend_put(data: Dict[str, str]):
+def manifest_backend_put(data: Dict[str, str], request: Request):
     """Update backend.md content."""
-    b_path = get_active_project_path() / "backend.md"
+    token = request.headers.get("X-User-Token")
+    b_path = get_active_project_path(token) / "backend.md"
     content = data.get("content", "")
     b_path.write_text(content, encoding="utf-8")
     return {"ok": True}
 
 
 @router.post("/api/manifest/import-stitch")
-async def manifest_import_stitch():
+def manifest_import_stitch(request: Request):
     """Parse design.md and sync with backend.md."""
-    d_path = get_active_project_path() / "design.md"
-    b_path = get_active_project_path() / "backend.md"
+    token = request.headers.get("X-User-Token")
+    p_path = get_active_project_path(token)
+    d_path = p_path / "design.md"
+    b_path = p_path / "backend.md"
     if not d_path.exists():
         raise HTTPException(status_code=404, detail="design.md not found in project")
 
@@ -102,9 +108,10 @@ async def manifest_import_stitch():
 
 
 @router.get("/api/manifest/get")
-async def manifest_get():
+def manifest_get(request: Request):
     """Get the current manifest.json content."""
-    m_path = get_project_manifest_path()
+    token = request.headers.get("X-User-Token")
+    m_path = get_project_manifest_path(token)
     if not m_path.exists():
         raise HTTPException(status_code=404, detail="manifest.json not found in project")
     with open(m_path, "r", encoding="utf-8") as f:
@@ -113,9 +120,10 @@ async def manifest_get():
 
 
 @router.post("/api/manifest/create")
-async def manifest_create(data: Dict[str, Any]):
+def manifest_create(data: Dict[str, Any], request: Request):
     """Create a new manifest.json with project metadata."""
-    m_path = get_project_manifest_path()
+    token = request.headers.get("X-User-Token")
+    m_path = get_project_manifest_path(token)
     if m_path.exists():
         return {"ok": False, "error": "manifest.json already exists in project"}
 
@@ -141,8 +149,9 @@ async def manifest_create(data: Dict[str, Any]):
 
 
 @router.post("/api/manifest/patch")
-async def manifest_patch(patch: Dict[str, Any]):
-    m_path = get_project_manifest_path()
+def manifest_patch(patch: Dict[str, Any], request: Request):
+    token = request.headers.get("X-User-Token")
+    m_path = get_project_manifest_path(token)
     if not m_path.exists():
         raise HTTPException(status_code=404)
     with open(m_path, "r", encoding="utf-8") as f:

@@ -26,13 +26,13 @@ API_KEY = os.getenv("DEEPSEEK_API_KEY")
 console = Console()
 
 def get_response(history):
+    # Timeout de 15s pour la connexion, 60s pour la réponse
     payload = {"model": MODEL, "messages": history, "stream": True}
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}"
     }
-    # On ajoute un timeout de 10s pour l'établissement de la connexion
-    return requests.post(API_URL, headers=headers, json=payload, stream=True, timeout=(10, None))
+    return requests.post(API_URL, headers=headers, json=payload, stream=True, timeout=(15, 60))
 
 def chat():
     if not API_KEY or "votre_cle_ici" in API_KEY:

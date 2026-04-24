@@ -9,19 +9,19 @@ router = APIRouter()
 
 
 @router.get("/stenciler")
-async def get_stenciler_redirect():
+def get_stenciler_redirect():
     """Mission 168: Redirect ancien /stenciler -> /workspace (architecture hexagonale M156)."""
     return RedirectResponse(url="/workspace", status_code=301)
 
 
 @router.get("/stenciler_v3")
-async def get_stenciler_v3_redirect():
+def get_stenciler_v3_redirect():
     """Mission 168: Redirect ancien /stenciler_v3 -> /workspace."""
     return RedirectResponse(url="/workspace", status_code=301)
 
 
 @router.get("/bkd")
-async def get_bkd_editor():
+def get_bkd_editor():
     path = STATIC_DIR_PATH / "templates/bkd_editor.html"
     if not path.exists():
         raise HTTPException(status_code=404, detail="bkd_editor.html not yet generated")
@@ -29,13 +29,13 @@ async def get_bkd_editor():
 
 
 @router.get("/frd-editor")
-async def get_frd_editor():
+def get_frd_editor():
     path = STATIC_DIR_PATH / "templates/frd_editor.html"
     return FileResponse(path)
 
 
 @router.get("/bkd-frd")
-async def get_bkd_frd():
+def get_bkd_frd():
     path = STATIC_DIR_PATH / "templates/bkd_frd.html"
     if not path.exists():
         raise HTTPException(status_code=404)
@@ -43,7 +43,7 @@ async def get_bkd_frd():
 
 
 @router.get("/brainstorm")
-async def get_brainstorm():
+def get_brainstorm():
     path = STATIC_DIR_PATH / "templates/brainstorm_war_room_tw.html"
     if not path.exists():
         raise HTTPException(status_code=404)
@@ -51,7 +51,7 @@ async def get_brainstorm():
 
 
 @router.get("/brainstorm-alt")
-async def get_brainstorm_alt():
+def get_brainstorm_alt():
     path = STATIC_DIR_PATH / "templates/brainstorm_alt.html"
     if not path.exists():
         raise HTTPException(status_code=404)
@@ -59,7 +59,7 @@ async def get_brainstorm_alt():
 
 
 @router.get("/intent-viewer")
-async def get_intent_viewer():
+def get_intent_viewer():
     path = STATIC_DIR_PATH / "templates/intent_viewer.html"
     if not path.exists():
         raise HTTPException(status_code=404)
@@ -67,17 +67,17 @@ async def get_intent_viewer():
 
 
 @router.get("/")
-async def get_root():
+def get_root():
     return RedirectResponse(url="/workspace")
 
 
 @router.get("/landing")
-async def get_landing():
+def get_landing():
     return RedirectResponse(url="/login", status_code=301)
 
 
 @router.get("/login")
-async def get_login():
+def get_login():
     """Mission 190: Page d'entrée auth — nom uniquement, pas de mot de passe."""
     path = STATIC_DIR_PATH / "templates/login.html"
     if not path.exists():
@@ -106,7 +106,7 @@ catch(e){document.getElementById('error-msg').style.display='block'}};</script><
 
 
 @router.get("/student-login")
-async def get_student_login():
+def get_student_login():
     """Mission 214: Page login étudiant — sans mot de passe."""
     path = STATIC_DIR_PATH / "templates/student_login.html"
     if not path.exists():
@@ -115,7 +115,7 @@ async def get_student_login():
 
 
 @router.get("/teacher")
-async def get_teacher_dashboard():
+def get_teacher_dashboard():
     """Mission 216: Dashboard prof -- vue classe temps reel."""
     path = STATIC_DIR_PATH / "templates/teacher_dashboard.html"
     if not path.exists():
@@ -124,7 +124,7 @@ async def get_teacher_dashboard():
 
 
 @router.get("/cadrage")
-async def get_cadrage(mode: str = "prof", class_id: str = ""):
+def get_cadrage(mode: str = "prof", class_id: str = ""):
     """Mission 219/221: Cadrage mode Studio -- sujet x referentiel DNMADE."""
     if mode == "standard":
         path = STATIC_DIR_PATH / "templates/cadrage_alt.html"

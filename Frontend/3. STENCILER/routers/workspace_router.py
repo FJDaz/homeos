@@ -3,7 +3,7 @@ import sys
 import json
 import logging
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
@@ -18,9 +18,9 @@ PROJECTS_DIR = ROOT_DIR / "projects"
 router = APIRouter()
 
 
-def get_active_project_path():
+def get_active_project_path(token: str = None):
     from bkd_service import get_active_project_path
-    return get_active_project_path()
+    return get_active_project_path(token)
 
 
 class GraftRequest(BaseModel):
@@ -30,21 +30,21 @@ class GraftRequest(BaseModel):
 
 
 @router.get("/workspace")
-async def get_workspace_editor():
+def get_workspace_editor():
     """Mission 127: Unified Workspace Canvas"""
     path = STATIC_DIR_PATH / "templates/workspace.html"
     return FileResponse(path)
 
 
 @router.get("/bkd")
-async def get_bkd_ide():
+def get_bkd_ide():
     """Mission 208: Backend War Room IDE"""
     path = STATIC_DIR_PATH / "templates/bkd_frd.html"
     return FileResponse(path)
 
 
 @router.get("/api/workspace/templates")
-async def list_workspace_templates():
+def list_workspace_templates():
     """Mission 110: Liste les templates de base pour le workspace."""
     tpl_dir = STATIC_DIR_PATH / "templates"
     if not tpl_dir.exists():
@@ -61,13 +61,14 @@ async def list_workspace_templates():
 
 
 @router.get("/api/workspace/tokens")
-async def get_workspace_tokens():
+def get_workspace_tokens(request: Request):
     """
     Mission 159 : Design System Intendant.
     Retourne les jetons de design du projet actif (ou HomeOS par defaut).
     """
     try:
-        project_path = get_active_project_path()
+        token = request.headers.get("X-User-Token")
+        project_path = get_active_project_path(token)
         tokens_path = project_path / "design_tokens.json"
 
         if tokens_path.exists():
@@ -94,13 +95,14 @@ async def get_workspace_tokens():
 
 
 @router.post("/api/workspace/graft")
-async def workspace_graft(payload: GraftRequest):
+def workspace_graft(payload: GraftRequest, request: Request):
     """
     Graft a new HTML snippet into an existing template file based on a CSS selector.
     """
     try:
         # Resolve project path
-        project_path = get_active_project_path()
+        token = request.headers.get("X-User-Token")
+        project_path = get_active_project_path(token)
         file_path = project_path / payload.filename
 
         if not file_path.exists():

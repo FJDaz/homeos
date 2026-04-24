@@ -93,6 +93,12 @@ class Settings(BaseSettings):
 
     groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL", description="Groq model to use")
 
+    claude_model: str = Field(
+        default="claude-sonnet-4-5",
+        alias="CLAUDE_MODEL",
+        description="Claude model to use — configurer via CLAUDE_MODEL dans .env",
+    )
+
     default_provider: str = Field(
         default="deepseek", alias="DEFAULT_PROVIDER", description="Default provider for code generation"
     )

@@ -20,10 +20,31 @@
         { id: 'deploy',     label: 'Déploiement', title: "La Sortie", path: '/deploy', disabled: true },
     ];
 
-    const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
-    if (session.role === 'prof' || session.role === 'admin') {
-        TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
+    // M327: Impersonation support
+    const urlParams = new URLSearchParams(window.location.search);
+    const isImpersonate = urlParams.get('impersonate') === '1';
+    let session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+    
+    if (isImpersonate) {
+        const pending = JSON.parse(localStorage.getItem('homeos_impersonation_pending') || '{}');
+        if (pending.token) {
+            session = pending;
+            sessionStorage.setItem('homeos_impersonation', JSON.stringify(pending));
+            localStorage.removeItem('homeos_impersonation_pending');
+            console.log("[AUTH] Impersonation Session Activated via localStorage bridge");
+        } else {
+            const impSession = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
+            if (impSession.token) session = impSession;
+        }
     }
+
+    if (session.role === 'prof' || session.role === 'admin') {
+        // En mode impersonation (student), on ne montre pas le dashboard enseignant
+        if (!isImpersonate) {
+            TABS.unshift({ id: 'dashboard', label: 'Dashboard', title: 'Tableau de bord enseignant', path: '/teacher' });
+        }
+    }
+
     const isLoginPath = window.location.pathname === '/login';
 
     if (!session.token && !isLoginPath) {
@@ -52,7 +73,7 @@
         const response = await originalFetch(resource, config);
         
         // Gérer le 401 (Session expirée ou invalide)
-        if (response.status === 401 && !isLoginPath) {
+        if (response.status === 401 && !isLoginPath && !isImpersonate) {
             console.warn("[AUTH] Session invalid or expired. Redirecting to login.");
             localStorage.removeItem('homeos_session');
             window.location.href = '/login';
@@ -242,6 +263,44 @@
 
         // ── SETTINGS DRAWER (Mission 191) ───────────────────────────────────
         injectSettingsDrawer();
+
+        // ── IMPERSONATION BANNER (Mission 327) ──────────────────────────────
+        injectImpersonationBanner();
+    }
+
+    function injectImpersonationBanner() {
+        if (!isImpersonate) return;
+        if (document.getElementById('homeos-impersonation-banner')) return;
+        
+        const banner = document.createElement('div');
+        banner.id = 'homeos-impersonation-banner';
+        banner.style.cssText = `
+            position: fixed; top: 48px; left: 0; right: 0; height: 26px;
+            background: #e53e3e; color: white; display: flex; align-items: center;
+            justify-content: space-between; font-size: 11px; font-weight: bold;
+            z-index: 10001; text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0 10px;
+        `;
+        banner.innerHTML = `
+            <div style="flex:1; text-align:center; padding-left:60px;">⚠️ Mode Impersonation — Vue en tant que : ${session.name || 'Étudiant'}</div>
+            <button id="stop-impersonation-btn" style="background:white; color:#e53e3e; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; text-transform:uppercase; transition: opacity 0.2s; white-space:nowrap;">Stop Impersonation</button>
+        `;
+        document.body.appendChild(banner);
+        document.body.style.paddingTop = (parseInt(document.body.style.paddingTop || '48') + 26) + 'px';
+
+        const stopBtn = document.getElementById('stop-impersonation-btn');
+        if (stopBtn) {
+            stopBtn.onclick = function() {
+                const impData = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}');
+                const classId = impData.class_id || '';
+                sessionStorage.removeItem('homeos_impersonation');
+                window.location.href = classId ? `/teacher?class_id=${classId}` : '/teacher';
+            };
+            stopBtn.onmouseover = () => stopBtn.style.opacity = '0.9';
+            stopBtn.onmouseout = () => stopBtn.style.opacity = '1';
+        }
     }
 
     function injectSwitcher() {
@@ -433,6 +492,14 @@
                 </button>
             </div>
 
+            <!-- M294: Provider Health -->
+            <div class="sd-section mt-4" id="sd-provider-health">
+                <span class="sd-label">État des moteurs AI</span>
+                <div id="provider-health-list" class="space-y-2 mt-2">
+                    <div class="text-[9px] text-slate-400 italic">Chargement...</div>
+                </div>
+            </div>
+
             <button class="sd-logout-btn" id="hn-logout-btn">
                 Changer d'identité
             </button>
@@ -508,6 +575,9 @@
             return false;
         }
 
+        // M294: Load provider health status
+        loadProviderHealth();
+
         // Mission 192: GPS Help Logic
         drawer.querySelectorAll('.sd-help-btn').forEach(btn => {
             btn.onclick = async (e) => {
@@ -535,6 +605,31 @@
                 }
             };
         });
+    }
+
+    async function loadProviderHealth() {
+        try {
+            const res = await fetch('/api/health/providers');
+            const data = await res.json();
+            const list = document.getElementById('provider-health-list');
+            if (!list || !data.providers) return;
+
+            const statusColors = { healthy: '#8cc63f', degraded: '#f59e0b', down: '#ef4444' };
+            const statusLabels = { healthy: 'OK', degraded: 'Lent', down: 'HS' };
+
+            list.innerHTML = data.providers.map(p => {
+                const color = statusColors[p.status] || '#9a9a98';
+                const label = statusLabels[p.status] || p.status;
+                const ttft = p.avg_ttft > 0 ? `${p.avg_ttft.toFixed(1)}s` : '—';
+                return `<div class="flex items-center justify-between text-[9px]">
+                    <span class="text-slate-500 font-bold uppercase">${p.name}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400">${ttft}</span>
+                        <span class="px-1.5 py-0.5 rounded font-bold" style="background:${color}22;color:${color}">${label}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {}
     }
 
     async function refreshKeyStatus() {

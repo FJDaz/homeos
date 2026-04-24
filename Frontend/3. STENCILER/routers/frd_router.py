@@ -250,7 +250,7 @@ def load_custom_injection():
 # =============================================================================
 
 @router.post("/api/frd/set-current")
-async def set_current_frd_context(req: CurrentFileRequest):
+def set_current_frd_context(req: CurrentFileRequest):
     global _CURRENT_FRD_CONTEXT
     _CURRENT_FRD_CONTEXT = {
         "type": req.type,
@@ -262,26 +262,27 @@ async def set_current_frd_context(req: CurrentFileRequest):
     return {"status": "ok", "context": _CURRENT_FRD_CONTEXT}
 
 @router.get("/api/frd/current")
-async def get_current_frd_context():
+def get_current_frd_context():
     return _CURRENT_FRD_CONTEXT
 
 @router.get("/api/frd/current")
-async def get_frd_current():
-    """Retourne l'import/template actuellement charg\u00e9 dans l'\u00e9diteur."""
-    from bkd_service import get_active_project_id
-    p_path = PROJECTS_DIR / get_active_project_id()
+def get_frd_current(request: Request):
+    """Retourne l'import/template actuellement chargé dans l'éditeur (token-aware)."""
+    token = request.headers.get("X-User-Token")
+    p_path = PROJECTS_DIR / get_active_project_id(token)
     f = p_path / "current_frd.json"
     if f.exists():
         return json.loads(f.read_text(encoding='utf-8'))
     return {"status": "none"}
 
 @router.get("/api/frd/manifest")
-async def get_frd_manifest(import_id: str = Query(...)):
+def get_frd_manifest(request: Request, import_id: str = Query(...)):
     """
-    D\u00e9tection de manifeste pour le routage intelligent (Mission 146).
+    Détection de manifeste pour le routage intelligent (Mission 146).
     Recherche manifest_{import_id}.json dans le dossier manifests du projet actif.
     """
-    manifest_dir = get_active_project_path() / "manifests"
+    token = request.headers.get("X-User-Token")
+    manifest_dir = get_active_project_path(token) / "manifests"
     manifest_path = manifest_dir / f"manifest_{import_id}.json"
 
     if manifest_path.exists():
@@ -298,7 +299,8 @@ async def get_frd_manifest(import_id: str = Query(...)):
 async def validate_wire(request: Request):
     body = await request.json()
     import_id = body.get("import_id", "")
-    manifest_dir = get_active_project_path() / "manifests"
+    token = request.headers.get("X-User-Token")
+    manifest_dir = get_active_project_path(token) / "manifests"
     manifest_dir.mkdir(parents=True, exist_ok=True)
     path = manifest_dir / f"manifest_{import_id}.json"
     existing = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
@@ -341,13 +343,14 @@ Output valid Markdown only, no prose."""
         return {"status": "error", "message": str(e)}
 
 @router.get("/api/frd/export-zip")
-async def export_zip(import_id: str):
+def export_zip(request: Request, import_id: str):
     """
     Export a screen as a ZIP containing HTML + fonts.
     Mission 144
     """
     try:
-        p_path = get_active_project_path()
+        token = request.headers.get("X-User-Token")
+        p_path = get_active_project_path(token)
         imports_dir = p_path / "imports"
         index_path = imports_dir / "index.json"
 
@@ -398,7 +401,7 @@ async def export_zip(import_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/api/frd/export-live-zip")
-async def export_live_zip(req: LiveExportRequest):
+def export_live_zip(req: LiveExportRequest):
     """
     Export a live DOM HTML string as a ZIP containing HTML + fonts.
     Mission 273: FEE Studio download functionality
@@ -433,7 +436,7 @@ async def export_live_zip(req: LiveExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/api/frd/file")
-async def get_frd_file(name: str = Query(...), raw: int = Query(0)):
+def get_frd_file(name: str = Query(...), raw: int = Query(0)):
     if '/' in name or '..' in name:
         raise HTTPException(status_code=400, detail="Invalid filename")
     path = STATIC_DIR_PATH / "templates" / name
@@ -445,7 +448,7 @@ async def get_frd_file(name: str = Query(...), raw: int = Query(0)):
     return {"content": path.read_text(encoding='utf-8'), "name": name}
 
 @router.post("/api/frd/file")
-async def save_frd_file(req: FRDFileRequest):
+def save_frd_file(req: FRDFileRequest):
     if '/' in req.name or '..' in req.name:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
@@ -465,7 +468,7 @@ async def save_frd_file(req: FRDFileRequest):
     return {"status": "ok", "name": req.name}
 
 @router.get("/api/frd/assets")
-async def list_frd_assets():
+def list_frd_assets():
     assets_dir = STATIC_DIR_PATH / "assets" / "frd"
     assets_dir.mkdir(parents=True, exist_ok=True)
     assets = []

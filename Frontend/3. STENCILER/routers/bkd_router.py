@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, HTTPException, Query, Body, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -46,7 +46,7 @@ from bkd_service import (
     SULLIVAN_BKD_SYSTEM, MANIFEST_FRD, SULLIVAN_RAG,
     exec_query_knowledge_base, route_request_bkd,
     resolve_bkd_project_root, bkd_safe_path, bkd_build_tree,
-    BKD_DB_PATH, bkd_db_con, PROJECTS_DIR as BKD_PROJECTS_DIR,
+    BKD_DB_PATH, bkd_db, PROJECTS_DIR as BKD_PROJECTS_DIR,
     get_active_project_id, set_active_project_id, get_active_project_path,
     BKD_ALLOWED_EXTENSIONS, BKD_EXCLUDE_DIRS,
     conv_create, conv_append, conv_get, conv_list, conv_auto_title,
@@ -118,7 +118,7 @@ ALLOWED_EXTENSIONS = {'.py', '.js', '.ts', '.html', '.css', '.md', '.json', '.tx
 EXCLUDE_DIRS = {'__pycache__', '.git', 'node_modules', '.venv', 'venv', 'dist', 'build', '.mypy_cache'}
 
 # Aliases vers bkd_service (pas de duplication)
-get_db_conn = bkd_db_con
+get_db_conn = bkd_db
 resolve_project_root = resolve_bkd_project_root
 build_tree = bkd_build_tree
 safe_path = bkd_safe_path
@@ -134,23 +134,24 @@ _ARBITRATOR = SullivanArbitrator()
 router = APIRouter(prefix="/api/bkd", tags=["bkd"])
 
 # --- HELPER: list_all_projects_route (needed by BKD projects endpoint) ---
-async def list_all_projects_route():
+def list_all_projects_route():
     active_id = get_active_project_id()
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
         return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4], active=(r[0] == active_id)) for r in rows]
 
 # --- ROUTES ---
 
 @router.get("/projects", response_model=Dict[str, List[ProjectInfo]])
-async def list_bkd_projects():
+def list_bkd_projects():
     # Legacy link for BKD
-    projects = await list_all_projects_route()
+    projects = list_all_projects_route()
     return {"projects": projects}
 
 @router.get("/files")
-async def list_bkd_files(project_id: str = Query(...)):
-    root = resolve_project_root(project_id)
+def list_bkd_files(request: Request, project_id: str = Query(...)):
+    token = request.headers.get("X-User-Token")
+    root = resolve_bkd_project_root(project_id, token)
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
     files = []
@@ -163,15 +164,16 @@ async def list_bkd_files(project_id: str = Query(...)):
     return {"files": files}
 
 @router.delete("/projects/{project_id}")
-async def delete_project(project_id: str):
+def delete_project(project_id: str):
     with get_db_conn() as conn:
         conn.execute('DELETE FROM projects WHERE id=?', (project_id,))
     return {"ok": True, "deleted": project_id}
 
 # --- BKD FILES ---
 @router.get("/files", response_model=BKDFileListingResponse)
-async def bkd_list_files(project_id: str = Query(...)):
-    root = resolve_bkd_project_root(project_id)
+def bkd_list_files(request: Request, project_id: str = Query(...)):
+    token = request.headers.get("X-User-Token")
+    root = resolve_bkd_project_root(project_id, token)
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -195,8 +197,9 @@ async def bkd_list_files(project_id: str = Query(...)):
     return BKDFileListingResponse(files=flat_files)
 
 @router.get("/file", response_model=FileResponse)
-async def get_file(project_id: str = Query(...), path: str = Query(...)):
-    root = resolve_bkd_project_root(project_id)
+def get_file(request: Request, project_id: str = Query(...), path: str = Query(...)):
+    token = request.headers.get("X-User-Token")
+    root = resolve_bkd_project_root(project_id, token)
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -215,8 +218,9 @@ async def get_file(project_id: str = Query(...), path: str = Query(...)):
     )
 
 @router.post("/file")
-async def write_file(req: FileWriteRequest):
-    root = resolve_project_root(req.project_id)
+def write_file(req: FileWriteRequest, request: Request):
+    token = request.headers.get("X-User-Token")
+    root = resolve_bkd_project_root(req.project_id, token)
     if not root:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -231,7 +235,7 @@ async def write_file(req: FileWriteRequest):
 # --- CONVERSATIONS ---
 
 @router.get("/conversations", response_model=List[ConversationInfo])
-async def list_conversations(project_id: str = Query(...), role: Optional[str] = None):
+def list_conversations(project_id: str = Query(...), role: Optional[str] = None):
     with get_db_conn() as conn:
         q = "SELECT id, project_id, role, title, updated_at FROM conversations WHERE project_id = ?"
         params = [project_id]
@@ -243,7 +247,7 @@ async def list_conversations(project_id: str = Query(...), role: Optional[str] =
         return [ConversationInfo(id=r[0], project_id=r[1], role=r[2], title=r[3], updated_at=r[4]) for r in rows]
 
 @router.get("/conversations/{conv_id}", response_model=ConversationDetail)
-async def get_conversation(conv_id: str):
+def get_conversation(conv_id: str):
     with get_db_conn() as conn:
         row = conn.execute("SELECT id, project_id, role, title, updated_at, content_json FROM conversations WHERE id = ?", (conv_id,)).fetchone()
         if not row:
@@ -251,7 +255,7 @@ async def get_conversation(conv_id: str):
         return ConversationDetail(id=row[0], project_id=row[1], role=row[2], title=row[3], updated_at=row[4], content_json=row[5])
 
 @router.post("/conversations/{conv_id}/append")
-async def append_to_conversation(conv_id: str, turn: Dict[str, Any] = Body(...)):
+def append_to_conversation(conv_id: str, turn: Dict[str, Any] = Body(...)):
     """Ajoute un tour (role: user|assistant, content: str) à une conversation existante."""
     with get_db_conn() as conn:
         row = conn.execute("SELECT content_json FROM conversations WHERE id = ?", (conv_id,)).fetchone()
@@ -263,12 +267,11 @@ async def append_to_conversation(conv_id: str, turn: Dict[str, Any] = Body(...))
         
         conn.execute("UPDATE conversations SET content_json = ?, updated_at = datetime('now') WHERE id = ?", 
                      (json.dumps(history), conv_id))
-        conn.commit()
     return {"ok": True}
 
 # --- BKD CHAT ---
 @router.post("/chat", response_model=ChatResponse)
-async def bkd_chat_endpoint(req: ChatRequest):
+def bkd_chat_endpoint(req: ChatRequest):
     try:
         # 1. Routing via Groq + SullivanArbitrator
         route_info = route_request_bkd(req.message, req.history, _ARBITRATOR)
@@ -296,7 +299,6 @@ async def bkd_chat_endpoint(req: ChatRequest):
                     "INSERT INTO conversations (id, project_id, role, title, content_json) VALUES (?, ?, ?, ?, ?)",
                     (conv_id, req.project_id or "homéos-default", req.role, title, json.dumps([]))
                 )
-                conn.commit()
 
         # Tools wiring...
         tools = [{
@@ -319,7 +321,7 @@ async def bkd_chat_endpoint(req: ChatRequest):
 
         final_text = ""
         for _ in range(4):
-            res = _ARBITRATOR.dispatch(config, messages, system=system_instruction, tools=tools)
+            res = _ARBITRATOR.dispatch(config, messages, system=SULLIVAN_BKD_SYSTEM, tools=tools)
             if not res.get("success"):
                 raise HTTPException(status_code=500, detail=res.get("error", "Dispatch error"))
 
@@ -359,7 +361,6 @@ async def bkd_chat_endpoint(req: ChatRequest):
                     "UPDATE conversations SET content_json = ?, updated_at = datetime('now') WHERE id = ?", 
                     (json.dumps(hist), conv_id)
                 )
-                conn.commit()
 
         return ChatResponse(
             explanation=final_text,
@@ -385,30 +386,30 @@ class ConvAppendRequest(BaseModel):
     text: str
 
 @router.post("/conversations")
-async def create_conversation(req: ConvCreateRequest):
+def create_conversation(req: ConvCreateRequest):
     cid = conv_create(req.project_id, req.role, req.title)
     return {"id": cid}
 
 @router.get("/conversations")
-async def list_conversations(project_id: str = Query(...), limit: int = Query(5)):
+def list_conversations(project_id: str = Query(...), limit: int = Query(5)):
     return {"conversations": conv_list(project_id, limit)}
 
 @router.get("/conversations/{conv_id}")
-async def get_conversation(conv_id: str):
+def get_conversation(conv_id: str):
     conv = conv_get(conv_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conv
 
 @router.post("/conversations/{conv_id}/append")
-async def append_to_conversation(conv_id: str, req: ConvAppendRequest):
+def append_to_conversation(conv_id: str, req: ConvAppendRequest):
     conv_append(conv_id, req.role, req.text)
     conv_auto_title(conv_id)
     return {"ok": True}
 
 @router.delete("/conversations/{conv_id}")
-async def delete_conversation(conv_id: str):
-    with bkd_db_con() as con:
+def delete_conversation(conv_id: str):
+    with bkd_db() as con:
         con.execute("DELETE FROM conversations WHERE id=?", (conv_id,))
     return {"ok": True}
 
@@ -416,7 +417,7 @@ async def delete_conversation(conv_id: str):
 # --- FEE LAB ROUTES ---
 
 @router.get("/fee/preview", response_class=HTMLResponse)
-async def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
+def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
     """Sert le HTML brut d'un fichier projet pour l'iframe FEE — M260: injecte <base> pour les assets relatifs."""
     root = resolve_bkd_project_root(project_id)
     if not root:
@@ -448,7 +449,7 @@ async def get_fee_preview(project_id: str = Query(...), path: str = Query(...)):
 
 
 @router.get("/fee/presets")
-async def get_fee_presets():
+def get_fee_presets():
     """Charge le catalogue des presets GSAP."""
     path = CWD / "static/fee_presets.json"
     if not path.exists():
@@ -457,14 +458,14 @@ async def get_fee_presets():
 
 
 @router.get("/fee/logic")
-async def get_fee_logic_route(project_id: str = Query(...), screen: str = Query(...)):
+def get_fee_logic_route(project_id: str = Query(...), screen: str = Query(...)):
     """Lit le code logic/{screen}.js."""
     content = get_fee_logic(project_id, screen)
     return {"content": content, "screen": screen}
 
 
 @router.post("/fee/logic")
-async def save_fee_logic_route(req: Dict[str, Any] = Body(...)):
+def save_fee_logic_route(req: Dict[str, Any] = Body(...)):
     """Sauvegarde le code logic/{screen}.js."""
     project_id = req.get("project_id")
     screen = req.get("screen")
@@ -476,7 +477,7 @@ async def save_fee_logic_route(req: Dict[str, Any] = Body(...)):
 
 
 @router.post("/fee/chat")
-async def fee_chat_endpoint(req: ChatRequest):
+def fee_chat_endpoint(req: ChatRequest):
     """Chat spécialisé Sullivan FEE (GSAP Expert)."""
     try:
         # On utilise Sullivan FEE System Prompt
@@ -508,7 +509,7 @@ async def fee_chat_endpoint(req: ChatRequest):
 
 
 @router.post("/fee/apply")
-async def fee_apply_code(req: dict):
+def fee_apply_code(req: dict):
     """M221: Applique le code GSAP généré dans logic.js du projet."""
     project_id = req.get("project_id")
     screen = req.get("screen", "landing.html")

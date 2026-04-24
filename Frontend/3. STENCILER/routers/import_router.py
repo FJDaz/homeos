@@ -12,22 +12,23 @@ logger = logging.getLogger("ImportRouter")
 CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 STATIC_DIR_PATH = CWD / "static"
+PROJECTS_DIR = CWD / "projects"
 
 router = APIRouter()
 
 _NEW_IMPORTS_COUNT = 0
 
 
-def get_project_imports_dir():
+def get_project_imports_dir(token: str = None):
     from bkd_service import get_active_project_path
-    d = get_active_project_path() / "imports"
+    d = get_active_project_path(token) / "imports"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
-def get_active_project_path():
+def get_active_project_path(token: str = None):
     from bkd_service import get_active_project_path
-    return get_active_project_path()
+    return get_active_project_path(token)
 
 
 def ensure_ids(html: str) -> str:
@@ -80,14 +81,15 @@ def ensure_ids(html: str) -> str:
 
 
 @router.post("/api/import/figma")
-async def import_figma_svg(body: dict = Body(...)):
+def import_figma_svg(request: Request, body: dict = Body(...)):
     """M265: Reçoit un SVG du plugin Figma → sauve dans imports/ du projet actif."""
+    token = request.headers.get("X-User-Token")
     svg_content = body.get("svg", "")
     name = body.get("name", "figma_export")
     if not svg_content:
         raise HTTPException(status_code=400, detail="SVG content is empty")
 
-    imports_dir = get_project_imports_dir()
+    imports_dir = get_project_imports_dir(token)
     today_str = datetime.now().strftime("%Y-%m-%d")
     timestamp_str = datetime.now().strftime("%H%M%S")
 
@@ -138,12 +140,13 @@ async def import_figma_svg(body: dict = Body(...)):
 
 
 @router.post("/api/import/upload")
-async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
+async def import_upload(request: Request, file: UploadFile = File(...), filename: str = Form("")):
     """
     Mission 100-bis: Generic upload endpoint for multi-format imports.
     Supports: ZIP (Stitch), TSX/TS (React), HTML/CSS/JS files.
     """
-    exports_dir = get_project_imports_dir()
+    token = request.headers.get("X-User-Token")
+    exports_dir = get_project_imports_dir(token)
     exports_dir.mkdir(parents=True, exist_ok=True)
 
     # Save file
@@ -239,7 +242,7 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
 
                 # Sauvegarde project-specific
                 from bkd_service import get_active_project_path
-                prj_path = get_active_project_path()
+                prj_path = get_active_project_path(token)
                 if prj_path:
                     m_dir = prj_path / "manifests"
                     m_dir.mkdir(parents=True, exist_ok=True)
@@ -276,12 +279,13 @@ async def import_upload(file: UploadFile = File(...), filename: str = Form("")):
 
 
 @router.delete("/api/imports/{import_id}")
-async def import_delete(import_id: str):
+def import_delete(import_id: str, request: Request):
     """
     Mission 125: Suppression d'un import.
     Supprime l'entree de index.json et les fichiers sur disque.
     """
-    exports_dir = get_project_imports_dir()
+    token = request.headers.get("X-User-Token")
+    exports_dir = get_project_imports_dir(token)
     index_path = exports_dir / "index.json"
 
     if not index_path.exists():
@@ -334,9 +338,10 @@ async def import_delete(import_id: str):
 
 
 @router.patch("/api/imports/{import_id}")
-async def import_patch(import_id: str, body: dict = Body(...)):
+def import_patch(import_id: str, request: Request, body: dict = Body(...)):
     """M233: Patch un import dans index.json (ex: ajouter html_template après forge)."""
-    exports_dir = get_project_imports_dir()
+    token = request.headers.get("X-User-Token")
+    exports_dir = get_project_imports_dir(token)
     index_path = exports_dir / "index.json"
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.json not found")
@@ -358,15 +363,16 @@ ALLOWED_IMG_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif'}
 MAX_UPLOAD_SIZE = 10_000_000  # 10MB
 
 
-def get_assets_dir():
-    d = get_active_project_path() / "assets" / "img"
+def get_assets_dir(token: str = None):
+    d = get_active_project_path(token) / "assets" / "img"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
 @router.post("/api/projects/active/assets/upload")
-async def asset_upload(file: UploadFile = File(...)):
+async def asset_upload(request: Request, file: UploadFile = File(...)):
     """M236: Upload d'une image dans le projet actif."""
+    token = request.headers.get("X-User-Token")
     ext = Path(file.filename).suffix.lower() if file.filename else ""
     if ext not in ALLOWED_IMG_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Extension non autorisée: {ext}. Autorisées: {', '.join(ALLOWED_IMG_EXTENSIONS)}")
@@ -379,7 +385,7 @@ async def asset_upload(file: UploadFile = File(...)):
     ts = datetime.now().strftime("%H%M%S")
     filename = f"{Path(safe_name).stem}_{ts}{ext}"
 
-    assets_dir = get_assets_dir()
+    assets_dir = get_assets_dir(token)
     file_path = assets_dir / filename
     file_path.write_bytes(content)
 
@@ -395,9 +401,10 @@ async def asset_upload(file: UploadFile = File(...)):
 
 
 @router.get("/api/projects/active/assets")
-async def asset_list():
+def asset_list(request: Request):
     """M236: Liste les images du projet actif."""
-    assets_dir = get_assets_dir()
+    token = request.headers.get("X-User-Token")
+    assets_dir = get_assets_dir(token)
     if not assets_dir.exists():
         return {"files": []}
 
@@ -418,10 +425,11 @@ async def asset_list():
 
 
 @router.get("/api/projects/assets/img/{filename}")
-async def asset_serve(filename: str):
+def asset_serve(filename: str, request: Request):
     """M236: Sert une image du projet."""
     from fastapi.responses import FileResponse
-    assets_dir = get_assets_dir()
+    token = request.headers.get("X-User-Token")
+    assets_dir = get_assets_dir(token)
     file_path = assets_dir / filename
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Image non trouvée")
@@ -429,9 +437,10 @@ async def asset_serve(filename: str):
 
 
 @router.delete("/api/projects/assets/img/{filename}")
-async def asset_delete(filename: str):
+def asset_delete(filename: str, request: Request):
     """M236: Supprime une image du projet."""
-    assets_dir = get_assets_dir()
+    token = request.headers.get("X-User-Token")
+    assets_dir = get_assets_dir(token)
     file_path = assets_dir / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Image non trouvée")
@@ -440,15 +449,13 @@ async def asset_delete(filename: str):
 
 
 @router.post("/api/imports/extract-tokens")
-async def extract_design_tokens():
+def extract_design_tokens(request: Request):
     """M293: Trigger background design token extraction from uploaded screens."""
     from routers.design_token_extractor import extract_tokens_background
-    from bkd_service import get_active_project_path
+    from bkd_service import get_active_project_id
 
-    active_file = ROOT_DIR / "active_project.json"
-    active_id = None
-    if active_file.exists():
-        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
 
     if not active_id:
         return {"status": "skipped", "reason": "no active project"}
@@ -461,12 +468,11 @@ async def extract_design_tokens():
 
 
 @router.get("/api/imports/design-tokens")
-async def get_design_tokens():
+def get_design_tokens(request: Request):
     """M293: Return current design tokens from manifest."""
-    active_file = ROOT_DIR / "active_project.json"
-    active_id = None
-    if active_file.exists():
-        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+    from bkd_service import get_active_project_id
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
 
     if not active_id:
         return {"tokens": {}}
@@ -505,3 +511,10 @@ async def manifest_analyze(body: dict = Body(default={})):
     from routers.manifest_analyzer import analyze_manifest
     result = await analyze_manifest(project_id, manifest_data, tokens)
     return result
+
+
+@router.get("/api/health/providers")
+def provider_health_status():
+    """M294: Return health status of all AI providers."""
+    from routers.model_health import get_all_health
+    return {"providers": get_all_health()}

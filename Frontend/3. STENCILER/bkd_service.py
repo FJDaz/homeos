@@ -7,9 +7,13 @@ Ne doit dépendre d'aucun des deux serveurs.
 import os
 import sys
 import json
-import sqlite3
-import urllib.request
+import sqlite3, asyncio, logging, subprocess, shutil, contextlib, fcntl, urllib.request
+from datetime import datetime
 from pathlib import Path
+
+# --- Logging ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("BKD")
 
 # --- Paths ---
 _SERVICE_DIR = Path(__file__).parent.resolve()
@@ -123,8 +127,8 @@ def exec_query_knowledge_base(query: str) -> str:
     if SULLIVAN_RAG is None:
         return "RAG non disponible."
     try:
-        import asyncio
-        nodes = asyncio.run(SULLIVAN_RAG.retrieve(query))
+        from Backend.Prod.core.async_utils import safe_run
+        nodes = safe_run(SULLIVAN_RAG.retrieve(query))
         if not nodes:
             return "Aucun résultat trouvé dans la base de connaissance."
         chunks = []
@@ -152,60 +156,201 @@ BKD_DB_PATH = ROOT_DIR / "db" / "projects.db"
 PROJECTS_DIR = ROOT_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 
+@contextlib.contextmanager
+def bkd_db(db_path: Path = None):
+    target_db = db_path or BKD_DB_PATH
+    con = sqlite3.connect(str(target_db), check_same_thread=False)
+    try:
+        with con: # Mission 303: Transaction (commit/rollback)
+            yield con
+    finally:
+        con.close()
+
 def init_bkd_db():
-    import sqlite3
     BKD_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(str(BKD_DB_PATH))
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS projects (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            path TEXT NOT NULL,
-            created_at TEXT DEFAULT (datetime('now')),
-            last_opened TEXT DEFAULT (datetime('now'))
-        )
-    """)
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS classes (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            subject TEXT DEFAULT '',
-            created_at TEXT DEFAULT (datetime('now'))
-        )
-    """)
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS students (
-            id TEXT PRIMARY KEY,
-            class_id TEXT NOT NULL,
-            display TEXT NOT NULL,
-            nom TEXT NOT NULL,
-            prenom TEXT NOT NULL,
-            project_id TEXT,
-            milestone INTEGER DEFAULT 0,
-            FOREIGN KEY (class_id) REFERENCES classes(id)
-        )
-    """)
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS conversations (
-            id TEXT PRIMARY KEY,
-            project_id TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'architect',
-            title TEXT,
-            created_at TEXT DEFAULT (datetime('now')),
-            updated_at TEXT DEFAULT (datetime('now')),
-            content_json TEXT DEFAULT '[]',
-            FOREIGN KEY (project_id) REFERENCES projects(id)
-        )
-    """)
-    default_path = str(PROJECTS_DIR / "homéos-default")
-    (PROJECTS_DIR / "homéos-default").mkdir(parents=True, exist_ok=True)
-    con.execute("INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
-                ("homéos-default", "homéos default", default_path))
-    con.commit()
-    con.close()
+    with bkd_db() as con:
+        con.execute("PRAGMA journal_mode=WAL")
+        con.execute("PRAGMA synchronous=NORMAL")
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS projects (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                path TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now')),
+                last_opened TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS classes (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                subject TEXT DEFAULT '',
+                created_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS students (
+                id TEXT PRIMARY KEY,
+                class_id TEXT NOT NULL,
+                display TEXT NOT NULL,
+                nom TEXT NOT NULL,
+                prenom TEXT NOT NULL,
+                project_id TEXT,
+                milestone INTEGER DEFAULT 0,
+                user_id TEXT,
+                FOREIGN KEY (class_id) REFERENCES classes(id)
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS conversations (
+                id TEXT PRIMARY KEY,
+                project_id TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'architect',
+                title TEXT,
+                created_at TEXT DEFAULT (datetime('now')),
+                updated_at TEXT DEFAULT (datetime('now')),
+                content_json TEXT DEFAULT '[]',
+                FOREIGN KEY (project_id) REFERENCES projects(id)
+            )
+        """)
+        # --- M307: Centralized auth & infra tables ---
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL UNIQUE,
+                role TEXT DEFAULT 'student',
+                token TEXT NOT NULL UNIQUE,
+                password_hash TEXT,
+                workspace_id TEXT,
+                created_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS sessions (
+                id TEXT PRIMARY KEY,
+                code TEXT NOT NULL UNIQUE,
+                creator_id TEXT NOT NULL,
+                title TEXT,
+                expires_at TEXT,
+                created_at TEXT DEFAULT (datetime('now')),
+                FOREIGN KEY (creator_id) REFERENCES users(id)
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS session_participants (
+                id TEXT PRIMARY KEY,
+                session_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT,
+                joined_at TEXT DEFAULT (datetime('now')),
+                FOREIGN KEY (session_id) REFERENCES sessions(id)
+            )
+        """)
+        
+        # Mission 313: Migration colonnes users
+        cursor = con.cursor()
+        cursor.execute("PRAGMA table_info(users)")
+        cols = [c[1] for c in cursor.fetchall()]
+        if "email" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN email TEXT")
+        if "password_hash_bcrypt" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN password_hash_bcrypt TEXT")
+        if "active_project_id" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN active_project_id TEXT")
+
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS user_keys (
+                user_id TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                api_key TEXT NOT NULL,
+                updated_at TEXT DEFAULT (datetime('now')),
+                PRIMARY KEY (user_id, provider)
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS workspaces (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                plan TEXT DEFAULT 'FREE',
+                owner_id TEXT,
+                created_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS workspace_members (
+                user_id TEXT,
+                workspace_id TEXT,
+                role_in_workspace TEXT,
+                PRIMARY KEY (user_id, workspace_id)
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS subjects (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                referential_json TEXT DEFAULT '[]',
+                criteria_json TEXT DEFAULT '[]',
+                created_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+
+        # Mission 316: Migration DB pour séparation projects.type + subject_id
+        cursor = con.cursor()
+        
+        # 1. Projects cols
+        cursor.execute("PRAGMA table_info(projects)")
+        p_cols = [c[1] for c in cursor.fetchall()]
+        if "type" not in p_cols:
+            con.execute("ALTER TABLE projects ADD COLUMN type TEXT DEFAULT 'personal'")
+        if "subject_id" not in p_cols:
+            con.execute("ALTER TABLE projects ADD COLUMN subject_id TEXT")
+        
+        # 2. Subjects cols
+        cursor.execute("PRAGMA table_info(subjects)")
+        sb_cols = [c[1] for c in cursor.fetchall()]
+        if "class_id" not in sb_cols:
+            con.execute("ALTER TABLE subjects ADD COLUMN class_id TEXT")
+        
+        # 3. Students cols
+        cursor.execute("PRAGMA table_info(students)")
+        st_cols = [c[1] for c in cursor.fetchall()]
+        if "subject_id" not in st_cols:
+            con.execute("ALTER TABLE students ADD COLUMN subject_id TEXT")
+        
+        # Mission 326: Migration classes.owner_id
+        cursor.execute("PRAGMA table_info(classes)")
+        cl_cols = [c[1] for c in cursor.fetchall()]
+        if "owner_id" not in cl_cols:
+            con.execute("ALTER TABLE classes ADD COLUMN owner_id TEXT")
+            # Backfill initial aux classes sans propriétaire
+            admin_name = os.getenv("ADMIN_NAME", "FJD")
+            con.execute("""
+                UPDATE classes SET owner_id = (SELECT id FROM users WHERE name = ?)
+                WHERE owner_id IS NULL
+            """, (admin_name,))
+            logger.info(f"BKD Migration M326: 'owner_id' added to classes and backfilled to {admin_name}")
+        
+        # 4. Migration des données existantes (élèves -> subject)
+        con.execute("""
+            UPDATE projects SET type = 'subject'
+            WHERE id IN (SELECT project_id FROM students WHERE project_id IS NOT NULL)
+        """)
+        logger.info("BKD Migration M316: DB structured and student projects migrated to 'subject' type.")
+
+        default_path = str(PROJECTS_DIR / "homéos-default")
+        (PROJECTS_DIR / "homéos-default").mkdir(parents=True, exist_ok=True)
+        con.execute("INSERT OR IGNORE INTO projects (id, name, path, type) VALUES (?, ?, ?, 'personal')",
+                    ("homéos-default", "homéos default", default_path))
     
     # Scaffold default project if empty
     scaffold_project(Path(default_path))
+
+def get_user_role(user_id: str) -> str | None:
+    """Lit le rôle d'un utilisateur par son ID (utilisé pour les permissions)."""
+    with bkd_db() as con:
+        row = con.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+    return row[0] if row else None
 
 
 def scaffold_project(project_path: Path):
@@ -286,78 +431,88 @@ def conv_auto_title(message: str, project_path: Path) -> str:
     return message[:60].strip() + ("..." if len(message) > 60 else "")
 
 
-def bkd_db_con():
-    import sqlite3
-    return sqlite3.connect(str(BKD_DB_PATH), check_same_thread=False)
+# --- End DB Helpers ---
 
 
-# Global State for Active Project — M227: token-aware
-_ACTIVE_PROJECT_ID = "homéos-default"
+def _write_json_locked(file_path: Path, data: dict):
+    """Writes JSON with explicit file locking (Mission 303)."""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        json.dump(data, f, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+        fcntl.flock(f, fcntl.LOCK_UN)
+
+
+# Global State for Active Project — M309: Pure DB persistence
 
 def get_active_project_id(token: str = None):
-    """M227: Resolve active project. If token is a student token, return their project_id from DB."""
+    """M309: Resolve active project with Role Isolation.
+    Students: return their private project_id.
+    Teachers/Admins: return their last active project_id from DB.
+    """
     if token:
         try:
-            with bkd_db_con() as con:
+            with bkd_db() as con:
+                # Optimized join to get project_id based on role
                 row = con.execute(
-                    "SELECT s.project_id FROM students s "
-                    "JOIN users u ON u.name = s.display "
-                    "WHERE u.token = ? AND s.project_id IS NOT NULL",
+                    "SELECT s.project_id, u.role, u.active_project_id FROM users u "
+                    "LEFT JOIN students s ON s.display = u.name "
+                    "WHERE u.token = ?",
                     (token,)
                 ).fetchone()
-                if row and row[0]:
-                    return row[0]
-        except Exception:
-            pass
-    # Fallback to active_project.json (prof/admin shared state)
-    try:
-        active_file = ROOT_DIR / "active_project.json"
-        if active_file.exists():
-            data = json.loads(active_file.read_text(encoding='utf-8'))
-            pid = data.get("active_id")
-            if pid:
-                return pid
-    except Exception:
-        pass
-    return _ACTIVE_PROJECT_ID
+                
+                if row:
+                    stud_pid, role, user_pid = row
+                    if role == 'student' and stud_pid:
+                        return stud_pid
+                    if role in ('teacher', 'admin', 'prof') and user_pid:
+                        return user_pid
+        except Exception as e:
+            logger.error(f"get_active_project_id: DB error: {e}")
+
+    return "homéos-default"
 
 def set_active_project_id(pid: str, token: str = None):
-    global _ACTIVE_PROJECT_ID
-    _ACTIVE_PROJECT_ID = pid
-    # If token is a student, update their project_id in DB
+    """M309: Persist active project with Role Isolation.
+    Students: update only their private project_id in DB.
+    Teachers: update their active_project_id in DB.
+    """
     if token:
         try:
-            with bkd_db_con() as con:
-                con.execute(
-                    "UPDATE students SET project_id=? WHERE display = ("
-                    "SELECT name FROM users WHERE token=?)",
-                    (pid, token)
-                )
-        except Exception:
-            pass
-    # Also persist to active_project.json for prof/admin
-    try:
-        active_file = ROOT_DIR / "active_project.json"
-        active_file.parent.mkdir(parents=True, exist_ok=True)
-        active_file.write_text(json.dumps({"active_id": pid}, ensure_ascii=False), encoding='utf-8')
-    except Exception as e:
-        logger.warning(f"set_active_project_id: failed to persist: {e}")
+            with bkd_db() as con:
+                # 1. Check role
+                row = con.execute("SELECT role, name FROM users WHERE token=?", (token,)).fetchone()
+                if not row: return
+                role, name = row
+
+                # 2. Update based on role
+                if role == 'student':
+                    con.execute("UPDATE students SET project_id=? WHERE display=?", (pid, name))
+                    logger.info(f"set_active_project_id: Student {name} project updated to {pid}")
+                else:
+                    con.execute("UPDATE users SET active_project_id=? WHERE token=?", (pid, token))
+                    logger.info(f"set_active_project_id: User {name} ({role}) active project updated to {pid}")
+        except Exception as e:
+            logger.error(f"set_active_project_id: DB error: {e}")
 
 def get_active_project_path(token: str = None) -> Path:
     id = get_active_project_id(token)
-    con = bkd_db_con()
-    row = con.execute("SELECT path FROM projects WHERE id=?", (id,)).fetchone()
-    con.close()
+    with bkd_db() as con:
+        row = con.execute("SELECT path FROM projects WHERE id=?", (id,)).fetchone()
     if row: return Path(row[0])
     # Fallback/Auto-init default
     p = PROJECTS_DIR / id
     p.mkdir(parents=True, exist_ok=True)
     return p
 
-def resolve_bkd_project_root(project_id: str):
-    con = bkd_db_con()
-    row = con.execute("SELECT path FROM projects WHERE id=?", (project_id,)).fetchone()
-    con.close()
+def resolve_bkd_project_root(project_id: str, token: str = None):
+    """M309: Resolve project root. If project_id == 'active', use token-aware active project."""
+    if project_id == "active":
+        project_id = get_active_project_id(token)
+    
+    with bkd_db() as con:
+        row = con.execute("SELECT path FROM projects WHERE id=?", (project_id,)).fetchone()
     return Path(row[0]) if row else None
 
 
@@ -393,12 +548,50 @@ def bkd_build_tree(root, rel="", depth=2, current=0):
     return result
 
 
+# --- Subjects Helpers (M322) ---
+
+def list_subjects(class_id: str = None) -> list:
+    with bkd_db() as con:
+        if class_id:
+            rows = con.execute("SELECT id, name, description, created_at FROM subjects WHERE class_id=?", (class_id,)).fetchall()
+        else:
+            rows = con.execute("SELECT id, name, description, created_at FROM subjects").fetchall()
+    return [{"id": r[0], "name": r[1], "description": r[2], "created_at": r[3]} for r in rows]
+
+def get_subject(subject_id: str) -> dict | None:
+    with bkd_db() as con:
+        row = con.execute("SELECT id, name, description, referential_json, criteria_json, class_id FROM subjects WHERE id=?", (subject_id,)).fetchone()
+    if not row: return None
+    return {
+        "id": row[0],
+        "name": row[1],
+        "description": row[2],
+        "referential": json.loads(row[3]),
+        "criteria": json.loads(row[4]),
+        "class_id": row[5]
+    }
+
+def save_subject(data: dict) -> str:
+    sid = data.get("id") or f"sj_{int(datetime.now().timestamp())}"
+    referential = json.dumps(data.get("referential", []), ensure_ascii=False)
+    criteria = json.dumps(data.get("criteria", []), ensure_ascii=False)
+    with bkd_db() as con:
+        con.execute("""
+            INSERT OR REPLACE INTO subjects (id, name, description, referential_json, criteria_json, class_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (sid, data["name"], data.get("description", ""), referential, criteria, data.get("class_id")))
+    return sid
+
+def delete_subject(subject_id: str):
+    with bkd_db() as con:
+        con.execute("DELETE FROM subjects WHERE id=?", (subject_id,))
+
 # --- Conversation History Helpers ---
 
 def conv_create(project_id: str, role: str = "architect", title: str = None) -> str:
     import uuid as _uuid
     cid = str(_uuid.uuid4())
-    with bkd_db_con() as con:
+    with bkd_db() as con:
         con.execute(
             "INSERT INTO conversations (id, project_id, role, title, content_json) VALUES (?, ?, ?, ?, ?)",
             (cid, project_id, role, title, "[]")
@@ -408,7 +601,7 @@ def conv_create(project_id: str, role: str = "architect", title: str = None) -> 
 
 def conv_append(conv_id: str, role: str, text: str):
     """Ajoute un turn à la conversation. role = 'user' | 'assistant'."""
-    with bkd_db_con() as con:
+    with bkd_db() as con:
         row = con.execute("SELECT content_json FROM conversations WHERE id=?", (conv_id,)).fetchone()
         if not row:
             return
@@ -421,7 +614,7 @@ def conv_append(conv_id: str, role: str, text: str):
 
 
 def conv_get(conv_id: str) -> dict | None:
-    with bkd_db_con() as con:
+    with bkd_db() as con:
         row = con.execute(
             "SELECT id, project_id, role, title, created_at, updated_at, content_json FROM conversations WHERE id=?",
             (conv_id,)
@@ -434,7 +627,6 @@ def conv_get(conv_id: str) -> dict | None:
 
 def get_fee_logic(project_id: str, screen_name: str) -> str:
     """Récupère le contenu de logic/{screen}.js pour le FEE Lab."""
-    from bkd_service import resolve_bkd_project_root
     root = resolve_bkd_project_root(project_id)
     if not root: return ""
     
@@ -449,7 +641,6 @@ def get_fee_logic(project_id: str, screen_name: str) -> str:
 
 def save_fee_logic(project_id: str, screen_name: str, content: str):
     """Sauvegarde ou patche le bloc // [FEE-LOGIC] dans le fichier écran correspondante."""
-    from bkd_service import resolve_bkd_project_root
     root = resolve_bkd_project_root(project_id)
     if not root: return
     
@@ -461,7 +652,7 @@ def save_fee_logic(project_id: str, screen_name: str, content: str):
 
 
 def conv_list(project_id: str, limit: int = 5) -> list:
-    with bkd_db_con() as con:
+    with bkd_db() as con:
         rows = con.execute(
             "SELECT id, role, title, updated_at FROM conversations WHERE project_id=? ORDER BY updated_at DESC LIMIT ?",
             (project_id, limit)
@@ -486,7 +677,7 @@ def conv_auto_title(conv_id: str):
         title = first_user[:60].strip() or "Sans titre"
     else:
         return
-    with bkd_db_con() as con:
+    with bkd_db() as con:
         con.execute("UPDATE conversations SET title=? WHERE id=?", (title, conv_id))
 
 

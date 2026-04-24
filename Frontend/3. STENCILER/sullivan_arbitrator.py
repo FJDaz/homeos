@@ -8,6 +8,7 @@ import urllib.error
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
+from bkd_service import bkd_db
 
 # --- CONFIGURATION ---
 SULLIVAN_BASE_DIR = Path(__file__).parent.resolve()
@@ -54,45 +55,40 @@ class SullivanSentinel:
 
     def _init_db(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS ai_calls (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                provider TEXT,
-                model TEXT,
-                run_type TEXT,
-                latency_ms INTEGER,
-                success INTEGER,
-                ts DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        conn.commit()
-        conn.close()
+        with bkd_db(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS ai_calls (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    provider TEXT,
+                    model TEXT,
+                    run_type TEXT,
+                    latency_ms INTEGER,
+                    success INTEGER,
+                    ts DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
 
     def log(self, provider: str, model: str, run_type: str, latency_ms: int, success: bool):
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO ai_calls (provider, model, run_type, latency_ms, success) VALUES (?, ?, ?, ?, ?)",
-                (provider, model, run_type, int(latency_ms), 1 if success else 0)
-            )
-            conn.commit()
-            conn.close()
+            with bkd_db(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO ai_calls (provider, model, run_type, latency_ms, success) VALUES (?, ?, ?, ?, ?)",
+                    (provider, model, run_type, int(latency_ms), 1 if success else 0)
+                )
         except Exception as e:
             print(f"[SENTINEL] Error logging metrics: {e}")
 
     def get_avg_latency(self, provider: str, window_s: int = 300) -> float:
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT AVG(latency_ms) FROM ai_calls WHERE provider = ? AND success = 1 AND ts > datetime('now', ?)",
-                (provider, f'-{window_s} seconds')
-            )
-            res = cursor.fetchone()[0]
-            conn.close()
+            with bkd_db(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT AVG(latency_ms) FROM ai_calls WHERE provider = ? AND success = 1 AND ts > datetime('now', ?)",
+                    (provider, f'-{window_s} seconds')
+                )
+                res = cursor.fetchone()[0]
             return res if res else 0.0
         except Exception:
             return 0.0

@@ -28,7 +28,6 @@ logger = logging.getLogger("WireRouter")
 CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 PROJECTS_DIR = ROOT_DIR / "projects"
-ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
 STATIC_DIR_PATH = CWD / "static"
 
 
@@ -79,22 +78,14 @@ def _build_wire_prompt(html_context: str) -> str:
     )
 
 
-def get_active_project_id() -> Optional[str]:
-    """Retourne l'ID du projet actif depuis le fichier active_project.json."""
-    if ACTIVE_PROJECT_FILE.exists():
-        try:
-            data = json.loads(ACTIVE_PROJECT_FILE.read_text(encoding='utf-8'))
-            return data.get("active_id")
-        except:
-            return None
-    return None
+from bkd_service import get_active_project_id
 
 
-def get_manifest_context(project_id: str):
-    """Mission 181: Protocole Sullivan : Manifeste-Driven Identity."""
+def get_manifest_context(project_id: str, token: str = None):
+    """Mission 181: Protocole Sullivan : Manifeste-Driven Identity (token-aware)."""
     try:
         if project_id == "active":
-            project_id = get_active_project_id()
+            project_id = get_active_project_id(token)
         manifest_path = PROJECTS_DIR / project_id / "manifest.json"
         if not manifest_path.exists():
             return "ALERTE : manifeste absent. anatomie non déclarée. rejoignez le mode CADRAGE pour initialiser cet organe."
@@ -193,7 +184,7 @@ async def frd_wire(req: WireRequest):
 
 
 @router.get("/api/frd/wire-audit")
-async def wire_audit(request: Request, name: str = Query(...)):
+def wire_audit(request: Request, name: str = Query(...)):
     """Audit technique intent <-> endpoint pour le mode Wire v2."""
     ROOT_DIR = Path(__file__).parent.parent.parent
     analyzer = WireAnalyzer(ROOT_DIR)
@@ -201,7 +192,7 @@ async def wire_audit(request: Request, name: str = Query(...)):
 
 
 @router.get("/api/frd/wire-source")
-async def get_wire_source(endpoint: str = Query(...)):
+def get_wire_source(endpoint: str = Query(...)):
     """
     Parser AST Python pour extraire le handler correspondant à la route dans server_v3.py.
     """
@@ -233,10 +224,11 @@ async def get_wire_source(endpoint: str = Query(...)):
 
 
 @router.get("/api/projects/{project_id}/wire-audit")
-async def wire_audit_project(project_id: str):
-    """Bilan de santé du maillage selon le Corpus CLEA."""
+def wire_audit_project(project_id: str, request: Request):
+    """Bilan de santé du maillage selon le Corpus CLEA (token-aware)."""
+    token = request.headers.get("X-User-Token")
     if project_id == "active":
-        project_id = get_active_project_id()
+        project_id = get_active_project_id(token)
     project_path = PROJECTS_DIR / project_id
     manifest_path = project_path / "manifest.json"
     if not manifest_path.exists():
@@ -396,10 +388,11 @@ RÉPONDS UNIQUEMENT EN JSON : [{{ "selector": "...", "label": "...", "intent": "
 
 
 @router.post("/api/projects/{project_id}/pre-wire/validate")
-async def pre_wire_validate(project_id: str, req: PreWireValidateRequest):
+def pre_wire_validate(project_id: str, req: PreWireValidateRequest, request: Request):
     """Mission 185 : Sullivan met à jour le manifeste après validation humaine."""
+    token = request.headers.get("X-User-Token")
     if project_id == "active":
-        project_id = get_active_project_id()
+        project_id = get_active_project_id(token)
 
     project_path = PROJECTS_DIR / project_id
     manifest_path = project_path / "manifest.json"
@@ -451,10 +444,11 @@ async def pre_wire_validate(project_id: str, req: PreWireValidateRequest):
 
 
 @router.post("/api/projects/{project_id}/wire-apply")
-async def wire_apply_plan(project_id: str, req: Dict[str, Any]):
+def wire_apply_plan(project_id: str, req: Dict[str, Any], request: Request):
     """Mission 187 : Forge déterministe (Plus de LLM). Applique les validations confirmées."""
+    token = request.headers.get("X-User-Token")
     if project_id == "active":
-        project_id = get_active_project_id()
+        project_id = get_active_project_id(token)
     screen_html = req.get("screen_html")
     validations = req.get("validations", [])
     if not screen_html:
@@ -554,19 +548,19 @@ async def wire_apply_plan(project_id: str, req: Dict[str, Any]):
 
 
 @router.post("/wire-preview")
-async def set_wire_preview(req: Dict[str, Any]):
+def set_wire_preview(req: Dict[str, Any]):
     global _wire_preview_html
     _wire_preview_html = req.get("html", "")
     return {"status": "ok"}
 
 
 @router.get("/wire-preview")
-async def get_wire_preview():
+def get_wire_preview():
     return HTMLResponse(content=_wire_preview_html or "<p>aucun preview</p>")
 
 
 @router.post("/api/wire-execute")
-async def wire_execute(request: Request, req: Dict[str, Any]):
+def wire_execute(request: Request, req: Dict[str, Any]):
     """Runtime Wire : intercepte une action et appelle Groq. Mission 137: BYOK."""
     from core.key_resolver import resolve_key
     wire = req.get("wire", "")

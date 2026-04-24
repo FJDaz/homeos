@@ -5,6 +5,8 @@ Fichier principal < 200L. Tous les routes sont dans routers/*.py
 """
 
 import os, json, sys, re, uuid, sqlite3, asyncio, logging, subprocess, shutil
+# nest_asyncio retiré — incompatible avec uvicorn loop_factory (Python 3.14+)
+
 import urllib.request, zipfile, io, unicodedata
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -50,7 +52,7 @@ from bkd_service import (
     SULLIVAN_BKD_SYSTEM, MANIFEST_FRD, SULLIVAN_RAG,
     exec_query_knowledge_base, route_request_bkd,
     resolve_bkd_project_root, bkd_safe_path, bkd_build_tree,
-    BKD_DB_PATH, bkd_db_con, PROJECTS_DIR,
+    BKD_DB_PATH, bkd_db, PROJECTS_DIR,
     get_active_project_id as _bkd_get_active_id,
     set_active_project_id as _bkd_set_active_id,
     get_active_project_path as _bkd_get_active_path,
@@ -86,7 +88,6 @@ _KIMI_JOBS: Dict[str, Dict[str, Any]] = {}
 _KIMI_JOBS_LOCK = asyncio.Lock()
 _wire_preview_html = ""
 _FONT_PATH_CACHE = {}
-ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
 GENOME_FILE = ROOT_DIR / "Frontend/2. GENOME/genome_enriched.json"
 LAYOUT_FILE = ROOT_DIR / "Frontend/2. GENOME/layout.json"
 PIPELINE_DIR = ROOT_DIR / "exports" / "pipeline"
@@ -98,13 +99,8 @@ async def lifespan(app: FastAPI):
     _PULSE.start()
     logger.info("Sullivan Pulse started")
 
-    # M275: Refresh API key URLs in background (Gemini + Search → cache 24h)
-    try:
-        from routers.api_key_urls import refresh_all_urls
-        asyncio.create_task(refresh_all_urls())
-        logger.info("[API URLs] Background refresh started")
-    except Exception as e:
-        logger.warning(f"[API URLs] Failed to start refresh: {e}")
+    # M275: API URLs refresh — DÉSACTIVÉ (bloque event loop via Gemini grounding au démarrage)
+    # logger.info("[API URLs] Background refresh disabled")
 
     yield
     logger.info("Server shutting down")
@@ -123,6 +119,23 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Lit X-User-Token → résout user_id → injecte request.state.user_id."""
     EXEMPT_PATHS = ["/api/auth/", "/login", "/static", "/docs", "/openapi.json", "/.well-known"]
 
+    @staticmethod
+    def _lookup_user(token: str) -> int | None:
+        """Résout user_id depuis un token UUID legacy ou un JWT M313."""
+        # JWT M313 : commence par eyJ → décoder directement
+        if token.startswith("eyJ"):
+            try:
+                from core.auth_utils import decode_access_token
+                payload = decode_access_token(token)
+                if payload and payload.get("user_id"):
+                    return payload["user_id"]
+            except Exception:
+                pass
+        # Legacy UUID token : chercher en DB
+        with bkd_db() as conn:
+            row = conn.execute("SELECT id FROM users WHERE token = ?", (token,)).fetchone()
+            return row[0] if row else None
+
     async def dispatch(self, request: StarletteRequest, call_next):
         # Exempt paths
         if any(request.url.path.startswith(p) for p in self.EXEMPT_PATHS):
@@ -134,11 +147,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         if token:
             try:
-                conn = sqlite3.connect(str(PROJECTS_DB_PATH))
-                user = conn.execute("SELECT id FROM users WHERE token = ?", (token,)).fetchone()
-                conn.close()
-                if user:
-                    request.state.user_id = user[0]
+                loop = asyncio.get_event_loop()
+                user_id = await loop.run_in_executor(None, self._lookup_user, token)
+                if user_id:
+                    request.state.user_id = user_id
                 else:
                     print(f"[M298-MW] {request.url.path} — token={token[:8]}... → user NOT FOUND")
             except Exception as e:
@@ -174,6 +186,7 @@ from routers.class_router import router as class_router
 from routers.page_router import router as page_router
 from routers.auth_router import router as auth_router
 from routers.stitch_router import router as stitch_router
+from routers.subject_router import router as subject_router
 
 app.include_router(wire_router)
 app.include_router(sullivan_router)
@@ -191,6 +204,7 @@ app.include_router(page_router)
 app.include_router(auth_router)
 app.include_router(stitch_router)
 app.include_router(class_router)
+app.include_router(subject_router)
 
 # --- M274: Health/Debug endpoint ---
 @app.get("/api/health")
@@ -203,19 +217,18 @@ async def health_check():
         result["db_path"] = str(db_path)
         result["db_exists"] = db_path.exists()
         if db_path.exists():
-            conn = sqlite3.connect(str(db_path))
-            cur = conn.cursor()
-            cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
-            result["tables"] = [r[0] for r in cur.fetchall()]
-            if "classes" in result["tables"]:
-                cur.execute("SELECT COUNT(*) FROM classes")
-                result["class_count"] = cur.fetchone()[0]
-                cur.execute("SELECT id, name, teacher FROM classes LIMIT 5")
-                result["classes"] = [dict(zip(["id","name","teacher"], r)) for r in cur.fetchall()]
-            if "students" in result["tables"]:
-                cur.execute("SELECT COUNT(*) FROM students")
-                result["student_count"] = cur.fetchone()[0]
-            conn.close()
+            with bkd_db() as conn:
+                cur = conn.cursor()
+                cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                result["tables"] = [r[0] for r in cur.fetchall()]
+                if "classes" in result["tables"]:
+                    cur.execute("SELECT COUNT(*) FROM classes")
+                    result["class_count"] = cur.fetchone()[0]
+                    cur.execute("SELECT id, name, owner_id FROM classes LIMIT 5")
+                    result["classes"] = [dict(zip(["id","name","owner_id"], r)) for r in cur.fetchall()]
+                if "students" in result["tables"]:
+                    cur.execute("SELECT COUNT(*) FROM students")
+                    result["student_count"] = cur.fetchone()[0]
         # Check seed log
         seed_log = db_path.parent / "seed.log"
         if seed_log.exists():
@@ -224,21 +237,8 @@ async def health_check():
         result["error"] = str(e)
     return result
 
-# --- ACTIVE PROJECT OVERRIDES (bkd_service uses JSON file, not DB) ---
-def get_active_project_id():
-    if ACTIVE_PROJECT_FILE.exists():
-        try: return json.loads(ACTIVE_PROJECT_FILE.read_text()).get("active_id")
-        except: pass
-    return None
-
-def set_active_project_id(pid: str):
-    ACTIVE_PROJECT_FILE.write_text(json.dumps({"active_id": pid}))
-
-def get_active_project_path():
-    pid = get_active_project_id()
-    if pid: return PROJECTS_DIR / pid
-    return _bkd_get_active_path()
+from bkd_service import get_active_project_id, set_active_project_id, get_active_project_path
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server_v3:app", host="0.0.0.0", port=9998, reload=True)
+    uvicorn.run("server_v3:app", host="0.0.0.0", port=9998, workers=1, timeout_keep_alive=5, reload=False)

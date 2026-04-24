@@ -61,7 +61,8 @@ def capture_html_screenshot_sync(
     full_page: bool = False,
 ) -> bytes:
     """Synchronous wrapper around capture_html_screenshot."""
-    return asyncio.run(
+    from Backend.Prod.core.async_utils import safe_run
+    return safe_run(
         capture_html_screenshot(
             html_content,
             viewport_width=viewport_width,

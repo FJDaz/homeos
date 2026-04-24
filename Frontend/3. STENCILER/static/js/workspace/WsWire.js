@@ -240,7 +240,7 @@ class WsWire {
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 bg-[#f7f6f2] z-20">
                             <tr class="border-b border-[#e5e5e5]">
-                                <th class="p-4 text-[11px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest w-[50px] text-center">✓</th>
+                                <th class="p-4 text-[11px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest w-[50px] text-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><polyline points="20 6 9 17 4 12"/></svg></th>
                                 <th class="p-4 text-[11px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest">Organe</th>
                                 <th class="p-4 text-[11px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest">Intention</th>
                                 <th class="p-4 text-[11px] font-bold text-[#3d3d3c]/40 uppercase tracking-widest text-right">Custom</th>

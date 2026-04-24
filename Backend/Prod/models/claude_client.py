@@ -24,7 +24,7 @@ class ClaudeGenerationResult:
 
 
 class ClaudeClient(BaseLLMClient):
-    """Async client for Claude API (Sonnet 3.5)."""
+    """Async client for Claude API (model via CLAUDE_MODEL in .env)."""
     
     # Claude API pricing (Sonnet 3.5)
     INPUT_COST_PER_1M = 3.00  # $3.00 per million input tokens
@@ -42,12 +42,12 @@ class ClaudeClient(BaseLLMClient):
         
         Args:
             api_key: Anthropic API key (defaults to settings)
-            model: Model name (defaults to claude-3-5-sonnet-20241022)
+            model: Model name (defaults to CLAUDE_MODEL in .env)
             timeout: Request timeout in seconds (defaults to settings)
             max_retries: Maximum retry attempts (defaults to settings)
         """
         self.api_key = api_key or settings.anthropic_api_key
-        self.model = model or "claude-3-5-sonnet-20241022"
+        self.model = model or settings.claude_model
         self.timeout = timeout or settings.timeout
         self.max_retries = max_retries or settings.max_retries
         

@@ -103,16 +103,16 @@ def _warm_up_font_cache():
 _warm_up_font_cache()
 
 # --- HELPER: get_active_project_path ---
-def get_active_project_path():
+def get_active_project_path(token: str = None):
     from bkd_service import get_active_project_path
-    return get_active_project_path()
+    return get_active_project_path(token)
 
 # --- HELPER: get_manifest_context ---
-def get_manifest_context(project_id: str):
-    """Mission 181: Protocole Sullivan : Manifeste-Driven Identity."""
+def get_manifest_context(project_id: str, token: str = None):
+    """Mission 181: Protocole Sullivan : Manifeste-Driven Identity (token-aware)."""
     try:
         if project_id == "active":
-            project_id = get_active_project_path().name
+            project_id = get_active_project_path(token).name
         manifest_path = PROJECTS_DIR / project_id / "manifest.json"
         if not manifest_path.exists():
             return "ALERTE : manifeste absent. anatomie non declaree. rejoignez le mode CADRAGE pour initialiser cet organe."
@@ -123,10 +123,10 @@ def get_manifest_context(project_id: str):
         return f"""
 MANIFESTE DU PROJET (SOURCE DE VERITE) :
 ---
-ARCHETYPE : {manifest.get('archetype', 'non defini')}
-ANATOMIE : {', '.join(manifest.get('anatomy', []))}
-DESIGN TOKENS : {json.dumps(manifest.get('design_tokens', {}))}
-WIRES (CABLAGE) : {len(manifest.get('wires', []))} actifs
+ARCHETYPE : {manifest.get('archetype') or 'non defini'}
+ANATOMIE : {', '.join(manifest.get('anatomy') or [])}
+DESIGN TOKENS : {json.dumps(manifest.get('design_tokens') or {})}
+WIRES (CABLAGE) : {len(manifest.get('wires') or [])} actifs
 ---
 """
     except Exception as e:
@@ -139,7 +139,7 @@ WIRES (CABLAGE) : {len(manifest.get('wires', []))} actifs
 # =============================================================================
 
 @router.get("/api/sullivan/pulse")
-async def get_sullivan_pulse():
+def get_sullivan_pulse():
     return _PULSE.get_status()
 
 
@@ -196,7 +196,7 @@ async def sullivan_font_upload(file: UploadFile = File(...)):
 
 
 @router.get("/api/sullivan/fonts")
-async def sullivan_list_fonts():
+def sullivan_list_fonts():
     """Liste les fontes uploadées dans /static/fonts/."""
     from Backend.Prod.sullivan.font_webgen import FontWebGen
     webgen = FontWebGen()
@@ -205,16 +205,23 @@ async def sullivan_list_fonts():
 
 
 @router.get("/api/sullivan/system-fonts")
-async def sullivan_system_fonts():
+def sullivan_system_fonts():
     """Liste les familles de fontes installees sur le poste via le cache."""
     return {"families": sorted(_FONT_PATH_CACHE.keys())}
 
 
 @router.post("/api/sullivan/tool-call", response_model=ToolCallResponse)
-async def sullivan_tool_call(req: ToolCallRequest):
+def sullivan_tool_call(req: ToolCallRequest, request: Request = None):
     """
     Mission 204: Execute un tool-call (instrumentation de canevas ou patch).
     """
+    token = request.headers.get("X-User-Token") if request else None
+    
+    # Resolve 'active' project_id if needed
+    p_id = req.project_id
+    if p_id == "active":
+        from bkd_service import get_active_project_id
+        p_id = get_active_project_id(token)
     try:
         if req.tool == "insert_canvas":
             canvas_name = req.params.get("canvas")
@@ -223,7 +230,7 @@ async def sullivan_tool_call(req: ToolCallRequest):
             if canvas_name not in CANVAS_LIBRARY:
                 return {"status": "error", "error": f"Canevas '{canvas_name}' inconnu."}
             
-            html = applier.instanciate(canvas_name, props, req.project_id)
+            html = applier.instanciate(canvas_name, props, p_id)
             return {"status": "ok", "html": html}
             
         elif req.tool == "patch_element":
@@ -322,7 +329,7 @@ async def sullivan_generate_webfont(body: Dict[str, Any]):
 
 
 @router.delete("/api/sullivan/fonts/{slug}")
-async def sullivan_delete_font(slug: str):
+def sullivan_delete_font(slug: str):
     """Supprime une fonte et son repertoire."""
     from Backend.Prod.sullivan.font_webgen import FontWebGen
     webgen = FontWebGen()
@@ -373,14 +380,15 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
 
     # --- MISSION 181 : PROTOCOLE SULLIVAN (MANIFESTE) ---
     project_id = req.project_id or "active"
-    manifest_context = get_manifest_context(project_id)
+    token = request.headers.get("X-User-Token")
+    manifest_context = get_manifest_context(project_id, token)
 
     base_system += f"\n\n{manifest_context}"
 
     # --- MISSION 189 : HOMEO_GENOME.md (Source de Vérité Unifiée) ---
     genome_block = ""
     try:
-        genome_path = get_active_project_path() / "HOMEO_GENOME.md"
+        genome_path = get_active_project_path(token) / "HOMEO_GENOME.md"
         if genome_path.exists():
             genome_content = genome_path.read_text(encoding='utf-8')
             # Tronquer à 8000 tokens max (~32000 chars)
@@ -403,7 +411,7 @@ Ton fichier HOMEO_GENOME.md définit le projet. Ne génère rien qui contrevienn
     # --- MISSION 152 : DESIGN SYSTEM (DESIGN.md) ---
     design_md_block = ""
     try:
-        design_path = get_active_project_path() / "DESIGN.md"
+        design_path = get_active_project_path(token) / "DESIGN.md"
         if not design_path.exists():
             design_path = STATIC_DIR_PATH / "templates" / "DESIGN.md"
         if design_path.exists():
@@ -420,7 +428,11 @@ Utilise ces tokens et ces regles pour garantir la coherence visuelle si l'utilis
     # --- MISSION 181 : MANIFEST PROJET (IDENTITE & ORGANES) ---
     manifest_block = ""
     try:
-        manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+        final_id = project_id
+        if final_id == "active":
+            from bkd_service import get_active_project_id
+            final_id = get_active_project_id(token)
+        manifest_path = PROJECTS_DIR / final_id / "manifest.json"
         if manifest_path.exists():
             manifest_data = json.loads(manifest_path.read_text(encoding='utf-8'))
             manifest_block = f"""
@@ -566,10 +578,11 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
             try:
                 tool_data = json.loads(raw_text)
                 # On execute le tool call en interne pour retourner le HTML si besoin
-                tool_res = await sullivan_tool_call(ToolCallRequest(
+                tool_res = sullivan_tool_call(ToolCallRequest(
                     tool=tool_data["tool"],
                     params=tool_data["params"],
-                    project_id=req.project_id
+                    project_id=req.project_id,
+                    request=request
                 ))
                 if tool_res["status"] == "ok":
                     return {
@@ -625,7 +638,7 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
         # Sauvegarde de la logique dans logic.js (Mission 161)
         if logic_js:
             try:
-                p_path = get_active_project_path()
+                p_path = get_active_project_path(token)
                 if p_path:
                     (p_path / "logic.js").write_text(logic_js, encoding='utf-8')
                     logger.info(f"Sullivan: GSAP logic saved to {p_path}/logic.js")

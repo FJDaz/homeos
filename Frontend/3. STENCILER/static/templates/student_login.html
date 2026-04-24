@@ -213,16 +213,25 @@
             startBtn.textContent = 'chargement...';
             errorMsg.style.display = 'none';
             try {
-                var res = await fetch(API + '/' + classId + '/students/' + studentId + '/start', { method: 'POST' });
+                var res = await fetch('/api/auth/login-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, class_id: classId })
+                });
                 var data = await res.json();
-                if (data.project_id) {
+                if (data.token) {
                     localStorage.setItem('homeos_session', JSON.stringify({
-                        student_id: studentId,
-                        class_id: classId,
+                        token: data.token,
+                        user_id: data.user_id,
+                        student_id: data.student_id,
+                        class_id: data.class_id,
+                        active_project_id: data.project_id,
                         project_id: data.project_id,
-                        display: data.display
+                        name: data.name,      // ← ajout : bootstrap.js attend session.name
+                        display: data.name,   // ← conservé : WsStitchDrill lit session.display
+                        role: 'student'
                     }));
-                    window.location.href = '/workspace?project_id=' + data.project_id;
+                    window.location.href = '/workspace';
                 } else {
                     errorMsg.textContent = data.detail || 'Erreur inattendue.';
                     errorMsg.style.display = 'block';

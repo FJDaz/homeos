@@ -54,7 +54,7 @@ async def cadrage_rank(body: dict):
 
 
 @router.get("/cadrage")
-async def get_cadrage():
+def get_cadrage():
     path = STATIC_DIR_PATH / "templates/cadrage_alt.html"
     if not path.exists():
         raise HTTPException(status_code=404)
@@ -62,7 +62,7 @@ async def get_cadrage():
 
 
 @router.get("/cadrage-alt")
-async def get_cadrage_alt():
+def get_cadrage_alt():
     path = STATIC_DIR_PATH / "templates/cadrage_alt.html"
     if not path.exists():
         raise HTTPException(status_code=404)

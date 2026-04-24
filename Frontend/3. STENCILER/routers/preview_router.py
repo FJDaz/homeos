@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.post("/api/preview/run")
-async def preview_run(body: dict):
+def preview_run(body: dict):
     """Save current HTML to a temporary file for independent tab preview."""
     html = body.get("html", "")
     p_path = STATIC_DIR_PATH / "templates/_preview_tmp.html"
@@ -18,7 +18,7 @@ async def preview_run(body: dict):
 
 
 @router.get("/api/preview/show")
-async def preview_show():
+def preview_show():
     """Serve the temporary preview file."""
     p_path = STATIC_DIR_PATH / "templates/_preview_tmp.html"
     if not p_path.exists():

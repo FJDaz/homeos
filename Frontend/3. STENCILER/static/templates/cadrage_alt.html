@@ -300,7 +300,7 @@
                         // Mission R8 : Confirmation visuelle
                         const confirmCard = document.createElement('div');
                         confirmCard.className = 'p-4 my-4 bg-[#f0f9eb] border-l-4 border-[#8cc63f] rounded-r-8 font-univers text-[14px] text-[#2d5a27] shadow-sm';
-                        confirmCard.innerHTML = `<div class="font-bold mb-1">✓ sujet structuré identifié</div>
+                        confirmCard.innerHTML = `<div class="font-bold mb-1 flex items-center gap-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> sujet structuré identifié</div>
                              <div class="opacity-80">${_lastSujet.title}</div>
                              <div class="mt-2 text-[12px] uppercase tracking-wider opacity-60">compétences : ${competences.join(', ')}</div>`;
                         streams.gemini.appendChild(confirmCard);

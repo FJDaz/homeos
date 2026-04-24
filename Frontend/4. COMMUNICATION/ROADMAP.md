@@ -29,13 +29,50 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 5. STYLE HOMÉOS
    Pas de majuscules dans les labels UI. Pas d'emojis. Border-radius max `rounded-[20px]`.
    Vert HoméOS (#8cc63f) uniquement en nudge — jamais en fond large.
-```
 
+6. ICÔNES — SVG INLINE UNIQUEMENT
+   Interdiction absolue : emojis dans les boutons ou actions UI (👁 ✏️ 🗑 etc.).
+   Règle : utiliser des SVG inline Lucide-style (viewBox 0 0 24 24, stroke currentColor, fill none, stroke-width 1.8).
+   Les SVG doivent hériter de `color` via `stroke="currentColor"` pour rester compatibles avec les tokens HoméOS.
+   Taille par défaut : 14×14 ou 16×16 selon le contexte (jamais en rem, toujours en px).
+   Pas de CDN icon font, pas de base64, pas de sprite externe.
+```
 
 ---
 
-## 🧠 BOOTSTRAP QWEN — RÈGLES DE PERFORMANCE UI (Mission Performance)
+## 🧠 BOOTSTRAP BACKEND — RÈGLE ASYNC (CRITIQUE — Python 3.14 + uvicorn)
 
+```
+INTERDICTION ABSOLUE : nest_asyncio.apply() en global dans server_v3.py ou tout fichier importé au démarrage.
+RAISON : nest_asyncio patche asyncio.run() d'une façon incompatible avec uvicorn (loop_factory, Python 3.14+).
+SYMPTÔME : serveur démarre, accepte les connexions TCP, mais ne répond jamais → page blanche sans erreur console.
+
+RÈGLE : pour exécuter du code synchrone bloquant dans un contexte async FastAPI, utiliser UNIQUEMENT :
+  - asyncio.to_thread(fn, *args)          ← préféré pour les fonctions pures
+  - loop.run_in_executor(None, fn, *args) ← si accès au loop nécessaire
+
+Jamais : asyncio.run() imbriqué, nest_asyncio, event loop manuel dans une coroutine.
+```
+
+---
+
+## 🧠 BOOTSTRAP BACKEND — RÈGLE REDÉMARRAGE (CRITIQUE — livraison back)
+
+```
+RÈGLE OBLIGATOIRE : après toute mission livrée en backend (router, route, modèle Pydantic, middleware…),
+le serveur DOIT être redémarré avant tout test.
+
+RAISON : uvicorn charge les modules Python au démarrage. Une nouvelle route ajoutée dans un router
+ne sera jamais exposée si le serveur n'est pas relancé — elle retournera 404 même si le code est correct.
+
+PROCÉDURE :
+  1. Vérifier la livraison dans le fichier .py concerné (grep de la nouvelle route/fonction)
+  2. Redémarrer : cd /AETHERFLOW && bash start.sh
+  3. Confirmer via curl ou /openapi.json que la route est bien enregistrée
+  4. Seulement ensuite tester depuis le navigateur (hard refresh Cmd+Shift+R)
+
+S'applique à : auth_router.py, class_router.py, subject_router.py, bkd_router.py, et tout fichier dans routers/.
+```
 
 ---
 
@@ -43,3453 +80,378 @@ CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
 
 ```
 RÈGLES D'ANIMATION LOW-CPU :
-1. INTERDICTION DU BOX-SHADOW ANIMÉ (trop gourmand en CPU).
-2. LA FORMULE "PULSE" OPTIMISÉE (TRANSFORM + OPACITY) :
-   Utiliser un pseudo-élément (::after) animé :
-   #mon-bouton { position: relative; }
-   #mon-bouton::after {
-     content: ""; position: absolute; inset: 0;
-     border: 2px solid #COLOR; border-radius: 50%;
-     animation: pulse-low-cpu 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-   }
-   @keyframes pulse-low-cpu {
-     0% { transform: scale(1); opacity: 0.8; }
-     100% { transform: scale(1.6); opacity: 0; }
-   }
+- Utiliser transform/opacity uniquement (pas de width/height/top/left animés).
+- will-change: transform sur les éléments animés.
+- requestAnimationFrame pour les boucles JS, jamais setInterval pour du visuel.
+- Pas de box-shadow animé (recalcul layout).
 ```
 
 ---
 
-## Phase Active (2026-04-10)
+## Sprint actif — 2026-04-24
 
-> M260, M266–M276 ✅ — archivées ROADMAP_ACHIEVED.md
-> M278, M281, M275 (BYOK) ✅ — archivées ROADMAP_ACHIEVED.md
-
----
-
-### Thème 30 — Moteur AetherFlow (optimisation par les sessions)
-
-### Mission 290 — Contrôle des clés API par session + optimisation cascade
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Principe :** À chaque nouveau projet d'un user, la stack de clés API est contrôlée. Le résultat met à jour la "meilleure stack du moment" globale. Plus il y a d'utilisateurs, mieux le système marche — effet réseau.
-
-**Mécanisme :**
-- Au `POST /api/projects/activate` → contrôle asynchrone de chaque provider configuré (gemini, groq, openai, etc.)
-- Résultat stocké dans `db/provider_health.json` : `{ provider, latency_ms, success: bool, last_check, model }`
-- Cascade optimisée automatiquement : le provider le plus rapide + fiable passe en #1
-- Fallback sur la stack précédente si la nouvelle échoue
-
-**Avantage :**
-- Pas de ping permanent — les contrôles sont déclenchés par les sessions réelles
-- Les erreurs API (quota, clé expirée, downtime) sont détectées organiquement
-- Argument marketing : "plus on est d'utilisateurs, plus AetherFlow est rapide"
-- L'expérimentation avec les étudiants = données massives de fiabilité API
-
-**Stack actuelle à tester :**
-1. Gemini (vision + design tokens) — fiable mais lent
-2. Groq (vision ? ultra rapide) — à tester, si oui → priorité #1
-3. OpenAI — payant, bon fallback
-4. DeepSeek — bon rapport qualité/prix
-5. Qwen — gratuit, fallback
-6. Mimo — gratuit via OpenRouter
-7. Watson — gratuit IBM Cloud Lite
-
-**Fichiers :** `auth_router.py` (vérif au login), nouveau `engine_optimizer.py`, `api_key_urls.py`
-
-### Mission 291 — Drill A : Avec manifest (voie Stitch)
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Flux :** Upload manifest → Upload écrans (1-4) → Contrôle clés → Lancement Stitch → Sync polling 2min
-
-- Bouton rond pulsant "Créer un projet" sur canvas vide
-- Manifest obligatoire (sinon → redirect Cadrage)
-- Écrans uploadés (max 4 pour latence)
-- Clés vérifiées → ouverture Stitch
-- Polling 2min → détection nouveaux screens → pull auto
-
-**Fichiers :** `WsStitchDrill.js` (existant, à adapter), `WsStitchSync.js` (existant), `stitch_router.py`
-
-### Mission 292 — Drill B : Sans manifest (voie locale HomeOS)
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Flux :** Upload écrans (1-4, obligatoire) → Contrôle clés + optimisation cascade → Cadrage (manifest editor + extraction tokens + validation Sullivan) → Forge background → Canvas ready
-
-- Pas de manifest bloquant — les écrans suffisent
-- Clés contrôlées → cascade optimisée
-- Cadrage transformé : manifest editor inline avec design MD + swatches + "voici ce que j'ai compris"
-- Pendant la validation → forge HTML Tailwind en background
-- Canvas → écrans prêts, draggables, éditables
-
-**Fichiers :** nouveau `WsLocalDrill.js`, `cadrage_alt.html` → `WsManifestEditor.js`, `forge_router.py` optimisé
-
-### Mission 293 — Extraction tokens design dès 1er upload
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Objectif :** Dès le 1er écran uploadé, extraire les tokens design (couleurs, typo, spacing) via vision LLM.
-
-**Priorité cascade :**
-1. **Groq vision** — si disponible, ultra rapide (~1s) → extraction couleurs/typo
-2. Gemini vision — fallback (~3-5s)
-3. Regex SVG/CSS — dernier recours (couleurs hex, font-family)
-
-**Résultat :** Design MD généré automatiquement → swatches → Sullivan propose "voici ce que j'ai compris, tu valides ?"
-
-**Fichiers :** `svg_to_tailwind.py` (existant), nouveau `design_token_extractor.py`, `cadrage_router.py`
+| Mission | Titre | Status | Actor |
+|---------|-------|--------|-------|
+| M330 | Nettoyage structure ROADMAP.md | 🟢 TERMINÉE | GEMINI |
+| M331 | Fix onboarding student — session + drill | 🟢 TERMINÉE | GEMINI |
+| M332 | Handoff dev senior — chapitre ROADMAP | 🟢 CLAUDE | CLAUDE |
+| M333 | UX drill : nouveau projet + sortie croix | 🟢 TERMINÉE | GEMINI |
+| M334 | Fix impersonation : WsStitchDrill lit sessionStorage | 🟢 TERMINÉE | GEMINI |
+| M335 | UX : bouton nouveau projet + header panel | 🟢 TERMINÉE | GEMINI |
+| M336 | Fix critique : impersonation + séparation login/session | 🔴 BLOQUANT | GEMINI |
 
 ---
 
-### Thème 29 — Stitch & Manifest (en cours)
-
-### Mission 282 — Refonte panels : Project Panel V2 & Synchro Manifeste
-**STATUS: ✅ FAIT | DATE: 2026-04-12 | ACTOR: ANTIGRAVITY**
-
-**Objectif :** Gestionnaire multi-projets avec accordéon explicite et synchronisation automatique du manifeste.
-
-**CR (Compte-Rendu) :**
-- **Boucle Projets** : Rendu explicite de tous les projets avec header [Titre] + gestion de l'état `expanded` par projet.
-- **Activation Auto** : Le déploiement d'un projet dans la sidebar l'active automatiquement (`POST /api/projects/activate`).
-- **Synchro Manifeste** : L'activation d'un projet déclenche instantanément `window.ManifestBox.showForProject(id)`, mettant à jour l'éditeur de manifeste.
-- **Backend Evolutif** : L'API `/api/retro-genome/imports` accepte désormais un `project_id` pour charger les écrans de n'importe quel projet sans forcément l'activer au préalable (prévisualisation).
-
-**Fichiers :** `WsProjectPanel.js` (V2), `ManifestBox.js` (Synchro), `retro_genome/routes.py` (API params).
-
-
-
-### Mission 281 — Drill step 3 : bouton "ouvrir dans l'éditeur" + fix 404 manifest
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: GEMINI**
+### M336 — Fix critique : impersonation localStorage + séparation login/session
+**STATUS: 🔴 BLOQUANT | DATE: 2026-04-24 | ACTOR: GEMINI**
 
 > BOOTSTRAP OBLIGATOIRE
 
-**Contexte :** Le drill `WsStitchDrill.js` a 5 étapes. Step 3 (manifest) s'arrête à l'affichage du manifest ou au formulaire d'upload — **il n'y a aucun bouton pour ouvrir le manifest dans l'éditeur**. `window.ManifestBox.show()` existe (ManifestBox.js L442) mais n'est jamais appelé depuis le drill.
+**Contexte :** Deux bugs bloquants introduits par les missions précédentes.
 
-**Fichier unique :** `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js`
+**Fichiers :** `teacher_dashboard.html`, `bootstrap.js`, `login.html`, `page_router.py`
 
 ---
 
-**Fix 1 — Ajouter le bouton "ouvrir l'éditeur" dans `loadManifestStep()`**
+**Bug 1 — Impersonation : sessionStorage non partagé entre onglets**
 
-Dans la branche `hasContent` (L331-339), remplacer le HTML du step manifest par :
+`window.open(..., '_blank')` crée un contexte de navigation indépendant. Le `sessionStorage` du dashboard n'est PAS copié dans le nouvel onglet. Résultat : le workspace ouvre avec `?impersonate=1`, bootstrap.js lit un sessionStorage vide, tombe sur le token du prof dans localStorage, envoie ce token aux routes student → 401 → redirect `/login`.
+
+**Fix A — `teacher_dashboard.html` : passer par localStorage temporaire**
+
+Dans la fonction `impersonate()`, remplacer le `sessionStorage.setItem` par un `localStorage.setItem` avec une clé temporaire :
 
 ```js
-section.innerHTML = `
-    <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[11px] text-[#3d3d3c]">
-        <div class="font-bold text-[12px] mb-1">${name}</div>
-        ${desc ? '<div class="text-[#9a9a98] mb-2 text-[10px]">' + desc.substring(0, 200) + '</div>' : ''}
-        <div class="flex gap-3 text-[9px] text-[#9a9a98] mb-3"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
-    </div>
-    <div class="flex gap-2">
-        <button id="drill-open-editor" class="px-6 py-2.5 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all">ouvrir l'éditeur →</button>
-        <button id="drill-continue-manifest" class="px-6 py-2.5 bg-[#8cc63f] text-white text-[11px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">continuer →</button>
-    </div>
-`;
-document.getElementById('drill-open-editor').onclick = () => {
-    if (window.ManifestBox) window.ManifestBox.show();
+// AVANT
+sessionStorage.setItem('homeos_impersonation', JSON.stringify({...}));
+window.open('/workspace?impersonate=1', '_blank');
+
+// APRÈS
+localStorage.setItem('homeos_impersonation_pending', JSON.stringify({
+    token: data.token,
+    user_id: data.user_id,
+    student_id: studentId,
+    class_id: classId,
+    active_project_id: data.project_id,  // ← clé correcte attendue par WsStitchDrill
+    project_id: data.project_id,
+    role: 'student',
+    name: data.name
+}));
+window.open('/workspace?impersonate=1', '_blank');
+```
+
+**Fix B — `bootstrap.js` : lire `localStorage.homeos_impersonation_pending` au boot**
+
+Dans le bloc impersonation de bootstrap.js, remplacer la lecture sessionStorage par :
+
+```js
+if (isImpersonate) {
+    // Lire depuis localStorage (seul moyen de passer data à un _blank tab)
+    const pending = JSON.parse(localStorage.getItem('homeos_impersonation_pending') || '{}');
+    if (pending.token) {
+        session = pending;
+        // Déplacer en sessionStorage pour cette session d'onglet
+        sessionStorage.setItem('homeos_impersonation', JSON.stringify(pending));
+        // Supprimer la clé temporaire pour éviter que d'autres onglets la lisent
+        localStorage.removeItem('homeos_impersonation_pending');
+    }
+}
+```
+
+---
+
+**Bug 2 — `/login` : deux formulaires cohabitent (impossible)**
+
+La page `/login` affiche actuellement deux onglets : "Session Code" (CPF) et "Formateur" (email+password). Ces deux flux ne peuvent pas cohabiter sur la même page — UX cassée, confusion prof/apprenant, redirection impersonation vers le mauvais onglet.
+
+**Fix C — `login.html` : une seule forme, prof uniquement**
+
+La page `/login` doit afficher uniquement le formulaire email+password (onglet "Formateur"). Supprimer entièrement le formulaire "Session Code" et la logique `selectContext()`.
+
+Le formulaire CPF session code sera traité dans une mission dédiée sur une URL séparée (ex: `/classroom`). Ne pas l'implémenter ici — le supprimer et laisser la place propre.
+
+**Fix D — `page_router.py` : vérifier que la route `/login` sert bien `login.html`**
+
+Aucun changement attendu — juste vérifier que la route est intacte après modification de login.html.
+
+---
+
+**output attendu :**
+- Clic "voir en tant que" → workspace s'ouvre dans un nouvel onglet → drill s'affiche avec la session de l'élève → plus de redirect vers login
+- `/login` → formulaire email+password uniquement, pas de session code
+- Session de l'onglet impersonation isolée (sessionStorage) → fermeture onglet = session détruite
+- Session prof dans l'onglet dashboard intacte (localStorage)
+
+---
+
+### M335 — Restauration WsStitchDrill.js + Alignement UX Projet
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+**CR Ultra-Précis (Gemini) :**
+
+1. **Nettoyage WsStitchDrill.js** :
+   - **Suppression du bouton flottant** : La fonction `createSmallButton()` (bouton "+ Nouveau projet" en bas à droite) a été intégralement supprimée du code.
+   - **Simplification de `show()`** : Désormais la fonction appelle directement `createOverlay()` au lieu de vérifier l'état du canvas. Elle s'autolimite au rôle `student` et s'exécute au boot si `active_project_id` est absent.
+   - **Fix Session** : Validation de la lecture prioritaire du `sessionStorage` pour l'impersonation.
+
+2. **Refonte WsProjectPanel.js** :
+   - **Header Redesign** : Dans `_renderSectionHeader()`, le bouton `+` est maintenant un cercle vert (`#8cc63f`) de 24x24px, avec un plus blanc (SVG) et un effet de scale au survol.
+   - **Câblage Drill** : Le `onclick` du bouton `+` dans le panneau latéral appelle désormais `window.WsStitchDrill.show()`. Cela replace le Drill (overlay central + gros bouton rond) au cœur de l'expérience de création.
+   - **Visibilité** : Suppression des blocages d'affichage pour les élèves ayant un seul sujet. La section "Projets Personnels" est désormais une ancre permanente dans la sidebar.
+
+3. **Intégration** :
+   - Le flux est maintenant : **Panel Project (+) → Drill Overlay (Centre) → Création Projet**.
+
+---
+
+
+
+### M334 — Fix impersonation globale : WsStitchDrill + WsProjectPanel
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+**CR (Gemini) :**
+- **Impersonation-Awareness** : Les fichiers `WsStitchDrill.js` et `WsProjectPanel.js` lisent désormais la session élève dans le `sessionStorage` (`homeos_impersonation`) quand le paramètre `?impersonate=1` est présent.
+- **Project Panel Fix** : Le panneau des projets n'est plus "invisible" en mode impersonation ; il reflète bien le contexte élève.
+- **Drill Lifecycle** : Le drill se lance désormais systématiquement en mode "voir en tant que" si l'élève n'a pas de projet actif.
+- **Restart Serveur** : Redémarrage effectué pour valider la prise en compte des routes et correctifs.
+
+---
+
+
+## Thème 37 — Handoff Dev Senior & NLP/HCI
+
+### M330 — Nettoyage structure ROADMAP.md
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+**CR (Gemini) :**
+- Suppression des séparateurs `---` redondants.
+- Suppression de la version spécification de M328 (doublon).
+- Réorganisation chronologique des CRs (M327 → M328 → M329).
+- Validation du tableau "Sprint actif" en tête de document.
+
+---
+
+### M333 — UX drill : bouton "nouveau projet" + croix de sortie
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+**CR (Gemini) :**
+- **Bouton Centre (Restore)** : Restauration du **gros bouton rond pulsant** d'origine (dégradé HoméOS) au centre du drill. Il est désormais fonctionnel et crée le projet personnel via `/api/projects/create` (autonomie totale).
+- **Project Panel Button +** : Ajout d'un bouton `+` vert permanent dans le header de section "Projets Personnels". La section est désormais visible en permanence, même si l'élève n'a qu'un seul sujet (suppression de la règle de masquage "vue directe").
+- **Overlay Exit** : Ajout d'une croix de fermeture `×` (SVG Lucide) en haut à droite de l'overlay drill pour permettre de quitter le flux sans effet de bord.
+
+---
+
+### M331 — Fix onboarding student : session + drill flow
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+
+**CR (Gemini) :**
+- `student_login.html` : injection de `session.name` pour le header.
+- `WsStitchDrill.js` : bouton "Commencer" ajouté à l'étape des clés API.
+- `WsStitchDrill.js` : retry défensif sur l'ouverture de `ManifestBox`.
+- `WsStitchDrill.js` : redirection vers Step 0 si `projectId` absent (meilleur UX).
+
+**Fichiers :**
+- `Frontend/3. STENCILER/static/templates/student_login.html`
+- `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js`
+
+**Fix 1 — `student_login.html` : champ `name` manquant dans la session**
+
+Le stockage localStorage de la session ne contient pas de champ `name`, alors que `bootstrap.js` attend `session.name` pour afficher le nom de l'élève dans le header. Ajouter `name` en plus de `display` :
+
+```js
+// AVANT (L230 environ)
+localStorage.setItem('homeos_session', JSON.stringify({
+    token: data.token,
+    user_id: data.user_id,
+    student_id: data.student_id,
+    class_id: data.class_id,
+    active_project_id: data.project_id,
+    project_id: data.project_id,
+    display: data.name,
+    role: 'student'
+}));
+
+// APRÈS
+localStorage.setItem('homeos_session', JSON.stringify({
+    token: data.token,
+    user_id: data.user_id,
+    student_id: data.student_id,
+    class_id: data.class_id,
+    active_project_id: data.project_id,
+    project_id: data.project_id,
+    name: data.name,      // ← ajout : bootstrap.js attend session.name
+    display: data.name,   // ← conservé : WsStitchDrill lit session.display
+    role: 'student'
+}));
+```
+
+**Fix 2 — `WsStitchDrill.js` : bouton "Commencer à travailler" accessible dès Step 2**
+
+Le bouton `_finishButton()` n'apparaît qu'à Step 3 (manifest) et Step 4. Un élève qui a déjà un manifest assigné par le prof est bloqué à Step 2 (clés API) avec seulement un bouton "Continuer →". Ajouter le bouton "Commencer à travailler" également à Step 2, juste après le bouton `drill-continue-keys` :
+
+```js
+// Ajouter après la ligne :
+document.getElementById('drill-continue-keys').onclick = () => { currentStep = 3; renderStep(); };
+
+// Ajouter :
+const keysSection = document.getElementById('drill-keys-section') || document.querySelector('[data-step="2"]');
+if (keysSection) _finishButton(keysSection);
+```
+
+**Fix 3 — `WsStitchDrill.js` : ManifestBox defensive retry**
+
+La ligne `btn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };` dans `_finishButton()` est silencieuse si ManifestBox n'est pas encore chargé. Remplacer par un retry :
+
+```js
+// AVANT (dans _finishButton, L511 environ)
+btn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
+
+// APRÈS
+btn.onclick = () => {
+    hide();
+    const _tryOpen = () => window.ManifestBox ? window.ManifestBox.show() : setTimeout(_tryOpen, 200);
+    _tryOpen();
 };
-document.getElementById('drill-continue-manifest').onclick = () => { currentStep = 4; renderStep(); };
 ```
 
----
+**Fix 4 — `WsStitchDrill.js` : project_id null → Step 0 au lieu d'erreur**
 
-**Fix 2 — Ajouter le même bouton après un upload réussi**
-
-Dans `uploadManifest()` (L374), après `statusEl.textContent = '✓ Manifest sauvegardé'`, avant le `setTimeout` :
+Dans `loadManifestStep()`, si `projectId` est null, le code affiche "projet non trouvé — contacte ton professeur". Ce message est trompeur : un nouvel élève n'a pas encore de projet, c'est normal. Remplacer le message par un retour à Step 0 ("Créer un projet") :
 
 ```js
-// Afficher le bouton éditeur sans attendre le step suivant
-const editorBtn = document.createElement('button');
-editorBtn.textContent = 'ouvrir l\'éditeur →';
-editorBtn.className = 'mt-3 px-6 py-2 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold rounded-[12px] hover:bg-[#f0fdf4] transition-all block';
-editorBtn.onclick = () => { if (window.ManifestBox) window.ManifestBox.show(); };
-statusEl.parentNode.insertBefore(editorBtn, statusEl.nextSibling);
-```
-
----
-
-**Fix 3 — Guard projectId null dans `loadManifestStep()`**
-
-L318 : `const projectId = session.active_project_id || session.project_id;`
-
-Si `projectId` est null/undefined → la fetch part sur `/api/projects/undefined/manifest` → 404 silencieux → `showManifestUpload()` alors que le manifest existe.
-
-Ajouter avant le fetch :
-```js
+// AVANT (L347-349)
 if (!projectId) {
-    showManifestUpload(section, 'projet non trouvé dans la session');
+    showManifestUpload(section, 'projet non trouvé — contacte ton professeur');
+    return;
+}
+
+// APRÈS
+if (!projectId) {
+    currentStep = 0;
+    renderStep();
     return;
 }
 ```
 
----
-
-**Livrable :**
-- Step 3 manifest présent → boutons "ouvrir l'éditeur" ET "continuer"
-- Step 3 manifest absent → upload + bouton "ouvrir l'éditeur" après upload réussi
-- Guard projectId null → message explicite au lieu de 404 silencieux
-- `window.ManifestBox` vérifié avant appel (`if (window.ManifestBox)`)
-- Aucun autre fichier touché
-
----
-
-### Mission 298 — Double contexte student / user : pont FK + project panel double tab
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-12 | ACTOR: QWEN (Back) + GEMINI (Front) — PARALLÈLE**
-
-**Principe :** Un étudiant a deux vies :
-1. **Student** — le drill école : le prof assigne un sujet, l'étudiant travaille dessus. Workflow basique, services institutionnels.
-2. **User** — le citoyen moyen : multi-projets perso, BYOK, libre.
-
-Les deux coexistent. Le student n'est pas exclu du user. Le panel projet affiche deux tabs :
-- Tab 1 (student) : `sujet assigné → écrans`
-- Tab 2 (user) : `mes projets perso → écrans`
-
-**Lien secure :** `students.user_id` (FK nullable → `users.id`). Au login étudiant, si pas de lien → créer user + écrire le lien (write once).
-
----
-
-#### BACKEND (QWEN) — 3 fichiers
-
-**Fichier 1 — Migration SQL (one-shot)**
-
-`supabase/migrations/006_student_user_link.sql` :
-```sql
-ALTER TABLE students ADD COLUMN user_id TEXT REFERENCES users(id);
-CREATE INDEX IF NOT EXISTS idx_students_user_id ON students(user_id);
-```
-
-**Fichier 2 — `auth_router.py`**
-
-Dans `auth_login_student()` (après `user = _find_user_by_name(display)`) :
-- Si student a un `user_id` → l'utiliser directement (plus de lookup par nom)
-- Si student n'a pas de `user_id` → créer/récupérer user → écrire `students.user_id = user_id`
-- Retourner les deux : `student_id` ET `user_id` dans la réponse
-
-Dans `auth_register()` (bloc student) :
-- Même logique : après création du user, écrire `students.user_id = user_id`
-
-**Fichier 3 — `projects_router.py`**
-
-Dans `list_all_projects_route()` :
-- Student voit : ses projets perso (`user_id = uuid`) + le projet student (`students.project_id`)
-- La requête UNION les deux sources
-
-```python
-# Student : projets perso + projet student
-rows = conn.execute("""
-    SELECT DISTINCT p.id, p.name, p.path, p.created_at, p.last_opened
-    FROM projects p
-    WHERE p.user_id = ?
-       OR p.id = (SELECT s.project_id FROM students s WHERE s.id = ? AND s.project_id IS NOT NULL)
-    ORDER BY p.last_opened DESC
-""", (user_id, student_id)).fetchall()
-```
-
-Dans `activate_project_route()` :
-- Si le projet activé appartient au student (via `students.project_id`) → écrire dans `students.project_id`
-- Sinon → c'est un projet perso du user, juste `last_opened`
-
----
-
-#### FRONTEND (GEMINI) — 2 fichiers
-
-**Fichier 1 — `bootstrap.js`**
-
-Ne plus cacher le project switcher aux students. Le student a besoin de naviguer entre son sujet et ses projets perso.
-
-**Fichier 2 — `WsProjectPanel.js`**
-
-Deux tabs :
-```
-┌─────────────────┬──────────────────┐
-│ sujet assigné   │ mes projets      │
-└─────────────────┴──────────────────┘
-```
-
-- **Tab 1 (student)** : affiché si `session.student_id && session.project_id`
-  - Header : nom du sujet (via `GET /api/projects/{project_id}/manifest`)
-  - Liste des écrans du sujet (via `/api/retro-genome/imports?project_id=...`)
-  - Pas de bouton supprimer, pas de bouton créer
-
-- **Tab 2 (user)** : affiché pour tous les users
-  - Liste des projets perso (`GET /api/projects` — déjà filtré par user_id côté serveur)
-  - Bouton "+ Nouveau projet" (appelle `POST /api/projects/create`)
-  - Chaque projet : expand → écrans → activer
-
-**Logique de tab :**
-- Par défaut → Tab 1 si student, Tab 2 sinon
-- `localStorage` mémorise le dernier tab actif
-- Les deux tabs partagent le même mécanisme d'activation (`POST /api/projects/activate`)
-
-**Session :** `homeos_session` stocke maintenant `student_id` ET `user_id` comme champs distincts. Le code existant qui lit `session.project_id` continue de fonctionner.
-
----
-
-**Fichiers Backend :** `auth_router.py`, `projects_router.py`, `supabase/migrations/006_student_user_link.sql`
-**Fichiers Frontend :** `WsProjectPanel.js`, `bootstrap.js`, `login.html`, `student_login.html`
-
-**Critères de succès :**
-1. Au login étudiant → `students.user_id` écrit (FK)
-2. Panel projet : 2 tabs visibles pour un student
-3. Tab 1 = sujet prof, Tab 2 = projets perso
-4. Student peut créer un projet perso (Tab 2 → "+ Nouveau projet")
-5. Aucun projet existant cassé
-
----
-
-### Mission 280-DIAG — Trois bugs bloquants du drill : manifest 404, stitch sync loop, race condition upload
-**STATUS: 🔴 DIAG | DATE: 2026-04-12 | ACTOR: QWEN**
-
----
-
-**Bug 1 — Manifest 404 persistant pour les étudiants existants**
-
-**Cause identifiée :** `GET /api/projects/{project_id}/manifest` (projects_router.py L290-295) lève 404 si `manifest.json` est absent sur disque. Le dossier projet n'est créé qu'au `register` (nouveaux étudiants). Les sessions existantes n'ont pas de dossier `projects/{project_id}/` → le fichier n'existe pas → 404 systématique.
-
-Le `PUT /api/projects/{project_id}/manifest` crée le dossier (L303) mais le `GET` n'a pas ce filet.
-
-**Fix :** dans `GET /api/projects/{project_id}/manifest`, si manifest absent → créer le dossier + retourner un manifest par défaut plutôt que 404 :
-```python
-@router.get("/projects/{project_id}/manifest")
-async def get_project_manifest_route(project_id: str):
-    p_path = PROJECTS_DIR / project_id
-    manifest_path = p_path / "manifest.json"
-    if not manifest_path.exists():
-        # Créer le dossier + manifest minimal plutôt que 404
-        p_path.mkdir(parents=True, exist_ok=True)
-        default = {"id": project_id, "name": project_id, "screens": [], "stitch_project_id": None}
-        manifest_path.write_text(json.dumps(default, indent=2), encoding='utf-8')
-        return default
-    manifest = get_project_manifest(project_id)
-    if not manifest:
-        raise HTTPException(status_code=404, detail="Manifest not found")
-    return manifest
-```
-
-**Fichier :** `Frontend/3. STENCILER/routers/projects_router.py` — L290-296
-
----
-
-**Bug 2 — Stitch sync 404 en boucle au premier poll**
-
-**Cause identifiée :** `WsStitch._syncProjectId()` appelle `GET /api/stitch/project-info`. Si `stitch_project_id` est null dans le manifest → retourne `{ linked: false }` (HTTP 200, pas 404). Le 404 vient d'ailleurs : `WsStitch.sync()` (L254) appelle `POST /api/stitch/sync` — cette route appelle `_get_stitch_key()` puis tente de récupérer les données Stitch. Si la clé est absente → route lève HTTPException 501, pas 404. 
-
-Le 404 est probablement sur `GET /api/stitch/screens?project_id=` avec `project_id` vide (string vide) → endpoint Stitch retourne 404 car l'ID est invalide.
-
-**Test de diagnostic :**
-```js
-// Dans la console workspace après ouverture du panel Stitch
-fetch('/api/stitch/project-info').then(r=>r.json()).then(console.log)
-// Si linked: false → project_id vide → screens?project_id= → 404
-
-// Vérifier la valeur exacte envoyée
-window.wsStitch?.projectIdInput?.value  // vide = cause confirmée
-```
-
-**Fix :** dans `WsStitch.loadSession()`, si `project_id` est vide ou null → ne pas appeler `GET /api/stitch/screens` → afficher "aucun projet lié" sans requête :
-```js
-async loadSession() {
-    const projectId = this.projectIdInput?.value?.trim();
-    if (!projectId) {
-        // Afficher état "non lié" sans appel API
-        this._renderUnlinked();
-        return;
-    }
-    // ... suite normale
-}
-```
-
-**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsStitch.js` — `loadSession()` L159
-
----
-
-**Bug 3 — Race condition upload manifest dans le drill**
-
-**Cause suspectée :** `WsStitchDrill.js` upload le manifest via `PUT /api/projects/{id}/manifest`, puis immédiatement lit l'état via `GET /api/projects/active/manifest`. Si le `PUT` est async et que le `GET` arrive avant que l'écriture disque soit terminée → le GET retourne l'ancienne version ou 404.
-
-**Test de diagnostic :**
-```js
-// Dans WsStitchDrill.js, chercher la séquence upload → read
-// Y a-t-il un await sur le PUT avant le GET suivant ?
-// Si le GET suit sans await → race condition confirmée
-```
-
-**Fix probable :** s'assurer que le GET ne part qu'après résolution du PUT :
-```js
-await fetch('/api/projects/active/manifest', { method: 'PUT', ... });
-// Seulement après :
-const manifest = await fetch('/api/projects/active/manifest').then(r => r.json());
-```
-
-**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js` — séquence upload manifest
-
----
-
-**Livrable QWEN :**
-1. Fix Bug 1 : `GET /api/projects/{id}/manifest` → créer manifest par défaut si absent
-2. Confirmer Bug 2 via test console → fix `loadSession()` guard
-3. Confirmer Bug 3 via lecture `WsStitchDrill.js` → fix await séquence
-4. Reporter les résultats des tests console dans le rapport
-
----
-
-### Mission 280 — Landing Canvas + Drill paramétrage Stitch
-**STATUS: 🟠 EN COURS | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Flux du drill actuel (implémenté) :**
-1. **Écrans** (1-4) → upload PNG/SVG/JPG avec drag&drop
-2. **Clés API** → 5 champs (Gemini, Groq, OpenAI, DeepSeek, Qwen) avec boutons OK + explication optimisation moteur ("Plus tu renseignes de clés, plus le moteur est fiable et rapide")
-3. **Manifeste** → upload si absent, aperçu si présent + lien vers ManifestBox editor
-4. **Écrans forgés** → liste les imports forgés pendant la config des clés
-5. **Canvas** → "Commencer à travailler"
-
-**Bouton "+ Nouveau projet"** → affiché en bas à droite pour les élèves quand le canvas n'est pas vide (z-index 99999)
-
-**Issues connues :**
-- **Manifest 404 persistant** : Même avec le fichier manifest.json sur disque, l'endpoint `/api/projects/{id}/manifest` retourne 404. Le dossier projet n'est pas créé automatiquement au login pour les étudiants existants (seulement pour les nouveaux). Fix partiel : `auth_router.py` crée le dossier + manifest par défaut au register, mais les sessions existantes n'ont pas de dossier projet.
-- **Stitch sync 404 en boucle** : Le polling retourne 404 quand aucun `stitch_project_id` n'est lié. Arrêt auto implémenté mais le 404 persiste au premier poll.
-- **Manifest upload du drill** : Le upload fonctionne mais le manifest n'est pas toujours persisté correctement (race condition ?)
-
-**Fichiers :** `WsStitchDrill.js`, `auth_router.py`, `projects_router.py`, `WsImportList.js`
-
-### Mission 294 — Circuit Breaker + Passive Health Monitoring (Zero-Cost Smart Routing)
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-11 | ACTOR: QWEN**
-
-**Principe :** Ne jamais "pinguer" pour tester un provider. Utiliser les **vraies requêtes** comme capteurs de santé. Si DeepSeek plante, toute la classe bascule automatiquement sur Gemini/Groq.
-
-**1. Circuit Breaker (Coupe-circuit) :**
-- **Closed** (Normal) : Les requêtes passent vers le provider (ex: DeepSeek)
-- **Open** (Sécurité) : Si 3 requêtes échouent (timeout/503) → coupe-circuit saute → bascule auto sur fallback (Groq/Gemini) pendant 5 min
-- **Half-Open** (Test) : Après 5 min → 1 seule requête test → si OK → Closed, sinon → Open pour 5 min de plus
-
-**2. Monitoring Passif TTFT (Time To First Token) :**
-- Mesurer le temps du premier token de chaque requête
-- Si moyenne glissante > 10s → provider marqué "Congested" 🟠
-- UI : voyant "DeepSeek encombré — passer sur Gemini ?"
-
-**3. Headers Rate Limit :**
-- Lire `X-RateLimit-Remaining` et `X-RateLimit-Reset` sur chaque réponse réussie
-- Savoir exactement où on en est sans appel de test
-
-**4. Mutualisation classe (Smart Routing) :**
-- Si l'élève A détecte DeepSeek DOWN → info partagée via serveur AetherFlow
-- Les 29 autres élèves basculent instantanément sur fallback sans tester
-- `provider_health.json` partagé sur le serveur : `{ provider, status, last_check, avg_ttft, failure_count }`
-
-**Implémentation — `ModelHealthManager` :**
-```python
-class ModelHealthManager:
-    def __init__(self):
-        self.failure_count = 0
-        self.status = "HEALTHY"  # HEALTHY, DEGRADED, DOWN
-        self.last_failure_ts = 0
-
-    def record_success(self, latency):
-        self.failure_count = 0
-        self.status = "DEGRADED" if latency > 15.0 else "HEALTHY"
-
-    def record_failure(self):
-        self.failure_count += 1
-        self.last_failure_ts = time.time()
-        if self.failure_count >= 3:
-            self.status = "DOWN"
-
-    def can_attempt(self):
-        if self.status == "DOWN":
-            return (time.time() - self.last_failure_ts) > 300  # 5 min
-        return True
-```
-
-**Fichiers :**
-- Nouveau `model_health.py` — `ModelHealthManager` par provider (gemini, deepseek, groq, etc.)
-- `gemini_client.py` / `deepseek_client.py` — `record_success(latency)`, `record_failure()`
-- `rbac_middleware.py` — `check_provider_health(provider)` → fallback si DOWN
-- UI — voyant provider dans settings drawer (🟢/🟠/🔴)
-- `provider_health.json` — état partagé serveur (mis à jour en mémoire, persisté toutes les 30s)
-
-**Avantage marketing :** "Plus on est d'utilisateurs, plus AetherFlow détecte vite les pannes API et bascule sur des providers sains."
-
-
-### Mission 295 — Sullivan "Micro-Mode" (Global Collapsed State)
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-11 | ACTOR: GEMINI**
-
-**Objectif :** Implémenter un mode "réduit" pour Sullivan utilisable partout dans l'application pour minimiser l'encombrement visuel.
-
-**Spécifications :**
-- **UI :** Hauteur réduite au strict minimum (input + bouton send).
-- **Behavior :** Masquage de l'historique et des boutons secondaires (`edit code`, etc.) dans cet état.
-- **Trigger :** Bouton de collapse/expand sur le header.
-- **Persistence :** L'état (ouvert/réduit) est mémorisé via localStorage.
-- **Global scope :** S'applique au Chat Main et au Surgical Sullivan.
-
-**Fichiers :** `WsChatBase.js`, `WsChatSurgical.js`, `bootstrap.js` (CSS global)
-
----
-
-### Mission 283a — Backend : RBAC middleware + Entitlements + Workspaces DB
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Objectif :** Mettre en place le modèle RBAC + Entitlements côté backend (DB + middleware FastAPI).
-
-**Livrables :**
-1. **Migration 005** — `supabase/migrations/005_workspaces_and_entitlements.sql`
-   - Table `workspaces` (id, name, plan, owner_id)
-   - Table `workspace_members` (user_id, workspace_id, role_in_workspace)
-   - Colonne `plan` dans `users` (FREE/PRO/MAX)
-   - Seed : workspace personnel par user existant
-
-2. **`rbac_middleware.py`** — Middleware FastAPI + dépendances
-   - `get_current_user(token) → User` — résout le token, retourne `{ id, name, role, plan, workspace_id, entitlements }`
-   - `@require_role("TEACHER")` — décorateur d'accès par rôle
-   - `check_entitlement(user, feature) → bool` — vérifie un droit spécifique
-   - `check_quota(user, feature) → bool` — vérifie un quota dynamique
-
-3. **Matrice d'entitlements par plan :**
-   ```python
-   PLAN_LIMITS = {
-       "FREE":  {"max_projects": 3,  "ai_models": ["qwen", "llama"],    "stitch": False, "byok": False, "monthly_tokens": 50_000},
-       "PRO":   {"max_projects": 20, "ai_models": ["*"],               "stitch": True,  "byok": True,  "monthly_tokens": 500_000},
-       "MAX":   {"max_projects": 999,"ai_models": ["*"],               "stitch": True,  "byok": True,  "monthly_tokens": None},
-   }
-   ```
-
-4. **Enrichir les endpoints existants :**
-   - `POST /api/auth/register` → crée workspace personnel (`ws_{user_id}`)
-   - `GET /api/me` → retourne `{ user_id, name, role, plan, workspace_id, entitlements }`
-   - `GET /api/me/keys` → protégé par `X-User-Token`
-
-**Fichiers :** `auth_router.py`, `rbac_middleware.py`, `bkd_service.py`, `005_workspaces_and_entitlements.sql`, `server_v3.py`
-
----
-
-### Mission 283b — Frontend : Session RBAC + UI Workspace
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: GEMINI**
-
-**Contexte :** Le backend M283a expose maintenant des sessions enrichies avec `workspace_id`, `plan` et `entitlements`. Le frontend doit adapter la session, le bootstrap et l'UI.
-
-**Livrables :**
-
-1. **Session enrichie** — `bootstrap.js` :
-   - `homeos_session` = `{ user_id, name, role, plan, workspace_id, entitlements, token }`
-   - Le monkey-patch `fetch` inclut `X-User-Token` (déjà fait)
-   - Ajout : `X-Workspace-Id` header optionnel
-
-2. **Guard RBAC frontend** — nouveau `rbac_guard.js` :
-   - `canAccess(feature) → bool` — vérifie les entitlements de la session
-   - Masque les boutons non autorisés (ex: Stitch si FREE)
-   - Affiche un toast "Upgrade to Pro" si quota dépassé
-   - Appliqué sur : bouton Stitch, bouton Forge, bouton Cadrage avancé
-
-3. **UI Workspace selector** — dans le drawer Settings :
-   - Affiche le workspace actif + plan badge (FREE/PRO/MAX)
-   - Si teacher → lien vers "Ma classe" (dashboard)
-   - Si student → affiche "Classe : DNMADE3"
-   - Si user solo → "Workspace personnel"
-
-4. **Matrice de visibilité UI :**
-   | Élément UI | FREE | PRO | MAX |
-   |------------|------|-----|-----|
-   | Bouton Stitch | ❌ (grisé) | ✅ | ✅ |
-   | BYOK panel | ❌ | ✅ | ✅ |
-   | Max 4 écrans upload | ✅ (hard limit) | ✅ (20) | ✅ (∞) |
-   | Quota indicator | ✅ | ✅ | ❌ (pas de quota) |
-
-5. **Migration login/register** — le login retourne maintenant `plan` + `workspace_id` + `entitlements` → mettre à jour le stockage localStorage
-
-**Fichiers :** `bootstrap.js`, nouveau `rbac_guard.js`, `WsStitchDrill.js` (adapter bouton Stitch si FREE), `ws_main.js` (guard sur forge)
-
-### Mission 279 — FEE Studio : resolve écran actif + assets 404
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Vérifications :**
-- `WsFEEStudio.open()` : résout `activeScreen` depuis `wsCanvas.activeScreenId` ✅
-- `bkd_router.py` `/fee/preview` : injecte `<base href>` ✅
-- Tester sur un écran forgé (PNG → HTML) → l'iframe affiche le rendu avec CSS
-
-**Fichiers :** `WsFEEStudio.js`, `bkd_router.py`, `WsImportList.js`
-
----
-
-### Thème 29 — Sécurité clés API : isolation élève + masquage
-
----
-
-### Mission 268 — Chiffrement : bcrypt pour les mots de passe + Fernet pour les clés API
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: QWEN**
-
-**Contexte :** deux faiblesses crypto dans la DB SQLite :
-- Mots de passe profs : SHA-256 sans sel → vulnérable aux rainbow tables si DB volée
-- Clés API (Stitch, HF) : stockées en clair → exploitables directement si DB volée
-
-**Dépendances à ajouter dans `requirements.txt` :**
-```
-bcrypt>=4.0.0
-cryptography>=41.0.0
-```
-
----
-
-**Fix 1 — Mots de passe : SHA-256 → bcrypt**
-
-Fichier : `Frontend/3. STENCILER/routers/auth_router.py` — `_hash_password()` L516-518 et les deux appels.
-
-```python
-# Avant
-import hashlib
-def _hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
-
-# Après
-import bcrypt
-def _hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def _verify_password(password: str, stored_hash: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
-```
-
-Remplacer la comparaison directe dans le login prof :
-```python
-# Avant
-if password_hash != stored_hash:
-
-# Après
-if not _verify_password(req.password, stored_hash):
-```
-
-**Migration :** les hashes SHA-256 existants en DB sont incompatibles avec bcrypt. À la première connexion d'un utilisateur avec l'ancien hash, forcer la réinitialisation de mot de passe (retourner 401 avec `detail="reset_required"`). Le frontend affiche "veuillez redéfinir votre mot de passe".
-
----
-
-**Fix 2 — Clés API : stockage Fernet (AES-128 symétrique)**
-
-Fichier : `Frontend/3. STENCILER/core/key_resolver.py` (lire avant de toucher — il existe déjà).
-
-Créer un helper `crypto_keys.py` dans `Frontend/3. STENCILER/core/` :
-```python
-from cryptography.fernet import Fernet
-import os
-
-def _get_fernet() -> Fernet:
-    key = os.getenv("FERNET_KEY")
-    if not key:
-        raise RuntimeError("FERNET_KEY manquante dans .env — générer avec: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
-    return Fernet(key.encode())
-
-def encrypt_key(plain: str) -> str:
-    return _get_fernet().encrypt(plain.encode()).decode()
-
-def decrypt_key(token: str) -> str:
-    return _get_fernet().decrypt(token.encode()).decode()
-```
-
-Modifier `stitch_router.py` — `_get_stitch_key()` : déchiffrer à la lecture.
-Modifier toute route qui fait `INSERT INTO user_keys` : chiffrer à l'écriture.
-
-**Migration DB :** les clés en clair existantes sont invalides avec Fernet. Ajouter une colonne `encrypted BOOLEAN DEFAULT 0` dans `user_keys`. À la lecture : si `encrypted=0` → retourner en clair + re-chiffrer + mettre `encrypted=1`. Migration transparente sans downtime.
-
----
-
-**Générer la FERNET_KEY une fois :**
-```bash
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-Ajouter dans `.env` : `FERNET_KEY=<valeur générée>`. Ne jamais la committer.
-
----
-
-**Livrable QWEN :**
-1. `bcrypt` pour hash + verify mots de passe dans `auth_router.py`
-2. Logique `reset_required` sur ancien hash SHA-256
-3. `core/crypto_keys.py` avec `encrypt_key` / `decrypt_key`
-4. `stitch_router.py` : déchiffrement à la lecture des clés
-5. Migration transparente (`encrypted` column) dans `user_keys`
-6. `requirements.txt` mis à jour
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/routers/auth_router.py` — L514-570
-- `Frontend/3. STENCILER/routers/stitch_router.py` — `_get_stitch_key()`
-- `Frontend/3. STENCILER/core/key_resolver.py`
-
----
-
-### Mission 267 — DIAG + FIX : gestion des clés API — isolation élève, masquage, logs
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-12 | ACTOR: QWEN**
-
-**Contexte :** Audit sécurité sur la gestion des clés API (Stitch, Hugging Face). Trois problèmes identifiés à corriger dans le même fichier principal `stitch_router.py` + `stitch_client.py`.
-
----
-
-**Problème 1 — Résolution de clé biaisée admin/prof** (CRITIQUE)
-
-Dans `stitch_router.py` — `_get_stitch_key()` L37-39 :
-```python
-"WHERE uk.provider = 'stitch' AND u.role IN ('admin','prof') "
-"ORDER BY u.role DESC LIMIT 1"
-```
-Un élève qui renseigne son propre token Stitch ne sera jamais trouvé. Pire : le token du prof est utilisé à sa place.
-
-**Fix :** résoudre d'abord par `user_id` de la session courante, puis fallback prof/admin :
-```python
-def _get_stitch_key(user_id: str = None) -> str:
-    key = os.getenv("STITCH_API_KEY", "")
-    if key:
-        return key
-    try:
-        conn = get_db_connection()
-        # 1. Clé propre à l'utilisateur
-        if user_id:
-            row = conn.execute(
-                "SELECT api_key FROM user_keys WHERE user_id=? AND provider='stitch'",
-                (user_id,)
-            ).fetchone()
-            if row:
-                return row[0]
-        # 2. Fallback prof/admin
-        row = conn.execute(
-            "SELECT uk.api_key FROM user_keys uk JOIN users u ON uk.user_id=u.id "
-            "WHERE uk.provider='stitch' AND u.role IN ('admin','prof') "
-            "ORDER BY u.role DESC LIMIT 1"
-        ).fetchone()
-        return row[0] if row else ""
-    except:
-        return ""
-```
-Passer `user_id` depuis la session dans tous les appels `_get_stitch_key()`.
-
----
-
-**Problème 2 — Logs bavards qui exposent les clés** (ÉLEVÉ)
-
-Dans `stitch_client.py` — supprimer ou masquer toute ligne loggant des données brutes de l'API :
-```python
-# Avant (à supprimer)
-logger.info(f"Stitch get_screen FULL KEYS: {list(screen_data.keys())} ...")
-
-# Remplacer par
-logger.debug(f"Stitch get_screen keys count: {len(screen_data)}")
-```
-Règle générale : passer tous les logs `INFO` contenant des données de réponse API en `DEBUG`. Ne jamais logger de dict complet depuis une réponse externe.
-
----
-
-**Problème 3 — Tokens HF stockés en clair + exposés dans les réponses API** (MOYEN)
-
-**3a — Masquage dans les réponses :** créer un helper `mask_key(key: str) -> str` :
-```python
-def mask_key(key: str) -> str:
-    if not key or len(key) < 8:
-        return "****"
-    return key[:4] + "****" + key[-4:]
-# hf_hub_abcdef1234 → hf_h****1234
-```
-Utiliser dans toutes les routes qui retournent des settings utilisateur.
-
-**3b — Champ password côté frontend :** dans `teacher_dashboard.html` ou la page settings, le champ de saisie du token HF doit être `type="password"`. Mission frontend séparée si Gemini doit intervenir — noter ici comme dette.
-
----
-
-**Livrable QWEN :**
-1. `_get_stitch_key(user_id)` avec résolution user-first dans `stitch_router.py`
-2. Logs `stitch_client.py` nettoyés (DEBUG uniquement pour les données API)
-3. `mask_key()` helper utilisé dans les routes settings/profil
-4. Aucun autre fichier touché sauf `stitch_router.py` et `stitch_client.py`
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/routers/stitch_router.py` — `_get_stitch_key()` + tous ses appels
-- `Frontend/3. STENCILER/core/stitch_client.py` — lignes logger.info avec données API
-- `Frontend/3. STENCILER/routers/auth_router.py` — pour comprendre comment `user_id` est résolu depuis la session
-
----
-
-### Thème 28 — Workflow Stitch : prompt maître + tracking
-
----
-
-### Mission 265 — DIAG : prompt maître bloqué — ne remonte pas dans le chatbot Stitch
-**STATUS: 🔴 NON RÉSOLU | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Symptôme :** Le méga-prompt est copié dans le clipboard mais **n'apparaît pas automatiquement dans le chatbox Stitch**. L'élève doit coller manuellement (Cmd+V).
-
-**Contrainte :** Stitch est sur un domaine différent (`stitch.withgoogle.com`) — injection DOM impossible (cross-origin).
-
-**Solutions possibles :**
-1. **Background MCP** : `create_project` + `generate_screen_from_text` en arrière-plan → Stitch s'ouvre avec l'écran déjà généré (pas besoin de coller). Prend 2-3 min.
-2. **Extension Stitch** : si Google expose une API URL pour pré-remplir le chat (à vérifier).
-3. **Accepter le clipboard** : doc user, on considère le copier-coller comme le workflow normal.
-
----
-
-### Mission 266 — Prompt maître Stitch : design brief court depuis DESIGN.md projet
-**STATUS: 🟠 PRÊTE — après M265 | DATE: 2026-04-10 | ACTOR: QWEN**
-
-**Contexte :** Le prompt maître envoyé à Stitch ne doit pas décrire l'écran existant (Stitch ne reconstruit pas — il interprète). Il doit être un **design brief court** : intention UX + style + contraintes fortes. L'élève arrive avec un point de départ cohérent, pas une spécification à reproduire.
-
-**Format cible du prompt maître (< 200 tokens) :**
-```
-Projet : [titre du sujet DNMADE]
-Écran : [nom de l'écran — ex: "page d'accueil"]
-Objectif : [1 phrase — ce que l'utilisateur fait sur cet écran]
-Style : [3 mots depuis DESIGN.md — ex: "minimaliste, tons neutres, typographie claire"]
-Couleurs : [primary + neutral + text depuis DESIGN.md]
-Contraintes : [2-3 règles fortes — ex: "pas de sidebar, hero pleine largeur, CTA unique"]
-```
-
-**Sources à agréger pour construire ce brief :**
-1. `projects/{project_id}/DESIGN.md` → style + couleurs
-2. `classes/{class_id}/subjects/` → titre du sujet + objectif pédagogique
-3. `projects/{project_id}/manifest.json` → nom de l'écran actif
-
-**Backend — créer `stitch_prompt_builder.py` dans `Frontend/3. STENCILER/core/` :**
-```python
-def build_stitch_brief(project_id: str, screen_name: str, class_id: str = None) -> str:
-    """Construit un design brief court pour Stitch depuis les sources projet."""
-    # 1. Lire DESIGN.md projet
-    # 2. Lire sujet DNMADE si class_id
-    # 3. Extraire : titre, style (3 mots), couleurs, contraintes
-    # 4. Retourner le brief formaté < 200 tokens
-```
-
-**Brancher dans `stitch_router.py`** — endpoint existant `GET /api/stitch/open/{id}` :
-- Appeler `build_stitch_brief()` pour construire le prompt
-- L'inclure dans la réponse JSON : `{ url: ..., prompt: brief, copy_ready: True }`
-
-**Selon résultat M265 :**
-- Si injection URL possible → encoder le brief dans l'URL Stitch
-- Si impossible → retourner le brief dans la réponse pour affichage panneau copier-coller côté frontend
-
-**Règle :** ne pas injecter le contenu pédagogique complet (référentiel, compétences) dans le brief Stitch — ça reste dans HoméOS. Le brief est une amorce créative, pas un cahier des charges.
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/core/stitch_prompt_builder.py` (existe déjà — lire avant de toucher)
-- `Frontend/3. STENCILER/routers/stitch_router.py`
-- `Backend/Prod/retro_genome/project_context.py` — pour réutiliser la logique de chargement DESIGN.md
-
----
-
-### Thème 27 — Contexte actif dans FEE Studio et Stitch
-
----
-
-### Thème 26 — Forge Pipeline : réparation Vision-to-Code
-
----
-
-### Mission 264 — dist.zip compilé : snapshot DOM via Playwright → HTML éditable
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: QWEN**
-
-**Contexte :** Un dist.zip React sans sources TSX est actuellement extrait tel quel et servi dans l'iframe — non éditable par Sullivan. Playwright est installé (`python3 -c "import playwright"` → ok). L'objectif : charger le bundle headless, attendre le render React, snapshotter le DOM statique, convertir en Tailwind HTML via LLM → résultat éditable.
-
-**Fichiers à lire :**
-- `Backend/Prod/retro_genome/routes.py` — bloc `dist_html` (cas dist/index.html dans le ZIP, L706-739)
-- `Backend/Prod/retro_genome/react_to_tailwind.py` — `convert()` existant (source TSX → Tailwind)
-
-**Ce qu'il faut créer :**
-Ajouter une méthode `snapshot_and_convert(dist_dir: Path, entry_name: str) -> str` dans `react_to_tailwind.py` :
-
-```python
-async def snapshot_and_convert(self, dist_dir: Path, entry_name: str) -> str:
-    """
-    Charge le dist React dans Playwright, snapshotte le DOM après render,
-    nettoie le HTML (supprime scripts/styles inline lourds),
-    convertit en Tailwind via LLM.
-    """
-    from playwright.async_api import async_playwright
-
-    index_html = dist_dir / "index.html"
-    if not index_html.exists():
-        raise FileNotFoundError(f"index.html absent dans {dist_dir}")
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        # Charger en file:// — pas besoin de serveur
-        await page.goto(f"file://{index_html.resolve()}", wait_until="networkidle", timeout=15000)
-        # Attendre que React ait rendu (div#root non vide)
-        await page.wait_for_selector("#root > *", timeout=10000)
-        dom_html = await page.content()
-        await browser.close()
-
-    # Nettoyer le HTML snapshot (supprimer scripts, styles inline lourds)
-    import re
-    dom_html = re.sub(r'<script[\s\S]*?</script>', '', dom_html, flags=re.IGNORECASE)
-    dom_html = re.sub(r'<style[^>]*>[\s\S]{2000,}?</style>', '', dom_html, flags=re.IGNORECASE)
-    dom_html = dom_html[:40000]  # cap contexte LLM
-
-    # Convertir le DOM statique en Tailwind HTML via LLM
-    prompt = f"""Tu es un Expert Intégrateur Frontend.
-MISSION : Ce HTML est un snapshot DOM d'une app React compilée.
-Convertis-le en HTML5 sémantique + Tailwind CSS autonome et éditable.
-Préserve fidèlement la structure, les textes, les couleurs visibles.
-Supprime toute dépendance React (data-reactroot, __reactFiber, etc.).
-Résultat : document HTML5 complet autonome (<!DOCTYPE html>).
-Réponds UNIQUEMENT avec le code HTML. Pas de prose.
-
-NOM : {entry_name}
-
-DOM SNAPSHOT :
-{dom_html}
-"""
-    from Backend.Prod.models.gemini_client import GeminiClient
-    client = GeminiClient(execution_mode="BUILD")
-    result = await client.generate(prompt, max_tokens=16000, temperature=0.1)
-    if not result.success:
-        raise RuntimeError(f"LLM conversion failed: {result.error}")
-    code = result.code
-    if "```html" in code:
-        code = code.split("```html")[1].split("```")[0]
-    elif "```" in code:
-        code = code.split("```")[1].split("```")[0]
-    return code.strip()
-```
-
-**Brancher dans `routes.py` — remplacer le court-circuit dist :**
-
-Actuellement (L706-739), quand `dist/index.html` est détecté, le code extrait le dist et retourne `origin: compiled`. Remplacer par :
-
-```python
-if dist_html:
-    safe_base = entry["name"].lower().replace(" ", "_").split(".")[0]
-    dist_dir = stenciler_templates / f"zip_dist_{safe_base}"
-    dist_dir.mkdir(parents=True, exist_ok=True)
-    # Extraire le dist
-    dist_prefix = dist_html.replace('index.html', '')
-    for member in file_list:
-        if member.startswith(dist_prefix) and not member.startswith('__MACOSX') and not member.endswith('/'):
-            rel = member[len(dist_prefix):]
-            dest = dist_dir / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_bytes(z.read(member))
-    # Snapshot + conversion Tailwind
-    try:
-        html_code = await get_react_converter().snapshot_and_convert(dist_dir, entry["name"])
-        origin = "generated"
-    except Exception as e:
-        logger.warning(f"[ZIP/Playwright] Snapshot failed ({e}), fallback dist_url")
-        # Fallback : servir le dist compilé si Playwright échoue
-        dist_url = f"/static/templates/zip_dist_{safe_base}/index.html"
-        wrapper_name = f"zip_dist_{safe_base}/index.html"
-        idx = json.loads(index_path.read_text(encoding='utf-8'))
-        for e2 in idx.get('imports', []):
-            if e2['id'] == req.import_id:
-                e2['html_template'] = wrapper_name
-                e2['dist_url'] = dist_url
-                e2['elements_count'] = 0
-                e2['origin'] = "compiled"
-                break
-        index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
-        _SVG_JOBS[job_id] = {"status": "done", "template_name": wrapper_name, "dist_url": dist_url, "error": None}
-        return
-    # Suite normale : sauvegarder le HTML généré dans templates
-    # (le flux rejoint le chemin commun après le bloc ZIP)
-    template_name = f"reality_{safe_base}.html"
-    (stenciler_templates / template_name).write_text(html_code, encoding='utf-8')
-    idx = json.loads(index_path.read_text(encoding='utf-8'))
-    for e2 in idx.get('imports', []):
-        if e2['id'] == req.import_id:
-            e2['html_template'] = template_name
-            e2['elements_count'] = 0
-            e2['origin'] = "generated"
-            break
-    index_path.write_text(json.dumps(idx, indent=2, ensure_ascii=False), encoding='utf-8')
-    _SVG_JOBS[job_id] = {"status": "done", "template_name": template_name, "error": None}
-    logger.info(f"[ZIP/Playwright] snapshot → {template_name}")
-    return
-```
-
-**Points d'attention :**
-- `wait_for_selector("#root > *")` — si le div racine React s'appelle autrement (`#app`, `#main`), Playwright timeout. Ajouter un fallback : `await page.wait_for_load_state("networkidle")` suffit si selector échoue.
-- Playwright headless en `file://` ne charge pas les assets réseau — c'est OK, on veut le DOM structurel, pas les images.
-- Si Playwright échoue (env sans Chromium, timeout) : fallback propre vers `dist_url` compilé (déjà géré dans le code ci-dessus).
-
-**Livrable :**
-- dist.zip forgé → HTML Tailwind éditable (plus d'iframe compilé)
-- Fallback silencieux vers dist compilé si Playwright échoue
-- Aucune régression sur les ZIP avec sources TSX (M119 inchangé)
-
----
-
-### Mission 263 — Canvas N0 : drag d'éléments dans un dist React compilé
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: GEMINI**
-
-**Contexte :** Le hover engine M237 (injecté dans l'iframe) détecte correctement les éléments du dist React via `mouseover`. Le drag ne fonctionne pas : déplacer un nœud DOM dans un bundle React compilé est impossible sans passer par le state React — le reconciler réécrit le DOM au prochain render.
-
-**Approche :** ne pas déplacer l'élément React. À la place, créer un **calque SVG fantôme** sur le canvas au-dessus de l'iframe. Au `mousedown` sur un élément hover, capturer sa `getBoundingClientRect()`, créer un rectangle SVG fantôme aux mêmes dimensions et coordonnées canvas, le rendre draggable sur le canvas. L'iframe reste intacte.
-
-**Ce que le drag fantôme permet :**
-- Repositionner visuellement un élément sans toucher au React bundle
-- Stocker la position finale dans le manifest (`element_overrides`) pour reconstruction future
-- Sullivan peut lire ces overrides pour proposer une version HTML éditable
-
-**Séquence technique :**
-
-1. Dans `WsCanvas.js` — écouter `hm-select` depuis l'iframe :
-```js
-// Déjà présent : window.addEventListener('message', ...)
-// Ajouter sur hm-select :
-if (e.data.type === 'hm-select') {
-    this._selectedIframeEl = e.data; // { tag, id, cls, rect }
-}
-```
-
-2. Le hover engine injecté (dans `injectHoverEngine()`) doit envoyer le `rect` avec `hm-select` :
-```js
-document.addEventListener('mousedown', function(e) {
-    const el = e.target;
-    const rect = el.getBoundingClientRect();
-    window.parent.postMessage({
-        type: 'hm-select',
-        tag: el.tagName, id: el.id || '', cls: (el.className||'').toString().slice(0,80),
-        rect: { x: rect.left, y: rect.top, w: rect.width, h: rect.height }
-    }, '*');
-});
-```
-
-3. Dans `WsCanvas.js` — à réception de `hm-select` avec `rect`, créer le fantôme SVG :
-```js
-_createGhostElement(shellG, rect) {
-    // Convertir les coordonnées iframe → canvas world
-    const shellRect = shellG.querySelector('foreignObject').getBoundingClientRect();
-    const scaleX = (shellRect.width / parseFloat(shellG.querySelector('foreignObject').getAttribute('width')));
-    const wx = (shellRect.left - this.wrapper.getBoundingClientRect().left - this.viewX) / this.scale
-               + rect.x / scaleX;
-    const wy = (shellRect.top  - this.wrapper.getBoundingClientRect().top  - this.viewY) / this.scale
-               + rect.y / scaleX;
-    const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    ghost.setAttribute('x', wx); ghost.setAttribute('y', wy);
-    ghost.setAttribute('width', rect.w / scaleX); ghost.setAttribute('height', rect.h / scaleX);
-    ghost.setAttribute('fill', 'rgba(140,198,63,0.15)');
-    ghost.setAttribute('stroke', '#8cc63f'); ghost.setAttribute('stroke-width', '1.5');
-    ghost.setAttribute('rx', '4');
-    ghost.classList.add('ws-ghost-element');
-    ghost.dataset.sourceTag = this._selectedIframeEl?.tag || '';
-    ghost.dataset.sourceId  = this._selectedIframeEl?.id  || '';
-    this.content.appendChild(ghost);
-    return ghost;
-}
-```
-
-4. Rendre le fantôme draggable avec le même système `mousedown/mousemove/mouseup` que les shells.
-
-5. Au `mouseup`, émettre un event `ws-element-placed` avec `{ sourceId, sourceCls, x, y, w, h }` — Sullivan pourra le lire pour proposer une refonte positionnée.
-
-**Points d'attention :**
-- Un seul fantôme actif à la fois — supprimer le précédent au prochain `hm-select`
-- `pointer-events` de l'iframe : `auto` en mode `select` uniquement (déjà géré M238)
-- Ne pas stocker les fantômes dans le manifest pour l'instant — juste l'affichage
-
-**Fichiers :** `WsCanvas.js` (ghost + drag), `injectHoverEngine` dans `WsCanvas.js` (ajouter rect dans hm-select)
-
-**Livrable :**
-- Hover → outline vert (déjà OK)
-- Mousedown → fantôme SVG vert semi-transparent sur le canvas
-- Drag du fantôme → repositionnement fluide
-- Mouseup → console `[WS-GHOST]` avec tag/id/position finale
-
----
-
-### Mission 265 — Forge SVG/Figma : tokens HoméOS + SVG trop lourd
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
-
-**Fichier unique :** `Backend/Prod/retro_genome/svg_to_tailwind.py` — méthode `convert()` L72-135
-
-**Symptôme :** Export Figma forgé → résultat identique au bug PNG (HoméOS). 62787 tokens, 78s.
-
----
-
-**Fix 1 — Retirer les tokens HoméOS du prompt (L101-107)**
-
-`color_hint` est déjà calculé L87 — l'utiliser à la place des tokens injectés :
-
-```python
-# Avant — remplacer le bloc "TOKENS DE DESIGN À RESPECTER (IMPÉRATIF)" par :
-CONTRAINTE DESIGN :
-- Extrais les couleurs dominantes directement depuis les valeurs `fill` du SVG.
-- Couleurs détectées dans ce fichier (plus fréquentes) : {color_hint}
-- Utilise ces couleurs — ne substitue pas tes propres préférences.
-```
-
----
-
-**Fix 2 — Réduire le SVG envoyé au LLM**
-
-Cap actuel `clean_svg[:50000]` → ~60K tokens totaux → 78s. Deux actions dans `_strip_noise()` + cap :
-
-```python
-# Dans _strip_noise(), ajouter après les suppressions existantes :
-# Supprimer les paths complexes (d= > 200 chars = bruit, pas d'info structurelle)
-content = re.sub(r'<path\b[^>]*\bd="[^"]{200,}"[^/]*/>', '', content)
-content = re.sub(r'<path\b[^>]*\bd="[^"]{200,}"[\s\S]*?/>', '', content)
-```
-
-Et dans `convert()`, abaisser le cap L99 :
-```python
-# Avant
-{clean_svg[:50000]}
-# Après
-{clean_svg[:20000]}
-```
-
----
-
-**Livrable :** prompt sans tokens HoméOS, SVG < 20K chars, latence estimée < 30s. Aucun autre fichier.
-
----
-
-### Mission 262 — Forge Vision : remettre le pipeline dans un état carré
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: QWEN**
-
-**Fichier unique :** `Backend/Prod/retro_genome/svg_to_tailwind.py`
-
-**Fix 1 — Retirer les tokens HoméOS du fallback `convert_image()` — bloc `else` du `design_section` L164-172**
-```python
-# Avant
-else:
-    design_section = f"""
-TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
-- Background principal : `{tokens['colors']['neutral']}`
-...
-"""
-# Après
-else:
-    design_section = """
-CONTRAINTE DESIGN : aucun design system prédéfini pour ce projet.
-Extrais les couleurs, typographies et espacements directement depuis l'image.
-Sois fidèle à ce que tu vois — ne substitue pas tes propres préférences.
-"""
-```
-
-**Fix 2 — Restaurer le fallback MIMO Vision (supprimé par erreur)**
-MIMO-V2-Omni supporte la Vision base64 OpenAI-compatible. Le remettre après `result = await self.client.generate_with_image(...)` :
-```python
-if not result.success:
-    logger.warning("[SvgToTailwind] Gemini Vision failed, trying Mimo fallback...")
-    try:
-        from Backend.Prod.models.mimo_client import MimoClient
-        mimo = MimoClient()
-        result = await mimo.generate_with_image(
-            prompt=prompt, image_base64=image_base64,
-            mime_type=mime_type, max_tokens=16000, temperature=0.1
-        )
-    except Exception as e:
-        logger.error(f"[SvgToTailwind] Mimo fallback vision failed: {e}")
-if not result.success:
-    logger.error(f"[SvgToTailwind] LLM Vision Error: {result.error}")
-    raise RuntimeError(f"Vision conversion failed: {result.error}")
-```
-
-**Fix 3 — Vérifier `analyze_image_design()` (même fichier L221+)**
-S'assurer que son prompt n'injecte pas de tokens HoméOS. Si oui, même correction que Fix 1.
-
-**Livrable :** aucun autre fichier touché. Scope strict.
-
----
-
-### Mission 257 — Hotfix : `convert_image()` — retirer les tokens HoméOS du fallback
-**STATUS: ✅ ABSORBÉE PAR M262**
-
-**Problème :** quand `design_md` est vide (projet sans DESIGN.md ou exception M256-A), `convert_image()` injecte les tokens HoméOS (`#8cc63f`, `#f7f6f2`, `#3d3d3c`, Geist) comme contrainte `IMPÉRATIVE`. Sullivan ignore l'image et produit une page HoméOS.
-
-**Fichier :** `Backend/Prod/retro_genome/svg_to_tailwind.py` — méthode `convert_image()`, bloc `else` du `design_section` (L164-172).
-
-**Fix :**
-```python
-# Avant
-else:
-    design_section = f"""
-TOKENS DE DESIGN À RESPECTER (IMPÉRATIF) :
-- Background principal : `{tokens['colors']['neutral']}`
-...
-"""
-
-# Après
-else:
-    design_section = """
-CONTRAINTE DESIGN : aucun design system prédéfini pour ce projet.
-Extrais les couleurs, typographies et espacements directement depuis l'image.
-Sois fidèle à ce que tu vois — ne substitue pas tes propres préférences de style.
-"""
-```
-
-**Règle :** ne pas toucher à la branche `if design_md:` ni à `analyze_image_design()`. Scope strict.
-
----
-
-### Mission 258 — Hotfix : `_generate_with_image_genai` bloque l'event loop
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: CODE DIRECT — FJD**
-
-**Problème :** `client.models.generate_content(...)` du SDK google-genai est **synchrone**. Appelé directement dans une coroutine FastAPI, il bloque l'event loop — cause probable du `zsh: killed` observé en session.
-
-**Fichier :** `Backend/Prod/models/gemini_client.py` — méthode `_generate_with_image_genai()` (L413).
-
-**Fix :**
-```python
-import asyncio
-import functools
-
-async def _generate_with_image_genai(self, prompt, image_base64, mime_type, max_tokens, temperature):
-    from google import genai
-    import base64
-    client = genai.Client(api_key=self.api_key)
-
-    contents = [{"parts": [
-        {"inline_data": {"mime_type": mime_type, "data": image_base64}},
-        {"text": prompt},
-    ]}]
-
-    # Synchronous SDK → exécuté dans un thread pour ne pas bloquer l'event loop
-    response = await asyncio.to_thread(
-        functools.partial(
-            client.models.generate_content,
-            model=self.primary_model,
-            contents=contents,
-            config={"max_output_tokens": max_tokens, "temperature": temperature},
-        )
-    )
-    return response.text
-```
-
-**Règle :** même fix à appliquer à `generate()` (text-only) si le SDK genai est utilisé dans ce chemin — vérifier.
-
----
-
-### Mission 259 — dist.zip : badge "rendu compilé" dans le shell
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-08 | ACTOR: GEMINI**
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Problème :** un dist.zip React forgé charge dans l'iframe comme un rendu fidèle, mais le hover engine ne peut pas inspecter les éléments (React Virtual DOM). L'élève croit que le mode select devrait fonctionner — pas de feedback visuel indiquant que ce shell est en lecture seule.
-
-**Comportement attendu :**
-- Le shell d'un dist.zip compilé affiche un badge discret `rendu compilé` dans son header, à droite du titre
-- En mode `select`, un tooltip ou message dans la status bar indique `inspecter non disponible — rendu compilé`
-- Le hover engine n'est pas injecté dans ces shells (guard dans `WsScreenShell.js`)
-
-**Détection :** `item.origin === 'compiled'` dans l'index.json (déjà positionné par le pipeline ZIP, L734).
-
-**Fichiers :**
-- `WsScreenShell.js` — dans `build()`, si `item.origin === 'compiled'` : ajouter badge SVG + skip `injectHoverEngine`
-- `WsCanvas.js` — dans `setMode('select')` : si le shell actif a `data-origin="compiled"`, afficher message dans `#ws-status-bar`
-
-**Livrable :**
-- Badge `rendu compilé` visible dans le header du shell
-- Aucune tentative d'injection hover sur ces shells
-- Message status bar en mode select
-
----
-
-### Thème 28 — Reroutage plugin Figma → Workspace (court-circuit Intent Viewer)
-
-### Mission 265 — Plugin Figma → Workspace direct
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-08 | ACTOR: QWEN**
-
-**Fix 1 — `ui.html` :** lien post-export → `/workspace` (plus `/intent-viewer`)
-**Fix 2 — `import_router.py` :** nouvelle route `POST /api/import/figma` → sauve SVG dans `imports/`, met à jour `index.json`
-**Fix 3 — Plugin `ui.html` :** `fetch()` poste vers `/api/import/figma` (plus `/api/retro-genome/upload-svg`)
-
-Le SVG apparaît dans la screen list du workspace, forgeable via `POST /generate-from-import`.
-
----
-
-### Thème 18 — Diagnostics workspace généralisés (2026-04-08)
-
----
-
-### Mission 239 — DIAG : Toolbar N0 — tous les boutons morts sauf Stitch
-**STATUS: 🔴 DIAG EN ATTENTE**
-
-**Symptôme** : Clic sur select (V), drag (H), frame (F), text (T), effects (E) → rien de visible. Seul le bouton Stitch (`<a>` brut) réagit.
-
----
-
-**Hypothèse 1 — Les `onclick` des `.ws-tool-btn` ne sont jamais attachés**
-Probabilité : TRÈS PROBABLE
-
-`ws_main.js` est `type="module"` (workspace.html ligne 579). L'ensemble de l'init est dans un `DOMContentLoaded` async. Si une exception non catchée survient **avant la ligne 58** (setup toolbar), la promise avorte silencieusement. Le [S] de la screen list fonctionne car son onclick est attaché dans `fetchWorkspaceImports()` (ligne ~303), mais cette fonction est appelée à la ligne 52 — les onclicks toolbar sont attachés à la ligne 58, **après** le await. Si `fetchWorkspaceImports()` throw en dehors de son try/catch interne (ex: `list` null → `list.innerHTML` crash dans le catch), DOMContentLoaded avorte avant la ligne 58.
-
-Test :
-```js
-document.querySelectorAll('.ws-tool-btn').length           // 0 → handlers jamais attachés
-document.querySelector('.ws-tool-btn[data-mode="select"]').onclick  // null confirme
-```
-
----
-
-**Hypothèse 2 — Les `onclick` sont attachés mais `window.wsCanvas` est null**
-Probabilité : PROBABLE
-
-Si `new WsCanvas(...)` (ligne 11) throw ou retourne un objet incomplet, `window.wsCanvas` est null. Tous les appels `window.wsCanvas?.setMode(mode)` sont des no-ops silencieux.
-
-Test :
-```js
-window.wsCanvas         // null ?
-window.wsCanvas?.activeMode   // undefined ?
-```
-
----
-
-**Hypothèse 3 — Les `onclick` sont attachés et setMode tourne, mais le feedback visuel est invisible**
-Probabilité : MOYENNE
-
-`setMode()` ajoute/retire la classe `.active-tool` sur les boutons. Si `.active-tool` n'a aucune règle CSS visible (background, couleur, border), le bouton paraît mort alors qu'il fonctionne. De plus, les modes "frame", "effects", "colors" ne déclenchent aucune ouverture de panneau dans `ws_main.js` — ils changent juste `activeMode` en silence.
-
-Test :
-```js
-document.querySelector('.ws-tool-btn[data-mode="select"]').classList.contains('active-tool') // avant clic
-// Cliquer "drag"
-document.querySelector('.ws-tool-btn[data-mode="drag"]').classList.contains('active-tool')    // → true si setMode tourne
-```
-
----
-
-### Mission 240 — DIAG : Bouton Aperçu dans le shell — mort
-**STATUS: 🔴 DIAG EN ATTENTE**
-
-**Symptôme** : Clic sur "Aperçu" dans un shell canvas → rien ne s'ouvre.
-
----
-
-**Hypothèse 1 — `window.wsPreview` est undefined**
-Probabilité : TRÈS PROBABLE
-
-Si ws_main.js crashe avant ou à la ligne 9 (`window.wsPreview = new WsPreview()`), `window.wsPreview` est undefined. L'appel `window.wsPreview?.enterPreviewMode(...)` dans le clic du shell est un no-op silencieux.
-
-Test :
-```js
-window.wsPreview                // undefined ?
-typeof window.wsPreview         // "undefined" ?
-```
-
----
-
-**Hypothèse 2 — `ws-preview-overlay` absent du DOM**
-Probabilité : PROBABLE
-
-`enterPreviewMode()` fait `document.getElementById('ws-preview-overlay')`. Si l'élément est absent (supprimé par une régression Gemini), la fonction retourne silencieusement à la ligne `if (!shell || !overlay) return`.
-
-Test :
-```js
-document.getElementById('ws-preview-overlay')          // null ?
-document.getElementById('ws-preview-frame-container')  // null ?
-```
-
----
-
-**Hypothèse 3 — Le shell id passé ne correspond à aucun élément**
-Probabilité : FAIBLE
-
-Le bouton passe `g.id` à `enterPreviewMode`. Si `g.id` est vide ou mal formé, `document.getElementById(id)` retourne null → retour silencieux ligne 76.
-
-Test :
-```js
-document.querySelector('.ws-screen-shell')?.id  // vide ou undefined ?
-```
-
----
-
-### Mission 241 — DIAG : Bouton [S] apparaît sur les imports dist.zip
-**STATUS: 🔴 DIAG EN ATTENTE**
-
-**Symptôme** : Un import dist.zip affiche un bouton [S] dans la screen list. Clic → `GET /api/stitch/open/2026-04-08_142326_dist.zip` → 400.
-
----
-
-**Hypothèse 1 — L'entrée index.json a un `archetype_id` hérité d'une ancienne version du code**
-Probabilité : TRÈS PROBABLE
-
-La condition `isStitch` dans `fetchWorkspaceImports()` évalue `item.archetype_id === 'stitch_import'`. Si une version précédente du code a créé des entrées avec un archetype_id différent, le check est correct **pour les nouvelles entrées** mais les anciennes dans index.json ont peut-être une valeur aberrante qui passe le test. Ou pire : une régression a enlevé la condition et tout affiche [S].
-
-Test :
-```js
-fetch('/api/retro-genome/imports').then(r=>r.json()).then(d=>console.log(JSON.stringify(d.imports.map(i=>({id:i.id,archetype_id:i.archetype_id,archetype_label:i.archetype_label})),null,2)))
-```
-
----
-
-**Hypothèse 2 — Le fichier ws_main.js servi est une version cachée sans la condition**
-Probabilité : PROBABLE
-
-Les agents ont peut-être appliqué le fix dans le mauvais fichier, ou le serveur sert une version antérieure. Le browser peut avoir en cache une version de ws_main.js sans la condition `isStitch`.
-
-Test : Ouvrir DevTools → Sources → `ws_main.js` → chercher "isStitch". Si absent → version ancienne en cache.
-Fix : Cmd+Shift+R (hard refresh).
-
----
-
-**Hypothèse 3 — La condition est présente mais évalue `true` pour les zips car `archetype_label` contient "stitch" par accident**
-Probabilité : FAIBLE
-
-La condition est `item.archetype_label.toLowerCase().includes('stitch')`. Si l'archetype_label d'un zip est "import multi-format" (normal), il ne contient pas "stitch". Mais si un agent a changé le label dans import_router.py, le check peut être faussé.
-
-Test : vérifier dans import_router.py l'`archetype_label` assigné aux uploads ZIP.
-
----
-
-### Mission 242 — DIAG : FEE Studio — "veuillez activer un projet"
-**STATUS: 🔴 DIAG EN ATTENTE**
-
-**Symptôme** : Ouverture FEE Studio → `alert("veuillez activer un projet")` même quand un projet est chargé.
-
----
-
-**Hypothèse 1 — `window.wsBackend` non instancié → `projectId` undefined**
-Probabilité : TRÈS PROBABLE
-
-`ws_main.js` n'instancie jamais `window.wsBackend = new WsBackend()`. `WsFEEStudio.open()` résout `this.ws = window.wsBackend || window.wsCanvas || {}`. Si `wsBackend` est undefined et `wsCanvas` n'a pas de propriété `activeProject`, `projectId` = undefined → alert.
-
-Test :
-```js
-window.wsBackend                    // undefined ?
-window.wsCanvas?.activeProject      // undefined ?
-JSON.parse(localStorage.getItem('homeos_session') || '{}')  // a-t-il active_project_id ?
-```
-
----
-
-**Hypothèse 2 — La session localStorage n'a pas de clé `active_project_id`**
-Probabilité : PROBABLE
-
-Même si M240 a patché `WsFEEStudio.open()` pour lire depuis `localStorage.homeos_session`, si la session stockée n'a pas de clé `active_project_id` ou `project_id`, le fallback échoue quand même.
-
-Test :
-```js
-JSON.parse(localStorage.getItem('homeos_session') || '{}')
-// Chercher : active_project_id, project_id, token
-```
-
----
-
-**Hypothèse 3 — Le patch M240 n'a pas été appliqué (version ancienne de WsFEEStudio.js servie)**
-Probabilité : MOYENNE
-
-Le serveur sert peut-être une version de `WsFEEStudio.js` antérieure au patch. Vérifier dans Sources DevTools que `WsFEEStudio.open()` lit bien `localStorage.homeos_session`.
-
-Test : DevTools → Sources → `WsFEEStudio.js` → chercher "homeos_session". Absent → version antérieure au patch.
-
----
-
-### Thème 16 — Pipeline Import → Canvas
-> M233 ✅, M234 ✅, M235 ✅, M236 ✅, M237 ✅ — archivées ROADMAP_ACHIEVED.md
-
----
-
-### Thème 17 — Réparations post-M237 (Gemini regressions)
-
-### Mission 238 — Hotfix canvas : 4 régressions M237
-**STATUS: ✅ LIVRÉ**
-
-- **Bug 1** : Hover outline exclut maintenant `el.id === 'root'` (React containers)
-- **Bug 2** : Aucun changement de `pointer-events` sur les iframes dans `setMode()` — les iframes restent `pointer-events: none`, le moteur hover fonctionne inside l'iframe
-- **Bug 3a** : Bouton Stitch ajouté dans la toolbar droite (lien vers `https://stitch.withgoogle.com`)
-- **Bug 3b** : Bouton [S] restauré dans `fetchWorkspaceImports()` + listener `fetch('/api/stitch/open/{id}')` → `window.open(d.url)`
-- **Bug 4** : `addScreen()` défensif — log si `WsScreenShell` non chargé, structure simplifiée
-
-**Fichiers :** `WsCanvas.js`, `WsScreenShell.js`, `ws_main.js`, `workspace.html`
-
----
-
-**Bug 1 — Hover outline ne touche que le body**
-
-Le moteur injecté utilise `mouseover` qui bubble — `e.target` est correct mais le React dist enveloppe tout dans des divs avec héritage de `pointer-events`. Fix : cibler `e.target` direct ET exclure les conteneurs racine connus (`#root`, `[data-reactroot]`).
-
-Dans le script injecté (dans `WsCanvas.injectHoverEngine`), remplacer la condition d'exclusion :
-```js
-// Avant
-if (el === document.body || el === document.documentElement) return;
-// Après
-if (el === document.body || el === document.documentElement || el.id === 'root') return;
-// Et forcer pointer-events sur tout le document
-document.documentElement.style.setProperty('pointer-events', 'all', 'important');
-```
-
----
-
-**Bug 2 — Drag shell cassé en mode select (iframe mange les events)**
-
-Gemini a mis `pointer-events: auto` sur les iframes en mode select → le SVG canvas ne reçoit plus les mousedown quand on drag au-dessus de l'iframe.
-
-Fix dans `WsCanvas.setMode()` : ne jamais passer les iframes en `auto`. À la place, activer le moteur hover via un flag sur le canvas, et garder les iframes en `pointer-events: none` **toujours**. Le moteur hover fonctionne car il est injecté dans le document de l'iframe — il n'a pas besoin que l'iframe reçoive les events de la page parente.
-
-```js
-setMode(mode) {
-    this.activeMode = mode;
-    // NE PAS toucher pointer-events des iframes — le moteur hover est inside l'iframe
-    // Les iframes restent pointer-events: none pour que le canvas drag fonctionne
-    // ... reste du setMode
-}
-```
-
-Retirer tout le bloc `document.querySelectorAll('.ws-screen-shell iframe').forEach(...)` que Gemini a ajouté dans `setMode`.
-
----
-
-**Bug 3 — Bouton Stitch disparu**
-
-Deux endroits à restaurer :
-
-*3a — Dans la toolbar (`workspace.html`)*, remettre le bouton Stitch entre typo et séparateur zoom, avec un `href` vers Stitch (pas de panel dédié) :
-```html
-<!-- STITCH (lien direct) -->
-<a href="https://stitch.withgoogle.com" target="_blank"
-   class="p-3 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
-   title="Ouvrir Stitch">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-    </svg>
-</a>
-```
-
-*3b — Dans `ws_main.js` `fetchWorkspaceImports()`*, le bouton [S] par item était conditionnel sur `stitch_screen_id`. Gemini l'a supprimé entièrement. Le remettre dans le template HTML des items de liste :
-```js
-${item.stitch_screen_id ? `
-<button class="btn-s-open p-1.5 hover:bg-slate-50 text-slate-400 hover:text-indigo-500 rounded transition-all" title="Ouvrir dans Stitch">
-    <span class="text-[9px] font-black font-sans">S</span>
-</button>` : ''}
-```
-Et remettre le listener correspondant :
-```js
-const btnOpen = el.querySelector('.btn-s-open');
-if (btnOpen) btnOpen.onclick = async (e) => {
-    e.stopPropagation();
-    const res = await fetch(`/api/stitch/open/${item.id}`);
-    const d = await res.json();
-    if (d.url) window.open(d.url);
-};
-```
-
----
-
-**Bug 4 — Impossible de remettre un item sur le canvas une seconde fois**
-
-`addScreen(item)` dans `WsCanvas.js` :
-```js
-if (document.getElementById(`shell-${item.id}`)) {
-    this.selectScreen(document.getElementById(`shell-${item.id}`));
-    return; // ← si le shell a été fermé et retiré du DOM, getElementById retourne null
-}
-```
-La logique est correcte — si `getElementById` retourne `null`, il tombe dans `WsScreenShell.build`. Le bug vient sûrement d'une régression Gemini dans `WsScreenShell.build` ou dans la façon dont le shell est retiré du DOM.
-
-Vérifier dans `WsScreenShell.js` le close button :
-```js
-closeBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); g.remove(); });
-```
-Si `g.remove()` retire bien le `<g>` du SVG, `getElementById` retourne null au prochain appel → reconstruit. Tester dans la console : `document.getElementById('shell-XXX')` après fermeture. Si null → le bug est ailleurs (peut-être `addScreen` ne reconstruit pas si `WsScreenShell` est undefined).
-
-Ajouter un log défensif dans `addScreen` :
-```js
-async addScreen(item) {
-    const existing = document.getElementById(`shell-${item.id}`);
-    if (existing) { this.selectScreen(existing); return; }
-    if (!window.WsScreenShell) { console.error('WsScreenShell not loaded'); return; }
-    const g = await window.WsScreenShell.build(item, this);
-    this.content.appendChild(g);
-    this.selectScreen(g);
-    return g;
-}
-```
-
----
-
-### Mission 237 — Canvas N0 : drag zone + moteur hover injecté dans l'iframe
-**STATUS: ✅ LIVRÉ**
-
-- **Zone de drag** : gripper visuel "⋯" centré sur le header du shell, `cursor: move`
-- **Moteur hover** : `injectHoverEngine()` dans `WsCanvas.js` injecté dans le contentDocument de l'iframe
-  - `mouseover` → outline vert `#8cc63f` + postMessage `{ type: 'hm-hover', tag, id, cls }`
-  - `mouseout` → clear outline + postMessage `{ type: 'hm-clear' }`
-  - `click` → stopPropagation + postMessage `{ type: 'hm-click', tag, id, cls, href }`
-- `WsScreenShell.js` : appel `wsCanvas.injectHoverEngine(iframe)` au `load`
-- `pointer-events: none` par défaut sur l'iframe, `auto` en mode `select` (déjà géré par le canvas)
-
----
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Contexte :** Deux comportements attendus en mode `select` (flèche). Architecture choisie : moteur hover **injecté dans le contentDocument** de l'iframe au chargement — zéro coordinate math côté canvas, le highlight est rendu à l'intérieur de l'iframe par son propre DOM.
-
----
-
-**Comportement 1 — Zone de drag du shell (codée mais invisible)**
-
-`WsCanvas.js` ligne 124 : drag déjà restreint à `worldY <= 40`. Manque le visuel.
-
-Dans `WsScreenShell.js`, ajouter après le `<rect class="ws-screen-header">` :
-```js
-// Cursor move sur le header
-header.style.cursor = 'move';
-
-// Gripper visuel centré
-const grip = this._createElement('text', {
-    x: String(SW / 2), y: '26', 'text-anchor': 'middle',
-    fill: '#d1d5db',
-    style: 'font-size:11px; letter-spacing:5px; pointer-events:none; user-select:none;'
-});
-grip.textContent = '⋯';
-g.appendChild(grip);
-```
-
----
-
-**Comportement 2 — Moteur hover injecté (postMessage)**
-
-**Architecture :**
-- `WsCanvas.js` expose `injectHoverEngine(iframe)` — injecte un script dans `iframe.contentDocument` après chargement
-- Le script injecté gère `mouseover` / `mouseout` / `click` → remonte via `window.parent.postMessage`
-- `WsCanvas.js` écoute `window.addEventListener('message', ...)` → met à jour `this._selectedIframeEl`
-- `pointer-events` de l'iframe : `none` par défaut, `auto` quand `activeMode === 'select'`
-
-**Dans `WsScreenShell.js`**, modifier le listener `load` de l'iframe :
-```js
-iframe.addEventListener('load', () => {
-    if (window.wsFontManager) window.wsFontManager.injectStyles();
-    if (window.wsCanvas) window.wsCanvas.injectHoverEngine(iframe);
-});
-```
-
-**Dans `WsCanvas.js`**, ajouter la méthode `injectHoverEngine(iframe)` :
-```js
-injectHoverEngine(iframe) {
-    try {
-        const doc = iframe.contentDocument;
-        if (!doc || doc.__hmInjected) return;
-        doc.__hmInjected = true;
-
-        const script = doc.createElement('script');
-        script.textContent = `
-(function() {
-    let _last = null;
-    function _clear() {
-        if (_last) {
-            _last.style.removeProperty('outline');
-            _last.style.removeProperty('outline-offset');
-            _last = null;
-        }
-    }
-    document.addEventListener('mouseover', function(e) {
-        const el = e.target;
-        if (el === document.body || el === document.documentElement) return;
-        _clear();
-        el.style.outline = '2px solid #8cc63f';
-        el.style.outlineOffset = '-1px';
-        _last = el;
-        window.parent.postMessage({ type: 'hm-hover', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80) }, '*');
-    });
-    document.addEventListener('mouseout', function(e) {
-        if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
-            _clear();
-            window.parent.postMessage({ type: 'hm-clear' }, '*');
-        }
-    });
-    document.addEventListener('click', function(e) {
-        const el = e.target;
-        window.parent.postMessage({ type: 'hm-select', tag: el.tagName, id: el.id || '', cls: (el.className || '').toString().slice(0, 80), text: (el.textContent || '').trim().slice(0, 100) }, '*');
-    });
-})();`;
-        doc.head.appendChild(script);
-    } catch(_) {}
-}
-```
-
-**Dans `WsCanvas.js` — `setMode(mode)`**, ajouter la gestion des pointer-events sur toutes les iframes des shells :
-```js
-setMode(mode) {
-    this.activeMode = mode;
-    // Activer pointer-events dans les iframes en mode select uniquement
-    const isSelect = mode === 'select';
-    document.querySelectorAll('.ws-screen-shell iframe').forEach(iframe => {
-        iframe.style.pointerEvents = isSelect ? 'auto' : 'none';
-    });
-    // ... reste du setMode existant
-}
-```
-
-**Dans `WsCanvas.js` — `init()`**, ajouter le listener message :
-```js
-window.addEventListener('message', (e) => {
-    if (e.data?.type === 'hm-select') {
-        this._selectedIframeEl = e.data;
-        console.log('[HM-SELECT]', e.data.tag, e.data.id, e.data.text);
-        // Sullivan context à brancher ici (mission suivante)
-    }
-});
-```
-
-**Points d'attention :**
-- `doc.__hmInjected` guard : évite la double injection si l'iframe reload
-- Ne pas injecter si `doc.head` n'existe pas encore (iframe vide ou error page)
-- En mode `drag` ou tout autre mode ≠ `select`, les iframes ont `pointer-events: none` → le canvas gère tout sans interférence
-- `addScreen()` appelle `WsScreenShell.build()` qui crée l'iframe — l'injection se fait au `load` event, donc après que le contenu soit rendu
-
-**Fichiers :** `WsCanvas.js` + `WsScreenShell.js`
-
-**Livrable :**
-- Header shell = curseur `move` + gripper `⋯` centré
-- Mode select → iframes activées + moteur hover injecté au load
-- Hover = outline vert `#8cc63f` sur l'élément HTML sous la souris, géré entièrement dans l'iframe
-- Click = `[HM-SELECT]` dans la console avec tag/id/text
-- Tous autres modes → pointer-events none, comportement canvas inchangé
-
----
-
-### Mission 235 — Toolbar canvas : refonte UX
-**STATUS: 🔴 PRIORITÉ | DATE: 2026-04-08 | ACTOR: GEMINI**
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Contexte :** Audit FJD de la toolbar droite flottante (`data-purpose="floating-toolbar"` dans `workspace.html`). Plusieurs outils inutiles, illisibles, ou mal placés.
-
-**Décisions FJD :**
-
-| Outil actuel | Action |
-|---|---|
-| Flèche `select` | Garder tel quel |
-| Main `drag` | Garder — mais remplacer le picto SVG illisible par une main simple (3 tracés max), tooltip `"naviguer (H)"` |
-| Couleurs `colors` | **Masquer** (`hidden`) — viendra dans une mission Design System dédiée |
-| Typographie `text` | Garder |
-| Stitch `stitch` | **Supprimer** (intégré dans M234 — panneau Stitch supprimé) |
-| Réinitialiser vue | Garder — corriger le titre en `"recentrer (0)"` |
-| Reset layout panels | **Déplacer** hors de la toolbar → voir ci-dessous |
-
-**Fix 1 — Nouveau picto main (drag)**
-Remplacer le SVG `path` complexe actuel par un SVG main simple :
-```html
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11V6a2 2 0 014 0v5m0 0V6a2 2 0 014 0v5m0 0a2 2 0 014 0v3a6 6 0 01-6 6H9a6 6 0 01-6-6v-3"/>
-</svg>
-```
-
-**Fix 2 — Masquer couleurs**
-Ajouter `hidden` au bouton `data-mode="colors"`.
-
-**Fix 3 — Supprimer le bouton Stitch de la toolbar**
-Supprimer le `<button data-mode="stitch" ...>` (le lien Stitch est désormais dans le dashboard projet).
-
-**Fix 4 — Déplacer "réinitialiser layout des panneaux" vers le header workspace**
-- Supprimer le bouton `onclick="window.PanelDragger?.resetAll()"` de la toolbar
-- L'ajouter dans le header du workspace (zone title "Workspace Canvas"), comme un bouton discret à côté du label :
-  ```html
-  <button onclick="window.PanelDragger?.resetAll()" 
-          title="réinitialiser layout des panneaux"
-          class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
-    <svg class="w-3 h-3" ...><!-- icône reset --></svg>
-  </button>
-  ```
-- Trouver le bon endroit dans le header (chercher `data-purpose` ou le label "Workspace Canvas" ou "canvas")
-
-**Fix 5 — Ajouter bouton image avec popover assets**
-Nouveau bouton dans la toolbar, entre typo et le séparateur zoom :
-- Picto : icône image (montagne + soleil) standard
-- Au clic : ouvre un popover flottant `#ws-image-picker` positionné à gauche de la toolbar
-- Le popover liste les fichiers de `assets/img/` du projet actif via `GET /api/projects/active/assets`
-- Chaque fichier affiche : thumbnail + nom + bouton "copier lien" (`/api/projects/assets/img/{filename}`)
-- Un bouton "importer" dans le popover déclenche `document.getElementById('ws-direct-upload').click()` (l'input existant filtre déjà `.png,.jpg,.jpeg`)
-
-**Note :** Les routes assets sont implémentées dans M236 (QWEN). M235 peut être livrée avec la liste vide (`{ files: [] }`) si M236 n'est pas encore joué — le popover fonctionnera à vide.
-
-**Livrable :**
-- Toolbar épurée : flèche / main (picto correct) / typo / image / séparateur / recentrer
-- Couleurs + Stitch absents
-- "Réinitialiser layout panels" déplacé vers le header
-- Popover image basique fonctionnel (même vide)
-
----
-
-### Mission 236 — Backend : routes assets/img par projet
-**STATUS: ✅ LIVRÉ**
-
-- `POST /api/projects/active/assets/upload` — upload image (png/jpg/jpeg/webp/svg/gif, max 10MB)
-- `GET /api/projects/active/assets` — liste images du projet (tri par date desc)
-- `GET /api/projects/assets/img/{filename}` — sert l'image
-- `DELETE /api/projects/assets/img/{filename}` — supprime
-- Stockage : `projects/{project_id}/assets/img/`
-- Extensions validées + limite 10MB
-
-**Contexte :** Les élèves uploadent des images (PNG, JPG, JPEG, WebP, SVG) dans leur projet. Ces images doivent être stockées dans `projects/{project_id}/assets/img/`, listables, servables, et supprimables.
-
-**Fichier cible :** `Frontend/3. STENCILER/routers/import_router.py` (ou nouveau `assets_router.py` si plus propre — dans ce cas l'enregistrer dans `server_9998_v2.py`)
-
-**Routes à créer :**
-
-**1. Upload**
-```
-POST /api/projects/active/assets/upload
-Content-Type: multipart/form-data
-file: <UploadFile>
-```
-- Stocke dans `get_active_project_path() / "assets" / "img" / {safe_filename}`
-- `safe_filename` = slugify + timestamp pour éviter les collisions
-- Retourne `{ "status": "ok", "file": { "name": original_name, "filename": safe_filename, "url": "/api/projects/assets/img/{safe_filename}" } }`
-
-**2. Liste**
-```
-GET /api/projects/active/assets
-```
-- Retourne `{ "files": [ { "name": ..., "filename": ..., "url": ..., "size": ... }, ... ] }`
-- Scanne `assets/img/` — extensions acceptées : `.png .jpg .jpeg .webp .svg .gif`
-- Ordre : plus récent en premier
-
-**3. Servir un fichier**
-```
-GET /api/projects/assets/img/{filename}
-```
-- `FileResponse` depuis `get_active_project_path() / "assets" / "img" / filename`
-- 404 si absent
-
-**4. Supprimer**
-```
-DELETE /api/projects/assets/img/{filename}
-```
-- Supprime le fichier physique
-- Retourne `{ "status": "deleted" }`
-
-**Contraintes :**
-- Créer `assets/img/` avec `mkdir(parents=True, exist_ok=True)` à chaque accès
-- Limiter la taille upload à 10MB (vérifier `len(content) <= 10_000_000`)
-- Extensions autorisées uniquement (rejeter sinon avec 400)
-
----
-
-### Thème 7 — Wire → Cadrage
-
-> M147 ✅, M181 ✅, M183 ✅, M185 ✅, M186 absorbée M187, M187 ✅, M184 ✅, M188 (dashboard) ✅ — archivées
-
-### Mission 188 — Wire : Aperçu fonctionnel post-forge
-**STATUS: 🟠 PRÊTE**
-**DATE: 2026-04-06 | ACTOR: GEMINI**
-
-Bouton "tester" dans l'overlay Wire post-forge → `window.open('/api/frd/file?name={name}&raw=1&wire=1')`.
-- `server_v3.py` : si `wire=1`, retourner HTML brut sans tracker
-- `WsWire.js` : bouton cliquable après `_executeForge` succès
-
----
-
-### Mission 182-A — Wire : organes du manifest dans le tableau
-**STATUS: 🟠 PRÊTE**
-**DATE: 2026-04-06 | ACTOR: GEMINI**
-
-> BOOTSTRAP OBLIGATOIRE
-
-Diagnostic console d'abord :
-```js
-fetch('/api/projects/active/wire-audit').then(r=>r.json()).then(d=>console.log('audit:', d.audit?.length, d.audit))
-```
-- `audit.length === 6` → modifier `WsWire.js _renderBilan()`
-- `audit.length === 0` → modifier route `wire-audit` dans `server_v3.py`
-
-**Livrable :** tableau Wire affiche 6 lignes d'organes.
-
----
-
-### Mission 182-B — Wire : bouton "activer le plan"
-**STATUS: 🔵 EN ATTENTE 182-A | ACTOR: GEMINI**
-
-Cliquer `#ws-wire-apply-plan` → champ chat se remplit → Sullivan répond. Inspecter `WsWire.js` autour de `btnApplyPlan.onclick`.
-
----
-
-### Mission 180 — Rebranchement WiRE dans cadrage_alt
-**STATUS: 🔴 PRIORITÉ**
-**DATE: 2026-04-05 | ACTOR: GEMINI**
-
-- [ ] Shell `#ws-wire-overlay` dans `cadrage_alt.html`
-- [ ] Chargement `WsWire.js` + `WsInspect.js`
-- [ ] Déclenchement diagnostic z-index au clic `.wire`
-
----
-
-### Mission 149 — Canvas N0 : États de sélection + toolbar
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-02**
-- [ ] États CSS (hover, selected, dragging)
-- [ ] WsCanvas.js : notifyToolbar, cursor
-
----
-
-### Mission 150 — Retour Cadrage : session pré-alimentée
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-02**
-- [ ] Route `POST /api/cadrage/init-context`
-- [ ] Badge "contexte wire chargé" dans Cadrage UI
-
----
-
-### Mission 153 — Undo Sullivan
-**STATUS: 🔵 EN COURS — GEMINI | DATE: 2026-04-03**
-- [ ] WsCanvas.js : snapshot avant update
-- [ ] Bouton Undo dans le header workspace
-
----
-
-### Mission 155 — Bouton Stop Sullivan
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-03**
-- [ ] WsChat.js : AbortController + bouton Stop UI
-
----
-
-### Thème 8 — Système Miroir
-> M158 ✅, M159 ✅, M160 ✅, M161 ✅ — archivées
-
-**Dette technique post-M158 :**
-1. `Canvas.feature.js` (53KB) : Découplage moteur SVG / Zoom-Pan
-2. `sullivan_renderer.js` (33KB) : Migration DOM Factory → composants DESIGN.md
-3. `semantic_bridge.js` (19KB) : Simplification routage Sullivan → FEE
-
----
-
-### Thème 9 — Multi-Projet
-> M162 ✅, M163 ✅, M164 ✅, M165 ✅ — archivées
-
----
-
-### Thème 10 — Design System
-
-### Mission 167 — DESIGN.md HoméOS
-**STATUS: ✅ LIVRÉ | ACTOR: FJD + CLAUDE**
-`Frontend/1. CONSTITUTION/DESIGN.md` — Colors, Typography, Shape, Effects, Spacing, Tone, Forbidden.
-
----
-
-### Mission 170 — BEHAVIOR_SULLIVAN.md
-**STATUS: 🟠 PRÊTE**
-**DATE: 2026-04-06 | ACTOR: FJD + CLAUDE**
-**Dépendance : M167**
-
-- [ ] `Frontend/1. CONSTITUTION/BEHAVIOR_SULLIVAN.md` : Identité, Modes, Manifest, Règles, Format, Interdits
-- [ ] Brancher dans `server_v3.py` → injecté dans `base_system` de chaque mode
-
----
-
-### Thème 14 — Backend IDE
-> M208 ✅ — archivée (`WsBackend.js`, War Room 3 colonnes, Quick-Switcher)
-
----
-
-### Thème 15 — FEE Lab
-> M209 ✅ — archivée (`WsFEE.js`, layout Studio, Sullivan FEE)
-
-### Mission 221 — FEE Studio : overlay "Camera RAW" 4 zones au clic "front dev"
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: GEMINI**
-
-> BOOTSTRAP OBLIGATOIRE
-> Vision complète : `docs/09_Frontend/FEE_POPOVER_VISION.md`
-
-**CONTEXTE CRITIQUE : cette mission se passe entièrement dans `/workspace` (`workspace.html`).
-Ne pas créer de nouvelle page, ni de route `/fee`. L'overlay est injecté dans le DOM du workspace au clic sur le bouton `[data-mode="front-dev"]` déjà présent dans `workspace.html`. Il flotte au-dessus du layout workspace existant (`position: fixed; inset: 0; z-index: 9000`). Le workspace reste monté en dessous.**
-
-**Concept :** le mode FEE est un outil d'étalonnage de l'interactivité, pas de construction. L'étudiant est DA, Sullivan traduit l'émotion en timeline GSAP.
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│  GAUCHE (~240px)    │   CENTRE (flex-1)     │  DROITE (~320px) │
-│  Explorateur        │   Iframe "pristine"   │  Sullivan FEE    │
-│  data-af-id tree    │   Hot-Reload temporel │  Vibe-to-Code    │
-│  LEDs GSAP          │   Play/Pause/Rewind   │  logic.js AST    │
-│  State selector     │   Slow-Mo             │  chat + input    │
-│─────────────────────┴───────────────────────┴─────────────────│
-│  BAS (~100px) — Pellicule : Entrées | Sorties | Parallaxe | Distorsions | Hover │
-└──────────────────────────────────────────────────────────────┘
-```
-
-**Gauche — Explorateur de Triggers :**
-- Appel `postMessage` à l'iframe → récupère tous les `[data-af-id]`
-- Afficher arborescence : nom de l'élément + `data-af-id`
-- LED verte si l'élément possède déjà une timeline GSAP dans `logic.js`
-- Sélecteur State : `initial` / `hover` / `click` / `scroll-trigger` — filtre le contexte envoyé à Sullivan
-
-**Centre — Labo Photo :**
-- `<iframe id="fee-preview-iframe">` → URL : `/api/bkd/fee/preview?project_id={id}&path={file}`
-- Hot-Reload : injection via `postMessage` du code généré par Sullivan, sans rechargement complet
-- Barre de contrôle : Play / Pause / Rewind / ×0.25 Slow-Mo (dispatche des commandes GSAP via postMessage)
-
-**Droite — Sullivan FEE (Vibe-to-Code) :**
-- Réutiliser `WsFEE.js` logique chat (historique + input + stream SSE)
-- Contexte envoyé à Sullivan = `{ trigger: data-af-id, state, existing_code: extrait logic.js }`
-- Code généré isolé dans un bloc `// [FEE-LOGIC-START] ... // [FEE-LOGIC-END]` dans `logic.js`
-- Bouton "appliquer" → `POST /api/bkd/fee/apply` → patch chirurgical AST
-
-**Bas — Pellicule d'Effets :**
-- Strip horizontale scrollable, vignettes par catégorie : `Entrées` | `Sorties` | `Parallaxe` | `Distorsions P5.js` | `Hover`
-- Clic vignette → pré-remplit le chat Sullivan avec le squelette de code correspondant
-
-**Déclenchement :**
-- Clic `[data-mode="front-dev"]` → injecte l'overlay dans `body` si absent → `classList.remove('hidden')`
-- Bouton × → `classList.add('hidden')` + reset mode toggle
-- Ne pas toucher au GSAP drawer existant (`ws-fee-effects-drawer`) — ce nouvel overlay le remplace
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/templates/workspace.html` — bouton `front-dev`, structure body
-- `Frontend/3. STENCILER/static/js/workspace/WsFEE.js` — logique Sullivan FEE existante
-- `Frontend/3. STENCILER/static/templates/bkd_frd.html` — référence layout tripartite Mission 208
-- `docs/09_Frontend/FEE_POPOVER_VISION.md` — vision complète
-
-**Fichiers à créer/modifier :**
-- `Frontend/3. STENCILER/static/js/workspace/WsFEEStudio.js` — **créer** : classe `WsFEEStudio`, injecte et orchestre les 4 zones
-- `Frontend/3. STENCILER/static/templates/workspace.html` — charger `WsFEEStudio.js`, brancher sur `[data-mode="front-dev"]`
-
-**Style :** `#f7f6f2` bg, `#3d3d3c` text, `#8cc63f` accent, `border: 1px solid #e5e5e5`, `font-family: Geist`, `border-radius: 0` (Hard-Edge). Pas d'emojis. Pas de majuscules labels.
-
-**Livrable :**
-1. Clic "front dev" → overlay 4 zones s'ouvre plein écran
-2. Explorateur gauche liste les `data-af-id` de l'iframe
-3. Sullivan traduit l'intention en timeline GSAP → code injecté dans `logic.js`
-4. Hot-reload visible dans l'iframe sans rechargement
-5. Pellicule bas cliquable → pré-remplit Sullivan
-
-**CR post-livraison (Qwen) :**
-- `POST /api/bkd/fee/apply` manquante → ajoutée (injecte code avec markers FEE dans logic.js)
-- Bouton `[data-mode="front-dev"]` non branché → auto-init ajouté dans WsFEEStudio.js
-- Bloc try/except de `fee/chat` cassé → réparé
-- Presets étendus : 5 → **20** dans 5 catégories (entrées ×7, sorties ×3, parallaxe ×3, hover ×5, continu ×2)
-
----
-
-### Thème 16 — EdTech DNMADE
-> M210 ✅, M214 ✅, M215 ✅, M216 ✅, M217 ✅, M218 ✅, M219 ✅, M220 ✅ — archivées
-
----
-
-## Thème 17 — Rattrapage EdTech (Vendredi)
-
-> Bugs identifiés 2026-04-07. Traiter dans l'ordre.
-
-### R0 — Sullivan patch_element : _apply_tailwind_diff manquant → blobs Tailwind
-**STATUS: ✅ LIVRÉ**
-
-**Fix appliqué dans `frd_router.py` :**
-- `_apply_tailwind_diff(source_html, diff)` — patch chirurgical de classes Tailwind via BeautifulSoup (fallback data-wire inclus)
-- `_strip_tailwind_blobs(html)` — supprime les `<style>` > 5000 chars avant sauvegarde
-- `save_frd_file()` appelle `_strip_tailwind_blobs()` avant `write_text`
-- `sullivan_router.py` importe maintenant la fonction existante → plus d'exception silencieuse
-
-**Validé :**
-```bash
-# patch_element : add/remove classes OK
-# strip blob >5000 : ✅ supprimé
-# preserve small <style> : ✅ conservé
-# data-wire fallback : ✅ OK
-```
-
-### R1 — `/teacher` : formulaire "créer une classe" ne soumet pas
-**STATUS: ✅ LIVRÉ**
-
-**Fix appliqué :**
-- `createClass()` : error handling complet (validation HTTP status, feedback UI rouge/vert, console.log debug)
-- Ajout `PUT /api/classes/{id}` — modifier une classe (backend + modal frontend)
-- Ajout `DELETE /api/classes/{id}` — supprimer une classe + cascade étudiants
-- Boutons "modifier" et "supprimer" visibles quand une classe est sélectionnée
-- Tableau de sujets ajouté au dashboard — `GET /api/classes/{id}/subjects` appelé au chargement
-- Affiche sujet/description/competences ou "aucun sujet" si vide
-
-```bash
-# Testé et validé :
-curl -X POST http://localhost:9998/api/classes -H "Content-Type: application/json" -d '{"name":"DNMADE 2026","subject":"Design Web"}'
-curl -X PUT http://localhost:9998/api/classes/dnmade-2026 -H "Content-Type: application/json" -d '{"name":"DNMADE 2026 v2","subject":"Design Web"}'
-curl -X DELETE http://localhost:9998/api/classes/dnmade-2026
-```
-
----
-
-### R2 — Cadrage mode prof : `class_id` pas transmis à Sullivan
-**STATUS: ✅ LIVRÉ**
-
-**Diagnostic :** Le frontend passait déjà `class_id` dans l'URL SSE. Le router l'acceptait déjà. `_load_class_meta()`, `_load_dnmade_referentiel()`, `_build_prof_system()` existaient déjà dans `brainstorm_logic.py`.
-
-**Le seul bug :** chemin DB incorrect dans `_load_class_meta()`
-- Avait : `... / "Frontend/3. STENCILER" / "db" / "projects.db"` (n'existait pas)
-- Corrigé : `... / "db" / "projects.db"` (racine AETHERFLOW)
-
-**Résultat :** Sullivan reçoit maintenant le contexte DNMADE complet — nom de classe, sujet actif, et référentiel 4 domaines / 10 compétences.
-
-**Fichier modifié :** `Backend/Prod/retro_genome/brainstorm_logic.py` — ligne DB path corrigée
-
----
-
-### R9 — bootstrap.js:814 TypeError : refreshNav undefined
-**STATUS: ✅ LIVRÉ**
-
-**Fix :** ajout guard `if (!window.HOMEOS) window.HOMEOS = {};` avant assignation de `refreshNav` et `boot`.
-**Fichier :** `Frontend/3. STENCILER/static/js/bootstrap.js` ligne 814.
-
-### R3 — Onglet "Dashboard" absent du nav en mode prof
-**STATUS: ✅ VALIDÉ**
-
-Bootstrap.js injecte le nav dynamique avec l'onglet Dashboard pour `role === 'prof'` (ligne `TABS.unshift({ id: 'dashboard', label: 'Dashboard', ... path: '/teacher' })`).
-
----
-
-### R4 — cadrage_alt.html : Univers LT Std Light + max-width
-**STATUS: ✅ LIVRÉ (CODE DIRECT)**
-
-- Streams + inputs → `font-family: 'Univers LT Std'; font-weight: 300; font-size: 14px`
-- `@font-face` → `/static/fonts/univers-lt-std/univers-lt-std-300.woff2`
-- Contenu centré `max-width: 48rem`
-- Panneau compétences prof → `top: 120px` (hors zone "+ capture")
-
----
-
-### R8 — Cadrage mode prof : UX simplifiée (sans arbitrage, sans PRD)
-**STATUS: ✅ LIVRÉ**
-
-**Modifications appliquées :**
-- Masquage auto des outils d'arbitrage/PRD et du panneau Sullivan en mode prof.
-- Amorce silencieuse auto-générée à l'ouverture pour guider le professeur.
-- Carte de confirmation visuelle (verte) injectée lors de la détection du sujet structuré.
-- Logique de redirection vers `/teacher` après création du sujet.
-
-**Livrable :**
-1. `/cadrage?mode=prof&class_id=dnmade-2026` → accueil Sullivan automatique, pas de boutons arbitrage/PRD
-2. Discussion → compétences dans panneau droit
-3. `<!-- SUJET: -->` détecté → carte verte + bouton "créer le sujet →" actif
-4. Clic → retour `/teacher`
-
----
-
-### R5 — Sujets créés → visibles dans `/teacher`
-**STATUS: ✅ VÉRIFIÉ**
-
-`teacher_dashboard.html` appelle `GET /api/classes/{id}/subjects` via `loadSubjects()` au chargement d'une classe. Tableau affiché avec titre, description, compétences.
-
----
-
-### R6-A — Login élève : résolution classe + student_id
-**STATUS: ✅ LIVRÉ**
-
-- `auth_register()` cherche l'élève dans `students` par `display` (case-insensitive)
-- Retourne `student_id`, `class_id`, `project_id` dans la réponse
-- `login.html` : si élève reconnu et `project_id` null → appelle `/start` pour créer le projet → redirige `/workspace?project_id=X`
-- Session stocke `student_id`, `class_id`, `project_id` pour les composants downstream
-- Flow admin/prof inchangé (class_id null = redirect `/teacher`)
-
----
-
-### R6 — Workspace étudiant : isolation projet dans Stitch
-**STATUS: ✅ LIVRÉ**
-
-- `/workspace?project_id={id}` → active le projet via `POST /api/projects/activate` avant chargement (XHR synchrone dans `<head>`)
-- Stitch pointe sur `projects/{uuid}/imports/` (active_id mis à jour)
-- Export → sauvegardé dans `projects/{uuid}/exports/`
-- Dashboard prof → bouton "ouvrir" active le projet puis ouvre `/workspace` dans nouvel onglet
-
----
-
-### M222 — Stitch : reconnaissance et sync automatique par project_id HoméOS
-**STATUS: ✅ LIVRÉ**
-
-- Backend : `GET /api/stitch/project-info` → retourne `stitch_project_id` + titre du manifest du projet actif
-- Frontend : `WsStitch._syncProjectId()` auto-remplit le champ `project_id` au `show()`
-- Flow : `show()` → `updateStatus()` → `_syncProjectId()` → `loadSession()`
-
-**Fichiers à modifier :**
-- `stitch_router.py` — ajouter `GET /api/stitch/project-info`
-- `WsStitch.js` — ajouter `_syncProjectId()`, l'appeler dans `show()`
-
-**Règle :** ne pas toucher à `loadSession()` ni à `_patch_manifest_stitch_project_id`. Scope strict.
-
-**Livrable :**
-1. Workspace ouvert avec `?project_id=dnmade-2026-blart-samuel`
-2. Panel Stitch ouvert → `stitch_project_id` auto-rempli depuis manifest
-3. `loadSession()` peut opérer sans saisie manuelle
-
----
-
-### R7 — CI/CD élèves : déploiement des rendus
-**STATUS: ✅ LIVRÉ**
-
-**Pipeline GitHub Actions :** `.github/workflows/deploy-student.yml`
-- Trigger : `workflow_dispatch` (manual avec `project_id`) ou push sur `student-deploy/*`
-- Étapes : resolve project → check exports → prepare bundle → deploy HF Spaces → update milestone N5
-- Cible : HF Space `FJDaz/homeos-students` (ou fallback `FJDaz/homeos`)
-
-**Backend :** `POST /api/classes/{class_id}/students/{student_id}/deploy`
-- Vérifie exports exists + HTML files
-- Trigger GitHub Actions via repository_dispatch
-- Update milestone à N5 (Déployé)
-- Retourne URL de déploiement
-
-**Utilisation :**
-```bash
-# Via API
-curl -X POST http://localhost:9998/api/classes/dnmade1-2026/students/blart-samuel/deploy
-
-# Via GitHub Actions (manuel)
-# Actions → deploy student render → Run workflow → project_id=dnmade1-2026-blart-samuel
-```
-
----
-
----
-
-## Thème 18 — Désintoxication bootstrap.js
-
-> Diagnostic 2026-04-07. `bootstrap.js` (829L) injecte ~350L de CSS inline à chaque page, plus du code workspace-spécifique (GSAP). Pas de bug actif (R9 réglé, static nav supprimé), mais c'est une bombe à retardement pour les agents et le cache browser.
-
-### B1 — Extraire le CSS de bootstrap.js → homeos-nav.css
-**STATUS: ✅ LIVRÉ**
-**DATE: 2026-04-07 | ACTOR: QWEN**
-
-**Contexte :**
-`bootstrap.js` injecte ~350L de CSS via `style.textContent = \`...\`` dans `injectStyles()`.
-Ce CSS ne change jamais → il devrait être un fichier statique, cacheable.
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/js/bootstrap.js` (829L)
-
-**Fichiers à créer/modifier :**
-- `Frontend/3. STENCILER/static/css/homeos-nav.css` — **créer** avec tout le contenu de `injectStyles()`
-- `Frontend/3. STENCILER/static/js/bootstrap.js` — remplacer `injectStyles()` par injection d'un `<link>` vers `/static/css/homeos-nav.css`
-
-**Livrable :**
-```js
-// bootstrap.js — injectStyles() remplacée par :
-function injectStyles() {
-    if (document.getElementById('homeos-bootstrap-css')) return;
-    const link = document.createElement('link');
-    link.id = 'homeos-bootstrap-css';
-    link.rel = 'stylesheet';
-    link.href = '/static/css/homeos-nav.css';
-    document.head.appendChild(link);
-}
-```
-
-**Règle :** ne pas toucher à autre chose dans bootstrap.js. Scope strict.
-
----
-
-### B2 — Sortir le code GSAP/workspace de bootstrap.js
-**STATUS: ✅ LIVRÉ**
-
-- Code workspace (`ws-mode-btn`, `effects-drawer`, `GsapCheatSheet`) extrait de `bootstrap.js`
-- Déplacé dans nouveau fichier `WsBootstrap.js`
-- `workspace.html` charge `WsBootstrap.js`
-- `bootstrap.js` est maintenant propre : ne fait que nav + styles globaux
-
----
-
----
-
-## Thème 19 — Auth & Login redesign
-
-### M224 — Login : prof par mot de passe, élève par classe + prénom
-**STATUS: ✅ LIVRÉ**
-
-**Backend (`auth_router.py`) :**
-- Migration DB : colonne `password_hash` ajoutée à `users`
-- `POST /api/auth/register-prof` — inscription prof (nom + mot de passe hashé SHA-256)
-- `POST /api/auth/login-prof` — login prof par nom + mot de passe
-- `POST /api/auth/login-student` — login élève sans mot de passe (class_id + student_id)
-- `GET /api/classes/{class_id}/students-list` — liste publique des élèves (sans auth)
-
-**Testé :**
-- ✅ Inscription prof → token + role='prof'
-- ✅ Login prof correct → token retourné
-- ✅ Mauvais mot de passe → 401 "Mot de passe incorrect"
-- ✅ Students list → retourne id + display + project_id
-
-**Note :** Frontend UI login (deux branches prof/élève) à implémenter par Gemini.
-
----
-
----
-
-## Thème 21 — ProjectContext RAG
-
-### M226 — ProjectContext : contexte projet canonique injecté dans tous les LLM
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: QWEN**
-
-> Absorbe M225. Remplace toutes les injections de contexte ad hoc.
-
-**Principe :**
-Un seul objet `ProjectContext` chargé une fois par session → injecté dans **tout** appel LLM (cadrage, brainstorm, Sullivan FEE, pre-eval). Le LLM est instruit de respecter impérativement ce contexte avant de répondre.
-
-**Sources à agréger (par ordre de priorité) :**
-```
-projects/{project_id}/
-  ├── manifest.json          → écrans, atoms, stitch_project_id
-  ├── genome.json            → structure narrative
-  ├── exports/PRD_*.md       → dernier PRD validé (le plus récent)
-  └── design.md              → design system projet (si présent)
-
-Frontend/1. CONSTITUTION/
-  └── DESIGN.md              → design system HoméOS global (fallback)
-
-classes/{class_id}/subjects/ → sujet DNMADE lié (si class_id en session)
-dnmade_referentiel.json      → compétences (si mode éducation)
-```
-
-**Backend — créer `Backend/Prod/retro_genome/project_context.py` (ACTOR: QWEN) :**
-
-```python
-class ProjectContext:
-    def __init__(self, project_id: str = None, class_id: str = None):
-        self.project_id = project_id
-        self.class_id = class_id
-        self._cache = None
-
-    def load(self) -> str:
-        """Charge et formate toutes les sources en un bloc texte pour le prompt."""
-        if self._cache:
-            return self._cache
-        sections = []
-
-        # 1. Manifest
-        manifest = self._read_json(PROJECTS_DIR / self.project_id / "manifest.json")
-        if manifest:
-            sections.append(self._format_manifest(manifest))
-
-        # 2. Genome
-        genome = self._read_json(PROJECTS_DIR / self.project_id / "genome.json")
-        if genome:
-            sections.append(f"GÉNOME PROJET:\n{json.dumps(genome, ensure_ascii=False, indent=2)[:2000]}")
-
-        # 3. Dernier PRD
-        prd = self._latest_prd()
-        if prd:
-            sections.append(f"PRD VALIDÉ:\n{prd[:3000]}")
-
-        # 4. Design system projet ou HoméOS global
-        design = self._read_file(PROJECTS_DIR / self.project_id / "design.md") \
-                 or self._read_file(CONSTITUTION_DIR / "DESIGN.md")
-        if design:
-            sections.append(f"DESIGN SYSTEM:\n{design[:1500]}")
-
-        # 5. Sujet DNMADE si class_id
-        if self.class_id:
-            sujet = self._latest_subject()
-            if sujet:
-                sections.append(f"SUJET DNMADE:\n{sujet}")
-            ref = _load_dnmade_referentiel()
-            if ref:
-                sections.append(f"RÉFÉRENTIEL DNMADE:\n{ref}")
-
-        self._cache = "\n\n---\n\n".join(sections)
-        return self._cache
-
-    def as_system_prefix(self) -> str:
-        ctx = self.load()
-        if not ctx:
-            return ""
-        return (
-            "CONTEXTE PROJET — respecte ces règles IMPÉRATIVEMENT avant de répondre.\n"
-            "Ne propose rien qui contredise le manifest, le design system ou le PRD validé.\n\n"
-            + ctx + "\n\n---\n\n"
-        )
-```
-
-**Intégration dans `brainstorm_logic.py` :**
-
-Modifier `sse_chat_generator()` — remplacer toute la logique d'injection contextuelle par :
-```python
-from .project_context import ProjectContext
-
-ctx = ProjectContext(project_id=project_id, class_id=class_id)
-system_prompt = ctx.as_system_prefix() + (BRS_CHAT_SYSTEM if not class_id else "")
-```
-
-Supprimer les helpers devenus redondants : `_load_class_meta`, `_load_dnmade_referentiel`, `_build_prof_system` → absorbés dans `ProjectContext`.
-
-**Routes à mettre à jour :**
-- `cadrage_router.py` → ajouter `project_id: str = Query(None)` au SSE endpoint → passer à `sse_chat_generator`
-- `cadrage_alt.html` → lire `session.project_id` depuis localStorage → ajouter `&project_id=` à l'URL SSE
-
-**Fichiers à lire :**
-- `Backend/Prod/retro_genome/brainstorm_logic.py` — L247-370 (sse_chat_generator + helpers M220)
-- `Frontend/3. STENCILER/routers/cadrage_router.py`
-- `Frontend/3. STENCILER/static/templates/cadrage_alt.html` — `startStreaming()`
-
-**Fichiers à créer/modifier :**
-- `Backend/Prod/retro_genome/project_context.py` — **créer**
-- `Backend/Prod/retro_genome/brainstorm_logic.py` — remplacer helpers par `ProjectContext`
-- `Frontend/3. STENCILER/routers/cadrage_router.py` — ajouter `project_id` param
-
-**Règle fallback (CRITIQUE) :**
-- Si `project_id` absent → utiliser `default` comme project_id (projet HoméOS de référence)
-- Si `role === 'prof'` → jamais bloqué, toujours un contexte disponible
-- Le prof visitant une classe (`class_id` présent) reçoit le sujet de la classe en contexte, même sans project_id personnel
-
-**Livrable :**
-1. Tout appel Sullivan reçoit le manifest + genome + PRD + design en contexte
-2. Mode prof : sujet DNMADE + référentiel inclus automatiquement, fallback `default` si pas de projet actif
-3. Mode élève : idem + manifest Stitch de son projet
-4. Un seul endroit à maintenir pour enrichir le contexte de tous les LLM
-5. Plus jamais de "veuillez activer un projet" pour le prof
-
----
-
-### M225 — Cadrage : panneau "contexte projet" visible dans l'UI
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-07 | ACTOR: GEMINI**
-
-> Dépend de M226 (backend). Frontend uniquement.
-
-> BOOTSTRAP OBLIGATOIRE
+**input_files :** `student_login.html`, `WsStitchDrill.js`
 
-Panneau rétractable dans `cadrage_alt.html` affichant ce que Sullivan voit :
-- Titre du projet, ID Stitch, nb écrans, dernier PRD (lien), design system actif
-- Bouton "recharger" → re-fetch `GET /api/projects/active` + manifest
-- Collapsed par défaut, expand au clic sur "contexte projet ▸"
-- Position : colonne de droite sous le panneau compétences (mode prof) ou en haut à droite (mode élève)
+**output attendu :**
+- Login student → `session.name` présent → nom visible dans le header
+- Drill : si pas de projet → Step 0 s'affiche (pas d'erreur)
+- Clés renseignées à Step 2 → bouton "Commencer à travailler" visible
+- Clic "Commencer" → ManifestBox s'ouvre même si chargement lent
 
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/templates/cadrage_alt.html`
-- `Frontend/3. STENCILER/routers/cadrage_router.py`
-
-**Contexte :**
-Un élève arrive en Cadrage avec un projet déjà structuré (manifest Stitch : écrans, atoms, intentions).
-Sullivan ne voit rien de tout ça — il répond dans le vide.
-Il faut : (1) passer `project_id` au SSE, (2) lire le manifest et l'injecter dans le system prompt, (3) l'afficher dans l'UI.
-
-**Backend — `cadrage_router.py` + `brainstorm_logic.py` (ACTOR: QWEN) :**
-
-1. `cadrage_router.py` — ajouter `project_id` au SSE endpoint :
-```python
-@router.get("/api/cadrage/chat/{provider}")
-async def cadrage_chat_sse(provider: str, session_id: str = Query(...), message: str = Query(...), class_id: str = Query(None), project_id: str = Query(None)):
-    async def generate():
-        async for chunk in cadrage_logic.sse_chat_generator(session_id, provider, message, class_id=class_id, project_id=project_id):
-            yield chunk
-```
-
-2. `brainstorm_logic.py` — ajouter helper `_load_project_manifest(project_id)` :
-```python
-def _load_project_manifest(project_id: str) -> str:
-    """Lit projects/{project_id}/manifest.json → retourne texte formaté pour le prompt."""
-    try:
-        projects_dir = Path(__file__).parent.parent.parent.parent / "projects"
-        manifest_path = projects_dir / project_id / "manifest.json"
-        if not manifest_path.exists():
-            return ""
-        data = json.loads(manifest_path.read_text(encoding='utf-8'))
-        # Résumer : titre, écrans, atoms clés
-        lines = []
-        if data.get("name"): lines.append(f"Projet : {data['name']}")
-        if data.get("stitch_project_id"): lines.append(f"Stitch ID : {data['stitch_project_id']}")
-        screens = data.get("screens", [])
-        if screens: lines.append(f"Écrans : {', '.join(s.get('name','?') for s in screens)}")
-        return "\n".join(lines)
-    except Exception as e:
-        logger.warning(f"_load_project_manifest error: {e}")
-        return ""
-```
-
-3. Dans `sse_chat_generator()` — si `project_id` présent, enrichir `system_prompt` :
-```python
-if project_id:
-    manifest_ctx = _load_project_manifest(project_id)
-    if manifest_ctx:
-        system_prompt += f"\n\nCONTEXTE PROJET ÉLÈVE :\n{manifest_ctx}"
-```
-
-**Frontend — `cadrage_alt.html` (ACTOR: GEMINI) :**
-
-> BOOTSTRAP OBLIGATOIRE
-
-1. Au chargement, lire `localStorage.homeos_session.project_id`
-2. Si présent → `GET /api/projects/{project_id}/manifest` (ou lire depuis `/api/projects/active`) → afficher dans un panneau rétractable à droite intitulé "contexte projet" :
-   - Titre du projet, liste des écrans Stitch, compétences DNMADE si présentes
-   - Bouton "recharger" → re-fetch le manifest (utile si l'élève a importé de nouveaux écrans)
-   - Panneau collapsed par défaut, expand au clic
-3. Ajouter `&project_id={project_id}` à l'URL SSE dans `startStreaming()`
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/routers/cadrage_router.py`
-- `Backend/Prod/retro_genome/brainstorm_logic.py` — `sse_chat_generator()`, helpers M220
-- `Frontend/3. STENCILER/static/templates/cadrage_alt.html` — `startStreaming()`, panneau Sullivan
-
-**Livrable :**
-1. Élève ouvre `/cadrage` avec `project_id` en session → Sullivan voit le manifest dans son contexte
-2. Panneau "contexte projet" visible et rétractable dans l'UI
-3. Bouton "recharger" met à jour sans rechargement de page
-
----
-
-## Thème 25 — Stitch UX
-
-### S1 — Panel Stitch : overflow coupé + formulaire toujours caché
-**STATUS: ✅ CODE DIRECT | DATE: 2026-04-08 | ACTOR: CLAUDE**
-
-- `WsStitch.js` : branches `!res.ok` et `!data.linked` appellent maintenant `showManualForm()` — le formulaire ID est visible dès l'ouverture si pas de session liée
-- `workspace.html` : `#panel-stitch` → `max-height: calc(100vh - 96px); flex-direction: column` / `#stitch-content` → `overflow-y: auto; flex: 1` (plus de `max-h-[60vh]`)
-
----
-
-### M227 — Isolation projet par session utilisateur (critique)
-**STATUS: ✅ LIVRÉ**
-
-- `bkd_service.get_active_project_id(token)` : si token élève → résout `students.project_id` depuis DB, sinon fallback `active_project.json`
-- `bkd_service.set_active_project_id(pid, token)` : si token élève → met à jour DB `students.project_id`
-- `projects_router.activate_project` : lit `X-User-Token` → passe au setter
-- `bootstrap.js` : project switcher masqué pour `role === 'student'`
-- `workspace.html` : activation XHR inclut `X-User-Token`
-
-**Résultat :** Chaque élève voit TOUJOURS son propre projet, même si le prof navigue en même temps sur un autre.
-- `Frontend/3. STENCILER/static/templates/workspace.html` — XHR activation L43-55
-- `Frontend/3. STENCILER/static/js/bootstrap.js` — `injectNav()`, project switcher
-
-**Livrable :**
-1. Hugo ouvre le workspace → son projet, même si le prof a switché entre-temps
-2. Hugo ne voit pas le project switcher dans la nav
-3. Le prof garde l'accès à tous les projets
-
----
-
-### S3 — Stitch MCP : utiliser la clé API de FJD pour tous les élèves
-**STATUS: ✅ LIVRÉ**
-
-- `_get_stitch_key()` dans `stitch_router.py` : lit d'abord `STITCH_API_KEY` depuis l'env, puis fallback sur `user_keys` (admin/prof)
-- Toutes les routes stitch utilisent `_get_stitch_key()` au lieu de `STITCH_API_KEY`
-- Tous les `StitchClient()` reçoivent `api_key=_get_stitch_key()`
-- `GET /api/stitch/status` retourne `connected: true` si la clé est dans `user_keys` (même sans `.env`)
-
----
-
-### M232 — Refonte layout workspace : dashboard projet + nettoyage toolbar
-**STATUS: ✅ LIVRÉ (Qwen full stack) | DATE: 2026-04-08**
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Fichiers à lire en entier :**
-- `Frontend/3. STENCILER/static/templates/workspace.html` — structure complète panels gauche + toolbar droite
-- `Frontend/3. STENCILER/static/js/workspace/ws_main.js` — `fetchWorkspaceImports()`
-- `Frontend/3. STENCILER/static/css/workspace.css`
-
-**Garder tous les IDs existants des éléments fonctionnels. Ne pas toucher à Sullivan chat ni au canvas.**
-
----
-
-**A. Supprimer le panel Audit UX**
-
-Dans `workspace.html`, supprimer entièrement :
-- `<div id="section-audit">` et son contenu
-- `<button id="badge-audit">` et son contenu
-- Tout CSS lié à `.panel-audit`, `#panel-audit`, `#badge-audit` dans `workspace.css`
-
----
-
-**B. Remplacer `#panel-screens` par un dashboard projet**
-
-Nouveau contenu de `#ws-import-list` (rendu par `fetchWorkspaceImports()`) :
-
-```
-┌─────────────────────────────────┐
-│  ▸ mon projet                   │  ← collapse (ouvert par défaut)
-│    [nom du projet depuis manifest]
-│    ┌ Stitch ──────────────────┐  │  ← sous-collapse fermé par défaut
-│    │ ID Stitch : [___________] │  │
-│    │ [lier →]                  │  │
-│    └───────────────────────────┘  │
-│                                   │
-│    mes écrans                     │
-│    ┌───────────────────────────┐  │
-│    │ nom-écran.html        [S] [↻] [×] │
-│    │ nom-écran-2.html      [S] [↻] [×] │
-│    │ ...                       │  │
-│    └───────────────────────────┘  │
-│    (message si vide)              │
-└─────────────────────────────────┘
-```
-
-**Comportement :**
-- Clic sur le nom d'écran → `window.wsCanvas?.addScreen({...})`
-- Bouton `[S]` (logo Stitch SVG, alt "ouvrir dans Stitch") → `fetch('/api/stitch/open/{screen_id}').then(d => window.open(d.url))`
-- Bouton `[↻]` → `POST /api/stitch/sync` puis recharger la liste
-- Bouton `[×]` → confirmation puis suppression de l'import local
-
-**Sous-collapse Stitch ID :**
-- Input texte + bouton "lier" → `POST /api/stitch/pull` avec le project_id saisi → mémorise dans manifest
-- Affiché seulement si `stitch_project_id` absent du manifest
-
----
-
-**C. Nettoyage toolbar droite**
-
-Dans `workspace.html`, toolbar `<nav class="absolute top-1/2 right-8...">`, garder uniquement :
-
-| Outil | Action | Garder |
-|-------|--------|--------|
-| Select (V) | sélection canvas | ✅ |
-| Drag (H) | pan canvas | ✅ |
-| Typographie (T) | `#btn-ws-typo` | ✅ |
-| Couleur (C) | `#ws-color-panel` — conditionné DESIGN.md | ✅ |
-| Stitch (S) | logo Stitch → ouvre panel Stitch | ✅ NOUVEAU |
-| Place Image (I) | stitch fait mieux | ❌ supprimer |
-| Frame (F) | non fonctionnel | ❌ supprimer |
-| Effets (E) | FEE Studio remplace | ❌ supprimer |
-
-Bouton Stitch dans toolbar : icône logo Stitch (ou "S" en attendant) → `window.wsStitch?.toggle()`.
-
----
-
-**D. Corrections de scope (notes de clarification FJD 2026-04-08)**
-
-- **Sullivan** : panneau en bas du workspace, pas à droite — il demeure
-- **Wire** : demeure dans le workspace comme outil/mode
-- **Disparaissent** : bouton KIMI (stratégie différente à venir), boutons hover/scroll/click/liste (pris en charge par FEE)
-- **Export** : aperçu localhost uniquement pour l'instant — pas de bouton forge/export dans ce scope
-- **DESIGN.md** : n'est PAS un document HoméOS exclusif. C'est le design du projet de l'élève = tokens Stitch + règles nécessaires à HoméOS pour jouer sa partie. Stitch = source de vérité design. À chaque pull Design DNA → **toujours mettre à jour** `DESIGN.md` sections `Colors`, `Typography`, `Spacing`. Ne jamais écraser les sections spécifiques HoméOS (ex: `## Wire Rules`, `## Interaction Tokens`) — merge sectionnel.
-
-**D. Règle DESIGN.md merge (backend — dans `stitch_router.py` au pull)**
-
-Structure DESIGN.md d'un projet élève :
-```markdown
-# DESIGN.md — {project_name}
-> Source: Stitch Design DNA + règles HoméOS
-
-## Colors          ← Stitch écrit ici (màj à chaque pull)
-## Typography      ← Stitch écrit ici
-## Spacing         ← Stitch écrit ici
-## Wire Rules      ← HoméOS écrit ici (ne pas écraser)
-## Interaction     ← FEE écrit ici (ne pas écraser)
-```
-
-Merge : parser les sections `##`, remplacer Stitch (Colors/Typography/Spacing), préserver le reste.
-
-**Livrable :**
-1. Panel audit UX supprimé
-2. Panel gauche = dashboard projet avec collapse + sous-collapse Stitch ID + liste écrans (3 actions par écran)
-3. Toolbar droite = 5 outils max (select, drag, typo, couleur, Stitch)
-4. Sullivan panneau bas et Wire préservés — KIMI et boutons interaction supprimés
-5. Aucune régression canvas
-
----
-
-### M231 — Pipeline d'import multi-source : PNG / SVG / Illustrator / Figma plugin / Stitch
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-08**
-
-**Contexte :**
-Un élève arrive avec ses maquettes depuis différentes sources. Toutes convergent vers `projects/{id}/imports/`. Le reste du workflow (Wire → Forge → Sullivan) est identique quelle que soit la source.
-
-**Sources à supporter :**
-
-| Source | Format | Mécanisme |
-|--------|--------|-----------|
-| PNG / JPG | image | Upload direct → stocké dans `imports/` comme asset visuel |
-| SVG | vecteur | Upload direct → utilisable dans le canvas SVG natif |
-| Illustrator | SVG (export) | L'élève exporte en SVG depuis Illustrator → même pipeline que SVG |
-| Figma plugin HoméOS | JSON + PNG | Le plugin pousse vers `POST /api/import/figma` → normalisation → `imports/` |
-| Stitch | HTML | `POST /api/stitch/pull` → déjà opérationnel ✅ |
-
-**Ce qu'il faut :**
-
-**Backend — `import_router.py` (ACTOR: QWEN) :**
-
-Route `POST /api/import/upload` — upload générique :
-```python
-@router.post("/import/upload")
-async def import_upload(file: UploadFile, request: Request):
-    # Accepte : .png, .jpg, .svg, .ai (SVG exporté)
-    # Sauvegarde dans projects/{active_id}/imports/{filename}
-    # Enregistre dans exports/index.json (même pipeline que Stitch)
-    # Retourne { "filename": "...", "type": "png|svg", "path": "..." }
-```
-
-Route `POST /api/import/figma` — payload plugin Figma HoméOS :
-```python
-@router.post("/import/figma")
-async def import_figma(request: Request):
-    # Body: { "screen_name": str, "png_base64": str, "metadata": {} }
-    # Décode le PNG → sauvegarde dans imports/figma_{screen_name}.png
-    # Sauvegarde metadata dans imports/figma_{screen_name}.json
-    # Retourne { "filename": "...", "imported": true }
-```
-
-**Frontend — zone d'import dans le workspace (ACTOR: GEMINI) :**
-
-Dans le panel gauche du workspace (section écrans/imports), ajouter une zone "importer" :
-```
-┌─────────────────────────────┐
-│  importer des maquettes     │
-│                             │
-│  [↑ PNG / SVG]  [Figma]     │
-│  [Stitch →]                 │
-│                             │
-│  ou glisser-déposer ici     │
-└─────────────────────────────┘
-```
-
-- Bouton "PNG / SVG" → `<input type="file" accept=".png,.jpg,.svg">` → `POST /api/import/upload`
-- Bouton "Figma" → instructions pour le plugin (lien doc)
-- Bouton "Stitch →" → ouvre le panel Stitch existant
-- Drag & drop → même route
-
-**Livrable :**
-1. Un élève peut uploader un PNG ou SVG → apparaît dans `imports/` + liste du workspace
-2. Le plugin Figma peut envoyer un écran → même résultat
-3. Stitch reste la voie principale pour les aller-retours live
-
----
-
-### M230 — Workflow Stitch complet : push/pull/sync élève
-**STATUS: ✅ LIVRÉ (Qwen full stack) | DATE: 2026-04-08**
-
-**Backend livré :**
-- `run_stitch_push_task()` extrait `project_id` depuis `screen_name` → `_patch_manifest_stitch_project_id()`
-- `POST /api/stitch/sync` — compare écrans Stitch vs imports locaux → pull les nouveaux
-- `GET /api/stitch/open/{screen_id}` — retourne URL Stitch `https://stitch.google.com/p/{pid}/s/{sid}`
-- Premier push → `stitch_project_id` mémorisé dans manifest → `stitch_url` retourné au frontend
-
-**Workflow cible :**
-```
-1. PREMIER PUSH
-   Élève clique "modifier dans Stitch" sur un écran HoméOS
-   → POST /api/stitch/push (Sullivan + genome + DESIGN.md)
-   → generate_screen_from_text → Stitch crée l'écran → retourne screen_name
-   → Extraire project_id depuis screen_name ("projects/{pid}/screens/{sid}")
-   → Sauvegarder manifest.json : stitch_project_id = pid
-   → Ouvrir https://stitch.google.com/p/{pid}/s/{sid} dans nouvel onglet
-
-2. PUSHES SUIVANTS
-   → Même stitch_project_id (lu depuis manifest)
-   → edit_screen si écran existant, generate_screen_from_text si nouveau
-
-3. PULL / SYNC (Stitch → HoméOS)
-   → window.onfocus : retour depuis Stitch → déclenche sync auto
-   → Polling toutes les 5min (si Stitch lié)
-   → Bouton "synchroniser" manuel
-   → Logique : diff écrans Stitch vs imports locaux → pull des nouveaux/modifiés
-
-4. TOOLBAR CANVAS
-   → Bouton "modifier dans Stitch" → push Sullivan → ouvre Stitch
-   → Bouton "importer de Stitch" → pull forcé
-
-5. PANEL STITCH — liste des écrans
-   Pour chaque écran :
-   [œil] ouvrir dans HoméOS  [S] ouvrir dans Stitch  [↻] pull cet écran
-   En-tête : titre projet (collapsible) + [↻ synchroniser tout]
-```
-
-**ACTOR QWEN — Backend :**
-
-A. Dans `run_stitch_push_task()` après succès : extraire `project_id` depuis `screen_name` → `_patch_manifest_stitch_project_id(pid)`.
-
-B. Route `POST /api/stitch/sync` :
-```python
-@router.post("/sync")
-async def stitch_sync(request: Request):
-    # Lit stitch_project_id depuis manifest
-    # Appelle stitch_session() pour avoir la liste live
-    # Pour chaque écran non local → pull (réutilise la logique de /pull)
-    # Retourne { "pulled": [...], "already_local": [...] }
-```
-
-C. Route `GET /api/stitch/open/{screen_id}` :
-```python
-@router.get("/open/{screen_id}")
-async def stitch_open_url(screen_id: str):
-    # Retourne { "url": "https://stitch.google.com/p/{pid}/s/{screen_id}" }
-```
-
-Fichiers : `stitch_router.py`, `stitch_client.py`
-
----
-
-**ACTOR GEMINI — Frontend (absorbe M228) :**
-
-> BOOTSTRAP OBLIGATOIRE
-
-Fichiers à lire : `workspace.html` panel `#panel-stitch`, `WsStitch.js`
-
-**Panel Stitch — réorganiser `#stitch-content` :**
-```
-[titre projet]          [↻ synchroniser tout]
-─────────────────────────────────────────────
-liste écrans :
-  Nom écran
-  [👁 HoméOS]  [S Stitch]  [↻ pull]
-─────────────────────────────────────────────
-[modifier dans Stitch →]   ← push Sullivan
-```
-ID projet : lecture seule si lié, éditable si non lié.
-
-**`WsStitch.js` — polling + focus :**
-```js
-// Dans show() après loadSession()
-if (this.isLinked) {
-    this._pollTimer = setInterval(() => this.sync(), 5 * 60 * 1000);
-    window.addEventListener('focus', () => { if (this.isOpen) this.sync(); });
-}
-
-sync() { fetch('/api/stitch/sync', { method: 'POST' }).then(() => this.loadSession()); }
-```
-
-**Toolbar canvas — bouton "modifier dans Stitch"** dans `workspace.html` (barre d'outils droite).
-
-Garder tous les IDs existants.
-
-**Livrable :**
-1. Premier push → `stitch_project_id` mémorisé → onglet Stitch ouvert
-2. Panel : liste écrans avec 3 actions chacun
-3. Sync auto focus + polling 5min + bouton
-4. Bouton toolbar "modifier dans Stitch"
-
----
-
-### M228 — Stitch : UX élève intelligible
-**STATUS: ✅ ABSORBÉE PAR M230 | DATE: 2026-04-08**
-
----
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Contexte :** Stitch est l'outil central pour les élèves DNMADE — ils collent l'ID de leur projet Figma/Stitch, importent leurs écrans, et c'est leur matière première pour la Forge. L'UX actuelle est illisible.
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/templates/workspace.html` — `id="panel-stitch"` et `id="ws-stitch-manual-form"`
-- `Frontend/3. STENCILER/static/js/workspace/WsStitch.js`
-
-**Réorganiser le contenu de `#stitch-content` en 3 sections lisibles :**
-
-```
-┌─────────────────────────┐
-│  stitch            [×]  │
-│  statut : ● connecté    │
-├─────────────────────────┤
-│  1. coller l'id stitch  │
-│  [_________________]    │
-│  [valider →]            │
-├─────────────────────────┤
-│  2. mes écrans          │
-│  (liste auto après pull)│
-│  [importer les écrans →]│
-├─────────────────────────┤
-│  3. générer via texte   │
-│  [__intention_________] │
-│  [générer →]            │
-└─────────────────────────┘
-```
-
-**Règles :**
-- Garder TOUS les `id` existants (`ws-stitch-project-id`, `ws-stitch-btn-list`, `ws-stitch-btn-pull`, `ws-stitch-screens-list`, `ws-stitch-intent`, `ws-stitch-btn-push`)
-- Supprimer `display:none` sur `#ws-stitch-manual-form` — toujours visible
-- Labels : minuscules, français, sans jargon
-- Tokens HoméOS. Pas d'emojis.
-
----
-
-> BOOTSTRAP OBLIGATOIRE
-
-**Symptômes :**
-1. Le bas du panel Stitch est coupé — `max-h-[60vh]` trop restrictif quand le panel est positionné
-2. L'interface est incompréhensible pour un élève
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/static/templates/workspace.html` — `id="panel-stitch"` (L253-315)
-- `Frontend/3. STENCILER/static/js/workspace/WsStitch.js`
-- `Frontend/3. STENCILER/static/css/workspace.css` — `.stitch-expanded`
-
-**Fix 1 — Overflow**
-Dans `workspace.html`, `id="stitch-content"` :
-- Remplacer `max-h-[60vh]` par `overflow-y-auto` sans max-height fixe
-- Le panel `#panel-stitch` doit avoir `max-height: calc(100vh - 96px); overflow-y: auto;` en inline style ou via workspace.css
-
-**Fix 2 — UX simplifiée (scope strict)**
-Réorganiser le contenu de `#stitch-content` en 3 blocs clairs, dans cet ordre :
-
-```
-┌─────────────────────────────┐
-│  STITCH                [×]  │
-├─────────────────────────────┤
-│  statut : connecté / off    │
-│  projet : [titre]           │
-├─────────────────────────────┤
-│  mes écrans                 │  ← liste des screens importés
-│  [+ importer un écran]      │  ← bouton ouvre le formulaire manuel (replié par défaut)
-├─────────────────────────────┤
-│  générer via intention      │  ← textarea + bouton "générer"
-└─────────────────────────────┘
-```
-
-- Formulaire manuel (`#ws-stitch-manual-form`) : replié par défaut, s'ouvre au clic sur "+ importer un écran"
-- Labels en français, minuscules, sans jargon
-- Supprimer le bouton "Lister les écrans" (remplacé par le chargement auto à l'ouverture)
-- Garder les IDs existants des éléments (WsStitch.js s'y accroche)
-
-**Style :** tokens HoméOS. Pas d'emojis. Pas de majuscules labels.
-
-**Livrable :**
-1. Panel scrollable — le bas est visible
-2. Un élève comprend en 3 secondes ce qu'il peut faire
-
----
-
-## Thème 24 — Fix activation projet élève (Hugo)
-
-### P1 — Student project : activation end-to-end cassée
-**STATUS: ✅ LIVRÉ (Qwen) | DATE: 2026-04-07 | ACTOR: QWEN**
-
-**Symptôme :** Hugo se connecte → workspace affiche le projet `default` (templates) au lieu de son espace vide.
-
-**Diagnostic à faire :**
-L'élève Hugo (`student_id: dumont-hugo`, `class_id: dnamde3`) a un projet existant sur disque.
-Tracer le flow complet et trouver où ça casse :
-
-1. `POST /api/auth/login-student` body `{ "class_id": "dnamde3", "student_id": "dumont-hugo" }`
-   - Retourne-t-il un `project_id` non-null ?
-   - Écrit-il bien `active_project.json` ?
-
-2. `POST /api/projects/activate` body `{ "id": "<project_id>" }`
-   - Le projet est-il dans la table `projects` de la DB ?
-   - Si non → le code doit l'auto-enregistrer (fix déjà dans `projects_router.py`) et continuer.
-   - Retourne-t-il 200 ou 404 ?
-
-3. `bkd_service.get_active_project_id()` — lit depuis la variable globale `_ACTIVE_PROJECT_ID` OU depuis `active_project.json` ?
-   - Si la variable globale n'est pas mise à jour (ex: deux imports différents du module), `get_active_project_path()` retourne le mauvais projet.
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/bkd_service.py` — `get_active_project_id()`, `set_active_project_id()`, `get_active_project_path()`
-- `Frontend/3. STENCILER/routers/projects_router.py` — `activate_project()`, `set_active_project_id()`
-- `Frontend/3. STENCILER/server_v3.py` — comment `set_active_project_id` est importé/exposé
-- `Frontend/3. STENCILER/routers/auth_router.py` — `auth_login_student()` L363-408
-
-**Problème probable :**
-`projects_router.py` importe `set_active_project_id` depuis `bkd_service` et met à jour la variable globale dans ce module.
-Mais `bkd_service.get_active_project_id()` lit `_ACTIVE_PROJECT_ID` depuis son propre module.
-Si `server_v3.py` réexporte `set_active_project_id` sous un autre alias, ou si les routers importent depuis des modules différents → la variable globale est dans un namespace différent → la mise à jour ne se propage pas.
-
-**Fix attendu :**
-- S'assurer que `set_active_project_id` dans `projects_router.py` modifie bien la variable globale de `bkd_service` (pas une copie locale).
-- OU : rendre `get_active_project_id()` dans `bkd_service` lire depuis `active_project.json` au lieu de la variable globale (plus robuste — pas de problème de namespace).
-- ET : s'assurer que `projects/activate` auto-enregistre le projet si absent de la DB (code déjà ajouté — vérifier qu'il est correct).
-
-**Livrable :**
-Hugo se connecte → workspace vide (son projet propre, sans templates).
-
----
-
-## Thème 23 — Typo globale
-
-### M229 — Audit et suppression de "Source Code Pro" sur les boutons
-**STATUS: 🟠 MISSION QWEN | DATE: 2026-04-07 | ACTOR: QWEN**
-
-**Symptôme :** Les boutons dans les pages `cadrage_alt.html` et `workspace.html` (et potentiellement d'autres) s'affichent en police monospace Source Code Pro au lieu de la police sans-serif attendue.
-
-**Mission :**
-
-1. Chercher dans tous les fichiers HTML et CSS du dossier `Frontend/3. STENCILER/static/` toutes les occurrences de :
-   - `Source Code Pro`
-   - `font-mono` (classe Tailwind → mappe vers monospace)
-   - `font-family.*mono`
-   - `'monospace'` ou `"monospace"` utilisé hors contexte de pre/code/kbd
-
-2. Pour chaque occurrence :
-   - Si c'est sur un élément **`<button>`**, `<input>`, `<select>`, `<label>`, `<span>` de contenu textuel UI → **remplacer par `font-family: inherit`** (ou supprimer la règle font si le parent l'hérite déjà)
-   - Si c'est sur `<pre>`, `<code>`, `<kbd>`, `.terminal-log`, `.sd-input` (champ clé API) → **laisser tel quel** (monospace légitime)
-   - Si c'est dans la config Tailwind (`mono: ['"Source Code Pro"'...]`) dans `cadrage_alt.html` → **remplacer `'Source Code Pro'` par `'Geist Mono', ui-monospace, monospace`**
-
-3. Dans `cadrage_alt.html` — vérifier que les boutons "Envoyer", "Sullivan Arbitrage", "Générer PRD" ont bien `font-family` hérité de la `body` (`'Source Sans 3'`). Si un bouton a explicitement `font-mono` → retirer la classe.
-
-4. Dans `workspace.html` — idem. Vérifier que les spans `font-mono` sont uniquement sur des éléments de code/tag display (`#ws-popover-tag`, `#ws-wire-import-label`) et PAS sur des boutons.
-
-**Fichiers à auditer :**
-- `Frontend/3. STENCILER/static/templates/cadrage_alt.html`
-- `Frontend/3. STENCILER/static/templates/workspace.html`
-- `Frontend/3. STENCILER/static/css/homeos-nav.css`
-- `Frontend/3. STENCILER/static/css/stenciler.css`
-- `Frontend/3. STENCILER/static/css/workspace.css`
-
-**Règle :** ne pas toucher aux `.sd-input`, `.terminal-log`, `pre`, `code`, `kbd`. Ne changer que les éléments UI (boutons, labels, spans de texte courant).
-
-**Livrable :** liste des occurrences trouvées + modifications appliquées.
-
----
-
-## Thème 22 — Fixes login & workspace élève
-
-### F1 — Login : activation projet élève au login + logout visible
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: QWEN (backend) + GEMINI (frontend)**
-
----
-
-### F2 — Projet élève : création automatique depuis le sujet actif de la classe
-**STATUS: 🟠 PRÊTE | DATE: 2026-04-07 | ACTOR: QWEN**
-
-**Contexte :**
-Hugo se connecte → son projet `dnamde3-dumont-hugo` existe dans `PROJECTS_DIR` et `students.project_id` est renseigné, MAIS il n'est pas enregistré dans la table `projects` → `get_active_project_path()` cherche dans `projects` → ne trouve rien → fallback `default` → workspace plein de templates.
-
-**Règle métier :**
-Si l'élève n'a pas de projet OU si son projet n'est pas dans la table `projects` :
-1. Charger le dernier sujet de la classe (`classes/{class_id}/subjects/*.json` → le plus récent)
-2. Nommer le projet d'après le titre du sujet (slugifié) : `contraintes-peruquiennes`
-3. Créer le dossier `projects/{class_id}-{student_id}-{sujet_slug}/`
-4. Écrire `manifest.json` avec `name: titre_sujet`, `class_id`, `student_id`, `subject_id`
-5. **Enregistrer dans la table `projects`** : `INSERT OR IGNORE INTO projects (id, name, path, user_id)`
-6. Mettre à jour `students.project_id`
-7. Écrire `active_project.json`
-
-**Modifier `create_student_project()` dans `class_router.py` :**
-```python
-def create_student_project(student, class_id) -> str:
-    # Chercher le sujet actif
-    subject_dir = CLASSES_DIR / class_id / "subjects"
-    subject_title = None
-    subject_slug = None
-    if subject_dir.exists():
-        subjects = sorted(subject_dir.glob("*.json"))
-        if subjects:
-            data = json.loads(subjects[-1].read_text(encoding='utf-8'))
-            subject_title = data.get("title", "")
-            subject_slug = slugify(subject_title) if subject_title else None
-
-    project_id = f"{class_id}-{student['id']}" + (f"-{subject_slug}" if subject_slug else "")
-    project_path = PROJECTS_DIR / project_id
-    project_path.mkdir(parents=True, exist_ok=True)
-
-    manifest = {
-        "name": subject_title or f"Projet {student['display']}",
-        ...
-    }
-    # Enregistrer dans table projects
-    with bkd_db_con() as con:
-        con.execute(
-            "INSERT OR IGNORE INTO projects (id, name, path) VALUES (?, ?, ?)",
-            (project_id, manifest["name"], str(project_path))
-        )
-```
-
-**Aussi : route `POST /api/classes/{class_id}/students/{student_id}/start`** — appeler `create_student_project` + activer + retourner `project_id`. Cette route est appelée depuis `login.html` quand `project_id` est null.
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/routers/class_router.py` — `create_student_project()`, L127-152
-- `Frontend/3. STENCILER/bkd_service.py` — `bkd_db_con`, schéma table `projects`
-
-**Livrable :**
-1. Hugo se connecte → projet créé/enregistré → workspace vide (son espace propre)
-2. Nom du projet = titre du sujet actif de la classe
-3. Plus jamais de fallback sur `default` pour un élève
-
 ---
-
-### F3 — Éditeur sujet : frontend manquant (M223 backend ✅, UI absente)
-**STATUS: ✅ LIVRÉ | DATE: 2026-04-07 | ACTOR: GEMINI**
-
-> BOOTSTRAP OBLIGATOIRE
-
-```
-CONTEXTE TECHNIQUE OBLIGATOIRE — lis avant de coder :
-
-1. DIAGNOSTIC DOM AVANT LISTENER
-   Avant d'ajouter un event listener, remonte la chaîne du DOM.
-
-2. RÈGLE DE LIVRAISON
-   Ne pas marquer TERMINÉ avant d'avoir testé manuellement dans le browser.
-
-3. SCOPE STRICT
-   Ne modifier que teacher_dashboard.html. Ne pas toucher aux autres fichiers.
-
-4. STYLE HOMÉOS
-   Même CSS que le dashboard existant. Pas de majuscules. Pas d'emojis.
-   Tokens : bg #f7f6f2, text #3d3d3c, accent #8cc63f, border #e5e5e5.
-   border-radius: 4px max. Font: Geist, -apple-system.
-   Hard-edge : pas de border-radius sur le formulaire principal (0px).
-```
-
-**Fichier à lire en ENTIER :**
-`Frontend/3. STENCILER/static/templates/teacher_dashboard.html`
 
-**Routes backend disponibles (déjà implémentées) :**
-- `GET /api/classes/{class_id}/subjects` — liste des sujets
-- `GET /api/classes/{class_id}/subjects/{subject_id}` — sujet complet
-- `POST /api/classes/{class_id}/subjects` — créer sujet
-- `PUT /api/classes/{class_id}/subjects/{subject_id}` — modifier sujet
+## Thème 37 — NLP / HCI (Réservé FJD)
 
-**Structure JSON d'un sujet (référence pour les formulaires) :**
-```json
-{
-  "id": "contraintes-peruquiennes",
-  "title": "Contraintes Péruquiennes",
-  "problematique": "Comment...",
-  "contexte": "Dans le cadre de...",
-  "parties": [
-    { "id": "p1", "titre": "Recherche", "description": "...", "duree": "2 semaines" }
-  ],
-  "livrables": ["Maquette Figma", "Export HTML"],
-  "evaluation": {
-    "modalite": "Soutenance orale",
-    "criteres": [
-      { "competence": "A1", "libelle": "Analyse du contexte", "poids": 30 }
-    ]
-  },
-  "competences": ["A1", "A2", "B1"]
-}
-```
-
-**Ce qu'il faut implémenter dans `teacher_dashboard.html` :**
-
-**1. Bouton "modifier" dans chaque ligne de la table sujets**
-
-Dans `renderSubjects()`, chaque ligne doit avoir un bouton "modifier" :
-```js
-'<td><button class="btn-action" onclick="editSubject(\'' + s.id + '\')">modifier</button></td>'
-```
-Ajouter une 5e colonne `<th></th>` dans le thead.
-
-**2. Drawer de formulaire (panel latéral ou modal)**
-
-Un `<div id="subject-form-panel">` positionné en `position: fixed; right: 0; top: 48px; bottom: 0; width: 420px` (drawer droite, s'ouvre par-dessus le contenu).
-Style : `background: #f7f6f2; border-left: 1px solid #e5e5e5; overflow-y: auto; padding: 24px; z-index: 500;`
-Caché par défaut : `transform: translateX(100%); transition: transform 0.25s ease`.
-Ouvert : `transform: translateX(0)`.
-
-**3. Formulaire en 5 sections dans le drawer**
-
-Section 1 — En-tête :
-```html
-<div class="sf-section">
-  <div class="sf-section-label">en-tête</div>
-  <label>titre</label>
-  <input type="text" id="sf-title" placeholder="Contraintes Péruquiennes">
-  <label>problématique</label>
-  <textarea id="sf-problematique" rows="2"></textarea>
-  <label>contexte</label>
-  <textarea id="sf-contexte" rows="3"></textarea>
-</div>
-```
-
-Section 2 — Parties (liste dynamique) :
-- Bouton "+ partie" → append une ligne `{ titre | description | durée | × }`
-- Bouton × → remove la ligne
-- IDs générés dynamiquement `sf-party-N`
-
-Section 3 — Livrables (liste dynamique) :
-- Bouton "+ livrable" → append `<input type="text">` + bouton ×
-
-Section 4 — Évaluation :
-- `<input id="sf-modalite" placeholder="Soutenance orale">`
-- Tableau critères : colonnes `compétence DNMADE | libellé | poids %`
-- Bouton "+ critère" → append ligne avec `<select>` des compétences DNMADE (A1, A2, A3, B1, B2, C1, C2, C3, D1, D2) + input libellé + input number poids
-- Ligne total : `Σ poids = X%` (recalculé à chaque changement)
-
-Section 5 — Compétences DNMADE :
-- Checkboxes : A1, A2, A3 / B1, B2 / C1, C2, C3 / D1, D2
-- Groupées par domaine avec label discret
-
-Bouton "enregistrer" (`.btn-create`) en bas du drawer.
-Bouton "annuler" (`.btn-action`) → ferme le drawer.
-
-**4. Fonctions JS à implémenter**
-
-```js
-var subjectFormMode = null; // 'create' ou 'edit'
-var editingSubjectId = null;
-
-function openSubjectForm(mode, subjectData) {
-    subjectFormMode = mode;
-    editingSubjectId = subjectData ? subjectData.id : null;
-    // Remplir le formulaire si subjectData présent, sinon vider
-    fillSubjectForm(subjectData || {});
-    document.getElementById('subject-form-panel').style.transform = 'translateX(0)';
-}
-
-function closeSubjectForm() {
-    document.getElementById('subject-form-panel').style.transform = 'translateX(100%)';
-}
-
-function editSubject(subjectId) {
-    fetch(API + '/' + currentClassId + '/subjects/' + subjectId)
-        .then(function(r) { return r.json(); })
-        .then(function(data) { openSubjectForm('edit', data); });
-}
-
-function saveSubjectForm() {
-    var payload = collectFormData(); // lit tous les champs
-    var url = API + '/' + currentClassId + '/subjects' + (subjectFormMode === 'edit' ? '/' + editingSubjectId : '');
-    var method = subjectFormMode === 'edit' ? 'PUT' : 'POST';
-    fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function() { closeSubjectForm(); loadSubjects(currentClassId); })
-    .catch(function(e) { alert('erreur: ' + e.message); });
-}
-```
-
-**5. Modifier `createSubject()`**
-
-Remplacer la redirection vers `/cadrage` par :
-```js
-function createSubject() {
-    if (!currentClassId) return;
-    openSubjectForm('create', null);
-}
-```
-
-**Livrable attendu :**
-1. Clic "+ sujet" → drawer s'ouvre à droite, formulaire vide
-2. Clic "modifier" sur un sujet → drawer s'ouvre pré-rempli avec les données
-3. "enregistrer" → POST ou PUT selon le mode → tableau sujets rafraîchi
-4. "annuler" → drawer se ferme
-5. Pas d'erreur console
-
-**Bugs constatés :**
-1. Élève connecté (ex: Hugo) → workspace affiche le projet `default` (templates) au lieu de son projet isolé — `active_project.json` n'est pas mis à jour au login
-2. Pas de bouton logout visible — seul le drawer settings (icône engrenage) permet de se déconnecter, trop caché pour une classe
-
-**Fix 1 — Backend : route `POST /api/auth/login-student` doit activer le projet**
-
-Dans `auth_router.py`, après avoir résolu `project_id` :
-```python
-# Activer le projet de l'élève immédiatement
-if project_id:
-    active_file = ROOT_DIR / "active_project.json"
-    active_file.write_text(json.dumps({"active_id": project_id}), encoding='utf-8')
-```
-
-Fichier : `Frontend/3. STENCILER/routers/auth_router.py` — route `POST /api/auth/login-student`
-
-**Fix 2 — Frontend login.html : forcer activation avant redirect**
+> **Ces travaux sont exclusivement menés par FJD. Ne pas déléguer.**
 
-Dans `loginStudent()`, après `saveSession(data)` :
-```js
-// Toujours activer le projet avant de rediriger
-if (projectId) {
-    await fetch('/api/projects/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: projectId })
-    });
-    window.location.href = `/workspace?project_id=${projectId}`;
-}
-```
-Fichier : `Frontend/3. STENCILER/static/templates/login.html`
+### Vision architecture BERT + Bayesian + MinB/MaxB
 
-**Fix 3 — Logout visible dans le nav**
+FJD se concentre sur l'expérimentation d'une architecture d'inférence locale chip, dont l'objectif est de réduire drastiquement le coût et l'empreinte environnementale de l'inférence LLM, en faisant peser le maximum de décision sur un modèle léger local.
 
-Dans `bootstrap.js`, dans `injectNav()`, ajouter un bouton logout discret dans `hn-actions` à côté du user pill :
-```js
-const logoutBtn = document.createElement('button');
-logoutBtn.className = 'hn-logout';
-logoutBtn.textContent = 'quitter';
-logoutBtn.onclick = () => {
-    localStorage.removeItem('homeos_session');
-    window.location.href = '/login';
-};
-actions.appendChild(logoutBtn);
+**Pipeline cible :**
 ```
-CSS dans `homeos-nav.css` :
-```css
-#homeos-global-nav .hn-logout {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: #ccc; background: none; border: none;
-    cursor: pointer; padding: 2px 6px; transition: color 0.15s;
-}
-#homeos-global-nav .hn-logout:hover { color: #ef4444; }
+Contexte large (RAG passages) + message user (500 tokens)
+  → BERT all-MiniLM-L6-v2 (cosine sim → intent vector 384d)
+  → Bayesian update : prior = sliding window 3 derniers intents
+                      evidence = scores RAG + BERT
+                      → posterior confidence ∈ [0,1]
+  → Routing MinB / MaxB :
+      confidence < 0.65 → LLM "clarification" (Min Budget)
+      confidence > 0.80 → handler déterministe (Max Budget)
+      sinon              → template LLM standard
+  → Mistral 7B LoRA (Spinoza) / ou autre LLM cible
 ```
-
-**Fichiers à lire :**
-- `Frontend/3. STENCILER/routers/auth_router.py` — `login-student`
-- `Frontend/3. STENCILER/static/templates/login.html` — `loginStudent()`
-- `Frontend/3. STENCILER/static/js/bootstrap.js` — `injectNav()`
-- `Frontend/3. STENCILER/static/css/homeos-nav.css`
-
-**Livrable :**
-1. Hugo se connecte → workspace vide (son projet isolé, pas default)
-2. Bouton "quitter" visible dans le nav sur toutes les pages
-3. Clic → `localStorage` vidé → `/login`
-
----
-
-## Thème 20 — Sujet DNMADE structuré
-
-### M223 — Éditeur de sujet : format structuré + parties + livrables + évaluation
-**STATUS: ✅ LIVRÉ (backend)**
-
-**Backend (`class_router.py`) :**
-- `SubjectCreateRequest` enrichi : `problematique`, `contexte`, `parties[]`, `livrables[]`, `evaluation{modalite, criteres[]}`, `competences[]`
-- `POST /{class_id}/subjects` — création format structuré complet
-- `GET /{class_id}/subjects/{subject_id}` — lecture d'un sujet par ID
-- `PUT /{class_id}/subjects/{subject_id}` — mise à jour complète (préserve id + created_at)
 
-**Frontend (`teacher_dashboard.html`) :**
-- Tableau sujets : colonne "details" ajoutée (nb parties + nb livrables)
-- Affichage `problematique` si `description` vide (rétrocompatibilité)
+**État actuel dans `maiathon/Spinoza_Secours_HF/Backend/app_runpod.py` :**
+- ✅ BERT `all-MiniLM-L6-v2` chargé
+- ✅ 4 intent anchors (accord / confusion / resistance / neutre)
+- ✅ Cosine similarity → intent label
+- ❌ Score de confiance non retourné
+- ❌ Aucun routing MinB/MaxB
+- ❌ Aucun prior bayésien (chaque message traité isolément)
 
-**Format JSON produit :**
-```json
-{
-  "id": "design-sonore-et-interface",
-  "class_id": "dnmade1-2026",
-  "title": "Design Sonore et Interface",
-  "problematique": "Comment le son peut-il enrichir une interface numérique ?",
-  "contexte": "Dans le cadre du studio DNMADE 2ème année...",
-  "parties": [{"id": "p1", "titre": "...", "description": "...", "duree": "..."}],
-  "livrables": ["Dossier PDF", "Prototype", "Présentation"],
-  "evaluation": {"modalite": "Jury DNMADE", "criteres": [{"competence": "A1", "libelle": "...", "poids": 30}]},
-  "competences": ["A1", "C2", "C3"]
-}
-```
+**Expérience MVP (15-20 lignes, fichier unique) :**
+1. Modifier `detecter_contexte()` pour retourner aussi le score de confiance
+2. Implémenter le routing 3-way dans `spinoza_repond()`
+3. Tester sur 5 inputs benchmark : `"oui"` / `"non c'est faux"` / `"hmmm"` / message mixte / bruit
+4. Mesure : le routing change-t-il le comportement de Mistral de manière pédagogiquement pertinente ?
 
-**Note :** Frontend UI d'édition modale (formulaire structuré 5 sections) à implémenter par Gemini.
+**Point de décision :** si ça marche → Bayesian prior (sliding window conv). Si ça ne marche pas → réviser les anchors ou la granularité des intents.
 
 ---
-
-## Backlog
- 
-### Mission 140 — DPL : Instancier le repo GitHub dans HoméOS
-**STATUS: 🔵 BACKLOG**
-- [ ] Création/Liaison automatique d'un repo GitHub par projet pour le déploiement continu.
-
-
-### Mission 110 — Templates FRD : liste vide
-**STATUS: 🔴 HOTFIX | DATE: 2026-03-31**
-- [ ] Diagnostic `#template-select` vide après manifest minimal
-
-### Mission 115 — Bouton "éditer" global
-**STATUS: 🔴 HOTFIX**
-
-### Mission 111-A/B — Multi-project isolation + UI
-**STATUS: 🔵 BACKLOG**
-
-### Mission 112 — Sullivan Welcome Screen
-**STATUS: 🔵 BACKLOG**
-
-### Mission 113 — Sullivan Tips + Smart Nudges
-**STATUS: 🔵 BACKLOG**
 
-### Mission 114 — FRD Canvas v2 : snap + zoom + resize
-**STATUS: 🔵 BACKLOG**
+### Axe 2 — NLP Middleware : outil de veille API
 
-### Mission 118 — Pont SVG Illustrator → Tailwind
-**STATUS: 🔵 BACKLOG**
+Vision : un outil autonome qui surveille les breaking changes des pipelines LLM (DeepSeek, Qwen, Gemini, Groq, MIMO…) et produit un refactor systématique à chaque changement de shape ou de comportement.
 
-### Mission 120 — Plugin Figma → FRD Editor
-**STATUS: 🔵 BACKLOG**
+Composants à concevoir (roadmap dédiée à rédiger quand BERT MVP validé) :
+- **Watcher** : polling changelogs officiels + sampling régulier des API responses
+- **Diff detector** : compare shapes avant/après, détecte les dérives de comportement
+- **Refactor suggester** : prompt → patch automatique du code appelant
 
-### Mission 135-139 — Auth, Multi-tenancy, BYOK, Upload, Wire v2
-**STATUS: 🔵 BACKLOG**
-
 ---
-
-### Mission 257 — Forge PNG : validation genai SDK + fidélité du rendu
-**STATUS: ✅ LIVRÉ | ACTOR: QWEN | DATE: 2026-04-08**
 
-- SDK `google-genai` installé (v1.70.0) et testé — `gemini-3.1-flash-lite-preview` répond OK
-- `gemini_client.py` : `_generate_with_image_genai()` pour modèles 3.x, REST API pour modèles stables
-- `generate_with_image()` route automatiquement selon le nom du modèle (détection "preview")
-- `svg_to_tailwind.py` : `convert_image()` accepte `design_md` optionnel, injecté dans le prompt
-- `routes.py` : séquence A (analyse) → B (save DESIGN.md) → C (forge avec DESIGN.md)
+### Axe 3 — Sullivan RL
 
-**Note :** Le serveur a été tué (`killed`) avant qu'une forge PNG ne soit validée end-to-end avec le nouveau code. À retester au prochain redémarrage.
-
----
+Point de décision conditionnel au résultat du chip tool BERT+Bayesian.
 
-### Mission 258 — Drag d'éléments dans l'iframe : fix `elementFromPoint` React
-**STATUS: ✅ LIVRÉ | ACTOR: QWEN | DATE: 2026-04-08**
+- Si le chip tool est validé → Sullivan devient le sujet d'expérimentation RL : reward signal pédagogique, RLHF local, évaluation de la pertinence des réponses.
+- Si le chip tool échoue → trouver un remplacement (distillation, fine-tune direct Mistral, RAG enrichi), avant de revenir à Sullivan.
 
-- Remplacé `document.elementFromPoint(x, y)` par `document.elementsFromPoint(x, y)` (retourne TOUS les éléments au point, pas juste le premier)
-- Fonction `_findElementAtPoint(x, y)` filtre les wrappers React (`#root`, `#__next`, etc.)
-- Accepte le premier élément qui a : un id significatif, une classe CSS, du texte, ou est un élément sémantique
-- Fonctionne pour les bundles React (traverse le shadow DOM des conteneurs) ET le HTML statique
+*Pas d'action avant validation BERT MVP.*
 
 ---
 
-### Mission 259 — dist.zip : mode preview statique sans React bundle
-**STATUS: 🔵 BACKLOG | ACTOR: QWEN | DATE: 2026-04-08**
+## Handoff Dev Senior
 
-**CR — Diagnostic final :**
-- Les bundles React dans iframes ne sont JAMAIS draggables — leurs event listeners capturent tous les événements avant que le navigateur ne les transmette
-- `elementsFromPoint()` fonctionne pour sélectionner l'élément dans l'arbre React mais le `transform: translate()` appliqué n'a aucun effet visuel car React contrôle le rendu via son virtual DOM
-- **Décision :** dist.zip = mode preview seule. Pour modifier le contenu, utiliser le pipeline PNG (M256) sur un screenshot du dist.zip
+> Document complet : [docs/04_HomeOS/Handoff/DEV_ONBOARDING.md](../../docs/04_HomeOS/Handoff/DEV_ONBOARDING.md)
 
 ---
 
-### CR Session 8 avril 2026 — M257/M258/M259
+### M327 — Impersonation (Showroom Prof)
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
 
-**M257 — genai SDK pour Gemini 3.x :**
-- Tous les modèles Gemini Vision retournaient 404 via REST API `v1beta` — Google a déprécié les anciens noms
-- SDK `google-genai` v1.70.0 installé pour Python 3.14 — testé et OK avec `gemini-3.1-flash-lite-preview`
-- `generate_with_image()` route automatiquement : modèles "preview" → genai SDK, modèles stables → REST API
-- Pipeline PNG corrigé : A (analyse design) → B (save DESIGN.md) → C (forge avec DESIGN.md injecté)
-- **⚠️ Non testé end-to-end** — serveur tué avant validation. À retester au prochain redémarrage.
+**CR (Gemini) :**
+- Route `/api/auth/impersonate` fonctionnelle (auth_router.py).
+- Bouton "Voir en tant que" (icône œil Lucide) sur le dashboard.
+- Mode impersonation actif via `sessionStorage` for l'isolation des onglets.
+- Bandeau d'alerte rouge injecté dans le workspace avec bouton "Stop".
+- Bouton "Dashboard" masqué programmatiquement durant l'impersonation.
+- Redirection automatique vers /teacher lors de l'arrêt de l'impersonation, avec conservation de la classe active (`class_id`).
 
-**M258 — Drag éléments dans iframe :**
-- `elementFromPoint()` → `elementsFromPoint()` + filtre `_findElementAtPoint()`
-- Fonctionne sur HTML statique ET bundles React (traverse les conteneurs wrapper)
-- **⚠️ Le drag sur React bundles reste non-fonctionnel** — React capture les events avant le navigateur (M259)
-
-**M259 — dist.zip draggable :**
-- **Diagnostic :** Impossible — React contrôle tous les événements dans l'iframe
-- **Décision :** dist.zip = preview seule. Modification via screenshot + pipeline PNG (M256).
-
-**Fichiers modifiés :** `gemini_client.py`, `svg_to_tailwind.py`, `routes.py`, `WsCanvas.js`
-
 ---
-
-## Thème 25 — Refactorisation ws_main.js : modules isolés + boot ordonné
 
-> Objectif : éliminer les 7 catégories de bugs récurrents (état undefined, race conditions, crash en cascade, IDs manquants, pointer-events, IDs API erronés, double-binding).
-> **Règle :** zéro classe, zéro import complexe. Fonctions pures + IIFE. Chaque fichier expose `window.WsXxx` avec traces console.
+### M328 — Panel Admin : gestion des users
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
 
-### Mission 250 — WsState : état global unique, tracé en console
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- Centralise `projectId`, `activeMode`, `session` en un seul objet
-- Résout le projet depuis `localStorage.homeos_session` (plus besoin de `wsBackend`)
-- Traces : `[WsState] init`, `[WsState] projectId=xxx`, `[WsState] session.role=xxx`
-- Fichier : `static/js/workspace/WsState.js`
+**CR (Gemini) :**
+- Nouvel onglet "Utilisateurs" visible uniquement par les admins.
+- CRUD complet des utilisateurs (Rôles, Reset MDP, Suppression).
+- Intégration dans `teacher_dashboard.html` avec design HoméOS (760px).
+- Routes backend sécurisées dans `admin_router.py`.
 
-### Mission 251 — WsBoot : séquence d'init isolée, try/catch par composant
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- Remplace le bloc `async function initWorkspace()` de ws_main.js
-- Boot explicite étape par étape : Audit → Forge → Preview → Canvas → Chat → Wire → FEEStudio
-- Chaque étape dans `bootSafe(nom, fn)` — si crash, log clair + continue
-- Traces : `[WsBoot] ✅ WsAudit OK (12ms)`, `[WsBoot] ❌ WsChatMain: <erreur>`
-- Fichier : `static/js/workspace/WsBoot.js`
-
-### Mission 252 — wsDom : utilitaires DOM sécurisés
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- `safeEl(id)` — getElementById avec warning si absent
-- `safeClick(selector, handler)` — addEventListener silencieux si absent
-- Traces : `[wsDom] ⚠ #xxx not found`, `[wsDom] ✓ .btn click wired`
-- Fichier : `static/js/workspace/wsDom.js`
-
-### Mission 253 — WsImportList : extraction template + handlers imports
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- Extrait `fetchWorkspaceImports()` et son template HTML (80+ lignes)
-- Boutons [👁] [S] [↻] [×] avec handlers propres
-- Traces : `[WsImportList] 5 imports`, `[WsImportList] [S] clicked`
-- Fichier : `static/js/workspace/WsImportList.js`
-
-### Mission 254 — WsAssetPicker : extraction gestion assets
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- `toggleImagePicker()`, `fetchProjectAssets()`, `copyAssetUrl()`, `deleteAsset()`
-- Traces : `[WsAssetPicker] opened`, `[WsAssetPicker] 3 assets`
-- Fichier : `static/js/workspace/WsAssetPicker.js`
-
-### Mission 255 — ws_main.js final : ~120 lignes d'orchestration
-**STATUS: 🟠 À TRAITER | ACTOR: QWEN**
-- Après extraction : boot + wiring toolbar + mode buttons uniquement
-- Traces : `[ws_main] toolbar 7 buttons`, `[ws_main] ✅ READY`
-- Fichier : `static/js/workspace/ws_main.js` (réécrit)
-
 ---
-
-### CR — Pipeline de forge PNG : diagnostic hallucination
 
-**Traçage complet effectué :**
+### M329 — Finalisation UI & HoméOS Compliance
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
 
-**PNG upload → forge → HTML :**
-1. `POST /api/import/upload` — sauve le PNG dans `projects/{pid}/imports/{date}/IMPORT_xxx.png`
-2. `POST /api/retro-genome/generate-from-import` — lit le PNG, base64 → `GeminiClient.generate_with_image()`
-3. **Le PNG atteint bien le LLM** (base64 inline via Gemini `inlineData` API)
-4. **Système prompt** : tokens de design depuis `{project}/exports/design_tokens.json` (ou valeurs par défaut)
-5. **DESIGN.md n'est JAMAIS chargé** — le `design.md` à la racine du repo est ignoré
+**CR (Gemini) :**
+- Largeur `.main` fixée à 760px dans le dashboard prof pour la cohérence.
+- Suppression radicale de TOUS les emojis restants (📄, 📁, 🎓, 🎨, 👁, ↑, ✓).
+- Remplacement systématique par des SVGs inline (Lucide-style).
+- Nettoyage des libellés (Passage de "Voir en tant que" en attribut `alt`).
 
-**dist.zip upload → forge → HTML :**
-1. `POST /api/import/upload` — sauve le ZIP
-2. Si `dist/index.html` présent → **aucun LLM** — extraction directe + serve via iframe
-3. Si `.tsx/.jsx` → `ReactToTailwindConverter` → Gemini (texte seul)
-4. Si HTML simple → `SvgToTailwindConverter.convert()` → Gemini BUILD mode
-
-**Constat :**
-- Le PNG est bien envoyé au LLM mais le **prompt n'a aucune référence au DESIGN.md du projet**
-- Les seuls tokens design sont les valeurs par défaut (`#f7f6f2`, `#3d3d3c`, `#8cc63f`, `Geist Sans`)
-- Le `design.md` repo root existe mais n'est jamais lu par le pipeline de forge
-- **Solution** : injecter le contenu du `DESIGN.md` du projet actif dans le prompt de forge PNG
-
 ---
-
-## 🏛️ Doctrine Architecturale (Aether Core)
 
-**Principe du Miroir :** Host (WsCanvas) gère l'UI AetherFlow. Guest (Iframe) = Agents de Terrain légers, aucun scope partagé.
+## Thème 35 — Dashboard Prof : Suivi & Analytics
 
-**AetherCore :** point d'entrée unique `ws_iframe_core.js`, lazy-load des sous-trackers (`tracker_fee.js`, `tracker_construct.js`).
+> Ce thème concerne la visibilité en temps réel de l'avancement des étudiants et la gestion granulaire des sujets.
 
-**DESIGN.md comme source de vérité :** l'interface Host lit ce fichier et configure les outils disponibles. Sullivan = "Intendant du Magasin".
+### M350 — Vue "Live Watch" (Drill Status Polling) 
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
 
-**Mode FEE :** GSAP + Lenis. Visual Wiring Trigger→Target. Sullivan reçoit la paire de sélecteurs, génère une timeline `gsap.to()`.
+### M351 — Notation Automatique par Référentiel
+**STATUS: 🟠 À TRAITER | ACTOR: CLAUDE**

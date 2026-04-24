@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
+from bkd_service import bkd_db
+
 from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -37,6 +39,8 @@ class ProjectInfo(BaseModel):
     id: str
     name: str
     path: str
+    type: str = "personal"
+    subject_id: Optional[str] = None
     created_at: Optional[str] = None
     last_opened: Optional[str] = None
     active: bool = False
@@ -101,17 +105,9 @@ def parse_design_md(content: str) -> dict:
 
     return tokens
 
-ACTIVE_PROJECT_FILE = ROOT_DIR / "active_project.json"
 
-def get_active_project_id(token: str = None) -> Optional[str]:
-    """M227: Retourne l'ID du projet actif. Si token élève, résout depuis la DB."""
-    from bkd_service import get_active_project_id as bkd_get_active_project_id
-    return bkd_get_active_project_id(token)
+from bkd_service import get_active_project_id, set_active_project_id, get_active_project_path
 
-def set_active_project_id(project_id: str, token: str = None):
-    """M227: Sauvegarde l'ID du projet actif. Si token élève, met à jour la DB."""
-    from bkd_service import set_active_project_id as bkd_set_active_project_id
-    bkd_set_active_project_id(project_id, token)
 
 def get_project_manifest(project_id: str) -> Dict[str, Any]:
     """Lit le manifest.json d'un projet."""
@@ -129,9 +125,8 @@ def save_project_manifest(project_id: str, manifest: Dict[str, Any]):
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
 
-def get_active_project_path():
-    from bkd_service import get_active_project_path, scaffold_project
-    return get_active_project_path()
+# Removed duplicated get_active_project_path proxy
+
 
 def get_project_exports_dir():
     d = get_active_project_path() / "exports"
@@ -141,20 +136,21 @@ def get_project_exports_dir():
 # --- ROUTES ---
 
 @router.get("/projects/active", response_model=ProjectInfo)
-async def get_active_project_route():
-    active_id = get_active_project_id()
+def get_active_project_route(request: Request):
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
     if not active_id:
         raise HTTPException(status_code=404, detail="No active project")
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         row = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects WHERE id=?",
                            (active_id,)).fetchone()
         if not row: raise HTTPException(status_code=404, detail="Active project not found")
         return ProjectInfo(id=row[0], name=row[1], path=row[2], created_at=row[3], last_opened=row[4], active=True)
 
 @router.post("/projects/activate")
-async def activate_project(req: ProjectActivateRequest, request: Request = None):
+def activate_project(req: ProjectActivateRequest, request: Request = None):
     token = request.headers.get("X-User-Token") if request else None
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         exists = conn.execute("SELECT id FROM projects WHERE id=?", (req.id,)).fetchone()
         if not exists:
             # Auto-register si le dossier existe sur disque (projets élèves créés avant F2)
@@ -177,11 +173,22 @@ async def activate_project(req: ProjectActivateRequest, request: Request = None)
         conn.execute("UPDATE projects SET last_opened=datetime('now') WHERE id=?", (req.id,))
 
     set_active_project_id(req.id, token)
+    # M304 — update students.project_id depuis le pattern project_id quand pas de token (appel prof)
+    if not token:
+        try:
+            with bkd_db() as con:
+                con.execute(
+                    "UPDATE students SET project_id=? WHERE ? LIKE class_id || '-' || id || '%'",
+                    (req.id, req.id)
+                )
+            logger.info(f"[M304] students.project_id mis à jour pour pattern: {req.id}")
+        except Exception as e:
+            logger.warning(f"[M304] Student update failed: {e}")
     logger.info(f"Project activated: {get_active_project_id(token)}")
     return {"status": "ok", "active_id": get_active_project_id(token)}
 
 @router.get("/projects/active/manifest")
-async def get_active_manifest_route(request: Request):
+def get_active_manifest_route(request: Request):
     """M232: Retourne le manifest.json du projet actif (token-aware)."""
     token = request.headers.get("X-User-Token")
     active_id = get_active_project_id(token)
@@ -196,9 +203,10 @@ async def get_active_manifest_route(request: Request):
         return {}
 
 @router.get("/projects/active/logic.js")
-async def get_active_logic_js():
-    """Mission 161: Sert le fichier logic.js du projet actif."""
-    p_path = get_active_project_path()
+def get_active_logic_js(request: Request = None):
+    """Mission 161: Sert le fichier logic.js du projet actif (token-aware)."""
+    token = request.headers.get("X-User-Token") if request else None
+    p_path = get_active_project_path(token)
     f_path = p_path / "logic.js"
     if not f_path.exists():
         from fastapi.responses import HTMLResponse
@@ -206,14 +214,15 @@ async def get_active_logic_js():
     return FileResponse(f_path, media_type="application/javascript")
 
 @router.get("/projects", response_model=List[ProjectInfo])
-async def list_all_projects_route(request: Request):
+def list_all_projects_route(request: Request):
     """Mission 190 + M298: Admin voit tout, user voit ses projets + (si étudiant) son sujet assigné."""
+    token = request.headers.get("X-User-Token")
     user_id = getattr(request.state, 'user_id', None)
-    active_id = get_active_project_id()
+    active_id = get_active_project_id(token)
 
     logger.info(f"[M298] GET /api/projects — user_id={user_id}, active_id={active_id}")
 
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         # Check if user is admin
         is_admin = False
         if user_id:
@@ -222,12 +231,11 @@ async def list_all_projects_route(request: Request):
             is_admin = row and row[0] == admin_name
 
         if is_admin:
-            rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+            rows = conn.execute("SELECT id, name, path, created_at, last_opened, type, subject_id FROM projects ORDER BY last_opened DESC").fetchall()
         elif user_id:
             # M298: UNION — projets perso du user + projet étudiant assigné (via students.user_id)
-            # NOTE: pas de "user_id IS NULL" — les projets legacy sans user_id sont exclus
             rows = conn.execute("""
-                SELECT DISTINCT p.id, p.name, p.path, p.created_at, p.last_opened
+                SELECT DISTINCT p.id, p.name, p.path, p.created_at, p.last_opened, p.type, p.subject_id
                 FROM projects p
                 WHERE p.user_id = ?
                    OR p.id = (SELECT s.project_id FROM students s WHERE s.user_id = ? AND s.project_id IS NOT NULL)
@@ -236,12 +244,12 @@ async def list_all_projects_route(request: Request):
             logger.info(f"[M298] user_id={user_id[:8]}... → {len(rows)} projet(s)")
         else:
             # Legacy: no token → show all (backward compat)
-            rows = conn.execute("SELECT id, name, path, created_at, last_opened FROM projects ORDER BY last_opened DESC").fetchall()
+            rows = conn.execute("SELECT id, name, path, created_at, last_opened, type, subject_id FROM projects ORDER BY last_opened DESC").fetchall()
 
-        return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4], active=(r[0] == active_id)) for r in rows]
+        return [ProjectInfo(id=r[0], name=r[1], path=r[2], created_at=r[3], last_opened=r[4], type=r[5], subject_id=r[6], active=(r[0] == active_id)) for r in rows]
 
 @router.post("/projects/create")
-async def create_project_route(request: Request, req: ProjectCreateRequest):
+def create_project_route(request: Request, req: ProjectCreateRequest):
     """Mission 190: Ajoute user_id au projet créé."""
     user_id = getattr(request.state, 'user_id', None)
     pid = req.id or str(uuid.uuid4())[:8] # Small IDs for slugs
@@ -266,17 +274,17 @@ async def create_project_route(request: Request, req: ProjectCreateRequest):
     from bkd_service import scaffold_project
     scaffold_project(p_path)
 
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         try:
-            conn.execute("INSERT INTO projects (id, name, path, user_id) VALUES (?,?,?,?)",
-                         (pid, req.name, str(p_path), user_id))
+            conn.execute("INSERT INTO projects (id, name, path, user_id, type) VALUES (?,?,?,?,?)",
+                         (pid, req.name, str(p_path), user_id, "personal"))
         except sqlite3.IntegrityError:
             raise HTTPException(status_code=400, detail="Project ID already exists")
 
     return {"status": "ok", "id": pid}
 
 @router.delete("/projects/{project_id}")
-async def delete_project_route(project_id: str):
+def delete_project_route(project_id: str):
     """Mission 162: Supprime un projet (dossier + DB entry)."""
     p_path = PROJECTS_DIR / project_id
     if not p_path.exists():
@@ -286,18 +294,15 @@ async def delete_project_route(project_id: str):
     shutil.rmtree(p_path)
 
     # Supprimer de la DB
-    with sqlite3.connect(str(PROJECTS_DB_PATH)) as conn:
+    with bkd_db() as conn:
         conn.execute('DELETE FROM projects WHERE id=?', (project_id,))
 
-    # Si c'était le projet actif, reset
-    if get_active_project_id() == project_id:
-        ACTIVE_PROJECT_FILE.unlink(missing_ok=True)
 
     logger.info(f"Project deleted: {project_id}")
     return {"status": "ok", "deleted": project_id}
 
 @router.get("/projects/{project_id}/manifest")
-async def get_project_manifest_route(project_id: str):
+def get_project_manifest_route(project_id: str):
     """Retourne le manifest.json d'un projet. Crée un manifest par défaut si absent."""
     manifest = get_project_manifest(project_id)
     if not manifest:
@@ -319,7 +324,7 @@ async def get_project_manifest_route(project_id: str):
     return manifest
 
 @router.put("/projects/{project_id}/manifest")
-async def update_project_manifest_route(project_id: str, manifest: ProjectManifest):
+def update_project_manifest_route(project_id: str, manifest: ProjectManifest):
     """Met à jour le manifest.json d'un projet."""
     p_path = PROJECTS_DIR / project_id
     # M277: Create directory if missing (for students with no prior project)
@@ -332,7 +337,7 @@ async def update_project_manifest_route(project_id: str, manifest: ProjectManife
     return {"status": "ok", "manifest": manifest_data}
 
 @router.post("/projects/{project_id}/wires")
-async def add_project_wire_route(project_id: str, wire: dict = Body(...)):
+def add_project_wire_route(project_id: str, wire: dict = Body(...)):
     """Mission 160: Ajoute un 'wire' (câblage visuel) au projet."""
     manifest = get_project_manifest(project_id)
     if "wires" not in manifest: manifest["wires"] = []
@@ -359,7 +364,7 @@ async def import_design_md(file: UploadFile = File(...)):
     return {"status": "ok", "tokens": tokens}
 
 @router.get("/project/design-tokens")
-async def get_design_tokens():
+def get_design_tokens():
     """Retourne les tokens du projet actif ou les defaults."""
     token_path = get_project_exports_dir() / "design_tokens.json"
     if token_path.exists():
@@ -376,7 +381,7 @@ async def get_design_tokens():
 
 # --- MISSION 189 : HOMEO_GENOME COMPILER ---
 @router.post("/projects/{project_id}/genome-compile")
-async def genome_compile(project_id: str):
+def genome_compile(project_id: str):
     """Compile HOMEO_GENOME.md unifié pour le projet."""
     if project_id == "active":
         project_id = get_active_project_id()
@@ -406,7 +411,7 @@ async def genome_compile(project_id: str):
 
 
 @router.get("/projects/{project_id}/genome")
-async def genome_read(project_id: str):
+def genome_read(project_id: str):
     """Lit le HOMEO_GENOME.md du projet."""
     if project_id == "active":
         project_id = get_active_project_id()
@@ -419,7 +424,7 @@ async def genome_read(project_id: str):
 
     return {"content": genome_path.read_text(encoding='utf-8')}
 @router.get("/projects/{project_id}/context")
-async def get_project_context_route(project_id: str, class_id: Optional[str] = None):
+def get_project_context_route(project_id: str, class_id: Optional[str] = None):
     """Mission 225: Retourne le contexte complet du projet (summary + text)."""
     if project_id == "active":
         active_id = get_active_project_id()

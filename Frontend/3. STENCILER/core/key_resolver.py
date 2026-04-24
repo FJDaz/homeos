@@ -4,7 +4,6 @@ Résout les clés API : 1. clé user en DB (BYOK) → 2. fallback .env
 """
 
 import os
-import sqlite3
 from pathlib import Path
 from typing import Optional
 
@@ -39,12 +38,12 @@ def resolve_key(provider: str, user_id: Optional[str] = None) -> Optional[str]:
     # 1. Chercher clé user en DB
     if user_id and PROJECTS_DB_PATH.exists():
         try:
-            conn = sqlite3.connect(str(PROJECTS_DB_PATH))
-            row = conn.execute(
-                "SELECT api_key FROM user_keys WHERE user_id = ? AND provider = ?",
-                (user_id, provider)
-            ).fetchone()
-            conn.close()
+            from bkd_service import bkd_db
+            with bkd_db() as conn:
+                row = conn.execute(
+                    "SELECT api_key FROM user_keys WHERE user_id = ? AND provider = ?",
+                    (user_id, provider)
+                ).fetchone()
             if row and row[0]:
                 return row[0]
         except Exception:

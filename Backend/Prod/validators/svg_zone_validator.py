@@ -22,11 +22,6 @@ try:
 except ImportError:
     _GEMINI_OK = False
 
-try:
-    import anthropic as _anthropic_mod
-    _ANTHROPIC_OK = True
-except ImportError:
-    _ANTHROPIC_OK = False
 
 
 # ── Checks structurels rapides (sans LLM) ────────────────────────────────────
@@ -164,7 +159,7 @@ def _llm_validate_zones(svg_content: str, api_key: str) -> tuple[bool, str]:
         '{"result":"PASS"|"FAIL","score":0-100,"issues":[],"summary":"une phrase"}'
     )
 
-    # Essai Gemini Flash
+    # Gemini Flash uniquement — pas de fallback Claude
     if _GEMINI_OK:
         try:
             client = google_genai.Client(api_key=api_key)
@@ -179,29 +174,10 @@ def _llm_validate_zones(svg_content: str, api_key: str) -> tuple[bool, str]:
             reason = "[Gemini] " + data.get("summary", "") + " | " + str(data.get("issues", []))
             return passed, reason
         except Exception as e:
-            print(f"  [VALIDATOR] Gemini 429/erreur → fallback Claude Haiku ({type(e).__name__})")
+            print(f"  [VALIDATOR] Gemini erreur ({type(e).__name__}) — validation LLM skippée")
+            return True, f"Gemini indisponible ({type(e).__name__}) — skip LLM check"
 
-    # Fallback Claude Haiku
-    if _ANTHROPIC_OK:
-        anthropic_key = os.environ.get('ANTHROPIC_API_KEY')
-        if anthropic_key:
-            try:
-                cl = _anthropic_mod.Anthropic(api_key=anthropic_key)
-                msg = cl.messages.create(
-                    model="claude-haiku-4-5-20251001",
-                    max_tokens=512,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                raw = msg.content[0].text.strip()
-                raw = re.sub(r'^```json\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
-                data = json.loads(raw)
-                passed = data.get("result") == "PASS"
-                reason = "[Haiku] " + data.get("summary", "") + " | " + str(data.get("issues", []))
-                return passed, reason
-            except Exception as e2:
-                return True, f"Haiku fallback échec ({e2}) — skip"
-
-    return True, "Aucun LLM disponible — skip"
+    return True, "google.genai non disponible — skip LLM check"
 
 
 # ── Validateur principal ──────────────────────────────────────────────────────

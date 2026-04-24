@@ -4,7 +4,7 @@ import sys
 import subprocess
 import logging
 from typing import Any, Dict
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 logger = logging.getLogger("GenomeRouter")
 
@@ -12,50 +12,72 @@ CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 BACKEND_PROD = ROOT_DIR / "Backend/Prod"
 
-GENOME_FILE = ROOT_DIR / "Frontend/2. GENOME/genome_enriched.json"
-LAYOUT_FILE = ROOT_DIR / "Frontend/2. GENOME/layout.json"
-PIPELINE_DIR = ROOT_DIR / "exports" / "pipeline"
+# Les fichiers globaux deviennent des fallbacks ou des sources initiales
+GLOBAL_GENOME_FILE = ROOT_DIR / "Frontend/2. GENOME/genome_enriched.json"
+GLOBAL_LAYOUT_FILE = ROOT_DIR / "Frontend/2. GENOME/layout.json"
 
 router = APIRouter()
 
 
-def get_project_pipeline_dir():
+def get_project_pipeline_dir(token: str = None):
     from bkd_service import get_active_project_path
-    d = get_active_project_path() / "exports" / "pipeline"
+    d = get_active_project_path(token) / "exports" / "pipeline"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
-def load_genome():
-    if GENOME_FILE.exists():
+def get_genome_path(token: str = None):
+    from bkd_service import get_active_project_path
+    p = get_active_project_path(token) / "genome_enriched.json"
+    if not p.exists() and GLOBAL_GENOME_FILE.exists():
+        import shutil
+        shutil.copy2(GLOBAL_GENOME_FILE, p)
+    return p
+
+
+def get_layout_path(token: str = None):
+    from bkd_service import get_active_project_path
+    p = get_active_project_path(token) / "layout.json"
+    if not p.exists() and GLOBAL_LAYOUT_FILE.exists():
+        import shutil
+        shutil.copy2(GLOBAL_LAYOUT_FILE, p)
+    return p
+
+
+def load_genome(token: str = None):
+    p = get_genome_path(token)
+    if p.exists():
         try:
-            return json.loads(GENOME_FILE.read_text(encoding="utf-8"))
+            return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {"n0_phases": []}
     return {"n0_phases": []}
 
 
-def save_genome(genome):
-    GENOME_FILE.parent.mkdir(parents=True, exist_ok=True)
-    GENOME_FILE.write_text(json.dumps(genome, indent=2, ensure_ascii=False), encoding="utf-8")
+def save_genome(genome, token: str = None):
+    p = get_genome_path(token)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(genome, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def load_layout():
-    if LAYOUT_FILE.exists():
+def load_layout(token: str = None):
+    p = get_layout_path(token)
+    if p.exists():
         try:
-            return json.loads(LAYOUT_FILE.read_text(encoding="utf-8"))
+            return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {}
     return {}
 
 
-def save_layout(data):
-    LAYOUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    LAYOUT_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+def save_layout(data, token: str = None):
+    p = get_layout_path(token)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def _load_overrides():
-    f = get_project_pipeline_dir() / "template_overrides.json"
+def _load_overrides(token: str = None):
+    f = get_project_pipeline_dir(token) / "template_overrides.json"
     if f.exists():
         try:
             return json.loads(f.read_text(encoding="utf-8"))
@@ -64,8 +86,8 @@ def _load_overrides():
     return {}
 
 
-def _save_overrides(data):
-    f = get_project_pipeline_dir() / "template_overrides.json"
+def _save_overrides(data, token: str = None):
+    f = get_project_pipeline_dir(token) / "template_overrides.json"
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
@@ -134,21 +156,24 @@ async def _infer_layout_llm(organs, context=""):
 
 
 @router.get("/api/genome")
-async def get_genome():
-    return load_genome()
+def get_genome(request: Request):
+    token = request.headers.get("X-User-Token")
+    return load_genome(token)
 
 
 @router.post("/api/genome")
-async def post_genome(genome: Dict[str, Any]):
-    save_genome(genome)
+def post_genome(genome: Dict[str, Any], request: Request):
+    token = request.headers.get("X-User-Token")
+    save_genome(genome, token)
     return {"status": "ok"}
 
 
 @router.post("/api/layout")
-async def post_layout(body: Dict[str, Any]):
-    layout = load_layout()
+def post_layout(body: Dict[str, Any], request: Request):
+    token = request.headers.get("X-User-Token")
+    layout = load_layout(token)
     layout.update(body)
-    save_layout(layout)
+    save_layout(layout, token)
     return {"ok": True}
 
 
@@ -166,34 +191,40 @@ async def infer_layout(body: Dict[str, Any]):
 
 
 @router.post("/api/organ-move")
-async def organ_move(body: Dict[str, Any]):
+def organ_move(body: Dict[str, Any], request: Request):
     oid = body.get("id")
     if not oid:
         raise HTTPException(status_code=400)
-    ovr = _load_overrides()
+    token = request.headers.get("X-User-Token")
+    ovr = _load_overrides(token)
     ovr.setdefault(oid, {}).update({"x": body.get("x"), "y": body.get("y")})
-    _save_overrides(ovr)
+    _save_overrides(ovr, token)
     composer = BACKEND_PROD / "pipeline/07_composer.py"
+    # Note: 07_composer.py might need update to be token-aware if run via CLI
     subprocess.run([sys.executable, str(composer)], cwd=str(ROOT_DIR))
     return {"ok": True}
 
 
 @router.post("/api/comp-move")
-async def comp_move(body: Dict[str, Any]):
+def comp_move(body: Dict[str, Any], request: Request):
     cid = body.get("id")
     if not cid:
         raise HTTPException(status_code=400)
-    ovr = _load_overrides()
+    token = request.headers.get("X-User-Token")
+    ovr = _load_overrides(token)
     ovr.setdefault(cid, {}).update({"x": body.get("x"), "y": body.get("y"), "s": body.get("s", 1)})
-    _save_overrides(ovr)
+    _save_overrides(ovr, token)
     composer = BACKEND_PROD / "pipeline/07_composer.py"
     subprocess.run([sys.executable, str(composer)], cwd=str(ROOT_DIR))
     return {"ok": True}
 
 
 @router.post("/api/accept")
-async def accept_template():
-    exports_dir = ROOT_DIR / "exports"
+def accept_template(request: Request):
+    from bkd_service import get_active_project_path
+    token = request.headers.get("X-User-Token")
+    prj_path = get_active_project_path(token)
+    exports_dir = prj_path / "exports"
     src = exports_dir / "template_latest.svg"
     if src.exists():
         from datetime import datetime

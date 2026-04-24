@@ -31,8 +31,8 @@ def _get_stitch_key() -> str:
     if key:
         return key
     try:
-        from bkd_service import bkd_db_con
-        with bkd_db_con() as con:
+        from bkd_service import bkd_db
+        with bkd_db() as con:
             row = con.execute(
                 "SELECT uk.api_key FROM user_keys uk "
                 "JOIN users u ON u.id = uk.user_id "
@@ -72,7 +72,7 @@ class SyncPushRequest(BaseModel):
 
 # --- ROUTES ---
 @router.get("/status")
-async def stitch_status():
+def stitch_status():
     """Vérifie que Stitch est configuré et joignable. S3: key from env or DB."""
     key = _get_stitch_key()
     return StatusResponse(
@@ -82,17 +82,11 @@ async def stitch_status():
 
 
 @router.get("/project-info")
-async def stitch_project_info():
+def stitch_project_info(request: Request):
     """M222: Retourne le stitch_project_id lié au projet HoméOS actif."""
-    active_file = ROOT_DIR / "active_project.json"
-    if not active_file.exists():
-        return {"linked": False}
-
-    try:
-        active_data = json.loads(active_file.read_text())
-        active_id = active_data.get("active_id")
-    except Exception:
-        return {"linked": False}
+    from bkd_service import get_active_project_id
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
 
     if not active_id:
         return {"linked": False}
@@ -117,18 +111,11 @@ async def stitch_project_info():
         return {"linked": False}
 
 
-@router.get("/session")
-async def stitch_session():
-    """Source de vérité live : état du projet Stitch vs imports locaux."""
-    if not _get_stitch_key():
-        raise HTTPException(status_code=501, detail="Stitch non configuré — ajoutez STITCH_API_KEY au .env")
-
     try:
         # Charger manifest pour récupérer project_id
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
 
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         manifest = {}
@@ -167,7 +154,8 @@ async def stitch_session():
             "linked": True,
             "project_id": project_id,
             "project_title": project_data.get("title", project_id),
-            "screens": screens
+            "screens": screens,
+            "active_id": active_id
         }
 
     except HTTPException:
@@ -175,10 +163,9 @@ async def stitch_session():
     except Exception as e:
         logger.error(f"Stitch session failed: {e}")
         # Fallback : retourner les données du manifest si MCP échoue
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         if manifest_path.exists():
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
@@ -189,7 +176,7 @@ async def stitch_session():
 
 
 @router.post("/sync-push")
-async def stitch_sync_push(req: SyncPushRequest):
+def stitch_sync_push(req: SyncPushRequest, request: Request):
     """
     Pousse une modification vers l'écran Stitch source.
     body: { stitch_id: str, instructions: str }
@@ -200,10 +187,9 @@ async def stitch_sync_push(req: SyncPushRequest):
 
     try:
         # Récupérer project_id depuis manifest
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
 
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         if not manifest_path.exists():
@@ -229,7 +215,7 @@ async def stitch_sync_push(req: SyncPushRequest):
 
 
 @router.get("/screens")
-async def stitch_screens(project_id: str):
+def stitch_screens(project_id: str):
     """Liste les écrans disponibles dans le projet Stitch."""
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré — ajoutez STITCH_API_KEY au .env")
@@ -310,13 +296,11 @@ def _merge_design_md(project_dir: Path, dna_tokens: dict):
         return False
 
 
-def _patch_manifest_stitch_project_id(project_id: str):
+def _patch_manifest_stitch_project_id(project_id: str, token: str = None):
     """Stocke stitch_project_id dans manifest.json après un premier pull réussi."""
     try:
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        active_id = get_active_project_id(token)
 
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         manifest = {}
@@ -332,7 +316,7 @@ def _patch_manifest_stitch_project_id(project_id: str):
 
 
 @router.post("/pull")
-async def stitch_pull(request: Request, req: PullRequest):
+def stitch_pull(request: Request, req: PullRequest):
     """
     Importe un écran Stitch dans le projet actif.
     - Si screen_name absent → retourne la liste des écrans disponibles
@@ -372,11 +356,9 @@ async def stitch_pull(request: Request, req: PullRequest):
             raise HTTPException(status_code=500, detail="No HTML returned from Stitch")
 
         # 4. Sauvegarder dans imports/ du projet actif
-        user_id = getattr(request.state, 'user_id', None)
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
 
         imports_dir = PROJECTS_DIR / (active_id or "default") / "imports"
         imports_dir.mkdir(parents=True, exist_ok=True)
@@ -439,7 +421,7 @@ async def stitch_pull(request: Request, req: PullRequest):
         logger.info(f"Stitch PULL: imported {filename} → {import_path}")
 
         # Mémoriser project_id dans manifest.json
-        _patch_manifest_stitch_project_id(req.project_id)
+        _patch_manifest_stitch_project_id(req.project_id, token)
 
         return {
             "screens": [],
@@ -456,7 +438,7 @@ async def stitch_pull(request: Request, req: PullRequest):
 
 # --- PUSH & TASK LOGIC ---
 
-async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str):
+def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str, token: str = None):
     from core.task_manager import TaskManager
     from core.stitch_client import StitchClient
     from core.stitch_prompt_builder import StitchPromptBuilder
@@ -467,10 +449,8 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
 
     try:
         # Résoudre le projet AetherFlow actif
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text()).get("active_id")
+        from bkd_service import get_active_project_id
+        active_id = get_active_project_id(token)
 
         project_dir = PROJECTS_DIR / (active_id or "default")
         if not project_dir.exists():
@@ -499,7 +479,7 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
                 if p == "projects" and i + 1 < len(parts):
                     extracted_pid = parts[i + 1]
                     break
-        _patch_manifest_stitch_project_id(extracted_pid)
+        _patch_manifest_stitch_project_id(extracted_pid, token)
         logger.info(f"Stitch PUSH: extracted project_id={extracted_pid} from screen_name={screen_name}")
 
         # 3. Success
@@ -519,7 +499,7 @@ async def run_stitch_push_task(task_id: str, project_id: str, screen_intent: str
 
 
 @router.post("/push")
-async def stitch_push(req: PushRequest, background_tasks: BackgroundTasks):
+def stitch_push(req: PushRequest, background_tasks: BackgroundTasks, request: Request):
     """Lance une génération d'écran Stitch en arrière-plan depuis le genome du projet."""
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
@@ -527,13 +507,14 @@ async def stitch_push(req: PushRequest, background_tasks: BackgroundTasks):
     from core.task_manager import TaskManager
     status = TaskManager.create_task()
 
-    background_tasks.add_task(run_stitch_push_task, status.task_id, req.project_id, req.screen_intent)
+    token = request.headers.get("X-User-Token")
+    background_tasks.add_task(run_stitch_push_task, status.task_id, req.project_id, req.screen_intent, token)
 
     return {"task_id": status.task_id}
 
 
 @router.get("/task/{task_id}")
-async def stitch_task_status(task_id: str):
+def stitch_task_status(task_id: str):
     """Retourne l'état d'avancement d'une tâche Stitch."""
     from core.task_manager import TaskManager
     status = TaskManager.get_task(task_id)
@@ -546,7 +527,7 @@ async def stitch_task_status(task_id: str):
 # --- M277/M280: CREATE PROJECT (instant via MCP) ---
 
 @router.post("/create-project")
-async def stitch_create_project(request: Request):
+def stitch_create_project(request: Request):
     """
     M277/M280: Crée un vrai projet Stitch via MCP + génère le méga-prompt.
     Retourne le prompt + l'URL du projet Stitch créé.
@@ -556,12 +537,9 @@ async def stitch_create_project(request: Request):
 
     try:
         from core.stitch_client import _mcp_call
-
-        # Get active project
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
 
         active_id = active_id or "default"
         manifest_path = PROJECTS_DIR / active_id / "manifest.json"
@@ -656,20 +634,16 @@ Ce badge est nécessaire pour le suivi pédagogique de la plateforme."""
 # --- M230/M276: SYNC & OPEN ---
 
 @router.post("/sync")
-async def stitch_sync(request: Request):
+def stitch_sync(request: Request):
     """M230/M276: Synchronise les écrans Stitch vers HoméOS (pull des nouveaux/modifiés)."""
     if not _get_stitch_key():
         raise HTTPException(status_code=501, detail="Stitch non configuré")
 
     try:
         from core.stitch_client import StitchClient, _mcp_call
-        client = StitchClient(api_key=_get_stitch_key())
-
-        # Read stitch_project_id from manifest
-        active_file = ROOT_DIR / "active_project.json"
-        active_id = None
-        if active_file.exists():
-            active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+        from bkd_service import get_active_project_id
+        token = request.headers.get("X-User-Token")
+        active_id = get_active_project_id(token)
 
         manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
         if not manifest_path.exists():
@@ -784,13 +758,11 @@ async def stitch_sync(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/open/{screen_id}")
-async def stitch_open_url(screen_id: str):
+def stitch_open_url(screen_id: str, request: Request):
     """M230: Retourne l'URL Stitch pour ouvrir un écran dans l'éditeur Stitch."""
-    active_file = ROOT_DIR / "active_project.json"
-    active_id = None
-    if active_file.exists():
-        active_id = json.loads(active_file.read_text(encoding='utf-8')).get("active_id")
+    from bkd_service import get_active_project_id
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
 
     manifest_path = PROJECTS_DIR / (active_id or "default") / "manifest.json"
     if not manifest_path.exists():
