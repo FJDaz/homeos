@@ -309,7 +309,10 @@ def list_classes(request: Request):
                 (user_id,)
             ).fetchall()
         else:
-            return {"classes": []}
+            # Public: login page needs class list to populate dropdown (no auth required)
+            rows = con.execute(
+                "SELECT id, name, subject, created_at, owner_id FROM classes ORDER BY created_at DESC"
+            ).fetchall()
             
     return {"classes": [{"id": r[0], "name": r[1], "subject": r[2], "created_at": r[3], "owner_id": r[4]} for r in rows]}
 

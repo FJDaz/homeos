@@ -9069,6 +9069,21 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOST ê
 
 ---
 
+### Fix Login — /api/classes public + Enter key prof (2026-04-26)
+**STATUS: ✅ LIVRÉ | DATE: 2026-04-26 | ACTOR: CLAUDE (CODE DIRECT)**
+
+**Symptôme :** Page login freeze, rien en console, dropdown classes vide. Diagnostic Gemini confirmé.
+
+**Causes :**
+1. `class_router.py` `list_classes()` retournait `{"classes": []}` pour tout utilisateur non-authentifié (else → return []). La page login est publique par définition — elle n'a pas de token.
+2. Champ mot de passe prof sans listener `keydown` → la touche Entrée / trousseau Chrome ne déclenchait rien.
+
+**Fixes appliqués :**
+- `routers/class_router.py` : branche `else` renvoie désormais toutes les classes (SELECT sans filtre), identique au cas admin. La liste est publique en lecture.
+- `static/templates/login.html` : ajout `onkeydown="if(event.key==='Enter') loginProf()"` sur `#prof-password`.
+
+---
+
 ### Missions Techniques (M300-M306)
 - M306 : Débloquer l'event loop ✅
 - M304 : DB comme seule source de vérité ✅

@@ -62,8 +62,77 @@
             flex-direction: column;
         `;
         document.body.appendChild(overlay);
+        injectDrillStyles();
         fetchKeyStatus();
         renderStep();
+    }
+
+    function injectDrillStyles() {
+        if (document.getElementById('ws-drill-styles')) return;
+        const s = document.createElement('style');
+        s.id = 'ws-drill-styles';
+        s.textContent = `
+            @keyframes pulse-low-cpu {
+                0% { transform: scale(1); opacity: 0.8; }
+                100% { transform: scale(1.6); opacity: 0; }
+            }
+            @keyframes success-pop {
+                0% { transform: scale(0.9); opacity: 0; }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .success-badge {
+                animation: success-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            }
+            #drill-landing-btn { position: relative; }
+            #drill-landing-btn::after {
+                content: "";
+                position: absolute;
+                inset: -6px;
+                border: 3px solid #8cc63f;
+                border-radius: 50%;
+                animation: pulse-low-cpu 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+                pointer-events: none;
+            }
+            .drill-card {
+                background: white;
+                border-radius: 24px;
+                padding: 40px;
+                box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05), 0 0 1px rgba(0,0,0,0.1);
+                border: 1px solid rgba(229,229,225,0.5);
+                animation: success-pop 0.5s ease-out;
+                position: relative;
+            }
+            .drill-screen-stack {
+                position: relative;
+                height: 180px;
+                margin-top: 20px;
+                margin-bottom: 40px;
+                perspective: 1200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .stacked-screen {
+                position: absolute;
+                width: 100px;
+                height: 160px;
+                object-fit: cover;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                border: 3px solid white;
+                transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+                background: white;
+                transform-origin: bottom center;
+            }
+            .status-reward {
+                font-size: 18px !important;
+                font-weight: 800;
+                color: #1a1a1a;
+                letter-spacing: -0.02em;
+            }
+        `;
+        document.head.appendChild(s);
     }
 
     function renderStep() {
@@ -73,43 +142,32 @@
             // Step 0: Landing
             {
                 html: `
-                    <button id="drill-landing-btn" class="w-32 h-32 rounded-full text-white font-bold text-[16px] uppercase tracking-widest shadow-lg cursor-pointer"
+                    <button id="drill-landing-btn" class="w-36 h-36 rounded-full text-white font-bold text-[18px] uppercase tracking-widest shadow-2xl cursor-pointer hover:scale-105 transition-transform"
                             style="background: linear-gradient(135deg, #a3d960 0%, #8cc63f 30%, #7ab536 70%, #5a8a26 100%);">
                         Créer un<br>projet
                     </button>
-                    <style>
-                        #drill-landing-btn { position: relative; }
-                        #drill-landing-btn::after {
-                            content: "";
-                            position: absolute;
-                            inset: 0;
-                            border: 2px solid #8cc63f;
-                            border-radius: 50%;
-                            animation: pulse-low-cpu 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-                            pointer-events: none;
-                        }
-                        @keyframes pulse-low-cpu {
-                            0% { transform: scale(1); opacity: 0.8; }
-                            100% { transform: scale(1.6); opacity: 0; }
-                        }
-                    </style>
                 `
             },
             // Step 1: Screens FIRST
             {
                 html: `
-                    <div class="text-center max-w-md">
-                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 1 — Écrans</div>
-                        <div class="text-[13px] text-[#9a9a98] mb-6">Charge 1 à 4 écrans (PNG, SVG, JPG). La forge les traitera dès tes clés configurées.</div>
-                        <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-screen-upload-zone">
-                            <div class="text-[26px] mb-2">↑</div>
-                            <div class="text-[14px] font-bold text-[#3d3d3c]">Glisser tes écrans ici</div>
-                            <div class="text-[12px] text-[#9a9a98]">ou cliquer pour parcourir</div>
+                    <div class="drill-card text-center max-w-sm">
+                        <div class="text-[22px] font-black text-[#1a1a1a] mb-2 tracking-tight">1. Écrans</div>
+                        <div class="text-[14px] text-[#94a3b8] mb-8 leading-relaxed">Charge tes ressources architecturales (1-4 fichiers). La forge les traitera dès ton signal.</div>
+                        
+                        <div id="drill-screen-preview-area" class="hidden drill-screen-stack"></div>
+
+                        <div class="p-10 border-2 border-dashed border-[#f1f5f9] bg-[#f8fafc] rounded-[24px] hover:border-[#8cc63f] hover:bg-white transition-all group cursor-pointer" id="drill-screen-upload-zone">
+                            <div class="text-[32px] mb-2 group-hover:scale-110 transition-transform">↑</div>
+                            <div class="text-[15px] font-bold text-[#1a1a1a]">Sélectionner les écrans</div>
+                            <div class="text-[12px] text-[#94a3b8] mt-1">PNG, JPG ou SVG</div>
                             <input type="file" id="drill-screen-input" class="hidden" accept=".png,.svg,.jpg,.jpeg" multiple>
                         </div>
-                        <div id="drill-screen-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
-                        <div class="mt-2 text-[12px] text-[#9a9a98]" id="drill-screen-count">0 écran(s) — min. 1 requis</div>
-                        <button id="drill-continue-screens" class="mt-4 px-8 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>Continuer →</button>
+                        <div id="drill-screen-status" class="mt-4 font-medium min-h-[24px]"></div>
+                        <div id="drill-screen-count-container" class="mt-6 flex flex-col items-center gap-2">
+                             <div class="text-[12px] text-[#94a3b8] font-mono" id="drill-screen-count">ATTENTE RESSOURCES</div>
+                        </div>
+                        <button id="drill-continue-screens" class="mt-8 w-full py-4 bg-[#8cc63f] text-[#1a1a1a] text-[14px] font-black rounded-[20px] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-20 disabled:cursor-not-allowed uppercase tracking-widest disabled:translate-y-0" disabled>Continuer →</button>
                     </div>
                 `
             },
@@ -290,12 +348,34 @@
 
     async function handleScreenUpload(files, statusEl, countEl, btn) {
         let uploaded = 0;
-        statusEl.textContent = 'Upload en cours...';
-        statusEl.style.color = '#8cc63f';
+        statusEl.textContent = 'Capture des fichiers...';
+        statusEl.className = 'mt-4 font-medium min-h-[24px] text-[#8cc63f]';
 
-        for (const file of files) {
-            if (uploaded >= 4) break;
+        const previewArea = document.getElementById('drill-screen-preview-area');
+        if (previewArea) {
+            previewArea.classList.remove('hidden');
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (uploaded + screenCount >= 4) break;
+            
             try {
+                // Aperçu immédiat (Cléa stack logic - Fan Effect 10° interval)
+                if (previewArea) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'stacked-screen success-badge';
+                    
+                    const index = screenCount + uploaded;
+                    const angle = index * 10; // 10° par rapport au précédent
+                    const xOffset = (index * 20) - 30; // Décalage horizontal pour l'éventail
+                    
+                    img.style.transform = `translateX(${xOffset}px) rotate(${angle}deg)`;
+                    img.style.zIndex = index;
+                    previewArea.appendChild(img);
+                }
+
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('filename', file.name);
@@ -307,13 +387,29 @@
 
         if (uploaded > 0) {
             screenCount += uploaded;
-            countEl.textContent = screenCount + ' écran(s) chargé(s) — min. 1 requis';
-            statusEl.textContent = '✓ ' + uploaded + ' écran(s) uploadé(s) — extraction des tokens en cours...';
-            statusEl.style.color = '#8cc63f';
-            if (screenCount >= 1) btn.disabled = false;
-            if (window.WsProjectPanel) window.WsProjectPanel.refresh();
+            const countEl = document.getElementById('drill-screen-count');
+            const countContainer = document.getElementById('drill-screen-count-container');
+            const uploadZone = document.getElementById('drill-screen-upload-zone');
+            
+            if (countEl) countEl.remove();
+            if (uploadZone) uploadZone.style.display = 'none';
+            
+            const badge = document.createElement('div');
+            badge.className = 'success-badge flex items-center gap-2 px-4 py-2 bg-[#8cc63f]/10 border border-[#8cc63f]/30 rounded-full text-[#6a9a2f] text-[13px] font-bold shadow-sm';
+            badge.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>${screenCount} ressource(s) architecturale(s) sécurisée(s)</span>
+            `;
+            countContainer.appendChild(badge);
 
-            // M293: Trigger background design token extraction
+            statusEl.innerHTML = 'Moteur AetherFlow activé !';
+            statusEl.className = 'mt-4 status-reward'; // Passage à 18px via CSS
+
+            if (screenCount >= 1) {
+                btn.disabled = false;
+                btn.classList.add('success-badge');
+            }
+            if (window.WsProjectPanel) window.WsProjectPanel.refresh();
             triggerTokenExtraction();
         }
     }
@@ -369,12 +465,21 @@
 
                     const name = m.name || 'Sans titre';
                     const desc = m.description || m.raw_content || '';
-                    const archetype = m.archetype?.label || m.archetype || '—';
+                    const archetype = m.archetype?.label || m.archetype || 'Studio HoméOS';
+                    const finalScreenCount = Math.max((m.screens || []).length, screenCount);
+
                     section.innerHTML = `
-                        <div class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left text-[13px] text-[#3d3d3c]">
-                            <div class="font-bold text-[14px] mb-1">${name}</div>
-                            ${desc ? '<div class="text-[#9a9a98] mb-2 text-[12px]">' + desc.substring(0, 200) + '</div>' : ''}
-                            <div class="flex gap-3 text-[11px] text-[#9a9a98]"><span>archétype: ${archetype}</span><span>écrans: ${(m.screens||[]).length}</span></div>
+                        <div class="success-badge bg-white border-2 border-[#8cc63f] rounded-[16px] p-5 mb-5 text-left text-[13px] text-[#3d3d3c] relative shadow-md">
+                            <div class="absolute -top-3 -right-3 w-8 h-8 bg-[#8cc63f] rounded-full flex items-center justify-center text-white shadow-lg">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="text-[10px] font-bold text-[#8cc63f] uppercase tracking-widest mb-1">Manifeste Validé</div>
+                            <div class="font-bold text-[15px] mb-1">${name}</div>
+                            ${desc ? '<div class="text-[#9a9a98] mb-3 text-[12px] leading-relaxed">' + desc.substring(0, 150) + '...</div>' : ''}
+                            <div class="flex gap-4 text-[11px] text-[#9a9a98] font-medium">
+                                <span class="bg-[#f7f6f2] px-2 py-0.5 rounded-full">Projet: ${archetype}</span>
+                                <span class="bg-[#f7f6f2] px-2 py-0.5 rounded-full">Écrans: ${finalScreenCount}</span>
+                            </div>
                             ${tokensHtml}
                         </div>
                     `;
@@ -427,8 +532,13 @@
                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
             if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
-            statusEl.textContent = '✓ Manifest sauvegardé'; statusEl.style.color = '#8cc63f';
-            _finishButton(statusEl.parentNode);
+            statusEl.innerHTML = `
+                <div class="success-badge flex items-center justify-center gap-2 text-[#8cc63f] font-bold py-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>ADN du projet sauvegardé !</span>
+                </div>
+            `;
+            loadManifestStep(); // Pour afficher le bloc validé
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
     }
 
@@ -483,7 +593,7 @@
         const btn = document.createElement('button');
         btn.id = 'drill-finish';
         btn.textContent = 'Commencer à travailler →';
-        btn.className = 'px-8 py-3 bg-gradient-to-r from-[#8cc63f] to-[#6a9a2f] text-white text-[13px] font-bold uppercase tracking-wider rounded-[16px] hover:shadow-lg transition-all cursor-pointer';
+        btn.className = 'success-badge px-10 py-4 bg-gradient-to-br from-[#8cc63f] via-[#7ab536] to-[#5a8a26] text-white text-[14px] font-extrabold uppercase tracking-widest rounded-[20px] shadow-[0_10px_25px_-5px_rgba(140,198,63,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(140,198,63,0.6)] hover:-translate-y-0.5 transition-all cursor-pointer';
         btn.onclick = () => { hide(); if (window.ManifestBox) window.ManifestBox.show(); };
         if (prepend) container.insertBefore(btn, container.firstChild);
         else container.appendChild(btn);

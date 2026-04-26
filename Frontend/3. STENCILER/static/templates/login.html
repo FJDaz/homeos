@@ -178,7 +178,7 @@
                     </div>
                     <div>
                         <label class="block text-[13px] font-bold text-slate-400 mb-2">Mot de passe</label>
-                        <input type="password" id="prof-password" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="••••••••">
+                        <input type="password" id="prof-password" class="input-field hard-edge w-full px-4 py-3 text-[16px] font-medium tracking-tight" placeholder="••••••••" onkeydown="if(event.key==='Enter') loginProf()">
                     </div>
                 </div>
                 <button onclick="loginProf()" class="primary-btn hard-edge w-full py-4 text-[14px] uppercase tracking-[0.2em] shadow-lg">
@@ -230,7 +230,9 @@
         let currentContext = 'student';
 
         // Initialisation
+        console.log('[LOGIN] page script loaded');
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[LOGIN] DOMContentLoaded — calling fetchClasses');
             fetchClasses();
         });
 
@@ -250,10 +252,14 @@
         }
 
         async function fetchClasses() {
+            console.log('[LOGIN] fetchClasses — start');
             const select = document.getElementById('select-class');
             try {
+                console.log('[LOGIN] fetchClasses — fetch /api/classes...');
                 const res = await fetch('/api/classes');
+                console.log('[LOGIN] fetchClasses — response status:', res.status);
                 const data = await res.json();
+                console.log('[LOGIN] fetchClasses — data:', data);
                 
                 select.innerHTML = '<option value="">Choisir une classe...</option>';
                 if (data.classes && data.classes.length > 0) {
@@ -267,7 +273,7 @@
                     select.innerHTML = '<option value="">Aucune classe active</option>';
                 }
             } catch (err) {
-                console.error("Classes fetch failed", err);
+                console.error('[LOGIN] fetchClasses — ERREUR:', err);
                 select.innerHTML = '<option value="">Erreur serveur</option>';
             }
         }
@@ -305,35 +311,43 @@
             const classId = document.getElementById('select-class').value;
             const studentId = document.getElementById('select-student').value;
             const errorEl = document.getElementById('auth-error');
-            
+            console.log('[LOGIN] loginStudent — classId:', classId, 'studentId:', studentId);
+
             if (!classId || !studentId) {
                 showError("Veuillez remplir tous les champs.");
                 return;
             }
 
             try {
+                console.log('[LOGIN] loginStudent — fetch /api/auth/login-student...');
                 const res = await fetch('/api/auth/login-student', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ class_id: classId, student_id: studentId })
                 });
                 
+                console.log('[LOGIN] loginStudent — response status:', res.status);
                 const data = await res.json();
+                console.log('[LOGIN] loginStudent — data:', data);
                 if (res.ok) {
                     saveSession(data);
-                    
+
                     if (data.project_id) {
+                        console.log('[LOGIN] loginStudent — redirect workspace project_id:', data.project_id);
                         window.location.href = `/workspace?project_id=${data.project_id}`;
                     } else {
-                        // Attempt to auto-start project if missing
+                        console.log('[LOGIN] loginStudent — no project_id, fetching /start...');
                         const startRes = await fetch(`/api/classes/${data.class_id}/students/${data.student_id}/start`, { method: 'POST' });
+                        console.log('[LOGIN] loginStudent — /start status:', startRes.status);
                         const startData = await startRes.json();
+                        console.log('[LOGIN] loginStudent — startData:', startData);
                         window.location.href = `/workspace?project_id=${startData.project_id || ''}`;
                     }
                 } else {
                     showError(data.detail || "Impossible de se connecter.");
                 }
             } catch (err) {
+                console.error('[LOGIN] loginStudent — ERREUR:', err);
                 showError("Le serveur d'authentification est indisponible.");
             }
         }
@@ -348,13 +362,15 @@
             }
 
             try {
+                console.log('[LOGIN] loginProf — fetch /api/auth/login-prof...');
                 const res = await fetch('/api/auth/login-prof', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, password })
                 });
-                
+                console.log('[LOGIN] loginProf — response status:', res.status);
                 const data = await res.json();
+                console.log('[LOGIN] loginProf — data:', data);
                 if (res.ok) {
                     saveSession(data);
                     window.location.href = '/teacher';
@@ -362,6 +378,7 @@
                     showError(data.detail || "Identification échouée.");
                 }
             } catch (err) {
+                console.error('[LOGIN] loginProf — ERREUR:', err);
                 showError("Erreur de connexion serveur.");
             }
         }

@@ -99,11 +99,27 @@ RÈGLES D'ANIMATION LOW-CPU :
 | M334 | Fix impersonation : WsStitchDrill lit sessionStorage | 🟢 TERMINÉE | GEMINI |
 | M335 | UX : bouton nouveau projet + header panel | 🟢 TERMINÉE | GEMINI |
 | M336 | Fix critique : impersonation localStorage bridge + 401 guard | 🟢 TERMINÉE | CLAUDE |
-| M337 | Fix manifest impersonation — JWT decode dans get_active_project_id | 🔴 BLOQUANT | CLAUDE |
+| M337 | Fix manifest impersonation — JWT decode dans get_active_project_id | 🟢 TERMINÉE | CLAUDE |
 | M338 | Tab Dashboard en mode impersonation | 🟢 TERMINÉE | CLAUDE |
 | M339 | ManifestBox impersonation-aware — getSession + projectId élève | 🟢 TERMINÉE | GEMINI |
+| UX_26_04 | Recadrage UX Drill Onboarding (Badges "Ressources", Rewards, Animations) | 🟢 TERMINÉE | GEMINI |
 
 ---
+
+## 📝 COMPTE-RENDU EXÉCUTION (26 Avril 2026)
+
+### 🧩 IMPERSONATION & AUTH BRIDGE (M337-M339)
+L'expérience "Voir en tant que" est désormais stabilisée et isolée :
+- **Backend (`bkd_service.py`)** : Décodage JWT ajouté dans `get_active_project_id` pour résoudre le `project_id` de l'élève à partir de tokens d'impersonation (non stockés en DB).
+- **Frontend Interceptor (`bootstrap.js`)** : Injection du `X-User-Token` dans tous les fetchs. Bannière épurée (informational only).
+- **ManifestBox (`ManifestBox.js`)** : Mise à jour de `getSession()` pour basculer dynamiquement entre `localStorage` (prof) et `sessionStorage` (impersonation student).
+
+### 🎨 DESIGN & UX REWARDS (CLÉA UX)
+Refonte sémantique et visuelle du Drill Onboarding dans `WsStitchDrill.js` :
+- **Framing Psychologique** : Passage d'un décompte technique ("1 écran") à une capture de valeur ("1 ressource architecturale sécurisée").
+- **Success States** : Injection d'animations `success-pop` et de badges vibrants (Vert HoméOS) lors de la validation des étapes (Upload, Manifeste).
+- **Seal of Approval** : Ajout d'un sceau de validation visuel sur le bloc manifeste pour confirmer l'auto-détection sémantique.
+- **Bouton Final** : Upgrade esthétique (dégradé triple, shadow premium, hover state) pour marquer la fin du drill comme un accomplissement.
 
 ### M336 — Fix critique : impersonation localStorage + séparation login/session
 **STATUS: 🔴 BLOQUANT | DATE: 2026-04-24 | ACTOR: GEMINI**

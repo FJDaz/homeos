@@ -11,8 +11,6 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
-import requests
-
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from pydantic import BaseModel
