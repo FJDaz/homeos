@@ -101,7 +101,10 @@
      */
     async function fetchProjectScreens(projectId) {
         try {
-            const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`);
+            const session = _getSession();
+            const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`, {
+                headers: { 'X-User-Token': session.token || '' }
+            });
             if (res.ok) {
                 const data = await res.json();
                 _screensCache[projectId] = data.imports || [];
@@ -168,9 +171,9 @@
         const container = document.getElementById('ws-project-list');
         if (!container) return;
         
-        const session = getSession();
+        const session = _getSession();
         const student = session.student || session; 
-        const projects = optionalProjects || student.projects || [];
+        const projects = optionalProjects || _projects || [];
         const activeId = session.active_project_id || session.project_id;
 
         container.innerHTML = '';

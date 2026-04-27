@@ -673,10 +673,30 @@
         if (window.ManifestBox) window.ManifestBox.show();
     }
 
-    function show() {
+    async function show() {
         const session = getSession();
         const role = session.role || 'student';
         if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
+
+        const projectId = session.active_project_id || session.project_id;
+        if (projectId) {
+            try {
+                const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`, {
+                    headers: { 'X-User-Token': session.token || '' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const imports = data.imports || (Array.isArray(data) ? data : []);
+                    if (imports.length > 0) {
+                        console.log('[WsStitchDrill] Skipping — student has', imports.length, 'screen(s)');
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.warn('[WsStitchDrill] content check failed, showing drill anyway', e);
+            }
+        }
+
         createOverlay();
     }
 

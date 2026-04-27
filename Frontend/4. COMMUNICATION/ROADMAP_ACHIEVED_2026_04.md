@@ -9091,3 +9091,179 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOST ê
 - M302 : Groq Context Injection ✅
 - M305 : Frontend Resilience ✅
 - M300 : Serveur stabilisation ✅
+---
+
+### 🧩 IMPERSONATION & AUTH BRIDGE (M337-M339)
+**DATE: 2026-04-26 | ACTOR: CLAUDE & GEMINI**
+L'expérience "Voir en tant que" est désormais stabilisée et isolée :
+- **Backend ()** : Décodage JWT ajouté dans `get_active_project_id` pour résoudre le `project_id` de l'élève à partir de tokens d'impersonation (non stockés en DB).
+- **Frontend Interceptor (`bootstrap.js`)** : Injection du `X-User-Token` dans tous les fetchs. Bannière épurée (informational only).
+- **ManifestBox (`ManifestBox.js`)** : Mise à jour de `getSession()` pour basculer dynamiquement entre `localStorage` (prof) et `sessionStorage` (impersonation student).
+
+---
+
+### 🎨 DESIGN & UX REWARDS (CLÉA UX)
+**DATE: 2026-04-26 | ACTOR: GEMINI**
+Refonte sémantique et visuelle du Drill Onboarding dans `WsStitchDrill.js` :
+- **Framing Psychologique** : Passage d'un décompte technique ("1 écran") à une capture de valeur ("1 ressource architecturale sécurisée").
+- **Success States** : Injection d'animations `success-pop` et de badges vibrants (Vert HoméOS) lors de la validation des étapes (Upload, Manifeste).
+- **Stack 3D** : Aperçu "Fan Effect" des écrans empilés avec inclinaison de 10°.
+- **Bouton Final** : Upgrade esthétique (dégradé triple, shadow premium, hover state) pour marquer la fin du drill comme un accomplissement.
+
+---
+
+### M336 — Fix critique : impersonation localStorage bridge + 401 guard
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Clic "voir en tant que" → workspace s'ouvre dans un nouvel onglet → drill s'affiche avec la session de l'élève → plus de redirect vers login
+- `/login` → formulaire email+password uniquement, pas de session code
+- Session de l'onglet impersonation isolée (sessionStorage) → fermeture onglet = session détruite
+- Session prof dans l'onglet dashboard intacte (localStorage)
+
+---
+
+### M339 — ManifestBox impersonation-aware
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- En mode impersonation, ManifestBox charge le manifest du projet de l'élève. L'éditeur affiche le contenu correct.
+
+---
+
+### M338 — Tab Dashboard en mode impersonation
+**STATUS: 🟡 QUICK-WIN | DATE: 2026-04-24 | ACTOR: CLAUDE**
+- Tab Dashboard visible en mode impersonation. Clic → retour au dashboard prof. Fermeture onglet = fin de session impersonation.
+
+---
+
+### M337 — Fix manifest impersonation — JWT decode dans get_active_project_id
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: CLAUDE**
+- ManifestBox se charge en mode impersonation. Le manifest de l'élève (et non `homéos-default`) est retourné par `/api/manifest/get`.
+
+---
+
+### M335 — Restauration WsStitchDrill.js + Alignement UX Projet
+**STATUS: �� TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Le flux est maintenant : **Panel Project (+) → Drill Overlay (Centre) → Création Projet**.
+
+---
+
+### M334 — Fix impersonation globale : WsStitchDrill + WsProjectPanel
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Le panneau des projets n'est plus "invisible" en mode impersonation ; il reflète bien le contexte élève.
+
+---
+
+### M330 — Nettoyage structure ROADMAP.md
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Validation du tableau "Sprint actif" en tête de document.
+
+---
+
+### M333 — UX drill : bouton "nouveau projet" + croix de sortie
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Ajout d'une croix de fermeture `×` (SVG Lucide) en haut à droite de l'overlay drill.
+
+---
+
+### M331 — Fix onboarding student : session + drill flow
+**STATUS: 🟢 TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Login student → `session.name` présent → nom visible dans le header.
+
+---
+
+### M327 — Impersonation (Showroom Prof)
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Mode impersonation actif via `sessionStorage` for l'isolation des onglets.
+
+---
+
+### M328 — Panel Admin : gestion des users
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- CRUD complet des utilisateurs (Rôles, Reset MDP, Suppression).
+
+---
+
+### M329 — Finalisation UI & HoméOS Compliance
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-24 | ACTOR: GEMINI**
+- Suppression radicale de TOUS les emojis restants.
+
+---
+
+### Mission 306 — Débloquer l'event loop
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-14 | ACTOR: Claude**
+- Changement `async def` → `def` sur tous les handlers qui n'ont PAS de `await`.
+
+---
+
+### Mission 304 — DB comme seule source de vérité
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-14 | ACTOR: Claude**
+- La DB `students.project_id` devient l'état maître.
+
+---
+
+### Mission 303 — Diagnostic Système : DB Leak + Race Condition JSON
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-14 | ACTOR: QWEN**
+- Implémentation du context manager `bkd_db()` et `fcntl.flock`.
+
+---
+
+### Mission 305 — Frontend Resilience : Guards & Timeouts
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-15 | ACTOR: GEMINI**
+- Timeout de 5000ms sur l'appel `isCanvasEmpty()`.
+
+---
+
+### Mission 300 — Serveur : stabilisation reload=False
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-13 | ACTOR: Claude**
+- Suppression de StatReload pour éviter le bug des ports fantômes.
+
+---
+
+### M352 — Réécriture extract-tokens : PIL → Gemini Vision
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+- Remplacement de l'extraction CPU locale par Gemini Vision (Multimodal).
+- Archivage des tokens sémantiques dans `homeos_design.md`.
+- Implémentation d'un verrou (`_ACTIVE_EXTRACTIONS`) pour éviter les "ghost processes".
+
+---
+
+### M353 — Intent inference depuis design tokens
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+- Nouvelle route `POST /api/imports/infer-intent`.
+- Sullivan transforme les tokens bruts en ébauche de manifeste (archétype, humeur, sections).
+- Sauvegarde dans `manifest.json["intent_inference"]`.
+
+---
+
+### M354 — Drill rework : linear flow + merge
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+- Refonte complète de `WsStitchDrill.js` en flow linéaire et strict.
+- Suppression de la cohabitation des boutons "Upload" et "Zéro-to-One".
+- Injection systématique du jeton `X-User-Token` dans tous les headers.
+
+---
+
+### M355 — Wiring intégré dans le drill onboarding
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+- Finalisation du bouton "Commencer à travailler" lançant le Manifest Editor.
+- Validation du wiring simplifié et fermeture auto du drill après succès.
+
+---
+
+### Mission M356 — Pipeline incrémental par écran : tokens → seed → match → reconcile
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+
+### Mission M357 — Sullivan ME : critique auto + appareil oui/non + suggestions numérotées
+**STATUS: ✅ TERMINÉE | DATE: 2026-04-27 | ACTOR: GEMINI**
+
+**Problème résolu :**
+Sullivan Manifest Editor répond en bloc de texte indigeste. L'utilisateur ne sait pas quoi répondre, les suggestions arrivent avant l'analyse. Le chat démarre à vide — l'élève ne sait pas qu'il peut interagir avec Sullivan.
+
+**Solution :**
+Externalisation de la logique Sullivan dans un module dédié (ManifestSullivan.js) piloté par injection de refs.
+Implémentation d'un appareil de critique structuré (Oui/Non) avec suggestions contextuelles dynamiques.
+Synchronisation avec le curseur de l'éditeur pour un positionnement flottant contextuel.
+
+**Livrables :**
+- Frontend/3. STENCILER/static/js/ManifestSullivan.js
+- Frontend/3. STENCILER/static/js/ManifestBox.js (refactoring)
+- Frontend/3. STENCILER/static/templates/workspace.html (inclusion script)
+

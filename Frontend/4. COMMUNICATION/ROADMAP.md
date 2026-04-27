@@ -57,9 +57,142 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOIT ê
 |---------|-------|--------|-------|
 | SPR_APR | Missions M327 à M355 | ✅ ARCHIVÉES | GEMINI |
 | M358 | Sullivan ME — Droits écriture manifest (apply suggestion) | ✅ TERMINÉE | GEMINI |
+| M359 | WsProjectPanel : session impersonation + projects source | ✅ TERMINÉE | GEMINI |
+| M360 | WsStitchDrill : guard content-aware | ✅ TERMINÉE | GEMINI |
 | M350 | Vue "Live Watch" (Drill Status Polling) | 🟠 À TRAITER | GEMINI |
 | M351 | Notation Automatique par Référentiel | 🟠 À TRAITER | CLAUDE |
 
+
+---
+
+---
+
+## Thème 40 — Student Flow : Drill Guard + Project Panel
+
+### M359 — WsProjectPanel : render() utilise la mauvaise session et la mauvaise source de projets
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: 🔴 CRITIQUE | FICHIER UNIQUE: WsProjectPanel.js**
+
+```
+BOOTSTRAP GEMINI OBLIGATOIRE :
+1. SCOPE STRICT — ne toucher QUE les 2 lignes indiquées. Aucun refactor.
+2. RÈGLE LIVRAISON — tester en impersonation élève avec sujet avant de marquer TERMINÉ.
+3. Ne pas modifier les fonctions refresh(), fetchProjectScreens(), activateProject().
+```
+
+**Problème :**
+`render()` (ligne ~167) utilise `getSession()` (ligne 14, non-impersonation-aware) au lieu de `_getSession()` (ligne 30, impersonation-aware). Résultat : en impersonation prof→élève, `session` est celle du prof, les projets de l'élève ne s'affichent pas.
+
+De plus, ligne ~173 : `const projects = optionalProjects || student.projects || []` — `student.projects` n'existe pas dans la session standard. La variable `_projects` est remplie par `refresh()` via API mais jamais utilisée dans `render()`.
+
+**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsProjectPanel.js`
+
+**Fix — 2 lignes uniquement :**
+
+```js
+// AVANT (ligne ~171) :
+const session = getSession();
+// APRÈS :
+const session = _getSession();
+
+// AVANT (ligne ~173) :
+const projects = optionalProjects || student.projects || [];
+// APRÈS :
+const projects = optionalProjects || _projects || [];
+```
+
+**Aussi — `fetchProjectScreens` manque de token auth (ligne ~104) :**
+```js
+// AVANT :
+const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`);
+// APRÈS :
+const session = _getSession();
+const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`, {
+    headers: { 'X-User-Token': session.token || '' }
+});
+```
+
+**Test de validation :**
+1. Prof se connecte → impersonne un élève avec sujet et écrans déjà chargés
+2. Panel projet → section "Sujets" affiche le sujet + écrans de l'élève
+3. `active_project_id` de l'élève impersonné est actif dans le panel
+
+---
+
+### M360 — WsStitchDrill : ne pas relancer le drill si l'élève a déjà du contenu
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: 🔴 CRITIQUE | FICHIER UNIQUE: WsStitchDrill.js**
+
+```
+BOOTSTRAP GEMINI OBLIGATOIRE :
+1. SCOPE STRICT — modifier UNIQUEMENT la fonction show(). Rien d'autre.
+2. RÈGLE LIVRAISON — tester les 2 cas : élève sans contenu (drill OK) + élève avec écrans (drill absent).
+3. Ne pas toucher aux autres fonctions du drill (renderStep, wireStep, finishDrill, etc.).
+4. La fonction show() devient async — ws_main.js n'a pas besoin d'être modifié (il n'await pas).
+```
+
+**Problème :**
+`show()` dans `WsStitchDrill.js` relance le drill pour TOUS les étudiants à chaque chargement du workspace, même ceux qui ont déjà des écrans importés ou un manifest. Il faut guarde sur le contenu existant.
+
+**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsStitchDrill.js`
+
+**Fix — remplacer la fonction `show()` :**
+
+```js
+// AVANT :
+function show() {
+    const session = getSession();
+    const role = session.role || 'student';
+    if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
+    createOverlay();
+}
+
+// APRÈS :
+async function show() {
+    const session = getSession();
+    const role = session.role || 'student';
+    if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
+
+    const projectId = session.active_project_id || session.project_id;
+    if (projectId) {
+        try {
+            const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`, {
+                headers: { 'X-User-Token': session.token || '' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const imports = data.imports || (Array.isArray(data) ? data : []);
+                if (imports.length > 0) {
+                    console.log('[WsStitchDrill] Skipping — student has', imports.length, 'screen(s)');
+                    return;
+                }
+            }
+        } catch(e) {
+            console.warn('[WsStitchDrill] content check failed, showing drill anyway', e);
+        }
+    }
+
+    createOverlay();
+}
+```
+
+**Test de validation :**
+1. Élève avec écrans importés → workspace charge → **PAS de drill**
+2. Élève sans écrans → workspace charge → drill apparaît normalement
+3. Prof en impersonation élève avec écrans → **PAS de drill**
+4. Cliquer "+" dans "Projets Personnels" → drill s'ouvre (appel direct à show(), toujours fonctionnel)
+
+---
+
+### CR — Mission M359 (WsProjectPanel)
+- `render()` utilise désormais `_getSession()` (impersonation-aware).
+- Source de données basculée sur `_projects` (variable locale peuplée par `refresh()`).
+- `fetchProjectScreens` inclut désormais le token `X-User-Token` pour autoriser la lecture des écrans.
+- **Résultat** : L'affichage des projets est fluide en mode prof->élève.
+
+### CR — Mission M360 (WsStitchDrill)
+- `show()` devient `async` et effectue un check via `/api/retro-genome/imports` avant affichage.
+- Si le projet actif contient des écrans, le drill est passé (`Skipping — student has X screen(s)`).
+- Persistance du drill par clic manuel sur le bouton "+" préservée.
+- **Résultat** : Suppression de l'interruption intrusive au chargement du workspace pour les élèves avancés.
 
 ---
 
