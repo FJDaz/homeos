@@ -177,18 +177,31 @@
         pending.classList.add('opacity-50', 'italic');
 
         try {
+            const session = getSession();
             const res = await fetch('/api/sullivan/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Token': session.token || ''
+                },
                 body: JSON.stringify({
                     message: msg,
                     mode: 'manifest_assist',
-                    context: `L'utilisateur travaille sur le manifest. Ligne actuelle : "${currentLine}"\nTout le texte:\n${els.editor.value}`
+                    project_id: (manifestData && manifestData.project_id) || null,
+                    context: `L'utilisateur travaille sur le manifest. Ligne actuelle : "${currentLine}"\nManifest complet :\n${els.editor.value}`
                 })
             });
             const data = await res.json();
             pending.remove();
-            if (data.explanation) appendBubble(data.explanation, 'sullivan');
+            if (!res.ok) {
+                appendBubble(`erreur serveur (${res.status}) : ${data.detail || JSON.stringify(data)}`, 'sullivan');
+            } else if (data.explanation) {
+                appendBubble(data.explanation, 'sullivan');
+            } else if (data.reply) {
+                appendBubble(data.reply, 'sullivan');
+            } else {
+                appendBubble(`réponse inattendue : ${JSON.stringify(data)}`, 'sullivan');
+            }
         } catch(e) {
             pending.remove();
             appendBubble('Erreur de communication.', 'sullivan');
@@ -197,7 +210,7 @@
 
     function appendBubble(text, sender) {
         const b = document.createElement('div');
-        b.className = `p-2 rounded-lg text-[12px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
+        b.className = `p-2 rounded-lg text-[14px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
         if (sender === 'sullivan') {
             b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
         } else {
@@ -331,19 +344,19 @@
                 <!-- EDITOR COL -->
                 <div id="manifest-editor-wrap" class="flex-1 relative p-10 overflow-y-auto scrollbar-hide" style="scroll-behavior: smooth;">
                     <!-- SULLIVAN PAPER FLOAT -->
-                    <div id="manifest-sullivan-box" class="absolute right-10 top-10 w-[320px] bg-white rounded-xl border border-slate-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col z-20" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height:400px;">
+                    <div id="manifest-sullivan-box" class="absolute right-10 top-10 w-[450px] bg-white rounded-xl border border-slate-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col z-20" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height:400px;">
 
                         <!-- TOP INPUT (M292 spec) -->
                         <div class="p-3 bg-white border-b border-slate-50 flex items-center gap-2 rounded-t-xl z-10 sticky top-0 shadow-sm">
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse shrink-0"></div>
                             <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?"
-                                   class="flex-1 border-none bg-transparent text-[13px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
+                                   class="flex-1 border-none bg-transparent text-[15px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
                         </div>
 
                         <!-- HISTORY -->
                         <div id="manifest-sullivan-hist" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 max-h-[300px] scrollbar-hide bg-slate-50/30">
                             <!-- bulles injectées -->
-                            <div class="p-2 rounded-lg text-[12px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]">
+                            <div class="p-2 rounded-lg text-[14px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]">
                                 <span class="font-bold text-[#8cc63f] mr-1">S.</span>Je lis par-dessus votre épaule. Saisissez du texte par ici.
                             </div>
                         </div>
@@ -365,7 +378,7 @@
 
                     <textarea id="manifest-editor-textarea" spellcheck="false"
                               placeholder="# Votre Manifeste..."
-                              class="w-[calc(100%-360px)] min-h-[150%] max-w-[800px] bg-transparent border-none outline-none text-[#3d3d3c] focus:ring-0 resize-none font-mono text-[13px] leading-relaxed tracking-tight"
+                              class="w-[calc(100%-490px)] min-h-[150%] max-w-[800px] bg-transparent border-none outline-none text-[#3d3d3c] focus:ring-0 resize-none font-mono text-[13px] leading-relaxed tracking-tight"
                               style="font-family: 'JetBrains Mono', 'Monaco', monospace; margin-bottom:50vh;"></textarea>
                 </div>
 
@@ -559,7 +572,7 @@
         const hist = document.getElementById('manifest-sullivan-hist');
         if (!hist) return;
         const div = document.createElement('div');
-        div.className = 'p-2 rounded-lg text-[12px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]';
+        div.className = 'p-2 rounded-lg text-[14px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]';
         div.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
         hist.appendChild(div);
         hist.scrollTop = hist.scrollHeight;

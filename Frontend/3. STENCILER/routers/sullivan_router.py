@@ -20,6 +20,7 @@ if str(_ROOT) not in sys.path:
 from core.key_resolver import resolve_key
 from core.canvas_library import CANVAS_LIBRARY
 from core.canvas_applier import applier
+from Backend.Prod.config.settings import settings
 
 from fastapi import APIRouter, HTTPException, Query, Body, Request, UploadFile, File, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -75,6 +76,7 @@ class SullivanChatRequest(BaseModel):
     canvas_screens: Optional[list] = None  # [{ id, title, html }]
     selected_element: Optional[dict] = None  # { selector, tag, html } — M154
     wires: Optional[List[Dict]] = None  # [{ trigger, target, event }] — M161
+    context: Optional[str] = None  # Contexte libre injecté par le frontend (ex: manifest texte)
 
 class ToolCallRequest(BaseModel):
     tool: str
@@ -345,11 +347,42 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
     Chat Sullivan - repond a un message utilisateur selon le mode courant.
     Mission 142 + 152 : Support multi-screens et Design System (DESIGN.md).
     Mission 137 : BYOK — injection clé user au runtime.
+    manifest_assist → Groq (texte pur, pas de vision, ultra-rapide).
     """
     from core.key_resolver import resolve_key
     user_id = getattr(request.state, 'user_id', None)
 
-    # Mission 137: Injecter clé BYOK si disponible
+    # manifest_assist : Groq uniquement (pas besoin de vision, plus rapide)
+    if req.mode == "manifest_assist":
+        groq_key = resolve_key("groq", user_id) or settings.groq_api_key
+        if not groq_key:
+            return {"explanation": "Clé Groq manquante — configure ta clé dans les paramètres.", "html": None}
+        try:
+            from Backend.Prod.models.groq_client import GroqClient
+            groq = GroqClient(api_key=groq_key, timeout=20)
+            system = (
+                "Tu es Sullivan, assistant de cadrage de projet HoméOS. "
+                "L'utilisateur édite son manifest — un document texte définissant l'identité, "
+                "les organes et les intentions de son projet. "
+                "Aide-le à affiner, compléter ou reformuler. "
+                "Réponds en texte clair, concis, sans HTML ni JSON."
+            )
+            context_block = f"\n\nCONTEXTE MANIFEST :\n{req.context[:3000]}" if req.context else ""
+            prompt = f"{system}{context_block}\n\nMessage : {req.message}"
+            result = await asyncio.wait_for(
+                groq.generate(prompt=prompt, temperature=0.4, max_tokens=600),
+                timeout=20.0
+            )
+            await groq.close()
+            text = result.code.strip() if result.success else "Désolé, je rencontre une difficulté technique."
+            return {"explanation": text, "html": None}
+        except asyncio.TimeoutError:
+            return {"explanation": "Timeout Groq (20s). Réessaie dans un moment.", "html": None}
+        except Exception as e:
+            logger.error(f"Sullivan manifest_assist Groq failed: {e}")
+            return {"explanation": f"Erreur : {e}", "html": None}
+
+    # Autres modes : Gemini (avec BYOK)
     gemini_key = resolve_key("gemini", user_id)
     original_key = os.environ.get("GOOGLE_API_KEY")
     if gemini_key:
@@ -362,7 +395,6 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
         logger.error(f"GeminiClient init failed: {e}")
         raise HTTPException(status_code=500, detail="LLM unavailable")
     finally:
-        # Restaurer clé originale
         if gemini_key:
             if original_key:
                 os.environ["GOOGLE_API_KEY"] = original_key
@@ -374,6 +406,7 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
         "inspect": "Tu es Sullivan, inspecteur UI/UX. Analyse le design courant pour identifier des problemes ergonomiques ou d'accessibilite.",
         "preview": "Tu es Sullivan, critique design. Commente le rendu final de l'interface.",
         "front-dev": "Tu es Sullivan, Front-End Engineer & Expert GSAP. Ton role est de transformer les intentions de design et les connexions (Wires) en animations fluides et professionnelles utilisant la bibliotheque GSAP.",
+        "manifest_assist": "Tu es Sullivan, assistant de cadrage de projet. L'utilisateur edit son manifest — un document texte qui definit l'identite, les organes et les intentions de son projet. Aide-le a affiner, completer ou reformuler son manifest. Reponds en texte clair, sans HTML ni JSON.",
     }
 
     base_system = mode_context.get(req.mode, mode_context["construct"])
@@ -511,12 +544,24 @@ CATALOGUE DE CANEVAS AUTORISES (MISSION 204) :
 ---
 """
 
+    # --- CONTEXTE LIBRE FRONTEND (ex: manifest texte depuis ManifestBox) ---
+    frontend_context_block = ""
+    if req.context:
+        frontend_context_block = f"""
+CONTEXTE FOURNI PAR L'UTILISATEUR :
+---
+{req.context[:3000]}
+---
+"""
+
     system_prompt = f"""
 {base_system}
 
 {manifest_block}
 
 {design_md_block}
+
+{frontend_context_block}
 
 {catalogue_block}
 
@@ -563,11 +608,34 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
 """
 
     try:
-        result = await client.generate(
-            prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}",
-            max_tokens=16384
+        result = await asyncio.wait_for(
+            client.generate(
+                prompt=f"{system_prompt}\n\nMessage utilisateur : {req.message}",
+                max_tokens=2000
+            ),
+            timeout=30.0
         )
+    except asyncio.TimeoutError:
+        logger.error("Sullivan generate timed out after 30s")
+        try:
+            await client.close()
+        except Exception:
+            pass
+        return {"explanation": "Timeout Gemini (30s dépassé). Réessaie dans un moment.", "html": None}
+    except Exception as e:
+        logger.error(f"Sullivan generate failed: {e}")
+        try:
+            await client.close()
+        except Exception:
+            pass
+        return {"explanation": f"Erreur : {e}", "html": None}
+    finally:
+        try:
+            await client.close()
+        except Exception:
+            pass
 
+    try:
         if not result.success:
             return {"explanation": "Desole, je rencontre une difficulte technique.", "html": None}
 
@@ -644,6 +712,10 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
                     logger.info(f"Sullivan: GSAP logic saved to {p_path}/logic.js")
             except Exception as e:
                 logger.error(f"Failed to save logic.js: {e}")
+
+        # Fallback : si Sullivan répond en texte libre sans délimiteurs
+        if not explanation and not html:
+            explanation = raw_text
 
         return {"explanation": explanation, "html": html, "logic_js": logic_js}
 

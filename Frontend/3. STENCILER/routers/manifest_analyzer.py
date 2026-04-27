@@ -117,13 +117,15 @@ async def _call_ai(prompt: str) -> str:
     # Fallback: Gemini
     try:
         from Backend.Prod.models.gemini_client import GeminiClient
-        client = GeminiClient()
-        result = await client.generate(
-            prompt=prompt,
-            output_constraint="Markdown or JSON",
-            max_tokens=2000,
-            temperature=0.3
-        )
+        client = GeminiClient(execution_mode="FAST", max_tokens=1500)
+        try:
+            result = await client.generate(
+                prompt=prompt,
+                max_tokens=1500,
+                temperature=0.3
+            )
+        finally:
+            await client.close()
         if result.success:
             return result.code.strip()
     except Exception as e:
@@ -151,6 +153,9 @@ async def _call_groq(prompt: str, api_key: str) -> str:
         method="POST"
     )
 
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        result = json.loads(resp.read().decode())
-        return result["choices"][0]["message"]["content"].strip()
+    def _do_request():
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+            return result["choices"][0]["message"]["content"].strip()
+
+    return await asyncio.to_thread(_do_request)

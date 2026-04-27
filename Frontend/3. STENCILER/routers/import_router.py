@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import logging
+import asyncio
 import re
 import unicodedata
 from datetime import datetime
@@ -17,6 +18,7 @@ PROJECTS_DIR = CWD / "projects"
 router = APIRouter()
 
 _NEW_IMPORTS_COUNT = 0
+_ACTIVE_EXTRACTIONS = set()
 
 
 def get_project_imports_dir(token: str = None):
@@ -449,7 +451,7 @@ def asset_delete(filename: str, request: Request):
 
 
 @router.post("/api/imports/extract-tokens")
-def extract_design_tokens(request: Request):
+async def extract_design_tokens(request: Request):
     """M293: Trigger background design token extraction from uploaded screens."""
     from routers.design_token_extractor import extract_tokens_background
     from bkd_service import get_active_project_id
@@ -460,9 +462,22 @@ def extract_design_tokens(request: Request):
     if not active_id:
         return {"status": "skipped", "reason": "no active project"}
 
-    # Launch in background
-    import asyncio
-    asyncio.create_task(extract_tokens_background(active_id))
+    # M354-Optim: Eviter les extractions fantômes multiples
+    if active_id in _ACTIVE_EXTRACTIONS:
+        logger.info(f"[M354-Optim] Extraction already in progress for {active_id}, skipping.")
+        return {"status": "already_running", "project_id": active_id}
+
+    def run_in_thread(pid):
+        _ACTIVE_EXTRACTIONS.add(pid)
+        try:
+            asyncio.run(extract_tokens_background(pid))
+        except Exception as e:
+            logger.error(f"[M352] Extraction thread error for {pid}: {e}")
+        finally:
+            _ACTIVE_EXTRACTIONS.discard(pid)
+
+    import threading
+    threading.Thread(target=run_in_thread, args=(active_id,), daemon=True).start()
     logger.info(f"M293: Triggered design token extraction for {active_id}")
     return {"status": "started", "project_id": active_id}
 
@@ -488,14 +503,104 @@ def get_design_tokens(request: Request):
         return {"tokens": {}}
 
 
+@router.post("/api/imports/infer-intent")
+async def infer_intent_from_tokens(request: Request):
+    """
+    M353: Intent inference from design tokens.
+    Sullivan analyzes visual signals to suggest project structure.
+    """
+    from bkd_service import get_active_project_id
+    from Backend.Prod.models.gemini_client import GeminiClient
+
+    token = request.headers.get("X-User-Token")
+    active_id = get_active_project_id(token)
+
+    if not active_id:
+        raise HTTPException(status_code=400, detail="no_active_project")
+
+    # 1. Load manifest
+    manifest_path = PROJECTS_DIR / active_id / "manifest.json"
+    if not manifest_path.exists():
+        return {"status": "pending", "hint": "extraction en cours — relance dans 3s"}
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    except Exception as e:
+        logger.error(f"[M353] Failed to load manifest for {active_id}: {e}")
+        raise HTTPException(status_code=500, detail="manifest_corrupted")
+
+    # 2. Extract tokens
+    tokens = manifest.get("design_tokens", {})
+    if not tokens or not tokens.get("colors"):
+        return {"error": "no_tokens", "hint": "Lance d'abord /api/imports/extract-tokens"}
+
+    # 3. Preparation du prompt
+    colors_str = ", ".join(tokens["colors"].get("palette", []))
+    typo_str = f"{tokens['typography'].get('body', 'Geist Sans')} (weight: {tokens['typography'].get('headline_weight', '600')})"
+    spacing_str = f"border_radius: {tokens['shape'].get('border_radius', '6px')}, context: {tokens['layout'].get('source', 'image analysis')}"
+
+    prompt = f"""
+Tu es un expert HCI et pédagogie design. Voici les tokens visuels extraits des écrans d'un projet étudiant DNMADE (design numérique).
+
+Couleurs dominantes : {colors_str}
+Typographie détectée : {typo_str}
+Espacement : {spacing_str}
+
+À partir de ces signaux, infère :
+- "archetype" : un mot parmi [portfolio, app-outil, site-vitrine, interface-data, editorial, identite-visuelle]
+- "description" : une phrase courte décrivant le projet (ton neutre, pas de majuscule inutile)
+- "mood" : liste de 3 mots-clés d'ambiance visuelle
+- "suggested_sections" : liste de 3 à 5 sections probables du projet (ex: ["présentation", "galerie", "contact"])
+
+Réponds UNIQUEMENT en JSON valide, sans balise markdown, sans commentaire.
+Exemple : {{"archetype": "portfolio", "description": "...", "mood": ["..."], "suggested_sections": ["..."]}}
+"""
+
+    # 4. Appel Sullivan (GeminiClient)
+    try:
+        client = GeminiClient(execution_mode="BUILD")
+        result = await client.generate(
+            prompt=prompt,
+            system_prompt="Tu es l'architecte Sullivan en charge de l'inférence HCI.",
+            temperature=0.3,
+            max_tokens=400
+        )
+        await client.close()
+
+        if not result.success:
+            logger.error(f"[M353] Sullivan failed: {result.error}")
+            raise HTTPException(status_code=500, detail="sullivan_failed")
+
+        # 5. Parsing & Cleaning
+        raw_text = result.code.strip()
+        # Remove potential markdown block
+        json_str = re.sub(r'^```json\s*|\s*```$', '', raw_text, flags=re.MULTILINE)
+        inference = json.loads(json_str)
+
+        # 6. Save to manifest
+        manifest["intent_inference"] = inference
+        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
+
+        logger.info(f"[M353] Intent inferred for {active_id}: {inference.get('archetype')}")
+        return inference
+
+    except json.JSONDecodeError as e:
+        logger.error(f"[M353] JSON parse failed: {result.code if 'result' in locals() else 'no result'}")
+        return {"error": "parse_failed", "raw": result.code if 'result' in locals() else "no result"}
+    except Exception as e:
+        logger.error(f"[M353] Inference crash: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/api/manifest/analyze")
-async def manifest_analyze(body: dict = Body(default={})):
-    """M282/M292: Analyze manifest + tokens → propose content or ask questions."""
+def manifest_analyze(body: dict = Body(default={})):
+    """M282/M292: Analyze manifest + tokens → propose content or ask questions.
+    Route sync (def) pour éviter le blocage de l'event loop asyncio — asyncio.run() en thread pool.
+    """
     project_id = body.get("project_id", "")
     if not project_id:
         return {"error": "project_id required"}
 
-    # Load manifest
     manifest_path = PROJECTS_DIR / project_id / "manifest.json"
     manifest_data = {}
     if manifest_path.exists():
@@ -504,13 +609,10 @@ async def manifest_analyze(body: dict = Body(default={})):
         except:
             pass
 
-    # Load tokens
     tokens = manifest_data.get("design_tokens", {})
 
-    # Call analyzer
     from routers.manifest_analyzer import analyze_manifest
-    result = await analyze_manifest(project_id, manifest_data, tokens)
-    return result
+    return asyncio.run(analyze_manifest(project_id, manifest_data, tokens))
 
 
 @router.get("/api/health/providers")

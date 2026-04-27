@@ -6,6 +6,10 @@
     'use strict';
 
     let _expanded = {};
+    let _projects = [];
+    let _expandedState = {};
+    let _screensCache = {};
+    let optionalProjects = null;
 
     function getSession() {
         let s = {};
@@ -171,9 +175,8 @@
 
         container.innerHTML = '';
 
-        const session = _getSession();
-        const subjects = _projects.filter(p => p.type === 'subject');
-        const personal = _projects.filter(p => p.type === 'personal');
+        const subjects = projects.filter(p => p.type === 'subject');
+        const personal = projects.filter(p => p.type === 'personal');
 
         // Sinon : Affichage par sections
         if (subjects.length > 0 || (session.role === 'prof' || session.role === 'teacher' || session.role === 'admin' || session.role === 'student')) {
