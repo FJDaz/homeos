@@ -1,6 +1,6 @@
 # CONSTITUTION AETHERFLOW V3
-**Version** : 3.0.0
-**Date** : 15 février 2026
+**Version** : 3.1.0
+**Date** : 27 avril 2026 (amendement hiérarchie agents)
 **Autorité** : François-Jean Dazin (CTO)
 **Statut** : LOI SUPRÊME — Remplace V1 et V2
 
@@ -26,8 +26,9 @@ Il existe une frontière **inviolable** entre deux systèmes :
 Cette frontière ne se négocie pas. Aucune optimisation, aucune deadline ne peut la compromettre.
 
 **Acteurs autorisés :**
-- Système Cognitif : Claude (toutes versions), DeepSeek, Gemini (mode backend)
-- Système de Rendu : KIMI (lead), Gemini (mode vfx)
+- Système Cognitif (backend Python) : Gemini (exécutant principal), Claude (hotfix < 10L uniquement)
+- Système de Rendu (frontend JS/HTML/CSS) : Gemini (exécutant unique)
+- Claude = Architecte pur : rédige les missions, reçoit les rapports, vérifie, fixe les hotfix critiques. Claude ne produit JAMAIS de code frontend ou backend de fonctionnalité, sauf hotfix explicite.
 
 ---
 
@@ -76,17 +77,26 @@ L'historique est **immutable** : on ajoute, on n'efface jamais. Rollback = rejou
 
 # TITRE II — TERRITOIRES
 
-## Article 4 — Territoire Cognitif (Claude)
+## Article 4 — Rôle Claude (Architecte)
 
-Contrôle exclusif :
-- Structure Genome (N0 Corps → N1 Organes → N2 Cellules → N3 Atomes)
-- État canonique (JSON Modifs)
-- Validation et cohérence structurelle
-- Persistance, rollback, event sourcing
-- Logique métier et règles de composition
-- Inférence d'attributs sémantiques depuis analyse
+Responsabilités exclusives :
+- Rédiger les missions dans ROADMAP.md (spec, contraintes, tests de validation)
+- Recevoir et analyser les rapports Gemini
+- Vérifier la conformité avant archivage
+- Écrire les amendments si livraison incomplète
+- Hotfix backend < 10 lignes si critique (bloquant prod, aucun autre chemin)
 
-Ne connaît **jamais** : Tailwind, breakpoints, flex/grid, animations, pixels.
+Claude ne produit **jamais** : code frontend (HTML/CSS/JS/Tailwind), code de fonctionnalité backend, refactors larges.
+
+## Article 4bis — Territoire Gemini (Exécutant)
+
+Responsabilités exclusives :
+- Tout le code frontend (HTML, CSS, JS, Tailwind, SVG)
+- Tout le code backend de fonctionnalité (Python, FastAPI, routers)
+- Exécute les missions rédigées par Claude
+- Écrit le rapport de livraison dans ROADMAP.md (remplace le bloc Mission)
+
+Ne décide **jamais** : architecture, modèle de données, décisions UX structurelles — ces décisions appartiennent à Claude + FJD.
 
 ---
 

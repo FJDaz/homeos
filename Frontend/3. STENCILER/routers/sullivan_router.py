@@ -722,3 +722,163 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
     except Exception as e:
         logger.error(f"Sullivan chat failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/sullivan/manifest-critique")
+async def sullivan_manifest_critique(request: Request, body: dict = Body(default={})):
+    """
+    Analyse automatique du manifest étudiant.
+    Retourne {questions: [{id, text}], suggestions: [{id, text}]} — JSON strict, Groq, < 20s.
+    Les questions sont binaires (oui/non). Les suggestions sont numérotées pour correspondre.
+    """
+    from core.key_resolver import resolve_key
+    user_id = getattr(request.state, 'user_id', None)
+
+    manifest_text = body.get("manifest_text", "").strip()
+    design_tokens = body.get("design_tokens", {})
+
+    if not manifest_text:
+        return {"questions": [], "suggestions": [], "error": "manifest vide"}
+
+    groq_key = resolve_key("groq", user_id) or settings.groq_api_key
+    if not groq_key:
+        return {"questions": [], "suggestions": [], "error": "clé Groq manquante"}
+
+    tokens_summary = ""
+    if design_tokens:
+        tokens_summary = f"""
+TOKENS VISUELS EXTRAITS :
+- Couleurs : {', '.join(design_tokens.get('colors', [])[:5]) or 'non détectées'}
+- Typographie : {', '.join(design_tokens.get('typography', [])[:3]) or 'non détectée'}
+- Ambiance : {', '.join(design_tokens.get('mood', [])[:4]) or 'non détectée'}
+- Espacement : {design_tokens.get('spacing', 'non détecté')}
+- Layout : {design_tokens.get('layout', 'non détecté')}
+"""
+
+    system = f"""Tu es Sullivan, critique de projet HoméOS. Tu analyses le manifest d'un étudiant en design (DNMADE).
+
+GRILLE D'ÉVALUATION (4 axes) :
+1. Cohérence archétype/intention — l'archétype déclaré (portfolio, app-outil, editorial, identite-visuelle, site-vitrine) correspond-il aux tokens visuels et au ton du texte ?
+2. Couverture des organes — les écrans/sections déclarés couvrent-ils les cas d'usage attendus pour cet archétype ?
+3. Adéquation design tokens — palette, typo, spacing sont-ils cohérents avec l'intention déclarée ?
+4. Lisibilité pour un dev — est-ce qu'un développeur peut déduire ce qu'il doit construire en lisant ce manifest ?
+
+MANIFEST ÉTUDIANT :
+---
+{manifest_text[:2500]}
+---
+{tokens_summary}
+
+Génère une critique STRICTEMENT dans ce format JSON, sans texte avant ni après, sans markdown :
+{{
+  "questions": [
+    {{"id": 1, "text": "question oui/non courte et directe"}},
+    {{"id": 2, "text": "question oui/non courte et directe"}},
+    {{"id": 3, "text": "question oui/non courte et directe"}}
+  ],
+  "suggestions": [
+    {{"id": 1, "text": "suggestion concrète et actionnable liée à la question 1"}},
+    {{"id": 2, "text": "suggestion concrète et actionnable liée à la question 2"}},
+    {{"id": 3, "text": "suggestion concrète et actionnable liée à la question 3"}}
+  ]
+}}
+
+Règles :
+- 3 à 5 questions maximum
+- Questions binaires oui/non uniquement, formulées positivement
+- Suggestions numérotées pour correspondre exactement aux questions
+- Aucune phrase d'introduction, aucun commentaire hors JSON
+- Suggestions concrètes : pas "penser à X" mais "ajouter une section X qui fait Y"
+"""
+
+    try:
+        from Backend.Prod.models.groq_client import GroqClient
+        groq = GroqClient(api_key=groq_key, timeout=20)
+        result = await asyncio.wait_for(
+            groq.generate(prompt=system, temperature=0.2, max_tokens=800),
+            timeout=20.0
+        )
+        await groq.close()
+
+        if not result.success:
+            return {"questions": [], "suggestions": [], "error": "génération échouée"}
+
+        raw = result.code.strip()
+        # Nettoyer éventuel wrapping markdown
+        raw = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
+        parsed = json.loads(raw)
+        return {
+            "questions": parsed.get("questions", []),
+            "suggestions": parsed.get("suggestions", [])
+        }
+
+    except asyncio.TimeoutError:
+        return {"questions": [], "suggestions": [], "error": "timeout (20s)"}
+    except json.JSONDecodeError as e:
+        logger.error(f"manifest-critique JSON parse error: {e} — raw: {raw[:200]}")
+        return {"questions": [], "suggestions": [], "error": "réponse non parseable"}
+    except Exception as e:
+        logger.error(f"manifest-critique failed: {e}")
+        return {"questions": [], "suggestions": [], "error": str(e)}
+
+
+@router.post("/api/sullivan/manifest-apply")
+async def sullivan_manifest_apply(request: Request, body: dict = Body(default={})):
+    """
+    Réécris le manifest en intégrant une suggestion.
+    Retourne {proposed_manifest: "...", error: null} — Groq, < 20s.
+    """
+    from core.key_resolver import resolve_key
+    user_id = getattr(request.state, 'user_id', None)
+
+    manifest_text = body.get("manifest_text", "").strip()
+    suggestion = body.get("suggestion", "").strip()
+
+    if not manifest_text or not suggestion:
+        return {"proposed_manifest": None, "error": "données manquantes"}
+
+    groq_key = resolve_key("groq", user_id) or settings.groq_api_key
+    if not groq_key:
+        return {"proposed_manifest": None, "error": "clé Groq manquante"}
+
+    system = f"""Tu es Sullivan, assistant de cadrage HoméOS. Ton rôle est de réécrire le manifest d'un étudiant pour y intégrer intelligemment une suggestion.
+
+MANIFEST ACTUEL :
+---
+{manifest_text}
+---
+
+SUGGESTION À INTÉGRER :
+"{suggestion}"
+
+Règles impératives :
+1. Réécris le manifest complet en intégrant naturellement la suggestion.
+2. Garde le style Markdown et la structure du document original.
+3. Ne change pas les intentions fondamentales de l'étudiant, améliore-les simplement.
+4. Retourne UNIQUEMENT le nouveau texte du manifest, sans aucune phrase d'introduction, sans commentaire, sans markdown wrapper (pas de ```).
+5. Ne discute pas, n'explique pas. Juste le texte brut.
+"""
+
+    try:
+        from Backend.Prod.models.groq_client import GroqClient
+        groq = GroqClient(api_key=groq_key, timeout=20)
+        result = await asyncio.wait_for(
+            groq.generate(prompt=system, temperature=0.3, max_tokens=1500),
+            timeout=20.0
+        )
+        await groq.close()
+
+        if not result.success:
+            return {"proposed_manifest": None, "error": "génération échouée"}
+
+        proposed = result.code.strip()
+        # Sécurité : retirer d'éventuels wrappers markdown
+        proposed = re.sub(r'^```(?:markdown|md)?\s*|\s*```$', '', proposed, flags=re.MULTILINE).strip()
+        
+        return {"proposed_manifest": proposed, "error": None}
+
+    except asyncio.TimeoutError:
+        return {"proposed_manifest": None, "error": "timeout (20s)"}
+    except Exception as e:
+        logger.error(f"manifest-apply failed: {e}")
+        return {"proposed_manifest": None, "error": str(e)}

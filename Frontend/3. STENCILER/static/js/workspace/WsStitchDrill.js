@@ -210,23 +210,54 @@
                     </div>
                 `
             },
-            // Step 3: Manifest
+            // Step 3: Choice (M354 Linear Flow)
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 3 — Manifeste</div>
-                        <div class="text-[13px] text-[#9a9a98] mb-4">Le manifeste définit l'ADN de ton projet.</div>
-                        <div id="drill-manifest-section">
-                            <div class="text-[13px] text-[#9a9a98]">Chargement...</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Configuration du projet</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-8">Comment souhaites-tu définir l'ADN de ton projet ?</div>
+                        <div class="flex flex-col gap-4">
+                            <button id="btn-drill-choice-upload" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
+                                <div class="font-bold text-[15px] mb-1 group-hover:text-[#8cc63f]">J'ai un manifeste</div>
+                                <div class="text-[12px] text-[#9a9a98]">Tu possèdes déjà un fichier .json ou .md de ton architecture.</div>
+                            </button>
+                            <button id="btn-drill-choice-zero" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
+                                <div class="font-bold text-[15px] mb-1 group-hover:text-[#8cc63f]">Je pars de zéro</div>
+                                <div class="text-[12px] text-[#9a9a98]">Laisse Sullivan analyser tes écrans pour prédire ton intention de design.</div>
+                            </button>
                         </div>
                     </div>
                 `
             },
-            // Step 4: Forged screens
+            // Step 4: Manifest Upload
             {
                 html: `
                     <div class="text-center max-w-md">
-                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Étape 4 — Écrans forgés</div>
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Import du manifeste</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-6">Dépose ton fichier pour synchroniser ton architecture.</div>
+                        <div id="drill-manifest-upload-container"></div>
+                        <button id="btn-drill-back-choice" class="mt-6 text-[12px] text-[#9a9a98] hover:text-[#3d3d3c]">← retour au choix</button>
+                    </div>
+                `
+            },
+            // Step 5: Sullivan Inference View
+            {
+                html: `
+                    <div class="text-center max-w-md">
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Analyse Sullivan</div>
+                        <div id="drill-inference-container" class="mb-6"></div>
+                        <div class="flex gap-3">
+                            <button id="btn-drill-back-to-choice" class="flex-1 py-4 border-2 border-[#e5e5e5] rounded-[16px] text-[#3d3d3c] font-bold text-[13px]">← retour</button>
+                            <button id="btn-drill-confirm-inference" class="flex-1 py-4 bg-[#8cc63f] text-white rounded-[16px] font-bold text-[13px]">valider l'intention →</button>
+                        </div>
+                    </div>
+                `
+            },
+            // Step 6: Forged screens (ancien Step 4)
+            {
+                html: `
+                    <div class="text-center max-w-md">
+                        <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Écrans forgés</div>
                         <div class="text-[13px] text-[#9a9a98] mb-4">Pendant que tu configurais tes clés, la forge a traité tes écrans.</div>
                         <div id="drill-forged-screens" class="bg-white border border-[#e5e5e5] rounded-[16px] p-4 mb-4 text-left max-h-64 overflow-y-auto space-y-2">
                             <div class="text-[13px] text-[#9a9a98] italic">Chargement...</div>
@@ -313,9 +344,19 @@
             document.getElementById('drill-continue-keys').onclick = () => { currentStep = 3; renderStep(); };
         }
         else if (stepIndex === 3) {
-            loadManifestStep();
+            document.getElementById('btn-drill-choice-upload').onclick = () => { currentStep = 4; renderStep(); };
+            document.getElementById('btn-drill-choice-zero').onclick = () => { currentStep = 5; renderStep(); };
         }
         else if (stepIndex === 4) {
+             const session = getSession();
+             const projectId = session.active_project_id || session.project_id;
+             showManifestUpload(document.getElementById('drill-manifest-upload-container'), null);
+             document.getElementById('btn-drill-back-choice').onclick = () => { currentStep = 3; renderStep(); };
+        }
+        else if (stepIndex === 5) {
+            renderInferenceStep();
+        }
+        else if (stepIndex === 6) {
             loadForgedScreens();
         }
     }
@@ -381,6 +422,12 @@
                 formData.append('filename', file.name);
                 const res = await fetch('/api/import/upload', { method: 'POST', body: formData });
                 if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
+                
+                // M354: Architecture Extract par écran (fire-and-forget)
+                fetch('/api/imports/extract-tokens', { method: 'POST', headers: { 'X-User-Token': getSession().token || '' } })
+                    .then(() => fetch('/api/imports/infer-intent', { method: 'POST', headers: { 'X-User-Token': getSession().token || '' } }))
+                    .catch(() => {}); // silenscieux
+                
                 uploaded++;
             } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; return; }
         }
@@ -416,84 +463,101 @@
 
     async function triggerTokenExtraction() {
         try {
-            await fetch('/api/imports/extract-tokens', { method: 'POST' });
+            const session = getSession();
+            await fetch('/api/imports/extract-tokens', {
+                method: 'POST',
+                headers: { 'X-User-Token': session.token || '' }
+            });
         } catch(e) {
             console.warn('[WsStitchDrill] Token extraction failed:', e);
         }
     }
 
-    async function loadManifestStep() {
-        const section = document.getElementById('drill-manifest-section');
-        if (!section) return;
+    async function renderInferenceStep() {
+        const container = document.getElementById('drill-inference-container');
+        if (!container) return;
 
         try {
             const session = getSession();
             const projectId = session.active_project_id || session.project_id;
+            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                headers: { 'X-User-Token': session.token || '' }
+            });
+            const m = res.ok ? await res.json() : {};
+            const intent = m.intent_inference || null;
 
-            if (!projectId) {
-                showManifestUpload(section, 'projet non trouvé dans la session');
-                return;
+            if (!intent) {
+                 container.innerHTML = `
+                    <div class="bg-[#f8fafc] border border-[#e5e5e5] rounded-[16px] p-8 text-center">
+                        <div class="w-8 h-8 border-4 border-[#8cc63f] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <div class="text-[14px] text-[#3d3d3c] font-bold">Analyse Sullivan en cours...</div>
+                        <div class="text-[12px] text-[#9a9a98] mt-1">Extraction des signaux visuels de tes écrans</div>
+                    </div>
+                 `;
+                 setTimeout(() => renderInferenceStep(), 3000);
+                 return;
             }
 
-            const res = await fetch(`/api/projects/${projectId}/manifest`);
+            container.innerHTML = `
+                <div class="bg-[#f8fafc] border-2 border-[#8cc63f] rounded-[24px] p-6 text-left animate-in zoom-in duration-500">
+                    <div class="text-[11px] font-bold text-[#8cc63f] uppercase tracking-widest mb-3">Intelligence Sullivan</div>
+                    <div class="text-[18px] font-black text-[#3d3d3c] mb-1">${intent.archetype}</div>
+                    <div class="text-[13px] text-[#3d3d3c] leading-relaxed mb-4">${intent.description}</div>
+                    <div class="space-y-2 pt-4 border-t border-[#8cc63f]/20">
+                        <div class="text-[12px] text-[#9a9a98]">ambiance : <span class="text-[#3d3d3c] font-bold">${intent.mood.join(', ')}</span></div>
+                        <div class="text-[12px] text-[#9a9a98]">sections : <span class="text-[#3d3d3c] font-bold">${intent.suggested_sections.join(', ')}</span></div>
+                    </div>
+                </div>
+            `;
 
-            if (res.ok) {
-                const m = await res.json();
-                const hasContent = m.raw_content || m.description || m.archetype || (m.screens && m.screens.length > 0);
+            document.getElementById('btn-drill-back-to-choice').onclick = () => { currentStep = 3; renderStep(); };
+            document.getElementById('btn-drill-confirm-inference').onclick = () => createFromZero(intent, session);
 
-                if (!hasContent) {
-                    showManifestUpload(section);
-                } else {
-                    // Fetch design tokens too
-                    let tokensHtml = '';
-                    try {
-                        const tokenRes = await fetch('/api/imports/design-tokens');
-                        const tokenData = await tokenRes.json();
-                        const tokens = tokenData.tokens || {};
-                        const palette = tokens.colors?.palette || [];
-                        if (palette.length > 0) {
-                            tokensHtml = `
-                                <div class="mt-3 pt-3 border-t border-[#e5e5e5]">
-                                    <div class="text-[9px] font-bold text-[#9a9a98] uppercase tracking-wider mb-2">tokens extraits des écrans</div>
-                                    <div class="flex gap-1 flex-wrap">
-                                        ${palette.map(c => `<div class="w-6 h-6 rounded-[4px] border border-[#e5e5e5] cursor-pointer" style="background:${c}" title="${c}"></div>`).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    } catch(e) {}
-
-                    const name = m.name || 'Sans titre';
-                    const desc = m.description || m.raw_content || '';
-                    const archetype = m.archetype?.label || m.archetype || 'Studio HoméOS';
-                    const finalScreenCount = Math.max((m.screens || []).length, screenCount);
-
-                    section.innerHTML = `
-                        <div class="success-badge bg-white border-2 border-[#8cc63f] rounded-[16px] p-5 mb-5 text-left text-[13px] text-[#3d3d3c] relative shadow-md">
-                            <div class="absolute -top-3 -right-3 w-8 h-8 bg-[#8cc63f] rounded-full flex items-center justify-center text-white shadow-lg">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            </div>
-                            <div class="text-[10px] font-bold text-[#8cc63f] uppercase tracking-widest mb-1">Manifeste Validé</div>
-                            <div class="font-bold text-[15px] mb-1">${name}</div>
-                            ${desc ? '<div class="text-[#9a9a98] mb-3 text-[12px] leading-relaxed">' + desc.substring(0, 150) + '...</div>' : ''}
-                            <div class="flex gap-4 text-[11px] text-[#9a9a98] font-medium">
-                                <span class="bg-[#f7f6f2] px-2 py-0.5 rounded-full">Projet: ${archetype}</span>
-                                <span class="bg-[#f7f6f2] px-2 py-0.5 rounded-full">Écrans: ${finalScreenCount}</span>
-                            </div>
-                            ${tokensHtml}
-                        </div>
-                    `;
-                    _finishButton(section);
-                }
-            } else {
-                showManifestUpload(section);
-            }
-        } catch(e) {
-            showManifestUpload(section, 'Erreur: ' + e.message);
-        }
+        } catch(e) { container.innerHTML = "Erreur de chargement d'inférence."; }
     }
 
-    function showManifestUpload(section, errorMsg) {
+    async function loadManifestStep() {
+        // Obsolete dans le flow linéaire, mais gardée pour compatibilité si besoin
+    }
+
+    async function createFromZero(intent, session) {
+        if (!intent) {
+            alert("Sullivan n'a pas encore fini l'analyse. Patiente quelques secondes...");
+            return;
+        }
+
+        const projectId = session.active_project_id || session.project_id;
+        const payload = {
+            name: "Nouveau Projet",
+            description: intent.description,
+            archetype: intent.archetype,
+            screens: intent.suggested_sections.map(s => ({ name: s, intent: s })),
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            const res = await fetch(`/api/projects/${projectId}/manifest`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                container.innerHTML = `
+                    <div class="success-badge bg-[#8cc63f]/10 border-2 border-[#8cc63f] rounded-[24px] p-8 text-center animate-in zoom-in">
+                        <div class="w-12 h-12 bg-[#8cc63f] rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div class="text-[18px] font-black text-[#3d3d3c] mb-1">Intention validée !</div>
+                        <div class="text-[13px] text-[#9a9a98] mb-6">Sullivan a configuré ton manifest editor.</div>
+                        <div id="drill-final-zone-zero"></div>
+                    </div>
+                `;
+                _finishButton(document.getElementById('drill-final-zone-zero'));
+            }
+        } catch(e) { alert("erreur lors de la création"); }
+    }
+
+    function showManifestUpload(section, existingManifest, errorMsg) {
         section.innerHTML = `
             <div class="p-6 border-2 border-dashed border-[#e5e5e5] rounded-[20px] hover:border-[#8cc63f] transition-all cursor-pointer" id="drill-manifest-upload-zone">
                 <div class="text-[26px] mb-2">↑</div>
@@ -502,6 +566,7 @@
                 <input type="file" id="drill-manifest-input" class="hidden" accept=".json,.md,.txt">
             </div>
             <div id="drill-manifest-status" class="mt-3 text-[12px] text-[#9a9a98]"></div>
+            <div id="drill-merge-zone" class="mt-4 hidden"></div>
             ${errorMsg ? '<div class="mt-2 text-[12px] text-[#d44]">' + errorMsg + '</div>' : ''}
         `;
 
@@ -512,12 +577,11 @@
         zone.onclick = () => input.click();
         zone.ondragover = (e) => { e.preventDefault(); zone.style.borderColor = '#8cc63f'; };
         zone.ondragleave = () => { zone.style.borderColor = '#e5e5e5'; };
-        zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status); };
-        input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status); };
-        _finishButton(section);
+        zone.ondrop = (e) => { e.preventDefault(); zone.style.borderColor = '#e5e5e5'; if (e.dataTransfer.files.length) uploadManifest(e.dataTransfer.files[0], status, existingManifest); };
+        input.onchange = () => { if (input.files.length) uploadManifest(input.files[0], status, existingManifest); };
     }
 
-    async function uploadManifest(file, statusEl) {
+    async function uploadManifest(file, statusEl, existingManifest) {
         try {
             const text = await file.text();
             const session = getSession();
@@ -528,18 +592,55 @@
             } else {
                 payload = { name: file.name.replace(/\.(md|txt)$/i, ''), description: text.substring(0, 500), raw_content: text, screens: [] };
             }
-            const res = await fetch(`/api/projects/${projectId}/manifest`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            });
-            if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
-            statusEl.innerHTML = `
-                <div class="success-badge flex items-center justify-center gap-2 text-[#8cc63f] font-bold py-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    <span>ADN du projet sauvegardé !</span>
-                </div>
-            `;
-            loadManifestStep(); // Pour afficher le bloc validé
+
+            // M354: Proposer la fusion si inférence disponible
+            const intent = existingManifest ? existingManifest.intent_inference : null;
+            if (intent) {
+                const mergeZone = document.getElementById('drill-merge-zone');
+                if (mergeZone) {
+                    mergeZone.classList.remove('hidden');
+                    mergeZone.innerHTML = `
+                        <div class="p-4 bg-[#8cc63f]/10 border border-[#8cc63f]/30 rounded-[12px] flex items-center justify-between gap-3 animate-in zoom-in">
+                            <div class="text-[12px] text-[#6a9a2f]">fusionner avec l'inférence Sullivan ?</div>
+                            <button id="btn-drill-merge" class="px-4 py-1.5 bg-[#8cc63f] text-white rounded-[8px] text-[11px] font-bold">fusionner</button>
+                        </div>
+                    `;
+                    document.getElementById('btn-drill-merge').onclick = async () => {
+                        // Fusion simple : ajouter les suggested_sections si absentes
+                        const currentScreens = (payload.screens || []).map(s => s.intent || s.name);
+                        intent.suggested_sections.forEach(sec => {
+                            if (!currentScreens.includes(sec)) {
+                                payload.screens = payload.screens || [];
+                                payload.screens.push({ name: sec, intent: sec });
+                            }
+                        });
+                        payload.archetype = payload.archetype || intent.archetype;
+                        payload.description = payload.description || intent.description;
+                        await saveAndRefresh(projectId, payload, session, statusEl);
+                    };
+                }
+            }
+
+            await saveAndRefresh(projectId, payload, session, statusEl);
+
         } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; }
+    }
+
+    async function saveAndRefresh(projectId, payload, session, statusEl) {
+        const res = await fetch(`/api/projects/${projectId}/manifest`, {
+            method: 'PUT', headers: { 'X-User-Token': session.token || '', 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
+        statusEl.innerHTML = `
+            <div class="success-badge flex flex-col items-center justify-center gap-4 text-[#8cc63f] font-bold py-6">
+                <div class="flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span class="text-[16px]">Manifeste synchronisé !</span>
+                </div>
+                <div id="drill-final-zone-upload"></div>
+            </div>
+        `;
+        _finishButton(document.getElementById('drill-final-zone-upload'));
     }
 
     async function loadForgedScreens() {

@@ -27,7 +27,7 @@
 
     /**
      * Calcule la position relative (X, Y) du curseur dans un textarea.
-     * Utilise un div miroir invisible pour calculer la hauteur du texte.
+     * Exporté pour ManifestSullivan.
      */
     function getCaretCoordinates(element, position) {
         const div = document.createElement('div');
@@ -157,85 +157,11 @@
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(saveManifestDeferred, 1000);
         updateSignets();
-        updateSullivanPosition();
-    }
-
-    // --- SULLIVAN (Contextual floating chat) ---
-    async function sendSullivanMessage() {
-        const msg = els.sullivanInput.value.trim();
-        if (!msg) return;
-
-        // Context line
-        const caretPos = els.editor.selectionStart;
-        const textBefore = els.editor.value.substring(0, caretPos);
-        const currentLine = textBefore.split('\n').pop() || '';
-
-        appendBubble(msg, 'user');
-        els.sullivanInput.value = '';
-
-        const pending = appendBubble('analyse...', 'sullivan');
-        pending.classList.add('opacity-50', 'italic');
-
-        try {
-            const session = getSession();
-            const res = await fetch('/api/sullivan/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-User-Token': session.token || ''
-                },
-                body: JSON.stringify({
-                    message: msg,
-                    mode: 'manifest_assist',
-                    project_id: (manifestData && manifestData.project_id) || null,
-                    context: `L'utilisateur travaille sur le manifest. Ligne actuelle : "${currentLine}"\nManifest complet :\n${els.editor.value}`
-                })
-            });
-            const data = await res.json();
-            pending.remove();
-            if (!res.ok) {
-                appendBubble(`erreur serveur (${res.status}) : ${data.detail || JSON.stringify(data)}`, 'sullivan');
-            } else if (data.explanation) {
-                appendBubble(data.explanation, 'sullivan');
-            } else if (data.reply) {
-                appendBubble(data.reply, 'sullivan');
-            } else {
-                appendBubble(`réponse inattendue : ${JSON.stringify(data)}`, 'sullivan');
-            }
-        } catch(e) {
-            pending.remove();
-            appendBubble('Erreur de communication.', 'sullivan');
-        }
-    }
-
-    function appendBubble(text, sender) {
-        const b = document.createElement('div');
-        b.className = `p-2 rounded-lg text-[14px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
-        if (sender === 'sullivan') {
-            b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
-        } else {
-            b.innerText = text;
-        }
-        els.sullivanHist.appendChild(b);
-        els.sullivanHist.scrollTop = els.sullivanHist.scrollHeight;
-        return b;
+        if (window.ManifestSullivan) window.ManifestSullivan.updatePosition();
     }
 
     function updateSullivanPosition() {
-        if (!els.editor || !els.sullivanBox) return;
-        
-        const pos = els.editor.selectionStart;
-        const coords = getCaretCoordinates(els.editor, pos);
-        
-        // Calculer l'offset Y en retranchant le scroll de la zone parente de l'editeur
-        let targetY = coords.top - els.editorWrap.scrollTop;
-        
-        // Contraindre Sullivan pour ne pas sortir de l'ecran (padding 40px en haut, bottom constraint)
-        const maxY = els.editorWrap.clientHeight - els.sullivanBox.offsetHeight - 20;
-        targetY = Math.max(0, Math.min(targetY, maxY));
-        
-        // Animation fluide
-        els.sullivanBox.style.transform = `translateY(${targetY}px)`;
+        if (window.ManifestSullivan) window.ManifestSullivan.updatePosition();
     }
 
     // --- SIGNETS (TOC) ---
@@ -351,6 +277,9 @@
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse shrink-0"></div>
                             <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?"
                                    class="flex-1 border-none bg-transparent text-[15px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
+                            <button id="manifest-sullivan-reanalyze" class="p-1 text-slate-300 hover:text-[#8cc63f] transition-colors" title="Relancer la critique HCI">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h5M20 20v-5h-5M4 13a8.1 8.1 0 0015.4 3M20 11a8.1 8.1 0 00-15.4-3"/></svg>
+                            </button>
                         </div>
 
                         <!-- HISTORY -->
@@ -457,9 +386,16 @@
         els.sullivanInput.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                sendSullivanMessage();
+                if (window.ManifestSullivan) window.ManifestSullivan.sendSullivanMessage();
             }
         };
+        
+        const reanalyzeBtn = document.getElementById('manifest-sullivan-reanalyze');
+        if (reanalyzeBtn) {
+            reanalyzeBtn.onclick = () => {
+                if (window.ManifestSullivan) window.ManifestSullivan.launchCritique();
+            };
+        }
 
         // Drag Header
         const handle = document.getElementById('manifestbox-handle');
@@ -514,14 +450,41 @@
         panel.style.display = 'flex';
         await loadManifest();
 
-        const hasManifest = manifestData && (manifestData.raw_content || manifestData.description);
+        const content = (manifestData.raw_content || manifestData.description || '').trim();
+        const hasManifest = manifestData && content.length > 10;
 
         if (hasManifest) {
-            els.editor.value = manifestData.raw_content || manifestData.description || '';
-            analyzeManifestQuestions();
+            els.editor.value = content;
+            if (window.ManifestSullivan) {
+                window.ManifestSullivan.init({
+                    chatEl: els.sullivanHist,
+                    inputEl: els.sullivanInput,
+                    editorEl: els.editor,
+                    sullivanBoxEl: els.sullivanBox,
+                    editorWrapEl: els.editorWrap,
+                    getSession: getSession,
+                    getManifestText: () => els.editor.value,
+                    getDesignTokens: () => manifestData && manifestData.design_tokens,
+                    applyManifest: (text) => { els.editor.value = text; onTextChange(); }
+                });
+                window.ManifestSullivan.launchCritique();
+            }
         } else {
-            els.editor.value = '# Analyse en cours...\n\nJe regarde les tokens extraits de tes écrans...';
-            inferFromTokens();
+            els.editor.value = content || '# mon manifeste\n\n';
+            if (window.ManifestSullivan) {
+                window.ManifestSullivan.init({
+                    chatEl: els.sullivanHist,
+                    inputEl: els.sullivanInput,
+                    editorEl: els.editor,
+                    sullivanBoxEl: els.sullivanBox,
+                    editorWrapEl: els.editorWrap,
+                    getSession: getSession,
+                    getManifestText: () => els.editor.value,
+                    getDesignTokens: () => manifestData && manifestData.design_tokens,
+                    applyManifest: (text) => { els.editor.value = text; onTextChange(); }
+                });
+                window.ManifestSullivan.appendBubble("c'est vide par ici ! commence par décrire ton projet ou tes intentions pour que je puisse t'aider.", "sullivan");
+            }
         }
 
         updateSignets();
@@ -529,53 +492,24 @@
         els.editor.focus();
     }
 
-    async function inferFromTokens() {
-        try {
-            const session = getSession();
-            const projectId = session.active_project_id || session.project_id;
-            if (!projectId) return;
-            const res = await fetch('/api/manifest/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
-                body: JSON.stringify({ project_id: projectId })
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.proposed_content) els.editor.value = data.proposed_content;
-            if (data.questions && data.questions.length > 0) {
-                addSullivanBubble("Voilà ce que je crois avoir compris de ce que tu veux faire, d'après tes écrans. Ai-je raison ? Corrige-moi.");
-                data.questions.forEach((q, i) => { setTimeout(() => addSullivanBubble(q), (i+1) * 800); });
-            }
-        } catch(e) { console.warn('[ManifestBox] Token inference failed:', e); }
-    }
+    function updateSideSummary(text) {
+        const el = document.getElementById('manifest-summary-content');
+        if (!el) return;
 
-    async function analyzeManifestQuestions() {
-        try {
-            const session = getSession();
-            const projectId = session.active_project_id || session.project_id;
-            if (!projectId) return;
-            const res = await fetch('/api/manifest/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
-                body: JSON.stringify({ project_id: projectId })
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.questions && data.questions.length > 0) {
-                addSullivanBubble("J'ai lu ton manifeste. Quelques questions pour mieux cerner ton intention :");
-                data.questions.forEach((q, i) => { setTimeout(() => addSullivanBubble(q), (i+1) * 800); });
-            }
-        } catch(e) { console.warn('[ManifestBox] Analysis failed:', e); }
-    }
+        if (!text || text.trim() === '') {
+            el.innerHTML = '<span class="italic opacity-50">manifeste vide...</span>';
+            return;
+        }
 
-    function addSullivanBubble(text) {
-        const hist = document.getElementById('manifest-sullivan-hist');
-        if (!hist) return;
-        const div = document.createElement('div');
-        div.className = 'p-2 rounded-lg text-[14px] bg-[#f7f6f2] self-start border border-[#e5e5e5] max-w-[90%]';
-        div.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">S.</span>${text}`;
-        hist.appendChild(div);
-        hist.scrollTop = hist.scrollHeight;
+        let summary = text
+            .replace(/^#+\s+/gm, '')
+            .split('\n')
+            .filter(line => line.trim().length > 0)
+            .slice(0, 3)
+            .join(' / ');
+
+        if (summary.length > 120) summary = summary.substring(0, 117) + '...';
+        el.innerText = summary.toLowerCase();
     }
 
     /**
@@ -603,7 +537,7 @@
     }
 
     // API Publique
-    window.ManifestBox = { show, hide, toggle, showForProject };
+    window.ManifestBox = { show, hide, toggle, showForProject, getCaretCoordinates };
     
     // Initialisation automatique du résumé latéral (M292B)
     document.addEventListener('DOMContentLoaded', async () => {
