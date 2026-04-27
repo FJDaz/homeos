@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from loguru import logger
@@ -661,8 +661,9 @@ class ImportGenRequest(BaseModel):
 
 @router.post("/generate-from-svg")  # Alias compatibilité M118
 @router.post("/generate-from-import")
-async def generate_from_import(req: ImportGenRequest):
+async def generate_from_import(req: ImportGenRequest, request: Request):
     """Déclenche la conversion asynchrone de l'import (SVG ou ZIP) en Tailwind — avec ForgeTrace."""
+    token = request.headers.get("X-User-Token")
     job_id = f"job_{datetime.now().strftime('%H%M%S')}"
     _SVG_JOBS[job_id] = {"status": "running", "template_name": None, "error": None, "trace": None}
 
@@ -671,7 +672,7 @@ async def generate_from_import(req: ImportGenRequest):
         import unicodedata
         import base64
 
-        p_path = get_active_project_path()
+        p_path = get_active_project_path(token)
         imports_dir = p_path / "imports"
         index_path = imports_dir / "index.json"
 

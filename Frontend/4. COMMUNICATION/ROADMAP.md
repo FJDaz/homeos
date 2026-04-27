@@ -59,11 +59,65 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOIT ê
 | M358 | Sullivan ME — Droits écriture manifest (apply suggestion) | ✅ TERMINÉE | GEMINI |
 | M359 | WsProjectPanel : session impersonation + projects source | ✅ TERMINÉE | GEMINI |
 | M360 | WsStitchDrill : guard content-aware | ✅ TERMINÉE | GEMINI |
+| M361 | WsForge : ajouter X-User-Token sur forgeScreen() | 🔴 CRITIQUE | GEMINI |
 | M350 | Vue "Live Watch" (Drill Status Polling) | 🟠 À TRAITER | GEMINI |
 | M351 | Notation Automatique par Référentiel | 🟠 À TRAITER | CLAUDE |
 
 
 ---
+
+---
+
+---
+
+## Thème 41 — Forge Student Auth
+
+### M361 — WsForge.js : ajouter X-User-Token sur forgeScreen()
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: 🔴 CRITIQUE | FICHIER UNIQUE: WsForge.js**
+
+```
+BOOTSTRAP GEMINI OBLIGATOIRE :
+1. SCOPE STRICT — modifier UNIQUEMENT l'appel fetch dans forgeScreen(). Rien d'autre.
+2. Ne pas changer la structure du job, le polling, WsForgeMonitor, etc.
+3. RÈGLE LIVRAISON — tester la forge sur un écran d'élève avant de marquer TERMINÉ.
+```
+
+**Problème :**
+`forgeScreen(importId)` dans `WsForge.js` appelle `POST /api/retro-genome/generate-from-import`
+sans header `X-User-Token`. Le backend utilise alors le projet actif du serveur (admin) au lieu
+du projet de l'élève → "Import not found".
+
+Le backend a été corrigé (routes.py accepte maintenant le token), mais le frontend ne l'envoie pas encore.
+
+**Fichier :** `Frontend/3. STENCILER/static/js/workspace/WsForge.js`
+
+**Fix — remplacer le fetch dans forgeScreen() :**
+```js
+// AVANT :
+const res = await fetch('/api/retro-genome/generate-from-import', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ import_id: importId })
+});
+
+// APRÈS :
+const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+const res = await fetch('/api/retro-genome/generate-from-import', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-User-Token': session.token || ''
+    },
+    body: JSON.stringify({ import_id: importId })
+});
+```
+
+**Aussi — bumper le ?v= de WsForge.js dans workspace.html :**
+- Ligne actuelle : `WsForge.js?v=298`
+- Nouvelle valeur : `WsForge.js?v=361`
+
+**Test de validation :**
+Élève connecté avec des écrans → clic forge → job démarre → résultat visible en < 30s (pas "Import not found").
 
 ---
 
