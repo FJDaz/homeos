@@ -178,26 +178,36 @@ async def extract_tokens_background(project_id: str):
     imports_dir = PROJECTS_DIR / project_id / "imports"
     if not imports_dir.exists(): return
 
-    # 1. Collecter les écrans (max 6, triés par date/dossier)
-    screens = []
-    for day_dir in sorted(imports_dir.iterdir()):
+    # 1. Collecter les écrans — 1 par nom de base, newest day + newest file first
+    import re as _re
+    all_files = []
+    for day_dir in sorted(imports_dir.iterdir(), reverse=True):
         if day_dir.is_dir():
-            for f in sorted(day_dir.iterdir()):
+            for f in sorted(day_dir.iterdir(), reverse=True):
                 if f.is_file() and f.suffix.lower() in SUPPORTED:
-                    screens.append(f)
+                    all_files.append(f)
+    seen_bases = set()
+    screens = []
+    for f in all_files:
+        base = _re.sub(r'^IMPORT_', '', f.name)
+        base = _re.sub(r'_\d{6}(\.\w+)$', r'\1', base)
+        if base not in seen_bases:
+            seen_bases.add(base)
+            screens.append(f)
     screens = screens[:6]
     if not screens: return
 
     # 2. Charger l'état
     manifest_path = PROJECTS_DIR / project_id / "manifest.json"
     manifest = _load_manifest(manifest_path)
-    pipeline = manifest.setdefault("intent_pipeline", {
+    pipeline = manifest.get("intent_pipeline") or {
         "processed_screens": [],
         "seed_intent": None,
         "accumulated_intents": [],
         "reconciled": False
-    })
-    processed = set(pipeline["processed_screens"])
+    }
+    manifest["intent_pipeline"] = pipeline
+    processed = set(pipeline.get("processed_screens") or [])
     global_tokens = manifest.get("design_tokens") or {"colors": [], "typography": [], "mood": [], "spacing": "équilibré", "layout": "libre"}
 
     # 3. Boucle incrémentale
