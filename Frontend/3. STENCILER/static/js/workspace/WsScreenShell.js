@@ -115,6 +115,10 @@ class WsScreenShell {
             iframe.src = item.dist_url;
         } else if (item.html_template) {
             iframe.src = `/api/frd/file?name=${encodeURIComponent(item.html_template)}&raw=1`;
+        } else if (item.type === 'png' && item.file_path) {
+            // M368: Affichage du PNG brut sur le canvas
+            const imgUrl = `/api/projects/${item.project_id}/imports/${item.file_path}`;
+            iframe.srcdoc = `<html><body style="margin:0;padding:0;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${imgUrl}" style="max-width:100%;max-height:100%;object-fit:contain;display:block;"></body></html>`;
         }
         fo.appendChild(iframe);
         g.appendChild(fo);
@@ -239,11 +243,144 @@ class WsScreenShell {
         forgeOverlay.appendChild(wrap);
 
         forgeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-        forgeBtn.addEventListener('click', (e) => {
+        forgeBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            window.wsForge?.forgeScreen(item.id, g, forgeOverlay);
+            await WsScreenShell._forgeWithImageGate(item, g, forgeOverlay);
         });
         g.appendChild(forgeOverlay);
+    }
+
+    static async _forgeWithImageGate(item, shell, overlay) {
+        // 1. Résoudre token (impersonation-safe)
+        const sess = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}').token
+            ? JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}')
+            : JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        const token = sess.token || '';
+
+        // 2. Lire le manifest frais du projet actif
+        let imageAssets = [];
+        try {
+            const ar = await fetch('/api/projects/active', { headers: { 'X-User-Token': token } });
+            const ap = await ar.json();
+            if (ap.id) {
+                const mr = await fetch(`/api/projects/${ap.id}/manifest`, { headers: { 'X-User-Token': token } });
+                const manifest = await mr.json();
+                imageAssets = manifest?.design_tokens?.image_assets || [];
+            }
+        } catch(_) {}
+
+        // 3. Si pas d'assets → forge directe, pas de gate
+        if (!imageAssets.length) {
+            window.wsForge?.forgeScreen(item.id, shell, overlay);
+            return;
+        }
+
+        // 4. Afficher la gate modal
+        const decisions = {};
+        const modal = document.createElement('div');
+        modal.id = 'forge-image-gate';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+        const box = document.createElement('div');
+        box.style.cssText = 'background:#fff;border-radius:16px;padding:24px;max-width:480px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.18);display:flex;flex-direction:column;gap:16px;max-height:80vh;overflow-y:auto; font-family: "Source Sans 3", sans-serif;';
+
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:14px;font-weight:700;color:#3d3d3c;';
+        title.textContent = `${imageAssets.length} illustration${imageAssets.length > 1 ? 's' : ''} détectée${imageAssets.length > 1 ? 's' : ''} — que fait-on ?`;
+        box.appendChild(title);
+
+        imageAssets.forEach((asset, i) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:10px;background:#f7f6f2;border:1px solid #e5e5e5;';
+
+            const img = document.createElement('img');
+            img.src = asset.specimen_url || '';
+            img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e5e5e5;flex-shrink:0;';
+            row.appendChild(img);
+
+            const right = document.createElement('div');
+            right.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex:1;';
+
+            const desc = document.createElement('div');
+            desc.style.cssText = 'font-size:12px;color:#64748b;font-style:italic;';
+            desc.textContent = (asset.description || `illustration ${i + 1}`).toLowerCase();
+            right.appendChild(desc);
+
+            const btns = document.createElement('div');
+            btns.style.cssText = 'display:flex;gap:6px;';
+
+            ['tenter en vecteur', 'aplatir en image'].forEach(label => {
+                const val = label.includes('vecteur') ? 'vector' : 'png';
+                const b = document.createElement('button');
+                b.style.cssText = 'padding:4px 10px;border-radius:8px;font-size:12px;border:1px solid #e5e5e5;background:#fff;cursor:pointer;transition:all 0.15s; color: #3d3d3c;';
+                b.textContent = label;
+                b.dataset.val = val;
+                b.dataset.idx = String(i);
+                b.onclick = () => {
+                    decisions[i] = val;
+                    btns.querySelectorAll('button').forEach(x => {
+                        x.style.background = '#fff';
+                        x.style.color = '#3d3d3c';
+                        x.style.borderColor = '#e5e5e5';
+                        x.style.fontWeight = 'normal';
+                    });
+                    b.style.background = '#8cc63f';
+                    b.style.color = '#fff';
+                    b.style.borderColor = '#8cc63f';
+                    b.style.fontWeight = '700';
+                };
+                btns.appendChild(b);
+            });
+            right.appendChild(btns);
+            row.appendChild(right);
+            box.appendChild(row);
+        });
+
+        const footer = document.createElement('div');
+        footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:4px;';
+
+        const skipBtn = document.createElement('button');
+        skipBtn.style.cssText = 'padding:8px 16px;border-radius:10px;font-size:13px;border:1px solid #e5e5e5;background:#fff;cursor:pointer; color: #3d3d3c;';
+        skipBtn.textContent = 'ignorer et forger';
+        skipBtn.onclick = () => { modal.remove(); window.wsForge?.forgeScreen(item.id, shell, overlay); };
+
+        const goBtn = document.createElement('button');
+        goBtn.style.cssText = 'padding:8px 20px;border-radius:10px;font-size:13px;font-weight:700;border:none;background:#3d3d3c;color:#fff;cursor:pointer;';
+        goBtn.textContent = 'forger avec ces choix';
+        goBtn.onclick = async () => {
+            modal.remove();
+            // Écrire les décisions dans le manifest (format lisible par la forge)
+            try {
+                const ar2 = await fetch('/api/projects/active', { headers: { 'X-User-Token': token } });
+                const ap2 = await ar2.json();
+                if (ap2.id) {
+                    const mr2 = await fetch(`/api/projects/${ap2.id}/manifest`, { headers: { 'X-User-Token': token } });
+                    const manifest2 = await mr2.json();
+                    let text = manifest2.raw_content || manifest2.description || '';
+                    imageAssets.forEach((asset, i) => {
+                        const val = decisions[i];
+                        if (!val) return;
+                        const line = val === 'png'
+                            ? `${(asset.description || `illustration ${i+1}`).toLowerCase()} : garder png`
+                            : `${(asset.description || `illustration ${i+1}`).toLowerCase()} : tenter vecteurs`;
+                        if (!text.includes(line)) text = line + '\n' + text;
+                    });
+                    manifest2.raw_content = text;
+                    await fetch(`/api/projects/${ap2.id}/manifest`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-User-Token': token },
+                        body: JSON.stringify(manifest2)
+                    });
+                }
+            } catch(_) {}
+            window.wsForge?.forgeScreen(item.id, shell, overlay);
+        };
+
+        footer.appendChild(skipBtn);
+        footer.appendChild(goBtn);
+        box.appendChild(footer);
+        modal.appendChild(box);
+        document.body.appendChild(modal);
     }
 }
 

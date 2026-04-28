@@ -485,6 +485,15 @@ def get_active_project_id(token: str = None):
                             ).fetchone()
                             if row and row[0]:
                                 return row[0]
+                            # Fallback: user_id = "student_<id>" — lookup by students.id
+                            if user_id.startswith('student_'):
+                                s_id = user_id[len('student_'):]
+                                row = con.execute(
+                                    "SELECT project_id FROM students WHERE id = ?",
+                                    (s_id,)
+                                ).fetchone()
+                                if row and row[0]:
+                                    return row[0]
                         
                         # Si prof JWT — chercher active_project_id dans users
                         row = con.execute(

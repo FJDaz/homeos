@@ -22,6 +22,14 @@ class WsWire {
         this.init();
     }
 
+    _getSession() {
+        try {
+            const isImp = new URLSearchParams(window.location.search).get('impersonate') === '1';
+            const imp = isImp ? JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}') : {};
+            return imp.token ? imp : JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        } catch(e) { return {}; }
+    }
+
     init() {
         if (this.btnCadrage) {
             this.btnCadrage.onclick = () => this._openCadrage();
@@ -51,13 +59,19 @@ class WsWire {
                 this.btnApplyPlan.classList.add('animate-pulse');
 
                 try {
-                    const projectRes = await fetch('/api/projects/active');
+                    const token = this._getSession().token || '';
+                    const projectRes = await fetch('/api/projects/active', {
+                        headers: { 'X-User-Token': token }
+                    });
                     const project = await projectRes.json();
 
                     // --- MISSION 185 : PRE-WIRE CHECK ---
                     const preRes = await fetch(`/api/projects/${project.id}/pre-wire`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-User-Token': token
+                        },
                         body: JSON.stringify({ screen_html: screen.srcdoc })
                     });
                     const preData = await preRes.json();
@@ -168,7 +182,10 @@ class WsWire {
         if (footer) footer.classList.add('hidden');
 
         try {
-            const projectRes = await fetch('/api/projects/active');
+            const token = this._getSession().token || '';
+            const projectRes = await fetch('/api/projects/active', {
+                headers: { 'X-User-Token': token }
+            });
             const project = await projectRes.json();
             this._projectId = project.id;
 
@@ -178,7 +195,10 @@ class WsWire {
             const screen_html = screen?.srcdoc || iframe?.contentDocument?.documentElement?.outerHTML || '';
             const preRes = await fetch(`/api/projects/${project.id}/pre-wire`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Token': token
+                },
                 body: JSON.stringify({ screen_html })
             });
             const preData = await preRes.json();
@@ -230,8 +250,8 @@ class WsWire {
                         <h3 class="text-[#3d3d3c] font-bold text-xs tracking-widest uppercase italic" style="font-family: 'Source Sans 3', sans-serif;">Cadrage Global</h3>
                         <p class="text-[#3d3d3c]/50 text-[11px] tracking-widest uppercase">${checkedCount} / ${totalCount} Organes Validés par Sullivan</p>
                     </div>
-                    <button onclick="window.wsWire._openCadrage()" class="px-4 py-2 border border-[#e5e5e5] text-[#3d3d3c]/50 hover:text-[#3d3d3c] hover:bg-slate-50 text-[11px] font-bold uppercase tracking-widest transition-colors" style="border-radius: 0px;">
-                        Cadrage LLM
+                    <button onclick="window.wsWire.hide(); window.ManifestBox?.show();" class="px-4 py-2 border border-[#e5e5e5] text-[#3d3d3c]/50 hover:text-[#3d3d3c] hover:bg-slate-50 text-[11px] font-bold uppercase tracking-widest transition-colors" style="border-radius: 0px;">
+                        retour manifeste
                     </button>
                 </div>
 
@@ -398,9 +418,13 @@ class WsWire {
         iframe?.contentWindow.postMessage({ type: 'clear-highlights' }, '*');
 
         try {
+            const token = this._getSession().token || '';
             const res = await fetch(`/api/projects/${this._projectId}/pre-wire/validate`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Token': token
+                },
                 body: JSON.stringify({ validations: this._validations })
             });
             const data = await res.json();
@@ -435,9 +459,13 @@ class WsWire {
         `;
 
         try {
+            const token = this._getSession().token || '';
             const res = await fetch(`/api/projects/${projectId}/wire-apply`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Token': token
+                },
                 body: JSON.stringify({ 
                     screen_id: window.wsCanvas.activeScreenId,
                     screen_html: html,
@@ -560,11 +588,17 @@ class WsWire {
         };
         this._drawPermanentWire(trigger, target);
         try {
-            const projectRes = await fetch('/api/projects/active');
+            const token = this._getSession().token || '';
+            const projectRes = await fetch('/api/projects/active', {
+                headers: { 'X-User-Token': token }
+            });
             const projectData = await projectRes.json();
             await fetch(`/api/projects/${projectData.id}/wires`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Token': token
+                },
                 body: JSON.stringify(wire)
             });
         } catch (err) { console.error(err); }

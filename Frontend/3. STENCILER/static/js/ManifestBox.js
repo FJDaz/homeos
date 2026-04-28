@@ -183,7 +183,7 @@
                 const pos = positionInStr;
                 
                 const btn = document.createElement('button');
-                btn.className = `text-left w-full truncate py-1 hover:text-homeos-green transition-colors ${level === 1 ? 'font-bold text-[#3d3d3c] text-[13px] mt-2' : level === 2 ? 'text-[12px] text-slate-500 pl-2' : 'text-[11px] text-slate-400 pl-4'}`;
+                btn.className = `text-left w-full truncate py-1 hover:text-homeos-green transition-colors ${level === 1 ? 'font-bold text-[#3d3d3c] text-[15px] mt-2' : level === 2 ? 'text-[14px] text-slate-500 pl-2' : 'text-[13px] text-slate-400 pl-4'}`;
                 btn.innerText = title;
                 btn.onclick = () => {
                     els.editor.focus();
@@ -202,7 +202,7 @@
         });
 
         if (count === 0) {
-            els.signetsList.innerHTML = '<span class="text-slate-300 italic">Aucun chapitre (#, ##)...</span>';
+            els.signetsList.innerHTML = '<span class="text-slate-300 italic text-[13px]">Aucun chapitre (#, ##)...</span>';
         }
     }
 
@@ -314,7 +314,7 @@
                 <!-- SIGNETS COL -->
                 <div id="manifest-signets-col" class="w-[250px] bg-[#fcfaf7] border-left border-white shadow-[-5px_0_15px_rgba(0,0,0,0.02)] flex flex-col transition-all duration-300 shrink-0 z-30 relative">
                     <div class="h-[40px] px-3 flex items-center justify-between border-b border-[#f0eee4] bg-[#fcfaf7]">
-                        <span id="manifest-signets-title" class="text-[11px] font-bold uppercase tracking-widest text-slate-400">chapitres (toc)</span>
+                        <span id="manifest-signets-title" class="text-[13px] font-bold uppercase tracking-widest text-slate-400">chapitres (toc)</span>
                         <button id="manifest-signets-toggle" class="p-1 rounded-md text-slate-400 hover:bg-slate-100 transition-colors">
                             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>

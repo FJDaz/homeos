@@ -178,8 +178,9 @@
 
         container.innerHTML = '';
 
-        const subjects = projects.filter(p => p.type === 'subject');
-        const personal = projects.filter(p => p.type === 'personal');
+        const isInClass = !!(session.class_id);
+        const subjects = isInClass ? projects : projects.filter(p => p.type === 'subject');
+        const personal = isInClass ? [] : projects.filter(p => p.type === 'personal');
 
         // Sinon : Affichage par sections
         if (subjects.length > 0 || (session.role === 'prof' || session.role === 'teacher' || session.role === 'admin' || session.role === 'student')) {
@@ -342,15 +343,22 @@
             const sEl = document.createElement('div');
             sEl.className = 'group flex items-center justify-between p-2 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer';
             
+            const thumbUrl = screen.file_path
+                ? `/api/projects/${projectId}/imports/${screen.file_path}`
+                : null;
+
             sEl.innerHTML = `
-                <span class="text-[12px] font-medium text-slate-500 group-hover:text-slate-700 truncate">${screen.name}</span>
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex items-center gap-2 min-w-0">
+                    ${thumbUrl ? `<img src="${thumbUrl}" class="w-[48px] h-[36px] rounded-[4px] object-cover shrink-0 border border-[#f0eee4]" loading="lazy">` : '<div class="w-[48px] h-[36px] rounded-[4px] bg-slate-100 shrink-0"></div>'}
+                    <span class="text-[12px] font-medium text-slate-500 group-hover:text-slate-700 truncate">${screen.name}</span>
+                </div>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <button class="btn-s-open p-1 text-slate-300 hover:text-homeos-green"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg></button>
                 </div>
             `;
             sEl.onclick = (e) => {
                 e.stopPropagation();
-                if (window.wsCanvas) window.wsCanvas.addScreen(screen);
+                if (window.wsCanvas) window.wsCanvas.addScreen({ ...screen, project_id: projectId });
             };
             list.appendChild(sEl);
         });

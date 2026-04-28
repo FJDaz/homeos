@@ -245,15 +245,24 @@ async def extract_tokens_background(project_id: str):
         _save_manifest(manifest_path, manifest)
         logger.info(f"[M356] design_tokens sauvegardés pour {screen_rel_path}")
 
-        # 3e. Seed Intent (si c'est le premier) — non-bloquant, best-effort
+        # 3e. Seed Intent (si c'est le premier) — fire-and-forget via thread séparé
+        # asyncio.wait_for() dans un thread daemon ne cancelle pas fiablement les appels httpx → on isole
         if not pipeline["seed_intent"]:
-            try:
-                seed = await asyncio.wait_for(infer_seed_intent(tokens), timeout=20.0)
-                if seed:
-                    pipeline["seed_intent"] = seed
-                    manifest["intent_inference"] = seed
-            except Exception:
-                logger.warning("[M356] Seed intent ignoré (timeout ou erreur)")
+            def _run_seed(tok, pid, mpath):
+                import asyncio as _asyncio
+                try:
+                    seed = _asyncio.run(infer_seed_intent(tok))
+                    if seed:
+                        m = _load_manifest(mpath)
+                        m["intent_pipeline"] = m.get("intent_pipeline") or {}
+                        m["intent_pipeline"]["seed_intent"] = seed
+                        m["intent_inference"] = seed
+                        _save_manifest(mpath, m)
+                        logger.info(f"[M356] Seed intent sauvegardé pour {pid}")
+                except Exception as ex:
+                    logger.warning(f"[M356] Seed intent ignoré: {ex}")
+            import threading
+            threading.Thread(target=_run_seed, args=(tokens, project_id, manifest_path), daemon=True).start()
         
         _archive_design_md(project_id, global_tokens)
         logger.info(f"[M356] Progress saved for {screen_rel_path}")

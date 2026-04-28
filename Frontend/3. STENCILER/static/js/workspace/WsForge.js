@@ -19,9 +19,13 @@ class WsForge {
         say('forge démarrée — analyse sémantique en cours...');
 
         try {
+            const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const res = await fetch('/api/retro-genome/generate-from-import', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Token': session.token || ''
+                },
                 body: JSON.stringify({ import_id: importId })
             });
             if (!res.ok) throw new Error(`${res.status}`);
@@ -66,7 +70,7 @@ class WsForge {
                         try {
                             await fetch(`/api/imports/${importId}`, {
                                 method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
                                 body: JSON.stringify({ html_template: job.template_name, type: 'html', archetype_id: job.archetype || 'stitch_import' })
                             });
                             // Refresh imports list
@@ -106,6 +110,7 @@ class WsForge {
                         }
                     } else if (job.status === 'failed') {
                         clearInterval(poll);
+                        sessionStorage.removeItem('active_forge');
                         if (statusEl) statusEl.textContent = `échec : ${job.error}`;
                         if (btn) { btn.disabled = false; btn.textContent = 'réessayer'; }
                         say(`forge échouée : ${job.error}`);

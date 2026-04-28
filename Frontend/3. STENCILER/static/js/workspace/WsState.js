@@ -14,7 +14,9 @@
 
     var session = {};
     try {
-        session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        var _isImp = new URLSearchParams(window.location.search).get('impersonate') === '1';
+        var _imp = _isImp ? JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}') : {};
+        session = (_imp.token ? _imp : JSON.parse(localStorage.getItem('homeos_session') || '{}'));
     } catch(e) {
         console.error('[WsState] session parse error:', e);
     }

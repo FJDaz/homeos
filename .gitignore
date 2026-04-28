@@ -99,3 +99,34 @@ projects/
 # Venvs supplémentaires
 .venv_veille/
 
+# AETHERFLOW — Sécurité Hygiène (Audit 2026-04-24)
+=*
+server.log
+archives/scripts_legacy/
+
+# Sécurité — clés et configs locales sensibles
+.mcp.json
+.claude/
+.claude-flow/
+.cursor/
+
+# Bases de données Stenciler (données élèves)
+Frontend/3. STENCILER/db/
+
+# Index RAG backups (lourds, régénérables)
+rag_index_bkp_*/
+Frontend/3. STENCILER/rag_index_bkp_*/
+
+# Scripts orphelins racine (outils locaux, non-versionnables)
+af
+ga
+gr1
+r1
+chat
+code
+groq-r1.py
+super_diag.py
+test_extract.py
+start.sh
+scripts/
+

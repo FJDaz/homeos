@@ -9267,3 +9267,78 @@ Synchronisation avec le curseur de l'éditeur pour un positionnement flottant co
 - Frontend/3. STENCILER/static/js/ManifestBox.js (refactoring)
 - Frontend/3. STENCILER/static/templates/workspace.html (inclusion script)
 
+
+---
+
+## Thème 41 — Forge Student Auth
+
+### M361 — WsForge.js : ajouter X-User-Token sur forgeScreen()
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: ✅ TERMINÉE**
+
+**CR — Mission M361 (WsForge Multi-Tenant)**
+- Ajout du header `X-User-Token` dans l'appel `POST /api/retro-genome/generate-from-import`.
+- Récupération sécurisée de la session via `localStorage`.
+- Bumper de version `v=361` appliqué dans `workspace.html`.
+- **Résultat** : La forge est désormais isolée par étudiant, garantissant que Sullivan travaille sur le bon projet même en environnement mutualisé.
+
+---
+
+## Thème 42 — Student Panel : sémantique Sujet vs Projet
+
+### M362 — WsProjectPanel : sémantique Sujet vs Projet
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: ✅ TERMINÉE**
+
+### CR — Mission M362 (Student Panel Semantics)
+- Modification de `render()` dans `WsProjectPanel.js` :
+    - Si `session.class_id` est présent : tous les projets (`_projects`) sont basculés dans `subjects`.
+    - Si `session.class_id` est absent : filtrage classique par `p.type`.
+- Bumper de version `v=362` appliqué dans `workspace.html`.
+- **Résultat** : Cohérence sémantique pour les élèves en classe — leurs travaux sont des "Sujets", pas des "Projets Personnels".
+
+---
+
+## Thème 40 — Student Flow : Drill Guard + Project Panel
+
+### M359 — WsProjectPanel : session impersonation + projects source
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: ✅ TERMINÉE**
+
+### CR — Mission M359 (WsProjectPanel)
+- `render()` utilise désormais `_getSession()` (impersonation-aware).
+- Source de données basculée sur `_projects` (variable locale peuplée par `refresh()`).
+- `fetchProjectScreens` inclut désormais le token `X-User-Token` pour autoriser la lecture des écrans.
+- **Résultat** : L'affichage des projets est fluide en mode prof->élève.
+
+### M360 — WsStitchDrill : guard content-aware
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: ✅ TERMINÉE**
+
+### CR — Mission M360 (WsStitchDrill)
+- `show()` devient `async` et effectue un check via `/api/retro-genome/imports` avant affichage.
+- Si le projet actif contient des écrans, le drill est passé (`Skipping — student has X screen(s)`).
+- Persistance du drill par clic manuel sur le bouton "+" préservée.
+- **Résultat** : Suppression de l'interruption intrusive au chargement du workspace pour les élèves avancés.
+
+---
+
+## Thème 39 — Sullivan Manifest Editor
+
+### M358 — Sullivan ME : droits écriture manifest (apply suggestion)
+**ACTOR: GEMINI | MODE: CODE DIRECT | STATUS: ✅ TERMINÉE**
+
+**CR — Mission M358**
+*   **Backend API (`sullivan_router.py`)**: Implémentation de `POST /api/sullivan/manifest-apply`.
+*   **Frontend Logic (`ManifestSullivan.js`)**: Ajout d'un bouton "appliquer" par carte de suggestion.
+*   **Editor Integration (`ManifestBox.js`)**: Injection de la callback `applyManifest` pour mettre à jour l'éditeur en temps réel.
+*   **Résultat** : Workflow d'édition bi-directionnel entre la critique AI et le manifest opérationnel.
+
+---
+
+### M352 — CR (Compte-Rendu)
+**STATUS: ✅ TERMINÉE | ACTOR: GEMINI**
+- **Async Fix** : Passage de `extract_design_tokens` en `async def` dans `import_router.py`. La tâche de fond `extract_tokens_background` est maintenant invoquée proprement via le loop principal de FastAPI, prévenant les blocages d'event loop.
+- **Archivage** : Déplacement du fichier legacy `design.md` (racine) vers `docs/04_Archives/design_stitch_legacy.md`. La Constitution (`Frontend/1. CONSTITUTION/DESIGN.md`) est désormais l'unique source de vérité stylistique.
+
+### M353 — CR (Compte-Rendu)
+**STATUS: ✅ TERMINÉE | ACTOR: GEMINI**
+- **Inférence HCI** : Nouvelle route `POST /api/imports/infer-intent` implémentée.
+- **Sullivan Bridge** : Utilisation de `GeminiClient` pour transformer les design tokens bruts (palette hex, typo, spacing) en intention structurée (archétype, humeur, sections suggérées).
+- **Persistance Manifeste** : Les résultats sont sauvegardés dans `manifest.json["intent_inference"]`, permettant une pré-configuration intelligente du projet avant même que l'élève ne commence à câbler.

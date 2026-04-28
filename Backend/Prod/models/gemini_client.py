@@ -139,7 +139,9 @@ class GeminiClient(BaseLLMClient):
         cache_params: Optional[Dict[str, Any]] = None,
         output_constraint: Optional[str] = None,
         system_prompt: Optional[str] = None,
-        use_search: bool = False
+        use_search: bool = False,
+        image_base64: Optional[str] = None,
+        mime_type: Optional[str] = None
     ) -> GenerationResult:
         """
         Generate code/text from a prompt with automatic fallback cascade.
@@ -162,13 +164,20 @@ class GeminiClient(BaseLLMClient):
         # Build full prompt
         full_prompt = self._build_prompt(prompt, context, output_constraint)
 
-        # Prepare request for Gemini API format
+        # Prepare request for Gemini API format (multimodal support)
+        parts = [{"text": full_prompt}]
+        if image_base64 and mime_type:
+            parts.append({
+                "inlineData": {
+                    "mimeType": mime_type,
+                    "data": image_base64
+                }
+            })
+
         request_data = {
             "contents": [
                 {
-                    "parts": [
-                        {"text": full_prompt}
-                    ]
+                    "parts": parts
                 }
             ],
             "generationConfig": {

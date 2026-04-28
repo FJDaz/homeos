@@ -807,8 +807,31 @@ Règles :
         # Nettoyer éventuel wrapping markdown
         raw = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
         parsed = json.loads(raw)
+        questions = parsed.get("questions", [])
+        
+        # --- MISSION M367 : Une question par asset illustratif (max 4) ---
+        image_assets = design_tokens.get("image_assets", [])
+        if image_assets:
+            # On génère une question par asset (max 4)
+            # On utilise directement la description de l'asset (déjà en FR via Gemini Vision)
+            for i, asset in enumerate(image_assets[:4]):
+                questions.insert(i, {
+                    "id": f"img_q_{i}",
+                    "type": "image_choice",
+                    "text": asset.get("description", f"illustration {i+1}"),
+                    "specimen": asset  # UN seul specimen désormais
+                })
+        else:
+            # Aucun asset détecté encore — injecter un déclencheur visible
+            questions.append({
+                "id": "img_q",
+                "type": "image_trigger",
+                "text": "tes illustrations n'ont pas encore été analysées. lance l'analyse pour arbitrer leur rendu.",
+                "specimens": []
+            })
+
         return {
-            "questions": parsed.get("questions", []),
+            "questions": questions,
             "suggestions": parsed.get("suggestions", [])
         }
 
