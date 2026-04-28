@@ -408,7 +408,7 @@ def pre_wire_validate(project_id: str, req: PreWireValidateRequest, request: Req
         manifest["screens"] = [{"id": "workspace", "corps": [{"id": "main", "organes": []}]}]
 
     organs = manifest["screens"][0]["corps"][0]["organes"]
-    pending = manifest.get("pending_intents", [])
+    pending = manifest.get("pending_intents") or []
 
     count = 0
     for val in req.validations:

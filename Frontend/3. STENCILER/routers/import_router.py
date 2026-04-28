@@ -13,7 +13,7 @@ logger = logging.getLogger("ImportRouter")
 CWD = Path(__file__).parent.parent.resolve()
 ROOT_DIR = CWD.parent.parent
 STATIC_DIR_PATH = CWD / "static"
-PROJECTS_DIR = CWD / "projects"
+PROJECTS_DIR = ROOT_DIR / "projects"
 
 router = APIRouter()
 
@@ -348,9 +348,11 @@ def import_patch(import_id: str, request: Request, body: dict = Body(...)):
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.json not found")
 
+    import unicodedata
+    import_id_nfc = unicodedata.normalize("NFC", import_id)
     index_data = json.loads(index_path.read_text(encoding="utf-8"))
     imports = index_data.get("imports", [])
-    entry = next((i for i in imports if i.get("id") == import_id), None)
+    entry = next((i for i in imports if unicodedata.normalize("NFC", i.get("id", "")) == import_id_nfc), None)
     if not entry:
         raise HTTPException(status_code=404, detail=f"Import {import_id} not found")
 
@@ -427,14 +429,27 @@ def asset_list(request: Request):
 
 
 @router.get("/api/projects/assets/img/{filename}")
-def asset_serve(filename: str, request: Request):
-    """M236: Sert une image du projet."""
+def asset_serve(filename: str, request: Request, project_id: str = None):
+    """M236: Sert une image du projet. project_id en query param prioritaire (les <img> n'envoient pas X-User-Token)."""
     from fastapi.responses import FileResponse
-    token = request.headers.get("X-User-Token")
-    assets_dir = get_assets_dir(token)
-    file_path = assets_dir / filename
+    if project_id:
+        file_path = PROJECTS_DIR / project_id / "assets" / "img" / filename
+    else:
+        token = request.headers.get("X-User-Token")
+        assets_dir = get_assets_dir(token)
+        file_path = assets_dir / filename
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Image non trouvée")
+    return FileResponse(str(file_path))
+
+
+@router.get("/api/projects/{project_id}/imports/{date}/{filename}")
+def serve_import_file(project_id: str, date: str, filename: str):
+    """M368: Sert un fichier importé (PNG/SVG) pour l'affichage dans le workspace."""
+    from fastapi.responses import FileResponse
+    file_path = PROJECTS_DIR / project_id / "imports" / date / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Import non trouvé")
     return FileResponse(str(file_path))
 
 
@@ -467,8 +482,9 @@ async def extract_design_tokens(request: Request):
         logger.info(f"[M354-Optim] Extraction already in progress for {active_id}, skipping.")
         return {"status": "already_running", "project_id": active_id}
 
+    _ACTIVE_EXTRACTIONS.add(active_id)  # Guard BEFORE thread spawn to prevent race
+
     def run_in_thread(pid):
-        _ACTIVE_EXTRACTIONS.add(pid)
         try:
             asyncio.run(extract_tokens_background(pid))
         except Exception as e:
