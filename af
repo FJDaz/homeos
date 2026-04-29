@@ -1,0 +1,4 @@
+#!/bin/bash
+PROJECT_DIR="/Users/francois-jeandazin/AETHERFLOW"
+cd "$PROJECT_DIR"
+./venv/bin/python3 scripts/af.py "$@"

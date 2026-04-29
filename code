@@ -1,0 +1,80 @@
+#!/bin/bash
+# Raccourci AetherFlow pour Llama 3.3 Versatile (Heavy Coding)
+PROJECT_DIR="/Users/francois-jeandazin/AETHERFLOW"
+cd "$PROJECT_DIR"
+
+# On crée une version temporaire du script avec injection de LLAMA.md
+cat <<EOF > groq-versatile.py
+import os, json, requests, sys
+from pathlib import Path
+from dotenv import load_dotenv
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.live import Live
+from rich.prompt import Prompt
+
+load_dotenv(dotenv_path=Path("$PROJECT_DIR/.env"))
+API_URL = "https://api.groq.com/openai/v1/chat/completions"
+MODEL = "llama-3.3-70b-versatile"
+API_KEY = os.getenv("GROQ_API_KEY")
+console = Console()
+
+def chat():
+    # INJECTION DE L'IDENTITÉ
+    role_content = ""
+    try:
+        role_content = Path("$PROJECT_DIR/LLAMA.md").read_text(encoding='utf-8')
+    except:
+        role_content = "Tu es un ingénieur de production sur le projet AetherFlow."
+
+    console.print("[bold blue]🦙 LLAMA 3.3 VERSATILE ACTIF[/bold blue] (Identité chargée)")
+    
+    # On initialise l'historique avec le rôle système
+    history = [{"role": "system", "content": role_content}]
+
+    # M302 : Injection du contexte des fichiers
+    files_context = ""
+    for path_str in sys.argv[1:]:
+        p = Path(path_str)
+        if p.exists() and p.is_file():
+            try:
+                content = p.read_text(encoding='utf-8')
+                files_context += f"=== FICHIER : {path_str} ===\n{content}\n\n"
+            except Exception as e:
+                console.print(f"[bold red]Erreur lecture {path_str}[/bold red]: {e}")
+        else:
+            console.print(f"[bold yellow]Fichier ignoré (introuvable ou dossier) : {path_str}[/bold yellow]")
+
+    if files_context:
+        history.append({"role": "user", "content": f"Voici le contenu des fichiers cibles pour cette mission :\n\n{files_context}Prends-en connaissance avant que je ne te pose ma première question."})
+        console.print(f"[bold green]✓ {len(sys.argv[1:])} fichier(s) injecté(s) dans le contexte[/bold green]")
+
+    while True:
+
+        try:
+            u = Prompt.ask("\n[bold blue]CODE ❯[/bold blue]")
+            if u.lower() in ["exit", "quit"]: break
+            history.append({"role": "user", "content": u})
+            full = ""
+            console.print()
+            with Live(console=console, refresh_per_second=10) as live:
+                r = requests.post(API_URL, headers={"Authorization": f"Bearer {API_KEY}"}, 
+                                 json={"model": MODEL, "messages": history, "stream": True}, stream=True)
+                for line in r.iter_lines():
+                    if line:
+                        line_str = line.decode('utf-8')
+                        if line_str.startswith('data: '):
+                            data_str = line_str[6:].strip()
+                            if data_str == "[DONE]": break
+                            try:
+                                delta = json.loads(data_str)['choices'][0]['delta'].get('content', '')
+                                full += delta
+                                live.update(Markdown(full))
+                            except: continue
+            history.append({"role": "assistant", "content": full})
+        except KeyboardInterrupt: break
+if __name__ == "__main__": chat()
+EOF
+
+python3 groq-versatile.py "$@"
+rm groq-versatile.py

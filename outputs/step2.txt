@@ -1,3 +1,0 @@
-Step: step2
-Description: This is the second step
-Output: Output of step 2

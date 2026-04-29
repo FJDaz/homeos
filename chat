@@ -1,0 +1,9 @@
+#!/bin/bash
+# Raccourci Rapide DeepSeek V3 (Chat)
+PROJECT_DIR="/Users/francois-jeandazin/AETHERFLOW"
+cd "$PROJECT_DIR"
+# On force le modèle chat au lieu de reasoner via une variable temporaire
+sed -i '' 's/MODEL = "deepseek-reasoner"/MODEL = "deepseek-chat"/' ds-r1.py
+python3 ds-r1.py "$@"
+# On remet reasoner par défaut après
+sed -i '' 's/MODEL = "deepseek-chat"/MODEL = "deepseek-reasoner"/' ds-r1.py

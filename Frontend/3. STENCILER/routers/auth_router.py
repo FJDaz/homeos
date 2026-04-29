@@ -45,7 +45,52 @@ if _USE_SUPABASE:
 # Only classes/students go through Supabase
 _USE_SUPABASE_FOR_USERS = False
 
+# --- RBAC CONSTANTS (Inlined from rbac_middleware.py) ---
+PLAN_LIMITS = {
+    "FREE": {
+        "max_projects": 3,
+        "ai_models": ["qwen", "llama", "gemini-flash-lite"],
+        "stitch": False,
+        "byok": False,
+        "monthly_tokens": 50_000,
+        "max_screens_per_upload": 4
+    },
+    "PRO": {
+        "max_projects": 20,
+        "ai_models": ["*"],
+        "stitch": True,
+        "byok": True,
+        "monthly_tokens": 500_000,
+        "max_screens_per_upload": 20
+    },
+    "MAX": {
+        "max_projects": 999,
+        "ai_models": ["*"],
+        "stitch": True,
+        "byok": True,
+        "monthly_tokens": None,
+        "max_screens_per_upload": 100
+    },
+}
+
+def resolve_entitlements(plan: str, role: str) -> Dict[str, Any]:
+    """Résout les droits d'un utilisateur selon son plan et son rôle."""
+    effective_plan = plan
+    if role in ["admin", "prof"] and plan == "FREE":
+        effective_plan = "PRO"
+    
+    limits = PLAN_LIMITS.get(effective_plan, PLAN_LIMITS["FREE"])
+    
+    entitlements = {
+        **limits,
+        "is_teacher": role in ["admin", "prof"],
+        "can_manage_classes": role in ["admin", "prof"],
+        "effective_plan": effective_plan
+    }
+    return entitlements
+
 router = APIRouter(prefix="/api")
+
 
 # --- PATHS ---
 CWD = Path(__file__).parent.parent.resolve()
@@ -481,8 +526,7 @@ def auth_register(req: RegisterRequest):
             plan="FREE", workspace_id=workspace_id
         )
 
-    # M283a: Resolve entitlements for the response
-    from .rbac_middleware import resolve_entitlements
+    # M283a: Resolve entitlements for the response (Inlined)
     resp.entitlements = resolve_entitlements(resp.plan, resp.role)
 
     # M298: Write FK link for students (write once)
@@ -662,8 +706,7 @@ def auth_me(request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    # M283a: Resolve entitlements
-    from .rbac_middleware import resolve_entitlements
+    # M283a: Resolve entitlements (Inlined)
     user_id = user[0]
     role = user[2]
 
@@ -742,18 +785,20 @@ async def get_key_helper(provider: str):
     Mission 192: Retourne l'URL officielle de création de clé API.
     Utilise le cache actualisé au démarrage du serveur (TTL 24h).
     """
-    from routers.api_key_urls import load_cached_urls
-    urls = load_cached_urls()
+    # Fallback static URLs if api_key_urls is deleted
+    verified_urls = {
+        "gemini": "https://aistudio.google.com/app/apikey",
+        "groq": "https://console.groq.com/keys",
+        "openai": "https://platform.openai.com/api-keys",
+        "deepseek": "https://platform.deepseek.com/api-keys",
+        "qwen": "https://account.alibabacloud.com/login/login.htm",
+        "kimi": "https://platform.moonshot.cn/console/api-keys",
+        "mimo": "https://openrouter.ai/keys",
+        "watson": "https://cloud.ibm.com/catalog/services/watsonx-ai",
+    }
     provider_lower = provider.lower()
-
-    if provider_lower in urls:
-        return urls[provider_lower]
-
-    # Fallback: trigger a refresh for this provider
-    from routers.api_key_urls import refresh_all_urls
-    urls = await refresh_all_urls()
-    if provider_lower in urls:
-        return urls[provider_lower]
+    if provider_lower in verified_urls:
+        return {"url": verified_urls[provider_lower]}
     raise HTTPException(status_code=404, detail=f"Provider '{provider}' URL not found")
 
 

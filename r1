@@ -1,0 +1,14 @@
+#!/bin/bash
+# Raccourci AetherFlow pour DeepSeek R1 (v2.1)
+
+# Chemin absolu du projet
+PROJECT_DIR="/Users/francois-jeandazin/AETHERFLOW"
+cd "$PROJECT_DIR"
+
+# Activation de l'environnement virtuel si présent
+if [ -d "venv" ]; then
+    source venv/bin/activate
+fi
+
+# Lancement du script interactif
+python3 ds-r1.py "$@"

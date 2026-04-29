@@ -560,6 +560,114 @@ static async _forgeWithImageGate(item, shell, overlay) {
 
 > Ce thème concerne la visibilité en temps réel de l'avancement des étudiants et la gestion granulaire des sujets.
 
+### M370 — V4 Clean : suppression du code mort, branche propre pour handoff
+**STATUS: ✅ TERMINÉE | ACTOR: GEMINI**
+
+### CR — Mission M370 (V4 Clean)
+- **Root Cleanup** : Suppression de ~20 scripts legacy et fichiers de test à la racine.
+- **Routers Cleanup** : Suppression des 6 routers inactifs. Inlining des constantes RBAC (PLAN_LIMITS) dans `auth_router.py` pour maintenir la stabilité.
+- **Docs Cleanup** : Suppression des dossiers `docs/` legacy (archives).
+- **Templates Cleanup** : Conservation stricte des 10 templates HTML listés. `brainstorm_war_room.html` renommé en `brainstorm_war_room_tw.html` pour cohérence code.
+- **Architecture Cleanup** : Suppression du dossier `homeos/` (V3).
+- **Validation** : Serveur redémarré, `/api/health` OK, `/api/auth/me` (RBAC) testé OK.
+
+**Contexte**  
+Le repo AETHERFLOW contient environ 1500 fichiers pour ~80 actifs. L'objectif est une branche `v4-clean` git-propre, sans toucher aux imports Python ni à la structure des dossiers actifs. Phase 1 uniquement : supprimer, pas restructurer.
+
+**Ce que Gemini doit faire**
+
+**Étape 0 — Créer la branche**
+```bash
+cd /Users/francois-jeandazin/AETHERFLOW
+git checkout main
+git checkout -b v4-clean
+```
+
+**Étape 1 — Supprimer les fichiers morts à la racine** (`git rm` uniquement les fichiers trackés)
+```bash
+git rm -f groq-r1.py ds-r1.py serve_frontend.py super_diag.py test_extract.py 2>/dev/null || true
+git rm -f active_project.json manifest.json design.md build_trace_poc.py 2>/dev/null || true
+git rm -f "=1.0.9" "=4.43.0" 2>/dev/null || true
+git rm -rf outputs/ 2>/dev/null || true
+# Scripts test Qwen/Kimi :
+git rm -f test_key.py test_kimi_nim.py test_kimi_openrouter.py 2>/dev/null || true
+git rm -f test_qwen3_free.py test_qwen3_next_free.py test_qwen_api.py test_qwen_api_v2.py 2>/dev/null || true
+git rm -f test_qwen_free.py test_qwen_openrouter.py test_qwen_silicon.py 2>/dev/null || true
+git rm -f qwen_cli.py setup_local_qwen.py aether-glm.py aether-r1.py 2>/dev/null || true
+```
+
+**Étape 2 — Supprimer les routers morts** (non montés dans server_v3.py)
+```bash
+git rm -f "Frontend/3. STENCILER/routers/api_key_urls.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/auth_supabase.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/manifest_analyzer.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/model_health.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/rbac_middleware.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/supabase_client.py" 2>/dev/null || true
+git rm -f "Frontend/3. STENCILER/routers/supabase_client.py" 2>/dev/null || true
+```
+
+**Étape 3 — Supprimer les anciens docs trackés** (dossiers docs/ racine déjà archivés)
+```bash
+git rm -rf docs/02_Sullivan/ docs/03_AetherFlow/ docs/04_Archives/ 2>/dev/null || true
+git rm -rf docs/04_HomeOS/ docs/05_Operations/ docs/06_Design_Assets/ 2>/dev/null || true
+git rm -rf docs/07_Guides/ docs/08_Research/ docs/09_Frontend/ 2>/dev/null || true
+git rm -rf docs/00_Core/technique/ 2>/dev/null || true
+```
+
+**Étape 4 — Supprimer les templates HTML legacy** (non routés)
+Les templates actifs (à conserver) sont exactement :
+`login.html`, `workspace.html`, `student_login.html`, `teacher_dashboard.html`,
+`bkd_frd.html`, `cadrage_alt.html`, `cadrage_prof.html`, `frd_editor.html`,
+`brainstorm_war_room_tw.html`, `intent_viewer.html`
+
+Supprimer tout le reste dans `Frontend/3. STENCILER/static/templates/` :
+```bash
+cd "Frontend/3. STENCILER/static/templates/"
+# Lister tous les html, exclure les 10 actifs, git rm le reste
+git ls-files "*.html" | grep -vE "^(login|workspace|student_login|teacher_dashboard|bkd_frd|cadrage_alt|cadrage_prof|frd_editor|brainstorm_war_room_tw|intent_viewer)\.html$" | xargs git rm -f
+cd /Users/francois-jeandazin/AETHERFLOW
+```
+
+**Étape 5 — Supprimer le dossier homeos/ (architecture morte)**
+```bash
+git rm -rf homeos/ 2>/dev/null || true
+```
+
+**Étape 6 — Vérification serveur** (obligatoire avant commit)
+```bash
+cd /Users/francois-jeandazin/AETHERFLOW
+python3 -c "import ast, sys
+import subprocess
+result = subprocess.run(['python3', '-m', 'py_compile', 'Frontend/3. STENCILER/server_v3.py'], capture_output=True)
+print('server_v3 syntax:', 'OK' if result.returncode == 0 else result.stderr.decode())
+"
+curl -s http://localhost:9998/api/health | python3 -c "import sys,json; print('health:', json.load(sys.stdin).get('status'))"
+```
+
+**Étape 7 — Commit et push**
+```bash
+git add -A
+git commit -m "chore(v4-clean): suppression code mort — routers inactifs, docs archivés, templates legacy, homeos/"
+git push -u origin v4-clean
+```
+
+**Règles**
+- Ne toucher à aucun fichier `.py` actif (pas de refactor d'imports)
+- Ne toucher à aucun fichier dans `Frontend/3. STENCILER/routers/` sauf les 6 routers morts listés
+- Ne pas supprimer `Backend/` (trop de dépendances imbriquées à auditer séparément)
+- Si un `git rm` échoue (fichier non tracké) → `|| true`, continuer
+- Le serveur doit répondre `{"status":"ok"}` sur `/api/health` après le commit
+
+**Test de vérification**
+1. `git status` sur `v4-clean` → 0 modified, 0 untracked utiles
+2. `curl http://localhost:9998/api/health` → `status: ok`
+3. Login teacher FJD → dashboard classes visible
+4. Login student Lyse → workspace charge, drill fonctionne
+5. `git log --oneline -3` → commit propre visible
+
+---
+
 ### M350 — Vue "Live Watch" (Drill Status Polling) 
 **STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
 
