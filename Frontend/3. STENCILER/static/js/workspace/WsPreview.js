@@ -34,6 +34,7 @@ class WsPreview {
         const btnOut = document.getElementById('ws-preview-zoom-out');
         const btnClose = document.getElementById('ws-preview-close-btn');
         const btnDownload = document.getElementById('ws-preview-download');
+        const btnSaveFull = document.getElementById('ws-preview-save-full');
 
         if (btnIn) btnIn.onclick = () => this.setZoom(this.previewScale + 0.25);
         if (btnOut) btnOut.onclick = () => this.setZoom(this.previewScale - 0.25);
@@ -41,6 +42,7 @@ class WsPreview {
 
         // M273: Download
         if (btnDownload) btnDownload.onclick = () => this.downloadPreview();
+        if (btnSaveFull) btnSaveFull.onclick = () => this.saveFullPreview();
 
         // Wheel zoom (Ctrl/Cmd + wheel)
         const scrollArea = document.getElementById('ws-preview-scroll-area');
@@ -75,6 +77,66 @@ class WsPreview {
             URL.revokeObjectURL(url);
         } catch(e) {
             alert("Erreur téléchargement: " + e.message);
+        }
+    }
+
+    // M390: Save entire iframe HTML to template file
+    async saveFullPreview() {
+        const btn = document.getElementById('ws-preview-save-full');
+        if (!btn) return;
+
+        const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        if (!iframe || !iframe.contentDocument) return;
+
+        // 1. Récupérer le HTML complet
+        const html = iframe.contentDocument.documentElement.outerHTML;
+
+        // 2. Récupérer le filename depuis l'iframe source (N0)
+        const activeId = window.wsCanvas?.activeScreenId;
+        const shell = activeId ? document.getElementById(activeId) : null;
+        const iframeSource = shell ? shell.querySelector('iframe') : null;
+        
+        let filename = null;
+        if (iframeSource && iframeSource.src) {
+            const url = new URL(iframeSource.src, window.location.origin);
+            filename = url.searchParams.get('name');
+        }
+
+        if (!filename) {
+            alert("Nom de fichier introuvable.");
+            return;
+        }
+
+        const originalText = btn.innerText;
+        btn.innerText = '...';
+        btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/workspace/save-full', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, html })
+            });
+            const data = await resp.json();
+
+            if (data.status === 'success') {
+                btn.innerText = 'ok';
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 1000);
+                
+                // UxRun Log
+                if (window.UxRun) window.UxRun.log('RESULT', 'preview:save:success:' + filename);
+
+                // 4. Répercussion N0 : Refresh de l'iframe source
+                if (iframeSource) {
+                    iframeSource.src = iframeSource.src; // Force reload
+                }
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            btn.innerText = 'err';
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+            if (window.UxRun) window.UxRun.log('FRICTION', 'preview:save:error:' + filename);
         }
     }
 

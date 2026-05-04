@@ -41,8 +41,14 @@ async def extract_tokens_for_screen(image_path: Path) -> dict:
     try:
         image_b64 = base64.b64encode(image_path.read_bytes()).decode()
         prompt = """Analyse cet écran de design étudiant et extrais les design tokens visuels.
-Identifie aussi les régions illustratives (portraits, photos, illustrations, icônes, motifs).
-Réponds UNIQUEMENT en JSON valide, sans balise markdown.
+        
+ÉTABLISSEMENT DES ASSETS (CRITIQUE) :
+Pour CHAQUE élément visuel distinct (illustration, photo, icône, motif ou bloc UI complexe) :
+1. `figuration_score` (0.0 à 1.0) : 1.0 = pur contenu (humain, objet réel, scène) ; 0.0 = pure interface/abstrait (dégradé, forme géométrique, bouton).
+2. `confidence_score` (0.0 à 1.0) : ta certitude sur le détourage.
+3. `description` : Très précise (ex: "portrait homme barbu lunettes jaunes", "icône panier rouge").
+
+Réponds UNIQUEMENT en JSON valide.
 Format attendu :
 {
   "colors": ["#hex1", "#hex2", ...],
@@ -52,15 +58,16 @@ Format attendu :
   "layout": "colonne | grille | libre | asymétrique",
   "image_assets": [
     {
-      "type": "portrait | illustration | photo | icone | motif | fond",
-      "description": "description courte en français (ex: portrait de personnage cartoon)",
-      "count": 1,
-      "is_specimen": true,
+      "type": "portrait | illustration | photo | icone | motif | ui-complex",
+      "description": "description ultra-précise",
+      "figuration_score": 0.85,
+      "confidence_score": 0.9,
       "bbox": [y_min, x_min, y_max, x_max]
     }
   ]
 }
-Note : bbox est en % de 0 à 1000 pour [y_min, x_min, y_max, x_max]. Un seul specimen bbox par TYPE."""
+Note : bbox est en % de 0 à 1000. NE TE LIMITE PAS, extrais tous les éléments figuratifs importants.
+"""
 
         client = GeminiClient(execution_mode="BUILD")
         try:
@@ -112,7 +119,7 @@ async def _process_specimens(project_id: str, screen_path: Path, assets: List[di
         try:
             with Image.open(screen_path) as img:
                 w, h = img.size
-                for asset in assets:
+                for i, asset in enumerate(assets):
                     bbox = asset.get('bbox')
                     if not bbox or len(bbox) != 4: continue
                     
@@ -129,7 +136,7 @@ async def _process_specimens(project_id: str, screen_path: Path, assets: List[di
                     
                     t = asset['type'].replace(' ', '_')
                     screen_slug = screen_path.stem
-                    filename = f"specimen_{t}_{screen_slug}.png"
+                    filename = f"specimen_{t}_{i}_{screen_slug}.png"
                     save_path = assets_dir / filename
                     crop.save(save_path, "PNG")
                     
@@ -141,11 +148,15 @@ async def _process_specimens(project_id: str, screen_path: Path, assets: List[di
     await asyncio.to_thread(process_sync)
     return processed
 
-async def infer_seed_intent(tokens: dict) -> dict:
-    """Transforme les premiers tokens en intention de base (seed)."""
-    prompt = f"""Tu es un expert HCI. À partir de ces tokens design, infère l'intention de base du projet.
-Tokens : {json.dumps(tokens)}
+def _run_seed_intent_sync(tokens: dict) -> dict:
+    """Wrapper synchrone pour infer_seed_intent — safe depuis un thread asyncio.run()."""
+    import requests as _requests
+    from Backend.Prod.config.settings import settings as _settings
+    import json as _json
+    import re as _re
 
+    prompt = f"""Tu es un expert HCI. À partir de ces tokens design, infère l'intention de base du projet.
+Tokens : {_json.dumps(tokens)}
 Réponds UNIQUEMENT en JSON :
 {{
   "archetype": "portfolio | app-outil | site-vitrine | editorial | identite-visuelle",
@@ -153,25 +164,27 @@ Réponds UNIQUEMENT en JSON :
   "mood": ["mot1", "mot2", "mot3"],
   "suggested_sections": ["section1", "section2", "section3"]
 }}"""
-    client = GeminiClient(execution_mode="FAST")
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key={_settings.google_api_key}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": 250, "temperature": 0.3}
+    }
     try:
-        logger.info("[M356] infer_seed_intent: calling Gemini FAST...")
-        res = await asyncio.wait_for(client.generate(prompt=prompt, temperature=0.3, max_tokens=250), timeout=25.0)
-        if res.success:
-            text = re.sub(r'^```ja?son\s*|\s*```$', '', res.code.strip(), flags=re.MULTILINE | re.IGNORECASE)
-            return json.loads(text)
+        resp = _requests.post(url, json=payload, timeout=25)
+        resp.raise_for_status()
+        data = resp.json()
+        text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        # Strip markdown
+        text = _re.sub(r'^```[a-z]*\s*', '', text, flags=_re.IGNORECASE)
+        text = _re.sub(r'\s*```$', '', text)
+        s, e = text.find('{'), text.rfind('}')
+        if s >= 0 and e >= 0:
+            text = text[s:e+1]
+        return _json.loads(text)
+    except Exception as ex:
+        logger.error(f"[M356] Seed intent sync failed: {ex}")
         return {}
-    except asyncio.TimeoutError:
-        logger.error("[M356] Seed intent TIMEOUT (>25s) — skipping")
-        return {}
-    except Exception as e:
-        logger.error(f"[M356] Seed intent failed: {e}")
-        return {}
-    finally:
-        try:
-            await asyncio.wait_for(client.close(), timeout=1.0)
-        except Exception:
-            pass
 
 async def extract_tokens_background(project_id: str):
     """Pipeline incrémental M356 : 1 écran à la fois, avec persistance immédiate."""
@@ -245,16 +258,19 @@ async def extract_tokens_background(project_id: str):
         _save_manifest(manifest_path, manifest)
         logger.info(f"[M356] design_tokens sauvegardés pour {screen_rel_path}")
 
-        # 3e. Seed Intent (si c'est le premier) — non-bloquant, best-effort
+        # 3e. Seed Intent (si c'est le premier) — synchrone pour éviter tout deadlock asyncio dans le thread de fond
         if not pipeline["seed_intent"]:
-            try:
-                seed = await asyncio.wait_for(infer_seed_intent(tokens), timeout=20.0)
-                if seed:
-                    pipeline["seed_intent"] = seed
-                    manifest["intent_inference"] = seed
-            except Exception:
-                logger.warning("[M356] Seed intent ignoré (timeout ou erreur)")
+            logger.info("[M356] infer_seed_intent: calling Gemini FAST...")
+            seed = await asyncio.to_thread(_run_seed_intent_sync, tokens)
+            if seed:
+                pipeline["seed_intent"] = seed
+                manifest["intent_inference"] = seed
+                logger.info(f"[M356] Seed intent set: {seed.get('archetype', '?')}")
+            else:
+                logger.warning("[M356] Seed intent vide — on continue quand même")
         
+        # Sauvegarde systématique APRES seed intent (que seed soit rempli ou non)
+        _save_manifest(manifest_path, manifest)
         _archive_design_md(project_id, global_tokens)
         logger.info(f"[M356] Progress saved for {screen_rel_path}")
 

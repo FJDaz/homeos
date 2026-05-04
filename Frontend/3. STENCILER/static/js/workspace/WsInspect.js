@@ -28,6 +28,7 @@ class WsInspect {
         
         // Controls
         this.saveBtn = document.getElementById('ws-popover-save');
+        this.applyBtn = document.getElementById('ws-popover-apply');
         this.closeBtn = document.getElementById('ws-popover-close');
         this.tagLabel = document.getElementById('ws-popover-tag');
 
@@ -97,6 +98,7 @@ class WsInspect {
 
     setupListeners() {
         if (this.closeBtn) this.closeBtn.onclick = () => this.hide();
+        if (this.applyBtn) this.applyBtn.onclick = () => this.applyGraft();
         if (this.saveBtn) this.saveBtn.onclick = () => this.saveGraft();
         
         if (this.colorClose) this.colorClose.onclick = () => this.hideColor();
@@ -184,7 +186,7 @@ class WsInspect {
     show(data) {
         this.isActive = true; this.currentSelector = data.selector;
         const iframe = document.querySelector('#ws-preview-frame-container iframe');
-        let filename = "index.html"; if (iframe && iframe.src) { const url = new URL(iframe.src, window.location.origin); filename = url.searchParams.get('file') || url.pathname.split('/').pop(); }
+        let filename = "index.html"; if (iframe && iframe.src) { const url = new URL(iframe.src, window.location.origin); filename = url.searchParams.get('file') || url.searchParams.get('name') || url.pathname.split('/').pop(); }
         this.currentFile = filename; this.tagLabel.innerText = data.organName || data.tagName;
         const iframeRect = iframe.getBoundingClientRect();
         let x = iframeRect.left + data.rect.left + data.rect.width + 15; let y = iframeRect.top + data.rect.top;
@@ -383,6 +385,39 @@ class WsInspect {
         });
     }
 
+    async applyGraft() {
+        if (!this.isActive) return;
+        const newHtml = this.editor.getValue();
+        const iframe = document.querySelector('#ws-preview-frame-container iframe');
+        
+        // 1. Preview immédiate (DOM)
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'inspect-update-dom', selector: this.currentSelector, html: newHtml }, '*');
+        }
+
+        // 2. Persistance disque (Graft)
+        const btn = this.applyBtn;
+        const originalText = btn.innerText;
+        btn.innerText = '...'; btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/workspace/graft', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: this.currentFile, selector: this.currentSelector, html_content: newHtml })
+            });
+            const data = await resp.json();
+            if (data.status === 'success') {
+                btn.innerText = 'ok';
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 1000);
+                if (window.UxRun) window.UxRun.log('RESULT', 'graft:success:' + this.currentSelector);
+            } else throw new Error();
+        } catch (err) {
+            btn.innerText = 'err';
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+            if (window.UxRun) window.UxRun.log('FRICTION', 'graft:error:' + this.currentSelector);
+        }
+    }
+
     async saveGraft() {
         if (!this.isActive) return;
         const btn = this.saveBtn; const originalText = btn.innerText; btn.innerText = 'SAVING...'; btn.disabled = true;
@@ -400,12 +435,19 @@ class WsInspect {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: this.currentFile, selector: this.currentSelector, html_content: newHtml })
             });
-            if ((await resp.json()).status === 'success') {
+            const data = await resp.json();
+            if (data.status === 'success') {
                 const iframe = document.querySelector('#ws-preview-frame-container iframe');
                 iframe.contentWindow.postMessage({ type: 'inspect-update-dom', selector: this.currentSelector, html: newHtml }, '*');
                 btn.innerText = 'DONE ✓'; setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
-            } else throw new Error();
-        } catch (err) { btn.innerText = 'ERROR'; setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000); }
+                if (window.UxRun) window.UxRun.log('RESULT', 'graft:success:' + this.currentSelector);
+            } else {
+                throw new Error(data.message || 'Unknown error');
+            }
+        } catch (err) { 
+            btn.innerText = 'ERROR'; setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000); 
+            if (window.UxRun) window.UxRun.log('FRICTION', 'graft:error:' + this.currentSelector);
+        }
     }
     
     clearSelection() {

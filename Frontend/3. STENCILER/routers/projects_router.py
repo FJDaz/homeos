@@ -61,6 +61,8 @@ class ProjectManifest(BaseModel):
     screens: Optional[List] = None
     wires: Optional[List] = None
     pending_intents: Optional[List] = None
+    intent_pipeline: Optional[Dict] = None
+    intent_inference: Optional[Dict] = None
 
 # --- HELPER FUNCTIONS ---
 def slugify(text: str, max_len: int = 30) -> str:
@@ -325,16 +327,27 @@ def get_project_manifest_route(project_id: str):
 
 @router.put("/projects/{project_id}/manifest")
 def update_project_manifest_route(project_id: str, manifest: ProjectManifest):
-    """Met à jour le manifest.json d'un projet."""
+    """Met à jour le manifest.json d'un projet — merge profond pour préserver les champs pipeline."""
     p_path = PROJECTS_DIR / project_id
-    # M277: Create directory if missing (for students with no prior project)
     if not p_path.exists():
         p_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Projects: created directory for {project_id}")
 
-    manifest_data = manifest.model_dump()
-    save_project_manifest(project_id, manifest_data)
-    return {"status": "ok", "manifest": manifest_data}
+    # Charger le manifest existant sur disque
+    manifest_path = p_path / "manifest.json"
+    existing = {}
+    if manifest_path.exists():
+        try:
+            existing = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except Exception:
+            existing = {}
+
+    # Merger : existing d'abord, puis les champs envoyés par le client (non-None seulement)
+    incoming = {k: v for k, v in manifest.model_dump().items() if v is not None}
+    merged = {**existing, **incoming}
+
+    save_project_manifest(project_id, merged)
+    return {"status": "ok", "manifest": merged}
 
 @router.post("/projects/{project_id}/wires")
 def add_project_wire_route(project_id: str, wire: dict = Body(...)):

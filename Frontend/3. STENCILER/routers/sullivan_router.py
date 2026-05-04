@@ -807,9 +807,33 @@ Règles :
         # Nettoyer éventuel wrapping markdown
         raw = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
         parsed = json.loads(raw)
+        questions = parsed.get("questions", [])
+        suggestions = parsed.get("suggestions", [])
+
+        # --- MISSION M385 : Regroupement sémantique par figuration_score ---
+        image_assets = design_tokens.get("image_assets", [])
+        if image_assets:
+            # Trier par score de figuration décroissant
+            sorted_assets = sorted(image_assets, key=lambda x: x.get("figuration_score", 0), reverse=True)
+            for i, asset in enumerate(sorted_assets[:8]):  # On en montre un peu plus si besoin
+                questions.insert(i, {
+                    "id": f"img_q_{i}",
+                    "type": "image_choice",
+                    "text": asset.get("description", f"illustration {i+1}"),
+                    "specimen": asset,
+                    "figuration_score": asset.get("figuration_score", 0.5)
+                })
+        else:
+            questions.append({
+                "id": "img_q",
+                "type": "image_trigger",
+                "text": "tes illustrations n'ont pas encore été analysées. lance l'analyse pour arbitrer leur rendu.",
+                "specimens": []
+            })
+
         return {
-            "questions": parsed.get("questions", []),
-            "suggestions": parsed.get("suggestions", [])
+            "questions": questions,
+            "suggestions": suggestions
         }
 
     except asyncio.TimeoutError:

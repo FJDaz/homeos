@@ -842,6 +842,30 @@ async def generate_from_import(req: ImportGenRequest, request: Request):
                         s5.fail(str(e))
                     design_md = ""
 
+                # Step 6 — Load specimens from manifest (M386)
+                s6_spec = trace.step("load_specimen_urls")
+                try:
+                    manifest_path = p_path / "manifest.json"
+                    if manifest_path.exists():
+                        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+                        image_assets = manifest.get("design_tokens", {}).get("image_assets", [])
+                        specimens = [a for a in image_assets if a.get("specimen_url")]
+                        if specimens:
+                            specimen_block = "\n\nIMAGES RÉELLES DISPONIBLES — utilise ces URLs comme src=\"\" dans les <img>. SI UNE DESCRIPTION NE CORRESPOND PAS EXACTEMENT, UTILISE L'IMAGE LA PLUS PROCHE SÉMANTIQUEMENT :\n"
+                            for spec in specimens:
+                                t = spec.get('type', 'image')
+                                d = spec.get('description', '...')
+                                url = spec.get('specimen_url')
+                                specimen_block += f"- type={t}, description={d}: {url}\n"
+                            design_md += specimen_block
+                            s6_spec.ok(detail=f"{len(specimens)} specimens injected")
+                        else:
+                            s6_spec.ok(detail="No specimens found in manifest")
+                    else:
+                        s6_spec.ok(detail="manifest.json missing")
+                except Exception as e:
+                    s6_spec.fail(str(e))
+
                 s7 = trace.step("llm_vision_conversion")
                 try:
                     html_code = await get_svg_converter().convert_image(img_b64, mime, entry["name"], design_md)

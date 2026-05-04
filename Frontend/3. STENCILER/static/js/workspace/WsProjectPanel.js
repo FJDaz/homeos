@@ -65,6 +65,7 @@
             console.log('[WsProjectPanel] GET /api/projects →', res.status);
             if (!res.ok) return;
             _projects = await res.json();
+            if (window.UxRun) window.UxRun.log('RESULT', `panel:projects:${_projects.length}`);
             console.log('[WsProjectPanel] reçu', _projects.length, 'projet(s):', _projects.map(p => p.name + (p.active ? ' [ACTIF]' : '')).join(', '));
 
             // Filtrer : ne garder que les projets appartenant au user_id de la session
@@ -240,6 +241,8 @@
         
         const btnAdd = h.querySelector('.btn-section-add');
         if (btnAdd && onAdd) {
+            btnAdd.setAttribute('data-ux', 'ACTION');
+            btnAdd.setAttribute('data-ux-label', `section:add:${title}`);
             btnAdd.onclick = (e) => {
                 e.stopPropagation();
                 onAdd();
@@ -257,6 +260,8 @@
         // Header
         const header = document.createElement('div');
         header.className = `flex items-center justify-between p-4 cursor-pointer hover:bg-slate-100/50 transition-colors group`;
+        header.setAttribute('data-ux', 'NAV');
+        header.setAttribute('data-ux-label', `projet:${project.name || project.id}`);
         header.onclick = () => toggleProject(project.id);
 
         header.innerHTML = `
@@ -348,6 +353,8 @@
                     <button class="btn-s-open p-1 text-slate-300 hover:text-homeos-green"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg></button>
                 </div>
             `;
+            sEl.setAttribute('data-ux', 'ACTION');
+            sEl.setAttribute('data-ux-label', `screen:open:${screen.name}`);
             sEl.onclick = (e) => {
                 e.stopPropagation();
                 if (window.wsCanvas) window.wsCanvas.addScreen(screen);

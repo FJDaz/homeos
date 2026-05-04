@@ -163,35 +163,53 @@
         const wrap = document.createElement('div');
         wrap.className = 'flex flex-col gap-2 mt-2';
         
-        questions.forEach(q => {
-            try {
+        // --- MISSION M385: Grouping logic ---
+        const triggerQs = questions.filter(q => q.type === 'image_trigger');
+        const assetQs = questions.filter(q => q.type === 'image_choice');
+        const standardQs = questions.filter(q => q.type !== 'image_choice' && q.type !== 'image_trigger');
+
+        const highFig = assetQs.filter(q => (q.figuration_score || 0) > 0.5);
+        const lowFig = assetQs.filter(q => (q.figuration_score || 0) <= 0.5);
+
+        const renderCard = (q) => {
             const card = document.createElement('div');
             card.className = 'critique-question flex flex-col gap-1 p-2 rounded-[12px] bg-[#f7f6f2] border border-[#e5e5e5] transition-all';
-
+            
             if (q.type === 'image_trigger') {
                 card.innerHTML = `
                     <span class="text-[14px] text-slate-500 italic">${q.text || ''}</span>
                     <button class="btn-img-trigger mt-1 px-3 py-1 rounded-[8px] text-[13px] border border-[#e5e5e5] hover:bg-[#8cc63f]/10 hover:border-[#8cc63f] transition-all self-start">analyser les illustrations</button>
                 `;
                 card.querySelector('.btn-img-trigger').onclick = async () => {
-                    const sess = _refs.getSession ? _refs.getSession() : (JSON.parse(sessionStorage.getItem('homeos_impersonation')||'{}').token ? JSON.parse(sessionStorage.getItem('homeos_impersonation')||'{}') : JSON.parse(localStorage.getItem('homeos_session')||'{}'));
+                    const sess = _refs.getSession();
                     card.querySelector('.btn-img-trigger').textContent = 'analyse en cours...';
                     await fetch('/api/imports/extract-tokens', { method: 'POST', headers: { 'X-User-Token': sess.token || '' } });
                     await new Promise(r => setTimeout(r, 15000));
                     launchCritique();
                 };
             } else if (q.type === 'image_choice') {
-                // M367: Rendu par carte individuelle pour chaque asset
-                if (q.specimen) {
-                    card.innerHTML = `
-                        <span class="text-[14px] text-slate-500 italic">${q.text.toLowerCase()}</span>
-                        <img src="${q.specimen.specimen_url}" class="w-24 h-24 rounded-[8px] object-cover border border-[#e5e5e5] self-start mt-1">
-                        <div class="flex gap-2 mt-1">
-                            <button class="btn-img-choice px-3 py-1 rounded-[8px] text-[13px] border border-[#e5e5e5] hover:bg-[#8cc63f]/10 hover:border-[#8cc63f] transition-all" data-val="png">aplatir en image</button>
-                            <button class="btn-img-choice px-3 py-1 rounded-[8px] text-[13px] border border-[#e5e5e5] hover:bg-[#8cc63f]/10 hover:border-[#8cc63f] transition-all" data-val="vector">tenter en vecteur</button>
+                const isHigh = (q.figuration_score || 0) > 0.5;
+                const rec = isHigh ? 'png' : 'vector';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[13px] text-slate-500 italic">${q.text.toLowerCase()}</span>
+                        <span class="text-[10px] font-bold opacity-30 uppercase tracking-tighter">score: ${Math.round((q.figuration_score||0.5)*100)}%</span>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <img src="${q.specimen ? q.specimen.specimen_url : ''}" class="w-20 h-20 rounded-[8px] object-cover border border-[#e5e5e5] bg-white shrink-0">
+                        <div class="flex flex-col gap-1.5 grow">
+                            <button class="btn-img-choice w-full text-left px-3 py-1.5 rounded-[8px] text-[13px] border border-[#e5e5e5] transition-all ${rec==='png'?'bg-white border-[#8cc63f] border-2 shadow-sm':''}" data-val="png">
+                                <span class="block font-medium">garder en image (png)</span>
+                                <span class="text-[10px] opacity-60">recommandé pour figuratif</span>
+                            </button>
+                            <button class="btn-img-choice w-full text-left px-3 py-1.5 rounded-[8px] text-[13px] border border-[#e5e5e5] transition-all ${rec==='vector'?'bg-white border-[#8cc63f] border-2 shadow-sm':''}" data-val="vector">
+                                <span class="block font-medium">tenter en vecteur (code)</span>
+                                <span class="text-[10px] opacity-60">recommandé pour ui/icons</span>
+                            </button>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
 
                 const btns = card.querySelectorAll('.btn-img-choice');
                 btns.forEach(btn => {
@@ -199,28 +217,21 @@
                         const val = btn.dataset.val;
                         _critiqueAnswers[q.id] = val;
                         
-                        // Style toggle
-                        btns.forEach(b => b.className = 'btn-img-choice px-3 py-1 rounded-[8px] text-[13px] border border-[#e5e5e5] bg-white transition-all');
-                        btn.className = 'btn-img-choice px-3 py-1 rounded-[8px] text-[13px] font-bold bg-[#8cc63f] text-white border-[#8cc63f] transition-all';
+                        btns.forEach(b => b.className = 'btn-img-choice w-full text-left px-3 py-1.5 rounded-[8px] text-[13px] border border-[#e5e5e5] bg-white transition-all');
+                        btn.className = 'btn-img-choice w-full text-left px-3 py-1.5 rounded-[8px] text-[13px] font-bold bg-[#8cc63f] text-white border-[#8cc63f] transition-all';
                         
-                        // Application au manifest (M367: injection ligne par ligne)
+                        const choiceStr = val === 'png' ? `${q.text} : garder png` : `${q.text} : tenter vecteurs`;
                         const manifestText = _refs.getManifestText();
                         let newText = manifestText;
-                        const choiceStr = val === 'png' ? `${q.text} : garder png` : `${q.text} : tenter vecteurs`;
-                        
-                        // Injection intelligente juste après le titre ou au début
                         const regex = new RegExp(`${q.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:\\s*[^\\n]+`);
+                        
                         if (!newText.match(regex)) {
                             if (newText.startsWith('#')) {
                                 const lines = newText.split('\n');
                                 lines.splice(1, 0, choiceStr);
                                 newText = lines.join('\n');
-                            } else {
-                                newText = choiceStr + '\n' + newText;
-                            }
-                        } else {
-                            newText = newText.replace(regex, choiceStr);
-                        }
+                            } else { newText = choiceStr + '\n' + newText; }
+                        } else { newText = newText.replace(regex, choiceStr); }
                         
                         if (_refs.applyManifest) _refs.applyManifest(newText);
                         
@@ -230,21 +241,17 @@
                     };
                 });
             } else {
-                // Rendu standard Oui/Non
                 card.innerHTML = `
                     <span class="text-[14px] text-slate-600">${q.id}. ${(q.text || '').toLowerCase()}</span>
                     <div class="flex gap-2">
-                        <button class="btn-oui px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] hover:bg-[#8cc63f]/10 hover:border-[#8cc63f] transition-all" data-id="${q.id}">oui</button>
-                        <button class="btn-non px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] hover:bg-slate-100 transition-all" data-id="${q.id}">non</button>
+                        <button class="btn-oui px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] hover:bg-[#8cc63f]/10 hover:border-[#8cc63f] transition-all">oui</button>
+                        <button class="btn-non px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] hover:bg-slate-100 transition-all">non</button>
                     </div>
                 `;
-
                 const btnOui = card.querySelector('.btn-oui');
                 const btnNon = card.querySelector('.btn-non');
-
                 const handleAnswer = (val) => {
                     _critiqueAnswers[q.id] = val;
-                    
                     if (val === 'oui') {
                         btnOui.className = 'btn-oui px-3 py-1 rounded-[8px] text-[14px] font-bold bg-[#8cc63f] text-white border-[#8cc63f] transition-all';
                         btnNon.className = 'btn-non px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] bg-white transition-all';
@@ -252,19 +259,40 @@
                         btnNon.className = 'btn-non px-3 py-1 rounded-[8px] text-[14px] font-bold bg-slate-800 text-white border-slate-800 transition-all';
                         btnOui.className = 'btn-oui px-3 py-1 rounded-[8px] text-[14px] border border-[#e5e5e5] bg-white transition-all';
                     }
-
-                    if (Object.keys(_critiqueAnswers).length === questions.length) {
-                        showSuggestions(suggestions, _critiqueAnswers);
-                    }
+                    if (Object.keys(_critiqueAnswers).length === questions.length) showSuggestions(suggestions, _critiqueAnswers);
                 };
-
                 btnOui.onclick = () => handleAnswer('oui');
                 btnNon.onclick = () => handleAnswer('non');
             }
+            return card;
+        };
 
-            wrap.appendChild(card);
-            } catch(err) { console.error('[renderCritique] question error:', q, err); }
-        });
+        // Render sections
+        if (triggerQs.length > 0) triggerQs.forEach(q => wrap.appendChild(renderCard(q)));
+
+        if (highFig.length > 0) {
+            const h = document.createElement('div');
+            h.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-1 mb-1';
+            h.innerText = '🖼️ Contenu Illustratif (PNG)';
+            wrap.appendChild(h);
+            highFig.forEach(q => wrap.appendChild(renderCard(q)));
+        }
+
+        if (lowFig.length > 0) {
+            const h = document.createElement('div');
+            h.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-1 mb-1';
+            h.innerText = '✨ Éléments Graphiques (Code)';
+            wrap.appendChild(h);
+            lowFig.forEach(q => wrap.appendChild(renderCard(q)));
+        }
+
+        if (standardQs.length > 0) {
+            const h = document.createElement('div');
+            h.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-1 mb-1';
+            h.innerText = '🧭 Cadrage Technique';
+            wrap.appendChild(h);
+            standardQs.forEach(q => wrap.appendChild(renderCard(q)));
+        }
 
         if (_refs.chatEl) {
             _refs.chatEl.appendChild(wrap);

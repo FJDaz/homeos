@@ -29,6 +29,11 @@ class GraftRequest(BaseModel):
     html_content: str
 
 
+class SaveFullRequest(BaseModel):
+    filename: str
+    html: str
+
+
 @router.get("/workspace")
 def get_workspace_editor():
     """Mission 127: Unified Workspace Canvas"""
@@ -135,4 +140,30 @@ def workspace_graft(payload: GraftRequest, request: Request):
 
     except Exception as e:
         logger.error(f"[Workspace] Grafting failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/workspace/save-full")
+def save_full(payload: SaveFullRequest, request: Request):
+    """Mission M390: Sauvegarde l'état complet du template."""
+    try:
+        # Resolve project path
+        token = request.headers.get("X-User-Token")
+        project_path = get_active_project_path(token)
+        file_path = project_path / payload.filename
+
+        if not file_path.exists():
+            # Fallback to static/templates if not in project
+            file_path = STATIC_DIR_PATH / "templates" / payload.filename
+
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Template not found: {payload.filename}")
+
+        # On écrit tout sans BS4 pour garder le formatage exact renvoyé par l'iframe
+        file_path.write_text(payload.html, encoding="utf-8")
+
+        logger.info(f"[Workspace] Full save for {payload.filename}")
+        return {"status": "success", "file": payload.filename}
+    except Exception as e:
+        logger.error(f"[Workspace] Full save failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

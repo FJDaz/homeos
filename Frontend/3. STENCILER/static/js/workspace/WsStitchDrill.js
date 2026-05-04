@@ -198,7 +198,9 @@
                                         </div>
                                         <div class="flex gap-1">
                                             <input type="password" class="drill-key-input flex-1 px-2 py-1.5 text-[14px] border border-[#e5e5e5] rounded-[8px] outline-none focus:border-[#8cc63f] transition-all" data-provider="${p.id}" placeholder="Clé ${p.label}..." value="">
-                                            <button class="drill-save-btn px-2 py-1.5 text-[13px] font-bold bg-[#8cc63f] text-white rounded-[8px] hover:bg-[#7ab536] transition-all whitespace-nowrap" data-provider="${p.id}">OK</button>
+                                            <button class="drill-save-btn px-2 py-1.5 text-[13px] font-bold bg-[#8cc63f] text-white rounded-[8px] hover:bg-[#7ab536] transition-all whitespace-nowrap" 
+                                                data-ux="ACTION" data-ux-label="drill:keys:save"
+                                                data-provider="${p.id}">OK</button>
                                         </div>
                                         <div class="drill-helper-text mt-1 text-[13px] text-[#8cc63f] hidden" id="drill-helper-${p.id}"></div>
                                     </div>
@@ -206,7 +208,9 @@
                             `).join('')}
                         </div>
                         <div class="text-[12px] text-[#9a9a98] mb-3"><span id="drill-key-count">${getActiveKeyCount()}</span> clé(s) configurée(s) — <span class="text-[#8cc63f]">💡 aussi dispo via ⚙</span></div>
-                        <button id="drill-continue-keys" class="px-8 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
+                        <button id="drill-continue-keys" 
+                                data-ux="ACTION" data-ux-label="drill:keys:continue"
+                                class="px-8 py-2.5 bg-[#8cc63f] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#7ab536] transition-all">Continuer →</button>
                     </div>
                 `
             },
@@ -217,11 +221,11 @@
                         <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Configuration du projet</div>
                         <div class="text-[13px] text-[#9a9a98] mb-8">Comment souhaites-tu définir l'ADN de ton projet ?</div>
                         <div class="flex flex-col gap-4">
-                            <button id="btn-drill-choice-upload" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
+                            <button id="btn-drill-choice-upload" data-ux="DECISION" data-ux-label="Choix: Manifeste existant" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
                                 <div class="font-bold text-[15px] mb-1 group-hover:text-[#8cc63f]">J'ai un manifeste</div>
-                                <div class="text-[12px] text-[#9a9a98]">Tu possèdes déjà un fichier .json ou .md de ton architecture.</div>
+                                <div class="text-[12px] text-[#9a9a98]">Tu possèdes déjà un fichier .json or .md de ton architecture.</div>
                             </button>
-                            <button id="btn-drill-choice-zero" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
+                            <button id="btn-drill-choice-zero" data-ux="DECISION" data-ux-label="Choix: Partir de zéro" class="p-6 border-2 border-[#e5e5e5] rounded-[24px] text-left hover:border-[#8cc63f] hover:bg-[#f8fafc] transition-all group">
                                 <div class="font-bold text-[15px] mb-1 group-hover:text-[#8cc63f]">Je pars de zéro</div>
                                 <div class="text-[12px] text-[#9a9a98]">Laisse Sullivan analyser tes écrans pour prédire ton intention de design.</div>
                             </button>
@@ -247,8 +251,8 @@
                         <div class="text-[20px] font-bold text-[#3d3d3c] mb-2">Analyse Sullivan</div>
                         <div id="drill-inference-container" class="mb-6"></div>
                         <div class="flex gap-3">
-                            <button id="btn-drill-back-to-choice" class="flex-1 py-4 border-2 border-[#e5e5e5] rounded-[16px] text-[#3d3d3c] font-bold text-[13px]">← retour</button>
-                            <button id="btn-drill-confirm-inference" class="flex-1 py-4 bg-[#8cc63f] text-white rounded-[16px] font-bold text-[13px]">valider l'intention →</button>
+                            <button id="btn-drill-back-to-choice" data-ux="CORRECTION" data-ux-label="Retour au choix (Inférence)" class="flex-1 py-4 border-2 border-[#e5e5e5] rounded-[16px] text-[#3d3d3c] font-bold text-[13px]">← retour</button>
+                            <button id="btn-drill-confirm-inference" data-ux="ACTION" data-ux-label="Validation Inférence Sullivan" class="flex-1 py-4 bg-[#8cc63f] text-white rounded-[16px] font-bold text-[13px]">valider l'intention →</button>
                         </div>
                     </div>
                 `

@@ -551,6 +551,17 @@ def auth_register(req: RegisterRequest):
             (project_dir / "manifest.json").write_text(json.dumps(default_manifest, indent=2, ensure_ascii=False), encoding='utf-8')
             logger.info(f"Auth: created project directory for {project_id}")
 
+        # M372: INSERT project en DB si absent (le dossier peut exister sans ligne projects)
+        try:
+            with bkd_db() as conn:
+                conn.execute(
+                    "INSERT OR IGNORE INTO projects (id, name, path, user_id, type) VALUES (?, ?, ?, ?, 'personal')",
+                    (project_id, name, str(project_dir), resp.user_id)
+                )
+            logger.info(f"Auth: project {project_id} enregistré en DB (INSERT OR IGNORE)")
+        except Exception as e:
+            logger.warning(f"Auth: impossible d'enregistrer project {project_id} en DB: {e}")
+
     logger.info(f"Auth: user '{name}' registered (role={role}, student_id={student_id}, workspace={resp.workspace_id})")
     return resp
 

@@ -212,7 +212,13 @@
                          }
                          if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
                      } else {
-                         if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'empty_html');
+                         // Cas du vide (Delete) - Mission M388
+                         if (e.data.html !== undefined && e.data.html.trim() === "") {
+                             target.remove();
+                             if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'success');
+                         } else {
+                             if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'empty_html');
+                         }
                      }
                  } else {
                      if (e.data.transactionId) _sendReceipt(e.data.transactionId, 'error', 'element_not_found: ' + e.data.selector);
@@ -500,14 +506,17 @@
     }
 
     function getSelector(el) {
-        if (el.dataset && el.dataset.afId) return '[data-af-id="' + el.dataset.afId + '"]';
         if (el.id) return '#' + el.id;
-        let path = []; while (el && el.parentElement) {
-            let siblingIndex = 1; let sibling = el.previousElementSibling;
-            while (sibling) { if (sibling.tagName === el.tagName) siblingIndex++; sibling = sibling.previousElementSibling; }
-            path.unshift(el.tagName.toLowerCase() + ':nth-of-type(' + siblingIndex + ')'); el = el.parentElement;
+        let path = [];
+        let node = el;
+        while (node && node.parentElement && node !== document.body) {
+            const tag = node.tagName.toLowerCase();
+            const siblings = Array.from(node.parentNode.children).filter(c => c.tagName === node.tagName);
+            const idx = siblings.indexOf(node) + 1;
+            path.unshift(siblings.length > 1 ? tag + ':nth-of-type(' + idx + ')' : tag);
+            node = node.parentNode;
         }
-        return path.join(' > ');
+        return 'body > ' + path.join(' > ');
     }
 
     const style = document.createElement('style');

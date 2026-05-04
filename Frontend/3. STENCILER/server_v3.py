@@ -117,7 +117,7 @@ from starlette.responses import Response
 
 class AuthMiddleware(BaseHTTPMiddleware):
     """Lit X-User-Token → résout user_id → injecte request.state.user_id."""
-    EXEMPT_PATHS = ["/api/auth/", "/login", "/static", "/docs", "/openapi.json", "/.well-known"]
+    EXEMPT_PATHS = ["/api/auth/", "/api/ux-run", "/login", "/static", "/docs", "/openapi.json", "/.well-known"]
 
     @staticmethod
     def _lookup_user(token: str) -> int | None:
@@ -187,6 +187,7 @@ from routers.page_router import router as page_router
 from routers.auth_router import router as auth_router
 from routers.stitch_router import router as stitch_router
 from routers.subject_router import router as subject_router
+from routers.ux_run_router import router as ux_run_router
 
 app.include_router(wire_router)
 app.include_router(sullivan_router)
@@ -205,6 +206,7 @@ app.include_router(auth_router)
 app.include_router(stitch_router)
 app.include_router(class_router)
 app.include_router(subject_router)
+app.include_router(ux_run_router)
 
 # --- M274: Health/Debug endpoint ---
 @app.get("/api/health")

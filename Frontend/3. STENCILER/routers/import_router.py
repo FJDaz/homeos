@@ -11,6 +11,10 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger("ImportRouter")
 
 CWD = Path(__file__).parent.parent.resolve()
+# ROOT_DIR doit remonter jusqu'à AETHERFLOW (racine du workspace)
+# CWD = Frontend/3. STENCILER
+# CWD.parent = Frontend
+# CWD.parent.parent = AETHERFLOW (ROOT)
 ROOT_DIR = CWD.parent.parent
 STATIC_DIR_PATH = CWD / "static"
 PROJECTS_DIR = ROOT_DIR / "projects"

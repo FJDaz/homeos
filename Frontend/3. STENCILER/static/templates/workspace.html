@@ -69,6 +69,8 @@
     <!-- M269: ManifestBox -->
     <script src="/static/js/ManifestSullivan.js?v=369"></script>
     <script src="/static/js/ManifestBox.js?v=363"></script>
+    <!-- M375: UX Run Hooks -->
+    <script src="/static/js/ux/UxRunHooks.js"></script>
 </head>
 <body class="font-sans text-slate-800 bg-white h-screen flex flex-col overflow-hidden" style="font-family: 'Univers LT Std', 'Source Sans 3', sans-serif;">
 
@@ -121,7 +123,9 @@
                 <div id="ws-effects-stacher-list" class="flex-grow flex items-center space-x-2 overflow-x-auto scollbar-hide">
                     <span class="text-[11px] text-slate-400 italic">aucun effet sélectionné</span>
                 </div>
-                <button id="ws-effects-apply-all" class="ml-4 px-6 py-2 bg-slate-900 text-white text-[11px] font-bold rounded-[20px] uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
+                <button id="ws-effects-apply-all" 
+                   data-ux="ACTION" data-ux-label="Lancer la mission Forge"
+                   class="ml-4 px-6 py-2 bg-slate-900 text-white text-[11px] font-bold rounded-[20px] uppercase tracking-widest hover:bg-black transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap">
                     lancer la mission
                 </button>
             </div>
@@ -159,6 +163,9 @@
                     <span class="text-[10px] text-[#ccc] ml-1">Ctrl+molette</span>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button id="ws-preview-save-full" data-ux="ACTION" data-ux-label="preview:save:full" class="px-3 py-1 border border-[#e5e5e5] text-[11px] font-bold tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Sauvegarder">
+                        sauvegarder
+                    </button>
                     <button id="ws-preview-download" class="px-3 py-1 border border-[#e5e5e5] text-[11px] font-bold uppercase tracking-wider text-[#9a9a98] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all rounded-[20px]" title="Télécharger">
                         <svg class="w-[14px] h-[14px] inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         télécharger
@@ -235,7 +242,9 @@
                 <!-- Actions -->
                 <div class="flex items-center gap-3 justify-end">
                   <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[12px] font-bold tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all">vers le cadrage</button>
-                  <button id="ws-wire-apply-plan" class="px-6 py-2.5 text-[12px] font-bold tracking-widest rounded-[20px] transition-all" style="background:#8cc63f;color:#fff;">implémenter le plan d'action</button>
+                  <button id="ws-wire-apply-plan" 
+                     data-ux="ACTION" data-ux-label="Implémenter le plan d'action"
+                     class="px-6 py-2.5 text-[12px] font-bold tracking-widest rounded-[20px] transition-all" style="background:#8cc63f;color:#fff;">implémenter le plan d'action</button>
                 </div>
               </div>
             </div>
@@ -250,7 +259,9 @@
             <div id="section-projects" class="flex flex-col items-start">
                 <!-- PANEL PROJECTS -->
                 <aside id="panel-projects" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" data-drag-handle onclick="togglePanel('panel-projects')">
+                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" 
+                         data-ux="NAV" data-ux-label="panel:projets"
+                         data-drag-handle onclick="togglePanel('panel-projects')">
                         <div class="flex items-center space-x-2">
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green"></div>
                             <span id="ws-projects-header-label" class="text-[12px] font-bold text-slate-800 tracking-widest uppercase">projets</span>
@@ -273,7 +284,9 @@
             <div id="section-manifest" class="flex flex-col items-start">
                 <!-- PANEL MANIFEST (Initially collapsed) -->
                 <aside id="panel-manifest" class="w-80 glass-card rounded-custom shadow-2xl border border-slate-100 transition-all duration-300 pointer-events-auto origin-top-left collapsed">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" onclick="togglePanel('panel-manifest')">
+                    <div class="p-4 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition-colors" 
+                         data-ux="NAV" data-ux-label="panel:manifest"
+                         onclick="togglePanel('panel-manifest')">
                         <div class="flex items-center space-x-2">
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green shadow-[0_0_8px_rgba(163,205,84,0.4)]"></div>
                             <span class="text-[12px] font-bold text-slate-800 tracking-widest">manifest editor</span>
@@ -286,7 +299,9 @@
                         <div id="manifest-summary-content" class="text-[12px] text-slate-500 leading-relaxed italic mb-4">
                             Chargement du manifeste...
                         </div>
-                        <button onclick="window.ManifestBox.show(); togglePanel('panel-manifest')" class="w-full py-2 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] hover:text-white transition-all rounded-custom">
+                        <button onclick="window.ManifestBox.show(); togglePanel('panel-manifest')" 
+                                data-ux="ACTION" data-ux-label="manifest:open"
+                                class="w-full py-2 border border-[#8cc63f] text-[#8cc63f] text-[11px] font-bold uppercase tracking-widest hover:bg-[#8cc63f] hover:text-white transition-all rounded-custom">
                             Ouvrir l'éditeur complet
                         </button>
                     </div>
@@ -403,7 +418,9 @@
                     <div class="flex items-center justify-between mt-2">
                         <div class="flex items-center space-x-2">
                             <!-- Direct Upload -->
-                            <button onclick="document.getElementById('ws-direct-upload').click()" class="w-[26px] h-[26px] rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all">
+                            <button onclick="document.getElementById('ws-direct-upload').click()" 
+                                    data-ux="ACTION" data-ux-label="upload:ecrans"
+                                    class="w-[26px] h-[26px] rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-homeos-green hover:bg-slate-50 transition-all">
                                 <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                             </button>
                             <input type="file" id="ws-direct-upload" class="hidden" multiple accept=".svg,.zip,.tsx,.ts,.html,.css,.js,.png,.jpg,.jpeg,.md,.json,.txt">
@@ -451,7 +468,8 @@
                     <span id="ws-popover-tag" class="text-[9px] font-mono text-slate-300 bg-slate-100 px-1 rounded lowercase">div</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button id="ws-popover-save" class="px-3 py-1 bg-homeos-green text-white text-[12px] font-bold rounded-md hover:opacity-90 transition-all uppercase tracking-widest">Graft</button>
+                    <button id="ws-popover-apply" data-ux="ACTION" data-ux-label="monaco:apply" class="px-3 py-1 bg-slate-100 text-slate-500 text-[12px] font-bold rounded-md hover:bg-slate-200 transition-all lowercase tracking-widest">appliquer</button>
+                    <button id="ws-popover-save" data-ux="ACTION" data-ux-label="monaco:save" class="px-3 py-1 bg-homeos-green text-white text-[12px] font-bold rounded-md hover:opacity-90 transition-all lowercase tracking-widest">graft</button>
                     <button id="ws-popover-close" class="p-1 text-slate-300 hover:text-slate-500 transition-colors">
                         <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -495,7 +513,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Architecture Hexagonale Workspace (Mission 156) -->
     <script src="/static/js/workspace/WsAudit.js"></script>
-    <script src="/static/js/workspace/WsForge.js?v=363"></script>
+    <script src="/static/js/workspace/WsForge.js?v=380"></script>
     <script src="/static/js/workspace/WsForgeMonitor.js"></script>
     <script src="/static/js/workspace/WsPreview.js"></script>
     <script src="/static/js/workspace/WsScreenShell.js?v=369"></script>

@@ -19,9 +19,12 @@ class WsForge {
         say('forge démarrée — analyse sémantique en cours...');
 
         try {
+            const _sess = JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}').token
+                ? JSON.parse(sessionStorage.getItem('homeos_impersonation') || '{}')
+                : JSON.parse(localStorage.getItem('homeos_session') || '{}');
             const res = await fetch('/api/retro-genome/generate-from-import', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': _sess.token || '' },
                 body: JSON.stringify({ import_id: importId })
             });
             if (!res.ok) throw new Error(`${res.status}`);
@@ -84,6 +87,7 @@ class WsForge {
                         }
                         say('✓ rendu forgé et chargé.');
                         if (statusEl) statusEl.textContent = '';
+                        if (window.UxRun) window.UxRun.log('RESULT', `forge:success:${importId}`);
 
                         // M267: Nettoyer l'état de forge active
                         sessionStorage.removeItem('active_forge');
@@ -108,6 +112,7 @@ class WsForge {
                         clearInterval(poll);
                         if (statusEl) statusEl.textContent = `échec : ${job.error}`;
                         if (btn) { btn.disabled = false; btn.textContent = 'réessayer'; }
+                        if (window.UxRun) window.UxRun.log('FRICTION', `forge:error:${job.error}`);
                         say(`forge échouée : ${job.error}`);
                     } else {
                         pollCount++;
