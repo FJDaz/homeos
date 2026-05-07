@@ -37,6 +37,21 @@ BACKEND_PROD = ROOT_DIR / "Backend/Prod"
 PROJECTS_DIR = ROOT_DIR / "projects"
 STATIC_DIR_PATH = CWD / "static"
 
+def _ux_log(data: dict):
+    """
+    Mission M399: Log un événement Sullivan dans ux_run.ndjson
+    """
+    try:
+        import json, datetime
+        data.setdefault("ts", datetime.datetime.now().isoformat(timespec="seconds"))
+        data.setdefault("source", "sullivan")
+        log_path = ROOT_DIR / "logs" / "ux_run.ndjson"
+        log_path.parent.mkdir(exist_ok=True)
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(data, ensure_ascii=False) + "\n")
+    except Exception as e:
+        logger.error(f"Failed to write UX log: {e}")
+
 # --- SULLIVAN IMPORTS ---
 import sys
 for p in [str(ROOT_DIR), str(BACKEND_PROD), str(CWD)]:
@@ -217,6 +232,7 @@ def sullivan_tool_call(req: ToolCallRequest, request: Request = None):
     """
     Mission 204: Execute un tool-call (instrumentation de canevas ou patch).
     """
+    _ux_log({"event": "tool_called", "tool": req.tool, "project_id": req.project_id})
     token = request.headers.get("X-User-Token") if request else None
     
     # Resolve 'active' project_id if needed
@@ -349,6 +365,7 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
     Mission 137 : BYOK — injection clé user au runtime.
     manifest_assist → Groq (texte pur, pas de vision, ultra-rapide).
     """
+    _ux_log({"event": "chat_sent", "mode": req.mode, "project_id": req.project_id, "message_len": len(req.message)})
     from core.key_resolver import resolve_key
     user_id = getattr(request.state, 'user_id', None)
 
@@ -375,6 +392,7 @@ async def sullivan_chat(request: Request, req: SullivanChatRequest):
             )
             await groq.close()
             text = result.code.strip() if result.success else "Désolé, je rencontre une difficulté technique."
+            _ux_log({"event": "chat_ok", "mode": req.mode, "project_id": req.project_id})
             return {"explanation": text, "html": None}
         except asyncio.TimeoutError:
             return {"explanation": "Timeout Groq (20s). Réessaie dans un moment.", "html": None}
@@ -640,6 +658,8 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
             return {"explanation": "Desole, je rencontre une difficulte technique.", "html": None}
 
         raw_text = result.code.strip()
+        function_call = result.function_call
+        _ux_log({"event": "chat_ok", "mode": req.mode, "project_id": req.project_id})
 
         # Detection Tool-Call JSON (Mission 204)
         if raw_text.startswith("{") and "tool" in raw_text:
@@ -717,11 +737,239 @@ DETERMINISME : Ne genere JAMAIS de HTML libre si un canevas du catalogue peut fa
         if not explanation and not html:
             explanation = raw_text
 
-        return {"explanation": explanation, "html": html, "logic_js": logic_js}
+        return {"explanation": explanation, "html": html, "logic_js": logic_js, "function_call": function_call}
 
     except Exception as e:
         logger.error(f"Sullivan chat failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/sullivan/persist-asset-choice")
+async def persist_asset_choice(request: Request, body: dict = Body(...)):
+    """
+    Mission M393: Persiste le choix utilisateur (png/vector) pour un asset spécifique
+    dans le manifest.json du projet pour éviter de re-demander à chaque forge.
+    """
+    token = request.headers.get("X-User-Token")
+    project_id = body.get("project_id")
+    if not project_id or project_id == "active":
+        from bkd_service import get_active_project_id
+        project_id = get_active_project_id(token)
+    
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest non trouvé")
+        
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        assets = manifest.get("design_tokens", {}).get("image_assets", [])
+        
+        found = False
+        for asset in assets:
+            if asset.get("description") == body.get("asset_description"):
+                asset["validated_choice"] = body.get("choice")
+                found = True
+                break
+        
+        if found:
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+            return {"ok": True}
+        else:
+            return {"ok": False, "error": "Asset non trouvé dans le manifest"}
+    except Exception as e:
+        logger.error(f"Failed to persist asset choice: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Tools Sullivan (M398)
+SUMMON_TOOL = {
+    "functionDeclarations": [{
+        "name": "summon_screen",
+        "description": "Affiche visuellement un écran du projet (forgé ou storyboard) pour en discuter avec l'utilisateur.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "screen_id": { "type": "STRING", "description": "L'ID de l'écran (ex: screen-1, screen-2)" },
+                "focus": { "type": "STRING", "description": "Zone ou élément précis à mettre en valeur (optionnel)" }
+            },
+            "required": ["screen_id"]
+        }
+    }]
+}
+
+SWAP_ASSET_TOOL = {
+    "functionDeclarations": [{
+        "name": "swap_asset",
+        "description": "Change le choix d'arbitrage d'un asset (PNG vs Vecteur) suite à une demande utilisateur.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "asset_description": { "type": "STRING", "description": "Description exacte de l'asset dans le manifeste" },
+                "new_choice": { "type": "STRING", "enum": ["png", "vector"], "description": "Le nouveau choix (png ou vector)" }
+            },
+            "required": ["asset_description", "new_choice"]
+        }
+    }]
+}
+
+STORYBOARD_INTERVIEW_TOOL = {
+    "functionDeclarations": [{
+        "name": "storyboard_interview",
+        "description": "Lance une session d'interview pour valider chaque écran du storyboard un par un.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "start_screen_id": { "type": "STRING", "description": "L'ID de l'écran par lequel commencer (optionnel)" }
+            }
+        }
+    }]
+}
+
+SULLIVAN_TOOLS = [SUMMON_TOOL, SWAP_ASSET_TOOL, STORYBOARD_INTERVIEW_TOOL]
+
+@router.get("/api/manifest/storyboard-screen")
+async def storyboard_screen(project_id: str, screen_id: str, request: Request):
+    """
+    Mission M398: Récupère les données d'un écran du storyboard pour affichage Summon.
+    """
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(404, detail="Manifest non trouvé")
+        
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    storyboard = manifest.get("storyboard", [])
+    screen = next((s for s in storyboard if s["screen_id"] == screen_id), None)
+    
+    if not screen:
+        # Fallback si pas encore de storyboard structuré
+        tokens = manifest.get("intent_pipeline", {}).get("accumulated_intents", {})
+        try:
+            idx = int(screen_id.split("-")[-1]) - 1
+            keys = list(tokens.keys())
+            if 0 <= idx < len(keys):
+                screen = {
+                    "screen_id": screen_id,
+                    "screen_name": keys[idx],
+                    "forged": False,
+                    "raw_tokens": tokens[keys[idx]]
+                }
+        except: pass
+        
+    if not screen:
+        raise HTTPException(404, detail="Écran non trouvé")
+        
+    # Charger l'HTML si forgé
+    if screen.get("forged") and screen.get("html_path"):
+        html_abs = PROJECTS_DIR / project_id / screen["html_path"]
+        if html_abs.exists():
+            screen["html_content"] = html_abs.read_text(encoding='utf-8')
+            
+    return screen
+
+
+@router.post("/api/sullivan/reset-asset-choice")
+async def reset_asset_choice(request: Request, body: dict = Body(...)):
+    """
+    Mission M394: Supprime le choix validé (png/vector) pour un asset.
+    """
+    project_id = body.get("project_id")
+    asset_description = body.get("asset_description")
+    
+    if not project_id or not asset_description:
+        raise HTTPException(status_code=400, detail="Données manquantes")
+        
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest non trouvé")
+        
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        assets = manifest.get("design_tokens", {}).get("image_assets", [])
+        
+        found = False
+        for asset in assets:
+            if asset.get("description") == asset_description:
+                asset.pop("validated_choice", None)
+                found = True
+                break
+        
+        if found:
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+            return {"ok": True}
+        else:
+            return {"ok": False, "error": "Asset non trouvé"}
+    except Exception as e:
+        logger.error(f"Failed to reset asset choice: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/sullivan/bootstrap-storyboard")
+async def bootstrap_storyboard(request: Request, body: dict = Body(...)):
+    """
+    Mission M395: Génère un storyboard structuré à partir de la description du manifest.
+    """
+    import time
+    start = time.time()
+    user_id = getattr(request.state, 'user_id', None)
+    project_id = body.get("project_id")
+    if not project_id:
+        raise HTTPException(status_code=400, detail="Project ID manquant")
+        
+    _ux_log({"event": "storyboard_bootstrap_started", "project_id": project_id})
+    
+    manifest_path = PROJECTS_DIR / project_id / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest non trouvé")
+        
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        description = manifest.get("description", "")
+        intents = manifest.get("intent_pipeline", {}).get("accumulated_intents", {})
+        
+        system = """Tu es un expert UX AetherFlow. Ton rôle est d'extraire un STORYBOARD structuré à partir d'une spec textuelle d'application multi-écrans.
+Retourne UNIQUEMENT un JSON valide (tableau d'objets) avec les champs :
+- screen_id : string unique (ex: "screen-1", "screen-2")
+- screen_name : nom court et explicite
+- description : une phrase décrivant l'action principale sur cet écran
+- transitions : liste d'objets { label, intent, target_screen } définissant la navigation.
+Sois précis et exhaustif par rapport à la description fournie. Ne réponds qu'avec le JSON brut, pas de markdown, pas de prose."""
+
+        prompt = f"SPEC DE L'APP :\n{description}\n\nTOKENS PAR ÉCRAN :\n{json.dumps(intents, ensure_ascii=False)}"
+        
+        from sullivan_arbitrator import SullivanArbitrator
+        arb = SullivanArbitrator()
+        config = arb.pick("quick")
+        
+        result = await asyncio.to_thread(
+            arb.dispatch, config,
+            [{"role": "user", "content": prompt}],
+            system=system
+        )
+        
+        if not result.get("success"):
+            _ux_log({"event": "storyboard_bootstrap_error", "project_id": project_id, "error": "LLM failed"})
+            return {"ok": False, "error": "LLM failed"}
+            
+        raw = result["text"].strip()
+        # Nettoyage JSON
+        raw = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
+        screens = json.loads(raw)
+        
+        # Post-traitement
+        for s in screens:
+            s.setdefault("forged", False)
+            s.setdefault("html_path", None)
+            
+        manifest["storyboard"] = screens
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+        
+        _ux_log({"event": "storyboard_bootstrap_ok", "project_id": project_id, "screens": len(screens), "latency_ms": int((time.time()-start)*1000)})
+        return {"ok": True, "screens": len(screens)}
+        
+    except Exception as e:
+        _ux_log({"event": "storyboard_bootstrap_error", "project_id": project_id, "error": str(e)[:200]})
+        logger.error(f"Bootstrap storyboard failed: {e}")
+        return {"ok": False, "error": str(e)}
 
 
 @router.post("/api/sullivan/manifest-critique")
@@ -731,17 +979,24 @@ async def sullivan_manifest_critique(request: Request, body: dict = Body(default
     Retourne {questions: [{id, text}], suggestions: [{id, text}]} — JSON strict, Groq, < 20s.
     Les questions sont binaires (oui/non). Les suggestions sont numérotées pour correspondre.
     """
+    import time
+    start = time.time()
     from core.key_resolver import resolve_key
     user_id = getattr(request.state, 'user_id', None)
+    project_id = body.get("project_id")
+
+    _ux_log({"event": "critique_launched", "project_id": project_id or "unknown"})
 
     manifest_text = body.get("manifest_text", "").strip()
     design_tokens = body.get("design_tokens", {})
 
     if not manifest_text:
+        _ux_log({"event": "critique_error", "project_id": project_id, "error": "manifest vide"})
         return {"questions": [], "suggestions": [], "error": "manifest vide"}
 
     groq_key = resolve_key("groq", user_id) or settings.groq_api_key
     if not groq_key:
+        _ux_log({"event": "critique_error", "project_id": project_id, "error": "clé Groq manquante"})
         return {"questions": [], "suggestions": [], "error": "clé Groq manquante"}
 
     tokens_summary = ""
@@ -801,6 +1056,7 @@ Règles :
         await groq.close()
 
         if not result.success:
+            _ux_log({"event": "critique_error", "project_id": project_id, "error": "génération échouée"})
             return {"questions": [], "suggestions": [], "error": "génération échouée"}
 
         raw = result.code.strip()
@@ -813,8 +1069,11 @@ Règles :
         # --- MISSION M385 : Regroupement sémantique par figuration_score ---
         image_assets = design_tokens.get("image_assets", [])
         if image_assets:
+            # M393 : Ne montrer que les assets sans validated_choice
+            unvalidated = [a for a in image_assets if not a.get("validated_choice")]
+            
             # Trier par score de figuration décroissant
-            sorted_assets = sorted(image_assets, key=lambda x: x.get("figuration_score", 0), reverse=True)
+            sorted_assets = sorted(unvalidated, key=lambda x: x.get("figuration_score", 0), reverse=True)
             for i, asset in enumerate(sorted_assets[:8]):  # On en montre un peu plus si besoin
                 questions.insert(i, {
                     "id": f"img_q_{i}",
@@ -831,18 +1090,30 @@ Règles :
                 "specimens": []
             })
 
+        # M394 : Exposer les assets déjà validés
+        validated_assets = [
+            {"description": a["description"], "choice": a["validated_choice"]}
+            for a in design_tokens.get("image_assets", [])
+            if a.get("validated_choice")
+        ]
+
+        _ux_log({"event": "critique_ok", "project_id": project_id, "latency_ms": int((time.time()-start)*1000), "questions_count": len(questions)})
         return {
             "questions": questions,
-            "suggestions": suggestions
+            "suggestions": suggestions,
+            "validated_assets": validated_assets
         }
 
     except asyncio.TimeoutError:
+        _ux_log({"event": "critique_error", "project_id": project_id, "error": "timeout (20s)"})
         return {"questions": [], "suggestions": [], "error": "timeout (20s)"}
     except json.JSONDecodeError as e:
         logger.error(f"manifest-critique JSON parse error: {e} — raw: {raw[:200]}")
+        _ux_log({"event": "critique_error", "project_id": project_id, "error": "réponse non parseable"})
         return {"questions": [], "suggestions": [], "error": "réponse non parseable"}
     except Exception as e:
         logger.error(f"manifest-critique failed: {e}")
+        _ux_log({"event": "critique_error", "project_id": project_id, "error": str(e)[:200]})
         return {"questions": [], "suggestions": [], "error": str(e)}
 
 

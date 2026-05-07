@@ -71,6 +71,10 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOIT ê
 | M388 | UX Monaco : Logiciel "Apply" (Preview) vs "Save" (Persist) + Fix Delete | ✅ TERMINÉE | GEMINI |
 | M389 | Graft : sélecteur structurel stable (`nth-child`) au lieu de `data-af-id` | ✅ TERMINÉE | GEMINI |
 | M390 | Save N1 : bouton "sauvegarder" en aperçu → écrase template complet → N0 reflète | ✅ TERMINÉE | GEMINI |
+| M391 | Project Panel : btn "nouveau projet" → déclenche drill onboarding | 🟠 À TRAITER | GEMINI |
+| M392 | Project Panel : ajout d'écrans depuis panel → enrichissement tokens multi-type | 🟠 À TRAITER | GEMINI |
+| M393 | Sullivan ME : refonte questions manifeste (remplacer questions LLM génériques) | 🟠 À TRAITER | GEMINI |
+| BKG-8 | Extraction tokens : fire-and-forget à la forge = rustine — fix structurel via M391 | 🟡 BACKLOG | — |
 
 
 ---
@@ -272,3 +276,113 @@ IMAGES RÉELLES DISPONIBLES — utilise ces URLs comme src="" dans les <img> :
   2. Si la mission introduit une feature observable → ajouter le signal UxRun dans le callback de succès
   3. Mettre à jour TRACES_INDEX.md
   ```
+
+---
+
+## Thème 46 — Onboarding Élève & Enrichissement Tokens (2026-05-07)
+
+**Contexte :** L'extraction de design tokens ne se déclenche jamais sur un nouveau drill / nouvel élève. Le fix actuel (fire-and-forget à la forge) est une rustine — le vrai problème est l'absence d'un point d'entrée structurel pour distinguer "nouveau projet" vs "reprise". Ces trois missions corrigent ça proprement.
+
+---
+
+### M391 — Project Panel : btn "nouveau projet" → drill onboarding
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
+
+**Contexte :** Le bouton "nouveau projet" est déjà présent dans `WsProjectPanel.js` mais ne fait rien (ou ouvre un flow incomplet). Il doit déclencher le drill onboarding complet (comme au premier login).
+
+**Ce que Gemini doit faire :**
+1. Dans `WsProjectPanel.js`, wirer le bouton "nouveau projet" → appel `WsStitchDrill.show()` (ou équivalent)
+2. Le drill crée un nouveau projet propre + lance immédiatement `extract-tokens` sur les écrans dès upload
+3. Discriminer dans le drill : si `project_id` existant → reprise (ne pas re-extraire) / si nouveau → extraction complète
+
+**Fichiers cibles :** `WsProjectPanel.js`, `WsStitchDrill.js`
+
+**Contrainte :** Le fix résout aussi BKG-8 — avec ce point d'entrée, l'extraction fire-and-forget dans `WsForge.js` peut être supprimée ou maintenue en fallback uniquement.
+
+---
+
+### M392 — Project Panel : gestion des écrans (ajout + suppression)
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
+
+**Contexte :** Une fois un projet créé, l'élève doit pouvoir ajouter et supprimer des écrans depuis le project panel sans relancer un drill complet. Le panel affiche les écrans groupés par projet (`projects[i].screens[j]`). Chaque ajout enrichit les tokens existants ; chaque suppression nettoie index.json + fichiers disque.
+
+**Structure de données cible :**
+Le panel doit rendre une arborescence `projet → screens[]`, pas une liste plate. `_screensCache[projectId]` contient déjà les screens — le rendu doit les grouper sous leur projet parent dans le DOM.
+
+**Ce que Gemini doit faire :**
+
+**Ajout d'écrans :**
+1. Bouton "ajouter des écrans" visible à côté du projet actif dans le panel
+2. File picker multi-fichiers → upload vers `/api/import/upload` avec `project_id` explicite dans le body (ne pas résoudre via token seul — le user peut avoir plusieurs projets)
+3. `import_router.py` : vérifier que l'upload associe l'import au `project_id` du body en priorité
+4. Après upload réussi : déclencher `extract-tokens` sur ce `project_id` + appeler `window.fetchWorkspaceImports()` pour invalider le cache panel
+
+**Suppression d'écran :**
+5. Bouton supprimer (×) sur chaque screen dans le panel, visible au hover
+6. Confirmation user avant exécution ("supprimer cet écran ? cette action est irréversible")
+7. Appel `DELETE /api/imports/{import_id}?project_id={project_id}` (endpoint existant dans `import_router.py`)
+8. Après suppression : invalider `_screensCache[projectId]` + re-render panel
+
+**Spec annotations pour storyboard (FJD — rapport Gemini 2026-05-07) :**
+- Résolution optimale : **1280px ou 1440px** sur le plus grand côté (le pipeline plafonne à 1280px)
+- Corps minimum fiable : **12px** (corps 10px = zone de risque aliasing, <9px = hallucinations)
+- Contraste prime sur résolution : texte gris clair/fond blanc corps 12 < texte noir corps 10
+- Corps 14px+ : lecture parfaite après downsampling
+- Format cible pour écrans annotés storyboard : PNG 1280px, annotations noires sur fond blanc pur, corps 14px minimum
+
+**Fichiers cibles :** `WsProjectPanel.js`, `import_router.py`
+
+---
+
+### M393 — Sullivan ME : refonte questions manifeste
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
+
+**Contexte :** Les questions générées par le LLM Groq à partir du manifest étudiant sont "ineptes ou imbuvables" (FJD, 2026-05-07). Le modèle de questions oui/non génériques n'est pas adapté au contexte DNMADE.
+
+**Ce que Gemini doit faire :**
+1. Remplacer le prompt Groq de `manifest-critique` par une grille de questions **pré-établies** adaptées au contexte DNMADE, pas générées dynamiquement
+2. Questions statiques structurées autour de 4 axes DNMADE : archétype, couverture organes, cohérence tokens, lisibilité dev
+3. Format : 5-7 questions courtes, formulées en langage direct étudiant (pas jargon UX)
+4. Les suggestions restent dynamiques (Groq les génère en réponse aux questions pré-établies)
+
+**Exemple de questions cibles :**
+- "ton projet a un nom et une phrase d'intention claire ?"
+- "les écrans/sections sont listés avec leur rôle ?"
+- "la palette et la typo sont définies ?"
+- "un dev peut savoir ce qu'il doit construire en lisant ça ?"
+- "le style visuel (réaliste, flat, typographique...) est explicite ?"
+
+**Fichiers cibles :** `sullivan_router.py` (endpoint `manifest-critique`)
+
+---
+
+### M394 — Project Panel : drag & drop screen → projet
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
+
+**Contexte :** L'élève doit pouvoir déplacer un écran d'un projet vers un autre directement dans le panel. Opération destructive et multi-fichiers — nécessite confirmation user + séquence stricte côté backend.
+
+**Ce que Gemini doit faire :**
+
+**Frontend :**
+1. Rendre les screen items draggables (`draggable="true"`) dans le panel
+2. Rendre les zones projet droppables (`dragover`, `drop`)
+3. À l'évenement `drop` : afficher une modale de confirmation ("déplacer cet écran vers [projet cible] ?") avant tout appel backend
+4. Sur confirmation : appel `PATCH /api/imports/{import_id}/move` avec `{ target_project_id }`
+5. Sur succès : invalider `_screensCache` des deux projets concernés + re-render panel
+
+**Backend (`import_router.py`) :**
+6. Créer endpoint `PATCH /api/imports/{import_id}/move` :
+   - Lire l'entrée dans `index.json` du projet source
+   - Déplacer les fichiers physiques (import image + html_template si existe) vers le dossier du projet cible
+   - Mettre à jour les chemins dans l'entrée
+   - Retirer l'entrée de `index.json` source
+   - Ajouter l'entrée dans `index.json` cible
+   - Répondre `{ ok: true }` ou erreur explicite
+
+**Contraintes :**
+- Ne jamais déplacer sans confirmation user explicite
+- Si `html_template` existe : déplacer aussi le fichier template (sinon le screen cible aura un chemin cassé)
+- Si le projet cible n'a pas de dossier `imports/` : le créer
+- En cas d'erreur backend : ne pas modifier le frontend — afficher l'erreur en clair
+
+**Fichiers cibles :** `WsProjectPanel.js`, `import_router.py`

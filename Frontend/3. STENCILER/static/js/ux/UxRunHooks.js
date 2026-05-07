@@ -17,7 +17,8 @@ window.UxRun = (function() {
             console.warn(`[UxRun] Catégorie inconnue : ${category}`);
         }
 
-        const projectId = localStorage.getItem('homeos_active_project') || 'unknown';
+        const _sess = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+        const projectId = _sess.active_project_id || _sess.project_id || 'unknown';
         const payload = {
             tag: category,
             label: label,

@@ -476,7 +476,16 @@ async def extract_design_tokens(request: Request):
     from bkd_service import get_active_project_id
 
     token = request.headers.get("X-User-Token")
-    active_id = get_active_project_id(token)
+
+    # Lire project_id du body si présent (priorité sur session DB)
+    body_pid = None
+    try:
+        body = await request.json()
+        body_pid = body.get("project_id")
+    except Exception:
+        pass
+
+    active_id = body_pid or get_active_project_id(token)
 
     if not active_id:
         return {"status": "skipped", "reason": "no active project"}

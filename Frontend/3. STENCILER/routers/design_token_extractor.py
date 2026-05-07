@@ -39,7 +39,16 @@ async def extract_tokens_for_screen(image_path: Path) -> dict:
     mime = SUPPORTED.get(suffix, 'image/png')
     
     try:
-        image_b64 = base64.b64encode(image_path.read_bytes()).decode()
+        # Resize à 1280px max avant envoi (Gemini Vision plafonne silencieusement au-delà)
+        import io
+        with Image.open(image_path) as _img:
+            _img.thumbnail((1280, 1280), Image.LANCZOS)
+            if _img.mode == 'RGBA':
+                _img = _img.convert('RGB')
+            _buf = io.BytesIO()
+            _img.save(_buf, format='JPEG', quality=90)
+            image_b64 = base64.b64encode(_buf.getvalue()).decode()
+            mime = 'image/jpeg'
         prompt = """Analyse cet écran de design étudiant et extrais les design tokens visuels.
         
 ÉTABLISSEMENT DES ASSETS (CRITIQUE) :

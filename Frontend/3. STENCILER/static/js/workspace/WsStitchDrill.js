@@ -73,13 +73,13 @@
         s.id = 'ws-drill-styles';
         s.textContent = `
             @keyframes pulse-low-cpu {
-                0% { transform: scale(1); opacity: 0.8; }
-                100% { transform: scale(1.6); opacity: 0; }
+                0% { transform: scale(1) translateZ(0); opacity: 0.8; }
+                100% { transform: scale(1.4) translateZ(0); opacity: 0; }
             }
             @keyframes success-pop {
-                0% { transform: scale(0.9); opacity: 0; }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); opacity: 1; }
+                0% { transform: scale(0.9) translateZ(0); opacity: 0; }
+                50% { transform: scale(1.05) translateZ(0); }
+                100% { transform: scale(1) translateZ(0); opacity: 1; }
             }
             .success-badge {
                 animation: success-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -91,8 +91,9 @@
                 inset: -6px;
                 border: 3px solid #8cc63f;
                 border-radius: 50%;
-                animation: pulse-low-cpu 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+                animation: pulse-low-cpu 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
                 pointer-events: none;
+                will-change: transform, opacity;
             }
             .drill-card {
                 background: white;
@@ -428,9 +429,11 @@
                 if (!res.ok) { statusEl.textContent = 'Erreur (' + res.status + ')'; statusEl.style.color = '#d44'; return; }
                 
                 // M354: Architecture Extract par écran (fire-and-forget)
-                fetch('/api/imports/extract-tokens', { method: 'POST', headers: { 'X-User-Token': getSession().token || '' } })
-                    .then(() => fetch('/api/imports/infer-intent', { method: 'POST', headers: { 'X-User-Token': getSession().token || '' } }))
-                    .catch(() => {}); // silenscieux
+                const _s = getSession();
+                const _pid = _s.active_project_id || _s.project_id;
+                if (_pid) fetch('/api/imports/extract-tokens', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Token': _s.token || '' }, body: JSON.stringify({ project_id: _pid }) })
+                    .then(() => fetch('/api/imports/infer-intent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Token': _s.token || '' }, body: JSON.stringify({ project_id: _pid }) }))
+                    .catch(() => {}); // silencieux
                 
                 uploaded++;
             } catch(e) { statusEl.textContent = 'Erreur: ' + e.message; statusEl.style.color = '#d44'; return; }
@@ -468,9 +471,12 @@
     async function triggerTokenExtraction() {
         try {
             const session = getSession();
+            const pid = session.active_project_id || session.project_id;
+            if (!pid) return;
             await fetch('/api/imports/extract-tokens', {
                 method: 'POST',
-                headers: { 'X-User-Token': session.token || '' }
+                headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
+                body: JSON.stringify({ project_id: pid })
             });
         } catch(e) {
             console.warn('[WsStitchDrill] Token extraction failed:', e);

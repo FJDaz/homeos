@@ -364,10 +364,22 @@
         container.appendChild(list);
     }
 
+    async function refreshActiveScreens() {
+        const session = _getSession();
+        const activeId = session.active_project_id || session.project_id;
+        if (!activeId) return;
+        delete _screensCache[activeId];
+        await fetchProjectScreens(activeId);
+        render();
+    }
+
+    window.fetchWorkspaceImports = refreshActiveScreens;
+
     window.WsProjectPanel = {
         refresh: refresh,
         render: render,
         toggleProject: toggleProject,
+        refreshScreens: refreshActiveScreens,
         get projects() { return _projects; }
     };
 })();

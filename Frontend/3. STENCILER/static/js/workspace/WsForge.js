@@ -65,6 +65,14 @@ class WsForge {
 
                     if (job.status === 'done') {
                         clearInterval(poll);
+                        // Extraction design tokens en arrière-plan (fire-and-forget)
+                        const _pid = new URLSearchParams(window.location.search).get('project_id')
+                            || _sess.active_project_id || _sess.project_id;
+                        if (_pid) fetch('/api/imports/extract-tokens', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-User-Token': _sess.token || '' },
+                            body: JSON.stringify({ project_id: _pid })
+                        }).catch(() => {});
                         // M234: Update index.json with forge result
                         try {
                             await fetch(`/api/imports/${importId}`, {
