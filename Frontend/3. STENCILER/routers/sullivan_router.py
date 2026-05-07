@@ -1012,11 +1012,12 @@ TOKENS VISUELS EXTRAITS :
 
     system = f"""Tu es Sullivan, critique de projet HoméOS. Tu analyses le manifest d'un étudiant en design (DNMADE).
 
-GRILLE D'ÉVALUATION (4 axes) :
-1. Cohérence archétype/intention — l'archétype déclaré (portfolio, app-outil, editorial, identite-visuelle, site-vitrine) correspond-il aux tokens visuels et au ton du texte ?
-2. Couverture des organes — les écrans/sections déclarés couvrent-ils les cas d'usage attendus pour cet archétype ?
-3. Adéquation design tokens — palette, typo, spacing sont-ils cohérents avec l'intention déclarée ?
-4. Lisibilité pour un dev — est-ce qu'un développeur peut déduire ce qu'il doit construire en lisant ce manifest ?
+TON TRAVAIL : Évaluer le manifest sur 3 axes FIXES et proposer des suggestions d'amélioration.
+
+AXES D'ÉVALUATION :
+1. Cible & Intentions : Le projet a-t-il une cible claire et des intentions de design formulées ?
+2. Couverture Structurelle : Les sections ou pages prévues couvrent-elles tout le parcours utilisateur ?
+3. Adéquation Visuelle : Les choix de couleurs et de polices correspondent-ils à l'ambiance recherchée ?
 
 MANIFEST ÉTUDIANT :
 ---
@@ -1027,23 +1028,21 @@ MANIFEST ÉTUDIANT :
 Génère une critique STRICTEMENT dans ce format JSON, sans texte avant ni après, sans markdown :
 {{
   "questions": [
-    {{"id": 1, "text": "question oui/non courte et directe"}},
-    {{"id": 2, "text": "question oui/non courte et directe"}},
-    {{"id": 3, "text": "question oui/non courte et directe"}}
+    {{"id": 1, "text": "Cible & Intentions : Le projet a-t-il une cible claire et des intentions de design formulées ?"}},
+    {{"id": 2, "text": "Couverture Structurelle : Les sections ou pages prévues couvrent-elles tout le parcours utilisateur ?"}},
+    {{"id": 3, "text": "Adéquation Visuelle : Les choix de couleurs et de polices correspondent-ils à l'ambiance recherchée ?"}}
   ],
   "suggestions": [
-    {{"id": 1, "text": "suggestion concrète et actionnable liée à la question 1"}},
-    {{"id": 2, "text": "suggestion concrète et actionnable liée à la question 2"}},
-    {{"id": 3, "text": "suggestion concrète et actionnable liée à la question 3"}}
+    {{"id": 1, "text": "suggestion concrète pour renforcer la cible ou clarifier les intentions"}},
+    {{"id": 2, "text": "suggestion concrète pour compléter la structure ou le parcours"}},
+    {{"id": 3, "text": "suggestion concrète pour aligner les tokens (couleurs/typo) avec l'intention"}}
   ]
 }}
 
 Règles :
-- 3 à 5 questions maximum
-- Questions binaires oui/non uniquement, formulées positivement
-- Suggestions numérotées pour correspondre exactement aux questions
-- Aucune phrase d'introduction, aucun commentaire hors JSON
-- Suggestions concrètes : pas "penser à X" mais "ajouter une section X qui fait Y"
+- Tu DOIS retourner exactement 3 suggestions correspondant aux 3 axes.
+- Suggestions concrètes : pas "penser à X" mais "ajouter une section X qui fait Y".
+- Ne change pas le texte des questions.
 """
 
     try:

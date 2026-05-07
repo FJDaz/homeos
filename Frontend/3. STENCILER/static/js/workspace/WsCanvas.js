@@ -24,6 +24,10 @@ class WsCanvas {
         this.activeScreenId = null; 
         this.offsetDragX = 0;
         this.offsetDragY = 0;
+        
+        // M396: Storyboard Navigation
+        this.storyboard = [];
+        this.projectManifest = null;
 
         // Resize (Mission 114)
         this.isResizing = false;
@@ -85,10 +89,92 @@ class WsCanvas {
             } else if (e.data.type === 'hm-click') {
                 // Could open element inspector
                 console.log('[M237] iframe click:', e.data);
+            } else if (e.data.type === 'hm-select') {
+                // M396: Storyboard transition check
+                this.handleStoryboardTransition(e.data);
             }
         });
 
         this.updateTransform();
+    }
+
+    /**
+     * M396: Load storyboard from manifest
+     */
+    async loadStoryboard() {
+        try {
+            const res = await fetch('/api/projects/active');
+            const project = await res.json();
+            if (!project.id) return;
+            
+            const mRes = await fetch(`/api/projects/${project.id}/manifest`);
+            const manifest = await mRes.json();
+            this.projectManifest = manifest;
+            this.storyboard = manifest.storyboard || [];
+            console.log(`[M396] Storyboard loaded: ${this.storyboard.length} screens`);
+        } catch (e) {
+            console.warn('[M396] Failed to load storyboard:', e);
+        }
+    }
+
+    /**
+     * M396: Handle transition if element matches storyboard
+     */
+    async handleStoryboardTransition(data) {
+        if (!this.storyboard.length || !this.activeScreenId) return;
+        
+        // Trouver l'écran courant dans le storyboard
+        // activeScreenId est 'shell-import-id'
+        const currentImportId = this.activeScreenId.replace('shell-', '');
+        const currentScreen = this.storyboard.find(s => s.screen_id === currentImportId || s.import_id === currentImportId);
+        
+        if (!currentScreen || !currentScreen.transitions) return;
+        
+        // Chercher une transition qui matche l'élément cliqué
+        const transition = currentScreen.transitions.find(t => {
+            if (t.trigger_selector && (data.id === t.trigger_selector.replace('#', '') || data.cls.includes(t.trigger_selector.replace('.', '')))) return true;
+            if (t.trigger_id && data.id === t.trigger_id) return true;
+            return false;
+        });
+        
+        if (transition && transition.target_screen_id) {
+            console.log(`[M396] Navigating to ${transition.target_screen_id} via ${transition.trigger_selector}`);
+            this.switchToScreen(transition.target_screen_id);
+        }
+    }
+
+    /**
+     * M396: Switch to a specific screen (add if missing)
+     */
+    async switchToScreen(screenId) {
+        const shell = document.getElementById(`shell-${screenId}`);
+        if (shell) {
+            this.selectScreen(shell);
+            // Center view on it
+            const transform = shell.getAttribute('transform');
+            const m = transform.match(/matrix\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
+            if (m) {
+                const rect = this.svg.getBoundingClientRect();
+                this.viewX = rect.width/2 - m[4] * this.scale;
+                this.viewY = rect.height/2 - m[5] * this.scale;
+                this.updateTransform();
+            }
+        } else {
+            // Pas encore chargé ? On tente de l'ajouter
+            try {
+                const res = await fetch(`/api/frd/imports`);
+                const imports = await res.json();
+                const item = imports.find(i => i.id === screenId);
+                if (item) {
+                    const newShell = await this.addScreen(item);
+                    if (newShell) this.selectScreen(newShell);
+                } else {
+                    console.warn(`[M396] Screen ${screenId} not found in imports.`);
+                }
+            } catch(e) {
+                console.error(`[M396] Auto-load screen failed:`, e);
+            }
+        }
     }
 
     setMode(mode) {

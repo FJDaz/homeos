@@ -120,7 +120,7 @@ class WsPreview {
             const data = await resp.json();
 
             if (data.status === 'success') {
-                btn.innerText = 'ok';
+                btn.innerText = '✓';
                 setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 1000);
                 
                 // UxRun Log
@@ -134,7 +134,7 @@ class WsPreview {
                 throw new Error();
             }
         } catch (err) {
-            btn.innerText = 'err';
+            btn.innerText = 'ERR';
             setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
             if (window.UxRun) window.UxRun.log('FRICTION', 'preview:save:error:' + filename);
         }

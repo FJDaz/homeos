@@ -288,7 +288,14 @@
 
     function wireStep(stepIndex) {
         if (stepIndex === 0) {
-            document.getElementById('drill-landing-btn').onclick = () => { currentStep = 1; renderStep(); };
+            document.getElementById('drill-landing-btn').onclick = async () => { 
+                // M391: Créer un nouveau projet au clic
+                if (window.WsProjectPanel && window.WsProjectPanel.createProject) {
+                    await window.WsProjectPanel.createProject("nouveau projet");
+                }
+                currentStep = 1; 
+                renderStep(); 
+            };
         }
         else if (stepIndex === 1) {
             const zone = document.getElementById('drill-screen-upload-zone');
@@ -683,13 +690,13 @@
         if (window.ManifestBox) window.ManifestBox.show();
     }
 
-    async function show() {
+    async function show(options = {}) {
         const session = getSession();
         const role = session.role || 'student';
         if (role !== 'student') { console.log('[WsStitchDrill] Skipping for role:', role); return; }
 
         const projectId = session.active_project_id || session.project_id;
-        if (projectId) {
+        if (projectId && !options.force) {
             try {
                 const res = await fetch(`/api/retro-genome/imports?project_id=${projectId}`, {
                     headers: { 'X-User-Token': session.token || '' }
@@ -707,6 +714,7 @@
             }
         }
 
+        currentStep = 0;
         createOverlay();
     }
 

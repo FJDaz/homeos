@@ -26,6 +26,21 @@
     }
 
     /**
+     * Mission M399: Log un événement UX vers le serveur
+     */
+    function _manifestLog(event, data = {}) {
+        const sess = getSession();
+        const pid = sess.active_project_id || sess.project_id;
+        if (!pid) return;
+        
+        fetch('/api/ux-run/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-User-Token': sess.token || '' },
+            body: JSON.stringify({ source: 'manifest_box', event, project_id: pid, ...data })
+        }).catch(() => {});
+    }
+
+    /**
      * Calcule la position relative (X, Y) du curseur dans un textarea.
      * Exporté pour ManifestSullivan.
      */
@@ -123,8 +138,10 @@
                 body: JSON.stringify(payload)
             });
             console.log('[WsManifestEditor] saved');
+            _manifestLog('manifest:save', { text_len: text.length });
             updateSideSummary(text);
         } catch(e) {
+            _manifestLog('manifest:save_error', { error: e.message });
             console.error('Erreur save', e);
         }
     }
@@ -256,7 +273,7 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 13a8.1 8.1 0 0015.4 3M20 11a8.1 8.1 0 00-15.4-3"/></svg>
                         <span class="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">Recharger</span>
                     </button>
-                    <button id="manifestbox-validate" class="px-3 py-1 bg-[#8cc63f] text-white text-[11px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
+                    <button id="manifestbox-validate" data-ux="validate_button" class="px-3 py-1 bg-[#8cc63f] text-white text-[11px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
                         Valider le manifeste
                     </button>
                     <button id="manifestbox-close" class="text-slate-400 hover:text-red-500 transition-colors">
@@ -277,8 +294,11 @@
                             <div class="w-[10px] h-[10px] rounded-full bg-homeos-green animate-pulse shrink-0"></div>
                             <input type="text" id="manifest-sullivan-input" placeholder="Sullivan, une remarque sur ce passage ?"
                                    class="flex-1 border-none bg-transparent text-[15px] font-medium text-slate-700 outline-none placeholder:text-slate-300">
-                            <button id="manifest-sullivan-reanalyze" class="p-1 text-slate-300 hover:text-[#8cc63f] transition-colors" title="Relancer la critique HCI">
+                            <button id="manifest-sullivan-reanalyze" data-ux="critique_button" class="p-1 text-slate-300 hover:text-[#8cc63f] transition-colors" title="Relancer la critique HCI">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h5M20 20v-5h-5M4 13a8.1 8.1 0 0015.4 3M20 11a8.1 8.1 0 00-15.4-3"/></svg>
+                            </button>
+                            <button id="manifest-sullivan-storyboard" data-ux="storyboard_button" class="ml-auto text-[10px] font-bold uppercase tracking-widest text-slate-300 border border-slate-100 px-2 py-0.5 rounded-[6px] hover:bg-[#8cc63f]/10 hover:text-[#8cc63f] hover:border-[#8cc63f] transition-all">
+                                storyboard
                             </button>
                         </div>
 
@@ -346,6 +366,23 @@
         els.signetsTitle = document.getElementById('manifest-signets-title');
         els.signetsToggle = document.getElementById('manifest-signets-toggle');
 
+        // M357: Initialisation de Sullivan avec injection des dépendances
+        if (window.ManifestSullivan) {
+            window.ManifestSullivan.init({
+                chatEl: els.sullivanHist,
+                inputEl: els.sullivanInput,
+                editorEl: els.editor,
+                sullivanBoxEl: els.sullivanBox,
+                editorWrapEl: els.editorWrap,
+                getSession: getSession,
+                getManifestText: () => els.editor.value,
+                applyManifest: (text) => {
+                    els.editor.value = text;
+                    onTextChange();
+                }
+            });
+        }
+
         // Listeners
         document.getElementById('manifestbox-close').onclick = hide;
         document.getElementById('manifestbox-validate').onclick = () => {
@@ -394,6 +431,13 @@
         if (reanalyzeBtn) {
             reanalyzeBtn.onclick = () => {
                 if (window.ManifestSullivan) window.ManifestSullivan.launchCritique();
+            };
+        }
+        
+        const storyboardBtn = document.getElementById('manifest-sullivan-storyboard');
+        if (storyboardBtn) {
+            storyboardBtn.onclick = () => {
+                if (window.ManifestSullivan) window.ManifestSullivan.bootstrapStoryboard(storyboardBtn);
             };
         }
 

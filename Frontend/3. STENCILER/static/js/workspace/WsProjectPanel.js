@@ -195,8 +195,8 @@
         // Toujours afficher "Projets Personnels" pour les élèves (Fix M333/M334/M335)
         const svgFolder = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`;
         _renderSectionHeader(container, "Projets Personnels", svgFolder, true, () => {
-            // M335: Déclenche l'ouverture du Drill au centre
-            if (window.WsStitchDrill) window.WsStitchDrill.show();
+            // M391: Déclenche l'ouverture du Drill au centre (force mode pour nouveau projet)
+            if (window.WsStitchDrill) window.WsStitchDrill.show({ force: true });
         });
 
         if (personal.length > 0) {
@@ -222,6 +222,84 @@
                 await refresh();
             }
         } catch(e) { console.error('[WsProjectPanel] Create error:', e); }
+    }
+
+    async function _uploadScreens(projectId, files) {
+        const session = _getSession();
+        if (window.UxRun) window.UxRun.log('ACTION', `panel:upload:${projectId}:${files.length}`);
+        
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', file.name);
+            formData.append('project_id', projectId);
+            
+            try {
+                const res = await fetch('/api/import/upload', {
+                    method: 'POST',
+                    headers: { 'X-User-Token': session.token || '' },
+                    body: formData
+                });
+                if (res.ok) {
+                    // Trigger extraction
+                    fetch('/api/imports/extract-tokens', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-User-Token': session.token || '' },
+                        body: JSON.stringify({ project_id: projectId })
+                    }).catch(() => {});
+                }
+            } catch(e) { console.error('[WsProjectPanel] Upload error:', e); }
+        }
+        delete _screensCache[projectId];
+        await fetchProjectScreens(projectId);
+        render();
+    }
+
+    async function _deleteScreen(projectId, importId) {
+        if (!confirm('supprimer cet écran ? cette action est irréversible')) return;
+        const session = _getSession();
+        if (window.UxRun) window.UxRun.log('ACTION', `panel:delete:${importId}`);
+        
+        try {
+            const res = await fetch(`/api/imports/${importId}?project_id=${projectId}`, {
+                method: 'DELETE',
+                headers: { 'X-User-Token': session.token || '' }
+            });
+            if (res.ok) {
+                delete _screensCache[projectId];
+                await fetchProjectScreens(projectId);
+                render();
+            }
+        } catch(e) { console.error('[WsProjectPanel] Delete error:', e); }
+    }
+
+    async function _moveScreen(importId, currentPid, targetPid) {
+        if (currentPid === targetPid) return;
+        const session = _getSession();
+        if (window.UxRun) window.UxRun.log('ACTION', `panel:move:${importId}:${currentPid}->${targetPid}`);
+        
+        try {
+            const res = await fetch(`/api/imports/${importId}/move`, {
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Token': session.token || '' 
+                },
+                body: JSON.stringify({ 
+                    current_project_id: currentPid,
+                    target_project_id: targetPid
+                })
+            });
+            if (res.ok) {
+                delete _screensCache[currentPid];
+                delete _screensCache[targetPid];
+                await Promise.all([
+                    fetchProjectScreens(currentPid),
+                    fetchProjectScreens(targetPid)
+                ]);
+                render();
+            }
+        } catch(e) { console.error('[WsProjectPanel] Move error:', e); }
     }
 
     function _renderSectionHeader(container, title, icon, showAdd = false, onAdd = null) {
@@ -264,6 +342,23 @@
         header.setAttribute('data-ux-label', `projet:${project.name || project.id}`);
         header.onclick = () => toggleProject(project.id);
 
+        // M394: Drop Zone
+        header.ondragover = (e) => {
+            e.preventDefault();
+            header.classList.add('bg-slate-200');
+        };
+        header.ondragleave = () => {
+            header.classList.remove('bg-slate-200');
+        };
+        header.ondrop = (e) => {
+            e.preventDefault();
+            header.classList.remove('bg-slate-200');
+            const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
+            if (data.importId && data.projectId) {
+                _moveScreen(data.importId, data.projectId, project.id);
+            }
+        };
+
         header.innerHTML = `
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-homeos-green shadow-[0_0_8px_rgba(163,205,84,0.4)]' : 'bg-slate-200'}"></div>
@@ -272,6 +367,9 @@
                 </span>
             </div>
             <div class="flex items-center gap-2">
+                <button class="btn-add-screen p-1 text-slate-300 hover:text-homeos-green transition-colors" title="ajouter des écrans">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
                 ${project.type === 'personal' ? `
                     <button class="btn-cadrage p-1 text-slate-300 hover:text-indigo-500 transition-colors" title="Routine Cadrage">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
@@ -284,6 +382,18 @@
             </div>
         `;
         projectBox.appendChild(header);
+
+        const btnAdd = header.querySelector('.btn-add-screen');
+        if (btnAdd) {
+            btnAdd.onclick = (e) => {
+                e.stopPropagation();
+                const inp = document.createElement('input');
+                inp.type = 'file';
+                inp.multiple = true;
+                inp.onchange = () => { if (inp.files.length) _uploadScreens(project.id, inp.files); };
+                inp.click();
+            };
+        }
 
         const btnCadrage = header.querySelector('.btn-cadrage');
         if (btnCadrage) {
@@ -347,10 +457,22 @@
             const sEl = document.createElement('div');
             sEl.className = 'group flex items-center justify-between p-2 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer';
             
+            // M394: Draggable
+            sEl.draggable = true;
+            sEl.ondragstart = (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({ 
+                    importId: screen.id, 
+                    projectId: projectId 
+                }));
+                sEl.classList.add('opacity-50');
+            };
+            sEl.ondragend = () => sEl.classList.remove('opacity-50');
+
             sEl.innerHTML = `
                 <span class="text-[12px] font-medium text-slate-500 group-hover:text-slate-700 truncate">${screen.name}</span>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button class="btn-s-open p-1 text-slate-300 hover:text-homeos-green"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg></button>
+                    <button class="btn-s-open p-1 text-slate-300 hover:text-homeos-green" title="Ouvrir"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg></button>
+                    <button class="btn-s-delete p-1 text-slate-300 hover:text-red-500" title="Supprimer"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                 </div>
             `;
             sEl.setAttribute('data-ux', 'ACTION');
@@ -359,6 +481,14 @@
                 e.stopPropagation();
                 if (window.wsCanvas) window.wsCanvas.addScreen(screen);
             };
+
+            const btnDel = sEl.querySelector('.btn-s-delete');
+            if (btnDel) {
+                btnDel.onclick = (e) => {
+                    e.stopPropagation();
+                    _deleteScreen(projectId, screen.id);
+                };
+            }
             list.appendChild(sEl);
         });
         container.appendChild(list);
@@ -380,6 +510,7 @@
         render: render,
         toggleProject: toggleProject,
         refreshScreens: refreshActiveScreens,
+        createProject: _createNewProject,
         get projects() { return _projects; }
     };
 })();

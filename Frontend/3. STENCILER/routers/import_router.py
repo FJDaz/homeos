@@ -25,9 +25,13 @@ _NEW_IMPORTS_COUNT = 0
 _ACTIVE_EXTRACTIONS = set()
 
 
-def get_project_imports_dir(token: str = None):
-    from bkd_service import get_active_project_path
-    d = get_active_project_path(token) / "imports"
+def get_project_imports_dir(token: str = None, project_id: str = None):
+    from bkd_service import get_active_project_path, resolve_bkd_project_root
+    if project_id:
+        root = resolve_bkd_project_root(project_id, token)
+        d = root / "imports"
+    else:
+        d = get_active_project_path(token) / "imports"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -146,13 +150,14 @@ def import_figma_svg(request: Request, body: dict = Body(...)):
 
 
 @router.post("/api/import/upload")
-async def import_upload(request: Request, file: UploadFile = File(...), filename: str = Form("")):
+async def import_upload(request: Request, file: UploadFile = File(...), filename: str = Form(""), project_id: str = Form(None)):
     """
     Mission 100-bis: Generic upload endpoint for multi-format imports.
     Supports: ZIP (Stitch), TSX/TS (React), HTML/CSS/JS files.
+    Mission 392: Support explicit project_id.
     """
     token = request.headers.get("X-User-Token")
-    exports_dir = get_project_imports_dir(token)
+    exports_dir = get_project_imports_dir(token, project_id)
     exports_dir.mkdir(parents=True, exist_ok=True)
 
     # Save file
@@ -285,13 +290,14 @@ async def import_upload(request: Request, file: UploadFile = File(...), filename
 
 
 @router.delete("/api/imports/{import_id}")
-def import_delete(import_id: str, request: Request):
+def import_delete(import_id: str, request: Request, project_id: str = None):
     """
     Mission 125: Suppression d'un import.
+    Mission 392: Support project_id parameter.
     Supprime l'entree de index.json et les fichiers sur disque.
     """
     token = request.headers.get("X-User-Token")
-    exports_dir = get_project_imports_dir(token)
+    exports_dir = get_project_imports_dir(token, project_id)
     index_path = exports_dir / "index.json"
 
     if not index_path.exists():
@@ -649,3 +655,69 @@ def provider_health_status():
     """M294: Return health status of all AI providers."""
     from routers.model_health import get_all_health
     return {"providers": get_all_health()}
+
+
+@router.patch("/api/imports/{import_id}/move")
+async def import_move(import_id: str, request: Request, target_project_id: str = Body(..., embed=True), current_project_id: str = Body(..., embed=True)):
+    """
+    M394: Déplace un écran d'un projet à un autre.
+    """
+    token = request.headers.get("X-User-Token")
+    from bkd_service import resolve_bkd_project_root
+    
+    src_root = resolve_bkd_project_root(current_project_id, token)
+    dst_root = resolve_bkd_project_root(target_project_id, token)
+    
+    if not src_root or not dst_root:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    src_dir = src_root / "imports"
+    dst_dir = dst_root / "imports"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    
+    src_index_path = src_dir / "index.json"
+    dst_index_path = dst_dir / "index.json"
+    
+    if not src_index_path.exists():
+        raise HTTPException(status_code=404, detail="Source index not found")
+        
+    try:
+        src_data = json.loads(src_index_path.read_text(encoding="utf-8"))
+        dst_data = json.loads(dst_index_path.read_text(encoding="utf-8")) if dst_index_path.exists() else {"imports": []}
+        
+        target_entry = None
+        for i, entry in enumerate(src_data["imports"]):
+            if entry["id"] == import_id:
+                target_entry = src_data["imports"].pop(i)
+                break
+        
+        if not target_entry:
+            raise HTTPException(status_code=404, detail="Import not found")
+            
+        # Déplacer les fichiers
+        for key in ["file_path", "svg_path"]:
+            rel_p = target_entry.get(key)
+            if rel_p:
+                src_p = src_dir / rel_p
+                dst_p = dst_dir / rel_p
+                dst_p.parent.mkdir(parents=True, exist_ok=True)
+                if src_p.exists():
+                    import shutil
+                    shutil.move(str(src_p), str(dst_p))
+                    
+        # Déplacer le template HTML si présent
+        tpl_name = target_entry.get("html_template")
+        if tpl_name:
+            # Les templates sont partagés dans static/templates, donc pas besoin de bouger le fichier physique
+            # SAUF si on veut vraiment isoler par projet (pas le cas actuellement)
+            pass
+
+        dst_data["imports"].insert(0, target_entry)
+        
+        src_index_path.write_text(json.dumps(src_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        dst_index_path.write_text(json.dumps(dst_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        
+        return {"status": "ok", "import_id": import_id}
+    except Exception as e:
+        logger.error(f"[Import move] Crash: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
