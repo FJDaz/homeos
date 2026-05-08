@@ -67,8 +67,8 @@
     <script src="/static/js/rbac_guard.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <!-- M269: ManifestBox -->
-    <script src="/static/js/ManifestSullivan.js?v=372"></script>
-    <script src="/static/js/ManifestBox.js?v=363"></script>
+    <script src="/static/js/ManifestSullivan.js?v=374"></script>
+    <script src="/static/js/ManifestBox.js?v=371"></script>
     <!-- M375: UX Run Hooks -->
     <script src="/static/js/ux/UxRunHooks.js?v=2"></script>
 </head>
@@ -241,7 +241,7 @@
 
                 <!-- Actions -->
                 <div class="flex items-center gap-3 justify-end">
-                  <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[12px] font-bold tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all">vers le cadrage</button>
+                  <button id="ws-wire-btn-cadrage" class="px-6 py-2.5 text-[12px] font-bold tracking-widest text-slate-500 border border-slate-200 rounded-custom hover:bg-slate-50 transition-all uppercase">MANIFESTE</button>
                   <button id="ws-wire-apply-plan" 
                      data-ux="ACTION" data-ux-label="Implémenter le plan d'action"
                      class="px-6 py-2.5 text-[12px] font-bold tracking-widest rounded-[20px] transition-all" style="background:#8cc63f;color:#fff;">implémenter le plan d'action</button>
@@ -270,7 +270,7 @@
                             <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </div>
                     </div>
-                    <div class="p-0 overflow-y-auto" style="max-height: calc(100vh - 160px);" id="ws-project-list">
+                    <div class="p-0 flex-1 overflow-y-auto scrollbar-thin" id="ws-project-list">
                         <div class="p-4 text-xs text-slate-400 italic">chargement...</div>
                     </div>
                 </aside>

@@ -8,6 +8,7 @@
     let panel = null;
     let manifestData = null;
     let isSignetsOpen = true;
+    let isTdahMode = false;
     let saveTimeout = null;
     
     // UI Refs
@@ -30,13 +31,11 @@
      */
     function _manifestLog(event, data = {}) {
         const sess = getSession();
-        const pid = sess.active_project_id || sess.project_id;
-        if (!pid) return;
-        
+        const pid = sess.active_project_id || sess.project_id || 'NONE';
         fetch('/api/ux-run/event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-User-Token': sess.token || '' },
-            body: JSON.stringify({ source: 'manifest_box', event, project_id: pid, ...data })
+            body: JSON.stringify({ tag: 'DIAG', label: event, ts: Date.now() / 1000, project_id: pid, details: data })
         }).catch(() => {});
     }
 
@@ -87,42 +86,73 @@
         try {
             const session = getSession();
             const projectId = targetProjectId || session.active_project_id || session.project_id;
-            if (!projectId) return;
+
+            _manifestLog('manifest:load_start', {
+                project_id_used: projectId || null,
+                session_active_project_id: session.active_project_id || null,
+                session_project_id: session.project_id || null,
+                session_token_present: !!session.token,
+                session_name: session.name || session.display || null,
+                target_override: targetProjectId || null,
+                localStorage_session_raw: localStorage.getItem('homeos_session')
+            });
+
+            if (!projectId) {
+                _manifestLog('manifest:load_abort', { reason: 'no_project_id' });
+                return;
+            }
 
             const res = await fetch(`/api/projects/${projectId}/manifest`, {
                 headers: { 'X-User-Token': session.token || '' }
             });
+
             if (res.ok) {
                 manifestData = await res.json();
-                
-                // Si pas de raw_content : utiliser description si dispo, sinon générer depuis les écrans
+
+                _manifestLog('manifest:load_api_response', {
+                    http_status: res.status,
+                    raw_content_len: manifestData.raw_content ? manifestData.raw_content.length : 0,
+                    raw_content_head: manifestData.raw_content ? manifestData.raw_content.substring(0, 120) : null,
+                    has_description: !!manifestData.description,
+                    description_len: manifestData.description ? manifestData.description.length : 0,
+                    has_screens: !!(manifestData.screens && manifestData.screens.length),
+                    screens_count: (manifestData.screens || []).length,
+                    manifest_name: manifestData.name || null,
+                    keys: Object.keys(manifestData)
+                });
+
                 if (!manifestData.raw_content) {
                     if (manifestData.description) {
                         manifestData.raw_content = manifestData.description;
+                        _manifestLog('manifest:load_fallback', { source: 'description' });
                     } else if (manifestData.screens && manifestData.screens.length > 0) {
                         let md = `# Manifeste : ${manifestData.name || 'Projet'}\n\n`;
                         manifestData.screens.forEach(s => {
                             md += `## ${s.name || 'Écran'}\n- Type: ${s.type || s.archetype_label}\n\n`;
                         });
                         manifestData.raw_content = md;
+                        _manifestLog('manifest:load_fallback', { source: 'screens_generated' });
+                    } else {
+                        _manifestLog('manifest:load_fallback', { source: 'none_empty' });
                     }
                 }
             } else {
-                // Initialise un nouveau manifest vide
+                _manifestLog('manifest:load_api_response', { http_status: res.status, error: 'not_ok' });
                 manifestData = {
                     name: 'Nouveau Projet',
                     raw_content: '# Mon Manifeste\n\nDécrivez votre intention ici...'
                 };
             }
         } catch(e) {
+            _manifestLog('manifest:load_exception', { error: e.message });
             console.error('Erreur chargement manifest', e);
         }
     }
 
-    async function saveManifestDeferred() {
+    async function saveManifestDeferred(projectId) {
         const text = els.editor.value;
         const session = getSession();
-        const projectId = session.active_project_id || session.project_id;
+        if (!projectId) projectId = session.active_project_id || session.project_id;
         if (!projectId) return;
 
         const payload = manifestData || {};
@@ -172,8 +202,11 @@
 
     function onTextChange() {
         clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(saveManifestDeferred, 1000);
+        const sess = getSession();
+        const lockedProjectId = sess.active_project_id || sess.project_id;
+        saveTimeout = setTimeout(() => saveManifestDeferred(lockedProjectId), 1000);
         updateSignets();
+        if (isTdahMode) updateBionic();
         if (window.ManifestSullivan) window.ManifestSullivan.updatePosition();
     }
 
@@ -273,6 +306,11 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 13a8.1 8.1 0 0015.4 3M20 11a8.1 8.1 0 00-15.4-3"/></svg>
                         <span class="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">Recharger</span>
                     </button>
+                    <button id="manifestbox-load-file" class="p-1 px-2 text-slate-400 hover:text-[#8cc63f] transition-all flex items-center gap-1" title="Charger un fichier .md ou .txt">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span id="manifestbox-load-label" class="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">Charger</span>
+                    </button>
+                    <input type="file" id="manifestbox-file-input" accept=".txt,.md" class="hidden">
                     <button id="manifestbox-validate" data-ux="validate_button" class="px-3 py-1 bg-[#8cc63f] text-white text-[11px] font-bold rounded-full uppercase tracking-widest hover:bg-[#7ab536] transition-all">
                         Valider le manifeste
                     </button>
@@ -323,12 +361,20 @@
                         <span class="text-[#e5e5e5] mx-1">|</span>
                         <button class="manifest-toolbar-btn" data-md="**" title="Gras"><span class="text-[12px] font-bold text-[#3d3d3c]">B</span></button>
                         <button class="manifest-toolbar-btn" data-md="*" title="Italique"><span class="text-[12px] italic text-[#3d3d3c]">I</span></button>
+                        <span class="text-[#e5e5e5] mx-1">|</span>
+                        <button id="manifest-tdah-toggle" class="px-2 py-0.5 border border-slate-200 rounded-[6px] hover:border-[#8cc63f] hover:text-[#8cc63f] transition-all" title="Mode TDAH (Bionic Reading)">
+                            <span class="text-[10px] font-bold uppercase tracking-widest">tdah</span>
+                        </button>
                     </div>
 
-                    <textarea id="manifest-editor-textarea" spellcheck="false"
-                              placeholder="# Votre Manifeste..."
-                              class="w-[calc(100%-490px)] min-h-[150%] max-w-[800px] bg-transparent border-none outline-none text-[#3d3d3c] focus:ring-0 resize-none font-mono text-[13px] leading-relaxed tracking-tight"
-                              style="font-family: 'JetBrains Mono', 'Monaco', monospace; margin-bottom:50vh;"></textarea>
+                    <div class="relative w-[calc(100%-490px)] max-w-[800px]">
+                        <div id="manifest-bionic-mirror" class="absolute inset-0 pointer-events-none text-[#3d3d3c] font-mono text-[13px] leading-relaxed tracking-tight whitespace-pre-wrap break-words hidden"
+                             style="font-family: 'JetBrains Mono', 'Monaco', monospace; padding: 0;"></div>
+                        <textarea id="manifest-editor-textarea" spellcheck="false"
+                                  placeholder="# Votre Manifeste..."
+                                  class="w-full min-h-[150vh] bg-transparent border-none outline-none text-[#3d3d3c] focus:ring-0 resize-none font-mono text-[13px] leading-relaxed tracking-tight"
+                                  style="font-family: 'JetBrains Mono', 'Monaco', monospace; margin-bottom:50vh; padding: 0;"></textarea>
+                    </div>
                 </div>
 
                 <!-- SIGNETS COL -->
@@ -408,6 +454,38 @@
             };
         }
 
+        // M406: Upload local file
+        const loadFileBtn = document.getElementById('manifestbox-load-file');
+        const fileInput = document.getElementById('manifestbox-file-input');
+        const loadLabel = document.getElementById('manifestbox-load-label');
+        if (loadFileBtn && fileInput) {
+            loadFileBtn.onclick = () => fileInput.click();
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    els.editor.value = event.target.result;
+                    onTextChange();
+                    
+                    if (window.ManifestSullivan) {
+                        window.ManifestSullivan.launchCritique();
+                    }
+                    
+                    if (loadLabel) {
+                        const orig = loadLabel.innerText;
+                        loadLabel.innerText = "Chargé ✓";
+                        setTimeout(() => loadLabel.innerText = orig, 2000);
+                    }
+                    
+                    _manifestLog('ui:file_loaded', { filename: file.name, size: file.size });
+                };
+                reader.readAsText(file);
+                fileInput.value = ''; // Reset to allow reloading same file
+            };
+        }
+
         els.signetsToggle.onclick = toggleSignets;
         
         els.editor.addEventListener('input', onTextChange);
@@ -462,6 +540,40 @@
             });
         }
 
+        // M405: TDAH Toggle
+        const tdahBtn = document.getElementById('manifest-tdah-toggle');
+        const mirror = document.getElementById('manifest-bionic-mirror');
+
+        if (sessionStorage.getItem('homeos_tdah_mode') === 'true') {
+            isTdahMode = true;
+            if (tdahBtn && mirror) {
+                tdahBtn.classList.add('bg-[#8cc63f]/10', 'text-[#8cc63f]', 'border-[#8cc63f]');
+                mirror.classList.remove('hidden');
+            }
+        }
+
+        if (tdahBtn && mirror) {
+            tdahBtn.onclick = () => {
+                isTdahMode = !isTdahMode;
+                sessionStorage.setItem('homeos_tdah_mode', isTdahMode);
+                if (isTdahMode) {
+                    tdahBtn.classList.add('bg-[#8cc63f]/10', 'text-[#8cc63f]', 'border-[#8cc63f]');
+                    mirror.classList.remove('hidden');
+                    els.editor.style.color = 'transparent';
+                    els.editor.style.caretColor = '#3d3d3c';
+                    updateBionic();
+                } else {
+                    tdahBtn.classList.remove('bg-[#8cc63f]/10', 'text-[#8cc63f]', 'border-[#8cc63f]');
+                    mirror.classList.add('hidden');
+                    els.editor.style.color = '#3d3d3c';
+                }
+                if (window.ManifestSullivan && window.ManifestSullivan.renderCardsBionic) {
+                    window.ManifestSullivan.renderCardsBionic();
+                }
+                if (window.UxRun) window.UxRun.log('ACTION', `tdah:${isTdahMode ? 'on' : 'off'}`, { editor_color: els.editor.style.color });
+            };
+        }
+
         // M282: Toolbar buttons — insert markdown at cursor
         document.querySelectorAll('.manifest-toolbar-btn').forEach(btn => {
             btn.onclick = (e) => {
@@ -487,6 +599,22 @@
                 onTextChange();
             };
         });
+
+    }
+
+    function updateBionic() {
+        const mirror = document.getElementById('manifest-bionic-mirror');
+        if (!mirror || !isTdahMode) return;
+        const text = els.editor.value;
+        mirror.innerHTML = text.split(/(\s+)/).map(part => {
+            if (/^\s+$/.test(part)) return part.replace(/\n/g, '<br>');
+            const len = part.length;
+            if (len === 0) return part;
+            let boldLen = 1;
+            if (len > 3) boldLen = Math.ceil(len * 0.4);
+            if (len === 4) boldLen = 2;
+            return `<b style="font-weight:800;color:#000">${part.substring(0, boldLen)}</b>${part.substring(boldLen)}`;
+        }).join('') + '<br><br>';
     }
 
     async function show() {
@@ -496,6 +624,13 @@
 
         const content = (manifestData.raw_content || manifestData.description || '').trim();
         const hasManifest = manifestData && content.length > 10;
+
+        _manifestLog('manifest:editor_inject', {
+            branch: hasManifest ? 'has_manifest' : 'empty',
+            content_len: content.length,
+            content_head: content.substring(0, 120),
+            tdah_mode: isTdahMode
+        });
 
         if (hasManifest) {
             els.editor.value = content;
@@ -531,6 +666,9 @@
             }
         }
 
+        if (els.editor) els.editor.style.color = isTdahMode ? 'transparent' : '#3d3d3c';
+        if (els.editor) els.editor.style.caretColor = '#3d3d3c';
+        if (isTdahMode) updateBionic();
         updateSignets();
         setTimeout(updateSullivanPosition, 100);
         els.editor.focus();
@@ -581,7 +719,7 @@
     }
 
     // API Publique
-    window.ManifestBox = { show, hide, toggle, showForProject, getCaretCoordinates };
+    window.ManifestBox = { show, hide, toggle, showForProject, getCaretCoordinates, isTdahActive: () => isTdahMode };
     
     // Initialisation automatique du résumé latéral (M292B)
     document.addEventListener('DOMContentLoaded', async () => {

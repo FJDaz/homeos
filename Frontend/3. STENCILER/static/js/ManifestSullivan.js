@@ -40,6 +40,26 @@
         }).catch(() => {}); // Fire-and-forget
     }
 
+    function bionicTextHtml(html) {
+        return html.split(/(<[^>]*>)/).map(part => {
+            if (part.startsWith('<')) return part;
+            return part.replace(/[a-zA-ZÀ-ÿ]+/g, (w) => {
+                if (w.length <= 1) return `<b style="font-weight:800;color:#000">${w}</b>`;
+                const fixLen = Math.ceil(w.length / 2);
+                return `<b style="font-weight:800;color:#000">${w.slice(0, fixLen)}</b>${w.slice(fixLen)}`;
+            });
+        }).join('');
+    }
+
+    function renderCardsBionic() {
+        if (!_refs.chatEl) return;
+        const isTdah = window.ManifestBox && window.ManifestBox.isTdahActive && window.ManifestBox.isTdahActive();
+        _refs.chatEl.querySelectorAll('.bubble-content, .bionic-target').forEach(el => {
+            if (!el.dataset.raw) el.dataset.raw = el.innerHTML;
+            el.innerHTML = isTdah ? bionicTextHtml(el.dataset.raw) : el.dataset.raw;
+        });
+    }
+
     /**
      * Mission 201 : Initialisation de Sullivan
      */
@@ -62,26 +82,26 @@
         if (!_refs.chatEl) return;
         const b = document.createElement('div');
         b.className = `p-2 rounded-lg text-[14px] max-w-[90%] ${sender === 'sullivan' ? 'bg-[#f7f6f2] self-start border border-[#e5e5e5]' : 'bg-slate-900 text-white self-end ml-auto'}`;
-        
+        const isTdah = window.ManifestBox && window.ManifestBox.isTdahActive && window.ManifestBox.isTdahActive();
+
         if (sender === 'sullivan') {
-            b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">s.</span><span class="bubble-content"></span>`;
+            b.innerHTML = `<span class="font-bold text-[#8cc63f] mr-1">s.</span><span class="bubble-content" data-raw="${text.replace(/"/g, '&quot;')}"></span>`;
             const contentEl = b.querySelector('.bubble-content');
-            
+
             if (useTyping && text.length > 20) {
-                // Effet Smart Typing (M400)
                 const chars = text.split('');
                 let current = '';
                 for (const char of chars) {
                     current += char;
-                    contentEl.innerText = current;
+                    contentEl.innerHTML = isTdah ? bionicTextHtml(current) : current;
                     await new Promise(r => setTimeout(r, Math.random() * 15 + 5));
                     _refs.chatEl.scrollTop = _refs.chatEl.scrollHeight;
                 }
             } else {
-                contentEl.innerHTML = text;
+                contentEl.innerHTML = isTdah ? bionicTextHtml(text) : text;
             }
         } else {
-            b.innerText = text;
+            b.innerHTML = `<span class="bubble-content" data-raw="${text.replace(/"/g, '&quot;')}">${isTdah ? bionicTextHtml(text) : text}</span>`;
         }
         
         _refs.chatEl.appendChild(b);
@@ -788,7 +808,8 @@
         sendSullivanMessage,
         appendBubble,
         updatePosition,
-        bootstrapStoryboard
+        bootstrapStoryboard,
+        renderCardsBionic
     };
 
 })();

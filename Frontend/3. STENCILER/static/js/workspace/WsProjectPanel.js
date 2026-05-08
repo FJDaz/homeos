@@ -399,9 +399,11 @@
         if (btnCadrage) {
             btnCadrage.onclick = (e) => {
                 e.stopPropagation();
-                const session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
-                const url = `/cadrage-alt?project_id=${project.id}` + (session.class_id ? `&class_id=${session.class_id}` : '');
-                window.open(url, '_blank');
+                if (window.ManifestBox) {
+                    window.ManifestBox.show();
+                } else {
+                    console.error('[WsProjectPanel] ManifestBox not found');
+                }
             };
         }
 

@@ -69,8 +69,10 @@ RÈGLE OBLIGATOIRE : après toute mission livrée en backend, le serveur DOIT ê
 | M394 | Project Panel : drag & drop screen → projet | 🟢 TERMINÉE | GEMINI |
 | M401 | UI : Alignement bouton SAVE Preview (Vert HoméOS) | 🟢 TERMINÉE | GEMINI |
 | M402 | UI : Feedback "✓" & "ERR" dans Preview | 🟢 TERMINÉE | GEMINI |
-| M403 | FIX : Scroll & Visibilité Project Panel (Overflow) | 🟠 À TRAITER | GEMINI |
-| M404 | UI : Redirection Routine Cadrage → Manifest Editor | 🟠 À TRAITER | GEMINI |
+| M403 | FIX : Scroll & Visibilité Project Panel (Overflow) | 🟢 TERMINÉE | GEMINI |
+| M404 | UI : Redirection Routine Cadrage → Manifest Editor | 🟢 TERMINÉE | GEMINI |
+| M405 | Sullivan ME : bouton TDAH — bionic reading du manifeste | 🟢 TERMINÉE | GEMINI |
+| M406 | Sullivan ME : bouton "charger" — import fichier texte/markdown | 🟢 TERMINÉE | GEMINI |
 
 ---
 
@@ -181,3 +183,82 @@ Le panel doit rendre une arborescence `projet → screens[]`, pas une liste plat
 - En cas d'erreur backend : ne pas modifier le frontend — afficher l'erreur en clair
 
 **Fichiers cibles :** `WsProjectPanel.js`, `import_router.py`
+
+---
+
+### M401 — UI : Alignement bouton SAVE Preview (Vert HoméOS)
+**STATUS: 🟢 TERMINÉE | ACTOR: GEMINI**
+Harmonisation du bouton de sauvegarde dans l'overlay de preview avec le système de design HoméOS (Haut de casse, fond vert #8cc63f, texte blanc).
+
+### M402 — UI : Feedback "✓" & "ERR" dans Preview
+**STATUS: 🟢 TERMINÉE | ACTOR: GEMINI**
+Alignement du feedback visuel post-save dans la preview sur celui du canvas (utilisation du checkmark et de "ERR").
+
+### M403 — FIX : Scroll & Visibilité Project Panel (Overflow)
+**STATUS: 🟢 TERMINÉE | ACTOR: GEMINI**
+Correction du bug empêchant de voir/scroller les projets du bas lorsque le panel est encombré. Nécessite une approche CSS plus sûre pour ne pas casser la logique de collapse.
+
+### M404 — UI : Redirection Routine Cadrage → Manifest Editor
+**STATUS: 🟢 TERMINÉE | ACTOR: GEMINI**
+Fusion fonctionnelle : le bouton "Routine Cadrage" doit désormais piloter directement le Manifest Editor au lieu d'ouvrir une page externe.
+
+---
+
+### M405 — Sullivan ME : bouton TDAH — bionic reading du manifeste
+**STATUS: 🟠 À TRAITER | ACTOR: GEMINI**
+
+**Contexte :** Le bionic reading est une technique de lecture facilitée par le design typographique. Les premières lettres de chaque mot sont mises en gras (points de fixation), guidant le regard et accélérant la saccade oculaire. Bénéfice spécifique pour les profils TDAH : réduction du bruit visuel, économie cognitive, maintien du focus sur le chemin visuel.
+
+**Ce que Gemini doit faire :**
+
+1. Ajouter un bouton toggle "tdah" dans la barre d'outils du Manifest Editor (Sullivan ME), à droite des boutons existants
+2. Au clic : transformer le texte du manifeste affiché en bionic reading — **purement côté client, sans modifier le contenu stocké**
+3. Au reclic : revenir au texte normal
+
+**Algorithme bionic (JS pur, sans lib externe) :**
+```js
+function bionicWord(word) {
+    if (word.length <= 1) return `<b>${word}</b>`;
+    const fixLen = Math.ceil(word.length / 2);
+    return `<b>${word.slice(0, fixLen)}</b>${word.slice(fixLen)}`;
+}
+function bionicText(text) {
+    return text.replace(/\b(\w+)\b/g, (_, w) => bionicWord(w));
+}
+```
+
+**Périmètre :**
+- S'applique uniquement au rendu affiché dans le Manifest Editor (zone de texte ou cards Sullivan)
+- Ne touche pas au markdown stocké en base — uniquement le DOM affiché
+- Le toggle doit persister pendant la session (pas de reset au rechargement des cards)
+
+**Style du bouton :**
+- Label : `tdah` (minuscules, style HoméOS)
+- Inactif : border gris clair, texte slate
+- Actif : border vert HoméOS (`#8cc63f`), texte vert — même pattern que les autres toggles du ME
+
+**Fichier cible :** `ManifestSullivan.js` (barre d'outils du ME, fonction de rendu des cards)
+
+---
+
+### M406 — Sullivan ME : bouton "charger" — import fichier texte/markdown
+**STATUS: 🟢 TERMINÉE | ACTOR: GEMINI**
+
+**Contexte :** Le manifeste peut être corrompu (mauvais projet_id lors d'une sauvegarde) ou absent. L'élève doit pouvoir charger un fichier texte ou markdown depuis son poste pour remplacer le contenu de l'éditeur.
+
+**Ce que Gemini doit faire :**
+
+1. Ajouter un bouton "charger" dans la barre d'outils du ME, à côté des boutons existants
+2. Au clic : ouvrir un `<input type="file" accept=".txt,.md">` (invisible, déclenché par JS)
+3. Lire le fichier via `FileReader.readAsText()` → injecter le contenu dans `els.editor.value`
+4. Déclencher `onTextChange()` pour mettre à jour les signets et la sauvegarde différée
+5. Relancer `window.ManifestSullivan.launchCritique()` automatiquement après injection
+6. Afficher un feedback discret ("manifeste chargé ✓") pendant 2s dans la barre d'outils
+
+**Contraintes :**
+- Pas de call backend pour le chargement — lecture 100% locale via FileReader
+- La sauvegarde vers le backend se fait via le mécanisme `saveManifestDeferred()` existant (déjà déclenché par `onTextChange`)
+- Accepter `.txt` et `.md` uniquement — ignorer silencieusement les autres formats
+- Style du bouton : `charger` (minuscules, style HoméOS), même gabarit que les autres boutons de la barre
+
+**Fichier cible :** `ManifestBox.js` (barre d'outils, à côté du bouton reload existant)
