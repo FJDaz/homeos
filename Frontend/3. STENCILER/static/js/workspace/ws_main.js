@@ -178,6 +178,63 @@
             });
             console.log('[Stitch] Button wired');
         }
+
+        // M421: Tester App Button
+        var testerBtn = document.getElementById('ws-tester-btn');
+        if (testerBtn) {
+            testerBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (window.wsPreview) window.wsPreview.enterWiredMode();
+            });
+        }
+
+        // M422: Export Button
+        var exportBtn = document.getElementById('ws-export-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (window.wsPreview) window.wsPreview.exportProject();
+            });
+        }
+
+        // Periodic check for wired controls visibility
+        setInterval(updateWiredControlsVisibility, 3000);
+        updateWiredControlsVisibility();
+    }
+
+    /**
+     * M421: Update visibility of "Tester" and "Exporter" based on manifest wires.
+     */
+    async function updateWiredControlsVisibility() {
+        var container = document.getElementById('ws-wired-controls');
+        if (!container) return;
+
+        var projectId = window.wsState?.projectId;
+        if (!projectId) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        try {
+            var session = JSON.parse(localStorage.getItem('homeos_session') || '{}');
+            var res = await fetch('/api/projects/' + projectId + '/manifest', {
+                headers: { 'X-User-Token': session.token || '' }
+            });
+            if (res.ok) {
+                var manifest = await res.json();
+                var hasWires = manifest.wires && manifest.wires.length > 0;
+                var hasStoryboard = manifest.storyboard && manifest.storyboard.length > 0;
+                
+                // Show if either has wires or storyboard (meaning screens are defined)
+                if (hasWires || hasStoryboard) {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            }
+        } catch(e) {
+            // Silently fail if project not found or manifest invalid
+        }
     }
 
     /**
@@ -203,13 +260,31 @@
                     }
                 });
 
-                // Body classes
-                document.body.classList.remove('mode-audit', 'mode-front-dev', 'mode-construct');
+                // Synchroniser wsCanvas.activeMode
+                if (window.wsCanvas) window.wsCanvas.setMode(activeMode);
+
+                // Body classes & attributes
+                document.body.classList.remove('mode-audit', 'mode-front-dev', 'mode-construct', 'mode-wire');
+                document.body.setAttribute('data-ws-mode', activeMode);
+                
                 if (activeMode === 'audit') document.body.classList.add('mode-audit');
                 if (activeMode === 'front-dev') document.body.classList.add('mode-front-dev');
                 if (activeMode === 'construct') document.body.classList.add('mode-construct');
+                if (activeMode === 'wire') document.body.classList.add('mode-wire');
             });
         });
+
+        // M424: Wire button intelligent routing
+        var wireBtn = document.getElementById('btn-wire');
+        if (wireBtn) {
+            wireBtn.addEventListener('click', function(e) {
+                // On laisse le toggle CSS se faire via le listener générique ci-dessus,
+                // mais on déclenche le router intelligent.
+                if (window.wsWireRouter) {
+                    window.wsWireRouter.enter();
+                }
+            });
+        }
     }
 
     /**

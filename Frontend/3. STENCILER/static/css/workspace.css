@@ -179,8 +179,31 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     display: flex !important;
 }
 
+/* Projects Panel Constraint (Mission 403) */
+#panel-projects {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 64px);
+    overflow: hidden;
+}
+
 /* Collapsable Panels (Mission 129/130-C) */
-#panel-screens, #panel-manifest {
+#panel-projects {
+    display: flex;
+    flex-direction: column;
+    transition: 
+        opacity 0.25s ease, 
+        transform 0.25s ease, 
+        max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 800px;
+    overflow: hidden;
+}
+
+#panel-projects.collapsed {
+    max-height: 52px; /* Hauteur du header seul */
+}
+
+#panel-manifest {
     display: flex;
     flex-direction: column;
     transition: 
@@ -193,14 +216,18 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     visibility: visible;
 }
  
-#panel-screens.collapsed, #panel-manifest.collapsed {
+#panel-projects.collapsed .panel-chevron {
+    transform: rotate(-90deg);
+}
+
+#panel-manifest.collapsed {
     max-height: 0;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-5px) translateX(-5px);
 }
  
-#badge-screens, #badge-manifest {
+#badge-manifest {
     transition: 
         opacity 0.3s ease, 
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -220,8 +247,16 @@ body.preview-mode nav[data-purpose="floating-toolbar"] {
     overflow: hidden;
 }
  
-#badge-screens:hover, #badge-stitch:hover, #badge-manifest:hover {
+#badge-manifest:hover {
     padding-left: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Étiquette style (Mission 411 suite) */
+.badge-etiquette {
+    border-left: 4px solid rgba(255,255,255,0.3);
+    letter-spacing: 0.1em;
+    font-weight: 800;
 }
 
 /* --- STITCH LAYOUT SHIFT (Mission 204-B) --- */
@@ -453,4 +488,20 @@ input[type="range"]::-webkit-slider-thumb {
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* M428 — Ghost Layer : protection D&D contre capture iframe */
+body.is-dragging-global iframe {
+    pointer-events: none !important;
+}
+
+body.is-dragging-global .ws-screen-shell {
+    pointer-events: none;
+}
+
+/* On laisse le canvas parent et les overlays de drop capturer le drop */
+body.is-dragging-global #canvas-wrapper,
+body.is-dragging-global #ws-project-panel,
+body.is-dragging-global .ws-drop-zone {
+    pointer-events: all;
 }

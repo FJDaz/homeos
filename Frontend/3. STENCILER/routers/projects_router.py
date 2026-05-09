@@ -63,6 +63,10 @@ class ProjectManifest(BaseModel):
     pending_intents: Optional[List] = None
     intent_pipeline: Optional[Dict] = None
     intent_inference: Optional[Dict] = None
+    storyboard: Optional[List] = None
+    flow: Optional[List] = None
+    annotations: Optional[List] = None
+    wire_threshold: Optional[int] = None
 
 # --- HELPER FUNCTIONS ---
 def slugify(text: str, max_len: int = 30) -> str:

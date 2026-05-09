@@ -108,7 +108,11 @@
             });
             if (res.ok) {
                 const data = await res.json();
-                _screensCache[projectId] = data.imports || [];
+                const _visExts = ['html','htm','png','jpg','jpeg','gif','svg','webp'];
+                _screensCache[projectId] = (data.imports || []).filter(imp => {
+                    const ext = (imp.name || '').toLowerCase().split('.').pop();
+                    return _visExts.includes(ext);
+                });
             }
         } catch(e) {
             console.error(`[WsProjectPanel] Error fetching screens for ${projectId}:`, e);
@@ -399,8 +403,11 @@
         if (btnCadrage) {
             btnCadrage.onclick = (e) => {
                 e.stopPropagation();
+                if (window.ManifestSullivanCore) {
+                    window.ManifestSullivanCore._sullivanLog('btn_cadrage_clicked', { project_id: project.id });
+                }
                 if (window.ManifestBox) {
-                    window.ManifestBox.show();
+                    window.ManifestBox.show({ project_id: project.id });
                 } else {
                     console.error('[WsProjectPanel] ManifestBox not found');
                 }
@@ -443,36 +450,71 @@
     }
 
     function _renderScreensList(container, projectId) {
+        // M424-B Fix 3: Ligne manifeste (hors D&D)
+        const manifestRow = document.createElement('div');
+        manifestRow.className = 'flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-600 cursor-pointer select-none border-b border-slate-50 mb-2 transition-colors';
+        manifestRow.innerHTML = `
+          <span class="flex-1 truncate uppercase tracking-wider">manifeste</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>`;
+        manifestRow.addEventListener('click', () => {
+            if (window.ManifestBox) window.ManifestBox.show({ project_id: projectId });
+        });
+        container.appendChild(manifestRow);
+
         const screens = _screensCache[projectId];
         if (!screens) {
-            container.innerHTML = '<div class="py-2 text-[11px] text-slate-300 italic">chargement...</div>';
+            const loader = document.createElement('div');
+            loader.className = 'py-2 text-[11px] text-slate-300 italic';
+            loader.textContent = 'chargement...';
+            container.appendChild(loader);
             return;
         }
         if (screens.length === 0) {
-            container.innerHTML = '<div class="py-2 text-[11px] text-slate-300 italic text-center">aucun écran</div>';
+            const empty = document.createElement('div');
+            empty.className = 'py-2 text-[11px] text-slate-300 italic text-center';
+            empty.textContent = 'aucun écran';
+            container.appendChild(empty);
             return;
         }
 
         const list = document.createElement('div');
         list.className = 'space-y-1';
         screens.forEach(screen => {
+            if (screen.name === 'manifest.json') return;
             const sEl = document.createElement('div');
             sEl.className = 'group flex items-center justify-between p-2 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer';
             
             // M394: Draggable
             sEl.draggable = true;
             sEl.ondragstart = (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({ 
-                    importId: screen.id, 
-                    projectId: projectId 
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    importId: screen.id,
+                    projectId: projectId
                 }));
                 sEl.classList.add('opacity-50');
             };
             sEl.ondragend = () => sEl.classList.remove('opacity-50');
 
+            // Thumbnail URL (M368)
+            const filePath = screen.file_path || screen.svg_path;
+            const isImage = filePath && /\.(png|jpg|jpeg|svg|webp)$/i.test(filePath);
+            const thumbnailUrl = isImage ? `/api/retro-genome/file?project_id=${projectId}&path=${encodeURIComponent(filePath)}` : '';
+            
+            const thumbHtml = thumbnailUrl 
+                ? `<div class="relative group/thumb w-8 h-8 shrink-0 rounded bg-slate-50 border border-slate-200 flex items-center justify-center mr-3">
+                    <img src="${thumbnailUrl}" class="w-full h-full object-cover rounded opacity-80 group-hover/thumb:opacity-100 transition-all duration-300 ease-out group-hover/thumb:scale-[2.2] group-hover/thumb:z-50 group-hover/thumb:shadow-2xl group-hover/thumb:border-2 group-hover/thumb:border-white group-hover/thumb:translate-x-2 group-hover/thumb:rotate-2" alt="thumb">
+                   </div>`
+                : `<div class="w-8 h-8 shrink-0 rounded bg-slate-100 border border-slate-200 flex items-center justify-center mr-3 text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`;
+
             sEl.innerHTML = `
-                <span class="text-[12px] font-medium text-slate-500 group-hover:text-slate-700 truncate">${screen.name}</span>
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex items-center flex-1 overflow-visible">
+                    ${thumbHtml}
+                    <span class="text-[12px] font-medium text-slate-500 group-hover:text-slate-700 truncate">${screen.name}</span>
+                </div>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <button class="btn-s-open p-1 text-slate-300 hover:text-homeos-green" title="Ouvrir"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M24 12s-4.5-8-12-8S0 12 0 12s4.5 8 12 8 12-8 12-8z"/></svg></button>
                     <button class="btn-s-delete p-1 text-slate-300 hover:text-red-500" title="Supprimer"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                 </div>
@@ -481,7 +523,11 @@
             sEl.setAttribute('data-ux-label', `screen:open:${screen.name}`);
             sEl.onclick = (e) => {
                 e.stopPropagation();
-                if (window.wsCanvas) window.wsCanvas.addScreen(screen);
+                if (window.wsCanvas) {
+                    // Enrichir avec le projectId pour que WsScreenShell puisse charger l'image
+                    const screenWithProject = { ...screen, project_id: projectId };
+                    window.wsCanvas.addScreen(screenWithProject);
+                }
             };
 
             const btnDel = sEl.querySelector('.btn-s-delete');

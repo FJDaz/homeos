@@ -1712,3 +1712,27 @@ body {
 .ws-dragging .ws-screen-bg {
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
 }
+/* --- WIRE ROUTER OVERLAYS (M424) --- */
+.ws-wire-overlay { 
+    transition: opacity 0.3s ease; 
+}
+.ws-shell-overlay-grey   { fill: rgba(100,116,139,0.50); }
+.ws-shell-overlay-red    { fill: rgba(239,68,68,0.35); }
+.ws-wire-overlay.ws-shell-overlay-orange { fill: rgba(249,115,22,0.35); }
+.ws-wire-overlay.ws-shell-overlay-green  { fill: rgba(140,198,63,0.25); }
+
+/* Visibilité conditionnelle des voiles */
+body:not([data-ws-mode="annotation"]):not([data-ws-mode="wire"]) .ws-wire-overlay {
+    opacity: 0;
+    pointer-events: none;
+}
+body[data-ws-mode="annotation"] .ws-wire-overlay,
+body[data-ws-mode="wire"] .ws-wire-overlay {
+    opacity: 1;
+}
+
+/* Wire/select mode — iframes transparentes aux mouseevents → drag + wire drop atteignent le SVG */
+body[data-ws-mode="wire"] .ws-screen-shell iframe,
+body[data-ws-mode="select"] .ws-screen-shell iframe {
+    pointer-events: none;
+}

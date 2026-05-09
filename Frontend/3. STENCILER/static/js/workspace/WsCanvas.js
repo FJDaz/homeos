@@ -25,8 +25,8 @@ class WsCanvas {
         this.offsetDragX = 0;
         this.offsetDragY = 0;
         
-        // M396: Storyboard Navigation
-        this.storyboard = [];
+        // M396: Scènes Navigation
+        this.scenes = [];
         this.projectManifest = null;
 
         // Resize (Mission 114)
@@ -49,9 +49,55 @@ class WsCanvas {
         this.wrapper.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.wrapper.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
         window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        window.addEventListener('mouseup', () => this.handleMouseUp());
+        window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
 
-        window.addEventListener('keydown', (e) => { 
+        // M428: Ghost Layer — neutralise les iframes pendant tout drag dans le workspace
+        document.addEventListener('dragstart', () => {
+            document.body.classList.add('is-dragging-global');
+        });
+
+        document.addEventListener('dragend', () => {
+            document.body.classList.remove('is-dragging-global');
+        });
+
+        document.addEventListener('drop', () => {
+            document.body.classList.remove('is-dragging-global');
+        });
+
+        // M429: Canvas drop target — panel screen → canvas placement
+        this.svg.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        this.svg.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            document.body.classList.remove('is-dragging-global');
+            let data;
+            try { data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}'); } catch(_) { return; }
+            if (!data.importId || !data.projectId) return;
+
+            try {
+                const token = window.wsState?.session?.token || '';
+                const res = await fetch(`/api/retro-genome/imports?project_id=${data.projectId}`, {
+                    headers: { 'X-User-Token': token }
+                });
+                const json = await res.json();
+                const item = (json.imports || []).find(i => i.id === data.importId);
+                if (!item) return;
+
+                const rect = this.svg.getBoundingClientRect();
+                const svgX = Math.round((e.clientX - rect.left - this.viewX) / this.scale);
+                const svgY = Math.round((e.clientY - rect.top - this.viewY) / this.scale);
+
+                const shell = await this.addScreen({ ...item, project_id: data.projectId });
+                if (shell) shell.setAttribute('transform', `matrix(1 0 0 1 ${svgX} ${svgY})`);
+            } catch(err) {
+                console.error('[WsCanvas] Drop failed:', err);
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') this.isSpacePressed = true; 
             if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) return;
 
@@ -90,8 +136,8 @@ class WsCanvas {
                 // Could open element inspector
                 console.log('[M237] iframe click:', e.data);
             } else if (e.data.type === 'hm-select') {
-                // M396: Storyboard transition check
-                this.handleStoryboardTransition(e.data);
+                // M396: Scènes transition check
+                this.handleSceneTransition(e.data);
             }
         });
 
@@ -99,9 +145,9 @@ class WsCanvas {
     }
 
     /**
-     * M396: Load storyboard from manifest
+     * M396: Load scènes from manifest
      */
-    async loadStoryboard() {
+    async loadScenes() {
         try {
             const res = await fetch('/api/projects/active');
             const project = await res.json();
@@ -110,23 +156,23 @@ class WsCanvas {
             const mRes = await fetch(`/api/projects/${project.id}/manifest`);
             const manifest = await mRes.json();
             this.projectManifest = manifest;
-            this.storyboard = manifest.storyboard || [];
-            console.log(`[M396] Storyboard loaded: ${this.storyboard.length} screens`);
+            this.scenes = manifest.storyboard || [];
+            console.log(`[M396] Scènes loaded: ${this.scenes.length} screens`);
         } catch (e) {
-            console.warn('[M396] Failed to load storyboard:', e);
+            console.warn('[M396] Failed to load scènes:', e);
         }
     }
 
     /**
-     * M396: Handle transition if element matches storyboard
+     * M396: Handle transition if element matches a scène
      */
-    async handleStoryboardTransition(data) {
-        if (!this.storyboard.length || !this.activeScreenId) return;
+    async handleSceneTransition(data) {
+        if (!this.scenes.length || !this.activeScreenId) return;
         
-        // Trouver l'écran courant dans le storyboard
+        // Trouver l'écran courant dans les scènes
         // activeScreenId est 'shell-import-id'
         const currentImportId = this.activeScreenId.replace('shell-', '');
-        const currentScreen = this.storyboard.find(s => s.screen_id === currentImportId || s.import_id === currentImportId);
+        const currentScreen = this.scenes.find(s => s.screen_id === currentImportId || s.import_id === currentImportId);
         
         if (!currentScreen || !currentScreen.transitions) return;
         
@@ -179,10 +225,12 @@ class WsCanvas {
 
     setMode(mode) {
         this.activeMode = mode;
+        document.body.setAttribute('data-ws-mode', mode); // M424
         document.querySelectorAll('.ws-tool-btn').forEach(btn => {
             btn.classList.toggle('active-tool', btn.dataset.mode === mode);
         });
         window.wsAudit?.notifyToolbar(null, mode, this.svg);
+        window.postMessage({ type: 'ws-mode-changed', mode: mode }, '*');
     }
 
     updateTransform() {
@@ -207,6 +255,7 @@ class WsCanvas {
     }
 
     handleMouseDown(e) {
+        console.log('[WsCanvas:mousedown] mode=' + this.activeMode + ' target=' + (e.target?.tagName || '?') + ' class=' + (e.target?.className?.toString?.().slice(0,60) || ''));
         if (this.isSpacePressed || e.button === 1 || this.activeMode === 'drag') {
             this.isPanning = true;
             this.startX = e.clientX - this.viewX;
@@ -216,6 +265,7 @@ class WsCanvas {
         }
 
         const shell = e.target.closest('.ws-screen-shell');
+        console.log('[WsCanvas:mousedown] shell found=' + !!shell);
         if (shell) {
             this.selectScreen(shell);
             const rect = this.svg.getBoundingClientRect();
@@ -233,35 +283,41 @@ class WsCanvas {
                 return;
             }
 
-            if (this.activeMode === 'select') {
-                const transformStr = shell.getAttribute('transform') || '';
-                let tx = 0, ty = 0;
-                if (transformStr.includes('matrix')) {
-                    const vals = transformStr.match(/matrix\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
-                    if (vals && vals.length >= 6) { tx = vals[4]; ty = vals[5]; }
-                }
-                const worldY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
-                if (worldY >= 0 && worldY <= 40) {
+            if (this.activeMode === 'wire') {
+                // M429: En mode wire, tout le shell est une zone de départ — pas de check iframe
+                this.isWiring = true;
+                this.wireSourceShell = shell;
+                this.wireStartX = (e.clientX - rect.left - this.viewX) / this.scale;
+                this.wireStartY = (e.clientY - rect.top - this.viewY) / this.scale;
+                this._createDraftWire(this.wireStartX, this.wireStartY);
+
+            } else if (this.activeMode === 'select') {
+                const iframe = shell.querySelector('iframe');
+                const fr = iframe?.getBoundingClientRect();
+                const isInsideIframe = fr && (
+                    e.clientX >= fr.left && e.clientX <= fr.right &&
+                    e.clientY >= fr.top && e.clientY <= fr.bottom
+                );
+
+                if (!isInsideIframe) {
+                    const transformStr = shell.getAttribute('transform') || '';
+                    let tx = 0, ty = 0;
+                    if (transformStr.includes('matrix')) {
+                        const vals = transformStr.match(/matrix\(([^)]+)\)/)?.[1].split(/[\s,]+/).map(Number);
+                        if (vals && vals.length >= 6) { tx = vals[4]; ty = vals[5]; }
+                    }
                     this.selectedScreen = shell;
                     this.selectedScreen.classList.add('ws-dragging');
                     this.offsetDragX = (e.clientX - rect.left - this.viewX) / this.scale - tx;
                     this.offsetDragY = (e.clientY - rect.top - this.viewY) / this.scale - ty;
-                } else {
-                    // Element drag inside iframe (N0 level — no snap)
-                    const iframe = shell.querySelector('iframe');
-                    if (iframe?.contentWindow) {
-                        const fr = iframe.getBoundingClientRect();
-                        const ix = e.clientX - fr.left;
-                        const iy = e.clientY - fr.top;
-                        if (ix >= 0 && iy >= 0 && ix <= fr.width && iy <= fr.height) {
-                            console.log('[WsCanvas] 🖱️ hm-click x=' + Math.round(ix) + ' y=' + Math.round(iy));
-                            iframe.contentWindow.postMessage({ type: 'hm-click', x: ix, y: iy }, '*');
-                            this.isDraggingElement = true;
-                            this.dragElementShell = shell;
-                            this.lastDragClientX = e.clientX;
-                            this.lastDragClientY = e.clientY;
-                        }
-                    }
+                } else if (iframe?.contentWindow) {
+                    const ix = e.clientX - fr.left;
+                    const iy = e.clientY - fr.top;
+                    iframe.contentWindow.postMessage({ type: 'hm-click', x: ix, y: iy }, '*');
+                    this.isDraggingElement = true;
+                    this.dragElementShell = shell;
+                    this.lastDragClientX = e.clientX;
+                    this.lastDragClientY = e.clientY;
                 }
             }
         } else if (this.svg.contains(e.target)) {
@@ -311,6 +367,14 @@ class WsCanvas {
             return;
         }
 
+        if (this.isWiring) {
+            const rect = this.svg.getBoundingClientRect();
+            const x = (e.clientX - rect.left - this.viewX) / this.scale;
+            const y = (e.clientY - rect.top - this.viewY) / this.scale;
+            this._updateDraftWire(x, y);
+            return;
+        }
+
         if (this.selectedScreen && !this.isResizing) {
             const rect = this.svg.getBoundingClientRect();
             let x = (e.clientX - rect.left - this.viewX) / this.scale - this.offsetDragX;
@@ -344,10 +408,29 @@ class WsCanvas {
         }
     }
 
-    handleMouseUp() {
+    handleMouseUp(e) {
         this.isPanning = false;
         this.isResizing = false;
         this.svg.style.cursor = 'grab';
+        
+        if (this.isWiring) {
+            this.isWiring = false;
+            if (this.draftWire) {
+                const targetShell = e?.target?.closest?.('.ws-screen-shell');
+                if (targetShell && targetShell !== this.wireSourceShell) {
+                    this._connectShells(this.wireSourceShell, targetShell);
+                } else {
+                    fetch('/api/ux-run/event', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tag: 'WIRE', label: 'wire_drop_missed', ts: Date.now(),
+                            project_id: new URLSearchParams(location.search).get('project_id'), details: {} })
+                    }).catch(() => {});
+                }
+                this.draftWire.remove();
+                this.draftWire = null;
+            }
+            this.wireSourceShell = null;
+        }
+
         if (this.selectedScreen) {
             this.selectedScreen.classList.remove('ws-dragging', 'ws-resizing');
             this.selectedScreen = null;
@@ -426,10 +509,22 @@ class WsCanvas {
             || iframe.contentDocument?.documentElement?.outerHTML
             || '';
         return {
+            id: this.activeScreenId.replace('shell-', ''),
             src: iframe.src,
             srcdoc,
             name: shell.querySelector('.ws-screen-title')?.textContent || 'Untitled'
         };
+    }
+
+    getScreens() {
+        return Array.from(document.querySelectorAll('.ws-screen-shell')).map(shell => {
+            const iframe = shell.querySelector('iframe');
+            return {
+                id: shell.id.replace('shell-', ''),
+                title: shell.querySelector('.ws-screen-title')?.textContent || 'Untitled',
+                html: iframe?.srcdoc || iframe?.contentDocument?.documentElement?.outerHTML || ''
+            };
+        });
     }
 
     resetView() {
@@ -554,6 +649,59 @@ class WsCanvas {
             doc.head.appendChild(script);
         } catch (e) {
             // Cross-origin or not loaded yet
+        }
+    }
+
+    _createDraftWire(x, y) {
+        if (this.draftWire) this.draftWire.remove();
+        this.draftWire = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        this.draftWire.setAttribute('fill', 'none');
+        this.draftWire.setAttribute('stroke', '#A3CD54');
+        this.draftWire.setAttribute('stroke-width', '3');
+        this.draftWire.setAttribute('stroke-dasharray', '5,5');
+        this.draftWire.setAttribute('pointer-events', 'none');
+        this.content.appendChild(this.draftWire);
+        this._updateDraftWire(x, y);
+    }
+
+    _updateDraftWire(x2, y2) {
+        if (!this.draftWire) return;
+        const x1 = this.wireStartX;
+        const y1 = this.wireStartY;
+        const dx = Math.abs(x2 - x1) * 0.5;
+        const d = `M ${x1} ${y1} C ${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`;
+        this.draftWire.setAttribute('d', d);
+    }
+
+    async _connectShells(source, target) {
+        const fromId = source.id.replace('shell-', '');
+        const toId = target.id.replace('shell-', '');
+        const pid = new URLSearchParams(window.location.search).get('project_id') || window.wsState?.projectId;
+
+        try {
+            const token = window.wsState?.session?.token || '';
+            const res = await fetch(`/api/projects/${pid}/manifest`, { headers: { 'X-User-Token': token } });
+            const manifest = await res.json();
+            if (!manifest.flow) manifest.flow = [];
+            if (!manifest.flow.find(f => f.from === fromId && f.to === toId)) {
+                manifest.flow.push({ from: fromId, to: toId });
+                await fetch(`/api/projects/${pid}/manifest`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-User-Token': token },
+                    body: JSON.stringify({ flow: manifest.flow })
+                });
+                fetch('/api/ux-run/event', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tag: 'WIRE', label: 'wire_connected', ts: Date.now(),
+                        project_id: pid, details: { from: fromId, to: toId } })
+                }).catch(() => {});
+                window.wsWireRouter?.enter();
+            }
+        } catch (err) {
+            console.error("[M429] _connectShells failed:", err);
+            fetch('/api/ux-run/event', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tag: 'WIRE', label: 'wire_connect_error', ts: Date.now(),
+                    project_id: pid, details: { from: fromId, to: toId, err: err.message } })
+            }).catch(() => {});
         }
     }
 }

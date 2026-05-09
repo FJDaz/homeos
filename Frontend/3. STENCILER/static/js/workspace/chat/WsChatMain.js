@@ -18,15 +18,8 @@ class WsChatMain extends WsChatBase {
                 this.currentMode = btn.dataset.mode;
                 console.log("🚀 WsChatMain: mode switched to", this.currentMode);
 
-                // Mission 147: Wire mode → enter preview + show overlay
+                // Wire mode handled by WsWireRouter (M424) — no legacy alert
                 if (this.currentMode === 'wire') {
-                    const activeId = window.wsCanvas?.activeScreenId;
-                    if (!activeId) { alert('Sélectionnez un screen sur le canvas d\'abord.'); return; }
-                    if (window.enterPreviewMode) window.enterPreviewMode(activeId);
-                    
-                    const shell = document.getElementById(activeId);
-                    const manifest = shell?.dataset?.manifest ? JSON.parse(shell.dataset.manifest) : { screens: [], components: [] };
-                    window.wsWire?.show(manifest, shell?.querySelector('.ws-screen-title')?.textContent || activeId);
                 }
             };
         });
